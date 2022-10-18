@@ -1,8 +1,10 @@
 use unicode_script::{Script, UnicodeScript};
 
-use super::{Font, FontLineIndex, FontShapeGlyph, FontShapeLine, FontShapeSpan, FontShapeWord};
+use crate::TextLineIndex;
+use super::{Font, FontShapeGlyph, FontShapeLine, FontShapeSpan, FontShapeWord};
 use super::fallback::{FontFallbackIter};
 
+/// Fonts that match a pattern
 pub struct FontMatches<'a> {
     pub locale: &'a str,
     pub fonts: Vec<Font<'a>>,
@@ -285,7 +287,7 @@ impl<'a> FontMatches<'a> {
         }
     }
 
-    pub fn shape_line(&self, line_i: FontLineIndex, line: &str) -> FontShapeLine {
+    pub fn shape_line(&self, line_i: TextLineIndex, line: &str) -> FontShapeLine {
         let mut spans = Vec::new();
 
         let bidi = unicode_bidi::BidiInfo::new(line, None);

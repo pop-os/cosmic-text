@@ -23,7 +23,6 @@ use cosmic_text::{
 };
 use std::{
     env,
-    fmt,
     fs,
     sync::{Arc, Mutex},
 };
@@ -135,8 +134,7 @@ impl Application for Window {
     }
 
     fn title(&self) -> String {
-        let buffer = self.buffer.lock().unwrap();
-        format!("COSMIC Text - iced - {}", buffer.font_matches().locale)
+        format!("COSMIC Text - iced - {}", FONT_SYSTEM.locale)
     }
 
     fn update(&mut self, message: Message) -> iced::Command<Self::Message> {

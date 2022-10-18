@@ -4,8 +4,9 @@ use std::{
     time::Instant,
 };
 
-use crate::{FontLayoutLine, FontLineIndex, FontMatches, FontShapeLine};
+use crate::{FontLayoutLine, FontMatches, FontShapeLine};
 
+/// An action to perform on a [TextBuffer]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TextAction {
     Left,
@@ -21,6 +22,7 @@ pub enum TextAction {
     Scroll(i32),
 }
 
+/// Current cursor location
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct TextCursor {
     pub line: usize,
@@ -33,9 +35,26 @@ impl TextCursor {
     }
 }
 
+/// Index of a text line
+#[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd)]
+pub struct TextLineIndex(usize);
+
+impl TextLineIndex {
+    pub fn new(index: usize) -> Self {
+        Self(index)
+    }
+
+    pub fn get(&self) -> usize {
+        self.0
+    }
+}
+
+/// Metrics of text
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct TextMetrics {
+    /// Font size in pixels
     pub font_size: i32,
+    /// Line height in pixels
     pub line_height: i32,
 }
 
@@ -58,6 +77,7 @@ impl fmt::Display for TextMetrics {
     }
 }
 
+/// A buffer of text that is shaped and laid out
 pub struct TextBuffer<'a> {
     font_matches: &'a FontMatches<'a>,
     text_lines: Vec<String>,
@@ -95,7 +115,7 @@ impl<'a> TextBuffer<'a> {
         }
     }
 
-    ///TODO: do not allow access
+    /// Pre-shape lines in the buffer, up to `lines`
     pub fn shape_until(&mut self, lines: i32) {
         let instant = Instant::now();
 
@@ -103,7 +123,7 @@ impl<'a> TextBuffer<'a> {
         while self.shape_lines.len() < self.text_lines.len()
             && (self.layout_lines.len() as i32) < lines
         {
-            let line_i = FontLineIndex::new(self.shape_lines.len());
+            let line_i = TextLineIndex::new(self.shape_lines.len());
             self.reshape_line(line_i);
             reshaped += 1;
         }
@@ -129,7 +149,7 @@ impl<'a> TextBuffer<'a> {
         );
     }
 
-    fn reshape_line(&mut self, line_i: FontLineIndex) {
+    fn reshape_line(&mut self, line_i: TextLineIndex) {
         let instant = Instant::now();
 
         let shape_line = self
@@ -167,7 +187,7 @@ impl<'a> TextBuffer<'a> {
         log::debug!("relayout: {:?}", duration);
     }
 
-    fn relayout_line(&mut self, line_i: FontLineIndex) {
+    fn relayout_line(&mut self, line_i: TextLineIndex) {
         let instant = Instant::now();
 
         let mut insert_opt = None;
@@ -198,10 +218,6 @@ impl<'a> TextBuffer<'a> {
 
         let duration = instant.elapsed();
         log::debug!("relayout line {}: {:?}", line_i.get(), duration);
-    }
-
-    pub fn font_matches(&self) -> &FontMatches {
-        &self.font_matches
     }
 
     /// Get the current [TextMetrics]

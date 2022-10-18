@@ -12,7 +12,7 @@ use cosmic::iced_native::{
     widget::{self, Widget},
 };
 use cosmic_text::{
-    FontLineIndex,
+    TextLineIndex,
     TextAction,
     TextBuffer,
 };
@@ -136,7 +136,7 @@ where
         let line_x = layout.bounds().x as i32;
         let mut line_y = layout.bounds().y as i32 + font_size;
         let mut start_line_opt = None;
-        let mut end_line = FontLineIndex::new(0);
+        let mut end_line = TextLineIndex::new(0);
         for (line_i, line) in buffer
             .layout_lines()
             .iter()

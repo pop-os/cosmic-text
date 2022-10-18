@@ -2,6 +2,7 @@ use std::ops::Deref;
 
 use super::{Font, FontMatches};
 
+/// Access system fonts
 pub struct FontSystem {
     pub locale: String,
     db: fontdb::Database,

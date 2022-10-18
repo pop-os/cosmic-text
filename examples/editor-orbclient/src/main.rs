@@ -1,6 +1,6 @@
-use cosmic_text::{FontLineIndex, FontSystem, TextAction, TextBuffer, TextCursor, TextMetrics};
+use cosmic_text::{FontSystem, TextAction, TextBuffer, TextCursor, TextLineIndex, TextMetrics};
 use orbclient::{Color, EventOption, Renderer, Window, WindowFlag};
-use std::{cmp, env, fs, time::Instant};
+use std::{env, fs, time::Instant};
 
 fn main() {
     env_logger::init();
@@ -156,7 +156,7 @@ fn main() {
 
             let mut line_y = line_height;
             let mut start_line_opt = None;
-            let mut end_line = FontLineIndex::new(0);
+            let mut end_line = TextLineIndex::new(0);
             for (line_i, line) in buffer
                 .layout_lines()
                 .iter()

@@ -1,4 +1,5 @@
-use super::{CacheKey, Font, FontLayoutGlyph, FontLayoutLine, FontLineIndex};
+use crate::TextLineIndex;
+use super::{CacheKey, Font, FontLayoutGlyph, FontLayoutLine};
 
 pub struct FontShapeGlyph<'a> {
     pub start: usize,
@@ -40,7 +41,7 @@ pub struct FontShapeSpan<'a> {
 }
 
 pub struct FontShapeLine<'a> {
-    pub line_i: FontLineIndex,
+    pub line_i: TextLineIndex,
     pub rtl: bool,
     pub spans: Vec<FontShapeSpan<'a>>,
 }
