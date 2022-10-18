@@ -7,6 +7,7 @@ use cosmic::iced_native::{
     },
     keyboard::{Event as KeyEvent, KeyCode},
     layout::{self, Layout},
+    mouse::{Event as MouseEvent, ScrollDelta},
     renderer,
     widget::{self, Widget},
 };
@@ -256,6 +257,16 @@ where
                     buffer.action(TextAction::Insert(character));
                     Status::Captured
                 },
+                _ => Status::Ignored,
+            },
+            Event::Mouse(mouse_event) => match mouse_event {
+                MouseEvent::WheelScrolled { delta } => match delta {
+                    ScrollDelta::Lines { x, y } => {
+                        buffer.action(TextAction::Scroll(-y as i32 * 6));
+                        Status::Captured
+                    },
+                    _ => Status::Ignored,
+                }
                 _ => Status::Ignored,
             },
             _ => Status::Ignored,
