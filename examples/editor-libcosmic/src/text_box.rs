@@ -116,8 +116,8 @@ where
 
         let buffer = self.buffer.lock().unwrap();
 
-        let font_size = buffer.font_size();
-        let line_height = buffer.line_height();
+        let font_size = buffer.metrics().font_size;
+        let line_height = buffer.metrics().line_height;
 
         let instant = Instant::now();
 

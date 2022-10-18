@@ -7,10 +7,8 @@ use cosmic::{
         Element,
         Theme,
         widget::{
-            container,
             column,
             pick_list,
-            radio,
             row,
             text,
         },
@@ -21,6 +19,7 @@ use cosmic_text::{
     FontMatches,
     FontSystem,
     TextBuffer,
+    TextMetrics,
 };
 use std::{
     env,
@@ -39,35 +38,13 @@ lazy_static::lazy_static! {
 //TODO: find out how to do this!
 static mut FONT_MATCHES: Option<FontMatches<'static>> = None;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct FontMetrics {
-    pub font_size: i32,
-    pub line_height: i32,
-}
-
-impl fmt::Display for FontMetrics {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        //TODO: should line height also be shown?
-        write!(f, "{}", self.font_size)
-    }
-}
-
-impl FontMetrics {
-    pub const fn new(font_size: i32, line_height: i32) -> Self {
-        Self {
-            font_size,
-            line_height,
-        }
-    }
-}
-
-static FONT_SIZES: &'static [FontMetrics] = &[
-    FontMetrics::new(10, 14), // Caption
-    FontMetrics::new(14, 20), // Body
-    FontMetrics::new(20, 28), // Title 4
-    FontMetrics::new(24, 32), // Title 3
-    FontMetrics::new(28, 36), // Title 2
-    FontMetrics::new(32, 44), // Title 1
+static FONT_SIZES: &'static [TextMetrics] = &[
+    TextMetrics::new(10, 14), // Caption
+    TextMetrics::new(14, 20), // Body
+    TextMetrics::new(20, 28), // Title 4
+    TextMetrics::new(24, 32), // Title 3
+    TextMetrics::new(28, 36), // Title 2
+    TextMetrics::new(32, 44), // Title 1
 ];
 
 fn main() -> cosmic::iced::Result {
@@ -118,7 +95,7 @@ pub struct Window {
 #[allow(dead_code)]
 #[derive(Clone, Copy, Debug)]
 pub enum Message {
-    FontSize(FontMetrics),
+    MetricsChanged(TextMetrics),
     ThemeChanged(&'static str),
 }
 
@@ -143,10 +120,7 @@ impl Application for Window {
         let buffer = Arc::new(Mutex::new(TextBuffer::new(
             unsafe { FONT_MATCHES.as_ref().unwrap() },
             &text,
-            FONT_SIZES[font_size_i].font_size,
-            FONT_SIZES[font_size_i].line_height,
-            0,
-            0
+            FONT_SIZES[font_size_i],
         )));
 
         let window = Window {
@@ -167,9 +141,9 @@ impl Application for Window {
 
     fn update(&mut self, message: Message) -> iced::Command<Self::Message> {
         match message {
-            Message::FontSize(font_metrics) => {
+            Message::MetricsChanged(metrics) => {
                 let mut buffer = self.buffer.lock().unwrap();
-                buffer.set_font_metrics(font_metrics.font_size, font_metrics.line_height);
+                buffer.set_metrics(metrics);
             },
             Message::ThemeChanged(theme) => match theme {
                 "Dark" => self.theme = Theme::Dark,
@@ -196,8 +170,8 @@ impl Application for Window {
             let buffer = self.buffer.lock().unwrap();
             pick_list(
                 FONT_SIZES,
-                Some(FontMetrics::new(buffer.font_size(), buffer.line_height())),
-                Message::FontSize
+                Some(buffer.metrics()),
+                Message::MetricsChanged
             )
         };
 

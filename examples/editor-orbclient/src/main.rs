@@ -1,4 +1,4 @@
-use cosmic_text::{FontLineIndex, FontSystem, TextAction, TextBuffer, TextCursor};
+use cosmic_text::{FontLineIndex, FontSystem, TextAction, TextBuffer, TextCursor, TextMetrics};
 use orbclient::{Color, EventOption, Renderer, Window, WindowFlag};
 use std::{cmp, env, fs, time::Instant};
 
@@ -61,12 +61,12 @@ fn main() {
     let bg_color = Color::rgb(0x34, 0x34, 0x34);
     let font_color = Color::rgb(0xFF, 0xFF, 0xFF);
     let font_sizes = [
-        (10, 14), // Caption
-        (14, 20), // Body
-        (20, 28), // Title 4
-        (24, 32), // Title 3
-        (28, 36), // Title 2
-        (32, 44), // Title 1
+        TextMetrics::new(10, 14).scale(display_scale), // Caption
+        TextMetrics::new(14, 20).scale(display_scale), // Body
+        TextMetrics::new(20, 28).scale(display_scale), // Title 4
+        TextMetrics::new(24, 32).scale(display_scale), // Title 3
+        TextMetrics::new(28, 36).scale(display_scale), // Title 2
+        TextMetrics::new(32, 44).scale(display_scale), // Title 1
     ];
     let font_size_default = 1; // Body
     let mut font_size_i = font_size_default;
@@ -85,8 +85,9 @@ fn main() {
     let mut buffer = TextBuffer::new(
         &font_matches,
         &text,
-        font_sizes[font_size_i].0 * display_scale,
-        font_sizes[font_size_i].1 * display_scale,
+        font_sizes[font_size_i]
+    );
+    buffer.set_size(
         window.width() as i32 - line_x * 2,
         window.height() as i32
     );
@@ -97,8 +98,8 @@ fn main() {
     let mut mouse_left = false;
     let mut rehit = false;
     loop {
-        let font_size = buffer.font_size();
-        let line_height = buffer.line_height();
+        let font_size = buffer.metrics().font_size;
+        let line_height = buffer.metrics().line_height;
 
         if rehit {
             let instant = Instant::now();
@@ -252,27 +253,18 @@ fn main() {
                     orbclient::K_PGDN if event.pressed => buffer.action(TextAction::PageDown),
                     orbclient::K_0 if event.pressed && ctrl_pressed => {
                         font_size_i = font_size_default;
-                        buffer.set_font_metrics(
-                            font_sizes[font_size_i].0 * display_scale,
-                            font_sizes[font_size_i].1 * display_scale,
-                        );
+                        buffer.set_metrics(font_sizes[font_size_i]);
                     },
                     orbclient::K_MINUS if event.pressed && ctrl_pressed => {
                         if font_size_i > 0 {
                             font_size_i -= 1;
-                            buffer.set_font_metrics(
-                                font_sizes[font_size_i].0 * display_scale,
-                                font_sizes[font_size_i].1 * display_scale,
-                            );
+                            buffer.set_metrics(font_sizes[font_size_i]);
                         }
                     },
                     orbclient::K_EQUALS if event.pressed && ctrl_pressed => {
                         if font_size_i + 1 < font_sizes.len() {
                             font_size_i += 1;
-                            buffer.set_font_metrics(
-                                font_sizes[font_size_i].0 * display_scale,
-                                font_sizes[font_size_i].1 * display_scale,
-                            );
+                            buffer.set_metrics(font_sizes[font_size_i]);
                         }
                     },
                     orbclient::K_D if event.pressed && ctrl_pressed => {

@@ -1,10 +1,12 @@
 use std::{
     cmp,
+    fmt,
     time::Instant,
 };
 
 use crate::{FontLayoutLine, FontLineIndex, FontMatches, FontShapeLine};
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TextAction {
     Left,
     Right,
@@ -15,18 +17,44 @@ pub enum TextAction {
     PageUp,
     PageDown,
     Insert(char),
+    Click { x: i32, y: i32 },
     Scroll(i32),
 }
 
-#[derive(Default, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct TextCursor {
     pub line: usize,
     pub glyph: usize,
 }
 
 impl TextCursor {
-    pub fn new(line: usize, glyph: usize) -> Self {
+    pub const fn new(line: usize, glyph: usize) -> Self {
         Self { line, glyph }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub struct TextMetrics {
+    pub font_size: i32,
+    pub line_height: i32,
+}
+
+impl TextMetrics {
+    pub const fn new(font_size: i32, line_height: i32) -> Self {
+        Self { font_size, line_height }
+    }
+
+    pub const fn scale(self, scale: i32) -> Self {
+        Self {
+            font_size: self.font_size * scale,
+            line_height: self.line_height * scale,
+        }
+    }
+}
+
+impl fmt::Display for TextMetrics {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}px / {}px", self.font_size, self.line_height)
     }
 }
 
@@ -35,8 +63,7 @@ pub struct TextBuffer<'a> {
     text_lines: Vec<String>,
     shape_lines: Vec<FontShapeLine<'a>>,
     layout_lines: Vec<FontLayoutLine<'a>>,
-    font_size: i32,
-    line_height: i32,
+    metrics: TextMetrics,
     width: i32,
     height: i32,
     scroll: i32,
@@ -48,32 +75,27 @@ impl<'a> TextBuffer<'a> {
     pub fn new(
         font_matches: &'a FontMatches<'a>,
         text: &str,
-        font_size: i32,
-        line_height: i32,
-        width: i32,
-        height: i32,
+        metrics: TextMetrics,
     ) -> Self {
         let mut text_lines: Vec<String> = text.lines().map(String::from).collect();
         if text_lines.is_empty() {
             text_lines.push(String::new());
         }
-        let mut buffer = Self {
+        Self {
             font_matches,
             text_lines,
             shape_lines: Vec::new(),
             layout_lines: Vec::new(),
-            font_size,
-            line_height,
-            width,
-            height,
+            metrics,
+            width: 0,
+            height: 0,
+            scroll: 0,
             cursor: TextCursor::default(),
             redraw: false,
-            scroll: 0,
-        };
-        buffer.shape_until_scroll();
-        buffer
+        }
     }
 
+    ///TODO: do not allow access
     pub fn shape_until(&mut self, lines: i32) {
         let instant = Instant::now();
 
@@ -92,7 +114,7 @@ impl<'a> TextBuffer<'a> {
         }
     }
 
-    pub fn shape_until_scroll(&mut self) {
+    fn shape_until_scroll(&mut self) {
         let lines = self.lines();
 
         let scroll_end = self.scroll + lines;
@@ -107,7 +129,7 @@ impl<'a> TextBuffer<'a> {
         );
     }
 
-    pub fn reshape_line(&mut self, line_i: FontLineIndex) {
+    fn reshape_line(&mut self, line_i: FontLineIndex) {
         let instant = Instant::now();
 
         let shape_line = self
@@ -125,14 +147,14 @@ impl<'a> TextBuffer<'a> {
         self.relayout_line(line_i);
     }
 
-    pub fn relayout(&mut self) {
+    fn relayout(&mut self) {
         let instant = Instant::now();
 
         self.layout_lines.clear();
         for line in self.shape_lines.iter() {
             let layout_i = self.layout_lines.len();
             line.layout(
-                self.font_size,
+                self.metrics.font_size,
                 self.width,
                 &mut self.layout_lines,
                 layout_i,
@@ -145,7 +167,7 @@ impl<'a> TextBuffer<'a> {
         log::debug!("relayout: {:?}", duration);
     }
 
-    pub fn relayout_line(&mut self, line_i: FontLineIndex) {
+    fn relayout_line(&mut self, line_i: FontLineIndex) {
         let instant = Instant::now();
 
         let mut insert_opt = None;
@@ -166,7 +188,7 @@ impl<'a> TextBuffer<'a> {
 
         let shape_line = &self.shape_lines[line_i.get()];
         shape_line.layout(
-            self.font_size,
+            self.metrics.font_size,
             self.width,
             &mut self.layout_lines,
             insert_i,
@@ -182,43 +204,26 @@ impl<'a> TextBuffer<'a> {
         &self.font_matches
     }
 
-    pub fn font_size(&self) -> i32 {
-        self.font_size
+    /// Get the current [TextMetrics]
+    pub fn metrics(&self) -> TextMetrics {
+        self.metrics
     }
 
-    pub fn line_height(&self) -> i32 {
-        self.line_height
-    }
-
-    pub fn set_font_metrics(&mut self, font_size: i32, line_height: i32) {
-        if font_size != self.font_size {
-            self.font_size = font_size;
+    /// Set the current [TextMetrics]
+    pub fn set_metrics(&mut self, metrics: TextMetrics) {
+        if metrics != self.metrics {
+            self.metrics = metrics;
             self.relayout();
             self.shape_until_scroll();
         }
-
-        if line_height != self.line_height {
-            self.line_height = line_height;
-            self.shape_until_scroll();
-        }
     }
 
-    pub fn width(&self) -> i32 {
-        self.width
+    /// Get the current buffer dimensions (width, height)
+    pub fn size(&self) -> (i32, i32) {
+        (self.width, self.height)
     }
 
-    pub fn height(&self) -> i32 {
-        self.height
-    }
-
-    pub fn scroll(&self) -> i32 {
-        self.scroll
-    }
-
-    pub fn lines(&self) -> i32 {
-        self.height / self.line_height
-    }
-
+    /// Set the current buffer dimensions
     pub fn set_size(&mut self, width: i32, height: i32) {
         if width != self.width {
             self.width = width;
@@ -232,14 +237,27 @@ impl<'a> TextBuffer<'a> {
         }
     }
 
+    /// Get the current scroll location
+    pub fn scroll(&self) -> i32 {
+        self.scroll
+    }
+
+    /// Get the number of lines that can be viewed in the buffer
+    pub fn lines(&self) -> i32 {
+        self.height / self.metrics.line_height
+    }
+
+    /// Get the lines after layout for rendering
     pub fn layout_lines(&self) -> &[FontLayoutLine] {
         &self.layout_lines
     }
 
+    /// Get the lines of the original text
     pub fn text_lines(&self) -> &[String] {
         &self.text_lines
     }
 
+    /// Perform a [TextAction] on the buffer
     pub fn action(&mut self, action: TextAction) {
         match action {
             TextAction::Left => {
@@ -349,6 +367,9 @@ impl<'a> TextBuffer<'a> {
                     self.cursor.glyph += 1;
                     self.reshape_line(line.line_i);
                 }
+            },
+            TextAction::Click { x, y } => {
+
             },
             TextAction::Scroll(lines) => {
                 self.scroll += lines;
