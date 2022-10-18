@@ -56,11 +56,7 @@ where
         {
             let mut buffer = self.buffer.write().unwrap();
 
-            let font_size = buffer.font_size();
-            let line_height = font_size + 8;
-
-            buffer.set_line_width(size.width as i32);
-            buffer.shape_until(size.height as i32 / line_height);
+            buffer.set_size(size.width as i32, size.height as i32);
         }
         layout::Node::new(size)
     }
@@ -78,7 +74,6 @@ where
         let buffer = self.buffer.read().unwrap();
         let font_size = buffer.font_size();
         let line_height = font_size + 8; /*TODO: store somewhere else */
-        let scroll = 0;
 
         let instant = Instant::now();
 
@@ -99,7 +94,7 @@ where
         for (line_i, line) in buffer
             .layout_lines()
             .iter()
-            .skip(scroll as usize)
+            .skip(buffer.scroll as usize)
             .enumerate()
         {
             if line_y >= (layout.bounds().y + layout.bounds().height) as i32 {
@@ -111,7 +106,7 @@ where
                 start_line_opt = Some(end_line);
             }
 
-            if buffer.cursor.line == line_i + scroll as usize {
+            if buffer.cursor.line == line_i + buffer.scroll as usize {
                 if buffer.cursor.glyph >= line.glyphs.len() {
                     let x = match line.glyphs.last() {
                         Some(glyph) => glyph.x + glyph.w,
@@ -246,6 +241,14 @@ where
                         },
                         KeyCode::Delete => {
                             buffer.action(TextAction::Delete);
+                            Status::Captured
+                        },
+                        KeyCode::PageUp => {
+                            buffer.action(TextAction::PageUp);
+                            Status::Captured
+                        },
+                        KeyCode::PageDown => {
+                            buffer.action(TextAction::PageDown);
                             Status::Captured
                         },
                         _ => Status::Ignored,

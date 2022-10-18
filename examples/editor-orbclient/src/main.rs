@@ -86,7 +86,9 @@ fn main() {
         &font_matches,
         &text,
         font_sizes[font_size_i].0 * display_scale,
+        font_sizes[font_size_i].1 * display_scale,
         window.width() as i32 - line_x * 2,
+        window.height() as i32
     );
 
     let mut ctrl_pressed = false;
@@ -94,22 +96,11 @@ fn main() {
     let mut mouse_y = -1;
     let mut mouse_left = false;
     let mut rehit = false;
-    let mut scroll = 0;
     loop {
         let font_size = buffer.font_size();
-        let line_height = font_sizes[font_size_i].1 * display_scale;
+        let line_height = buffer.line_height();
 
-        let window_lines = (window.height() as i32 + line_height - 1) / line_height;
-
-        buffer.shape_until(scroll + window_lines);
-
-        scroll = cmp::max(
-            0,
-            cmp::min(
-                buffer.layout_lines().len() as i32 - (window_lines - 1),
-                scroll,
-            ),
-        );
+        buffer.shape_until_scroll();
 
         if rehit {
             let instant = Instant::now();
@@ -120,7 +111,7 @@ fn main() {
             for (line_i, line) in buffer
                 .layout_lines()
                 .iter()
-                .skip(scroll as usize)
+                .skip(buffer.scroll as usize)
                 .enumerate()
             {
                 if line_y >= window.height() as i32 {
@@ -131,7 +122,7 @@ fn main() {
                     && mouse_y >= line_y - font_size
                     && mouse_y < line_y - font_size + line_height
                 {
-                    let new_cursor_line = line_i + scroll as usize;
+                    let new_cursor_line = line_i + buffer.scroll as usize;
                     let mut new_cursor_glyph = line.glyphs.len();
                     for (glyph_i, glyph) in line.glyphs.iter().enumerate() {
                         if mouse_x >= line_x + glyph.x as i32
@@ -170,7 +161,7 @@ fn main() {
             for (line_i, line) in buffer
                 .layout_lines()
                 .iter()
-                .skip(scroll as usize)
+                .skip(buffer.scroll as usize)
                 .enumerate()
             {
                 if line_y >= window.height() as i32 {
@@ -182,7 +173,7 @@ fn main() {
                     start_line_opt = Some(end_line);
                 }
 
-                if buffer.cursor.line == line_i + scroll as usize {
+                if buffer.cursor.line == line_i + buffer.scroll as usize {
                     if buffer.cursor.glyph >= line.glyphs.len() {
                         let x = match line.glyphs.last() {
                             Some(glyph) => glyph.x + glyph.w,
@@ -259,28 +250,31 @@ fn main() {
                     orbclient::K_DOWN if event.pressed => buffer.action(TextAction::Down),
                     orbclient::K_BKSP if event.pressed => buffer.action(TextAction::Backspace),
                     orbclient::K_DEL if event.pressed => buffer.action(TextAction::Delete),
-                    orbclient::K_PGUP if event.pressed => {
-                        scroll -= window_lines;
-                        buffer.redraw = true;
-                    },
-                    orbclient::K_PGDN if event.pressed => {
-                        scroll += window_lines;
-                        buffer.redraw = true;
-                    },
+                    orbclient::K_PGUP if event.pressed => buffer.action(TextAction::PageUp),
+                    orbclient::K_PGDN if event.pressed => buffer.action(TextAction::PageDown),
                     orbclient::K_0 if event.pressed && ctrl_pressed => {
                         font_size_i = font_size_default;
-                        buffer.set_font_size(font_sizes[font_size_i].0 * display_scale);
+                        buffer.set_font_metrics(
+                            font_sizes[font_size_i].0 * display_scale,
+                            font_sizes[font_size_i].1 * display_scale,
+                        );
                     },
                     orbclient::K_MINUS if event.pressed && ctrl_pressed => {
                         if font_size_i > 0 {
                             font_size_i -= 1;
-                            buffer.set_font_size(font_sizes[font_size_i].0 * display_scale);
+                            buffer.set_font_metrics(
+                                font_sizes[font_size_i].0 * display_scale,
+                                font_sizes[font_size_i].1 * display_scale,
+                            );
                         }
                     },
                     orbclient::K_EQUALS if event.pressed && ctrl_pressed => {
                         if font_size_i + 1 < font_sizes.len() {
                             font_size_i += 1;
-                            buffer.set_font_size(font_sizes[font_size_i].0 * display_scale);
+                            buffer.set_font_metrics(
+                                font_sizes[font_size_i].0 * display_scale,
+                                font_sizes[font_size_i].1 * display_scale,
+                            );
                         }
                     },
                     orbclient::K_D if event.pressed && ctrl_pressed => {
@@ -314,10 +308,13 @@ fn main() {
                     }
                 }
                 EventOption::Resize(event) => {
-                    buffer.set_line_width(event.width as i32 - line_x * 2);
+                    buffer.set_size(
+                        event.width as i32 - line_x * 2,
+                        event.height as i32,
+                    );
                 }
                 EventOption::Scroll(event) => {
-                    scroll -= event.y * 3;
+                    buffer.scroll -= event.y * 3;
                     buffer.redraw = true;
                 }
                 EventOption::Quit(_) => return,

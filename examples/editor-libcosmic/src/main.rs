@@ -108,12 +108,13 @@ impl Application for Window {
             default_text.to_string()
         };
 
-        let line_x = 8;
         let buffer = Arc::new(RwLock::new(TextBuffer::new(
             unsafe { FONT_MATCHES.as_ref().unwrap() },
             &text,
             font_sizes[font_size_i].0,
-            600 - line_x * 2,
+            font_sizes[font_size_i].1,
+            0,
+            0
         )));
 
         let window = Window {
