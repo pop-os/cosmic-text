@@ -17,6 +17,5 @@ unicode-script = "0.5"
 
 [workspace]
 members = [
-  "examples/editor-libcosmic",
-  "examples/editor-orbclient",
+  "examples/*",
 ]
