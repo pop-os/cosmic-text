@@ -15,6 +15,7 @@ pub enum TextAction {
     PageUp,
     PageDown,
     Insert(char),
+    Scroll(i32),
 }
 
 #[derive(Default, Eq, PartialEq)]
@@ -38,9 +39,9 @@ pub struct TextBuffer<'a> {
     line_height: i32,
     width: i32,
     height: i32,
+    scroll: i32,
     pub cursor: TextCursor,
     pub redraw: bool,
-    pub scroll: i32,
 }
 
 impl<'a> TextBuffer<'a> {
@@ -56,7 +57,7 @@ impl<'a> TextBuffer<'a> {
         if text_lines.is_empty() {
             text_lines.push(String::new());
         }
-        Self {
+        let mut buffer = Self {
             font_matches,
             text_lines,
             shape_lines: Vec::new(),
@@ -68,7 +69,9 @@ impl<'a> TextBuffer<'a> {
             cursor: TextCursor::default(),
             redraw: false,
             scroll: 0,
-        }
+        };
+        buffer.shape_until_scroll();
+        buffer
     }
 
     pub fn shape_until(&mut self, lines: i32) {
@@ -191,6 +194,7 @@ impl<'a> TextBuffer<'a> {
         if font_size != self.font_size {
             self.font_size = font_size;
             self.relayout();
+            self.shape_until_scroll();
         }
 
         if line_height != self.line_height {
@@ -207,6 +211,10 @@ impl<'a> TextBuffer<'a> {
         self.height
     }
 
+    pub fn scroll(&self) -> i32 {
+        self.scroll
+    }
+
     pub fn lines(&self) -> i32 {
         self.height / self.line_height
     }
@@ -215,6 +223,7 @@ impl<'a> TextBuffer<'a> {
         if width != self.width {
             self.width = width;
             self.relayout();
+            self.shape_until_scroll();
         }
 
         if height != self.height {
@@ -316,6 +325,7 @@ impl<'a> TextBuffer<'a> {
                 self.shape_until_scroll();
             },
             TextAction::Insert(character) => {
+                //TODO: handle Enter
                 let line = &self.layout_lines[self.cursor.line];
                 if self.cursor.glyph >= line.glyphs.len() {
                     match line.glyphs.last() {
@@ -340,6 +350,11 @@ impl<'a> TextBuffer<'a> {
                     self.reshape_line(line.line_i);
                 }
             },
+            TextAction::Scroll(lines) => {
+                self.scroll += lines;
+                self.redraw = true;
+                self.shape_until_scroll();
+            }
         }
     }
 }

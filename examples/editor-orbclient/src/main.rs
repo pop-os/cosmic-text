@@ -97,9 +97,6 @@ fn main() {
     let mut mouse_left = false;
     let mut rehit = false;
     loop {
-        //TODO: do not use this
-        buffer.shape_until_scroll();
-
         let font_size = buffer.font_size();
         let line_height = buffer.line_height();
 
@@ -112,7 +109,7 @@ fn main() {
             for (line_i, line) in buffer
                 .layout_lines()
                 .iter()
-                .skip(buffer.scroll as usize)
+                .skip(buffer.scroll() as usize)
                 .enumerate()
             {
                 if line_y >= window.height() as i32 {
@@ -123,7 +120,7 @@ fn main() {
                     && mouse_y >= line_y - font_size
                     && mouse_y < line_y - font_size + line_height
                 {
-                    let new_cursor_line = line_i + buffer.scroll as usize;
+                    let new_cursor_line = line_i + buffer.scroll() as usize;
                     let mut new_cursor_glyph = line.glyphs.len();
                     for (glyph_i, glyph) in line.glyphs.iter().enumerate() {
                         if mouse_x >= line_x + glyph.x as i32
@@ -162,7 +159,7 @@ fn main() {
             for (line_i, line) in buffer
                 .layout_lines()
                 .iter()
-                .skip(buffer.scroll as usize)
+                .skip(buffer.scroll() as usize)
                 .enumerate()
             {
                 if line_y >= window.height() as i32 {
@@ -174,7 +171,7 @@ fn main() {
                     start_line_opt = Some(end_line);
                 }
 
-                if buffer.cursor.line == line_i + buffer.scroll as usize {
+                if buffer.cursor.line == line_i + buffer.scroll() as usize {
                     if buffer.cursor.glyph >= line.glyphs.len() {
                         let x = match line.glyphs.last() {
                             Some(glyph) => glyph.x + glyph.w,
@@ -315,8 +312,7 @@ fn main() {
                     );
                 }
                 EventOption::Scroll(event) => {
-                    buffer.scroll -= event.y * 3;
-                    buffer.redraw = true;
+                    buffer.action(TextAction::Scroll(-event.y * 3));
                 }
                 EventOption::Quit(_) => return,
                 _ => (),

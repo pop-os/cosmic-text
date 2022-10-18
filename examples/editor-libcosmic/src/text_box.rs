@@ -39,11 +39,11 @@ where
     Renderer: renderer::Renderer,
 {
     fn width(&self) -> Length {
-        Length::Shrink
+        Length::Fill
     }
 
     fn height(&self) -> Length {
-        Length::Shrink
+        Length::Fill
     }
 
     fn layout(
@@ -95,7 +95,7 @@ where
         for (line_i, line) in buffer
             .layout_lines()
             .iter()
-            .skip(buffer.scroll as usize)
+            .skip(buffer.scroll() as usize)
             .take(buffer.lines() as usize)
             .enumerate()
         {
@@ -104,7 +104,7 @@ where
                 start_line_opt = Some(end_line);
             }
 
-            if buffer.cursor.line == line_i + buffer.scroll as usize {
+            if buffer.cursor.line == line_i + buffer.scroll() as usize {
                 if buffer.cursor.glyph >= line.glyphs.len() {
                     let x = match line.glyphs.last() {
                         Some(glyph) => glyph.x + glyph.w,
