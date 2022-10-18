@@ -73,7 +73,7 @@ where
     ) {
         let buffer = self.buffer.read().unwrap();
         let font_size = buffer.font_size();
-        let line_height = font_size + 8; /*TODO: store somewhere else */
+        let line_height = buffer.line_height();
 
         let instant = Instant::now();
 

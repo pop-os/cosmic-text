@@ -90,7 +90,7 @@ impl<'a> TextBuffer<'a> {
     }
 
     pub fn shape_until_scroll(&mut self) {
-        let lines = self.height / self.line_height;
+        let lines = self.lines();
 
         let scroll_end = self.scroll + lines;
         self.shape_until(scroll_end);
@@ -207,6 +207,10 @@ impl<'a> TextBuffer<'a> {
         self.height
     }
 
+    pub fn lines(&self) -> i32 {
+        self.height / self.line_height
+    }
+
     pub fn set_size(&mut self, width: i32, height: i32) {
         if width != self.width {
             self.width = width;
@@ -255,12 +259,27 @@ impl<'a> TextBuffer<'a> {
                 if self.cursor.line > 0 {
                     self.cursor.line -= 1;
                     self.redraw = true;
+
+                    let lines = self.lines();
+                    if (self.cursor.line as i32) < self.scroll
+                    || (self.cursor.line as i32) >= self.scroll + lines
+                    {
+                        self.scroll = self.cursor.line as i32;
+                    }
                 }
             },
             TextAction::Down => {
-                if self.cursor.line + 1 < self.layout_lines.len() {
+                if self.cursor.line < self.layout_lines.len() {
                     self.cursor.line += 1;
                     self.redraw = true;
+
+                    let lines = self.lines();
+                    if (self.cursor.line as i32) < self.scroll
+                    || (self.cursor.line as i32) >= self.scroll + lines
+                    {
+                        self.scroll = self.cursor.line as i32 - (lines - 1);
+                        self.shape_until_scroll();
+                    }
                 }
             },
             TextAction::Backspace => {
@@ -287,14 +306,12 @@ impl<'a> TextBuffer<'a> {
                 }
             },
             TextAction::PageUp => {
-                let lines = self.height / self.line_height;
-                self.scroll -= lines;
+                self.scroll -= self.lines();
                 self.redraw = true;
                 self.shape_until_scroll();
             },
             TextAction::PageDown => {
-                let lines = self.height / self.line_height;
-                self.scroll += lines;
+                self.scroll += self.lines();
                 self.redraw = true;
                 self.shape_until_scroll();
             },
