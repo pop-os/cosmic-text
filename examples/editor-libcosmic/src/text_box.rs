@@ -1,5 +1,5 @@
 use cosmic::iced_native::{
-    {Color, Element, Length, Point, Rectangle, Size, Shell},
+    {Color, Element, Length, Point, Rectangle, Size, Shell, Theme},
     clipboard::Clipboard,
     event::{
         Event,
@@ -17,9 +17,47 @@ use cosmic_text::{
     TextBuffer,
 };
 use std::{
+    cmp,
     sync::{Arc, Mutex},
     time::Instant,
 };
+
+pub struct Appearance {
+    background_color: Option<Color>,
+    text_color: Color,
+}
+
+impl Appearance {
+    fn text_color_u32(&self) -> u32 {
+        let channel = |f: f32, shift: i32| -> u32 {
+            (cmp::max(0, cmp::min(255, (f * 255.0) as i32)) << shift) as u32
+        };
+
+        channel(self.text_color.b, 0) |
+        channel(self.text_color.g, 8) |
+        channel(self.text_color.r, 16) |
+        channel(self.text_color.a, 24)
+    }
+}
+
+pub trait StyleSheet {
+    fn appearance(&self) -> Appearance;
+}
+
+impl StyleSheet for Theme {
+    fn appearance(&self) -> Appearance {
+        match self {
+            Theme::Dark => Appearance {
+                background_color: Some(Color::from_rgb8(0x34, 0x34, 0x34)),
+                text_color: Color::from_rgb8(0xFF, 0xFF, 0xFF),
+            },
+            Theme::Light => Appearance {
+                background_color: Some(Color::from_rgb8(0xFC, 0xFC, 0xFC)),
+                text_color: Color::from_rgb8(0x00, 0x00, 0x00),
+            },
+        }
+    }
+}
 
 pub struct TextBox<'a> {
     buffer: Arc<Mutex<TextBuffer<'a>>>,
@@ -38,6 +76,7 @@ pub fn text_box<'a>(buffer: Arc<Mutex<TextBuffer<'a>>>) -> TextBox<'a> {
 impl<'a, Message, Renderer> Widget<Message, Renderer> for TextBox<'a>
 where
     Renderer: renderer::Renderer,
+    Renderer::Theme: StyleSheet,
 {
     fn width(&self) -> Length {
         Length::Fill
@@ -66,12 +105,15 @@ where
         &self,
         _state: &widget::Tree,
         renderer: &mut Renderer,
-        _theme: &Renderer::Theme,
+        theme: &Renderer::Theme,
         _style: &renderer::Style,
         layout: Layout<'_>,
         _cursor_position: Point,
         _viewport: &Rectangle,
     ) {
+        let appearance = theme.appearance();
+        let text_color_u32 = appearance.text_color_u32();
+
         let buffer = self.buffer.lock().unwrap();
 
         let font_size = buffer.font_size();
@@ -79,15 +121,17 @@ where
 
         let instant = Instant::now();
 
-        renderer.fill_quad(
-            renderer::Quad {
-                bounds: layout.bounds(),
-                border_radius: 0.0,
-                border_width: 0.0,
-                border_color: Color::TRANSPARENT,
-            },
-            Color::from_rgb8(0x34, 0x34, 0x34),
-        );
+        if let Some(background_color) = appearance.background_color {
+            renderer.fill_quad(
+                renderer::Quad {
+                    bounds: layout.bounds(),
+                    border_radius: 0.0,
+                    border_width: 0.0,
+                    border_color: Color::TRANSPARENT,
+                },
+                background_color
+            );
+        }
 
         let line_x = layout.bounds().x as i32;
         let mut line_y = layout.bounds().y as i32 + font_size;
@@ -151,7 +195,7 @@ where
                 }
             }
 
-            line.draw(0xFFFFFF, |x, y, data| {
+            line.draw(text_color_u32, |x, y, data| {
                 let a = (data >> 24) as u8;
                 if a > 0 {
                     let r = (data >> 16) as u8;
@@ -277,6 +321,7 @@ where
 impl<'a, Message, Renderer> From<TextBox<'a>> for Element<'a, Message, Renderer>
 where
     Renderer: renderer::Renderer,
+    Renderer::Theme: StyleSheet,
 {
     fn from(text_box: TextBox<'a>) -> Self {
         Self::new(text_box)
