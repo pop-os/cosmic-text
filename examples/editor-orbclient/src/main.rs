@@ -97,10 +97,11 @@ fn main() {
     let mut mouse_left = false;
     let mut rehit = false;
     loop {
+        //TODO: do not use this
+        buffer.shape_until_scroll();
+
         let font_size = buffer.font_size();
         let line_height = buffer.line_height();
-
-        buffer.shape_until_scroll();
 
         if rehit {
             let instant = Instant::now();

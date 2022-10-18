@@ -16,21 +16,21 @@ use cosmic_text::{
     TextBuffer,
 };
 use std::{
-    sync::{Arc, RwLock},
+    sync::{Arc, Mutex},
     time::Instant,
 };
 
 pub struct TextBox<'a> {
-    buffer: Arc<RwLock<TextBuffer<'a>>>,
+    buffer: Arc<Mutex<TextBuffer<'a>>>,
 }
 
 impl<'a> TextBox<'a> {
-    pub fn new(buffer: Arc<RwLock<TextBuffer<'a>>>) -> Self {
+    pub fn new(buffer: Arc<Mutex<TextBuffer<'a>>>) -> Self {
         Self { buffer }
     }
 }
 
-pub fn text_box<'a>(buffer: Arc<RwLock<TextBuffer<'a>>>) -> TextBox<'a> {
+pub fn text_box<'a>(buffer: Arc<Mutex<TextBuffer<'a>>>) -> TextBox<'a> {
     TextBox::new(buffer)
 }
 
@@ -54,7 +54,7 @@ where
         println!("{:?}", limits);
         let size = limits.max();
         {
-            let mut buffer = self.buffer.write().unwrap();
+            let mut buffer = self.buffer.lock().unwrap();
 
             buffer.set_size(size.width as i32, size.height as i32);
         }
@@ -71,7 +71,8 @@ where
         _cursor_position: Point,
         _viewport: &Rectangle,
     ) {
-        let buffer = self.buffer.read().unwrap();
+        let buffer = self.buffer.lock().unwrap();
+
         let font_size = buffer.font_size();
         let line_height = buffer.line_height();
 
@@ -88,19 +89,16 @@ where
         );
 
         let line_x = layout.bounds().x as i32;
-        let mut line_y = layout.bounds().y as i32 + line_height;
+        let mut line_y = layout.bounds().y as i32 + font_size;
         let mut start_line_opt = None;
         let mut end_line = FontLineIndex::new(0);
         for (line_i, line) in buffer
             .layout_lines()
             .iter()
             .skip(buffer.scroll as usize)
+            .take(buffer.lines() as usize)
             .enumerate()
         {
-            if line_y >= (layout.bounds().y + layout.bounds().height) as i32 {
-                break;
-            }
-
             end_line = line.line_i;
             if start_line_opt == None {
                 start_line_opt = Some(end_line);
@@ -213,7 +211,7 @@ where
         _clipboard: &mut dyn Clipboard,
         _shell: &mut Shell<'_, Message>,
     ) -> Status {
-        let mut buffer = self.buffer.write().unwrap();
+        let mut buffer = self.buffer.lock().unwrap();
 
         match event {
             Event::Keyboard(key_event) => match key_event {

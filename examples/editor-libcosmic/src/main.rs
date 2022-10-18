@@ -19,7 +19,7 @@ use cosmic_text::{
 use std::{
     env,
     fs,
-    sync::{Arc, RwLock},
+    sync::{Arc, Mutex},
 };
 
 use self::text_box::text_box;
@@ -73,7 +73,7 @@ fn main() -> cosmic::iced::Result {
 }
 
 pub struct Window {
-    buffer: Arc<RwLock<TextBuffer<'static>>>,
+    buffer: Arc<Mutex<TextBuffer<'static>>>,
 }
 
 #[allow(dead_code)]
@@ -108,7 +108,7 @@ impl Application for Window {
             default_text.to_string()
         };
 
-        let buffer = Arc::new(RwLock::new(TextBuffer::new(
+        let buffer = Arc::new(Mutex::new(TextBuffer::new(
             unsafe { FONT_MATCHES.as_ref().unwrap() },
             &text,
             font_sizes[font_size_i].0,
@@ -124,7 +124,7 @@ impl Application for Window {
     }
 
     fn title(&self) -> String {
-        let buffer = self.buffer.read().unwrap();
+        let buffer = self.buffer.lock().unwrap();
         format!("COSMIC Text - iced - {}", buffer.font_matches().locale)
     }
 
