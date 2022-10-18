@@ -1,0 +1,22 @@
+[package]
+name = "cosmic-text"
+version = "0.1.0"
+authors = ["Jeremy Soller <jeremy@system76.com>"]
+edition = "2021"
+license = "MPL2"
+
+[dependencies]
+fontdb = "0.9"
+log = "0.4"
+rustybuzz = "0.5"
+swash = "0.1"
+sys-locale = "0.2"
+unicode-bidi = "0.3"
+unicode-linebreak = "0.1"
+unicode-script = "0.5"
+
+[workspace]
+members = [
+  "examples/editor-libcosmic",
+  "examples/editor-orbclient",
+]

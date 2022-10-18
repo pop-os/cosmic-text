@@ -1,0 +1,17 @@
+[package]
+name = "editor-orbclient"
+version = "0.1.0"
+authors = ["Jeremy Soller <jeremy@system76.com>"]
+edition = "2021"
+license = "MPL2"
+publish = false
+
+[dependencies]
+cosmic-text = { path = "../../" }
+env_logger = "0.9"
+fontdb = "0.9"
+log = "0.4"
+orbclient = "0.3.35"
+
+[features]
+mono = []
