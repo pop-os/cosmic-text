@@ -511,23 +511,25 @@ impl<'a> TextBuffer<'a> {
                     let end_glyph = if end.line == line_i_scrolled {
                         end.glyph
                     } else {
-                        line.glyphs.len()
+                        line.glyphs.len() + 1
                     };
 
-                    let start_x = line.glyphs.get(start_glyph).map_or(0, |glyph| {
-                        glyph.x as i32
-                    });
-                    let end_x = line.glyphs.get(end_glyph).map_or(self.width, |glyph| {
-                        (glyph.x + glyph.w) as i32
-                    });
+                    if end_glyph > start_glyph {
+                        let start_x = line.glyphs.get(start_glyph).map_or(0, |glyph| {
+                            glyph.x as i32
+                        });
+                        let end_x = line.glyphs.get(end_glyph - 1).map_or(self.width, |glyph| {
+                            (glyph.x + glyph.w) as i32
+                        });
 
-                    f(
-                        start_x,
-                        line_y - font_size,
-                        cmp::max(0, end_x - start_x) as u32,
-                        line_height as u32,
-                        0x33_00_00_00 | (color & 0xFF_FF_FF)
-                    );
+                        f(
+                            start_x,
+                            line_y - font_size,
+                            cmp::max(0, end_x - start_x) as u32,
+                            line_height as u32,
+                            0x33_00_00_00 | (color & 0xFF_FF_FF)
+                        );
+                    }
                 }
             }
 
