@@ -137,6 +137,8 @@ fn main() {
 
     //TODO: support bidi
     for line in text.lines() {
+        log::debug!("Line {:?}", line);
+
         for c in line.chars() {
             if c.is_control() {
                 log::warn!("Ignoring control character {:?}", c);
@@ -166,8 +168,6 @@ fn main() {
             // Finally, normal insert of character
             buffer.action(TextAction::Insert(c));
         }
-
-        log::debug!("Line '{}': {:?}", line, line);
 
         // Test backspace of newline
         {

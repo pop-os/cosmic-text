@@ -473,21 +473,31 @@ impl<'a> TextBuffer<'a> {
                     text_line.remove(glyph.start);
                     self.reshape_line(line.line_i);
                 } else if self.cursor.line > 0 {
-                    self.cursor.glyph = self.layout_lines[self.cursor.line - 1].glyphs.len();
-
                     {
                         let line = &self.layout_lines[self.cursor.line];
-                        let old_line = self.text_lines.remove(line.line_i.get());
-                        self.text_lines[line.line_i.get() - 1].push_str(&old_line);
+                        let prev_line = &self.layout_lines[self.cursor.line - 1];
+                        if prev_line.line_i.get() < line.line_i.get() {
+                            let old_line = self.text_lines.remove(line.line_i.get());
+                            self.text_lines[prev_line.line_i.get()].push_str(&old_line);
+                        } else {
+                            match prev_line.glyphs.last() {
+                                Some(glyph) => {
+                                    let text_line = &mut self.text_lines[line.line_i.get()];
+                                    text_line.remove(glyph.end);
+                                },
+                                None => (), // There should always be a last glyph
+                            }
+                        }
 
                         // Reshape all lines after new line
                         //TODO: improve performance
-                        self.shape_lines.truncate(line.line_i.get() - 1);
+                        self.shape_lines.truncate(prev_line.line_i.get());
                         self.relayout();
                         self.shape_until_scroll();
                     }
 
                     self.cursor.line -= 1;
+                    self.cursor.glyph = self.layout_lines[self.cursor.line].glyphs.len();
 
                     let lines = self.lines();
                     if (self.cursor.line as i32) < self.scroll
