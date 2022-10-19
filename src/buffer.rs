@@ -448,6 +448,29 @@ impl<'a> TextBuffer<'a> {
                     let text_line = &mut self.text_lines[line.line_i.get()];
                     text_line.remove(glyph.start);
                     self.reshape_line(line.line_i);
+                } else if self.cursor.line > 0 {
+                    self.cursor.glyph = self.layout_lines[self.cursor.line - 1].glyphs.len();
+
+                    {
+                        let line = &self.layout_lines[self.cursor.line];
+                        let old_line = self.text_lines.remove(line.line_i.get());
+                        self.text_lines[line.line_i.get() - 1].push_str(&old_line);
+
+                        // Reshape all lines after new line
+                        //TODO: improve performance
+                        self.shape_lines.truncate(line.line_i.get() - 1);
+                        self.relayout();
+                        self.shape_until_scroll();
+                    }
+
+                    self.cursor.line -= 1;
+
+                    let lines = self.lines();
+                    if (self.cursor.line as i32) < self.scroll
+                    || (self.cursor.line as i32) >= self.scroll + lines
+                    {
+                        self.scroll = self.cursor.line as i32;
+                    }
                 }
             },
             TextAction::Delete => {
@@ -457,6 +480,31 @@ impl<'a> TextBuffer<'a> {
                     let text_line = &mut self.text_lines[line.line_i.get()];
                     text_line.remove(glyph.start);
                     self.reshape_line(line.line_i);
+                } else {
+                    self.shape_until(self.cursor.line as i32 + 1);
+
+                    if self.cursor.line + 1 < self.layout_lines.len() {
+                        let line = &self.layout_lines[self.cursor.line];
+                        let next_line = &self.layout_lines[self.cursor.line + 1];
+                        if line.line_i.get() < next_line.line_i.get() {
+                            let old_line = self.text_lines.remove(next_line.line_i.get());
+                            self.text_lines[line.line_i.get()].push_str(&old_line);
+                        } else {
+                            match line.glyphs.last() {
+                                Some(glyph) => {
+                                    let text_line = &mut self.text_lines[line.line_i.get()];
+                                    text_line.remove(glyph.end);
+                                },
+                                None => (), // There should always be a last glyph
+                            }
+                        }
+
+                        // Reshape all lines after new line
+                        //TODO: improve performance
+                        self.shape_lines.truncate(line.line_i.get());
+                        self.relayout();
+                        self.shape_until_scroll();
+                    }
                 }
             },
             TextAction::Click { x, y } => {
