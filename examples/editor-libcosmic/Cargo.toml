@@ -18,5 +18,11 @@ git = "https://github.com/pop-os/libcosmic"
 branch = "cosmic-design-system"
 #path = "../../../libcosmic"
 
+[dependencies.rfd]
+version = "0.10"
+#TODO: iced portal
+#default-features = false
+#features = ["xdg-portal"]
+
 [features]
 mono = []

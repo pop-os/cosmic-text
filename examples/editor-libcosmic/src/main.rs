@@ -5,15 +5,20 @@ use cosmic::{
         Application,
         Command,
         Element,
+        Length,
         Theme,
         widget::{
             column,
+            horizontal_space,
             pick_list,
             row,
             text,
         },
     },
     settings,
+    widget::{
+        button,
+    },
 };
 use cosmic_text::{
     FontMatches,
@@ -94,6 +99,7 @@ pub struct Window {
 #[allow(dead_code)]
 #[derive(Clone, Copy, Debug)]
 pub enum Message {
+    Open,
     MetricsChanged(TextMetrics),
     ThemeChanged(&'static str),
 }
@@ -105,26 +111,26 @@ impl Application for Window {
     type Theme = Theme;
 
     fn new(_flags: ()) -> (Self, Command<Self::Message>) {
-        let text = if let Some(arg) = env::args().nth(1) {
-            fs::read_to_string(&arg).expect("failed to open file")
-        } else {
-            #[cfg(feature = "mono")]
-            let default_text = include_str!("../../../sample/mono.txt");
-            #[cfg(not(feature = "mono"))]
-            let default_text = include_str!("../../../sample/proportional.txt");
-            default_text.to_string()
-        };
-
         let font_size_i = 1; // Body
-        let buffer = Mutex::new(TextBuffer::new(
+        let mut buffer = TextBuffer::new(
             unsafe { FONT_MATCHES.as_ref().unwrap() },
-            &text,
             FONT_SIZES[font_size_i],
-        ));
+        );
+
+        if let Some(arg) = env::args().nth(1) {
+            match fs::read_to_string(&arg) {
+                Ok(text) => {
+                    buffer.set_text(&text);
+                },
+                Err(err) => {
+                    log::error!("failed to open '{}': {}", arg, err);
+                }
+            }
+        }
 
         let window = Window {
             theme: Theme::Dark,
-            buffer,
+            buffer: Mutex::new(buffer),
         };
         (window, Command::none())
     }
@@ -139,6 +145,20 @@ impl Application for Window {
 
     fn update(&mut self, message: Message) -> iced::Command<Self::Message> {
         match message {
+            Message::Open => {
+                if let Some(path) = rfd::FileDialog::new().pick_file() {
+                    let mut buffer = self.buffer.lock().unwrap();
+                    match fs::read_to_string(&path) {
+                        Ok(text) => {
+                            buffer.set_text(&text);
+                        },
+                        Err(err) => {
+                            buffer.set_text("");
+                            log::error!("failed to open '{}': {}", path.display(), err);
+                        }
+                    }
+                }
+            },
             Message::MetricsChanged(metrics) => {
                 let mut buffer = self.buffer.lock().unwrap();
                 buffer.set_metrics(metrics);
@@ -175,6 +195,8 @@ impl Application for Window {
 
         column![
             row![
+                button!("Open").on_press(Message::Open),
+                horizontal_space(Length::Fill),
                 text("Theme:"),
                 theme_picker,
                 text("Font Size:"),

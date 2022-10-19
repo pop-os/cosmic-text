@@ -84,13 +84,13 @@ fn main() {
     let line_x = 8 * display_scale;
     let mut buffer = TextBuffer::new(
         &font_matches,
-        &text,
         font_sizes[font_size_i]
     );
     buffer.set_size(
         window.width() as i32 - line_x * 2,
         window.height() as i32
     );
+    buffer.set_text(&text);
 
     let mut ctrl_pressed = false;
     let mut mouse_x = -1;

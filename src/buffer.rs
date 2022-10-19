@@ -114,16 +114,11 @@ pub struct TextBuffer<'a> {
 impl<'a> TextBuffer<'a> {
     pub fn new(
         font_matches: &'a FontMatches<'a>,
-        text: &str,
         metrics: TextMetrics,
     ) -> Self {
-        let mut text_lines: Vec<String> = text.lines().map(String::from).collect();
-        if text_lines.is_empty() {
-            text_lines.push(String::new());
-        }
         Self {
             font_matches,
-            text_lines,
+            text_lines: Vec::new(),
             shape_lines: Vec::new(),
             layout_lines: Vec::new(),
             metrics,
@@ -292,6 +287,20 @@ impl<'a> TextBuffer<'a> {
     /// Get the lines after layout for rendering
     pub fn layout_lines(&self) -> &[FontLayoutLine] {
         &self.layout_lines
+    }
+
+    /// Set text of buffer
+    pub fn set_text(&mut self, text: &str) {
+        self.text_lines = text.lines().map(String::from).collect();
+        if self.text_lines.is_empty() {
+            self.text_lines.push(String::new());
+        }
+        self.shape_lines.clear();
+        self.layout_lines.clear();
+        self.scroll = 0;
+        self.cursor = TextCursor::default();
+        self.select_opt = None;
+        self.shape_until_scroll();
     }
 
     /// Get the lines of the original text
