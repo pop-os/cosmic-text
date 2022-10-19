@@ -102,6 +102,7 @@ pub struct Window {
 #[derive(Clone, Copy, Debug)]
 pub enum Message {
     Open,
+    Save,
     MetricsChanged(TextMetrics),
     ThemeChanged(&'static str),
 }
@@ -111,6 +112,7 @@ impl Window {
         let mut buffer = self.buffer.lock().unwrap();
         match fs::read_to_string(&path) {
             Ok(text) => {
+                log::info!("opened '{}'", path.display());
                 buffer.set_text(&text);
                 self.path_opt = Some(path);
             },
@@ -131,7 +133,7 @@ impl Application for Window {
 
     fn new(_flags: ()) -> (Self, Command<Self::Message>) {
         let font_size_i = 1; // Body
-        let mut buffer = TextBuffer::new(
+        let buffer = TextBuffer::new(
             unsafe { FONT_MATCHES.as_ref().unwrap() },
             FONT_SIZES[font_size_i],
         );
@@ -164,6 +166,20 @@ impl Application for Window {
             Message::Open => {
                 if let Some(path) = rfd::FileDialog::new().pick_file() {
                     self.open(path);
+                }
+            },
+            Message::Save => {
+                if let Some(path) = &self.path_opt {
+                    let buffer = self.buffer.lock().unwrap();
+                    let text = buffer.text_lines().join("\n");
+                    match fs::write(path, text) {
+                        Ok(()) => {
+                            log::info!("saved '{}'", path.display());
+                        },
+                        Err(err) => {
+                            log::error!("failed to save '{}': {}", path.display(), err);
+                        }
+                    }
                 }
             },
             Message::MetricsChanged(metrics) => {
@@ -203,6 +219,7 @@ impl Application for Window {
         column![
             row![
                 button!("Open").on_press(Message::Open),
+                button!("Save").on_press(Message::Save),
                 horizontal_space(Length::Fill),
                 text("Theme:"),
                 theme_picker,
