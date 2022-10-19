@@ -411,6 +411,7 @@ impl<'a> TextBuffer<'a> {
             TextAction::Drag { x, y } => {
                 if self.select_opt.is_none() {
                     self.select_opt = Some(self.cursor);
+                    self.redraw = true;
                 }
                 self.click(x, y);
             },
