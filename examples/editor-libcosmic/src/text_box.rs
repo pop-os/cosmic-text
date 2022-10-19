@@ -9,7 +9,7 @@ use cosmic::iced_native::{
     layout::{self, Layout},
     mouse::{self, Button, Event as MouseEvent, ScrollDelta},
     renderer,
-    widget::{self, Widget},
+    widget::{self, tree, Widget},
 };
 use cosmic_text::{
     TextAction,
@@ -77,6 +77,14 @@ where
     Renderer: renderer::Renderer,
     Renderer::Theme: StyleSheet,
 {
+    fn tag(&self) -> tree::Tag {
+        tree::Tag::of::<State>()
+    }
+
+    fn state(&self) -> tree::State {
+        tree::State::new(State::new())
+    }
+
     fn width(&self) -> Length {
         Length::Fill
     }
@@ -194,7 +202,7 @@ where
 
     fn on_event(
         &mut self,
-        _state: &mut widget::Tree,
+        tree: &mut widget::Tree,
         event: Event,
         layout: Layout<'_>,
         cursor_position: Point,
@@ -202,79 +210,85 @@ where
         _clipboard: &mut dyn Clipboard,
         _shell: &mut Shell<'_, Message>,
     ) -> Status {
+        let state = tree.state.downcast_mut::<State>();
         let mut buffer = self.buffer.lock().unwrap();
 
         match event {
-            Event::Keyboard(key_event) => match key_event {
-                KeyEvent::KeyPressed { key_code, modifiers } => {
-                    match key_code {
-                        KeyCode::Left => {
-                            buffer.action(TextAction::Left);
-                            Status::Captured
-                        },
-                        KeyCode::Right => {
-                            buffer.action(TextAction::Right);
-                            Status::Captured
-                        },
-                        KeyCode::Up => {
-                            buffer.action(TextAction::Up);
-                            Status::Captured
-                        },
-                        KeyCode::Down => {
-                            buffer.action(TextAction::Down);
-                            Status::Captured
-                        },
-                        KeyCode::Backspace => {
-                            buffer.action(TextAction::Backspace);
-                            Status::Captured
-                        },
-                        KeyCode::Delete => {
-                            buffer.action(TextAction::Delete);
-                            Status::Captured
-                        },
-                        KeyCode::PageUp => {
-                            buffer.action(TextAction::PageUp);
-                            Status::Captured
-                        },
-                        KeyCode::PageDown => {
-                            buffer.action(TextAction::PageDown);
-                            Status::Captured
-                        },
-                        _ => Status::Ignored,
-                    }
+            Event::Keyboard(KeyEvent::KeyPressed { key_code, modifiers }) => match key_code {
+                KeyCode::Left => {
+                    buffer.action(TextAction::Left);
+                    return Status::Captured;
                 },
-                KeyEvent::CharacterReceived(character) => {
-                    buffer.action(TextAction::Insert(character));
-                    Status::Captured
+                KeyCode::Right => {
+                    buffer.action(TextAction::Right);
+                    return Status::Captured;
                 },
-                _ => Status::Ignored,
+                KeyCode::Up => {
+                    buffer.action(TextAction::Up);
+                    return Status::Captured;
+                },
+                KeyCode::Down => {
+                    buffer.action(TextAction::Down);
+                    return Status::Captured;
+                },
+                KeyCode::Backspace => {
+                    buffer.action(TextAction::Backspace);
+                    return Status::Captured;
+                },
+                KeyCode::Delete => {
+                    buffer.action(TextAction::Delete);
+                    return Status::Captured;
+                },
+                KeyCode::PageUp => {
+                    buffer.action(TextAction::PageUp);
+                    return Status::Captured;
+                },
+                KeyCode::PageDown => {
+                    buffer.action(TextAction::PageDown);
+                    return Status::Captured;
+                },
+                _ => ()
             },
-            Event::Mouse(mouse_event) => match mouse_event {
-                MouseEvent::ButtonPressed(button) => match button {
-                    Button::Left => if layout.bounds().contains(cursor_position) {
-                        buffer.action(TextAction::Click {
-                            x: (cursor_position.x - layout.bounds().x) as i32,
-                            y: (cursor_position.y - layout.bounds().y) as i32,
-                        });
-                        Status::Captured
-                    } else {
-                        Status::Ignored
-                    },
-                    _ => Status::Ignored,
-                },
-                MouseEvent::WheelScrolled { delta } => match delta {
-                    ScrollDelta::Lines { x, y } => {
-                        buffer.action(TextAction::Scroll {
-                            lines: (-y * 6.0) as i32,
-                        });
-                        Status::Captured
-                    },
-                    _ => Status::Ignored,
+            Event::Keyboard(KeyEvent::CharacterReceived(character)) => {
+                buffer.action(TextAction::Insert(character));
+                return Status::Captured;
+            },
+            Event::Mouse(MouseEvent::ButtonPressed(Button::Left)) => {
+                if layout.bounds().contains(cursor_position) {
+                    buffer.action(TextAction::Click {
+                        x: (cursor_position.x - layout.bounds().x) as i32,
+                        y: (cursor_position.y - layout.bounds().y) as i32,
+                    });
+                    state.is_dragging = true;
+                    return Status::Captured;
                 }
-                _ => Status::Ignored,
             },
-            _ => Status::Ignored,
+            Event::Mouse(MouseEvent::ButtonReleased(Button::Left)) => {
+                state.is_dragging = false;
+                return Status::Captured;
+            },
+            Event::Mouse(MouseEvent::CursorMoved { .. }) => {
+                if state.is_dragging {
+                    buffer.action(TextAction::Drag {
+                        x: (cursor_position.x - layout.bounds().x) as i32,
+                        y: (cursor_position.y - layout.bounds().y) as i32,
+                    });
+                    return Status::Captured;
+                }
+            },
+            Event::Mouse(MouseEvent::WheelScrolled { delta }) => match delta {
+                ScrollDelta::Lines { x, y } => {
+                    buffer.action(TextAction::Scroll {
+                        lines: (-y * 6.0) as i32,
+                    });
+                    return Status::Captured;
+                },
+                _ => (),
+            },
+            _ => ()
         }
+
+        Status::Ignored
     }
 }
 
@@ -285,5 +299,17 @@ where
 {
     fn from(text_box: TextBox<'a>) -> Self {
         Self::new(text_box)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct State {
+    is_dragging: bool,
+}
+
+impl State {
+    /// Creates a new [`State`].
+    pub fn new() -> State {
+        State::default()
     }
 }

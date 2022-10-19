@@ -29,6 +29,8 @@ pub enum TextAction {
     Insert(char),
     /// Mouse click at specified position
     Click { x: i32, y: i32 },
+    /// Mouse drag to specified position
+    Drag { x: i32, y: i32 },
     /// Scroll specified number of lines
     Scroll { lines: i32 },
 }
@@ -99,6 +101,7 @@ pub struct TextBuffer<'a> {
     height: i32,
     scroll: i32,
     cursor: TextCursor,
+    select_opt: Option<TextCursor>,
     pub redraw: bool,
 }
 
@@ -122,6 +125,7 @@ impl<'a> TextBuffer<'a> {
             height: 0,
             scroll: 0,
             cursor: TextCursor::default(),
+            select_opt: None,
             redraw: false,
         }
     }
@@ -401,6 +405,13 @@ impl<'a> TextBuffer<'a> {
                 }
             },
             TextAction::Click { x, y } => {
+                self.select_opt = None;
+                self.click(x, y);
+            },
+            TextAction::Drag { x, y } => {
+                if self.select_opt.is_none() {
+                    self.select_opt = Some(self.cursor);
+                }
                 self.click(x, y);
             },
             TextAction::Scroll { lines } => {
@@ -472,7 +483,56 @@ impl<'a> TextBuffer<'a> {
             .take(cmp::max(0, self.lines()) as usize)
             .enumerate()
         {
-            if self.cursor.line == line_i + self.scroll() as usize {
+            let line_i_scrolled = line_i + cmp::max(0, self.scroll()) as usize;
+
+            // Highlight selection (TODO: HIGHLIGHT COLOR!)
+            if let Some(select) = self.select_opt {
+                let (start, end) = if select.line < self.cursor.line {
+                    (select, self.cursor)
+                } else if select.line > self.cursor.line {
+                    (self.cursor, select)
+                } else {
+                    /* select.line == self.cursor.line */
+                    if select.glyph < self.cursor.glyph {
+                        (select, self.cursor)
+                    } else {
+                        /* select.glyph >= self.cursor.glyph */
+                        (self.cursor, select)
+                    }
+                };
+
+                if line_i_scrolled >= start.line && line_i_scrolled <= end.line {
+                    let start_glyph = if start.line == line_i_scrolled {
+                        start.glyph
+                    } else {
+                        0
+                    };
+
+                    let end_glyph = if end.line == line_i_scrolled {
+                        end.glyph
+                    } else {
+                        line.glyphs.len()
+                    };
+
+                    let start_x = line.glyphs.get(start_glyph).map_or(0, |glyph| {
+                        glyph.x as i32
+                    });
+                    let end_x = line.glyphs.get(end_glyph).map_or(self.width, |glyph| {
+                        (glyph.x + glyph.w) as i32
+                    });
+
+                    f(
+                        start_x,
+                        line_y - font_size,
+                        cmp::max(0, end_x - start_x) as u32,
+                        line_height as u32,
+                        0x33_00_00_00 | (color & 0xFF_FF_FF)
+                    );
+                }
+            }
+
+            // Draw cursor
+            if self.cursor.line == line_i_scrolled {
                 if self.cursor.glyph >= line.glyphs.len() {
                     let x = match line.glyphs.last() {
                         Some(glyph) => glyph.x + glyph.w,

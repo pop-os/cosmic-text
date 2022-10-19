@@ -203,7 +203,7 @@ fn main() {
                     mouse_x = event.x;
                     mouse_y = event.y;
                     if mouse_left {
-                        buffer.action(TextAction::Click {
+                        buffer.action(TextAction::Drag {
                             x: mouse_x - line_x,
                             y: mouse_y
                         });
