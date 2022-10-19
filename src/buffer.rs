@@ -412,23 +412,33 @@ impl<'a> TextBuffer<'a> {
             TextAction::Insert(character) => match character {
                 '\r' | '\n' => {
                     //TODO: handle Enter
-                    let line = &self.layout_lines[self.cursor.line];
-                    let new_line = if self.cursor.glyph >= line.glyphs.len() {
-                        String::new()
-                    } else {
-                        let glyph = &line.glyphs[self.cursor.glyph];
-                        self.text_lines[line.line_i.get()].split_off(glyph.start)
-                    };
-                    self.text_lines.insert(line.line_i.get() + 1, new_line);
+                    {
+                        let line = &self.layout_lines[self.cursor.line];
+                        let new_line = if self.cursor.glyph >= line.glyphs.len() {
+                            String::new()
+                        } else {
+                            let glyph = &line.glyphs[self.cursor.glyph];
+                            self.text_lines[line.line_i.get()].split_off(glyph.start)
+                        };
+                        self.text_lines.insert(line.line_i.get() + 1, new_line);
 
-                    // Reshape all lines after new line
-                    //TODO: improve performance
-                    self.shape_lines.truncate(line.line_i.get());
-                    self.relayout();
-                    self.shape_until_scroll();
+                        // Reshape all lines after new line
+                        //TODO: improve performance
+                        self.shape_lines.truncate(line.line_i.get());
+                        self.relayout();
+                        self.shape_until_scroll();
+                    }
 
                     self.cursor.glyph = 0;
                     self.cursor.line += 1;
+
+                    let lines = self.lines();
+                    if (self.cursor.line as i32) < self.scroll
+                    || (self.cursor.line as i32) >= self.scroll + lines
+                    {
+                        self.scroll = self.cursor.line as i32 - (lines - 1);
+                        self.shape_until_scroll();
+                    }
                 },
                 _ => {
                     let line = &self.layout_lines[self.cursor.line];
