@@ -9,17 +9,28 @@ use crate::{FontLayoutLine, FontMatches, FontShapeLine};
 /// An action to perform on a [TextBuffer]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TextAction {
+    /// Move cursor left
     Left,
+    /// Move cursor right
     Right,
+    /// Move cursor up
     Up,
+    /// Move cursor down
     Down,
+    /// Delete text behind cursor
     Backspace,
+    /// Delete text in front of cursor
     Delete,
+    /// Scroll up one page
     PageUp,
+    /// Scroll down one page
     PageDown,
+    /// Insert character at cursor
     Insert(char),
+    /// Mouse click at specified position
     Click { x: i32, y: i32 },
-    Scroll(i32),
+    /// Scroll specified number of lines
+    Scroll { lines: i32 },
 }
 
 /// Current cursor location
@@ -87,7 +98,7 @@ pub struct TextBuffer<'a> {
     width: i32,
     height: i32,
     scroll: i32,
-    pub cursor: TextCursor,
+    cursor: TextCursor,
     pub redraw: bool,
 }
 
@@ -218,6 +229,11 @@ impl<'a> TextBuffer<'a> {
 
         let duration = instant.elapsed();
         log::debug!("relayout line {}: {:?}", line_i.get(), duration);
+    }
+
+    /// Get the current cursor position
+    pub fn cursor(&self) -> TextCursor {
+        self.cursor
     }
 
     /// Get the current [TextMetrics]
@@ -387,7 +403,7 @@ impl<'a> TextBuffer<'a> {
             TextAction::Click { x, y } => {
                 self.click(x, y);
             },
-            TextAction::Scroll(lines) => {
+            TextAction::Scroll { lines } => {
                 self.scroll += lines;
                 self.redraw = true;
                 self.shape_until_scroll();

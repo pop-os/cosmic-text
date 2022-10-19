@@ -227,7 +227,9 @@ fn main() {
                     );
                 }
                 EventOption::Scroll(event) => {
-                    buffer.action(TextAction::Scroll(-event.y * 3));
+                    buffer.action(TextAction::Scroll {
+                        lines: -event.y * 3,
+                    });
                 }
                 EventOption::Quit(_) => return,
                 _ => (),

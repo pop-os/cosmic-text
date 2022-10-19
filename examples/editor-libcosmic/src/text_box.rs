@@ -249,7 +249,9 @@ where
                 },
                 MouseEvent::WheelScrolled { delta } => match delta {
                     ScrollDelta::Lines { x, y } => {
-                        buffer.action(TextAction::Scroll((-y * 6.0) as i32));
+                        buffer.action(TextAction::Scroll {
+                            lines: (-y * 6.0) as i32,
+                        });
                         Status::Captured
                     },
                     _ => Status::Ignored,
