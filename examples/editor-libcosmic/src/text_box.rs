@@ -116,9 +116,6 @@ where
 
         let buffer = self.buffer.lock().unwrap();
 
-        let font_size = buffer.metrics().font_size;
-        let line_height = buffer.metrics().line_height;
-
         let instant = Instant::now();
 
         if let Some(background_color) = appearance.background_color {
@@ -133,93 +130,28 @@ where
             );
         }
 
-        let line_x = layout.bounds().x as i32;
-        let mut line_y = layout.bounds().y as i32 + font_size;
-        let mut start_line_opt = None;
-        let mut end_line = TextLineIndex::new(0);
-        for (line_i, line) in buffer
-            .layout_lines()
-            .iter()
-            .skip(buffer.scroll() as usize)
-            .take(buffer.lines() as usize)
-            .enumerate()
-        {
-            end_line = line.line_i;
-            if start_line_opt == None {
-                start_line_opt = Some(end_line);
+        let buffer_x = layout.bounds().x;
+        let buffer_y = layout.bounds().y;
+        buffer.draw(text_color_u32, |x, y, w, h, color| {
+            let a = (color >> 24) as u8;
+            if a > 0 {
+                let r = (color >> 16) as u8;
+                let g = (color >> 8) as u8;
+                let b = color as u8;
+                renderer.fill_quad(
+                    renderer::Quad {
+                        bounds: Rectangle::new(
+                            Point::new(buffer_x + x as f32, buffer_y + y as f32),
+                            Size::new(w as f32, h as f32)
+                        ),
+                        border_radius: 0.0,
+                        border_width: 0.0,
+                        border_color: Color::TRANSPARENT,
+                    },
+                    Color::from_rgba8(r, g, b, a as f32 / 255.0),
+                );
             }
-
-            if buffer.cursor.line == line_i + buffer.scroll() as usize {
-                if buffer.cursor.glyph >= line.glyphs.len() {
-                    let x = match line.glyphs.last() {
-                        Some(glyph) => glyph.x + glyph.w,
-                        None => 0.0,
-                    };
-
-                    renderer.fill_quad(
-                        renderer::Quad {
-                            bounds: Rectangle::new(
-                                Point::new(line_x as f32 + x, (line_y - font_size) as f32),
-                                Size::new((font_size / 2) as f32, line_height as f32)
-                            ),
-                            border_radius: 0.0,
-                            border_width: 0.0,
-                            border_color: Color::TRANSPARENT,
-                        },
-                        Color::from_rgba8(0xFF, 0xFF, 0xFF, 0.125),
-                    );
-                } else {
-                    let glyph = &line.glyphs[buffer.cursor.glyph];
-                    renderer.fill_quad(
-                        renderer::Quad {
-                            bounds: Rectangle::new(
-                                Point::new(line_x as f32 + glyph.x, (line_y - font_size) as f32),
-                                Size::new(glyph.w, line_height as f32)
-                            ),
-                            border_radius: 0.0,
-                            border_width: 0.0,
-                            border_color: Color::TRANSPARENT,
-                        },
-                        Color::from_rgba8(0xFF, 0xFF, 0xFF, 0.125),
-                    );
-
-                    let text_line = &buffer.text_lines()[line.line_i.get()];
-                    log::info!(
-                        "{}, {}: '{}' ('{}'): '{}'",
-                        glyph.start,
-                        glyph.end,
-                        glyph.font.info.family,
-                        glyph.font.info.post_script_name,
-                        &text_line[glyph.start..glyph.end],
-                    );
-                }
-            }
-
-            line.draw(text_color_u32, |x, y, data| {
-                let a = (data >> 24) as u8;
-                if a > 0 {
-                    let r = (data >> 16) as u8;
-                    let g = (data >> 8) as u8;
-                    let b = data as u8;
-                    let bounds = Rectangle::new(
-                        Point::new((line_x + x) as f32, (line_y + y) as f32),
-                        Size::new(1.0, 1.0)
-                    );
-                    let color = Color::from_rgba8(r, g, b, a as f32 / 255.0);
-                    renderer.fill_quad(
-                        renderer::Quad {
-                            bounds,
-                            border_radius: 0.0,
-                            border_width: 0.0,
-                            border_color: Color::TRANSPARENT,
-                        },
-                        color
-                    );
-                }
-            });
-
-            line_y += line_height;
-        }
+        });
 
         /*
         // Draw scrollbar

@@ -385,13 +385,112 @@ impl<'a> TextBuffer<'a> {
                 }
             },
             TextAction::Click { x, y } => {
-
+                self.click(x, y);
             },
             TextAction::Scroll(lines) => {
                 self.scroll += lines;
                 self.redraw = true;
                 self.shape_until_scroll();
             }
+        }
+    }
+
+    fn click(&mut self, mouse_x: i32, mouse_y: i32) {
+        let instant = Instant::now();
+
+        let font_size = self.metrics.font_size;
+        let line_height = self.metrics.line_height;
+
+        let mut new_cursor_opt = None;
+
+        let mut line_y = font_size;
+        for (line_i, line) in self.layout_lines.iter()
+            .skip(cmp::max(0, self.scroll()) as usize)
+            .take(cmp::max(0, self.lines()) as usize)
+            .enumerate()
+        {
+            if mouse_y >= line_y - font_size
+            && mouse_y < line_y - font_size + line_height
+            {
+                let new_cursor_line = line_i + self.scroll() as usize;
+                let mut new_cursor_glyph = line.glyphs.len();
+                for (glyph_i, glyph) in line.glyphs.iter().enumerate() {
+                    if mouse_x >= glyph.x as i32
+                        && mouse_x <= (glyph.x + glyph.w) as i32
+                    {
+                        new_cursor_glyph = glyph_i;
+                    }
+                }
+                new_cursor_opt = Some(TextCursor::new(new_cursor_line, new_cursor_glyph));
+            }
+
+            line_y += line_height;
+        }
+
+        if let Some(new_cursor) = new_cursor_opt {
+            if new_cursor != self.cursor {
+                self.cursor = new_cursor;
+                self.redraw = true;
+            }
+        }
+
+        let duration = instant.elapsed();
+        log::debug!("click({}, {}): {:?}", mouse_x, mouse_y, duration);
+    }
+
+    /// Draw the buffer
+    pub fn draw<F>(&self, color: u32, mut f: F)
+        where F: FnMut(i32, i32, u32, u32, u32)
+    {
+        let font_size = self.metrics.font_size;
+        let line_height = self.metrics.line_height;
+
+        let mut line_y = font_size;
+        for (line_i, line) in self.layout_lines.iter()
+            .skip(cmp::max(0, self.scroll()) as usize)
+            .take(cmp::max(0, self.lines()) as usize)
+            .enumerate()
+        {
+            if self.cursor.line == line_i + self.scroll() as usize {
+                if self.cursor.glyph >= line.glyphs.len() {
+                    let x = match line.glyphs.last() {
+                        Some(glyph) => glyph.x + glyph.w,
+                        None => 0.0,
+                    };
+                    f(
+                        x as i32,
+                        line_y - font_size,
+                        (font_size / 2) as u32,
+                        line_height as u32,
+                        0x20FFFFFF,
+                    );
+                } else {
+                    let glyph = &line.glyphs[self.cursor.glyph];
+                    f(
+                        glyph.x as i32,
+                        line_y - font_size,
+                        glyph.w as u32,
+                        line_height as u32,
+                        0x20FFFFFF,
+                    );
+
+                    let text_line = &self.text_lines()[line.line_i.get()];
+                    log::info!(
+                        "{}, {}: '{}' ('{}'): '{}'",
+                        glyph.start,
+                        glyph.end,
+                        glyph.font.info.family,
+                        glyph.font.info.post_script_name,
+                        &text_line[glyph.start..glyph.end],
+                    );
+                }
+            }
+
+            line.draw(color, |x, y, color| {
+                f(x, line_y + y, 1, 1, color);
+            });
+
+            line_y += line_height;
         }
     }
 }
