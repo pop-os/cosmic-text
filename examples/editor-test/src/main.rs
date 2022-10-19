@@ -204,8 +204,8 @@ fn main() {
     let buffer_lines = buffer.text_lines();
     for (line_i, line) in text.lines().enumerate() {
         let buffer_line = &buffer_lines[line_i];
-        if buffer_line != line {
-            log::error!("line {}: {:?} != {:?}", line_i, buffer_line, line);
+        if buffer_line.text() != line {
+            log::error!("line {}: {:?} != {:?}", line_i, buffer_line.text(), line);
             wrong += 1;
         }
     }

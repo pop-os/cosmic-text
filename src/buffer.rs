@@ -96,10 +96,53 @@ impl fmt::Display for TextMetrics {
     }
 }
 
+pub struct TextBufferLine<'a> {
+    text: String,
+    shape_opt: Option<FontShapeLine<'a>>,
+    layout_opt: Option<Vec<FontLayoutLine<'a>>>,
+}
+
+impl<'a> TextBufferLine<'a> {
+    pub fn new(text: String) -> Self {
+        Self {
+            text,
+            shape_opt: None,
+            layout_opt: None,
+        }
+    }
+
+    pub fn text(&self) -> &str {
+        &self.text
+    }
+
+    pub fn shape(&mut self, font_matches: &'a FontMatches<'a>, line_i: TextLineIndex) -> &FontShapeLine<'a> {
+        if self.shape_opt.is_none() {
+            self.shape_opt = Some(font_matches.shape_line(line_i, &self.text));
+            self.layout_opt = None;
+        }
+        self.shape_opt.as_ref().unwrap()
+    }
+
+    pub fn layout(&mut self, font_matches: &'a FontMatches<'a>, line_i: TextLineIndex, font_size: i32, width: i32) -> &[FontLayoutLine<'a>] {
+        if self.layout_opt.is_none() {
+            let mut layout = Vec::new();
+            let shape = self.shape(font_matches, line_i);
+            shape.layout(
+                font_size,
+                width,
+                &mut layout,
+                0,
+            );
+            self.layout_opt = Some(layout);
+        }
+        self.layout_opt.as_ref().unwrap()
+    }
+}
+
 /// A buffer of text that is shaped and laid out
 pub struct TextBuffer<'a> {
     font_matches: &'a FontMatches<'a>,
-    text_lines: Vec<String>,
+    lines: Vec<TextBufferLine<'a>>,
     shape_lines: Vec<FontShapeLine<'a>>,
     layout_lines: Vec<FontLayoutLine<'a>>,
     metrics: TextMetrics,
@@ -116,9 +159,9 @@ impl<'a> TextBuffer<'a> {
         font_matches: &'a FontMatches<'a>,
         metrics: TextMetrics,
     ) -> Self {
-        Self {
+        let mut buffer = Self {
             font_matches,
-            text_lines: vec![String::new()], // Must have one line
+            lines: Vec::new(),
             shape_lines: Vec::new(),
             layout_lines: Vec::new(),
             metrics,
@@ -128,7 +171,9 @@ impl<'a> TextBuffer<'a> {
             cursor: TextCursor::default(),
             select_opt: None,
             redraw: false,
-        }
+        };
+        buffer.set_text("");
+        buffer
     }
 
     /// Pre-shape lines in the buffer, up to `lines`
@@ -136,7 +181,7 @@ impl<'a> TextBuffer<'a> {
         let instant = Instant::now();
 
         let mut reshaped = 0;
-        while self.shape_lines.len() < self.text_lines.len()
+        while self.shape_lines.len() < self.lines.len()
             && (self.layout_lines.len() as i32) < lines
         {
             let line_i = TextLineIndex::new(self.shape_lines.len());
@@ -170,7 +215,7 @@ impl<'a> TextBuffer<'a> {
 
         let shape_line = self
             .font_matches
-            .shape_line(line_i, &self.text_lines[line_i.get()]);
+            .shape_line(line_i, &self.lines[line_i.get()].text);
         if line_i.get() < self.shape_lines.len() {
             self.shape_lines[line_i.get()] = shape_line;
         } else {
@@ -291,9 +336,13 @@ impl<'a> TextBuffer<'a> {
 
     /// Set text of buffer
     pub fn set_text(&mut self, text: &str) {
-        self.text_lines = text.lines().map(String::from).collect();
-        if self.text_lines.is_empty() {
-            self.text_lines.push(String::new());
+        self.lines.clear();
+        for line in text.lines() {
+            self.lines.push(TextBufferLine::new(line.to_string()));
+        }
+        // Make sure there is always one line
+        if self.lines.is_empty() {
+            self.lines.push(TextBufferLine::new(String::new()));
         }
         self.shape_lines.clear();
         self.layout_lines.clear();
@@ -304,8 +353,8 @@ impl<'a> TextBuffer<'a> {
     }
 
     /// Get the lines of the original text
-    pub fn text_lines(&self) -> &[String] {
-        &self.text_lines
+    pub fn text_lines(&self) -> &[TextBufferLine<'a>] {
+        &self.lines
     }
 
     /// Perform a [TextAction] on the buffer
@@ -405,14 +454,13 @@ impl<'a> TextBuffer<'a> {
                 let insert_i = if self.cursor.glyph >= line.glyphs.len() {
                     match line.glyphs.last() {
                         Some(glyph) => glyph.end,
-                        None => self.text_lines[line.line_i.get()].len()
+                        None => self.lines[line.line_i.get()].text.len()
                     }
                 } else {
                     line.glyphs[self.cursor.glyph].start
                 };
 
-                let text_line = &mut self.text_lines[line.line_i.get()];
-                text_line.insert(insert_i, character);
+                self.lines[line.line_i.get()].text.insert(insert_i, character);
                 self.cursor.glyph += 1;
                 self.reshape_line(line.line_i);
 
@@ -438,9 +486,9 @@ impl<'a> TextBuffer<'a> {
                         String::new()
                     } else {
                         let glyph = &line.glyphs[self.cursor.glyph];
-                        self.text_lines[line.line_i.get()].split_off(glyph.start)
+                        self.lines[line.line_i.get()].text.split_off(glyph.start)
                     };
-                    self.text_lines.insert(line.line_i.get() + 1, new_line);
+                    self.lines.insert(line.line_i.get() + 1, TextBufferLine::new(new_line));
 
                     // Reshape all lines after new line
                     //TODO: improve performance
@@ -469,21 +517,19 @@ impl<'a> TextBuffer<'a> {
                 if self.cursor.glyph > 0 {
                     self.cursor.glyph -= 1;
                     let glyph = &line.glyphs[self.cursor.glyph];
-                    let text_line = &mut self.text_lines[line.line_i.get()];
-                    text_line.remove(glyph.start);
+                    self.lines[line.line_i.get()].text.remove(glyph.start);
                     self.reshape_line(line.line_i);
                 } else if self.cursor.line > 0 {
                     {
                         let line = &self.layout_lines[self.cursor.line];
                         let prev_line = &self.layout_lines[self.cursor.line - 1];
                         if prev_line.line_i.get() < line.line_i.get() {
-                            let old_line = self.text_lines.remove(line.line_i.get());
-                            self.text_lines[prev_line.line_i.get()].push_str(&old_line);
+                            let old_line = self.lines.remove(line.line_i.get()).text;
+                            self.lines[prev_line.line_i.get()].text.push_str(&old_line);
                         } else {
                             match prev_line.glyphs.last() {
                                 Some(glyph) => {
-                                    let text_line = &mut self.text_lines[line.line_i.get()];
-                                    text_line.remove(glyph.end);
+                                    self.lines[line.line_i.get()].text.remove(glyph.end);
                                 },
                                 None => (), // There should always be a last glyph
                             }
@@ -511,8 +557,7 @@ impl<'a> TextBuffer<'a> {
                 let line = &self.layout_lines[self.cursor.line];
                 if self.cursor.glyph < line.glyphs.len() {
                     let glyph = &line.glyphs[self.cursor.glyph];
-                    let text_line = &mut self.text_lines[line.line_i.get()];
-                    text_line.remove(glyph.start);
+                    self.lines[line.line_i.get()].text.remove(glyph.start);
                     self.reshape_line(line.line_i);
                 } else {
                     self.shape_until(self.cursor.line as i32 + 1);
@@ -521,13 +566,12 @@ impl<'a> TextBuffer<'a> {
                         let line = &self.layout_lines[self.cursor.line];
                         let next_line = &self.layout_lines[self.cursor.line + 1];
                         if line.line_i.get() < next_line.line_i.get() {
-                            let old_line = self.text_lines.remove(next_line.line_i.get());
-                            self.text_lines[line.line_i.get()].push_str(&old_line);
+                            let old_line = self.lines.remove(next_line.line_i.get()).text;
+                            self.lines[line.line_i.get()].text.push_str(&old_line);
                         } else {
                             match line.glyphs.last() {
                                 Some(glyph) => {
-                                    let text_line = &mut self.text_lines[line.line_i.get()];
-                                    text_line.remove(glyph.end);
+                                    self.lines[line.line_i.get()].text.remove(glyph.end);
                                 },
                                 None => (), // There should always be a last glyph
                             }
@@ -595,7 +639,7 @@ impl<'a> TextBuffer<'a> {
                 new_cursor_opt = Some(TextCursor::new(new_cursor_line, new_cursor_glyph));
 
                 if let Some(glyph) = line.glyphs.get(new_cursor_glyph) {
-                    let text_line = &self.text_lines[line.line_i.get()];
+                    let text_line = &self.lines[line.line_i.get()].text;
                     let text_glyph = &text_line[glyph.start..glyph.end];
                     log::debug!(
                         "{}, {}: '{}' ('{}'): '{}' ({:?})",
