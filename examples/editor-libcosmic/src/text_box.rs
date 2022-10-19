@@ -197,7 +197,7 @@ where
         */
 
         let duration = instant.elapsed();
-        log::debug!("redraw: {:?}", duration);
+        log::trace!("redraw: {:?}", duration);
     }
 
     fn on_event(

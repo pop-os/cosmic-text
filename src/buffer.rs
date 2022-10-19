@@ -568,6 +568,20 @@ impl<'a> TextBuffer<'a> {
                     }
                 }
                 new_cursor_opt = Some(TextCursor::new(new_cursor_line, new_cursor_glyph));
+
+                if let Some(glyph) = line.glyphs.get(new_cursor_glyph) {
+                    let text_line = &self.text_lines[line.line_i.get()];
+                    let text_glyph = &text_line[glyph.start..glyph.end];
+                    log::debug!(
+                        "{}, {}: '{}' ('{}'): '{}' ({:?})",
+                        new_cursor_line,
+                        new_cursor_glyph,
+                        glyph.font.info.family,
+                        glyph.font.info.post_script_name,
+                        text_glyph,
+                        text_glyph
+                    );
+                }
             }
 
             line_y += line_height;
@@ -581,9 +595,7 @@ impl<'a> TextBuffer<'a> {
         }
 
         let duration = instant.elapsed();
-        log::debug!("click({}, {}): {:?}", mouse_x, mouse_y, duration);
-
-        println!("cursor {:?} select {:?}", self.cursor, self.select_opt);
+        log::trace!("click({}, {}): {:?}", mouse_x, mouse_y, duration);
     }
 
     /// Draw the buffer
