@@ -411,7 +411,6 @@ impl<'a> TextBuffer<'a> {
             },
             TextAction::Insert(character) => match character {
                 '\r' | '\n' => {
-                    //TODO: handle Enter
                     {
                         let line = &self.layout_lines[self.cursor.line];
                         let new_line = if self.cursor.glyph >= line.glyphs.len() {
@@ -442,28 +441,19 @@ impl<'a> TextBuffer<'a> {
                 },
                 _ => {
                     let line = &self.layout_lines[self.cursor.line];
-                    if self.cursor.glyph >= line.glyphs.len() {
+                    let insert_i = if self.cursor.glyph >= line.glyphs.len() {
                         match line.glyphs.last() {
-                            Some(glyph) => {
-                                let text_line = &mut self.text_lines[line.line_i.get()];
-                                text_line.insert(glyph.end, character);
-                                self.cursor.glyph += 1;
-                                self.reshape_line(line.line_i);
-                            }
-                            None => {
-                                let text_line = &mut self.text_lines[line.line_i.get()];
-                                text_line.push(character);
-                                self.cursor.glyph += 1;
-                                self.reshape_line(line.line_i);
-                            }
+                            Some(glyph) => glyph.end,
+                            None => self.text_lines[line.line_i.get()].len()
                         }
                     } else {
-                        let glyph = &line.glyphs[self.cursor.glyph];
-                        let text_line = &mut self.text_lines[line.line_i.get()];
-                        text_line.insert(glyph.start, character);
-                        self.cursor.glyph += 1;
-                        self.reshape_line(line.line_i);
-                    }
+                        line.glyphs[self.cursor.glyph].start
+                    };
+
+                    let text_line = &mut self.text_lines[line.line_i.get()];
+                    text_line.insert(insert_i, character);
+                    self.cursor.glyph += 1;
+                    self.reshape_line(line.line_i);
                 }
             },
             TextAction::Click { x, y } => {
