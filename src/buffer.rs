@@ -483,7 +483,7 @@ impl<'a> TextBuffer<'a> {
                         line_y - font_size,
                         1,
                         line_height as u32,
-                        0x20FFFFFF,
+                        color,
                     );
                 } else {
                     let glyph = &line.glyphs[self.cursor.glyph];
@@ -492,7 +492,7 @@ impl<'a> TextBuffer<'a> {
                         line_y - font_size,
                         1,
                         line_height as u32,
-                        0x20FFFFFF,
+                        color,
                     );
 
                     let text_line = &self.text_lines()[line.line_i.get()];
