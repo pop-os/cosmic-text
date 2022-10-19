@@ -166,6 +166,7 @@ impl<'a> FontShapeLine<'a> {
                             layout_i,
                             FontLayoutLine {
                                 line_i: self.line_i,
+                                rtl: self.rtl,
                                 glyphs: glyphs_swap,
                             },
                         );
@@ -200,6 +201,7 @@ impl<'a> FontShapeLine<'a> {
                         layout_i,
                         FontLayoutLine {
                             line_i: self.line_i,
+                            rtl: self.rtl,
                             glyphs: glyphs_swap,
                         },
                     );
@@ -216,6 +218,7 @@ impl<'a> FontShapeLine<'a> {
                 layout_i,
                 FontLayoutLine {
                     line_i: self.line_i,
+                    rtl: self.rtl,
                     glyphs,
                 },
             );

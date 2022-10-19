@@ -302,9 +302,16 @@ impl<'a> TextBuffer<'a> {
                     self.cursor.glyph = line.glyphs.len();
                     self.redraw = true;
                 }
-                if self.cursor.glyph > 0 {
-                    self.cursor.glyph -= 1;
-                    self.redraw = true;
+                if line.rtl {
+                    if self.cursor.glyph < line.glyphs.len() {
+                        self.cursor.glyph += 1;
+                        self.redraw = true;
+                    }
+                } else {
+                    if self.cursor.glyph > 0 {
+                        self.cursor.glyph -= 1;
+                        self.redraw = true;
+                    }
                 }
             },
             TextAction::Right => {
@@ -313,9 +320,16 @@ impl<'a> TextBuffer<'a> {
                     self.cursor.glyph = line.glyphs.len();
                     self.redraw = true;
                 }
-                if self.cursor.glyph < line.glyphs.len() {
-                    self.cursor.glyph += 1;
-                    self.redraw = true;
+                if line.rtl {
+                    if self.cursor.glyph > 0 {
+                        self.cursor.glyph -= 1;
+                        self.redraw = true;
+                    }
+                } else {
+                    if self.cursor.glyph < line.glyphs.len() {
+                        self.cursor.glyph += 1;
+                        self.redraw = true;
+                    }
                 }
             },
             TextAction::Up => {
@@ -446,7 +460,8 @@ impl<'a> TextBuffer<'a> {
                     if mouse_x >= glyph.x as i32
                         && mouse_x <= (glyph.x + glyph.w) as i32
                     {
-                        if mouse_x >= (glyph.x + glyph.w / 2.0) as i32 {
+                        let right_half = mouse_x >= (glyph.x + glyph.w / 2.0) as i32;
+                        if right_half == !line.rtl {
                             // If clicking on last half of glyph, move cursor past glyph
                             new_cursor_glyph = glyph_i + 1;
                         } else {
@@ -469,6 +484,8 @@ impl<'a> TextBuffer<'a> {
 
         let duration = instant.elapsed();
         log::debug!("click({}, {}): {:?}", mouse_x, mouse_y, duration);
+
+        println!("cursor {:?} select {:?}", self.cursor, self.select_opt);
     }
 
     /// Draw the buffer
@@ -516,17 +533,30 @@ impl<'a> TextBuffer<'a> {
                     };
 
                     if end_glyph > start_glyph {
-                        let start_x = line.glyphs.get(start_glyph).map_or(0, |glyph| {
-                            glyph.x as i32
-                        });
-                        let end_x = line.glyphs.get(end_glyph - 1).map_or(self.width, |glyph| {
-                            (glyph.x + glyph.w) as i32
-                        });
+                        let (left_x, right_x) = if line.rtl {
+                            (
+                                line.glyphs.get(end_glyph - 1).map_or(0, |glyph| {
+                                    glyph.x as i32
+                                }),
+                                line.glyphs.get(start_glyph).map_or(self.width, |glyph| {
+                                    (glyph.x + glyph.w) as i32
+                                }),
+                            )
+                        } else {
+                            (
+                                line.glyphs.get(start_glyph).map_or(0, |glyph| {
+                                    glyph.x as i32
+                                }),
+                                line.glyphs.get(end_glyph - 1).map_or(self.width, |glyph| {
+                                    (glyph.x + glyph.w) as i32
+                                }),
+                            )
+                        };
 
                         f(
-                            start_x,
+                            left_x,
                             line_y - font_size,
-                            cmp::max(0, end_x - start_x) as u32,
+                            cmp::max(0, right_x - left_x) as u32,
                             line_height as u32,
                             0x33_00_00_00 | (color & 0xFF_FF_FF)
                         );
@@ -541,6 +571,7 @@ impl<'a> TextBuffer<'a> {
                         Some(glyph) => glyph.x + glyph.w,
                         None => 0.0,
                     };
+
                     f(
                         x as i32,
                         line_y - font_size,
@@ -550,22 +581,18 @@ impl<'a> TextBuffer<'a> {
                     );
                 } else {
                     let glyph = &line.glyphs[self.cursor.glyph];
+                    let x = if line.rtl {
+                        (glyph.x + glyph.w) as i32
+                    } else {
+                        glyph.x as i32
+                    };
+
                     f(
-                        glyph.x as i32,
+                        x,
                         line_y - font_size,
                         1,
                         line_height as u32,
                         color,
-                    );
-
-                    let text_line = &self.text_lines()[line.line_i.get()];
-                    log::info!(
-                        "{}, {}: '{}' ('{}'): '{}'",
-                        glyph.start,
-                        glyph.end,
-                        glyph.font.info.family,
-                        glyph.font.info.post_script_name,
-                        &text_line[glyph.start..glyph.end],
                     );
                 }
             }

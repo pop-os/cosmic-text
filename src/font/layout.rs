@@ -12,6 +12,7 @@ pub struct FontLayoutGlyph<'a> {
 
 pub struct FontLayoutLine<'a> {
     pub line_i: TextLineIndex,
+    pub rtl: bool,
     pub glyphs: Vec<FontLayoutGlyph<'a>>,
 }
 
