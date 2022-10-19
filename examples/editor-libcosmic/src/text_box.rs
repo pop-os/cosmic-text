@@ -7,7 +7,7 @@ use cosmic::iced_native::{
     },
     keyboard::{Event as KeyEvent, KeyCode},
     layout::{self, Layout},
-    mouse::{Button, Event as MouseEvent, ScrollDelta},
+    mouse::{self, Button, Event as MouseEvent, ScrollDelta},
     renderer,
     widget::{self, Widget},
 };
@@ -98,6 +98,21 @@ where
             buffer.set_size(size.width as i32, size.height as i32);
         }
         layout::Node::new(size)
+    }
+
+    fn mouse_interaction(
+        &self,
+        _tree: &widget::Tree,
+        layout: Layout<'_>,
+        cursor_position: Point,
+        _viewport: &Rectangle,
+        _renderer: &Renderer,
+    ) -> mouse::Interaction {
+        if layout.bounds().contains(cursor_position) {
+            mouse::Interaction::Text
+        } else {
+            mouse::Interaction::Idle
+        }
     }
 
     fn draw(

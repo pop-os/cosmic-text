@@ -476,7 +476,7 @@ impl<'a> TextBuffer<'a> {
                     f(
                         x as i32,
                         line_y - font_size,
-                        (font_size / 2) as u32,
+                        1,
                         line_height as u32,
                         0x20FFFFFF,
                     );
@@ -485,7 +485,7 @@ impl<'a> TextBuffer<'a> {
                     f(
                         glyph.x as i32,
                         line_y - font_size,
-                        glyph.w as u32,
+                        1,
                         line_height as u32,
                         0x20FFFFFF,
                     );
