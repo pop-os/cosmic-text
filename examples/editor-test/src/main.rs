@@ -135,14 +135,60 @@ fn main() {
         default_text.to_string()
     };
 
-    for c in text.chars() {
-        match c {
-            '\r' => (),
-            '\n' => buffer.action(TextAction::Enter),
-            _ => {
-                buffer.action(TextAction::Insert(c));
+    //TODO: support bidi
+    for line in text.lines() {
+        for c in line.chars() {
+            if c.is_control() {
+                log::warn!("Ignoring control character {:?}", c);
+                continue;
             }
+
+            log::debug!("Insert {:?}", c);
+
+            //TODO: ligatures break this, make cursor reference text lines not layout lines!
+            // Test backspace of character
+            {
+                let cursor = buffer.cursor();
+                buffer.action(TextAction::Insert(c));
+                buffer.action(TextAction::Backspace);
+                assert_eq!(cursor, buffer.cursor());
+            }
+
+            // Test delete of character (DOES NOT SUPPORT RTL)
+            {
+                let cursor = buffer.cursor();
+                buffer.action(TextAction::Insert(c));
+                buffer.action(TextAction::Left);
+                buffer.action(TextAction::Delete);
+                assert_eq!(cursor, buffer.cursor());
+            }
+
+            // Finally, normal insert of character
+            buffer.action(TextAction::Insert(c));
         }
+
+        log::debug!("Line '{}': {:?}", line, line);
+
+        // Test backspace of newline
+        {
+            let cursor = buffer.cursor();
+            buffer.action(TextAction::Enter);
+            buffer.action(TextAction::Backspace);
+            assert_eq!(cursor, buffer.cursor());
+        }
+
+        // Test delete of newline
+        {
+            let cursor = buffer.cursor();
+            buffer.action(TextAction::Enter);
+            buffer.action(TextAction::Up);
+            buffer.action(TextAction::End);
+            buffer.action(TextAction::Delete);
+            assert_eq!(cursor, buffer.cursor());
+        }
+
+        // Finally, normal enter
+        buffer.action(TextAction::Enter);
 
         redraw(&mut window, &mut buffer);
 
@@ -167,17 +213,5 @@ fn main() {
         log::info!("All lines matched!");
     } else {
         log::error!("{} lines did not match!", wrong);
-    }
-
-    redraw(&mut window, &mut buffer);
-
-    loop {
-        for event in window.events() {
-            match event.to_option() {
-                EventOption::Quit(_) => process::exit(0),
-                _ => (),
-            }
-        }
-        thread::sleep(Duration::from_millis(1));
     }
 }
