@@ -127,7 +127,12 @@ impl<'a> FontMatches<'a> {
         );
 
         //TODO: configure default family
-        let mut font_iter = FontFallbackIter::new(&self.fonts, Some("Fira Sans"), scripts, &self.locale);
+        let mut font_iter = FontFallbackIter::new(
+            &self.fonts,
+            &["Fira Sans", "Fira Mono"],
+            scripts,
+            &self.locale
+        );
 
         let (mut glyphs, mut missing) = self.shape_fallback(
             font_iter.next().unwrap(),

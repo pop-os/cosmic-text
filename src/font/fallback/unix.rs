@@ -4,10 +4,18 @@ use unicode_script::Script;
 pub fn common_fallback() -> &'static [&'static str] {
     //TODO: abstract style (sans/serif/monospaced)
     &[
+        /* Sans-serif fallbacks */
+        "Noto Sans",
         "DejaVu Sans",
         "FreeSans",
+        /* Mono fallbacks */
+        "Noto Sans Mono",
+        "DejaVu Sans Mono",
+        "FreeMono",
+        /* Symbols fallbacks */
         "Noto Sans Symbols",
         "Noto Sans Symbols2",
+        /* Emoji fallbacks*/
         "Noto Color Emoji",
         //TODO: Add CJK script here for doublewides?
     ]

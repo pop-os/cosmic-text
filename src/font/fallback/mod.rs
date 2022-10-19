@@ -26,7 +26,8 @@ mod platform;
 
 pub struct FontFallbackIter<'a> {
     fonts: &'a [Font<'a>],
-    default_family_opt: Option<&'a str>,
+    default_families: &'a [&'a str],
+    default_i: usize,
     scripts: Vec<Script>,
     locale: &'a str,
     script_i: (usize, usize),
@@ -36,10 +37,11 @@ pub struct FontFallbackIter<'a> {
 }
 
 impl<'a> FontFallbackIter<'a> {
-    pub fn new(fonts: &'a [Font<'a>], default_family_opt: Option<&'a str>, scripts: Vec<Script>, locale: &'a str) -> Self {
+    pub fn new(fonts: &'a [Font<'a>], default_families: &'a [&'a str], scripts: Vec<Script>, locale: &'a str) -> Self {
         Self {
             fonts,
-            default_family_opt,
+            default_families,
+            default_i: 0,
             scripts,
             locale,
             script_i: (0, 0),
@@ -82,7 +84,10 @@ impl<'a> FontFallbackIter<'a> {
 impl<'a> Iterator for FontFallbackIter<'a> {
     type Item = &'a Font<'a>;
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(default_family) = self.default_family_opt.take() {
+        while self.default_i < self.default_families.len() {
+            let default_family = self.default_families[self.default_i];
+            self.default_i += 1;
+
             for font in self.fonts.iter() {
                 if font.info.family == default_family {
                     return Some(font);
