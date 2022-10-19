@@ -231,14 +231,6 @@ where
                     buffer.action(TextAction::Down);
                     return Status::Captured;
                 },
-                KeyCode::Backspace => {
-                    buffer.action(TextAction::Backspace);
-                    return Status::Captured;
-                },
-                KeyCode::Delete => {
-                    buffer.action(TextAction::Delete);
-                    return Status::Captured;
-                },
                 KeyCode::Home => {
                     buffer.action(TextAction::Home);
                     return Status::Captured;
@@ -253,6 +245,18 @@ where
                 },
                 KeyCode::PageDown => {
                     buffer.action(TextAction::PageDown);
+                    return Status::Captured;
+                },
+                KeyCode::Enter => {
+                    buffer.action(TextAction::Enter);
+                    return Status::Captured;
+                },
+                KeyCode::Backspace => {
+                    buffer.action(TextAction::Backspace);
+                    return Status::Captured;
+                },
+                KeyCode::Delete => {
+                    buffer.action(TextAction::Delete);
                     return Status::Captured;
                 },
                 _ => ()

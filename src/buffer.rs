@@ -17,10 +17,6 @@ pub enum TextAction {
     Up,
     /// Move cursor down
     Down,
-    /// Delete text behind cursor
-    Backspace,
-    /// Delete text in front of cursor
-    Delete,
     /// Move cursor to start of line
     Home,
     /// Move cursor to end of line
@@ -31,6 +27,12 @@ pub enum TextAction {
     PageDown,
     /// Insert character at cursor
     Insert(char),
+    /// Create new line
+    Enter,
+    /// Delete text behind cursor
+    Backspace,
+    /// Delete text in front of cursor
+    Delete,
     /// Mouse click at specified position
     Click { x: i32, y: i32 },
     /// Mouse drag to specified position
@@ -363,29 +365,6 @@ impl<'a> TextBuffer<'a> {
                     }
                 }
             },
-            TextAction::Backspace => {
-                let line = &self.layout_lines[self.cursor.line];
-                if self.cursor.glyph > line.glyphs.len() {
-                    self.cursor.glyph = line.glyphs.len();
-                    self.redraw = true;
-                }
-                if self.cursor.glyph > 0 {
-                    self.cursor.glyph -= 1;
-                    let glyph = &line.glyphs[self.cursor.glyph];
-                    let text_line = &mut self.text_lines[line.line_i.get()];
-                    text_line.remove(glyph.start);
-                    self.reshape_line(line.line_i);
-                }
-            },
-            TextAction::Delete => {
-                let line = &self.layout_lines[self.cursor.line];
-                if self.cursor.glyph < line.glyphs.len() {
-                    let glyph = &line.glyphs[self.cursor.glyph];
-                    let text_line = &mut self.text_lines[line.line_i.get()];
-                    text_line.remove(glyph.start);
-                    self.reshape_line(line.line_i);
-                }
-            },
             TextAction::Home => {
                 if self.cursor.glyph > 0 {
                     self.cursor.glyph = 0;
@@ -409,50 +388,74 @@ impl<'a> TextBuffer<'a> {
                 self.redraw = true;
                 self.shape_until_scroll();
             },
-            TextAction::Insert(character) => match character {
-                '\r' | '\n' => {
-                    {
-                        let line = &self.layout_lines[self.cursor.line];
-                        let new_line = if self.cursor.glyph >= line.glyphs.len() {
-                            String::new()
-                        } else {
-                            let glyph = &line.glyphs[self.cursor.glyph];
-                            self.text_lines[line.line_i.get()].split_off(glyph.start)
-                        };
-                        self.text_lines.insert(line.line_i.get() + 1, new_line);
-
-                        // Reshape all lines after new line
-                        //TODO: improve performance
-                        self.shape_lines.truncate(line.line_i.get());
-                        self.relayout();
-                        self.shape_until_scroll();
+            TextAction::Insert(character) => if character.is_control() {
+                // Filter out special chars, use TextAction instead
+                log::debug!("Refusing to insert control character {:?}", character);
+            } else {
+                let line = &self.layout_lines[self.cursor.line];
+                let insert_i = if self.cursor.glyph >= line.glyphs.len() {
+                    match line.glyphs.last() {
+                        Some(glyph) => glyph.end,
+                        None => self.text_lines[line.line_i.get()].len()
                     }
+                } else {
+                    line.glyphs[self.cursor.glyph].start
+                };
 
-                    self.cursor.glyph = 0;
-                    self.cursor.line += 1;
-
-                    let lines = self.lines();
-                    if (self.cursor.line as i32) < self.scroll
-                    || (self.cursor.line as i32) >= self.scroll + lines
-                    {
-                        self.scroll = self.cursor.line as i32 - (lines - 1);
-                        self.shape_until_scroll();
-                    }
-                },
-                _ => {
+                let text_line = &mut self.text_lines[line.line_i.get()];
+                text_line.insert(insert_i, character);
+                self.cursor.glyph += 1;
+                self.reshape_line(line.line_i);
+            },
+            TextAction::Enter => {
+                {
                     let line = &self.layout_lines[self.cursor.line];
-                    let insert_i = if self.cursor.glyph >= line.glyphs.len() {
-                        match line.glyphs.last() {
-                            Some(glyph) => glyph.end,
-                            None => self.text_lines[line.line_i.get()].len()
-                        }
+                    let new_line = if self.cursor.glyph >= line.glyphs.len() {
+                        String::new()
                     } else {
-                        line.glyphs[self.cursor.glyph].start
+                        let glyph = &line.glyphs[self.cursor.glyph];
+                        self.text_lines[line.line_i.get()].split_off(glyph.start)
                     };
+                    self.text_lines.insert(line.line_i.get() + 1, new_line);
 
+                    // Reshape all lines after new line
+                    //TODO: improve performance
+                    self.shape_lines.truncate(line.line_i.get());
+                    self.relayout();
+                    self.shape_until_scroll();
+                }
+
+                self.cursor.glyph = 0;
+                self.cursor.line += 1;
+
+                let lines = self.lines();
+                if (self.cursor.line as i32) < self.scroll
+                || (self.cursor.line as i32) >= self.scroll + lines
+                {
+                    self.scroll = self.cursor.line as i32 - (lines - 1);
+                    self.shape_until_scroll();
+                }
+            },
+            TextAction::Backspace => {
+                let line = &self.layout_lines[self.cursor.line];
+                if self.cursor.glyph > line.glyphs.len() {
+                    self.cursor.glyph = line.glyphs.len();
+                    self.redraw = true;
+                }
+                if self.cursor.glyph > 0 {
+                    self.cursor.glyph -= 1;
+                    let glyph = &line.glyphs[self.cursor.glyph];
                     let text_line = &mut self.text_lines[line.line_i.get()];
-                    text_line.insert(insert_i, character);
-                    self.cursor.glyph += 1;
+                    text_line.remove(glyph.start);
+                    self.reshape_line(line.line_i);
+                }
+            },
+            TextAction::Delete => {
+                let line = &self.layout_lines[self.cursor.line];
+                if self.cursor.glyph < line.glyphs.len() {
+                    let glyph = &line.glyphs[self.cursor.glyph];
+                    let text_line = &mut self.text_lines[line.line_i.get()];
+                    text_line.remove(glyph.start);
                     self.reshape_line(line.line_i);
                 }
             },
