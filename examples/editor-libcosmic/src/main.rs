@@ -29,6 +29,7 @@ use cosmic_text::{
 use std::{
     env,
     fs,
+    path::PathBuf,
     sync::Mutex,
 };
 
@@ -93,6 +94,7 @@ fn main() -> cosmic::iced::Result {
 
 pub struct Window {
     theme: Theme,
+    path_opt: Option<PathBuf>,
     buffer: Mutex<TextBuffer<'static>>,
 }
 
@@ -102,6 +104,23 @@ pub enum Message {
     Open,
     MetricsChanged(TextMetrics),
     ThemeChanged(&'static str),
+}
+
+impl Window {
+    pub fn open(&mut self, path: PathBuf) {
+        let mut buffer = self.buffer.lock().unwrap();
+        match fs::read_to_string(&path) {
+            Ok(text) => {
+                buffer.set_text(&text);
+                self.path_opt = Some(path);
+            },
+            Err(err) => {
+                log::error!("failed to open '{}': {}", path.display(), err);
+                buffer.set_text("");
+                self.path_opt = None;
+            }
+        }
+    }
 }
 
 impl Application for Window {
@@ -117,21 +136,14 @@ impl Application for Window {
             FONT_SIZES[font_size_i],
         );
 
-        if let Some(arg) = env::args().nth(1) {
-            match fs::read_to_string(&arg) {
-                Ok(text) => {
-                    buffer.set_text(&text);
-                },
-                Err(err) => {
-                    log::error!("failed to open '{}': {}", arg, err);
-                }
-            }
-        }
-
-        let window = Window {
+        let mut window = Window {
             theme: Theme::Dark,
+            path_opt: None,
             buffer: Mutex::new(buffer),
         };
+        if let Some(arg) = env::args().nth(1) {
+            window.open(PathBuf::from(arg));
+        }
         (window, Command::none())
     }
 
@@ -140,23 +152,18 @@ impl Application for Window {
     }
 
     fn title(&self) -> String {
-        format!("COSMIC Text - iced - {}", FONT_SYSTEM.locale)
+        if let Some(path) = &self.path_opt {
+            format!("COSMIC Text - {} - {}", FONT_SYSTEM.locale, path.display())
+        } else {
+            format!("COSMIC Text - {}", FONT_SYSTEM.locale)
+        }
     }
 
     fn update(&mut self, message: Message) -> iced::Command<Self::Message> {
         match message {
             Message::Open => {
                 if let Some(path) = rfd::FileDialog::new().pick_file() {
-                    let mut buffer = self.buffer.lock().unwrap();
-                    match fs::read_to_string(&path) {
-                        Ok(text) => {
-                            buffer.set_text(&text);
-                        },
-                        Err(err) => {
-                            buffer.set_text("");
-                            log::error!("failed to open '{}': {}", path.display(), err);
-                        }
-                    }
+                    self.open(path);
                 }
             },
             Message::MetricsChanged(metrics) => {
