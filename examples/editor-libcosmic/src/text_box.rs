@@ -239,6 +239,14 @@ where
                     buffer.action(TextAction::Delete);
                     return Status::Captured;
                 },
+                KeyCode::Home => {
+                    buffer.action(TextAction::Home);
+                    return Status::Captured;
+                },
+                KeyCode::End => {
+                    buffer.action(TextAction::End);
+                    return Status::Captured;
+                },
                 KeyCode::PageUp => {
                     buffer.action(TextAction::PageUp);
                     return Status::Captured;

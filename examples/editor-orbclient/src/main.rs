@@ -166,6 +166,8 @@ fn main() {
                     orbclient::K_DOWN if event.pressed => buffer.action(TextAction::Down),
                     orbclient::K_BKSP if event.pressed => buffer.action(TextAction::Backspace),
                     orbclient::K_DEL if event.pressed => buffer.action(TextAction::Delete),
+                    orbclient::K_HOME if event.pressed => buffer.action(TextAction::Home),
+                    orbclient::K_END if event.pressed => buffer.action(TextAction::End),
                     orbclient::K_PGUP if event.pressed => buffer.action(TextAction::PageUp),
                     orbclient::K_PGDN if event.pressed => buffer.action(TextAction::PageDown),
                     orbclient::K_0 if event.pressed && ctrl_pressed => {

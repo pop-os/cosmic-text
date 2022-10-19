@@ -21,6 +21,10 @@ pub enum TextAction {
     Backspace,
     /// Delete text in front of cursor
     Delete,
+    /// Move cursor to start of line
+    Home,
+    /// Move cursor to end of line
+    End,
     /// Scroll up one page
     PageUp,
     /// Scroll down one page
@@ -382,6 +386,19 @@ impl<'a> TextBuffer<'a> {
                     self.reshape_line(line.line_i);
                 }
             },
+            TextAction::Home => {
+                if self.cursor.glyph > 0 {
+                    self.cursor.glyph = 0;
+                    self.redraw = true;
+                }
+            },
+            TextAction::End => {
+                let line = &self.layout_lines[self.cursor.line];
+                if self.cursor.glyph < line.glyphs.len() {
+                    self.cursor.glyph = line.glyphs.len();
+                    self.redraw = true;
+                }
+            }
             TextAction::PageUp => {
                 self.scroll -= self.lines();
                 self.redraw = true;
