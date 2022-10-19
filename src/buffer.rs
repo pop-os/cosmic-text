@@ -118,7 +118,7 @@ impl<'a> TextBuffer<'a> {
     ) -> Self {
         Self {
             font_matches,
-            text_lines: Vec::new(),
+            text_lines: vec![String::new()], // Must have one line
             shape_lines: Vec::new(),
             layout_lines: Vec::new(),
             metrics,
@@ -415,6 +415,21 @@ impl<'a> TextBuffer<'a> {
                 text_line.insert(insert_i, character);
                 self.cursor.glyph += 1;
                 self.reshape_line(line.line_i);
+
+                if self.cursor.glyph > self.layout_lines[self.cursor.line].glyphs.len() {
+                    if self.cursor.line + 1 < self.layout_lines.len() {
+                        self.cursor.glyph -= self.layout_lines[self.cursor.line].glyphs.len();
+                        self.cursor.line += 1;
+
+                        let lines = self.lines();
+                        if (self.cursor.line as i32) < self.scroll
+                        || (self.cursor.line as i32) >= self.scroll + lines
+                        {
+                            self.scroll = self.cursor.line as i32 - (lines - 1);
+                            self.shape_until_scroll();
+                        }
+                    }
+                }
             },
             TextAction::Enter => {
                 {
