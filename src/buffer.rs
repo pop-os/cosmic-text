@@ -434,7 +434,12 @@ impl<'a> TextBuffer<'a> {
                     if mouse_x >= glyph.x as i32
                         && mouse_x <= (glyph.x + glyph.w) as i32
                     {
-                        new_cursor_glyph = glyph_i;
+                        if mouse_x >= (glyph.x + glyph.w / 2.0) as i32 {
+                            // If clicking on last half of glyph, move cursor past glyph
+                            new_cursor_glyph = glyph_i + 1;
+                        } else {
+                            new_cursor_glyph = glyph_i;
+                        }
                     }
                 }
                 new_cursor_opt = Some(TextCursor::new(new_cursor_line, new_cursor_glyph));
