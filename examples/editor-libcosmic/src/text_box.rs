@@ -7,18 +7,17 @@ use cosmic::iced_native::{
     },
     keyboard::{Event as KeyEvent, KeyCode},
     layout::{self, Layout},
-    mouse::{Event as MouseEvent, ScrollDelta},
+    mouse::{Button, Event as MouseEvent, ScrollDelta},
     renderer,
     widget::{self, Widget},
 };
 use cosmic_text::{
-    TextLineIndex,
     TextAction,
     TextBuffer,
 };
 use std::{
     cmp,
-    sync::{Arc, Mutex},
+    sync::Mutex,
     time::Instant,
 };
 
@@ -60,16 +59,16 @@ impl StyleSheet for Theme {
 }
 
 pub struct TextBox<'a> {
-    buffer: Arc<Mutex<TextBuffer<'a>>>,
+    buffer: &'a Mutex<TextBuffer<'static>>,
 }
 
 impl<'a> TextBox<'a> {
-    pub fn new(buffer: Arc<Mutex<TextBuffer<'a>>>) -> Self {
+    pub fn new(buffer: &'a Mutex<TextBuffer<'static>>) -> Self {
         Self { buffer }
     }
 }
 
-pub fn text_box<'a>(buffer: Arc<Mutex<TextBuffer<'a>>>) -> TextBox<'a> {
+pub fn text_box<'a>(buffer: &'a Mutex<TextBuffer<'static>>) -> TextBox<'a> {
     TextBox::new(buffer)
 }
 
@@ -182,8 +181,8 @@ where
         &mut self,
         _state: &mut widget::Tree,
         event: Event,
-        _layout: Layout<'_>,
-        _cursor_position: Point,
+        layout: Layout<'_>,
+        cursor_position: Point,
         _renderer: &Renderer,
         _clipboard: &mut dyn Clipboard,
         _shell: &mut Shell<'_, Message>,
@@ -236,6 +235,18 @@ where
                 _ => Status::Ignored,
             },
             Event::Mouse(mouse_event) => match mouse_event {
+                MouseEvent::ButtonPressed(button) => match button {
+                    Button::Left => if layout.bounds().contains(cursor_position) {
+                        buffer.action(TextAction::Click {
+                            x: (cursor_position.x - layout.bounds().x) as i32,
+                            y: (cursor_position.y - layout.bounds().y) as i32,
+                        });
+                        Status::Captured
+                    } else {
+                        Status::Ignored
+                    },
+                    _ => Status::Ignored,
+                },
                 MouseEvent::WheelScrolled { delta } => match delta {
                     ScrollDelta::Lines { x, y } => {
                         buffer.action(TextAction::Scroll((-y * 6.0) as i32));

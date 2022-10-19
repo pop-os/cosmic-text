@@ -24,7 +24,7 @@ use cosmic_text::{
 use std::{
     env,
     fs,
-    sync::{Arc, Mutex},
+    sync::Mutex,
 };
 
 use self::text_box::text_box;
@@ -88,7 +88,7 @@ fn main() -> cosmic::iced::Result {
 
 pub struct Window {
     theme: Theme,
-    buffer: Arc<Mutex<TextBuffer<'static>>>,
+    buffer: Mutex<TextBuffer<'static>>,
 }
 
 #[allow(dead_code)]
@@ -116,11 +116,11 @@ impl Application for Window {
         };
 
         let font_size_i = 1; // Body
-        let buffer = Arc::new(Mutex::new(TextBuffer::new(
+        let buffer = Mutex::new(TextBuffer::new(
             unsafe { FONT_MATCHES.as_ref().unwrap() },
             &text,
             FONT_SIZES[font_size_i],
-        )));
+        ));
 
         let window = Window {
             theme: Theme::Dark,
@@ -183,7 +183,7 @@ impl Application for Window {
             .align_items(Alignment::Center)
             .spacing(8)
             ,
-            text_box(self.buffer.clone())
+            text_box(&self.buffer)
         ]
         .spacing(8)
         .padding(16)
