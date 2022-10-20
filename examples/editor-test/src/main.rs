@@ -135,6 +135,8 @@ fn main() {
         default_text.to_string()
     };
 
+    let test_start = Instant::now();
+
     //TODO: support bidi
     for line in text.lines() {
         log::debug!("Line {:?}", line);
@@ -199,6 +201,9 @@ fn main() {
             }
         }
     }
+
+    let test_elapsed = test_start.elapsed();
+    log::info!("Test completed in {:?}", test_elapsed);
 
     let mut wrong = 0;
     let buffer_lines = buffer.text_lines();
