@@ -413,10 +413,24 @@ impl<'a> TextBuffer<'a> {
                 }
             },
             TextAction::Left => {
-                todo!("left");
+                let rtl_opt = self.lines[self.cursor.line.get()].shape_opt.as_ref().map(|shape| shape.rtl);
+                if let Some(rtl) = rtl_opt {
+                    if rtl {
+                        self.action(TextAction::Next);
+                    } else {
+                        self.action(TextAction::Previous);
+                    }
+                }
             },
             TextAction::Right => {
-                todo!("right");
+                let rtl_opt = self.lines[self.cursor.line.get()].shape_opt.as_ref().map(|shape| shape.rtl);
+                if let Some(rtl) = rtl_opt {
+                    if rtl {
+                        self.action(TextAction::Previous);
+                    } else {
+                        self.action(TextAction::Next);
+                    }
+                }
             },
             TextAction::Up => {
                 todo!("up");
