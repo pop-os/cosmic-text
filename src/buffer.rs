@@ -432,8 +432,14 @@ impl<'a> TextBuffer<'a> {
                 self.shape_until_cursor(CursorScroll::Bottom);
             },
             TextAction::Enter => {
+                let new_line = {
+                    let line = &mut self.lines[self.cursor.line.get()];
+                    line.reset();
+                    line.text.split_off(self.cursor.index)
+                };
+
                 let next_line = self.cursor.line.get() + 1;
-                self.lines.insert(next_line, TextBufferLine::new(String::new()));
+                self.lines.insert(next_line, TextBufferLine::new(new_line));
 
                 self.cursor.line = TextLineIndex::new(next_line);
                 self.cursor.index = 0;
@@ -630,15 +636,24 @@ impl<'a> TextBuffer<'a> {
                 }
 
                 let cursor_glyph_opt = |cursor: &TextCursor| -> Option<usize> {
-                    let mut glyph_i_opt = None;
-                    for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
-                        if cursor.index == glyph.start {
-                            glyph_i_opt = Some(glyph_i);
-                        } else if cursor.index == glyph.end {
-                            glyph_i_opt = Some(glyph_i + 1);
+                    if cursor.line.get() == line_i {
+                        for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
+                            if cursor.index == glyph.start {
+                                return Some(glyph_i);
+                            }
+                        }
+                        match layout_line.glyphs.last() {
+                            Some(glyph) => {
+                                if cursor.index == glyph.end {
+                                    return Some(layout_line.glyphs.len());
+                                }
+                            },
+                            None => {
+                                return Some(0);
+                            }
                         }
                     }
-                    glyph_i_opt
+                    None
                 };
 
                 // Highlight selection (TODO: HIGHLIGHT COLOR!)
@@ -736,43 +751,41 @@ impl<'a> TextBuffer<'a> {
                 }
 
                 // Draw cursor
-                if self.cursor.line.get() == line_i {
-                    if let Some(cursor_glyph) = cursor_glyph_opt(&self.cursor) {
-                        let x = match layout_line.glyphs.get(cursor_glyph) {
+                if let Some(cursor_glyph) = cursor_glyph_opt(&self.cursor) {
+                    let x = match layout_line.glyphs.get(cursor_glyph) {
+                        Some(glyph) => {
+                            // Start of detected glyph
+                            if shape.rtl {
+                                (glyph.x + glyph.w) as i32
+                            } else {
+                                glyph.x as i32
+                            }
+                        },
+                        None => match layout_line.glyphs.last() {
                             Some(glyph) => {
-                                // Start of detected glyph
+                                // End of last glyph
                                 if shape.rtl {
-                                    (glyph.x + glyph.w) as i32
-                                } else {
                                     glyph.x as i32
+                                } else {
+                                    (glyph.x + glyph.w) as i32
                                 }
                             },
-                            None => match layout_line.glyphs.last() {
-                                Some(glyph) => {
-                                    // End of last glyph
-                                    if shape.rtl {
-                                        glyph.x as i32
-                                    } else {
-                                        (glyph.x + glyph.w) as i32
-                                    }
-                                },
-                                None => {
-                                    // Start of empty line
-                                    0
-                                }
+                            None => {
+                                // Start of empty line
+                                0
                             }
-                        };
+                        }
+                    };
 
-                        println!("x: {}", x);
+                    println!("x: {}", x);
 
-                        f(
-                            x,
-                            line_y - font_size,
-                            1,
-                            line_height as u32,
-                            color,
-                        );
-                    }
+                    f(
+                        x,
+                        line_y - font_size,
+                        1,
+                        line_height as u32,
+                        color,
+                    );
                 }
 
                 layout_line.draw(color, |x, y, color| {
