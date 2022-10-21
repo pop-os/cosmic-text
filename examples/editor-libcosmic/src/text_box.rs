@@ -136,8 +136,6 @@ where
         let appearance = theme.appearance();
         let text_color_u32 = appearance.text_color_u32();
 
-        let buffer = self.buffer.lock().unwrap();
-
         let instant = Instant::now();
 
         if let Some(background_color) = appearance.background_color {
@@ -151,6 +149,8 @@ where
                 background_color
             );
         }
+
+        let mut buffer = self.buffer.lock().unwrap();
 
         buffer.shape_until_cursor();
 

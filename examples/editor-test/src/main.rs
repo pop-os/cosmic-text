@@ -122,7 +122,7 @@ fn main() {
         log::debug!("Line {:?}", line);
 
         for c in line.chars() {
-            if c.is_control() {
+            if c.is_control() && c != '\t' {
                 log::warn!("Ignoring control character {:?}", c);
                 continue;
             }
