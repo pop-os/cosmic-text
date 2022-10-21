@@ -58,6 +58,12 @@ impl TextCursor {
     }
 }
 
+enum CursorScroll {
+    None,
+    Bottom,
+    Top,
+}
+
 /// Index of a text line
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Ord, PartialOrd)]
 pub struct TextLineIndex(usize);
@@ -212,6 +218,70 @@ impl<'a> TextBuffer<'a> {
         total_layout
     }
 
+    fn shape_until_cursor(&mut self, scroll: CursorScroll) {
+        let instant = Instant::now();
+
+        let mut reshaped = 0;
+        let mut layout_i = 0;
+        for (line_i, line) in self.lines.iter_mut().enumerate() {
+            if line_i > self.cursor.line.get() {
+                break;
+            }
+
+            if line.shape_opt.is_none() {
+                reshaped += 1;
+            }
+            let layout = line.layout(
+                self.font_matches,
+                self.metrics.font_size,
+                self.width
+            );
+            if line_i == self.cursor.line.get() {
+                for layout_line in layout {
+                    let mut found = false;
+                    for glyph in layout_line.glyphs.iter() {
+                        if glyph.start <= self.cursor.end {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if found {
+                        layout_i += 1;
+                    } else {
+                        break;
+                    }
+                }
+            } else {
+                layout_i += layout.len() as i32;
+            }
+        }
+
+        let duration = instant.elapsed();
+        if reshaped > 0 {
+            log::debug!("shape_until_cursor {}: {:?}", reshaped, duration);
+            self.redraw = true;
+        }
+
+        let lines = self.lines();
+        match scroll {
+            CursorScroll::None => (),
+            CursorScroll::Bottom => {
+                if layout_i < self.scroll
+                || layout_i >= self.scroll + lines
+                {
+                    self.scroll = layout_i - (lines - 1);
+                }
+            },
+            CursorScroll::Top => {
+                if layout_i < self.scroll
+                || layout_i >= self.scroll + lines
+                {
+                    self.scroll = layout_i;
+                }
+            }
+        }
+    }
+
     fn shape_until_scroll(&mut self) {
         let lines = self.lines();
 
@@ -362,7 +432,7 @@ impl<'a> TextBuffer<'a> {
                 self.cursor.start = self.cursor.end;
                 self.cursor.end += character.len_utf8();
 
-                self.shape_until_scroll();
+                self.shape_until_cursor(CursorScroll::Bottom);
             },
             TextAction::Enter => {
                 let next_line = self.cursor.line.get() + 1;
@@ -372,7 +442,7 @@ impl<'a> TextBuffer<'a> {
                 self.cursor.start = 0;
                 self.cursor.end = 0;
 
-                self.shape_until_scroll();
+                self.shape_until_cursor(CursorScroll::Bottom);
             },
             TextAction::Backspace => {
                 if self.cursor.end > 0 {
@@ -390,7 +460,7 @@ impl<'a> TextBuffer<'a> {
                         }
                     }
 
-                    self.shape_until_scroll();
+                    self.shape_until_cursor(CursorScroll::Top);
                 } else if self.cursor.line.get() > 0 {
                     let mut line_index = self.cursor.line.get();
                     let old_line = self.lines.remove(line_index);
@@ -412,7 +482,7 @@ impl<'a> TextBuffer<'a> {
 
                     line.text.push_str(&old_line.text);
 
-                    self.shape_until_scroll();
+                    self.shape_until_cursor(CursorScroll::Top);
                 }
             },
             TextAction::Delete => {
@@ -441,69 +511,104 @@ impl<'a> TextBuffer<'a> {
     }
 
     fn click(&mut self, mouse_x: i32, mouse_y: i32) {
-        todo!("click");
-        /*
         let instant = Instant::now();
 
         let font_size = self.metrics.font_size;
         let line_height = self.metrics.line_height;
 
-        let mut new_cursor_opt = None;
-
         let mut line_y = font_size;
-        for (line_i, line) in self.layout_lines.iter()
-            .skip(cmp::max(0, self.scroll()) as usize)
-            .take(cmp::max(0, self.lines()) as usize)
-            .enumerate()
-        {
-            if mouse_y >= line_y - font_size
-            && mouse_y < line_y - font_size + line_height
-            {
-                let new_cursor_line = line_i + self.scroll() as usize;
-                let mut new_cursor_glyph = line.glyphs.len();
-                for (glyph_i, glyph) in line.glyphs.iter().enumerate() {
-                    if mouse_x >= glyph.x as i32
-                        && mouse_x <= (glyph.x + glyph.w) as i32
-                    {
-                        let right_half = mouse_x >= (glyph.x + glyph.w / 2.0) as i32;
-                        if right_half == !line.rtl {
-                            // If clicking on last half of glyph, move cursor past glyph
-                            new_cursor_glyph = glyph_i + 1;
-                        } else {
-                            new_cursor_glyph = glyph_i;
+        let mut layout_i = 0;
+        for (line_i, line) in self.lines.iter().enumerate() {
+            let shape = match line.shape_opt.as_ref() {
+                Some(some) => some,
+                None => break,
+            };
+
+            let layout = match line.layout_opt.as_ref() {
+                Some(some) => some,
+                None => break,
+            };
+
+            for layout_line in layout {
+                let scrolled = layout_i < self.scroll;
+                layout_i += 1;
+
+                if scrolled {
+                    continue;
+                }
+
+                if line_y > self.height {
+                    return;
+                }
+
+                if mouse_y >= line_y - font_size
+                && mouse_y < line_y - font_size + line_height
+                {
+                    let mut new_cursor_glyph = layout_line.glyphs.len();
+                    for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
+                        if mouse_x >= glyph.x as i32
+                            && mouse_x <= (glyph.x + glyph.w) as i32
+                        {
+                            let right_half = mouse_x >= (glyph.x + glyph.w / 2.0) as i32;
+                            if right_half == !shape.rtl {
+                                // If clicking on last half of glyph, move cursor past glyph
+                                new_cursor_glyph = glyph_i + 1;
+                            } else {
+                                new_cursor_glyph = glyph_i;
+                            }
+                        }
+                    }
+
+                    let mut new_cursor = TextCursor::new(
+                        TextLineIndex::new(line_i),
+                        0,
+                        0
+                    );
+
+                    match layout_line.glyphs.get(new_cursor_glyph) {
+                        Some(glyph) => {
+                            // Position at glyph
+                            new_cursor.start = glyph.start;
+                            new_cursor.end = glyph.end;
+                        },
+                        None => match layout_line.glyphs.last() {
+                            Some(glyph) => {
+                                // Position at end of line
+                                new_cursor.start = glyph.end;
+                                new_cursor.end = glyph.end;
+                            },
+                            None => {
+                                // Keep at start of empty line
+                            },
+                        },
+                    }
+
+                    if new_cursor != self.cursor {
+                        self.cursor = new_cursor;
+                        self.redraw = true;
+
+                        if let Some(glyph) = layout_line.glyphs.get(new_cursor_glyph) {
+                            let text_glyph = &line.text[glyph.start..glyph.end];
+                            log::debug!(
+                                "{}, {}, {}: '{}' ('{}'): '{}' ({:?})",
+                                self.cursor.line.get(),
+                                self.cursor.start,
+                                self.cursor.end,
+                                glyph.font.info.family,
+                                glyph.font.info.post_script_name,
+                                text_glyph,
+                                text_glyph
+                            );
                         }
                     }
                 }
-                new_cursor_opt = Some(TextCursor::new(new_cursor_line, new_cursor_glyph));
 
-                if let Some(glyph) = line.glyphs.get(new_cursor_glyph) {
-                    let text_line = &self.lines[line.line_i.get()].text;
-                    let text_glyph = &text_line[glyph.start..glyph.end];
-                    log::debug!(
-                        "{}, {}: '{}' ('{}'): '{}' ({:?})",
-                        new_cursor_line,
-                        new_cursor_glyph,
-                        glyph.font.info.family,
-                        glyph.font.info.post_script_name,
-                        text_glyph,
-                        text_glyph
-                    );
-                }
-            }
-
-            line_y += line_height;
-        }
-
-        if let Some(new_cursor) = new_cursor_opt {
-            if new_cursor != self.cursor {
-                self.cursor = new_cursor;
-                self.redraw = true;
+                line_y += line_height;
             }
         }
 
         let duration = instant.elapsed();
         log::trace!("click({}, {}): {:?}", mouse_x, mouse_y, duration);
-        */
     }
 
     /// Draw the buffer
@@ -515,7 +620,12 @@ impl<'a> TextBuffer<'a> {
 
         let mut line_y = font_size;
         let mut layout_i = 0;
-        for line in self.lines.iter() {
+        for (line_i, line) in self.lines.iter().enumerate() {
+            let shape = match line.shape_opt.as_ref() {
+                Some(some) => some,
+                None => break,
+            };
+
             let layout = match line.layout_opt.as_ref() {
                 Some(some) => some,
                 None => {
@@ -596,29 +706,32 @@ impl<'a> TextBuffer<'a> {
                         }
                     }
                 }
+                */
 
                 // Draw cursor
-                if self.cursor.line == line_i_scrolled {
-                    if self.cursor.glyph >= line.glyphs.len() {
-                        let x = match line.glyphs.last() {
-                            Some(glyph) => glyph.x + glyph.w,
-                            None => 0.0,
-                        };
+                if self.cursor.line.get() == line_i {
+                    println!("FOUND CURSOR LINE {}", line_i);
 
-                        f(
-                            x as i32,
-                            line_y - font_size,
-                            1,
-                            line_height as u32,
-                            color,
-                        );
-                    } else {
-                        let glyph = &line.glyphs[self.cursor.glyph];
-                        let x = if line.rtl {
+                    let mut cursor_glyph_opt = None;
+                    for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
+                        if self.cursor.start == glyph.start {
+                            cursor_glyph_opt = Some((glyph_i, false));
+                        } else if self.cursor.start == glyph.end {
+                            cursor_glyph_opt = Some((glyph_i, true));
+                        }
+                    }
+
+                    if let Some((cursor_glyph, cursor_after)) = cursor_glyph_opt {
+                        println!("FOUND CURSOR GLYPH {}, {}", cursor_glyph, cursor_after);
+
+                        let glyph = &layout_line.glyphs[cursor_glyph];
+                        let x = if shape.rtl != cursor_after {
                             (glyph.x + glyph.w) as i32
                         } else {
                             glyph.x as i32
                         };
+
+                        println!("x: {}", x);
 
                         f(
                             x,
@@ -629,7 +742,6 @@ impl<'a> TextBuffer<'a> {
                         );
                     }
                 }
-                */
 
                 layout_line.draw(color, |x, y, color| {
                     f(x, line_y + y, 1, 1, color);
