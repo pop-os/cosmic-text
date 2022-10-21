@@ -1,4 +1,3 @@
-use crate::TextLineIndex;
 use super::{CacheKey, Font, FontLayoutGlyph, FontLayoutLine};
 
 pub struct FontShapeGlyph<'a> {
@@ -41,7 +40,6 @@ pub struct FontShapeSpan<'a> {
 }
 
 pub struct FontShapeLine<'a> {
-    pub line_i: TextLineIndex,
     pub rtl: bool,
     pub spans: Vec<FontShapeSpan<'a>>,
 }
@@ -165,7 +163,6 @@ impl<'a> FontShapeLine<'a> {
                         layout_lines.insert(
                             layout_i,
                             FontLayoutLine {
-                                line_i: self.line_i,
                                 rtl: self.rtl,
                                 glyphs: glyphs_swap,
                             },
@@ -200,7 +197,6 @@ impl<'a> FontShapeLine<'a> {
                     layout_lines.insert(
                         layout_i,
                         FontLayoutLine {
-                            line_i: self.line_i,
                             rtl: self.rtl,
                             glyphs: glyphs_swap,
                         },
@@ -217,7 +213,6 @@ impl<'a> FontShapeLine<'a> {
             layout_lines.insert(
                 layout_i,
                 FontLayoutLine {
-                    line_i: self.line_i,
                     rtl: self.rtl,
                     glyphs,
                 },

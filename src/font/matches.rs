@@ -1,6 +1,5 @@
 use unicode_script::{Script, UnicodeScript};
 
-use crate::TextLineIndex;
 use super::{Font, FontShapeGlyph, FontShapeLine, FontShapeSpan, FontShapeWord};
 use super::fallback::{FontFallbackIter};
 
@@ -292,7 +291,7 @@ impl<'a> FontMatches<'a> {
         }
     }
 
-    pub fn shape_line(&self, line_i: TextLineIndex, line: &str) -> FontShapeLine {
+    pub fn shape_line(&self, line: &str) -> FontShapeLine {
         let mut spans = Vec::new();
 
         let bidi = unicode_bidi::BidiInfo::new(line, None);
@@ -322,6 +321,6 @@ impl<'a> FontMatches<'a> {
             line_rtl
         };
 
-        FontShapeLine { line_i, rtl, spans }
+        FontShapeLine { rtl, spans }
     }
 }

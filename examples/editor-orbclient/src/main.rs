@@ -109,6 +109,7 @@ fn main() {
                 window.rect(line_x + x, y, w, h, Color { data: color });
             });
 
+            /*TODO
             let mut line_y = font_size;
             let mut start_line_opt = None;
             let mut end_line = TextLineIndex::new(0);
@@ -147,6 +148,7 @@ fn main() {
                     );
                 }
             }
+            */
 
             window.sync();
 

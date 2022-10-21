@@ -171,7 +171,11 @@ impl Application for Window {
             Message::Save => {
                 if let Some(path) = &self.path_opt {
                     let buffer = self.buffer.lock().unwrap();
-                    let text = buffer.text_lines().join("\n");
+                    let mut text = String::new();
+                    for line in buffer.text_lines() {
+                        text.push_str(line.text());
+                        text.push('\n');
+                    }
                     match fs::write(path, text) {
                         Ok(()) => {
                             log::info!("saved '{}'", path.display());

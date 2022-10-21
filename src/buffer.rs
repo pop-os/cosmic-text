@@ -44,18 +44,22 @@ pub enum TextAction {
 /// Current cursor location
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct TextCursor {
-    pub line: usize,
-    pub glyph: usize,
+    /// Text line the cursor is on
+    pub line: TextLineIndex,
+    /// Start of glyph (behind cursor)
+    pub start: usize,
+    /// End of glyph (after cursor)
+    pub end: usize,
 }
 
 impl TextCursor {
-    pub const fn new(line: usize, glyph: usize) -> Self {
-        Self { line, glyph }
+    pub const fn new(line: TextLineIndex, start: usize, end: usize) -> Self {
+        Self { line, start, end }
     }
 }
 
 /// Index of a text line
-#[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Ord, PartialOrd)]
 pub struct TextLineIndex(usize);
 
 impl TextLineIndex {
@@ -115,18 +119,23 @@ impl<'a> TextBufferLine<'a> {
         &self.text
     }
 
-    pub fn shape(&mut self, font_matches: &'a FontMatches<'a>, line_i: TextLineIndex) -> &FontShapeLine<'a> {
+    pub fn reset(&mut self) {
+        self.shape_opt = None;
+        self.layout_opt = None;
+    }
+
+    pub fn shape(&mut self, font_matches: &'a FontMatches<'a>) -> &FontShapeLine<'a> {
         if self.shape_opt.is_none() {
-            self.shape_opt = Some(font_matches.shape_line(line_i, &self.text));
+            self.shape_opt = Some(font_matches.shape_line(&self.text));
             self.layout_opt = None;
         }
         self.shape_opt.as_ref().unwrap()
     }
 
-    pub fn layout(&mut self, font_matches: &'a FontMatches<'a>, line_i: TextLineIndex, font_size: i32, width: i32) -> &[FontLayoutLine<'a>] {
+    pub fn layout(&mut self, font_matches: &'a FontMatches<'a>, font_size: i32, width: i32) -> &[FontLayoutLine<'a>] {
         if self.layout_opt.is_none() {
             let mut layout = Vec::new();
-            let shape = self.shape(font_matches, line_i);
+            let shape = self.shape(font_matches);
             shape.layout(
                 font_size,
                 width,
@@ -143,8 +152,6 @@ impl<'a> TextBufferLine<'a> {
 pub struct TextBuffer<'a> {
     font_matches: &'a FontMatches<'a>,
     lines: Vec<TextBufferLine<'a>>,
-    shape_lines: Vec<FontShapeLine<'a>>,
-    layout_lines: Vec<FontLayoutLine<'a>>,
     metrics: TextMetrics,
     width: i32,
     height: i32,
@@ -162,8 +169,6 @@ impl<'a> TextBuffer<'a> {
         let mut buffer = Self {
             font_matches,
             lines: Vec::new(),
-            shape_lines: Vec::new(),
-            layout_lines: Vec::new(),
             metrics,
             width: 0,
             height: 0,
@@ -176,109 +181,70 @@ impl<'a> TextBuffer<'a> {
         buffer
     }
 
-    /// Pre-shape lines in the buffer, up to `lines`
-    pub fn shape_until(&mut self, lines: i32) {
+    /// Pre-shape lines in the buffer, up to `lines`, return actual number of layout lines
+    pub fn shape_until(&mut self, lines: i32) -> i32 {
         let instant = Instant::now();
 
         let mut reshaped = 0;
-        while self.shape_lines.len() < self.lines.len()
-            && (self.layout_lines.len() as i32) < lines
-        {
-            let line_i = TextLineIndex::new(self.shape_lines.len());
-            self.reshape_line(line_i);
-            reshaped += 1;
+        let mut total_layout = 0;
+        for line in self.lines.iter_mut() {
+            if total_layout >= lines {
+                break;
+            }
+
+            if line.shape_opt.is_none() {
+                reshaped += 1;
+            }
+            let layout = line.layout(
+                self.font_matches,
+                self.metrics.font_size,
+                self.width
+            );
+            total_layout += layout.len() as i32;
         }
 
         let duration = instant.elapsed();
         if reshaped > 0 {
             log::debug!("shape_until {}: {:?}", reshaped, duration);
+            self.redraw = true;
         }
+
+        total_layout
     }
 
     fn shape_until_scroll(&mut self) {
         let lines = self.lines();
 
         let scroll_end = self.scroll + lines;
-        self.shape_until(scroll_end);
+        let total_layout = self.shape_until(scroll_end);
 
         self.scroll = cmp::max(
             0,
             cmp::min(
-                self.layout_lines().len() as i32 - (lines - 1),
+                total_layout - (lines - 1),
                 self.scroll,
             ),
         );
     }
 
-    fn reshape_line(&mut self, line_i: TextLineIndex) {
-        let instant = Instant::now();
-
-        let shape_line = self
-            .font_matches
-            .shape_line(line_i, &self.lines[line_i.get()].text);
-        if line_i.get() < self.shape_lines.len() {
-            self.shape_lines[line_i.get()] = shape_line;
-        } else {
-            self.shape_lines.insert(line_i.get(), shape_line);
-        }
-
-        let duration = instant.elapsed();
-        log::debug!("reshape line {}: {:?}", line_i.get(), duration);
-
-        self.relayout_line(line_i);
-    }
-
     fn relayout(&mut self) {
         let instant = Instant::now();
 
-        self.layout_lines.clear();
-        for line in self.shape_lines.iter() {
-            let layout_i = self.layout_lines.len();
-            line.layout(
-                self.metrics.font_size,
-                self.width,
-                &mut self.layout_lines,
-                layout_i,
-            );
+        for line in self.lines.iter_mut() {
+            if line.shape_opt.is_some() {
+                line.layout_opt = None;
+                line.layout(
+                    self.font_matches,
+                    self.metrics.font_size,
+                    self.width
+                );
+            }
         }
 
         self.redraw = true;
 
         let duration = instant.elapsed();
         log::debug!("relayout: {:?}", duration);
-    }
-
-    fn relayout_line(&mut self, line_i: TextLineIndex) {
-        let instant = Instant::now();
-
-        let mut insert_opt = None;
-        let mut layout_i = 0;
-        while layout_i < self.layout_lines.len() {
-            let layout_line = &self.layout_lines[layout_i];
-            if layout_line.line_i == line_i {
-                if insert_opt.is_none() {
-                    insert_opt = Some(layout_i);
-                }
-                self.layout_lines.remove(layout_i);
-            } else {
-                layout_i += 1;
-            }
-        }
-
-        let insert_i = insert_opt.unwrap_or(self.layout_lines.len());
-
-        let shape_line = &self.shape_lines[line_i.get()];
-        shape_line.layout(
-            self.metrics.font_size,
-            self.width,
-            &mut self.layout_lines,
-            insert_i,
-        );
-
-        self.redraw = true;
-
-        let duration = instant.elapsed();
-        log::debug!("relayout line {}: {:?}", line_i.get(), duration);
     }
 
     /// Get the current cursor position
@@ -329,11 +295,6 @@ impl<'a> TextBuffer<'a> {
         self.height / self.metrics.line_height
     }
 
-    /// Get the lines after layout for rendering
-    pub fn layout_lines(&self) -> &[FontLayoutLine] {
-        &self.layout_lines
-    }
-
     /// Set text of buffer
     pub fn set_text(&mut self, text: &str) {
         self.lines.clear();
@@ -344,11 +305,11 @@ impl<'a> TextBuffer<'a> {
         if self.lines.is_empty() {
             self.lines.push(TextBufferLine::new(String::new()));
         }
-        self.shape_lines.clear();
-        self.layout_lines.clear();
+
         self.scroll = 0;
         self.cursor = TextCursor::default();
         self.select_opt = None;
+
         self.shape_until_scroll();
     }
 
@@ -361,232 +322,105 @@ impl<'a> TextBuffer<'a> {
     pub fn action(&mut self, action: TextAction) {
         match action {
             TextAction::Left => {
-                let line = &self.layout_lines[self.cursor.line];
-                if self.cursor.glyph > line.glyphs.len() {
-                    self.cursor.glyph = line.glyphs.len();
-                    self.redraw = true;
-                }
-                if line.rtl {
-                    if self.cursor.glyph < line.glyphs.len() {
-                        self.cursor.glyph += 1;
-                        self.redraw = true;
-                    }
-                } else {
-                    if self.cursor.glyph > 0 {
-                        self.cursor.glyph -= 1;
-                        self.redraw = true;
-                    }
-                }
+                todo!("left");
             },
             TextAction::Right => {
-                let line = &self.layout_lines[self.cursor.line];
-                if self.cursor.glyph > line.glyphs.len() {
-                    self.cursor.glyph = line.glyphs.len();
-                    self.redraw = true;
-                }
-                if line.rtl {
-                    if self.cursor.glyph > 0 {
-                        self.cursor.glyph -= 1;
-                        self.redraw = true;
-                    }
-                } else {
-                    if self.cursor.glyph < line.glyphs.len() {
-                        self.cursor.glyph += 1;
-                        self.redraw = true;
-                    }
-                }
+                todo!("right");
             },
             TextAction::Up => {
-                if self.cursor.line > 0 {
-                    self.cursor.line -= 1;
-                    self.redraw = true;
-
-                    let lines = self.lines();
-                    if (self.cursor.line as i32) < self.scroll
-                    || (self.cursor.line as i32) >= self.scroll + lines
-                    {
-                        self.scroll = self.cursor.line as i32;
-                    }
-                }
+                todo!("up");
             },
             TextAction::Down => {
-                if self.cursor.line < self.layout_lines.len() {
-                    self.cursor.line += 1;
-                    self.redraw = true;
-
-                    let lines = self.lines();
-                    if (self.cursor.line as i32) < self.scroll
-                    || (self.cursor.line as i32) >= self.scroll + lines
-                    {
-                        self.scroll = self.cursor.line as i32 - (lines - 1);
-                        self.shape_until_scroll();
-                    }
-                }
+                todo!("down");
             },
             TextAction::Home => {
-                if self.cursor.glyph > 0 {
-                    self.cursor.glyph = 0;
-                    self.redraw = true;
-                }
+                todo!("home");
             },
             TextAction::End => {
-                let line = &self.layout_lines[self.cursor.line];
-                if self.cursor.glyph < line.glyphs.len() {
-                    self.cursor.glyph = line.glyphs.len();
-                    self.redraw = true;
-                }
+                todo!("end");
             }
             TextAction::PageUp => {
                 self.scroll -= self.lines();
                 self.redraw = true;
+
                 self.shape_until_scroll();
             },
             TextAction::PageDown => {
                 self.scroll += self.lines();
                 self.redraw = true;
+
                 self.shape_until_scroll();
             },
             TextAction::Insert(character) => if character.is_control() {
                 // Filter out special chars, use TextAction instead
                 log::debug!("Refusing to insert control character {:?}", character);
             } else {
-                let line = &self.layout_lines[self.cursor.line];
-                let insert_i = if self.cursor.glyph >= line.glyphs.len() {
-                    match line.glyphs.last() {
-                        Some(glyph) => glyph.end,
-                        None => self.lines[line.line_i.get()].text.len()
-                    }
-                } else {
-                    line.glyphs[self.cursor.glyph].start
-                };
+                let line = &mut self.lines[self.cursor.line.get()];
+                line.reset();
+                line.text.insert(self.cursor.end, character);
 
-                self.lines[line.line_i.get()].text.insert(insert_i, character);
-                self.cursor.glyph += 1;
-                self.reshape_line(line.line_i);
+                self.cursor.start = self.cursor.end;
+                self.cursor.end += character.len_utf8();
 
-                if self.cursor.glyph > self.layout_lines[self.cursor.line].glyphs.len() {
-                    if self.cursor.line + 1 < self.layout_lines.len() {
-                        self.cursor.glyph -= self.layout_lines[self.cursor.line].glyphs.len();
-                        self.cursor.line += 1;
-
-                        let lines = self.lines();
-                        if (self.cursor.line as i32) < self.scroll
-                        || (self.cursor.line as i32) >= self.scroll + lines
-                        {
-                            self.scroll = self.cursor.line as i32 - (lines - 1);
-                            self.shape_until_scroll();
-                        }
-                    }
-                }
+                self.shape_until_scroll();
             },
             TextAction::Enter => {
-                {
-                    let line = &self.layout_lines[self.cursor.line];
-                    let new_line = if self.cursor.glyph >= line.glyphs.len() {
-                        String::new()
-                    } else {
-                        let glyph = &line.glyphs[self.cursor.glyph];
-                        self.lines[line.line_i.get()].text.split_off(glyph.start)
-                    };
-                    self.lines.insert(line.line_i.get() + 1, TextBufferLine::new(new_line));
+                let next_line = self.cursor.line.get() + 1;
+                self.lines.insert(next_line, TextBufferLine::new(String::new()));
 
-                    // Reshape all lines after new line
-                    //TODO: improve performance
-                    self.shape_lines.truncate(line.line_i.get());
-                    self.relayout();
-                    self.shape_until_scroll();
-                }
+                self.cursor.line = TextLineIndex::new(next_line);
+                self.cursor.start = 0;
+                self.cursor.end = 0;
 
-                self.cursor.glyph = 0;
-                self.cursor.line += 1;
-
-                let lines = self.lines();
-                if (self.cursor.line as i32) < self.scroll
-                || (self.cursor.line as i32) >= self.scroll + lines
-                {
-                    self.scroll = self.cursor.line as i32 - (lines - 1);
-                    self.shape_until_scroll();
-                }
+                self.shape_until_scroll();
             },
             TextAction::Backspace => {
-                let line = &self.layout_lines[self.cursor.line];
-                if self.cursor.glyph > line.glyphs.len() {
-                    self.cursor.glyph = line.glyphs.len();
-                    self.redraw = true;
-                }
-                if self.cursor.glyph > 0 {
-                    self.cursor.glyph -= 1;
-                    let glyph = &line.glyphs[self.cursor.glyph];
-                    self.lines[line.line_i.get()].text.remove(glyph.start);
-                    self.reshape_line(line.line_i);
-                } else if self.cursor.line > 0 {
-                    {
-                        let line = &self.layout_lines[self.cursor.line];
-                        let prev_line = &self.layout_lines[self.cursor.line - 1];
-                        if prev_line.line_i.get() < line.line_i.get() {
-                            let old_line = self.lines.remove(line.line_i.get()).text;
-                            self.lines[prev_line.line_i.get()].text.push_str(&old_line);
+                if self.cursor.end > 0 {
+                    let line = &mut self.lines[self.cursor.line.get()];
+                    line.reset();
+                    line.text.remove(self.cursor.start);
+
+                    self.cursor.end = self.cursor.start;
+                    self.cursor.start = 0;
+                    for (i, _) in line.text.char_indices() {
+                        if i == self.cursor.end {
+                            break;
                         } else {
-                            match prev_line.glyphs.last() {
-                                Some(glyph) => {
-                                    self.lines[line.line_i.get()].text.remove(glyph.end);
-                                },
-                                None => (), // There should always be a last glyph
-                            }
+                            self.cursor.start = i;
                         }
-
-                        // Reshape all lines after new line
-                        //TODO: improve performance
-                        self.shape_lines.truncate(prev_line.line_i.get());
-                        self.relayout();
-                        self.shape_until_scroll();
                     }
 
-                    self.cursor.line -= 1;
-                    self.cursor.glyph = self.layout_lines[self.cursor.line].glyphs.len();
+                    self.shape_until_scroll();
+                } else if self.cursor.line.get() > 0 {
+                    let mut line_index = self.cursor.line.get();
+                    let old_line = self.lines.remove(line_index);
+                    line_index -= 1;
 
-                    let lines = self.lines();
-                    if (self.cursor.line as i32) < self.scroll
-                    || (self.cursor.line as i32) >= self.scroll + lines
-                    {
-                        self.scroll = self.cursor.line as i32;
+                    let line = &mut self.lines[line_index];
+                    line.reset();
+
+                    self.cursor.line = TextLineIndex::new(line_index);
+                    self.cursor.end = line.text.len();
+                    self.cursor.start = 0;
+                    for (i, _) in line.text.char_indices() {
+                        if i == self.cursor.end {
+                            break;
+                        } else {
+                            self.cursor.start = i;
+                        }
                     }
+
+                    line.text.push_str(&old_line.text);
+
+                    self.shape_until_scroll();
                 }
             },
             TextAction::Delete => {
-                let line = &self.layout_lines[self.cursor.line];
-                if self.cursor.glyph < line.glyphs.len() {
-                    let glyph = &line.glyphs[self.cursor.glyph];
-                    self.lines[line.line_i.get()].text.remove(glyph.start);
-                    self.reshape_line(line.line_i);
-                } else {
-                    self.shape_until(self.cursor.line as i32 + 1);
-
-                    if self.cursor.line + 1 < self.layout_lines.len() {
-                        let line = &self.layout_lines[self.cursor.line];
-                        let next_line = &self.layout_lines[self.cursor.line + 1];
-                        if line.line_i.get() < next_line.line_i.get() {
-                            let old_line = self.lines.remove(next_line.line_i.get()).text;
-                            self.lines[line.line_i.get()].text.push_str(&old_line);
-                        } else {
-                            match line.glyphs.last() {
-                                Some(glyph) => {
-                                    self.lines[line.line_i.get()].text.remove(glyph.end);
-                                },
-                                None => (), // There should always be a last glyph
-                            }
-                        }
-
-                        // Reshape all lines after new line
-                        //TODO: improve performance
-                        self.shape_lines.truncate(line.line_i.get());
-                        self.relayout();
-                        self.shape_until_scroll();
-                    }
-                }
+                todo!("delete");
             },
             TextAction::Click { x, y } => {
                 self.select_opt = None;
+
                 self.click(x, y);
             },
             TextAction::Drag { x, y } => {
@@ -594,17 +428,21 @@ impl<'a> TextBuffer<'a> {
                     self.select_opt = Some(self.cursor);
                     self.redraw = true;
                 }
+
                 self.click(x, y);
             },
             TextAction::Scroll { lines } => {
                 self.scroll += lines;
                 self.redraw = true;
+
                 self.shape_until_scroll();
             }
         }
     }
 
     fn click(&mut self, mouse_x: i32, mouse_y: i32) {
+        todo!("click");
+        /*
         let instant = Instant::now();
 
         let font_size = self.metrics.font_size;
@@ -665,6 +503,7 @@ impl<'a> TextBuffer<'a> {
 
         let duration = instant.elapsed();
         log::trace!("click({}, {}): {:?}", mouse_x, mouse_y, duration);
+        */
     }
 
     /// Draw the buffer
@@ -675,112 +514,129 @@ impl<'a> TextBuffer<'a> {
         let line_height = self.metrics.line_height;
 
         let mut line_y = font_size;
-        for (line_i, line) in self.layout_lines.iter()
-            .skip(cmp::max(0, self.scroll()) as usize)
-            .take(cmp::max(0, self.lines()) as usize)
-            .enumerate()
-        {
-            let line_i_scrolled = line_i + cmp::max(0, self.scroll()) as usize;
+        let mut layout_i = 0;
+        for line in self.lines.iter() {
+            let layout = match line.layout_opt.as_ref() {
+                Some(some) => some,
+                None => {
+                    return
+                },
+            };
 
-            // Highlight selection (TODO: HIGHLIGHT COLOR!)
-            if let Some(select) = self.select_opt {
-                let (start, end) = if select.line < self.cursor.line {
-                    (select, self.cursor)
-                } else if select.line > self.cursor.line {
-                    (self.cursor, select)
-                } else {
-                    /* select.line == self.cursor.line */
-                    if select.glyph < self.cursor.glyph {
+            for layout_line in layout {
+                let scrolled = layout_i < self.scroll;
+                layout_i += 1;
+
+                if scrolled {
+                    continue;
+                }
+
+                if line_y > self.height {
+                    return;
+                }
+
+                /*TODO
+                // Highlight selection (TODO: HIGHLIGHT COLOR!)
+                if let Some(select) = self.select_opt {
+                    let (start, end) = if select.line < self.cursor.line {
                         (select, self.cursor)
-                    } else {
-                        /* select.glyph >= self.cursor.glyph */
+                    } else if select.line > self.cursor.line {
                         (self.cursor, select)
-                    }
-                };
-
-                if line_i_scrolled >= start.line && line_i_scrolled <= end.line {
-                    let start_glyph = if start.line == line_i_scrolled {
-                        start.glyph
                     } else {
-                        0
-                    };
-
-                    let end_glyph = if end.line == line_i_scrolled {
-                        end.glyph
-                    } else {
-                        line.glyphs.len() + 1
-                    };
-
-                    if end_glyph > start_glyph {
-                        let (left_x, right_x) = if line.rtl {
-                            (
-                                line.glyphs.get(end_glyph - 1).map_or(0, |glyph| {
-                                    glyph.x as i32
-                                }),
-                                line.glyphs.get(start_glyph).map_or(self.width, |glyph| {
-                                    (glyph.x + glyph.w) as i32
-                                }),
-                            )
+                        /* select.line == self.cursor.line */
+                        if select.glyph < self.cursor.glyph {
+                            (select, self.cursor)
                         } else {
-                            (
-                                line.glyphs.get(start_glyph).map_or(0, |glyph| {
-                                    glyph.x as i32
-                                }),
-                                line.glyphs.get(end_glyph - 1).map_or(self.width, |glyph| {
-                                    (glyph.x + glyph.w) as i32
-                                }),
-                            )
+                            /* select.glyph >= self.cursor.glyph */
+                            (self.cursor, select)
+                        }
+                    };
+
+                    if line_i_scrolled >= start.line && line_i_scrolled <= end.line {
+                        let start_glyph = if start.line == line_i_scrolled {
+                            start.glyph
+                        } else {
+                            0
+                        };
+
+                        let end_glyph = if end.line == line_i_scrolled {
+                            end.glyph
+                        } else {
+                            line.glyphs.len() + 1
+                        };
+
+                        if end_glyph > start_glyph {
+                            let (left_x, right_x) = if line.rtl {
+                                (
+                                    line.glyphs.get(end_glyph - 1).map_or(0, |glyph| {
+                                        glyph.x as i32
+                                    }),
+                                    line.glyphs.get(start_glyph).map_or(self.width, |glyph| {
+                                        (glyph.x + glyph.w) as i32
+                                    }),
+                                )
+                            } else {
+                                (
+                                    line.glyphs.get(start_glyph).map_or(0, |glyph| {
+                                        glyph.x as i32
+                                    }),
+                                    line.glyphs.get(end_glyph - 1).map_or(self.width, |glyph| {
+                                        (glyph.x + glyph.w) as i32
+                                    }),
+                                )
+                            };
+
+                            f(
+                                left_x,
+                                line_y - font_size,
+                                cmp::max(0, right_x - left_x) as u32,
+                                line_height as u32,
+                                0x33_00_00_00 | (color & 0xFF_FF_FF)
+                            );
+                        }
+                    }
+                }
+
+                // Draw cursor
+                if self.cursor.line == line_i_scrolled {
+                    if self.cursor.glyph >= line.glyphs.len() {
+                        let x = match line.glyphs.last() {
+                            Some(glyph) => glyph.x + glyph.w,
+                            None => 0.0,
                         };
 
                         f(
-                            left_x,
+                            x as i32,
                             line_y - font_size,
-                            cmp::max(0, right_x - left_x) as u32,
+                            1,
                             line_height as u32,
-                            0x33_00_00_00 | (color & 0xFF_FF_FF)
+                            color,
+                        );
+                    } else {
+                        let glyph = &line.glyphs[self.cursor.glyph];
+                        let x = if line.rtl {
+                            (glyph.x + glyph.w) as i32
+                        } else {
+                            glyph.x as i32
+                        };
+
+                        f(
+                            x,
+                            line_y - font_size,
+                            1,
+                            line_height as u32,
+                            color,
                         );
                     }
                 }
+                */
+
+                layout_line.draw(color, |x, y, color| {
+                    f(x, line_y + y, 1, 1, color);
+                });
+
+                line_y += line_height;
             }
-
-            // Draw cursor
-            if self.cursor.line == line_i_scrolled {
-                if self.cursor.glyph >= line.glyphs.len() {
-                    let x = match line.glyphs.last() {
-                        Some(glyph) => glyph.x + glyph.w,
-                        None => 0.0,
-                    };
-
-                    f(
-                        x as i32,
-                        line_y - font_size,
-                        1,
-                        line_height as u32,
-                        color,
-                    );
-                } else {
-                    let glyph = &line.glyphs[self.cursor.glyph];
-                    let x = if line.rtl {
-                        (glyph.x + glyph.w) as i32
-                    } else {
-                        glyph.x as i32
-                    };
-
-                    f(
-                        x,
-                        line_y - font_size,
-                        1,
-                        line_height as u32,
-                        color,
-                    );
-                }
-            }
-
-            line.draw(color, |x, y, color| {
-                f(x, line_y + y, 1, 1, color);
-            });
-
-            line_y += line_height;
         }
     }
 }
