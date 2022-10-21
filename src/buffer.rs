@@ -840,8 +840,6 @@ impl<'a> TextBuffer<'a> {
                         }
                     };
 
-                    println!("x: {}", x);
-
                     f(
                         x,
                         line_y - font_size,

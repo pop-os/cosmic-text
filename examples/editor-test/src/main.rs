@@ -125,7 +125,7 @@ fn main() {
                 continue;
             }
 
-            log::debug!("Insert {:?}", c);
+            log::trace!("Insert {:?}", c);
 
             // Test backspace of character
             {
@@ -135,16 +135,14 @@ fn main() {
                 assert_eq!(cursor, buffer.cursor());
             }
 
-            /*TODO
-            // Test delete of character (DOES NOT SUPPORT RTL)
+            // Test delete of character
             {
                 let cursor = buffer.cursor();
                 buffer.action(TextAction::Insert(c));
-                buffer.action(TextAction::Left);
+                buffer.action(TextAction::Previous);
                 buffer.action(TextAction::Delete);
                 assert_eq!(cursor, buffer.cursor());
             }
-            */
 
             // Finally, normal insert of character
             buffer.action(TextAction::Insert(c));
@@ -158,17 +156,14 @@ fn main() {
             assert_eq!(cursor, buffer.cursor());
         }
 
-        /*TODO
         // Test delete of newline
         {
             let cursor = buffer.cursor();
             buffer.action(TextAction::Enter);
-            buffer.action(TextAction::Up);
-            buffer.action(TextAction::End);
+            buffer.action(TextAction::Previous);
             buffer.action(TextAction::Delete);
             assert_eq!(cursor, buffer.cursor());
         }
-        */
 
         // Finally, normal enter
         buffer.action(TextAction::Enter);
