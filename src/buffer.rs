@@ -46,15 +46,13 @@ pub enum TextAction {
 pub struct TextCursor {
     /// Text line the cursor is on
     pub line: TextLineIndex,
-    /// Start of glyph (behind cursor)
-    pub start: usize,
-    /// End of glyph (after cursor)
-    pub end: usize,
+    /// Index of glyph at cursor (will insert behind this glyph)
+    pub index: usize,
 }
 
 impl TextCursor {
-    pub const fn new(line: TextLineIndex, start: usize, end: usize) -> Self {
-        Self { line, start, end }
+    pub const fn new(line: TextLineIndex, index: usize) -> Self {
+        Self { line, index }
     }
 }
 
@@ -240,7 +238,7 @@ impl<'a> TextBuffer<'a> {
                 for layout_line in layout {
                     let mut found = false;
                     for glyph in layout_line.glyphs.iter() {
-                        if glyph.start <= self.cursor.end {
+                        if glyph.start <= self.cursor.index {
                             found = true;
                             break;
                         }
@@ -427,10 +425,9 @@ impl<'a> TextBuffer<'a> {
             } else {
                 let line = &mut self.lines[self.cursor.line.get()];
                 line.reset();
-                line.text.insert(self.cursor.end, character);
+                line.text.insert(self.cursor.index, character);
 
-                self.cursor.start = self.cursor.end;
-                self.cursor.end += character.len_utf8();
+                self.cursor.index += character.len_utf8();
 
                 self.shape_until_cursor(CursorScroll::Bottom);
             },
@@ -439,26 +436,28 @@ impl<'a> TextBuffer<'a> {
                 self.lines.insert(next_line, TextBufferLine::new(String::new()));
 
                 self.cursor.line = TextLineIndex::new(next_line);
-                self.cursor.start = 0;
-                self.cursor.end = 0;
+                self.cursor.index = 0;
 
                 self.shape_until_cursor(CursorScroll::Bottom);
             },
             TextAction::Backspace => {
-                if self.cursor.end > 0 {
+                if self.cursor.index > 0 {
                     let line = &mut self.lines[self.cursor.line.get()];
                     line.reset();
-                    line.text.remove(self.cursor.start);
 
-                    self.cursor.end = self.cursor.start;
-                    self.cursor.start = 0;
+                    // Find previous character index
+                    let mut prev_index = 0;
                     for (i, _) in line.text.char_indices() {
-                        if i == self.cursor.end {
-                            break;
+                        if i < self.cursor.index {
+                            prev_index = i;
                         } else {
-                            self.cursor.start = i;
+                            break;
                         }
                     }
+
+                    self.cursor.index = prev_index;
+
+                    line.text.remove(self.cursor.index);
 
                     self.shape_until_cursor(CursorScroll::Top);
                 } else if self.cursor.line.get() > 0 {
@@ -470,15 +469,7 @@ impl<'a> TextBuffer<'a> {
                     line.reset();
 
                     self.cursor.line = TextLineIndex::new(line_index);
-                    self.cursor.end = line.text.len();
-                    self.cursor.start = 0;
-                    for (i, _) in line.text.char_indices() {
-                        if i == self.cursor.end {
-                            break;
-                        } else {
-                            self.cursor.start = i;
-                        }
-                    }
+                    self.cursor.index = line.text.len();
 
                     line.text.push_str(&old_line.text);
 
@@ -559,23 +550,17 @@ impl<'a> TextBuffer<'a> {
                         }
                     }
 
-                    let mut new_cursor = TextCursor::new(
-                        TextLineIndex::new(line_i),
-                        0,
-                        0
-                    );
+                    let mut new_cursor = TextCursor::new(TextLineIndex::new(line_i), 0);
 
                     match layout_line.glyphs.get(new_cursor_glyph) {
                         Some(glyph) => {
                             // Position at glyph
-                            new_cursor.start = glyph.start;
-                            new_cursor.end = glyph.end;
+                            new_cursor.index = glyph.start;
                         },
                         None => match layout_line.glyphs.last() {
                             Some(glyph) => {
                                 // Position at end of line
-                                new_cursor.start = glyph.end;
-                                new_cursor.end = glyph.end;
+                                new_cursor.index = glyph.end;
                             },
                             None => {
                                 // Keep at start of empty line
@@ -590,10 +575,9 @@ impl<'a> TextBuffer<'a> {
                         if let Some(glyph) = layout_line.glyphs.get(new_cursor_glyph) {
                             let text_glyph = &line.text[glyph.start..glyph.end];
                             log::debug!(
-                                "{}, {}, {}: '{}' ('{}'): '{}' ({:?})",
+                                "{}, {}: '{}' ('{}'): '{}' ({:?})",
                                 self.cursor.line.get(),
-                                self.cursor.start,
-                                self.cursor.end,
+                                self.cursor.index,
                                 glyph.font.info.family,
                                 glyph.font.info.post_script_name,
                                 text_glyph,
@@ -648,9 +632,9 @@ impl<'a> TextBuffer<'a> {
                 let cursor_glyph_opt = |cursor: &TextCursor| -> Option<usize> {
                     let mut glyph_i_opt = None;
                     for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
-                        if cursor.start == glyph.start {
+                        if cursor.index == glyph.start {
                             glyph_i_opt = Some(glyph_i);
-                        } else if cursor.start == glyph.end {
+                        } else if cursor.index == glyph.end {
                             glyph_i_opt = Some(glyph_i + 1);
                         }
                     }
@@ -665,10 +649,10 @@ impl<'a> TextBuffer<'a> {
                         (self.cursor, select)
                     } else {
                         /* select.line == self.cursor.line */
-                        if select.start < self.cursor.start {
+                        if select.index < self.cursor.index {
                             (select, self.cursor)
                         } else {
-                            /* select.start >= self.cursor.start */
+                            /* select.index >= self.cursor.index */
                             (self.cursor, select)
                         }
                     };
@@ -682,7 +666,7 @@ impl<'a> TextBuffer<'a> {
                         if line_i == start.line.get() && line_i == end.line.get() {
                             // On edge of start and end line, check if any contained glyphs are after start and before end
                             for glyph in layout_line.glyphs.iter() {
-                                if glyph.start >= start.start && glyph.end <= end.end{
+                                if glyph.start >= start.index && glyph.end <= end.index {
                                     inside = true;
                                     break;
                                 }
@@ -690,7 +674,7 @@ impl<'a> TextBuffer<'a> {
                         } else if line_i == start.line.get() {
                             // On edge of start line, check if any contained glyphs are after start
                             for glyph in layout_line.glyphs.iter() {
-                                if glyph.start >= start.start {
+                                if glyph.start >= start.index {
                                     inside = true;
                                     break;
                                 }
@@ -698,7 +682,7 @@ impl<'a> TextBuffer<'a> {
                         } else if line_i == end.line.get() {
                             // On edge of end line, check if any contained glyphs are before end
                             for glyph in layout_line.glyphs.iter() {
-                                if glyph.end <= end.end {
+                                if glyph.end <= end.index {
                                     inside = true;
                                     break;
                                 }
