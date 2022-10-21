@@ -39,5 +39,14 @@ The following features must be supported before this is "ready":
 - [x] Text editing
     - [x] Performance improvements
     - [x] Text selection
-    - [ ] Can automatically recreate https://unicode.org/udhr/ without errors
+    - [ ] Can automatically recreate https://unicode.org/udhr/ without errors (see below)
     - [ ] Copy/paste
+
+The UDHR (UN Declaration of Human Rights) test involves taking the entire set of
+UDHR translations (almost 500 languages), concatenating them as one file (which
+ends up being 8 megabytes!), then via the `editor-test` example, automatically
+simulating the entry of that file into cosmic-text per-character, with the use
+of backspace and delete tested per character and per line. Then, the final
+contents of the buffer is compared to the original file. So far, 56 lines out of
+106746 are not correct, due to filtering out of some control characters. This
+means about 99.95% of the lines are currently correct.
