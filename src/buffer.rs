@@ -645,7 +645,18 @@ impl<'a> TextBuffer<'a> {
                     return;
                 }
 
-                /*TODO
+                let cursor_glyph_opt = |cursor: &TextCursor| -> Option<usize> {
+                    let mut glyph_i_opt = None;
+                    for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
+                        if cursor.start == glyph.start {
+                            glyph_i_opt = Some(glyph_i);
+                        } else if cursor.start == glyph.end {
+                            glyph_i_opt = Some(glyph_i + 1);
+                        }
+                    }
+                    glyph_i_opt
+                };
+
                 // Highlight selection (TODO: HIGHLIGHT COLOR!)
                 if let Some(select) = self.select_opt {
                     let (start, end) = if select.line < self.cursor.line {
@@ -654,43 +665,43 @@ impl<'a> TextBuffer<'a> {
                         (self.cursor, select)
                     } else {
                         /* select.line == self.cursor.line */
-                        if select.glyph < self.cursor.glyph {
+                        if select.start < self.cursor.start {
                             (select, self.cursor)
                         } else {
-                            /* select.glyph >= self.cursor.glyph */
+                            /* select.start >= self.cursor.start */
                             (self.cursor, select)
                         }
                     };
 
-                    if line_i_scrolled >= start.line && line_i_scrolled <= end.line {
-                        let start_glyph = if start.line == line_i_scrolled {
-                            start.glyph
+                    if line_i >= start.line.get() && line_i <= end.line.get() {
+                        let start_glyph = if start.line.get() == line_i {
+                            cursor_glyph_opt(&start).unwrap_or(0)
                         } else {
                             0
                         };
 
-                        let end_glyph = if end.line == line_i_scrolled {
-                            end.glyph
+                        let end_glyph = if end.line.get() == line_i {
+                            cursor_glyph_opt(&end).unwrap_or(layout_line.glyphs.len() + 1)
                         } else {
-                            line.glyphs.len() + 1
+                            layout_line.glyphs.len() + 1
                         };
 
                         if end_glyph > start_glyph {
-                            let (left_x, right_x) = if line.rtl {
+                            let (left_x, right_x) = if shape.rtl {
                                 (
-                                    line.glyphs.get(end_glyph - 1).map_or(0, |glyph| {
+                                    layout_line.glyphs.get(end_glyph - 1).map_or(0, |glyph| {
                                         glyph.x as i32
                                     }),
-                                    line.glyphs.get(start_glyph).map_or(self.width, |glyph| {
+                                    layout_line.glyphs.get(start_glyph).map_or(self.width, |glyph| {
                                         (glyph.x + glyph.w) as i32
                                     }),
                                 )
                             } else {
                                 (
-                                    line.glyphs.get(start_glyph).map_or(0, |glyph| {
+                                    layout_line.glyphs.get(start_glyph).map_or(0, |glyph| {
                                         glyph.x as i32
                                     }),
-                                    line.glyphs.get(end_glyph - 1).map_or(self.width, |glyph| {
+                                    layout_line.glyphs.get(end_glyph - 1).map_or(self.width, |glyph| {
                                         (glyph.x + glyph.w) as i32
                                     }),
                                 )
@@ -706,29 +717,33 @@ impl<'a> TextBuffer<'a> {
                         }
                     }
                 }
-                */
 
                 // Draw cursor
                 if self.cursor.line.get() == line_i {
-                    println!("FOUND CURSOR LINE {}", line_i);
-
-                    let mut cursor_glyph_opt = None;
-                    for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
-                        if self.cursor.start == glyph.start {
-                            cursor_glyph_opt = Some((glyph_i, false));
-                        } else if self.cursor.start == glyph.end {
-                            cursor_glyph_opt = Some((glyph_i, true));
-                        }
-                    }
-
-                    if let Some((cursor_glyph, cursor_after)) = cursor_glyph_opt {
-                        println!("FOUND CURSOR GLYPH {}, {}", cursor_glyph, cursor_after);
-
-                        let glyph = &layout_line.glyphs[cursor_glyph];
-                        let x = if shape.rtl != cursor_after {
-                            (glyph.x + glyph.w) as i32
-                        } else {
-                            glyph.x as i32
+                    if let Some(cursor_glyph) = cursor_glyph_opt(&self.cursor) {
+                        let x = match layout_line.glyphs.get(cursor_glyph) {
+                            Some(glyph) => {
+                                // Start of detected glyph
+                                if shape.rtl {
+                                    (glyph.x + glyph.w) as i32
+                                } else {
+                                    glyph.x as i32
+                                }
+                            },
+                            None => match layout_line.glyphs.last() {
+                                Some(glyph) => {
+                                    // End of last glyph
+                                    if shape.rtl {
+                                        glyph.x as i32
+                                    } else {
+                                        (glyph.x + glyph.w) as i32
+                                    }
+                                },
+                                None => {
+                                    // Start of empty line
+                                    0
+                                }
+                            }
                         };
 
                         println!("x: {}", x);
