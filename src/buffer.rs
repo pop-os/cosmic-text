@@ -673,7 +673,34 @@ impl<'a> TextBuffer<'a> {
                         }
                     };
 
-                    if line_i >= start.line.get() && line_i <= end.line.get() {
+                    // Check if this layout line is inside the selection
+                    let mut inside = false;
+                    if line_i > start.line.get() && line_i < end.line.get() {
+                        // In between start and end lines, definitely inside selection
+                        inside = true;
+                    } else {
+                        if line_i == start.line.get() {
+                            // On edge of start line, check if any contained glyphs are after start
+                            for glyph in layout_line.glyphs.iter() {
+                                if glyph.start >= start.start {
+                                    inside = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if line_i == end.line.get() && !inside {
+                            // On edge of end line, check if any contained glyphs are before end
+                            for glyph in layout_line.glyphs.iter() {
+                                if glyph.end <= end.end {
+                                    inside = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if inside {
                         let start_glyph = if start.line.get() == line_i {
                             cursor_glyph_opt(&start).unwrap_or(0)
                         } else {
