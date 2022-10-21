@@ -9,6 +9,10 @@ use crate::{FontLayoutLine, FontMatches, FontShapeLine};
 /// An action to perform on a [TextBuffer]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TextAction {
+    /// Move cursor to previous character ([Left] in LTR, [Right] in RTL)
+    Previous,
+    /// Move cursor to next character ([Right] in LTR, [Left] in RTL)
+    Next,
     /// Move cursor left
     Left,
     /// Move cursor right
@@ -389,6 +393,49 @@ impl<'a> TextBuffer<'a> {
     /// Perform a [TextAction] on the buffer
     pub fn action(&mut self, action: TextAction) {
         match action {
+            TextAction::Previous => {
+                let line = &mut self.lines[self.cursor.line.get()];
+
+                if self.cursor.index > 0 {
+                    // Find previous character index
+                    let mut prev_index = 0;
+                    for (i, _) in line.text.char_indices() {
+                        if i < self.cursor.index {
+                            prev_index = i;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    self.cursor.index = prev_index;
+
+                    self.shape_until_cursor(CursorScroll::Bottom);
+                } else if self.cursor.line.get() > 0 {
+                    self.cursor.line = TextLineIndex::new(self.cursor.line.get() - 1);
+                    self.cursor.index = self.lines[self.cursor.line.get()].text.len();
+
+                    self.shape_until_cursor(CursorScroll::Bottom);
+                }
+            },
+            TextAction::Next => {
+                let line = &mut self.lines[self.cursor.line.get()];
+
+                if self.cursor.index < line.text.len() {
+                    for (i, c) in line.text.char_indices() {
+                        if i == self.cursor.index {
+                            self.cursor.index += c.len_utf8();
+                            break;
+                        }
+                    }
+
+                    self.shape_until_cursor(CursorScroll::Bottom);
+                } else if self.cursor.line.get() + 1 < self.lines.len() {
+                    self.cursor.line = TextLineIndex::new(self.cursor.line.get() + 1);
+                    self.cursor.index = 0;
+
+                    self.shape_until_cursor(CursorScroll::Bottom);
+                }
+            },
             TextAction::Left => {
                 todo!("left");
             },
@@ -483,7 +530,23 @@ impl<'a> TextBuffer<'a> {
                 }
             },
             TextAction::Delete => {
-                todo!("delete");
+                if self.cursor.index < self.lines[self.cursor.line.get()].text.len() {
+                    let line = &mut self.lines[self.cursor.line.get()];
+                    line.reset();
+
+                    line.text.remove(self.cursor.index);
+
+                    self.shape_until_cursor(CursorScroll::Bottom);
+                } else if self.cursor.line.get() + 1 < self.lines.len() {
+                    let old_line = self.lines.remove(self.cursor.line.get() + 1);
+
+                    let line = &mut self.lines[self.cursor.line.get()];
+                    line.reset();
+
+                    line.text.push_str(&old_line.text);
+
+                    self.shape_until_cursor(CursorScroll::Bottom);
+                }
             },
             TextAction::Click { x, y } => {
                 self.select_opt = None;
