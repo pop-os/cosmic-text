@@ -100,6 +100,8 @@ fn main() {
         let font_size = buffer.metrics().font_size;
         let line_height = buffer.metrics().line_height;
 
+        buffer.shape_until_cursor();
+
         if buffer.redraw {
             let instant = Instant::now();
 

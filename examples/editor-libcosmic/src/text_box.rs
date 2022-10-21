@@ -152,6 +152,8 @@ where
             );
         }
 
+        buffer.shape_until_cursor();
+
         let buffer_x = layout.bounds().x;
         let buffer_y = layout.bounds().y;
         buffer.draw(text_color_u32, |x, y, w, h, color| {

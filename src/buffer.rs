@@ -60,12 +60,6 @@ impl TextCursor {
     }
 }
 
-enum CursorScroll {
-    None,
-    Bottom,
-    Top,
-}
-
 /// Index of a text line
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Ord, PartialOrd)]
 pub struct TextLineIndex(usize);
@@ -220,7 +214,7 @@ impl<'a> TextBuffer<'a> {
         total_layout
     }
 
-    fn shape_until_cursor(&mut self, scroll: CursorScroll) {
+    pub fn shape_until_cursor(&mut self) {
         let instant = Instant::now();
 
         let mut reshaped = 0;
@@ -265,23 +259,13 @@ impl<'a> TextBuffer<'a> {
         }
 
         let lines = self.lines();
-        match scroll {
-            CursorScroll::None => (),
-            CursorScroll::Bottom => {
-                if layout_i < self.scroll
-                || layout_i >= self.scroll + lines
-                {
-                    self.scroll = layout_i - (lines - 1);
-                }
-            },
-            CursorScroll::Top => {
-                if layout_i < self.scroll
-                || layout_i >= self.scroll + lines
-                {
-                    self.scroll = layout_i;
-                }
-            }
+        if layout_i < self.scroll {
+            self.scroll = layout_i;
+        } else if layout_i >= self.scroll + lines {
+            self.scroll = layout_i - (lines - 1);
         }
+
+        self.shape_until_scroll();
     }
 
     fn shape_until_scroll(&mut self) {
@@ -408,13 +392,9 @@ impl<'a> TextBuffer<'a> {
                     }
 
                     self.cursor.index = prev_index;
-
-                    self.shape_until_cursor(CursorScroll::Bottom);
                 } else if self.cursor.line.get() > 0 {
                     self.cursor.line = TextLineIndex::new(self.cursor.line.get() - 1);
                     self.cursor.index = self.lines[self.cursor.line.get()].text.len();
-
-                    self.shape_until_cursor(CursorScroll::Bottom);
                 }
             },
             TextAction::Next => {
@@ -427,13 +407,9 @@ impl<'a> TextBuffer<'a> {
                             break;
                         }
                     }
-
-                    self.shape_until_cursor(CursorScroll::Bottom);
                 } else if self.cursor.line.get() + 1 < self.lines.len() {
                     self.cursor.line = TextLineIndex::new(self.cursor.line.get() + 1);
                     self.cursor.index = 0;
-
-                    self.shape_until_cursor(CursorScroll::Bottom);
                 }
             },
             TextAction::Left => {
@@ -466,8 +442,8 @@ impl<'a> TextBuffer<'a> {
 
                 self.shape_until_scroll();
             },
-            TextAction::Insert(character) => if character.is_control() {
-                // Filter out special chars, use TextAction instead
+            TextAction::Insert(character) => if character.is_control() && character != '\t' {
+                // Filter out special chars (except for tab), use TextAction instead
                 log::debug!("Refusing to insert control character {:?}", character);
             } else {
                 let line = &mut self.lines[self.cursor.line.get()];
@@ -475,8 +451,6 @@ impl<'a> TextBuffer<'a> {
                 line.text.insert(self.cursor.index, character);
 
                 self.cursor.index += character.len_utf8();
-
-                self.shape_until_cursor(CursorScroll::Bottom);
             },
             TextAction::Enter => {
                 let new_line = {
@@ -490,8 +464,6 @@ impl<'a> TextBuffer<'a> {
 
                 self.cursor.line = TextLineIndex::new(next_line);
                 self.cursor.index = 0;
-
-                self.shape_until_cursor(CursorScroll::Bottom);
             },
             TextAction::Backspace => {
                 if self.cursor.index > 0 {
@@ -511,8 +483,6 @@ impl<'a> TextBuffer<'a> {
                     self.cursor.index = prev_index;
 
                     line.text.remove(self.cursor.index);
-
-                    self.shape_until_cursor(CursorScroll::Top);
                 } else if self.cursor.line.get() > 0 {
                     let mut line_index = self.cursor.line.get();
                     let old_line = self.lines.remove(line_index);
@@ -525,8 +495,6 @@ impl<'a> TextBuffer<'a> {
                     self.cursor.index = line.text.len();
 
                     line.text.push_str(&old_line.text);
-
-                    self.shape_until_cursor(CursorScroll::Top);
                 }
             },
             TextAction::Delete => {
@@ -535,8 +503,6 @@ impl<'a> TextBuffer<'a> {
                     line.reset();
 
                     line.text.remove(self.cursor.index);
-
-                    self.shape_until_cursor(CursorScroll::Bottom);
                 } else if self.cursor.line.get() + 1 < self.lines.len() {
                     let old_line = self.lines.remove(self.cursor.line.get() + 1);
 
@@ -544,8 +510,6 @@ impl<'a> TextBuffer<'a> {
                     line.reset();
 
                     line.text.push_str(&old_line.text);
-
-                    self.shape_until_cursor(CursorScroll::Bottom);
                 }
             },
             TextAction::Click { x, y } => {
