@@ -578,15 +578,19 @@ impl<'a> TextBuffer<'a> {
 
                 self.shape_until_scroll();
             },
-            TextAction::Insert(character) => if character.is_control() && character != '\t' {
-                // Filter out special chars (except for tab), use TextAction instead
-                log::debug!("Refusing to insert control character {:?}", character);
-            } else {
-                let line = &mut self.lines[self.cursor.line.get()];
-                line.reset();
-                line.text.insert(self.cursor.index, character);
+            TextAction::Insert(character) => {
+                if character.is_control()
+                && !['\t', '\u{92}'].contains(&character)
+                {
+                    // Filter out special chars (except for tab), use TextAction instead
+                    log::debug!("Refusing to insert control character {:?}", character);
+                } else {
+                    let line = &mut self.lines[self.cursor.line.get()];
+                    line.reset();
+                    line.text.insert(self.cursor.index, character);
 
-                self.cursor.index += character.len_utf8();
+                    self.cursor.index += character.len_utf8();
+                }
             },
             TextAction::Enter => {
                 let new_line = {

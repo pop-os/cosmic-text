@@ -1,13 +1,10 @@
-use cosmic_text::{FontSystem, TextAction, TextBuffer, TextCursor, TextLineIndex, TextMetrics};
+use cosmic_text::{FontSystem, TextAction, TextBuffer, TextMetrics};
 use orbclient::{Color, EventOption, Renderer, Window, WindowFlag};
 use std::{env, fs, process, thread, time::{Duration, Instant}};
 
 fn redraw(window: &mut Window, buffer: &mut TextBuffer<'_>) {
     let bg_color = Color::rgb(0x34, 0x34, 0x34);
     let font_color = Color::rgb(0xFF, 0xFF, 0xFF);
-
-    let font_size = buffer.metrics().font_size;
-    let line_height = buffer.metrics().line_height;
 
     buffer.shape_until_cursor();
 
@@ -32,24 +29,14 @@ fn redraw(window: &mut Window, buffer: &mut TextBuffer<'_>) {
 fn main() {
     env_logger::init();
 
-    let display_scale = match orbclient::get_display_size() {
-        Ok((w, h)) => {
-            log::info!("Display size: {}, {}", w, h);
-            (h as i32 / 1600) + 1
-        }
-        Err(err) => {
-            log::warn!("Failed to get display size: {}", err);
-            1
-        }
-    };
-
+    let display_scale = 1;
     let font_system = FontSystem::new();
 
     let mut window = Window::new_flags(
         -1,
         -1,
-        1024 * display_scale as u32,
-        768 * display_scale as u32,
+        1920,
+        1080,
         &format!("COSMIC TEXT - {}", font_system.locale),
         &[WindowFlag::Async],
     )
@@ -94,11 +81,10 @@ fn main() {
         TextMetrics::new(32, 44).scale(display_scale), // Title 1
     ];
     let font_size_default = 1; // Body
-    let mut font_size_i = font_size_default;
 
     let mut buffer = TextBuffer::new(
         &font_matches,
-        font_sizes[font_size_i]
+        font_sizes[font_size_default]
     );
     buffer.set_size(
         window.width() as i32,
@@ -122,11 +108,6 @@ fn main() {
         log::debug!("Line {:?}", line);
 
         for c in line.chars() {
-            if c.is_control() && c != '\t' {
-                log::warn!("Ignoring control character {:?}", c);
-                continue;
-            }
-
             log::trace!("Insert {:?}", c);
 
             // Test backspace of character
