@@ -392,9 +392,11 @@ impl<'a> TextBuffer<'a> {
                     }
 
                     self.cursor.index = prev_index;
+                    self.redraw = true;
                 } else if self.cursor.line.get() > 0 {
                     self.cursor.line = TextLineIndex::new(self.cursor.line.get() - 1);
                     self.cursor.index = self.lines[self.cursor.line.get()].text.len();
+                    self.redraw = true;
                 }
             },
             TextAction::Next => {
@@ -404,12 +406,14 @@ impl<'a> TextBuffer<'a> {
                     for (i, c) in line.text.char_indices() {
                         if i == self.cursor.index {
                             self.cursor.index += c.len_utf8();
+                            self.redraw = true;
                             break;
                         }
                     }
                 } else if self.cursor.line.get() + 1 < self.lines.len() {
                     self.cursor.line = TextLineIndex::new(self.cursor.line.get() + 1);
                     self.cursor.index = 0;
+                    self.redraw = true;
                 }
             },
             TextAction::Left => {
