@@ -437,10 +437,20 @@ impl<'a> TextBuffer<'a> {
                 }
             },
             TextAction::Up => {
-                todo!("up");
+                //TODO: make this move by layout lines and preserve X as best as possible!
+                if self.cursor.line.get() > 0 {
+                    self.cursor.line = TextLineIndex::new(self.cursor.line.get() - 1);
+                    self.cursor.index = 0;
+                    self.redraw = true;
+                }
             },
             TextAction::Down => {
-                todo!("down");
+                //TODO: make this move by layout lines and preserve X as best as possible!
+                if self.cursor.line.get() + 1 < self.lines.len() {
+                    self.cursor.line = TextLineIndex::new(self.cursor.line.get() + 1);
+                    self.cursor.index = 0;
+                    self.redraw = true;
+                }
             },
             TextAction::Home => {
                 todo!("home");
@@ -449,12 +459,14 @@ impl<'a> TextBuffer<'a> {
                 todo!("end");
             }
             TextAction::PageUp => {
+                //TODO: move cursor
                 self.scroll -= self.lines();
                 self.redraw = true;
 
                 self.shape_until_scroll();
             },
             TextAction::PageDown => {
+                //TODO: move cursor
                 self.scroll += self.lines();
                 self.redraw = true;
 
