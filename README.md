@@ -48,6 +48,5 @@ UDHR translations (almost 500 languages), concatenating them as one file (which
 ends up being 8 megabytes!), then via the `editor-test` example, automatically
 simulating the entry of that file into cosmic-text per-character, with the use
 of backspace and delete tested per character and per line. Then, the final
-contents of the buffer is compared to the original file. So far, 56 lines out of
-106746 are not correct, due to filtering out of some control characters. This
-means about 99.95% of the lines are currently correct.
+contents of the buffer is compared to the original file. All of the 106746
+lines are correct.
