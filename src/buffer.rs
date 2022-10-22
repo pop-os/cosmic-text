@@ -60,6 +60,18 @@ impl TextCursor {
     }
 }
 
+struct LayoutCursor {
+    line: TextLineIndex,
+    layout: usize,
+    glyph: usize,
+}
+
+impl LayoutCursor {
+    fn new(line: TextLineIndex, layout: usize, glyph: usize) -> Self {
+        Self { line, layout, glyph }
+    }
+}
+
 /// Index of a text line
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Ord, PartialOrd)]
 pub struct TextLineIndex(usize);
@@ -303,6 +315,81 @@ impl<'a> TextBuffer<'a> {
         log::debug!("relayout: {:?}", duration);
     }
 
+    fn layout_cursor(&self, cursor: &TextCursor) -> LayoutCursor {
+        let line = &self.lines[cursor.line.get()];
+
+        let layout = line.layout_opt.as_ref().unwrap(); //TODO: ensure layout is done?
+        for (layout_i, layout_line) in layout.iter().enumerate() {
+            for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
+                if cursor.index == glyph.start {
+                    return LayoutCursor::new(
+                        cursor.line,
+                        layout_i,
+                        glyph_i
+                    );
+                }
+            }
+            match layout_line.glyphs.last() {
+                Some(glyph) => {
+                    if cursor.index == glyph.end {
+                        return LayoutCursor::new(
+                            cursor.line,
+                            layout_i,
+                            layout_line.glyphs.len()
+                        );
+                    }
+                },
+                None => {
+                    return LayoutCursor::new(
+                        cursor.line,
+                        layout_i,
+                        0
+                    );
+                }
+            }
+        }
+
+        // Fall back to start of line
+        //TODO: should this be the end of the line?
+        LayoutCursor::new(
+            cursor.line,
+            0,
+            0
+        )
+    }
+
+    fn set_layout_cursor(&mut self, cursor: LayoutCursor) {
+        let line = &mut self.lines[cursor.line.get()];
+        let layout = line.layout(
+            &mut self.font_matches,
+            self.metrics.font_size,
+            self.width
+        );
+
+        let layout_line = match layout.get(cursor.layout) {
+            Some(some) => some,
+            None => match layout.last() {
+                Some(some) => some,
+                None => todo!("layout cursor in line with no layouts"),
+            }
+        };
+
+        let new_index = match layout_line.glyphs.get(cursor.glyph) {
+            Some(glyph) => glyph.start,
+            None => match layout_line.glyphs.last() {
+                Some(glyph) => glyph.end,
+                //TODO: is this correct?
+                None => 0,
+            }
+        };
+
+        if self.cursor.line != cursor.line || self.cursor.index != new_index {
+            self.cursor.line = cursor.line;
+            self.cursor.index = new_index;
+            self.redraw = true;
+        }
+    }
+
     /// Get the current cursor position
     pub fn cursor(&self) -> TextCursor {
         self.cursor
@@ -437,26 +524,45 @@ impl<'a> TextBuffer<'a> {
                 }
             },
             TextAction::Up => {
-                //TODO: make this move by layout lines and preserve X as best as possible!
-                if self.cursor.line.get() > 0 {
-                    self.cursor.line = TextLineIndex::new(self.cursor.line.get() - 1);
-                    self.cursor.index = 0;
-                    self.redraw = true;
+                //TODO: make this preserve X as best as possible!
+                let mut cursor = self.layout_cursor(&self.cursor);
+                if cursor.layout > 0 {
+                    cursor.layout -= 1;
+                } else if cursor.line.get() > 0 {
+                    cursor.line = TextLineIndex::new(cursor.line.get() - 1);
+                    cursor.layout = usize::max_value();
                 }
+                self.set_layout_cursor(cursor);
             },
             TextAction::Down => {
-                //TODO: make this move by layout lines and preserve X as best as possible!
-                if self.cursor.line.get() + 1 < self.lines.len() {
-                    self.cursor.line = TextLineIndex::new(self.cursor.line.get() + 1);
-                    self.cursor.index = 0;
-                    self.redraw = true;
+                //TODO: make this preserve X as best as possible!
+                let mut cursor = self.layout_cursor(&self.cursor);
+                let layout_len = {
+                    let line = &mut self.lines[cursor.line.get()];
+                    let layout = line.layout(
+                        &mut self.font_matches,
+                        self.metrics.font_size,
+                        self.width
+                    );
+                    layout.len()
+                };
+                if cursor.layout + 1 < layout_len {
+                    cursor.layout += 1;
+                } else if cursor.line.get() + 1 < self.lines.len() {
+                    cursor.line = TextLineIndex::new(cursor.line.get() + 1);
+                    cursor.layout = 0;
                 }
+                self.set_layout_cursor(cursor);
             },
             TextAction::Home => {
-                todo!("home");
+                let mut cursor = self.layout_cursor(&self.cursor);
+                cursor.glyph = 0;
+                self.set_layout_cursor(cursor);
             },
             TextAction::End => {
-                todo!("end");
+                let mut cursor = self.layout_cursor(&self.cursor);
+                cursor.glyph = usize::max_value();
+                self.set_layout_cursor(cursor);
             }
             TextAction::PageUp => {
                 //TODO: move cursor
@@ -664,6 +770,12 @@ impl<'a> TextBuffer<'a> {
     {
         let font_size = self.metrics.font_size;
         let line_height = self.metrics.line_height;
+        /*TODO
+        let layout_cursor = self.layout_cursor(&self.cursor);
+        let layout_select_opt = self.select_opt.as_ref().map(|cursor| {
+            self.layout_cursor(cursor)
+        });
+        */
 
         let mut line_y = font_size;
         let mut layout_i = 0;
@@ -675,9 +787,7 @@ impl<'a> TextBuffer<'a> {
 
             let layout = match line.layout_opt.as_ref() {
                 Some(some) => some,
-                None => {
-                    return
-                },
+                None => break,
             };
 
             for layout_line in layout {
@@ -808,6 +918,7 @@ impl<'a> TextBuffer<'a> {
                 }
 
                 // Draw cursor
+                //TODO: draw at end of line but not start of next line
                 if let Some(cursor_glyph) = cursor_glyph_opt(&self.cursor) {
                     let x = match layout_line.glyphs.get(cursor_glyph) {
                         Some(glyph) => {
