@@ -473,7 +473,7 @@ impl<'a> TextBuffer<'a> {
                 if self.cursor.index > 0 {
                     // Find previous character index
                     let mut prev_index = 0;
-                    for (i, _) in line.text.char_indices() {
+                    for (i, _) in line.text.grapheme_indices(true) {
                         if i < self.cursor.index {
                             prev_index = i;
                         } else {
@@ -493,9 +493,9 @@ impl<'a> TextBuffer<'a> {
                 let line = &mut self.lines[self.cursor.line.get()];
 
                 if self.cursor.index < line.text.len() {
-                    for (i, c) in line.text.char_indices() {
+                    for (i, c) in line.text.grapheme_indices(true) {
                         if i == self.cursor.index {
-                            self.cursor.index += c.len_utf8();
+                            self.cursor.index += c.len();
                             self.redraw = true;
                             break;
                         }
