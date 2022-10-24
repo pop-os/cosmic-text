@@ -12,7 +12,7 @@ rustybuzz = "0.5"
 swash = "0.1"
 sys-locale = "0.2"
 unicode-bidi = "0.3"
-xi-unicode = "0.3.0"
+unicode-linebreak = "0.1"
 unicode-script = "0.5"
 
 [workspace]

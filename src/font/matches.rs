@@ -245,7 +245,7 @@ impl<'a> FontMatches<'a> {
         let mut words = Vec::new();
 
         let mut start_word = 0;
-        for (end_lb, _) in xi_unicode::LineBreakIterator::new(span) {
+        for (end_lb, _) in unicode_linebreak::linebreaks(span) {
             let mut start_lb = end_lb;
             for (i, c) in span[start_word..end_lb].char_indices() {
                 if start_word + i == end_lb {
