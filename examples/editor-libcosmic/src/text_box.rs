@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 use cosmic::iced_native::{
     {Color, Element, Length, Point, Rectangle, Size, Shell, Theme},
     clipboard::Clipboard,

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 use unicode_script::Script;
 
 // Fallbacks to use after any script specific fallbacks
