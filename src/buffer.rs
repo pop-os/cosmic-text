@@ -806,21 +806,37 @@ impl<'a> TextBuffer<'a> {
                     return;
                 }
 
-                let cursor_glyph_opt = |cursor: &TextCursor| -> Option<usize> {
+                let cursor_glyph_opt = |cursor: &TextCursor| -> Option<(usize, f32)> {
                     if cursor.line.get() == line_i {
                         for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
                             if cursor.index == glyph.start {
-                                return Some(glyph_i);
+                                return Some((glyph_i, 0.0));
+                            } else if cursor.index > glyph.start && cursor.index < glyph.end {
+                                // Guess x offset based on characters
+                                //TODO: use EGCs?
+                                let mut before = 0;
+                                let mut total = 0;
+
+                                let cluster = &line.text[glyph.start..glyph.end];
+                                for (i, _) in cluster.char_indices() {
+                                    if glyph.start + i < cursor.index {
+                                        before += 1;
+                                    }
+                                    total += 1;
+                                }
+
+                                let offset = glyph.w * (before as f32) / (total as f32);
+                                return Some((glyph_i, offset));
                             }
                         }
                         match layout_line.glyphs.last() {
                             Some(glyph) => {
                                 if cursor.index == glyph.end {
-                                    return Some(layout_line.glyphs.len());
+                                    return Some((layout_line.glyphs.len(), 0.0));
                                 }
                             },
                             None => {
-                                return Some(0);
+                                return Some((0, 0.0));
                             }
                         }
                     }
@@ -877,35 +893,35 @@ impl<'a> TextBuffer<'a> {
                     }
 
                     if inside {
-                        let start_glyph = if start.line.get() == line_i {
-                            cursor_glyph_opt(&start).unwrap_or(0)
+                        let (start_glyph, start_glyph_offset) = if start.line.get() == line_i {
+                            cursor_glyph_opt(&start).unwrap_or((0, 0.0))
                         } else {
-                            0
+                            (0, 0.0)
                         };
 
-                        let end_glyph = if end.line.get() == line_i {
-                            cursor_glyph_opt(&end).unwrap_or(layout_line.glyphs.len() + 1)
+                        let (end_glyph, end_glyph_offset) = if end.line.get() == line_i {
+                            cursor_glyph_opt(&end).unwrap_or((layout_line.glyphs.len() + 1, 0.0))
                         } else {
-                            layout_line.glyphs.len() + 1
+                            (layout_line.glyphs.len() + 1, 0.0)
                         };
 
                         if end_glyph > start_glyph {
                             let (left_x, right_x) = if shape.rtl {
                                 (
                                     layout_line.glyphs.get(end_glyph - 1).map_or(0, |glyph| {
-                                        glyph.x as i32
+                                        (glyph.x - end_glyph_offset) as i32
                                     }),
                                     layout_line.glyphs.get(start_glyph).map_or(self.width, |glyph| {
-                                        (glyph.x + glyph.w) as i32
+                                        (glyph.x + glyph.w - start_glyph_offset) as i32
                                     }),
                                 )
                             } else {
                                 (
                                     layout_line.glyphs.get(start_glyph).map_or(0, |glyph| {
-                                        glyph.x as i32
+                                        (glyph.x + start_glyph_offset) as i32
                                     }),
                                     layout_line.glyphs.get(end_glyph - 1).map_or(self.width, |glyph| {
-                                        (glyph.x + glyph.w) as i32
+                                        (glyph.x + glyph.w + end_glyph_offset) as i32
                                     }),
                                 )
                             };
@@ -923,14 +939,14 @@ impl<'a> TextBuffer<'a> {
 
                 // Draw cursor
                 //TODO: draw at end of line but not start of next line
-                if let Some(cursor_glyph) = cursor_glyph_opt(&self.cursor) {
+                if let Some((cursor_glyph, cursor_glyph_offset)) = cursor_glyph_opt(&self.cursor) {
                     let x = match layout_line.glyphs.get(cursor_glyph) {
                         Some(glyph) => {
                             // Start of detected glyph
                             if shape.rtl {
-                                (glyph.x + glyph.w) as i32
+                                (glyph.x + glyph.w - cursor_glyph_offset) as i32
                             } else {
-                                glyph.x as i32
+                                (glyph.x + cursor_glyph_offset) as i32
                             }
                         },
                         None => match layout_line.glyphs.last() {
