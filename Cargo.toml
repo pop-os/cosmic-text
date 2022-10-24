@@ -14,6 +14,7 @@ sys-locale = "0.2"
 unicode-bidi = "0.3"
 unicode-linebreak = "0.1"
 unicode-script = "0.5"
+unicode-segmentation = "1.7"
 
 [workspace]
 members = [

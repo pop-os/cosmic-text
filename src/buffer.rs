@@ -900,7 +900,7 @@ impl<'a> TextBuffer<'a> {
                         if line_i == start.line.get() && line_i == end.line.get() {
                             // On edge of start and end line, check if any contained glyphs are after start and before end
                             for glyph in layout_line.glyphs.iter() {
-                                if glyph.start >= start.index && glyph.end <= end.index {
+                                if glyph.end > start.index && glyph.start < end.index {
                                     inside = true;
                                     break;
                                 }
@@ -908,7 +908,7 @@ impl<'a> TextBuffer<'a> {
                         } else if line_i == start.line.get() {
                             // On edge of start line, check if any contained glyphs are after start
                             for glyph in layout_line.glyphs.iter() {
-                                if glyph.start >= start.index {
+                                if glyph.end > start.index {
                                     inside = true;
                                     break;
                                 }
@@ -916,7 +916,7 @@ impl<'a> TextBuffer<'a> {
                         } else if line_i == end.line.get() {
                             // On edge of end line, check if any contained glyphs are before end
                             for glyph in layout_line.glyphs.iter() {
-                                if glyph.end <= end.index {
+                                if glyph.start < end.index {
                                     inside = true;
                                     break;
                                 }
