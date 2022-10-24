@@ -17,7 +17,7 @@ impl<'a> FontShapeGlyph<'a> {
         let y_offset = font_size as f32 * self.y_offset;
         let x_advance = font_size as f32 * self.x_advance;
 
-        let inner = CacheKey::new(self.inner, font_size, (x + x_offset, y - y_offset));
+        let inner = CacheKey::new(self.font.info.id, self.inner, font_size, (x + x_offset, y - y_offset));
         FontLayoutGlyph {
             start: self.start,
             end: self.end,
