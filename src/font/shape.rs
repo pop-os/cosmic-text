@@ -14,7 +14,7 @@ pub struct FontShapeGlyph<'a> {
 }
 
 impl<'a> FontShapeGlyph<'a> {
-    fn layout(&self, font_size: i32, x: f32, y: f32) -> FontLayoutGlyph<'a> {
+    fn layout(&self, font_size: i32, x: f32, y: f32, rtl: bool) -> FontLayoutGlyph<'a> {
         let x_offset = font_size as f32 * self.x_offset;
         let y_offset = font_size as f32 * self.y_offset;
         let x_advance = font_size as f32 * self.x_advance;
@@ -25,6 +25,7 @@ impl<'a> FontShapeGlyph<'a> {
             end: self.end,
             x: x,
             w: x_advance,
+            rtl,
             font: self.font,
             inner,
         }
@@ -183,7 +184,7 @@ impl<'a> FontShapeLine<'a> {
                             x -= x_advance
                         }
 
-                        glyphs.push(glyph.layout(font_size, x, y));
+                        glyphs.push(glyph.layout(font_size, x, y, span.rtl));
                         push_line = true;
 
                         if !self.rtl {

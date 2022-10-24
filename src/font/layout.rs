@@ -7,6 +7,7 @@ pub struct FontLayoutGlyph<'a> {
     pub end: usize,
     pub x: f32,
     pub w: f32,
+    pub rtl: bool,
     pub font: &'a Font<'a>,
     pub inner: (CacheKey, i32, i32),
 }
