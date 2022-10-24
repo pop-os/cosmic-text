@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 use cosmic_text::{FontSystem, TextAction, TextBuffer, TextCursor, TextLineIndex, TextMetrics};
 use orbclient::{Color, EventOption, Renderer, Window, WindowFlag};
 use std::{env, fs, time::Instant};

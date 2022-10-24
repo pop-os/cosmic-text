@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct CacheKey {
     pub glyph_id: u16,

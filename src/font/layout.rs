@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 use super::{CacheKey, Font};
 
 pub struct FontLayoutGlyph<'a> {

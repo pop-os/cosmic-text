@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 use unicode_script::{Script, UnicodeScript};
 
 use super::{Font, FontShapeGlyph, FontShapeLine, FontShapeSpan, FontShapeWord};
