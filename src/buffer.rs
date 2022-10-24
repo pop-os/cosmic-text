@@ -5,6 +5,7 @@ use std::{
     fmt,
     time::Instant,
 };
+use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{FontLayoutLine, FontMatches, FontShapeLine};
 
@@ -711,17 +712,43 @@ impl<'a> TextBuffer<'a> {
                 && mouse_y < line_y - font_size + line_height
                 {
                     let mut new_cursor_glyph = layout_line.glyphs.len();
-                    for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
+                    let mut new_cursor_char = 0;
+                    'hit: for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
                         if mouse_x >= glyph.x as i32
-                            && mouse_x <= (glyph.x + glyph.w) as i32
+                        && mouse_x <= (glyph.x + glyph.w) as i32
                         {
+                            new_cursor_glyph = glyph_i;
+
+                            let cluster = &line.text[glyph.start..glyph.end];
+                            let total = cluster.grapheme_indices(true).count();
+                            let mut egc_x = glyph.x;
+                            let egc_w = glyph.w / (total as f32);
+                            for (egc_i, egc) in cluster.grapheme_indices(true) {
+                                if mouse_x >= egc_x as i32
+                                && mouse_x <= (egc_x + egc_w) as i32
+                                {
+                                    new_cursor_char = egc_i;
+
+                                    let right_half = mouse_x >= (egc_x + egc_w / 2.0) as i32;
+                                    if right_half == !shape.rtl {
+                                        // If clicking on last half of glyph, move cursor past glyph
+                                        new_cursor_char += egc.len();
+                                        if new_cursor_char >= cluster.len() {
+                                            new_cursor_glyph += 1;
+                                            new_cursor_char = 0;
+                                        }
+                                    }
+                                    break 'hit;
+                                }
+                                egc_x += egc_w;
+                            }
+
                             let right_half = mouse_x >= (glyph.x + glyph.w / 2.0) as i32;
                             if right_half == !shape.rtl {
                                 // If clicking on last half of glyph, move cursor past glyph
-                                new_cursor_glyph = glyph_i + 1;
-                            } else {
-                                new_cursor_glyph = glyph_i;
+                                new_cursor_glyph += 1;
                             }
+                            break 'hit;
                         }
                     }
 
@@ -730,7 +757,7 @@ impl<'a> TextBuffer<'a> {
                     match layout_line.glyphs.get(new_cursor_glyph) {
                         Some(glyph) => {
                             // Position at glyph
-                            new_cursor.index = glyph.start;
+                            new_cursor.index = glyph.start + new_cursor_char;
                         },
                         None => match layout_line.glyphs.last() {
                             Some(glyph) => {
@@ -815,12 +842,11 @@ impl<'a> TextBuffer<'a> {
                                 return Some((glyph_i, 0.0));
                             } else if cursor.index > glyph.start && cursor.index < glyph.end {
                                 // Guess x offset based on characters
-                                //TODO: use EGCs?
                                 let mut before = 0;
                                 let mut total = 0;
 
                                 let cluster = &line.text[glyph.start..glyph.end];
-                                for (i, _) in cluster.char_indices() {
+                                for (i, _) in cluster.grapheme_indices(true) {
                                     if glyph.start + i < cursor.index {
                                         before += 1;
                                     }
@@ -860,6 +886,10 @@ impl<'a> TextBuffer<'a> {
                             (self.cursor, select)
                         }
                     };
+
+                    //TODO: do not calculate these on every line draw
+                    let start_layout = self.layout_cursor(&start);
+                    let end_layout = self.layout_cursor(&end);
 
                     // Check if this layout line is inside the selection
                     let mut inside = false;
@@ -907,7 +937,9 @@ impl<'a> TextBuffer<'a> {
                             (layout_line.glyphs.len() + 1, 0.0)
                         };
 
-                        if end_glyph > start_glyph {
+                        if end_glyph > start_glyph
+                        || (end_glyph == start_glyph && end_glyph_offset > start_glyph_offset)
+                        {
                             let (left_x, right_x) = if shape.rtl {
                                 (
                                     layout_line.glyphs.get(end_glyph - 1).map_or(0, |glyph| {
