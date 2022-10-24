@@ -645,11 +645,14 @@ impl<'a> TextBuffer<'a> {
                     let line = &mut self.lines[self.cursor.line.get()];
                     line.reset();
 
-                    for (i, c) in line.text.grapheme_indices(true) {
-                        if i == self.cursor.index {
-                            line.text.replace_range(i..(i + c.len()), "");
-                            break;
-                        }
+                    if let Some((i, c)) = line
+                        .text
+                        .grapheme_indices(true)
+                        .take_while(|(i, c)| *i <= self.cursor.index)
+                        .last()
+                    {
+                        line.text.replace_range(i..(i + c.len()), "");
+                        self.cursor.index = i;
                     }
                 } else if self.cursor.line.get() + 1 < self.lines.len() {
                     let old_line = self.lines.remove(self.cursor.line.get() + 1);
