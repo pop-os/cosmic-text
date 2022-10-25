@@ -32,8 +32,6 @@ impl CacheKey {
     }
 }
 
-pub type CacheItem = Option<swash::scale::image::Image>;
-
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum SubpixelBin {
     Zero,

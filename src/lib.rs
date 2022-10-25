@@ -5,3 +5,8 @@ mod buffer;
 
 pub use self::font::*;
 mod font;
+
+#[cfg(feature = "swash")]
+pub use self::swash::*;
+#[cfg(feature = "swash")]
+mod swash;

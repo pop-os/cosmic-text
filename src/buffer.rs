@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use std::{
-    cmp::{self, Ordering},
+    cmp,
     fmt,
     time::Instant,
 };
@@ -176,6 +176,8 @@ pub struct TextBuffer<'a> {
     cursor: TextCursor,
     select_opt: Option<TextCursor>,
     pub redraw: bool,
+    #[cfg(feature = "swash")]
+    cache: crate::SwashCache,
 }
 
 impl<'a> TextBuffer<'a> {
@@ -193,6 +195,8 @@ impl<'a> TextBuffer<'a> {
             cursor: TextCursor::default(),
             select_opt: None,
             redraw: false,
+            #[cfg(feature = "swash")]
+            cache: crate::SwashCache::new(),
         };
         buffer.set_text("");
         buffer
@@ -793,7 +797,8 @@ impl<'a> TextBuffer<'a> {
     }
 
     /// Draw the buffer
-    pub fn draw<F>(&self, color: u32, mut f: F)
+    #[cfg(feature = "swash")]
+    pub fn draw<F>(&mut self, color: u32, mut f: F)
         where F: FnMut(i32, i32, u32, u32, u32)
     {
         let font_size = self.metrics.font_size;
@@ -869,9 +874,9 @@ impl<'a> TextBuffer<'a> {
                 // Highlight selection (TODO: HIGHLIGHT COLOR!)
                 if let Some(select) = self.select_opt {
                     let (start, end) = match select.line.cmp(&self.cursor.line) {
-                        Ordering::Greater => (self.cursor, select),
-                        Ordering::Less => (select, self.cursor),
-                        Ordering::Equal => {
+                        cmp::Ordering::Greater => (self.cursor, select),
+                        cmp::Ordering::Less => (select, self.cursor),
+                        cmp::Ordering::Equal => {
                             /* select.line == self.cursor.line */
                             if select.index < self.cursor.index {
                                 (select, self.cursor)
@@ -975,9 +980,14 @@ impl<'a> TextBuffer<'a> {
                     );
                 }
 
-                layout_line.draw(self.font_matches, color, |x, y, color| {
-                    f(x, line_y + y, 1, 1, color);
-                });
+
+
+                for glyph in layout_line.glyphs.iter() {
+                    let (cache_key, x_int, y_int) = (glyph.cache_key, glyph.x_int, glyph.y_int);
+                    self.cache.with_pixels(self.font_matches, cache_key, color, |x, y, color| {
+                        f(x_int + x, line_y + y_int + y, 1, 1, color)
+                    });
+                }
 
                 line_y += line_height;
             }

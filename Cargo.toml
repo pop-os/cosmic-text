@@ -9,12 +9,15 @@ license = "MIT OR Apache-2.0"
 fontdb = "0.9"
 log = "0.4"
 rustybuzz = "0.5"
-swash = "0.1"
+swash = { version = "0.1", optional = true }
 sys-locale = "0.2"
 unicode-bidi = "0.3"
 unicode-linebreak = "0.1"
 unicode-script = "0.5"
 unicode-segmentation = "1.7"
+
+[features]
+default = ["swash"]
 
 [workspace]
 members = [
