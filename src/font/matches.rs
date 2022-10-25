@@ -132,7 +132,7 @@ impl<'a> FontMatches<'a> {
             &self.fonts,
             &["Fira Sans", "Fira Mono"],
             scripts,
-            &self.locale
+            self.locale
         );
 
         let (mut glyphs, mut missing) = self.shape_fallback(
@@ -306,7 +306,7 @@ impl<'a> FontMatches<'a> {
 
             log::trace!("Line {}: '{}'", if line_rtl { "RTL" } else { "LTR" }, line);
 
-            let paragraph = unicode_bidi::Paragraph::new(&bidi, &para_info);
+            let paragraph = unicode_bidi::Paragraph::new(&bidi, para_info);
 
             let mut start = 0;
             let mut span_rtl = line_rtl;

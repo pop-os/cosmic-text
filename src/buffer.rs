@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use std::{
-    cmp,
+    cmp::{self, Ordering},
     fmt,
     time::Instant,
 };
@@ -364,7 +364,7 @@ impl<'a> TextBuffer<'a> {
     fn set_layout_cursor(&mut self, cursor: LayoutCursor) {
         let line = &mut self.lines[cursor.line.get()];
         let layout = line.layout(
-            &mut self.font_matches,
+            self.font_matches,
             self.metrics.font_size,
             self.width
         );
@@ -543,7 +543,7 @@ impl<'a> TextBuffer<'a> {
                 let layout_len = {
                     let line = &mut self.lines[cursor.line.get()];
                     let layout = line.layout(
-                        &mut self.font_matches,
+                        self.font_matches,
                         self.metrics.font_size,
                         self.width
                     );
@@ -733,7 +733,7 @@ impl<'a> TextBuffer<'a> {
                                     new_cursor_char = egc_i;
 
                                     let right_half = mouse_x >= (egc_x + egc_w / 2.0) as i32;
-                                    if right_half == !glyph.rtl {
+                                    if right_half != glyph.rtl {
                                         // If clicking on last half of glyph, move cursor past glyph
                                         new_cursor_char += egc.len();
                                     }
@@ -743,7 +743,7 @@ impl<'a> TextBuffer<'a> {
                             }
 
                             let right_half = mouse_x >= (glyph.x + glyph.w / 2.0) as i32;
-                            if right_half == !glyph.rtl {
+                            if right_half != glyph.rtl {
                                 // If clicking on last half of glyph, move cursor past glyph
                                 new_cursor_char = cluster.len();
                             }
@@ -758,14 +758,9 @@ impl<'a> TextBuffer<'a> {
                             // Position at glyph
                             new_cursor.index = glyph.start + new_cursor_char;
                         },
-                        None => match layout_line.glyphs.last() {
-                            Some(glyph) => {
-                                // Position at end of line
-                                new_cursor.index = glyph.end;
-                            },
-                            None => {
-                                // Keep at start of empty line
-                            },
+                        None => if let Some(glyph) = layout_line.glyphs.last() {
+                            // Position at end of line
+                            new_cursor.index = glyph.end;
                         },
                     }
 
@@ -872,17 +867,17 @@ impl<'a> TextBuffer<'a> {
 
                 // Highlight selection (TODO: HIGHLIGHT COLOR!)
                 if let Some(select) = self.select_opt {
-                    let (start, end) = if select.line < self.cursor.line {
-                        (select, self.cursor)
-                    } else if select.line > self.cursor.line {
-                        (self.cursor, select)
-                    } else {
-                        /* select.line == self.cursor.line */
-                        if select.index < self.cursor.index {
-                            (select, self.cursor)
-                        } else {
-                            /* select.index >= self.cursor.index */
-                            (self.cursor, select)
+                    let (start, end) = match select.line.cmp(&self.cursor.line) {
+                        Ordering::Greater => (self.cursor, select),
+                        Ordering::Less => (select, self.cursor),
+                        Ordering::Equal => {
+                            /* select.line == self.cursor.line */
+                            if select.index < self.cursor.index {
+                                (select, self.cursor)
+                            } else {
+                                /* select.index >= self.cursor.index */
+                                (self.cursor, select)
+                            }
                         }
                     };
 
@@ -909,43 +904,35 @@ impl<'a> TextBuffer<'a> {
                                             (c_x + c_w) as i32,
                                         ))
                                     };
-                                } else {
-                                    match range_opt.take() {
-                                        Some((min, max)) => {
-                                            f(
-                                                min,
-                                                line_y - font_size,
-                                                cmp::max(0, max - min) as u32,
-                                                line_height as u32,
-                                                0x33_00_00_00 | (color & 0xFF_FF_FF)
-                                            );
-                                        },
-                                        None => (),
-                                    }
+                                } else if let Some((min, max)) = range_opt.take() {
+                                    f(
+                                        min,
+                                        line_y - font_size,
+                                        cmp::max(0, max - min) as u32,
+                                        line_height as u32,
+                                        0x33_00_00_00 | (color & 0xFF_FF_FF)
+                                    );
                                 }
                                 c_x += c_w;
                             }
                         }
 
-                        match range_opt.take() {
-                            Some((mut min, mut max)) => {
-                                if end.line.get() > line_i {
-                                    // Draw to end of line
-                                    if shape.rtl {
-                                        min = 0;
-                                    } else {
-                                        max = self.width;
-                                    }
+                        if let Some((mut min, mut max)) = range_opt.take() {
+                            if end.line.get() > line_i {
+                                // Draw to end of line
+                                if shape.rtl {
+                                    min = 0;
+                                } else {
+                                    max = self.width;
                                 }
-                                f(
-                                    min,
-                                    line_y - font_size,
-                                    cmp::max(0, max - min) as u32,
-                                    line_height as u32,
-                                    0x33_00_00_00 | (color & 0xFF_FF_FF)
-                                );
-                            },
-                            None => (),
+                            }
+                            f(
+                                min,
+                                line_y - font_size,
+                                cmp::max(0, max - min) as u32,
+                                line_height as u32,
+                                0x33_00_00_00 | (color & 0xFF_FF_FF)
+                            );
                         }
                     }
                 }
