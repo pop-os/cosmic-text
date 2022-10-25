@@ -1,6 +1,6 @@
 # COSMIC Text
 
-Pure Rust multi-line text shaping and rendering for COSMIC.
+Pure Rust multi-line text handling.
 
 COSMIC Text provides advanced text shaping, layout, and rendering wrapped up
 into a simple abstraction. Shaping is provided by rustybuzz, and supports a

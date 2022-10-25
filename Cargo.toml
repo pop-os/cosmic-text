@@ -1,5 +1,6 @@
 [package]
 name = "cosmic-text"
+description = "Pure Rust multi-line text handling"
 version = "0.1.0"
 authors = ["Jeremy Soller <jeremy@system76.com>"]
 edition = "2021"
