@@ -26,7 +26,7 @@ fn main() {
         1024 * display_scale as u32,
         768 * display_scale as u32,
         &format!("COSMIC TEXT - {}", font_system.locale),
-        &[WindowFlag::Resizable],
+        &[WindowFlag::Resizable, WindowFlag::Async],
     )
     .unwrap();
 
@@ -98,11 +98,19 @@ fn main() {
     let mut mouse_x = -1;
     let mut mouse_y = -1;
     let mut mouse_left = false;
+    let mut shape_me = true;
+
     loop {
         let font_size = buffer.metrics().font_size;
         let line_height = buffer.metrics().line_height;
 
-        buffer.shape_until_cursor();
+        let mut force_drag = true;
+
+        //lets do this once and rely on the events to do the rest.
+        if shape_me {
+            buffer.shape_until_cursor();
+            shape_me = false;
+        }
 
         if buffer.redraw {
             let instant = Instant::now();
@@ -180,19 +188,19 @@ fn main() {
                     orbclient::K_0 if event.pressed && ctrl_pressed => {
                         font_size_i = font_size_default;
                         buffer.set_metrics(font_sizes[font_size_i]);
-                    },
+                    }
                     orbclient::K_MINUS if event.pressed && ctrl_pressed => {
                         if font_size_i > 0 {
                             font_size_i -= 1;
                             buffer.set_metrics(font_sizes[font_size_i]);
                         }
-                    },
+                    }
                     orbclient::K_EQUALS if event.pressed && ctrl_pressed => {
                         if font_size_i + 1 < font_sizes.len() {
                             font_size_i += 1;
                             buffer.set_metrics(font_sizes[font_size_i]);
                         }
-                    },
+                    }
                     orbclient::K_D if event.pressed && ctrl_pressed => {
                         // Debug by shaping whole buffer
                         log::info!("Shaping rest of buffer");
@@ -214,8 +222,18 @@ fn main() {
                     if mouse_left {
                         buffer.action(TextAction::Drag {
                             x: mouse_x - line_x,
-                            y: mouse_y
+                            y: mouse_y,
                         });
+
+                        if mouse_y <= 5 {
+                            buffer.action(TextAction::Scroll { lines: -3 });
+                        } else if mouse_y + 5 >= window.height() as i32 {
+                            buffer.action(TextAction::Scroll { lines: 3 });
+                        } else {
+                            buffer.shape_until_cursor()
+                        }
+
+                        force_drag = false;
                     }
                 }
                 EventOption::Button(event) => {
@@ -224,16 +242,16 @@ fn main() {
                         if mouse_left {
                             buffer.action(TextAction::Click {
                                 x: mouse_x - line_x,
-                                y: mouse_y
+                                y: mouse_y,
                             });
+
+                            buffer.shape_until_cursor()
                         }
+                        force_drag = false;
                     }
                 }
                 EventOption::Resize(event) => {
-                    buffer.set_size(
-                        event.width as i32 - line_x * 2,
-                        event.height as i32,
-                    );
+                    buffer.set_size(event.width as i32 - line_x * 2, event.height as i32);
                 }
                 EventOption::Scroll(event) => {
                     buffer.action(TextAction::Scroll {
@@ -242,6 +260,19 @@ fn main() {
                 }
                 EventOption::Quit(_) => return,
                 _ => (),
+            }
+        }
+
+        if mouse_left && force_drag {
+            buffer.action(TextAction::Drag {
+                x: mouse_x - line_x,
+                y: mouse_y,
+            });
+
+            if mouse_y <= 5 {
+                buffer.action(TextAction::Scroll { lines: -3 });
+            } else if mouse_y + 5 >= window.height() as i32 {
+                buffer.action(TextAction::Scroll { lines: 3 });
             }
         }
     }
