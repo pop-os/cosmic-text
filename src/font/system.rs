@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use std::ops::Deref;
-
 use crate::{Attrs, Font, FontMatches};
 
 /// Access system fonts
@@ -51,20 +49,7 @@ impl FontSystem {
                 continue;
             }
 
-            let font_opt = Font::new(
-                face,
-                match &face.source {
-                    fontdb::Source::Binary(data) => data.deref().as_ref(),
-                    fontdb::Source::File(path) => {
-                        log::warn!("Unsupported fontdb Source::File('{}')", path.display());
-                        continue;
-                    }
-                    fontdb::Source::SharedFile(_path, data) => data.deref().as_ref(),
-                },
-                face.index,
-            );
-
-            match font_opt {
+            match Font::new(face) {
                 Some(font) => fonts.push(font),
                 None => {
                     log::warn!("failed to load font '{}'", face.post_script_name);
