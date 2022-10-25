@@ -14,6 +14,7 @@ use cosmic::iced_native::{
     widget::{self, tree, Widget},
 };
 use cosmic_text::{
+    SwashCache,
     TextAction,
     TextBuffer,
 };
@@ -62,16 +63,17 @@ impl StyleSheet for Theme {
 
 pub struct TextBox<'a> {
     buffer: &'a Mutex<TextBuffer<'static>>,
+    cache: &'a Mutex<SwashCache>,
 }
 
 impl<'a> TextBox<'a> {
-    pub fn new(buffer: &'a Mutex<TextBuffer<'static>>) -> Self {
-        Self { buffer }
+    pub fn new(buffer: &'a Mutex<TextBuffer<'static>>, cache: &'a Mutex<SwashCache>) -> Self {
+        Self { buffer, cache }
     }
 }
 
-pub fn text_box<'a>(buffer: &'a Mutex<TextBuffer<'static>>) -> TextBox<'a> {
-    TextBox::new(buffer)
+pub fn text_box<'a>(buffer: &'a Mutex<TextBuffer<'static>>, cache: &'a Mutex<SwashCache>) -> TextBox<'a> {
+    TextBox::new(buffer, cache)
 }
 
 impl<'a, Message, Renderer> Widget<Message, Renderer> for TextBox<'a>
@@ -153,12 +155,13 @@ where
         }
 
         let mut buffer = self.buffer.lock().unwrap();
+        let mut cache = self.cache.lock().unwrap();
 
         buffer.shape_until_cursor();
 
         let buffer_x = layout.bounds().x;
         let buffer_y = layout.bounds().y;
-        buffer.draw(text_color_u32, |x, y, w, h, color| {
+        buffer.draw(&mut cache, text_color_u32, |x, y, w, h, color| {
             let a = (color >> 24) as u8;
             if a > 0 {
                 let r = (color >> 16) as u8;

@@ -63,16 +63,24 @@ impl TextCursor {
     }
 }
 
-struct LayoutCursor {
+struct TextLayoutCursor {
     line: TextLineIndex,
     layout: usize,
     glyph: usize,
 }
 
-impl LayoutCursor {
+impl TextLayoutCursor {
     fn new(line: TextLineIndex, layout: usize, glyph: usize) -> Self {
         Self { line, layout, glyph }
     }
+}
+
+pub struct TextLayoutRun<'a> {
+    line_i: TextLineIndex,
+    text: &'a str,
+    shape: &'a FontShapeLine,
+    layout_line: &'a FontLayoutLine,
+    line_y: i32,
 }
 
 /// Index of a text line
@@ -176,8 +184,6 @@ pub struct TextBuffer<'a> {
     cursor: TextCursor,
     select_opt: Option<TextCursor>,
     pub redraw: bool,
-    #[cfg(feature = "swash")]
-    cache: crate::SwashCache,
 }
 
 impl<'a> TextBuffer<'a> {
@@ -195,8 +201,6 @@ impl<'a> TextBuffer<'a> {
             cursor: TextCursor::default(),
             select_opt: None,
             redraw: false,
-            #[cfg(feature = "swash")]
-            cache: crate::SwashCache::new(),
         };
         buffer.set_text("");
         buffer
@@ -323,14 +327,14 @@ impl<'a> TextBuffer<'a> {
         log::debug!("relayout: {:?}", duration);
     }
 
-    fn layout_cursor(&self, cursor: &TextCursor) -> LayoutCursor {
+    fn layout_cursor(&self, cursor: &TextCursor) -> TextLayoutCursor {
         let line = &self.lines[cursor.line.get()];
 
         let layout = line.layout_opt.as_ref().unwrap(); //TODO: ensure layout is done?
         for (layout_i, layout_line) in layout.iter().enumerate() {
             for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
                 if cursor.index == glyph.start {
-                    return LayoutCursor::new(
+                    return TextLayoutCursor::new(
                         cursor.line,
                         layout_i,
                         glyph_i
@@ -340,7 +344,7 @@ impl<'a> TextBuffer<'a> {
             match layout_line.glyphs.last() {
                 Some(glyph) => {
                     if cursor.index == glyph.end {
-                        return LayoutCursor::new(
+                        return TextLayoutCursor::new(
                             cursor.line,
                             layout_i,
                             layout_line.glyphs.len()
@@ -348,7 +352,7 @@ impl<'a> TextBuffer<'a> {
                     }
                 },
                 None => {
-                    return LayoutCursor::new(
+                    return TextLayoutCursor::new(
                         cursor.line,
                         layout_i,
                         0
@@ -359,14 +363,14 @@ impl<'a> TextBuffer<'a> {
 
         // Fall back to start of line
         //TODO: should this be the end of the line?
-        LayoutCursor::new(
+        TextLayoutCursor::new(
             cursor.line,
             0,
             0
         )
     }
 
-    fn set_layout_cursor(&mut self, cursor: LayoutCursor) {
+    fn set_layout_cursor(&mut self, cursor: TextLayoutCursor) {
         let line = &mut self.lines[cursor.line.get()];
         let layout = line.layout(
             &self.font_matches,
@@ -797,22 +801,10 @@ impl<'a> TextBuffer<'a> {
         log::trace!("click({}, {}): {:?}", mouse_x, mouse_y, duration);
     }
 
-    /// Draw the buffer
-    #[cfg(feature = "swash")]
-    pub fn draw<F>(&mut self, color: u32, mut f: F)
-        where F: FnMut(i32, i32, u32, u32, u32)
-    {
-        let font_size = self.metrics.font_size;
-        let line_height = self.metrics.line_height;
-        /*TODO
-        let layout_cursor = self.layout_cursor(&self.cursor);
-        let layout_select_opt = self.select_opt.as_ref().map(|cursor| {
-            self.layout_cursor(cursor)
-        });
-        */
-
-        let mut line_y = font_size;
-        let mut layout_i = 0;
+    /// Get the visible layout runs for rendering and other tasks
+    pub fn with_layout_runs<F: FnMut(TextLayoutRun)>(&self, mut f: F) {
+        let mut line_y = self.metrics.font_size;
+        let mut total_layout = 0;
         for (line_i, line) in self.lines.iter().enumerate() {
             let shape = match line.shape_opt.as_ref() {
                 Some(some) => some,
@@ -825,8 +817,8 @@ impl<'a> TextBuffer<'a> {
             };
 
             for layout_line in layout {
-                let scrolled = layout_i < self.scroll;
-                layout_i += 1;
+                let scrolled = total_layout < self.scroll;
+                total_layout += 1;
 
                 if scrolled {
                     continue;
@@ -836,162 +828,185 @@ impl<'a> TextBuffer<'a> {
                     return;
                 }
 
-                let cursor_glyph_opt = |cursor: &TextCursor| -> Option<(usize, f32)> {
-                    if cursor.line.get() == line_i {
-                        for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
-                            if cursor.index == glyph.start {
-                                return Some((glyph_i, 0.0));
-                            } else if cursor.index > glyph.start && cursor.index < glyph.end {
-                                // Guess x offset based on characters
-                                let mut before = 0;
-                                let mut total = 0;
+                f(TextLayoutRun {
+                    line_i: TextLineIndex::new(line_i),
+                    text: line.text.as_str(),
+                    shape,
+                    layout_line,
+                    line_y,
+                });
 
-                                let cluster = &line.text[glyph.start..glyph.end];
-                                for (i, _) in cluster.grapheme_indices(true) {
-                                    if glyph.start + i < cursor.index {
-                                        before += 1;
-                                    }
-                                    total += 1;
-                                }
-
-                                let offset = glyph.w * (before as f32) / (total as f32);
-                                return Some((glyph_i, offset));
-                            }
-                        }
-                        match layout_line.glyphs.last() {
-                            Some(glyph) => {
-                                if cursor.index == glyph.end {
-                                    return Some((layout_line.glyphs.len(), 0.0));
-                                }
-                            },
-                            None => {
-                                return Some((0, 0.0));
-                            }
-                        }
-                    }
-                    None
-                };
-
-                // Highlight selection (TODO: HIGHLIGHT COLOR!)
-                if let Some(select) = self.select_opt {
-                    let (start, end) = match select.line.cmp(&self.cursor.line) {
-                        cmp::Ordering::Greater => (self.cursor, select),
-                        cmp::Ordering::Less => (select, self.cursor),
-                        cmp::Ordering::Equal => {
-                            /* select.line == self.cursor.line */
-                            if select.index < self.cursor.index {
-                                (select, self.cursor)
-                            } else {
-                                /* select.index >= self.cursor.index */
-                                (self.cursor, select)
-                            }
-                        }
-                    };
-
-                    if line_i >= start.line.get() && line_i <= end.line.get() {
-                        let mut range_opt = None;
-                        for glyph in layout_line.glyphs.iter() {
-                            // Guess x offset based on characters
-                            let cluster = &line.text[glyph.start..glyph.end];
-                            let total = cluster.grapheme_indices(true).count();
-                            let mut c_x = glyph.x;
-                            let c_w = glyph.w / total as f32;
-                            for (i, c) in cluster.grapheme_indices(true) {
-                                let c_start = glyph.start + i;
-                                let c_end = glyph.start + i + c.len();
-                                if (start.line.get() != line_i || c_end > start.index)
-                                && (end.line.get() != line_i || c_start < end.index) {
-                                    range_opt = match range_opt.take() {
-                                        Some((min, max)) => Some((
-                                            cmp::min(min, c_x as i32),
-                                            cmp::max(max, (c_x + c_w) as i32),
-                                        )),
-                                        None => Some((
-                                            c_x as i32,
-                                            (c_x + c_w) as i32,
-                                        ))
-                                    };
-                                } else if let Some((min, max)) = range_opt.take() {
-                                    f(
-                                        min,
-                                        line_y - font_size,
-                                        cmp::max(0, max - min) as u32,
-                                        line_height as u32,
-                                        0x33_00_00_00 | (color & 0xFF_FF_FF)
-                                    );
-                                }
-                                c_x += c_w;
-                            }
-                        }
-
-                        if let Some((mut min, mut max)) = range_opt.take() {
-                            if end.line.get() > line_i {
-                                // Draw to end of line
-                                if shape.rtl {
-                                    min = 0;
-                                } else {
-                                    max = self.width;
-                                }
-                            }
-                            f(
-                                min,
-                                line_y - font_size,
-                                cmp::max(0, max - min) as u32,
-                                line_height as u32,
-                                0x33_00_00_00 | (color & 0xFF_FF_FF)
-                            );
-                        }
-                    }
-                }
-
-                // Draw cursor
-                //TODO: draw at end of line but not start of next line
-                if let Some((cursor_glyph, cursor_glyph_offset)) = cursor_glyph_opt(&self.cursor) {
-                    let x = match layout_line.glyphs.get(cursor_glyph) {
-                        Some(glyph) => {
-                            // Start of detected glyph
-                            if glyph.rtl {
-                                (glyph.x + glyph.w - cursor_glyph_offset) as i32
-                            } else {
-                                (glyph.x + cursor_glyph_offset) as i32
-                            }
-                        },
-                        None => match layout_line.glyphs.last() {
-                            Some(glyph) => {
-                                // End of last glyph
-                                if glyph.rtl {
-                                    glyph.x as i32
-                                } else {
-                                    (glyph.x + glyph.w) as i32
-                                }
-                            },
-                            None => {
-                                // Start of empty line
-                                0
-                            }
-                        }
-                    };
-
-                    f(
-                        x,
-                        line_y - font_size,
-                        1,
-                        line_height as u32,
-                        color,
-                    );
-                }
-
-
-
-                for glyph in layout_line.glyphs.iter() {
-                    let (cache_key, x_int, y_int) = (glyph.cache_key, glyph.x_int, glyph.y_int);
-                    self.cache.with_pixels(&self.font_matches, cache_key, color, |x, y, color| {
-                        f(x_int + x, line_y + y_int + y, 1, 1, color)
-                    });
-                }
-
-                line_y += line_height;
+                line_y += self.metrics.line_height;
             }
         }
+    }
+
+    /// Draw the buffer
+    #[cfg(feature = "swash")]
+    pub fn draw<F>(&mut self, cache: &mut crate::SwashCache, color: u32, mut f: F)
+        where F: FnMut(i32, i32, u32, u32, u32)
+    {
+        let font_size = self.metrics.font_size;
+        let line_height = self.metrics.line_height;
+
+        self.with_layout_runs(|run| {
+            let line_i = run.line_i;
+            let text = run.text;
+            let shape = run.shape;
+            let layout_line = run.layout_line;
+            let line_y = run.line_y;
+
+            let cursor_glyph_opt = |cursor: &TextCursor| -> Option<(usize, f32)> {
+                if cursor.line == line_i {
+                    for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
+                        if cursor.index == glyph.start {
+                            return Some((glyph_i, 0.0));
+                        } else if cursor.index > glyph.start && cursor.index < glyph.end {
+                            // Guess x offset based on characters
+                            let mut before = 0;
+                            let mut total = 0;
+
+                            let cluster = &text[glyph.start..glyph.end];
+                            for (i, _) in cluster.grapheme_indices(true) {
+                                if glyph.start + i < cursor.index {
+                                    before += 1;
+                                }
+                                total += 1;
+                            }
+
+                            let offset = glyph.w * (before as f32) / (total as f32);
+                            return Some((glyph_i, offset));
+                        }
+                    }
+                    match layout_line.glyphs.last() {
+                        Some(glyph) => {
+                            if cursor.index == glyph.end {
+                                return Some((layout_line.glyphs.len(), 0.0));
+                            }
+                        },
+                        None => {
+                            return Some((0, 0.0));
+                        }
+                    }
+                }
+                None
+            };
+
+            // Highlight selection (TODO: HIGHLIGHT COLOR!)
+            if let Some(select) = self.select_opt {
+                let (start, end) = match select.line.cmp(&self.cursor.line) {
+                    cmp::Ordering::Greater => (self.cursor, select),
+                    cmp::Ordering::Less => (select, self.cursor),
+                    cmp::Ordering::Equal => {
+                        /* select.line == self.cursor.line */
+                        if select.index < self.cursor.index {
+                            (select, self.cursor)
+                        } else {
+                            /* select.index >= self.cursor.index */
+                            (self.cursor, select)
+                        }
+                    }
+                };
+
+                if line_i >= start.line && line_i <= end.line {
+                    let mut range_opt = None;
+                    for glyph in layout_line.glyphs.iter() {
+                        // Guess x offset based on characters
+                        let cluster = &text[glyph.start..glyph.end];
+                        let total = cluster.grapheme_indices(true).count();
+                        let mut c_x = glyph.x;
+                        let c_w = glyph.w / total as f32;
+                        for (i, c) in cluster.grapheme_indices(true) {
+                            let c_start = glyph.start + i;
+                            let c_end = glyph.start + i + c.len();
+                            if (start.line != line_i || c_end > start.index)
+                            && (end.line != line_i || c_start < end.index) {
+                                range_opt = match range_opt.take() {
+                                    Some((min, max)) => Some((
+                                        cmp::min(min, c_x as i32),
+                                        cmp::max(max, (c_x + c_w) as i32),
+                                    )),
+                                    None => Some((
+                                        c_x as i32,
+                                        (c_x + c_w) as i32,
+                                    ))
+                                };
+                            } else if let Some((min, max)) = range_opt.take() {
+                                f(
+                                    min,
+                                    line_y - font_size,
+                                    cmp::max(0, max - min) as u32,
+                                    line_height as u32,
+                                    0x33_00_00_00 | (color & 0xFF_FF_FF)
+                                );
+                            }
+                            c_x += c_w;
+                        }
+                    }
+
+                    if let Some((mut min, mut max)) = range_opt.take() {
+                        if end.line > line_i {
+                            // Draw to end of line
+                            if shape.rtl {
+                                min = 0;
+                            } else {
+                                max = self.width;
+                            }
+                        }
+                        f(
+                            min,
+                            line_y - font_size,
+                            cmp::max(0, max - min) as u32,
+                            line_height as u32,
+                            0x33_00_00_00 | (color & 0xFF_FF_FF)
+                        );
+                    }
+                }
+            }
+
+            // Draw cursor
+            //TODO: draw at end of line but not start of next line
+            if let Some((cursor_glyph, cursor_glyph_offset)) = cursor_glyph_opt(&self.cursor) {
+                let x = match layout_line.glyphs.get(cursor_glyph) {
+                    Some(glyph) => {
+                        // Start of detected glyph
+                        if glyph.rtl {
+                            (glyph.x + glyph.w - cursor_glyph_offset) as i32
+                        } else {
+                            (glyph.x + cursor_glyph_offset) as i32
+                        }
+                    },
+                    None => match layout_line.glyphs.last() {
+                        Some(glyph) => {
+                            // End of last glyph
+                            if glyph.rtl {
+                                glyph.x as i32
+                            } else {
+                                (glyph.x + glyph.w) as i32
+                            }
+                        },
+                        None => {
+                            // Start of empty line
+                            0
+                        }
+                    }
+                };
+
+                f(
+                    x,
+                    line_y - font_size,
+                    1,
+                    line_height as u32,
+                    color,
+                );
+            }
+
+            for glyph in layout_line.glyphs.iter() {
+                let (cache_key, x_int, y_int) = (glyph.cache_key, glyph.x_int, glyph.y_int);
+                cache.with_pixels(&self.font_matches, cache_key, color, |x, y, color| {
+                    f(x_int + x, line_y + y_int + y, 1, 1, color)
+                });
+            }
+        });
     }
 }

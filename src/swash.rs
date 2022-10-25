@@ -22,13 +22,8 @@ impl SwashCache {
     }
 
     /// Create a swash Image from a cache key, caching results
-    pub fn with_image<F: FnMut(&Option<SwashImage>)>(
-        &mut self,
-        matches: &FontMatches<'_>,
-        cache_key: CacheKey,
-        mut f: F
-    ) {
-        let image_opt = self.cache.entry(cache_key).or_insert_with(|| {
+    pub fn get_image(&mut self, matches: &FontMatches<'_>, cache_key: CacheKey) -> &Option<SwashImage> {
+        self.cache.entry(cache_key).or_insert_with(|| {
             let font = match matches.get_font(&cache_key.font_id) {
                 Some(some) => some,
                 None => {
@@ -64,9 +59,7 @@ impl SwashCache {
             .offset(offset)
             // Render the image
             .render(&mut scaler, cache_key.glyph_id)
-        });
-
-        f(image_opt);
+        })
     }
 
     /// Enumerate pixels in an Image, use `with_image` for better performance
@@ -77,42 +70,40 @@ impl SwashCache {
         base: u32,
         mut f: F
     ) {
-        self.with_image(matches, cache_key, |image_opt| {
-            if let Some(image) = image_opt {
-                let x = image.placement.left;
-                let y = -image.placement.top;
+        if let Some(image) = self.get_image(matches, cache_key) {
+            let x = image.placement.left;
+            let y = -image.placement.top;
 
-                match image.content {
-                    Content::Mask => {
-                        let mut i = 0;
-                        for off_y in 0..image.placement.height as i32 {
-                            for off_x in 0..image.placement.width as i32 {
-                                //TODO: blend base alpha?
-                                let color = (image.data[i] as u32) << 24 | base & 0xFFFFFF;
-                                f(x + off_x, y + off_y, color);
-                                i += 1;
-                            }
+            match image.content {
+                Content::Mask => {
+                    let mut i = 0;
+                    for off_y in 0..image.placement.height as i32 {
+                        for off_x in 0..image.placement.width as i32 {
+                            //TODO: blend base alpha?
+                            let color = (image.data[i] as u32) << 24 | base & 0xFFFFFF;
+                            f(x + off_x, y + off_y, color);
+                            i += 1;
                         }
-                    }
-                    Content::Color => {
-                        let mut i = 0;
-                        for off_y in 0..image.placement.height as i32 {
-                            for off_x in 0..image.placement.width as i32 {
-                                //TODO: blend base alpha?
-                                let color = (image.data[i + 3] as u32) << 24
-                                    | (image.data[i] as u32) << 16
-                                    | (image.data[i + 1] as u32) << 8
-                                    | (image.data[i + 2] as u32);
-                                f(x + off_x, y + off_y, color);
-                                i += 4;
-                            }
-                        }
-                    }
-                    Content::SubpixelMask => {
-                        log::warn!("TODO: SubpixelMask");
                     }
                 }
+                Content::Color => {
+                    let mut i = 0;
+                    for off_y in 0..image.placement.height as i32 {
+                        for off_x in 0..image.placement.width as i32 {
+                            //TODO: blend base alpha?
+                            let color = (image.data[i + 3] as u32) << 24
+                                | (image.data[i] as u32) << 16
+                                | (image.data[i + 1] as u32) << 8
+                                | (image.data[i + 2] as u32);
+                            f(x + off_x, y + off_y, color);
+                            i += 4;
+                        }
+                    }
+                }
+                Content::SubpixelMask => {
+                    log::warn!("TODO: SubpixelMask");
+                }
             }
-        });
+        }
     }
 }

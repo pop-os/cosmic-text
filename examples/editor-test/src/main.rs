@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use cosmic_text::{FontSystem, TextAction, TextBuffer, TextMetrics};
+use cosmic_text::{FontSystem, SwashCache, TextAction, TextBuffer, TextMetrics};
 use orbclient::{Color, EventOption, Renderer, Window, WindowFlag};
 use std::{env, fs, process, thread, time::{Duration, Instant}};
 use unicode_segmentation::UnicodeSegmentation;
 
-fn redraw(window: &mut Window, buffer: &mut TextBuffer<'_>) {
+fn redraw(window: &mut Window, buffer: &mut TextBuffer<'_>, swash_cache: &mut SwashCache) {
     let bg_color = Color::rgb(0x34, 0x34, 0x34);
     let font_color = Color::rgb(0xFF, 0xFF, 0xFF);
 
@@ -16,7 +16,7 @@ fn redraw(window: &mut Window, buffer: &mut TextBuffer<'_>) {
 
         window.set(bg_color);
 
-        buffer.draw(font_color.data, |x, y, w, h, color| {
+        buffer.draw(swash_cache, font_color.data, |x, y, w, h, color| {
             window.rect(x, y, w, h, Color { data: color });
         });
 
@@ -94,6 +94,8 @@ fn main() {
         window.height() as i32
     );
 
+    let mut swash_cache = SwashCache::new();
+
     let text = if let Some(arg) = env::args().nth(1) {
         fs::read_to_string(&arg).expect("failed to open file")
     } else {
@@ -158,7 +160,7 @@ fn main() {
         // Finally, normal enter
         buffer.action(TextAction::Enter);
 
-        redraw(&mut window, &mut buffer);
+        redraw(&mut window, &mut buffer, &mut swash_cache);
 
         for event in window.events() {
             match event.to_option() {

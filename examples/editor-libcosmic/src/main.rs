@@ -25,6 +25,7 @@ use cosmic::{
 use cosmic_text::{
     FontMatches,
     FontSystem,
+    SwashCache,
     TextBuffer,
     TextMetrics,
 };
@@ -63,6 +64,7 @@ pub struct Window {
     theme: Theme,
     path_opt: Option<PathBuf>,
     buffer: Mutex<TextBuffer<'static>>,
+    cache: Mutex<SwashCache>,
 }
 
 #[allow(dead_code)]
@@ -139,6 +141,7 @@ impl Application for Window {
             theme: Theme::Dark,
             path_opt: None,
             buffer: Mutex::new(buffer),
+            cache: Mutex::new(SwashCache::new()),
         };
         if let Some(arg) = env::args().nth(1) {
             window.open(PathBuf::from(arg));
@@ -230,7 +233,7 @@ impl Application for Window {
             .align_items(Alignment::Center)
             .spacing(8)
             ,
-            text_box(&self.buffer)
+            text_box(&self.buffer, &self.cache)
         ]
         .spacing(8)
         .padding(16)

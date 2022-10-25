@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use cosmic_text::{FontSystem, TextAction, TextBuffer, TextMetrics};
+use cosmic_text::{FontSystem, SwashCache, TextAction, TextBuffer, TextMetrics};
 use orbclient::{Color, EventOption, Renderer, Window, WindowFlag};
 use std::{env, fs, thread, time::{Duration, Instant}};
 
@@ -83,6 +83,8 @@ fn main() {
         default_text.to_string()
     };
 
+    let mut swash_cache = SwashCache::new();
+
     let line_x = 8 * display_scale;
     let mut buffer = TextBuffer::new(
         font_matches,
@@ -110,7 +112,7 @@ fn main() {
 
             window.set(bg_color);
 
-            buffer.draw(font_color.data, |x, y, w, h, color| {
+            buffer.draw(&mut swash_cache, font_color.data, |x, y, w, h, color| {
                 window.rect(line_x + x, y, w, h, Color { data: color });
             });
 
