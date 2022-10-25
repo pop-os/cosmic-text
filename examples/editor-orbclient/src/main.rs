@@ -26,7 +26,7 @@ fn main() {
         1024 * display_scale as u32,
         768 * display_scale as u32,
         &format!("COSMIC TEXT - {}", font_system.locale),
-        &[WindowFlag::Resizable, WindowFlag::Async],
+        &[WindowFlag::Resizable],
     )
     .unwrap();
 
