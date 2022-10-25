@@ -98,19 +98,15 @@ fn main() {
     let mut mouse_x = -1;
     let mut mouse_y = -1;
     let mut mouse_left = false;
-    let mut shape_me = true;
+
+    //Lets do this once and rely on events for the rest.
+    buffer.shape_until_cursor();
 
     loop {
         let font_size = buffer.metrics().font_size;
         let line_height = buffer.metrics().line_height;
 
         let mut force_drag = true;
-
-        //lets do this once and rely on the events to do the rest.
-        if shape_me {
-            buffer.shape_until_cursor();
-            shape_me = false;
-        }
 
         if buffer.redraw {
             let instant = Instant::now();
