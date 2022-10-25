@@ -167,7 +167,7 @@ impl TextBufferLine {
 
 /// A buffer of text that is shaped and laid out
 pub struct TextBuffer<'a> {
-    font_matches: &'a FontMatches<'a>,
+    font_matches: FontMatches<'a>,
     lines: Vec<TextBufferLine>,
     metrics: TextMetrics,
     width: i32,
@@ -182,7 +182,7 @@ pub struct TextBuffer<'a> {
 
 impl<'a> TextBuffer<'a> {
     pub fn new(
-        font_matches: &'a FontMatches<'a>,
+        font_matches: FontMatches<'a>,
         metrics: TextMetrics,
     ) -> Self {
         let mut buffer = Self {
@@ -217,7 +217,7 @@ impl<'a> TextBuffer<'a> {
                 reshaped += 1;
             }
             let layout = line.layout(
-                self.font_matches,
+                &self.font_matches,
                 self.metrics.font_size,
                 self.width
             );
@@ -247,7 +247,7 @@ impl<'a> TextBuffer<'a> {
                 reshaped += 1;
             }
             let layout = line.layout(
-                self.font_matches,
+                &self.font_matches,
                 self.metrics.font_size,
                 self.width
             );
@@ -309,7 +309,7 @@ impl<'a> TextBuffer<'a> {
             if line.shape_opt.is_some() {
                 line.layout_opt = None;
                 line.layout(
-                    self.font_matches,
+                    &self.font_matches,
                     self.metrics.font_size,
                     self.width
                 );
@@ -368,7 +368,7 @@ impl<'a> TextBuffer<'a> {
     fn set_layout_cursor(&mut self, cursor: LayoutCursor) {
         let line = &mut self.lines[cursor.line.get()];
         let layout = line.layout(
-            self.font_matches,
+            &self.font_matches,
             self.metrics.font_size,
             self.width
         );
@@ -547,7 +547,7 @@ impl<'a> TextBuffer<'a> {
                 let layout_len = {
                     let line = &mut self.lines[cursor.line.get()];
                     let layout = line.layout(
-                        self.font_matches,
+                        &self.font_matches,
                         self.metrics.font_size,
                         self.width
                     );
@@ -984,7 +984,7 @@ impl<'a> TextBuffer<'a> {
 
                 for glyph in layout_line.glyphs.iter() {
                     let (cache_key, x_int, y_int) = (glyph.cache_key, glyph.x_int, glyph.y_int);
-                    self.cache.with_pixels(self.font_matches, cache_key, color, |x, y, color| {
+                    self.cache.with_pixels(&self.font_matches, cache_key, color, |x, y, color| {
                         f(x_int + x, line_y + y_int + y, 1, 1, color)
                     });
                 }

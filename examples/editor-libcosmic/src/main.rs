@@ -42,9 +42,6 @@ lazy_static::lazy_static! {
     static ref FONT_SYSTEM: FontSystem = FontSystem::new();
 }
 
-//TODO: find out how to do this!
-static mut FONT_MATCHES: Option<FontMatches<'static>> = None;
-
 static FONT_SIZES: &'static [TextMetrics] = &[
     TextMetrics::new(10, 14), // Caption
     TextMetrics::new(14, 20), // Body
@@ -56,38 +53,6 @@ static FONT_SIZES: &'static [TextMetrics] = &[
 
 fn main() -> cosmic::iced::Result {
     env_logger::init();
-
-    let font_matches: FontMatches<'static> = FONT_SYSTEM.matches(|info| -> bool {
-        #[cfg(feature = "mono")]
-        let monospaced = true;
-
-        #[cfg(not(feature = "mono"))]
-        let monospaced = false;
-
-        let matched = {
-            info.style == fontdb::Style::Normal &&
-            info.weight == fontdb::Weight::NORMAL &&
-            info.stretch == fontdb::Stretch::Normal &&
-            (info.monospaced == monospaced || info.post_script_name.contains("Emoji"))
-        };
-
-        if matched {
-            log::debug!(
-                "{:?}: family '{}' postscript name '{}' style {:?} weight {:?} stretch {:?} monospaced {:?}",
-                info.id,
-                info.family,
-                info.post_script_name,
-                info.style,
-                info.weight,
-                info.stretch,
-                info.monospaced
-            );
-        }
-
-        matched
-    }).unwrap();
-
-    unsafe { FONT_MATCHES = Some(font_matches); }
 
     let mut settings = settings();
     settings.window.min_size = Some((400, 100));
@@ -134,9 +99,39 @@ impl Application for Window {
     type Theme = Theme;
 
     fn new(_flags: ()) -> (Self, Command<Self::Message>) {
+        let font_matches: FontMatches<'static> = FONT_SYSTEM.matches(|info| -> bool {
+            #[cfg(feature = "mono")]
+            let monospaced = true;
+
+            #[cfg(not(feature = "mono"))]
+            let monospaced = false;
+
+            let matched = {
+                info.style == fontdb::Style::Normal &&
+                info.weight == fontdb::Weight::NORMAL &&
+                info.stretch == fontdb::Stretch::Normal &&
+                (info.monospaced == monospaced || info.post_script_name.contains("Emoji"))
+            };
+
+            if matched {
+                log::debug!(
+                    "{:?}: family '{}' postscript name '{}' style {:?} weight {:?} stretch {:?} monospaced {:?}",
+                    info.id,
+                    info.family,
+                    info.post_script_name,
+                    info.style,
+                    info.weight,
+                    info.stretch,
+                    info.monospaced
+                );
+            }
+
+            matched
+        }).unwrap();
+
         let font_size_i = 1; // Body
         let buffer = TextBuffer::new(
-            unsafe { FONT_MATCHES.as_ref().unwrap() },
+            font_matches,
             FONT_SIZES[font_size_i],
         );
 

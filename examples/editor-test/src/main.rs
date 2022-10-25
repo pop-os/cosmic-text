@@ -86,7 +86,7 @@ fn main() {
     let font_size_default = 1; // Body
 
     let mut buffer = TextBuffer::new(
-        &font_matches,
+        font_matches,
         font_sizes[font_size_default]
     );
     buffer.set_size(

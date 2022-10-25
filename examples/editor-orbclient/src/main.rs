@@ -85,7 +85,7 @@ fn main() {
 
     let line_x = 8 * display_scale;
     let mut buffer = TextBuffer::new(
-        &font_matches,
+        font_matches,
         font_sizes[font_size_i]
     );
     buffer.set_size(

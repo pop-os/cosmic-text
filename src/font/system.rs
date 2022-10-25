@@ -35,9 +35,7 @@ impl FontSystem {
         assert_eq!(db.len(), db.faces().len());
         for i in 0..db.len() {
             let id = db.faces()[i].id;
-            unsafe {
-                db.make_shared_face_data(id);
-            }
+            unsafe { db.make_shared_face_data(id); }
         }
 
         Self { locale, db }
