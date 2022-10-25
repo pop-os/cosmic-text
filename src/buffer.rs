@@ -738,13 +738,9 @@ impl<'a> TextBuffer<'a> {
                                     new_cursor_char = egc_i;
 
                                     let right_half = mouse_x >= (egc_x + egc_w / 2.0) as i32;
-                                    if right_half == !shape.rtl {
+                                    if right_half == !glyph.rtl {
                                         // If clicking on last half of glyph, move cursor past glyph
                                         new_cursor_char += egc.len();
-                                        if new_cursor_char >= cluster.len() {
-                                            new_cursor_glyph += 1;
-                                            new_cursor_char = 0;
-                                        }
                                     }
                                     break 'hit;
                                 }
@@ -752,9 +748,9 @@ impl<'a> TextBuffer<'a> {
                             }
 
                             let right_half = mouse_x >= (glyph.x + glyph.w / 2.0) as i32;
-                            if right_half == !shape.rtl {
+                            if right_half == !glyph.rtl {
                                 // If clicking on last half of glyph, move cursor past glyph
-                                new_cursor_glyph += 1;
+                                new_cursor_char = cluster.len();
                             }
                             break 'hit;
                         }
@@ -968,6 +964,7 @@ impl<'a> TextBuffer<'a> {
                                 )
                             };
 
+                            /*
                             f(
                                 left_x,
                                 line_y - font_size,
@@ -975,6 +972,30 @@ impl<'a> TextBuffer<'a> {
                                 line_height as u32,
                                 0x33_00_00_00 | (color & 0xFF_FF_FF)
                             );
+                            */
+                        }
+
+                        for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
+                            // Guess x offset based on characters
+                            let cluster = &line.text[glyph.start..glyph.end];
+                            let total = cluster.grapheme_indices(true).count();
+                            let mut c_x = glyph.x;
+                            let mut c_w = glyph.w / total as f32;
+                            for (i, c) in cluster.grapheme_indices(true) {
+                                let c_start = glyph.start + i;
+                                let c_end = glyph.start + i + c.len();
+                                if (start.line.get() != line_i || c_end > start.index)
+                                && (end.line.get() != line_i || c_start < end.index) {
+                                    f(
+                                        c_x as i32,
+                                        line_y - font_size,
+                                        c_w as u32,
+                                        line_height as u32,
+                                        0x33_00_00_00 | (color & 0xFF_FF_FF)
+                                    );
+                                }
+                                c_x += c_w;
+                            }
                         }
                     }
                 }
@@ -985,7 +1006,7 @@ impl<'a> TextBuffer<'a> {
                     let x = match layout_line.glyphs.get(cursor_glyph) {
                         Some(glyph) => {
                             // Start of detected glyph
-                            if shape.rtl {
+                            if glyph.rtl {
                                 (glyph.x + glyph.w - cursor_glyph_offset) as i32
                             } else {
                                 (glyph.x + cursor_glyph_offset) as i32
@@ -994,7 +1015,7 @@ impl<'a> TextBuffer<'a> {
                         None => match layout_line.glyphs.last() {
                             Some(glyph) => {
                                 // End of last glyph
-                                if shape.rtl {
+                                if glyph.rtl {
                                     glyph.x as i32
                                 } else {
                                     (glyph.x + glyph.w) as i32
