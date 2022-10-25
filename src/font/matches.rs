@@ -2,8 +2,8 @@
 
 use unicode_script::{Script, UnicodeScript};
 
+use super::fallback::FontFallbackIter;
 use super::{Font, FontShapeGlyph, FontShapeLine, FontShapeSpan, FontShapeWord};
-use super::fallback::{FontFallbackIter};
 
 /// Fonts that match a pattern
 pub struct FontMatches<'a> {
@@ -110,13 +110,12 @@ impl<'a> FontMatches<'a> {
         let mut scripts = Vec::new();
         for c in line[start_word..end_word].chars() {
             match c.script() {
-                Script::Common |
-                Script::Inherited |
-                Script::Latin |
-                Script::Unknown => (),
-                script => if ! scripts.contains(&script) {
-                    scripts.push(script);
-                },
+                Script::Common | Script::Inherited | Script::Latin | Script::Unknown => (),
+                script => {
+                    if !scripts.contains(&script) {
+                        scripts.push(script);
+                    }
+                }
             }
         }
 
@@ -132,7 +131,7 @@ impl<'a> FontMatches<'a> {
             &self.fonts,
             &["Fira Sans", "Fira Mono"],
             scripts,
-            &self.locale
+            self.locale,
         );
 
         let (mut glyphs, mut missing) = self.shape_fallback(
@@ -140,7 +139,7 @@ impl<'a> FontMatches<'a> {
             line,
             start_word,
             end_word,
-            span_rtl
+            span_rtl,
         );
 
         //TODO: improve performance!
@@ -151,13 +150,8 @@ impl<'a> FontMatches<'a> {
             };
 
             log::trace!("Evaluating fallback with font '{}'", font.info.family);
-            let (mut fb_glyphs, fb_missing) = self.shape_fallback(
-                font,
-                line,
-                start_word,
-                end_word,
-                span_rtl
-            );
+            let (mut fb_glyphs, fb_missing) =
+                self.shape_fallback(font, line, start_word, end_word, span_rtl);
 
             // Insert all matching glyphs
             let mut fb_i = 0;
@@ -306,7 +300,7 @@ impl<'a> FontMatches<'a> {
 
             log::trace!("Line {}: '{}'", if line_rtl { "RTL" } else { "LTR" }, line);
 
-            let paragraph = unicode_bidi::Paragraph::new(&bidi, &para_info);
+            let paragraph = unicode_bidi::Paragraph::new(&bidi, para_info);
 
             let mut start = 0;
             let mut span_rtl = line_rtl;

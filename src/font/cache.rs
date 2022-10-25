@@ -10,7 +10,12 @@ pub struct CacheKey {
 }
 
 impl CacheKey {
-    pub fn new(font_id: fontdb::ID, glyph_id: u16, font_size: i32, pos: (f32, f32)) -> (Self, i32, i32) {
+    pub fn new(
+        font_id: fontdb::ID,
+        glyph_id: u16,
+        font_size: i32,
+        pos: (f32, f32),
+    ) -> (Self, i32, i32) {
         let (x, x_bin) = SubpixelBin::new(pos.0);
         let (y, y_bin) = SubpixelBin::new(pos.1);
         (
@@ -53,18 +58,16 @@ impl SubpixelBin {
             } else {
                 (trunc - 1, Self::Zero)
             }
+        } else if fract < 0.125 {
+            (trunc, Self::Zero)
+        } else if fract < 0.375 {
+            (trunc, Self::One)
+        } else if fract < 0.625 {
+            (trunc, Self::Two)
+        } else if fract < 0.875 {
+            (trunc, Self::Three)
         } else {
-            if fract < 0.125 {
-                (trunc, Self::Zero)
-            } else if fract < 0.375 {
-                (trunc, Self::One)
-            } else if fract < 0.625 {
-                (trunc, Self::Two)
-            } else if fract < 0.875 {
-                (trunc, Self::Three)
-            } else {
-                (trunc + 1, Self::Zero)
-            }
+            (trunc + 1, Self::Zero)
         }
     }
 

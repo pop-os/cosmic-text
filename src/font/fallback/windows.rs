@@ -31,7 +31,7 @@ fn han_unification(locale: &str) -> &'static [&'static str] {
         // Taiwan
         "zh-TW" => &["Microsoft JhengHei UI"],
         // Simplified Chinese is the default (also catches "zh-CN" for China)
-        _ => &["Microsoft YaHei UI"]
+        _ => &["Microsoft YaHei UI"],
     }
 }
 

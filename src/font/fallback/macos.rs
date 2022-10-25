@@ -4,19 +4,12 @@ use unicode_script::Script;
 
 // Fallbacks to use after any script specific fallbacks
 pub fn common_fallback() -> &'static [&'static str] {
-    &[
-        ".SF NS",
-        "Apple Color Emoji",
-        "Geneva",
-        "Arial Unicode MS",
-    ]
+    &[".SF NS", "Apple Color Emoji", "Geneva", "Arial Unicode MS"]
 }
 
 // Fallbacks to never use
 pub fn forbidden_fallback() -> &'static [&'static str] {
-    &[
-        ".LastResort",
-    ]
+    &[".LastResort"]
 }
 
 fn han_unification(locale: &str) -> &'static [&'static str] {

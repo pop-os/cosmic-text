@@ -39,8 +39,7 @@ impl<'a> FontLayoutLine<'a> {
 
                 // Compute the fractional offset-- you'll likely want to quantize this
                 // in a real renderer
-                let offset =
-                    Vector::new(cache_key.x_bin.as_float(), cache_key.y_bin.as_float());
+                let offset = Vector::new(cache_key.x_bin.as_float(), cache_key.y_bin.as_float());
 
                 // Select our source order
                 Render::new(&[
