@@ -7,7 +7,7 @@ use std::{
 };
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::{FontLayoutLine, FontMatches, FontShapeLine};
+use crate::{LayoutGlyph, LayoutLine, FontMatches, FontShapeLine};
 
 /// An action to perform on a [TextBuffer]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -76,11 +76,73 @@ impl TextLayoutCursor {
 }
 
 pub struct TextLayoutRun<'a> {
-    line_i: TextLineIndex,
-    text: &'a str,
-    shape: &'a FontShapeLine,
-    layout_line: &'a FontLayoutLine,
+    /// The index of the original text line
+    pub line_i: TextLineIndex,
+    /// The original text line
+    pub text: &'a str,
+    /// True if the original shaped line was RTL
+    pub rtl: bool,
+    /// The array of layout glyphs to draw
+    pub glyphs: &'a [LayoutGlyph],
+    /// Y offset of line
+    pub line_y: i32,
+}
+
+pub struct TextLayoutRunIter<'a> {
+    buffer: &'a TextBuffer<'a>,
+    line_i: usize,
+    layout_i: usize,
     line_y: i32,
+    total_layout: i32,
+}
+
+impl<'a> TextLayoutRunIter<'a> {
+    pub fn new(buffer: &'a TextBuffer<'a>) -> Self {
+        Self {
+            buffer,
+            line_i: 0,
+            layout_i: 0,
+            line_y: buffer.metrics.font_size - buffer.metrics.line_height,
+            total_layout: 0,
+        }
+    }
+}
+
+impl<'a> Iterator for TextLayoutRunIter<'a> {
+    type Item = TextLayoutRun<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some(line) = self.buffer.lines.get(self.line_i) {
+            let shape = line.shape_opt.as_ref()?;
+            let layout = line.layout_opt.as_ref()?;
+            while let Some(layout_line) = layout.get(self.layout_i) {
+                self.layout_i += 1;
+
+                let scrolled = self.total_layout < self.buffer.scroll;
+                self.total_layout += 1;
+                if scrolled {
+                    continue;
+                }
+
+                self.line_y += self.buffer.metrics.line_height;
+                if self.line_y > self.buffer.height {
+                    return None;
+                }
+
+                return Some(TextLayoutRun {
+                    line_i: TextLineIndex::new(self.line_i),
+                    text: line.text.as_str(),
+                    rtl: shape.rtl,
+                    glyphs: &layout_line.glyphs,
+                    line_y: self.line_y,
+                });
+            }
+            self.line_i += 1;
+            self.layout_i = 0;
+        }
+
+        None
+    }
 }
 
 /// Index of a text line
@@ -128,7 +190,7 @@ impl fmt::Display for TextMetrics {
 pub struct TextBufferLine {
     text: String,
     shape_opt: Option<FontShapeLine>,
-    layout_opt: Option<Vec<FontLayoutLine>>,
+    layout_opt: Option<Vec<LayoutLine>>,
 }
 
 impl TextBufferLine {
@@ -157,7 +219,7 @@ impl TextBufferLine {
         self.shape_opt.as_ref().unwrap()
     }
 
-    pub fn layout(&mut self, font_matches: &FontMatches<'_>, font_size: i32, width: i32) -> &[FontLayoutLine] {
+    pub fn layout(&mut self, font_matches: &FontMatches<'_>, font_size: i32, width: i32) -> &[LayoutLine] {
         if self.layout_opt.is_none() {
             let mut layout = Vec::new();
             let shape = self.shape(font_matches);
@@ -802,43 +864,8 @@ impl<'a> TextBuffer<'a> {
     }
 
     /// Get the visible layout runs for rendering and other tasks
-    pub fn with_layout_runs<F: FnMut(TextLayoutRun)>(&self, mut f: F) {
-        let mut line_y = self.metrics.font_size;
-        let mut total_layout = 0;
-        for (line_i, line) in self.lines.iter().enumerate() {
-            let shape = match line.shape_opt.as_ref() {
-                Some(some) => some,
-                None => break,
-            };
-
-            let layout = match line.layout_opt.as_ref() {
-                Some(some) => some,
-                None => break,
-            };
-
-            for layout_line in layout {
-                let scrolled = total_layout < self.scroll;
-                total_layout += 1;
-
-                if scrolled {
-                    continue;
-                }
-
-                if line_y > self.height {
-                    return;
-                }
-
-                f(TextLayoutRun {
-                    line_i: TextLineIndex::new(line_i),
-                    text: line.text.as_str(),
-                    shape,
-                    layout_line,
-                    line_y,
-                });
-
-                line_y += self.metrics.line_height;
-            }
-        }
+    pub fn layout_runs(&self) -> TextLayoutRunIter {
+        TextLayoutRunIter::new(self)
     }
 
     /// Draw the buffer
@@ -849,16 +876,13 @@ impl<'a> TextBuffer<'a> {
         let font_size = self.metrics.font_size;
         let line_height = self.metrics.line_height;
 
-        self.with_layout_runs(|run| {
+        for run in self.layout_runs() {
             let line_i = run.line_i;
-            let text = run.text;
-            let shape = run.shape;
-            let layout_line = run.layout_line;
             let line_y = run.line_y;
 
             let cursor_glyph_opt = |cursor: &TextCursor| -> Option<(usize, f32)> {
                 if cursor.line == line_i {
-                    for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
+                    for (glyph_i, glyph) in run.glyphs.iter().enumerate() {
                         if cursor.index == glyph.start {
                             return Some((glyph_i, 0.0));
                         } else if cursor.index > glyph.start && cursor.index < glyph.end {
@@ -866,7 +890,7 @@ impl<'a> TextBuffer<'a> {
                             let mut before = 0;
                             let mut total = 0;
 
-                            let cluster = &text[glyph.start..glyph.end];
+                            let cluster = &run.text[glyph.start..glyph.end];
                             for (i, _) in cluster.grapheme_indices(true) {
                                 if glyph.start + i < cursor.index {
                                     before += 1;
@@ -878,10 +902,10 @@ impl<'a> TextBuffer<'a> {
                             return Some((glyph_i, offset));
                         }
                     }
-                    match layout_line.glyphs.last() {
+                    match run.glyphs.last() {
                         Some(glyph) => {
                             if cursor.index == glyph.end {
-                                return Some((layout_line.glyphs.len(), 0.0));
+                                return Some((run.glyphs.len(), 0.0));
                             }
                         },
                         None => {
@@ -910,9 +934,9 @@ impl<'a> TextBuffer<'a> {
 
                 if line_i >= start.line && line_i <= end.line {
                     let mut range_opt = None;
-                    for glyph in layout_line.glyphs.iter() {
+                    for glyph in run.glyphs.iter() {
                         // Guess x offset based on characters
-                        let cluster = &text[glyph.start..glyph.end];
+                        let cluster = &run.text[glyph.start..glyph.end];
                         let total = cluster.grapheme_indices(true).count();
                         let mut c_x = glyph.x;
                         let c_w = glyph.w / total as f32;
@@ -947,7 +971,7 @@ impl<'a> TextBuffer<'a> {
                     if let Some((mut min, mut max)) = range_opt.take() {
                         if end.line > line_i {
                             // Draw to end of line
-                            if shape.rtl {
+                            if run.rtl {
                                 min = 0;
                             } else {
                                 max = self.width;
@@ -967,7 +991,7 @@ impl<'a> TextBuffer<'a> {
             // Draw cursor
             //TODO: draw at end of line but not start of next line
             if let Some((cursor_glyph, cursor_glyph_offset)) = cursor_glyph_opt(&self.cursor) {
-                let x = match layout_line.glyphs.get(cursor_glyph) {
+                let x = match run.glyphs.get(cursor_glyph) {
                     Some(glyph) => {
                         // Start of detected glyph
                         if glyph.rtl {
@@ -976,7 +1000,7 @@ impl<'a> TextBuffer<'a> {
                             (glyph.x + cursor_glyph_offset) as i32
                         }
                     },
-                    None => match layout_line.glyphs.last() {
+                    None => match run.glyphs.last() {
                         Some(glyph) => {
                             // End of last glyph
                             if glyph.rtl {
@@ -1001,12 +1025,12 @@ impl<'a> TextBuffer<'a> {
                 );
             }
 
-            for glyph in layout_line.glyphs.iter() {
+            for glyph in run.glyphs.iter() {
                 let (cache_key, x_int, y_int) = (glyph.cache_key, glyph.x_int, glyph.y_int);
                 cache.with_pixels(&self.font_matches, cache_key, color, |x, y, color| {
                     f(x_int + x, line_y + y_int + y, 1, 1, color)
                 });
             }
-        });
+        }
     }
 }

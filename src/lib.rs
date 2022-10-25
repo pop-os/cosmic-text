@@ -3,8 +3,14 @@
 pub use self::buffer::*;
 mod buffer;
 
+pub use self::cache::*;
+mod cache;
+
 pub use self::font::*;
 mod font;
+
+pub use self::layout::*;
+mod layout;
 
 #[cfg(feature = "swash")]
 pub use self::swash::*;

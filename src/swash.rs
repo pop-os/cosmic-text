@@ -9,7 +9,7 @@ pub use swash::scale::image::Image as SwashImage;
 
 pub struct SwashCache {
     context: ScaleContext,
-    cache: HashMap<CacheKey, Option<SwashImage>>,
+    pub image_cache: HashMap<CacheKey, Option<SwashImage>>,
 }
 
 impl SwashCache {
@@ -17,13 +17,13 @@ impl SwashCache {
     pub fn new() -> Self {
         Self {
             context: ScaleContext::new(),
-            cache: HashMap::new()
+            image_cache: HashMap::new()
         }
     }
 
     /// Create a swash Image from a cache key, caching results
     pub fn get_image(&mut self, matches: &FontMatches<'_>, cache_key: CacheKey) -> &Option<SwashImage> {
-        self.cache.entry(cache_key).or_insert_with(|| {
+        self.image_cache.entry(cache_key).or_insert_with(|| {
             let font = match matches.get_font(&cache_key.font_id) {
                 Some(some) => some,
                 None => {

@@ -1,11 +1,17 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+/// Key for building a glyph cache
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct CacheKey {
+    /// Font ID
     pub font_id: fontdb::ID,
+    /// Glyph ID
     pub glyph_id: u16,
+    /// Font size in pixels
     pub font_size: i32,
+    /// Binning of fractional X offset
     pub x_bin: SubpixelBin,
+    /// Binning of fractional Y offset
     pub y_bin: SubpixelBin,
 }
 
@@ -32,6 +38,7 @@ impl CacheKey {
     }
 }
 
+/// Binning of subpixel position for cache optimization
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum SubpixelBin {
     Zero,

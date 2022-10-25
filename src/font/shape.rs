@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use super::{CacheKey, FontLayoutGlyph, FontLayoutLine};
+use crate::{CacheKey, LayoutGlyph, LayoutLine};
 
 pub struct FontShapeGlyph {
     pub start: usize,
@@ -14,7 +14,7 @@ pub struct FontShapeGlyph {
 }
 
 impl FontShapeGlyph {
-    fn layout(&self, font_size: i32, x: f32, y: f32, rtl: bool) -> FontLayoutGlyph {
+    fn layout(&self, font_size: i32, x: f32, y: f32, rtl: bool) -> LayoutGlyph {
         let x_offset = font_size as f32 * self.x_offset;
         let y_offset = font_size as f32 * self.y_offset;
         let x_advance = font_size as f32 * self.x_advance;
@@ -25,7 +25,7 @@ impl FontShapeGlyph {
             font_size,
             (x + x_offset, y - y_offset)
         );
-        FontLayoutGlyph {
+        LayoutGlyph {
             start: self.start,
             end: self.end,
             x,
@@ -58,7 +58,7 @@ impl FontShapeLine {
         &self,
         font_size: i32,
         line_width: i32,
-        layout_lines: &mut Vec<FontLayoutLine>,
+        layout_lines: &mut Vec<LayoutLine>,
         mut layout_i: usize,
     ) {
         let mut push_line = true;
@@ -171,8 +171,7 @@ impl FontShapeLine {
                         std::mem::swap(&mut glyphs, &mut glyphs_swap);
                         layout_lines.insert(
                             layout_i,
-                            FontLayoutLine {
-                                rtl: self.rtl,
+                            LayoutLine {
                                 glyphs: glyphs_swap,
                             },
                         );
@@ -205,8 +204,7 @@ impl FontShapeLine {
                     std::mem::swap(&mut glyphs, &mut glyphs_swap);
                     layout_lines.insert(
                         layout_i,
-                        FontLayoutLine {
-                            rtl: self.rtl,
+                        LayoutLine {
                             glyphs: glyphs_swap,
                         },
                     );
@@ -221,8 +219,7 @@ impl FontShapeLine {
         if push_line {
             layout_lines.insert(
                 layout_i,
-                FontLayoutLine {
-                    rtl: self.rtl,
+                LayoutLine {
                     glyphs,
                 },
             );
