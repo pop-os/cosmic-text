@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+use std::sync::Arc;
 use unicode_script::{Script, UnicodeScript};
 
 use super::{Font, FontShapeGlyph, FontShapeLine, FontShapeSpan, FontShapeWord};
@@ -8,13 +9,13 @@ use super::fallback::{FontFallbackIter};
 /// Fonts that match a pattern
 pub struct FontMatches<'a> {
     pub locale: &'a str,
-    pub fonts: Vec<Font<'a>>,
+    pub fonts: Vec<Arc<Font<'a>>>,
 }
 
 impl<'a> FontMatches<'a> {
     fn shape_fallback(
         &self,
-        font: &'a Font<'a>,
+        font: &Font<'a>,
         line: &str,
         start_word: usize,
         end_word: usize,

@@ -829,8 +829,8 @@ impl<'a> TextBuffer<'a> {
                             "{}, {}: '{}' ('{}'): '{}' ({:?})",
                             self.cursor.line.get(),
                             self.cursor.index,
-                            font_opt.map_or("?", |font| font.info.family.as_str()),
-                            font_opt.map_or("?", |font| font.info.post_script_name.as_str()),
+                            font_opt.as_ref().map_or("?", |font| font.info.family.as_str()),
+                            font_opt.as_ref().map_or("?", |font| font.info.post_script_name.as_str()),
                             text_glyph,
                             text_glyph
                         );

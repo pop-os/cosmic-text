@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+use std::sync::Arc;
 use unicode_script::Script;
 
-use super::Font;
+use crate::Font;
 
 use self::platform::*;
 
@@ -27,7 +28,7 @@ mod platform;
 mod platform;
 
 pub struct FontFallbackIter<'a> {
-    fonts: &'a [Font<'a>],
+    fonts: &'a [Arc<Font<'a>>],
     default_families: &'a [&'a str],
     default_i: usize,
     scripts: Vec<Script>,
@@ -39,7 +40,12 @@ pub struct FontFallbackIter<'a> {
 }
 
 impl<'a> FontFallbackIter<'a> {
-    pub fn new(fonts: &'a [Font<'a>], default_families: &'a [&'a str], scripts: Vec<Script>, locale: &'a str) -> Self {
+    pub fn new(
+        fonts: &'a [Arc<Font<'a>>],
+        default_families: &'a [&'a str],
+        scripts: Vec<Script>,
+        locale: &'a str
+    ) -> Self {
         Self {
             fonts,
             default_families,
@@ -84,7 +90,7 @@ impl<'a> FontFallbackIter<'a> {
 }
 
 impl<'a> Iterator for FontFallbackIter<'a> {
-    type Item = &'a Font<'a>;
+    type Item = &'a Arc<Font<'a>>;
     fn next(&mut self) -> Option<Self::Item> {
         while self.default_i < self.default_families.len() {
             let default_family = self.default_families[self.default_i];

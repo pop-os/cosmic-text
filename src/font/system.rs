@@ -1,14 +1,20 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex},
+};
+
 use crate::{Attrs, Font, FontMatches};
 
 /// Access system fonts
-pub struct FontSystem {
+pub struct FontSystem<'a> {
     pub locale: String,
     db: fontdb::Database,
+    pub font_cache: Mutex<HashMap<fontdb::ID, Option<Arc<Font<'a>>>>>,
 }
 
-impl FontSystem {
+impl<'a> FontSystem<'a> {
     pub fn new() -> Self {
         let locale = sys_locale::get_locale().unwrap_or_else(|| {
             log::warn!("failed to get system locale, falling back to en-US");
@@ -50,11 +56,29 @@ impl FontSystem {
             );
         }
 
-        Self { locale, db }
+        Self {
+            locale,
+            db,
+            font_cache: Mutex::new(HashMap::new()),
+        }
+    }
+
+    pub fn get_font(&'a self, id: fontdb::ID) -> Option<Arc<Font<'a>>> {
+        let mut font_cache = self.font_cache.lock().unwrap();
+        font_cache.entry(id).or_insert_with(|| {
+            let face = self.db.face(id)?;
+            match Font::new(face) {
+                Some(font) => Some(Arc::new(font)),
+                None => {
+                    log::warn!("failed to load font '{}'", face.post_script_name);
+                    None
+                }
+            }
+        }).clone()
     }
 
     pub fn matches<F: Fn(&fontdb::FaceInfo) -> bool>(
-        &self,
+        &'a self,
         f: F,
     ) -> Option<FontMatches<'_>> {
         let mut fonts = Vec::new();
@@ -63,11 +87,9 @@ impl FontSystem {
                 continue;
             }
 
-            match Font::new(face) {
+            match self.get_font(face.id) {
                 Some(font) => fonts.push(font),
-                None => {
-                    log::warn!("failed to load font '{}'", face.post_script_name);
-                }
+                None => (),
             }
         }
 
@@ -81,7 +103,7 @@ impl FontSystem {
         }
     }
 
-    pub fn matches_attrs(&self, attrs: Attrs) -> Option<FontMatches<'_>> {
+    pub fn matches_attrs(&'a self, attrs: Attrs) -> Option<FontMatches<'_>> {
         self.matches(|info| {
             let matched = {
                 info.style == attrs.style &&
@@ -106,11 +128,5 @@ impl FontSystem {
 
             matched
         })
-    }
-}
-
-impl Default for FontSystem {
-    fn default() -> Self {
-        Self::new()
     }
 }
