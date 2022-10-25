@@ -3,6 +3,7 @@
 use cosmic_text::{FontSystem, TextAction, TextBuffer, TextMetrics};
 use orbclient::{Color, EventOption, Renderer, Window, WindowFlag};
 use std::{env, fs, process, thread, time::{Duration, Instant}};
+use unicode_segmentation::UnicodeSegmentation;
 
 fn redraw(window: &mut Window, buffer: &mut TextBuffer<'_>) {
     let bg_color = Color::rgb(0x34, 0x34, 0x34);
@@ -109,30 +110,32 @@ fn main() {
     for line in text.lines() {
         log::debug!("Line {:?}", line);
 
-        for c in line.chars() {
-            log::trace!("Insert {:?}", c);
+        for grapheme in line.graphemes(true) {
+            for c in grapheme.chars() {
+                log::trace!("Insert {:?}", c);
 
-            // Test backspace of character
-            {
-                let cursor = buffer.cursor();
+                // Test backspace of character
+                {
+                    let cursor = buffer.cursor();
+                    buffer.action(TextAction::Insert(c));
+                    buffer.action(TextAction::Backspace);
+                    assert_eq!(cursor, buffer.cursor());
+                }
+
+                // Finally, normal insert of character
                 buffer.action(TextAction::Insert(c));
-                buffer.action(TextAction::Backspace);
-                assert_eq!(cursor, buffer.cursor());
             }
 
-            /*TODO: Delete will remove whole EGC
-            // Test delete of character
+            // Test delete of EGC
             {
                 let cursor = buffer.cursor();
-                buffer.action(TextAction::Insert(c));
                 buffer.action(TextAction::Previous);
                 buffer.action(TextAction::Delete);
+                for c in grapheme.chars() {
+                    buffer.action(TextAction::Insert(c));
+                }
                 assert_eq!(cursor, buffer.cursor());
             }
-            */
-
-            // Finally, normal insert of character
-            buffer.action(TextAction::Insert(c));
         }
 
         // Test backspace of newline
