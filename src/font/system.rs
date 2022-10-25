@@ -17,23 +17,37 @@ impl FontSystem {
         log::info!("Locale: {}", locale);
 
         let mut db = fontdb::Database::new();
-        let now = std::time::Instant::now();
-        db.load_system_fonts();
-        //TODO: configurable default fonts
-        db.set_monospace_family("Fira Mono");
-        db.set_sans_serif_family("Fira Sans");
-        db.set_serif_family("DejaVu Serif");
-        log::info!(
-            "Loaded {} font faces in {}ms.",
-            db.len(),
-            now.elapsed().as_millis()
-        );
+        {
+            let now = std::time::Instant::now();
 
-        //TODO only do this on demand!
-        assert_eq!(db.len(), db.faces().len());
-        for i in 0..db.len() {
-            let id = db.faces()[i].id;
-            unsafe { db.make_shared_face_data(id); }
+            db.load_system_fonts();
+            //TODO: configurable default fonts
+            db.set_monospace_family("Fira Mono");
+            db.set_sans_serif_family("Fira Sans");
+            db.set_serif_family("DejaVu Serif");
+
+            log::info!(
+                "Parsed {} font faces in {}ms.",
+                db.len(),
+                now.elapsed().as_millis()
+            );
+        }
+
+        {
+            let now = std::time::Instant::now();
+
+            //TODO only do this on demand!
+            assert_eq!(db.len(), db.faces().len());
+            for i in 0..db.len() {
+                let id = db.faces()[i].id;
+                unsafe { db.make_shared_face_data(id); }
+            }
+
+            log::info!(
+                "Mapped {} font faces in {}ms.",
+                db.len(),
+                now.elapsed().as_millis()
+            );
         }
 
         Self { locale, db }
