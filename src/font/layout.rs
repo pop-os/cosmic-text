@@ -1,38 +1,47 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use super::{CacheKey, Font};
+use super::{CacheKey, FontMatches};
 
-pub struct FontLayoutGlyph<'a> {
+pub struct FontLayoutGlyph {
     pub start: usize,
     pub end: usize,
     pub x: f32,
     pub w: f32,
     pub rtl: bool,
-    pub font: &'a Font<'a>,
-    pub inner: (CacheKey, i32, i32),
+    pub cache_key: CacheKey,
+    pub x_int: i32,
+    pub y_int: i32,
 }
 
-pub struct FontLayoutLine<'a> {
+pub struct FontLayoutLine {
     pub rtl: bool,
-    pub glyphs: Vec<FontLayoutGlyph<'a>>,
+    pub glyphs: Vec<FontLayoutGlyph>,
 }
 
-impl<'a> FontLayoutLine<'a> {
-    pub fn draw<F: FnMut(i32, i32, u32)>(&self, base: u32, mut f: F) {
+impl FontLayoutLine {
+    pub fn draw<F: FnMut(i32, i32, u32)>(&self, matches: &FontMatches<'_>, base: u32, mut f: F) {
         for glyph in self.glyphs.iter() {
             use swash::scale::{Render, Source, StrikeWith};
             use swash::zeno::{Format, Vector};
 
-            let mut cache = glyph.font.cache.lock().unwrap();
+            let font = match matches.get_font(&glyph.cache_key.font_id) {
+                Some(some) => some,
+                None => {
+                    log::warn!("did not find font {:?}", glyph.cache_key.font_id);
+                    continue;
+                },
+            };
 
-            let (cache_key, x_int, y_int) = glyph.inner;
+            let mut cache = font.cache.lock().unwrap();
+
+            let (cache_key, x_int, y_int) = (glyph.cache_key, glyph.x_int, glyph.y_int);
 
             let image_opt = cache.entry(cache_key).or_insert_with(|| {
-                let mut scale_context = glyph.font.scale_context.lock().unwrap();
+                let mut scale_context = font.scale_context.lock().unwrap();
 
                 // Build the scaler
                 let mut scaler = scale_context
-                    .builder(glyph.font.swash)
+                    .builder(font.swash)
                     .size(cache_key.font_size as f32)
                     .hint(true)
                     .build();

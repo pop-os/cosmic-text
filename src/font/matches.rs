@@ -57,7 +57,6 @@ impl<'a> FontMatches<'a> {
                 missing.push(start_word + info.cluster as usize);
             }
 
-            let inner = info.glyph_id as swash::GlyphId;
             glyphs.push(FontShapeGlyph {
                 start: start_word + info.cluster as usize,
                 end: end_word, // Set later
@@ -65,8 +64,8 @@ impl<'a> FontMatches<'a> {
                 y_advance,
                 x_offset,
                 y_offset,
-                font,
-                inner,
+                font_id: font.info.id,
+                glyph_id: info.glyph_id.try_into().unwrap(),
             });
         }
 
@@ -324,5 +323,14 @@ impl<'a> FontMatches<'a> {
         };
 
         FontShapeLine { rtl, spans }
+    }
+
+    pub fn get_font(&self, id: &fontdb::ID) -> Option<&Font> {
+        for font in self.fonts.iter() {
+            if &font.info.id == id {
+                return Some(font);
+            }
+        }
+        None
     }
 }

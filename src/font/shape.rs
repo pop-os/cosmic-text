@@ -1,58 +1,64 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use super::{CacheKey, Font, FontLayoutGlyph, FontLayoutLine};
+use super::{CacheKey, FontLayoutGlyph, FontLayoutLine};
 
-pub struct FontShapeGlyph<'a> {
+pub struct FontShapeGlyph {
     pub start: usize,
     pub end: usize,
     pub x_advance: f32,
     pub y_advance: f32,
     pub x_offset: f32,
     pub y_offset: f32,
-    pub font: &'a Font<'a>,
-    pub inner: swash::GlyphId,
+    pub font_id: fontdb::ID,
+    pub glyph_id: u16,
 }
 
-impl<'a> FontShapeGlyph<'a> {
-    fn layout(&self, font_size: i32, x: f32, y: f32, rtl: bool) -> FontLayoutGlyph<'a> {
+impl FontShapeGlyph {
+    fn layout(&self, font_size: i32, x: f32, y: f32, rtl: bool) -> FontLayoutGlyph {
         let x_offset = font_size as f32 * self.x_offset;
         let y_offset = font_size as f32 * self.y_offset;
         let x_advance = font_size as f32 * self.x_advance;
 
-        let inner = CacheKey::new(self.font.info.id, self.inner, font_size, (x + x_offset, y - y_offset));
+        let (cache_key, x_int, y_int) = CacheKey::new(
+            self.font_id,
+            self.glyph_id,
+            font_size,
+            (x + x_offset, y - y_offset)
+        );
         FontLayoutGlyph {
             start: self.start,
             end: self.end,
             x,
             w: x_advance,
             rtl,
-            font: self.font,
-            inner,
+            cache_key,
+            x_int,
+            y_int,
         }
     }
 }
 
-pub struct FontShapeWord<'a> {
+pub struct FontShapeWord {
     pub blank: bool,
-    pub glyphs: Vec<FontShapeGlyph<'a>>,
+    pub glyphs: Vec<FontShapeGlyph>,
 }
 
-pub struct FontShapeSpan<'a> {
+pub struct FontShapeSpan {
     pub rtl: bool,
-    pub words: Vec<FontShapeWord<'a>>,
+    pub words: Vec<FontShapeWord>,
 }
 
-pub struct FontShapeLine<'a> {
+pub struct FontShapeLine {
     pub rtl: bool,
-    pub spans: Vec<FontShapeSpan<'a>>,
+    pub spans: Vec<FontShapeSpan>,
 }
 
-impl<'a> FontShapeLine<'a> {
+impl FontShapeLine {
     pub fn layout(
         &self,
         font_size: i32,
         line_width: i32,
-        layout_lines: &mut Vec<FontLayoutLine<'a>>,
+        layout_lines: &mut Vec<FontLayoutLine>,
         mut layout_i: usize,
     ) {
         let mut push_line = true;

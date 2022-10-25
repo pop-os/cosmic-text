@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use cosmic_text::{FontSystem, TextAction, TextBuffer, TextCursor, TextLineIndex, TextMetrics};
+use cosmic_text::{FontSystem, TextAction, TextBuffer, TextMetrics};
 use orbclient::{Color, EventOption, Renderer, Window, WindowFlag};
 use std::{env, fs, thread, time::{Duration, Instant}};
 
@@ -103,9 +103,6 @@ fn main() {
     buffer.shape_until_cursor();
 
     loop {
-        let font_size = buffer.metrics().font_size;
-        let line_height = buffer.metrics().line_height;
-
         let mut force_drag = true;
 
         if buffer.redraw {

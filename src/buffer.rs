@@ -117,13 +117,13 @@ impl fmt::Display for TextMetrics {
     }
 }
 
-pub struct TextBufferLine<'a> {
+pub struct TextBufferLine {
     text: String,
-    shape_opt: Option<FontShapeLine<'a>>,
-    layout_opt: Option<Vec<FontLayoutLine<'a>>>,
+    shape_opt: Option<FontShapeLine>,
+    layout_opt: Option<Vec<FontLayoutLine>>,
 }
 
-impl<'a> TextBufferLine<'a> {
+impl TextBufferLine {
     pub fn new(text: String) -> Self {
         Self {
             text,
@@ -141,7 +141,7 @@ impl<'a> TextBufferLine<'a> {
         self.layout_opt = None;
     }
 
-    pub fn shape(&mut self, font_matches: &'a FontMatches<'a>) -> &FontShapeLine<'a> {
+    pub fn shape(&mut self, font_matches: &FontMatches<'_>) -> &FontShapeLine {
         if self.shape_opt.is_none() {
             self.shape_opt = Some(font_matches.shape_line(&self.text));
             self.layout_opt = None;
@@ -149,7 +149,7 @@ impl<'a> TextBufferLine<'a> {
         self.shape_opt.as_ref().unwrap()
     }
 
-    pub fn layout(&mut self, font_matches: &'a FontMatches<'a>, font_size: i32, width: i32) -> &[FontLayoutLine<'a>] {
+    pub fn layout(&mut self, font_matches: &FontMatches<'_>, font_size: i32, width: i32) -> &[FontLayoutLine] {
         if self.layout_opt.is_none() {
             let mut layout = Vec::new();
             let shape = self.shape(font_matches);
@@ -168,7 +168,7 @@ impl<'a> TextBufferLine<'a> {
 /// A buffer of text that is shaped and laid out
 pub struct TextBuffer<'a> {
     font_matches: &'a FontMatches<'a>,
-    lines: Vec<TextBufferLine<'a>>,
+    lines: Vec<TextBufferLine>,
     metrics: TextMetrics,
     width: i32,
     height: i32,
@@ -460,7 +460,7 @@ impl<'a> TextBuffer<'a> {
     }
 
     /// Get the lines of the original text
-    pub fn text_lines(&self) -> &[TextBufferLine<'a>] {
+    pub fn text_lines(&self) -> &[TextBufferLine] {
         &self.lines
     }
 
@@ -769,13 +769,14 @@ impl<'a> TextBuffer<'a> {
                         self.redraw = true;
 
                         if let Some(glyph) = layout_line.glyphs.get(new_cursor_glyph) {
+                            let font_opt = self.font_matches.get_font(&glyph.cache_key.font_id);
                             let text_glyph = &line.text[glyph.start..glyph.end];
                             log::debug!(
                                 "{}, {}: '{}' ('{}'): '{}' ({:?})",
                                 self.cursor.line.get(),
                                 self.cursor.index,
-                                glyph.font.info.family,
-                                glyph.font.info.post_script_name,
+                                font_opt.map_or("?", |font| font.info.family.as_str()),
+                                font_opt.map_or("?", |font| font.info.post_script_name.as_str()),
                                 text_glyph,
                                 text_glyph
                             );
@@ -974,7 +975,7 @@ impl<'a> TextBuffer<'a> {
                     );
                 }
 
-                layout_line.draw(color, |x, y, color| {
+                layout_line.draw(self.font_matches, color, |x, y, color| {
                     f(x, line_y + y, 1, 1, color);
                 });
 
