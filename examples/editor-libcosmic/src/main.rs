@@ -101,35 +101,8 @@ impl Application for Window {
     type Theme = Theme;
 
     fn new(_flags: ()) -> (Self, Command<Self::Message>) {
-        let font_matches: FontMatches<'static> = FONT_SYSTEM.matches(|info| -> bool {
-            #[cfg(feature = "mono")]
-            let monospaced = true;
-
-            #[cfg(not(feature = "mono"))]
-            let monospaced = false;
-
-            let matched = {
-                info.style == fontdb::Style::Normal &&
-                info.weight == fontdb::Weight::NORMAL &&
-                info.stretch == fontdb::Stretch::Normal &&
-                (info.monospaced == monospaced || info.post_script_name.contains("Emoji"))
-            };
-
-            if matched {
-                log::debug!(
-                    "{:?}: family '{}' postscript name '{}' style {:?} weight {:?} stretch {:?} monospaced {:?}",
-                    info.id,
-                    info.family,
-                    info.post_script_name,
-                    info.style,
-                    info.weight,
-                    info.stretch,
-                    info.monospaced
-                );
-            }
-
-            matched
-        }).unwrap();
+        let attrs = cosmic_text::Attrs::new().monospaced(cfg!(feature = "mono"));
+        let font_matches = FONT_SYSTEM.matches_attrs(attrs).unwrap();
 
         let font_size_i = 1; // Body
         let buffer = TextBuffer::new(

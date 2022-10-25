@@ -30,35 +30,8 @@ fn main() {
     )
     .unwrap();
 
-    let font_matches = font_system.matches(|info| -> bool {
-        #[cfg(feature = "mono")]
-        let monospaced = true;
-
-        #[cfg(not(feature = "mono"))]
-        let monospaced = false;
-
-        let matched = {
-            info.style == fontdb::Style::Normal &&
-            info.weight == fontdb::Weight::NORMAL &&
-            info.stretch == fontdb::Stretch::Normal &&
-            (info.monospaced == monospaced || info.post_script_name.contains("Emoji"))
-        };
-
-        if matched {
-            log::debug!(
-                "{:?}: family '{}' postscript name '{}' style {:?} weight {:?} stretch {:?} monospaced {:?}",
-                info.id,
-                info.family,
-                info.post_script_name,
-                info.style,
-                info.weight,
-                info.stretch,
-                info.monospaced
-            );
-        }
-
-        matched
-    }).unwrap();
+    let attrs = cosmic_text::Attrs::new().monospaced(cfg!(feature = "mono"));
+    let font_matches = font_system.matches_attrs(attrs).unwrap();
 
     let bg_color = Color::rgb(0x34, 0x34, 0x34);
     let font_color = Color::rgb(0xFF, 0xFF, 0xFF);

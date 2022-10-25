@@ -2,7 +2,7 @@
 
 use std::ops::Deref;
 
-use super::{Font, FontMatches};
+use crate::{Attrs, Font, FontMatches};
 
 /// Access system fonts
 pub struct FontSystem {
@@ -80,6 +80,33 @@ impl FontSystem {
         } else {
             None
         }
+    }
+
+    pub fn matches_attrs(&self, attrs: Attrs) -> Option<FontMatches<'_>> {
+        self.matches(|info| {
+            let matched = {
+                info.style == attrs.style &&
+                info.weight == attrs.weight &&
+                info.stretch == attrs.stretch &&
+                //TODO: smarter way of including emoji
+                (info.monospaced == attrs.monospaced || info.post_script_name.contains("Emoji"))
+            };
+
+            if matched {
+                log::debug!(
+                    "{:?}: family '{}' postscript name '{}' style {:?} weight {:?} stretch {:?} monospaced {:?}",
+                    info.id,
+                    info.family,
+                    info.post_script_name,
+                    info.style,
+                    info.weight,
+                    info.stretch,
+                    info.monospaced
+                );
+            }
+
+            matched
+        })
     }
 }
 
