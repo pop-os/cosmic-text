@@ -80,6 +80,8 @@ fn main() {
     loop {
         let mut force_drag = true;
 
+        buffer.shape_until_scroll();
+
         if buffer.redraw {
             let instant = Instant::now();
 

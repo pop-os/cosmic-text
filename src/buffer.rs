@@ -354,7 +354,7 @@ impl<'a> TextBuffer<'a> {
         self.shape_until_scroll();
     }
 
-    fn shape_until_scroll(&mut self) {
+    pub fn shape_until_scroll(&mut self) {
         let lines = self.lines();
 
         let scroll_end = self.scroll + lines;
