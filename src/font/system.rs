@@ -104,25 +104,19 @@ impl<'a> FontSystem<'a> {
     }
 
     pub fn matches_attrs(&'a self, attrs: Attrs) -> Option<FontMatches<'_>> {
-        self.matches(|info| {
-            let matched = {
-                info.style == attrs.style &&
-                info.weight == attrs.weight &&
-                info.stretch == attrs.stretch &&
-                //TODO: smarter way of including emoji
-                (info.monospaced == attrs.monospaced || info.post_script_name.contains("Emoji"))
-            };
+        self.matches(|face| {
+            let matched = attrs.matches(face);
 
             if matched {
                 log::debug!(
                     "{:?}: family '{}' postscript name '{}' style {:?} weight {:?} stretch {:?} monospaced {:?}",
-                    info.id,
-                    info.family,
-                    info.post_script_name,
-                    info.style,
-                    info.weight,
-                    info.stretch,
-                    info.monospaced
+                    face.id,
+                    face.family,
+                    face.post_script_name,
+                    face.style,
+                    face.weight,
+                    face.stretch,
+                    face.monospaced
                 );
             }
 

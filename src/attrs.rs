@@ -45,4 +45,12 @@ impl<'a> Attrs<'a> {
         self.weight = weight;
         self
     }
+
+    pub fn matches(&self, face: &fontdb::FaceInfo) -> bool {
+        face.style == self.style &&
+        face.weight == self.weight &&
+        face.stretch == self.stretch &&
+        //TODO: smarter way of including emoji
+        (face.monospaced == self.monospaced || face.post_script_name.contains("Emoji"))
+    }
 }
