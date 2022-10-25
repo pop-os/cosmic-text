@@ -167,6 +167,7 @@ fn main() {
         }
 
         let mut found_event = false;
+        let mut window_async = false;
         for event in window.events() {
             found_event = true;
             match event.to_option() {
@@ -225,8 +226,10 @@ fn main() {
 
                         if mouse_y <= 5 {
                             buffer.action(TextAction::Scroll { lines: -3 });
+                            window_async = true;
                         } else if mouse_y + 5 >= window.height() as i32 {
                             buffer.action(TextAction::Scroll { lines: 3 });
+                            window_async = true;
                         } else {
                             buffer.shape_until_cursor()
                         }
@@ -269,12 +272,19 @@ fn main() {
 
             if mouse_y <= 5 {
                 buffer.action(TextAction::Scroll { lines: -3 });
+                window_async = true;
             } else if mouse_y + 5 >= window.height() as i32 {
                 buffer.action(TextAction::Scroll { lines: 3 });
+                window_async = true;
             }
         }
 
-        if ! found_event {
+        if window_async != window.is_async() {
+            window.set_async(window_async);
+        }
+
+        if window_async && ! found_event {
+            // In async mode and no event found, sleep
             thread::sleep(Duration::from_millis(5));
         }
     }
