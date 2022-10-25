@@ -2,7 +2,7 @@
 
 use cosmic_text::{FontSystem, TextAction, TextBuffer, TextCursor, TextLineIndex, TextMetrics};
 use orbclient::{Color, EventOption, Renderer, Window, WindowFlag};
-use std::{env, fs, time::Instant};
+use std::{env, fs, thread, time::{Duration, Instant}};
 
 fn main() {
     env_logger::init();
@@ -166,7 +166,9 @@ fn main() {
             log::debug!("redraw: {:?}", duration);
         }
 
+        let mut found_event = false;
         for event in window.events() {
+            found_event = true;
             match event.to_option() {
                 EventOption::Key(event) => match event.scancode {
                     orbclient::K_CTRL => ctrl_pressed = event.pressed,
@@ -270,6 +272,10 @@ fn main() {
             } else if mouse_y + 5 >= window.height() as i32 {
                 buffer.action(TextAction::Scroll { lines: 3 });
             }
+        }
+
+        if ! found_event {
+            thread::sleep(Duration::from_millis(5));
         }
     }
 }
