@@ -20,6 +20,7 @@ use cosmic::{
     settings,
     widget::{
         button,
+        toggler,
     },
 };
 use cosmic_text::{
@@ -64,6 +65,9 @@ pub struct Window {
     path_opt: Option<PathBuf>,
     buffer: Mutex<TextBuffer<'static>>,
     cache: Mutex<SwashCache>,
+    bold: bool,
+    italic: bool,
+    monospaced: bool,
 }
 
 #[allow(dead_code)]
@@ -71,6 +75,9 @@ pub struct Window {
 pub enum Message {
     Open,
     Save,
+    Bold(bool),
+    Italic(bool),
+    Monospaced(bool),
     MetricsChanged(TextMetrics),
     ThemeChanged(&'static str),
 }
@@ -100,11 +107,10 @@ impl Application for Window {
     type Theme = Theme;
 
     fn new(_flags: ()) -> (Self, Command<Self::Message>) {
-        let attrs = cosmic_text::Attrs::new().monospaced(cfg!(feature = "mono"));
         let font_size_i = 1; // Body
         let buffer = TextBuffer::new(
             &FONT_SYSTEM,
-            attrs,
+            cosmic_text::Attrs::new(),
             FONT_SIZES[font_size_i],
         );
 
@@ -113,6 +119,9 @@ impl Application for Window {
             path_opt: None,
             buffer: Mutex::new(buffer),
             cache: Mutex::new(SwashCache::new()),
+            bold: false,
+            italic: false,
+            monospaced: false,
         };
         if let Some(arg) = env::args().nth(1) {
             window.open(PathBuf::from(arg));
@@ -157,6 +166,35 @@ impl Application for Window {
                     }
                 }
             },
+            Message::Bold(bold) => {
+                self.bold = bold;
+
+                let mut buffer = self.buffer.lock().unwrap();
+                let attrs = buffer.attrs().clone().weight(if bold {
+                    cosmic_text::Weight::BOLD
+                } else {
+                    cosmic_text::Weight::NORMAL
+                });
+                buffer.set_attrs(&FONT_SYSTEM, attrs);
+            },
+            Message::Italic(italic) => {
+                self.italic = italic;
+
+                let mut buffer = self.buffer.lock().unwrap();
+                let attrs = buffer.attrs().clone().style(if italic {
+                    cosmic_text::Style::Italic
+                } else {
+                    cosmic_text::Style::Normal
+                });
+                buffer.set_attrs(&FONT_SYSTEM, attrs);
+            },
+            Message::Monospaced(monospaced) => {
+                self.monospaced = monospaced;
+
+                let mut buffer = self.buffer.lock().unwrap();
+                let attrs = buffer.attrs().clone().monospaced(monospaced);
+                buffer.set_attrs(&FONT_SYSTEM, attrs);
+            },
             Message::MetricsChanged(metrics) => {
                 let mut buffer = self.buffer.lock().unwrap();
                 buffer.set_metrics(metrics);
@@ -196,6 +234,12 @@ impl Application for Window {
                 button!("Open").on_press(Message::Open),
                 button!("Save").on_press(Message::Save),
                 horizontal_space(Length::Fill),
+                text("Bold:"),
+                toggler(None, self.bold, Message::Bold),
+                text("Italic:"),
+                toggler(None, self.italic, Message::Italic),
+                text("Monospaced:"),
+                toggler(None, self.monospaced, Message::Monospaced),
                 text("Theme:"),
                 theme_picker,
                 text("Font Size:"),

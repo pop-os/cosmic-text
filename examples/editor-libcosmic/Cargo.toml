@@ -23,6 +23,3 @@ version = "0.10"
 #TODO: iced portal
 #default-features = false
 #features = ["xdg-portal"]
-
-[features]
-mono = []

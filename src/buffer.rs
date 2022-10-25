@@ -516,6 +516,24 @@ impl<'a> TextBuffer<'a> {
         self.height / self.metrics.line_height
     }
 
+    pub fn attrs(&self) -> &Attrs<'a> {
+        &self.attrs
+    }
+
+    /// Set attributes
+    pub fn set_attrs(&mut self, font_system: &'a FontSystem<'a>, attrs: Attrs<'a>) {
+        if attrs != self.attrs {
+            self.font_matches = font_system.matches_attrs(&attrs);
+            self.attrs = attrs;
+
+            for line in self.lines.iter_mut() {
+                line.reset();
+            }
+
+            self.shape_until_scroll();
+        }
+    }
+
     /// Set text of buffer
     pub fn set_text(&mut self, text: &str) {
         self.lines.clear();

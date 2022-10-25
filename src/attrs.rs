@@ -2,6 +2,7 @@
 
 pub use fontdb::{Family, Stretch, Style, Weight};
 
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Attrs<'a> {
     pub family: Family<'a>,
     pub monospaced: bool,
