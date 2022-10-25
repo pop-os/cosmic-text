@@ -23,7 +23,7 @@ impl<'a> FontShapeGlyph<'a> {
         FontLayoutGlyph {
             start: self.start,
             end: self.end,
-            x: x,
+            x,
             w: x_advance,
             rtl,
             font: self.font,
