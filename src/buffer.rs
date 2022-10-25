@@ -762,101 +762,88 @@ impl<'a> TextBuffer<'a> {
         let font_size = self.metrics.font_size;
         let line_height = self.metrics.line_height;
 
-        let mut line_y = font_size;
-        let mut layout_i = 0;
-        for (line_i, line) in self.lines.iter().enumerate() {
-            let layout = match line.layout_opt.as_ref() {
-                Some(some) => some,
-                None => break,
-            };
+        let mut new_cursor = self.cursor;
 
-            for layout_line in layout {
-                let scrolled = layout_i < self.scroll;
-                layout_i += 1;
+        for run in self.layout_runs() {
+            let line_y = run.line_y;
 
-                if scrolled {
-                    continue;
-                }
+            if mouse_y >= line_y - font_size
+            && mouse_y < line_y - font_size + line_height
+            {
+                let mut new_cursor_glyph = run.glyphs.len();
+                let mut new_cursor_char = 0;
+                'hit: for (glyph_i, glyph) in run.glyphs.iter().enumerate() {
+                    if mouse_x >= glyph.x as i32
+                    && mouse_x <= (glyph.x + glyph.w) as i32
+                    {
+                        new_cursor_glyph = glyph_i;
 
-                if line_y > self.height {
-                    return;
-                }
+                        let cluster = &run.text[glyph.start..glyph.end];
+                        let total = cluster.grapheme_indices(true).count();
+                        let mut egc_x = glyph.x;
+                        let egc_w = glyph.w / (total as f32);
+                        for (egc_i, egc) in cluster.grapheme_indices(true) {
+                            if mouse_x >= egc_x as i32
+                            && mouse_x <= (egc_x + egc_w) as i32
+                            {
+                                new_cursor_char = egc_i;
 
-                if mouse_y >= line_y - font_size
-                && mouse_y < line_y - font_size + line_height
-                {
-                    let mut new_cursor_glyph = layout_line.glyphs.len();
-                    let mut new_cursor_char = 0;
-                    'hit: for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
-                        if mouse_x >= glyph.x as i32
-                        && mouse_x <= (glyph.x + glyph.w) as i32
-                        {
-                            new_cursor_glyph = glyph_i;
-
-                            let cluster = &line.text[glyph.start..glyph.end];
-                            let total = cluster.grapheme_indices(true).count();
-                            let mut egc_x = glyph.x;
-                            let egc_w = glyph.w / (total as f32);
-                            for (egc_i, egc) in cluster.grapheme_indices(true) {
-                                if mouse_x >= egc_x as i32
-                                && mouse_x <= (egc_x + egc_w) as i32
-                                {
-                                    new_cursor_char = egc_i;
-
-                                    let right_half = mouse_x >= (egc_x + egc_w / 2.0) as i32;
-                                    if right_half != glyph.rtl {
-                                        // If clicking on last half of glyph, move cursor past glyph
-                                        new_cursor_char += egc.len();
-                                    }
-                                    break 'hit;
+                                let right_half = mouse_x >= (egc_x + egc_w / 2.0) as i32;
+                                if right_half != glyph.rtl {
+                                    // If clicking on last half of glyph, move cursor past glyph
+                                    new_cursor_char += egc.len();
                                 }
-                                egc_x += egc_w;
+                                break 'hit;
                             }
-
-                            let right_half = mouse_x >= (glyph.x + glyph.w / 2.0) as i32;
-                            if right_half != glyph.rtl {
-                                // If clicking on last half of glyph, move cursor past glyph
-                                new_cursor_char = cluster.len();
-                            }
-                            break 'hit;
+                            egc_x += egc_w;
                         }
-                    }
 
-                    let mut new_cursor = TextCursor::new(TextLineIndex::new(line_i), 0);
-
-                    match layout_line.glyphs.get(new_cursor_glyph) {
-                        Some(glyph) => {
-                            // Position at glyph
-                            new_cursor.index = glyph.start + new_cursor_char;
-                        },
-                        None => if let Some(glyph) = layout_line.glyphs.last() {
-                            // Position at end of line
-                            new_cursor.index = glyph.end;
-                        },
-                    }
-
-                    if new_cursor != self.cursor {
-                        self.cursor = new_cursor;
-                        self.redraw = true;
-
-                        if let Some(glyph) = layout_line.glyphs.get(new_cursor_glyph) {
-                            let font_opt = self.font_matches.get_font(&glyph.cache_key.font_id);
-                            let text_glyph = &line.text[glyph.start..glyph.end];
-                            log::debug!(
-                                "{}, {}: '{}' ('{}'): '{}' ({:?})",
-                                self.cursor.line.get(),
-                                self.cursor.index,
-                                font_opt.map_or("?", |font| font.info.family.as_str()),
-                                font_opt.map_or("?", |font| font.info.post_script_name.as_str()),
-                                text_glyph,
-                                text_glyph
-                            );
+                        let right_half = mouse_x >= (glyph.x + glyph.w / 2.0) as i32;
+                        if right_half != glyph.rtl {
+                            // If clicking on last half of glyph, move cursor past glyph
+                            new_cursor_char = cluster.len();
                         }
+                        break 'hit;
                     }
                 }
 
-                line_y += line_height;
+                new_cursor.line = run.line_i;
+                new_cursor.index = 0;
+
+                match run.glyphs.get(new_cursor_glyph) {
+                    Some(glyph) => {
+                        // Position at glyph
+                        new_cursor.index = glyph.start + new_cursor_char;
+                    },
+                    None => if let Some(glyph) = run.glyphs.last() {
+                        // Position at end of line
+                        new_cursor.index = glyph.end;
+                    },
+                }
+
+                if new_cursor != self.cursor {
+                    if let Some(glyph) = run.glyphs.get(new_cursor_glyph) {
+                        let font_opt = self.font_matches.get_font(&glyph.cache_key.font_id);
+                        let text_glyph = &run.text[glyph.start..glyph.end];
+                        log::debug!(
+                            "{}, {}: '{}' ('{}'): '{}' ({:?})",
+                            self.cursor.line.get(),
+                            self.cursor.index,
+                            font_opt.map_or("?", |font| font.info.family.as_str()),
+                            font_opt.map_or("?", |font| font.info.post_script_name.as_str()),
+                            text_glyph,
+                            text_glyph
+                        );
+                    }
+                }
+
+                break;
             }
+        }
+
+        if new_cursor != self.cursor {
+            self.cursor = new_cursor;
+            self.redraw = true;
         }
 
         let duration = instant.elapsed();
