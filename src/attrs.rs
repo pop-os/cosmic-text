@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 pub use fontdb::{Family, Stretch, Style, Weight};
 
 pub struct Attrs<'a> {
