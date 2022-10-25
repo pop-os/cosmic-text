@@ -233,6 +233,7 @@ impl<'a> TextBuffer<'a> {
         total_layout
     }
 
+    /// Shape lines until cursor, also scrolling to include cursor in view
     pub fn shape_until_cursor(&mut self) {
         let instant = Instant::now();
 
