@@ -80,7 +80,7 @@ impl<'a> FontSystem<'a> {
     pub fn matches<F: Fn(&fontdb::FaceInfo) -> bool>(
         &'a self,
         f: F,
-    ) -> Option<FontMatches<'_>> {
+    ) -> FontMatches<'_> {
         let mut fonts = Vec::new();
         for face in self.db.faces() {
             if !f(face) {
@@ -93,17 +93,13 @@ impl<'a> FontSystem<'a> {
             }
         }
 
-        if !fonts.is_empty() {
-            Some(FontMatches {
-                locale: &self.locale,
-                fonts
-            })
-        } else {
-            None
+        FontMatches {
+            locale: &self.locale,
+            fonts
         }
     }
 
-    pub fn matches_attrs(&'a self, attrs: Attrs) -> Option<FontMatches<'_>> {
+    pub fn matches_attrs(&'a self, attrs: &Attrs) -> FontMatches<'_> {
         self.matches(|face| {
             let matched = attrs.matches(face);
 

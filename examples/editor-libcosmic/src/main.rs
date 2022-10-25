@@ -23,7 +23,6 @@ use cosmic::{
     },
 };
 use cosmic_text::{
-    FontMatches,
     FontSystem,
     SwashCache,
     TextBuffer,
@@ -40,7 +39,7 @@ use self::text_box::text_box;
 mod text_box;
 
 lazy_static::lazy_static! {
-    static ref FONT_SYSTEM: FontSystem = FontSystem::new();
+    static ref FONT_SYSTEM: FontSystem<'static> = FontSystem::new();
 }
 
 static FONT_SIZES: &'static [TextMetrics] = &[
@@ -102,11 +101,10 @@ impl Application for Window {
 
     fn new(_flags: ()) -> (Self, Command<Self::Message>) {
         let attrs = cosmic_text::Attrs::new().monospaced(cfg!(feature = "mono"));
-        let font_matches = FONT_SYSTEM.matches_attrs(attrs).unwrap();
-
         let font_size_i = 1; // Body
         let buffer = TextBuffer::new(
-            font_matches,
+            &FONT_SYSTEM,
+            attrs,
             FONT_SIZES[font_size_i],
         );
 

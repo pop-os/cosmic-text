@@ -7,7 +7,7 @@ use std::{
 };
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::{LayoutGlyph, LayoutLine, FontMatches, FontShapeLine};
+use crate::{Attrs, LayoutGlyph, LayoutLine, FontMatches, FontShapeLine, FontSystem};
 
 /// An action to perform on a [TextBuffer]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -238,6 +238,7 @@ impl TextBufferLine {
 /// A buffer of text that is shaped and laid out
 pub struct TextBuffer<'a> {
     font_matches: FontMatches<'a>,
+    attrs: Attrs<'a>,
     lines: Vec<TextBufferLine>,
     metrics: TextMetrics,
     width: i32,
@@ -250,11 +251,14 @@ pub struct TextBuffer<'a> {
 
 impl<'a> TextBuffer<'a> {
     pub fn new(
-        font_matches: FontMatches<'a>,
+        font_system: &'a FontSystem<'a>,
+        attrs: Attrs<'a>,
         metrics: TextMetrics,
     ) -> Self {
+        let font_matches = font_system.matches_attrs(&attrs);
         let mut buffer = Self {
             font_matches,
+            attrs,
             lines: Vec::new(),
             metrics,
             width: 0,

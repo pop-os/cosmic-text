@@ -45,9 +45,6 @@ fn main() {
     )
     .unwrap();
 
-    let attrs = cosmic_text::Attrs::new().monospaced(cfg!(feature = "mono"));
-    let font_matches = font_system.matches_attrs(attrs).unwrap();
-
     let font_sizes = [
         TextMetrics::new(10, 14).scale(display_scale), // Caption
         TextMetrics::new(14, 20).scale(display_scale), // Body
@@ -58,8 +55,10 @@ fn main() {
     ];
     let font_size_default = 1; // Body
 
+    let attrs = cosmic_text::Attrs::new().monospaced(cfg!(feature = "mono"));
     let mut buffer = TextBuffer::new(
-        font_matches,
+        &font_system,
+        attrs,
         font_sizes[font_size_default]
     );
     buffer.set_size(

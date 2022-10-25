@@ -30,9 +30,6 @@ fn main() {
     )
     .unwrap();
 
-    let attrs = cosmic_text::Attrs::new().monospaced(cfg!(feature = "mono"));
-    let font_matches = font_system.matches_attrs(attrs).unwrap();
-
     let bg_color = Color::rgb(0x34, 0x34, 0x34);
     let font_color = Color::rgb(0xFF, 0xFF, 0xFF);
     let font_sizes = [
@@ -59,8 +56,10 @@ fn main() {
     let mut swash_cache = SwashCache::new();
 
     let line_x = 8 * display_scale;
+    let attrs = cosmic_text::Attrs::new().monospaced(cfg!(feature = "mono"));
     let mut buffer = TextBuffer::new(
-        font_matches,
+        &font_system,
+        attrs,
         font_sizes[font_size_i]
     );
     buffer.set_size(
