@@ -843,7 +843,7 @@ impl<'a> TextBuffer<'a> {
 
     /// Draw the buffer
     #[cfg(feature = "swash")]
-    pub fn draw<F>(&mut self, cache: &mut crate::SwashCache, color: u32, mut f: F)
+    pub fn draw<F>(&self, cache: &mut crate::SwashCache, color: u32, mut f: F)
         where F: FnMut(i32, i32, u32, u32, u32)
     {
         let font_size = self.metrics.font_size;
