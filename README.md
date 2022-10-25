@@ -42,7 +42,7 @@ The following features must be supported before this is "ready":
     - [x] Performance improvements
     - [x] Text selection
     - [x] Can automatically recreate https://unicode.org/udhr/ without errors (see below)
-    - [ ] Bidirectional selection
+    - [x] Bidirectional selection
     - [ ] Copy/paste
 
 The UDHR (UN Declaration of Human Rights) test involves taking the entire set of
