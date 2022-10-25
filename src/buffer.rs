@@ -648,7 +648,7 @@ impl<'a> TextBuffer<'a> {
                     if let Some((i, c)) = line
                         .text
                         .grapheme_indices(true)
-                        .take_while(|(i, c)| *i <= self.cursor.index)
+                        .take_while(|(i, _)| *i <= self.cursor.index)
                         .last()
                     {
                         line.text.replace_range(i..(i + c.len()), "");
@@ -694,11 +694,6 @@ impl<'a> TextBuffer<'a> {
         let mut line_y = font_size;
         let mut layout_i = 0;
         for (line_i, line) in self.lines.iter().enumerate() {
-            let shape = match line.shape_opt.as_ref() {
-                Some(some) => some,
-                None => break,
-            };
-
             let layout = match line.layout_opt.as_ref() {
                 Some(some) => some,
                 None => break,
@@ -891,111 +886,66 @@ impl<'a> TextBuffer<'a> {
                         }
                     };
 
-                    //TODO: do not calculate these on every line draw
-                    let start_layout = self.layout_cursor(&start);
-                    let end_layout = self.layout_cursor(&end);
-
-                    // Check if this layout line is inside the selection
-                    let mut inside = false;
-                    if line_i > start.line.get() && line_i < end.line.get() {
-                        // In between start and end lines, definitely inside selection
-                        inside = true;
-                    } else {
-                        if line_i == start.line.get() && line_i == end.line.get() {
-                            // On edge of start and end line, check if any contained glyphs are after start and before end
-                            for glyph in layout_line.glyphs.iter() {
-                                if glyph.end > start.index && glyph.start < end.index {
-                                    inside = true;
-                                    break;
-                                }
-                            }
-                        } else if line_i == start.line.get() {
-                            // On edge of start line, check if any contained glyphs are after start
-                            for glyph in layout_line.glyphs.iter() {
-                                if glyph.end > start.index {
-                                    inside = true;
-                                    break;
-                                }
-                            }
-                        } else if line_i == end.line.get() {
-                            // On edge of end line, check if any contained glyphs are before end
-                            for glyph in layout_line.glyphs.iter() {
-                                if glyph.start < end.index {
-                                    inside = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    if inside {
-                        let (start_glyph, start_glyph_offset) = if start.line.get() == line_i {
-                            cursor_glyph_opt(&start).unwrap_or((0, 0.0))
-                        } else {
-                            (0, 0.0)
-                        };
-
-                        let (end_glyph, end_glyph_offset) = if end.line.get() == line_i {
-                            cursor_glyph_opt(&end).unwrap_or((layout_line.glyphs.len() + 1, 0.0))
-                        } else {
-                            (layout_line.glyphs.len() + 1, 0.0)
-                        };
-
-                        if end_glyph > start_glyph
-                        || (end_glyph == start_glyph && end_glyph_offset > start_glyph_offset)
-                        {
-                            let (left_x, right_x) = if shape.rtl {
-                                (
-                                    layout_line.glyphs.get(end_glyph - 1).map_or(0, |glyph| {
-                                        (glyph.x - end_glyph_offset) as i32
-                                    }),
-                                    layout_line.glyphs.get(start_glyph).map_or(self.width, |glyph| {
-                                        (glyph.x + glyph.w - start_glyph_offset) as i32
-                                    }),
-                                )
-                            } else {
-                                (
-                                    layout_line.glyphs.get(start_glyph).map_or(0, |glyph| {
-                                        (glyph.x + start_glyph_offset) as i32
-                                    }),
-                                    layout_line.glyphs.get(end_glyph - 1).map_or(self.width, |glyph| {
-                                        (glyph.x + glyph.w + end_glyph_offset) as i32
-                                    }),
-                                )
-                            };
-
-                            /*
-                            f(
-                                left_x,
-                                line_y - font_size,
-                                cmp::max(0, right_x - left_x) as u32,
-                                line_height as u32,
-                                0x33_00_00_00 | (color & 0xFF_FF_FF)
-                            );
-                            */
-                        }
-
-                        for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
+                    if line_i >= start.line.get() && line_i <= end.line.get() {
+                        let mut range_opt = None;
+                        for glyph in layout_line.glyphs.iter() {
                             // Guess x offset based on characters
                             let cluster = &line.text[glyph.start..glyph.end];
                             let total = cluster.grapheme_indices(true).count();
                             let mut c_x = glyph.x;
-                            let mut c_w = glyph.w / total as f32;
+                            let c_w = glyph.w / total as f32;
                             for (i, c) in cluster.grapheme_indices(true) {
                                 let c_start = glyph.start + i;
                                 let c_end = glyph.start + i + c.len();
                                 if (start.line.get() != line_i || c_end > start.index)
                                 && (end.line.get() != line_i || c_start < end.index) {
-                                    f(
-                                        c_x as i32,
-                                        line_y - font_size,
-                                        c_w as u32,
-                                        line_height as u32,
-                                        0x33_00_00_00 | (color & 0xFF_FF_FF)
-                                    );
+                                    range_opt = match range_opt.take() {
+                                        Some((min, max)) => Some((
+                                            cmp::min(min, c_x as i32),
+                                            cmp::max(max, (c_x + c_w) as i32),
+                                        )),
+                                        None => Some((
+                                            c_x as i32,
+                                            (c_x + c_w) as i32,
+                                        ))
+                                    };
+                                } else {
+                                    match range_opt.take() {
+                                        Some((min, max)) => {
+                                            f(
+                                                min,
+                                                line_y - font_size,
+                                                cmp::max(0, max - min) as u32,
+                                                line_height as u32,
+                                                0x33_00_00_00 | (color & 0xFF_FF_FF)
+                                            );
+                                        },
+                                        None => (),
+                                    }
                                 }
                                 c_x += c_w;
                             }
+                        }
+
+                        match range_opt.take() {
+                            Some((mut min, mut max)) => {
+                                if end.line.get() > line_i {
+                                    // Draw to end of line
+                                    if shape.rtl {
+                                        min = 0;
+                                    } else {
+                                        max = self.width;
+                                    }
+                                }
+                                f(
+                                    min,
+                                    line_y - font_size,
+                                    cmp::max(0, max - min) as u32,
+                                    line_height as u32,
+                                    0x33_00_00_00 | (color & 0xFF_FF_FF)
+                                );
+                            },
+                            None => (),
                         }
                     }
                 }
