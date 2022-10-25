@@ -80,7 +80,7 @@ pub struct TextLayoutRun<'a> {
     pub line_i: TextLineIndex,
     /// The original text line
     pub text: &'a str,
-    /// True if the original paragraph starts from the right
+    /// True if the original paragraph direction is RTL
     pub rtl: bool,
     /// The array of layout glyphs to draw
     pub glyphs: &'a [LayoutGlyph],
