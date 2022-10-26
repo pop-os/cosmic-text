@@ -5,13 +5,14 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use crate::{Attrs, Family, Font, FontMatches};
+use crate::{Attrs, Font, FontMatches};
 
 /// Access system fonts
 pub struct FontSystem<'a> {
     pub locale: String,
     pub db: fontdb::Database,
     pub font_cache: Mutex<HashMap<fontdb::ID, Option<Arc<Font<'a>>>>>,
+    pub font_matches_cache: Mutex<HashMap<Attrs<'a>, Arc<FontMatches<'a>>>>,
 }
 
 impl<'a> FontSystem<'a> {
@@ -60,6 +61,7 @@ impl<'a> FontSystem<'a> {
             locale,
             db,
             font_cache: Mutex::new(HashMap::new()),
+            font_matches_cache: Mutex::new(HashMap::new()),
         }
     }
 
@@ -77,48 +79,33 @@ impl<'a> FontSystem<'a> {
         }).clone()
     }
 
-    pub fn matches<F: Fn(&fontdb::FaceInfo) -> bool>(
-        &'a self,
-        default_family: &Family,
-        f: F,
-    ) -> FontMatches<'_> {
-        let mut fonts = Vec::new();
-        for face in self.db.faces() {
-            if !f(face) {
-                continue;
+    pub fn get_font_matches(&'a self, attrs: Attrs<'a>) -> Arc<FontMatches<'a>> {
+        let mut font_matches_cache = self.font_matches_cache.lock().unwrap();
+        font_matches_cache.entry(attrs).or_insert_with(|| {
+            let now = std::time::Instant::now();
+
+            let mut fonts = Vec::new();
+            for face in self.db.faces() {
+                if !attrs.matches(face) {
+                    continue;
+                }
+
+                match self.get_font(face.id) {
+                    Some(font) => fonts.push(font),
+                    None => (),
+                }
             }
 
-            match self.get_font(face.id) {
-                Some(font) => fonts.push(font),
-                None => (),
-            }
-        }
+            let font_matches = Arc::new(FontMatches {
+                locale: &self.locale,
+                default_family: self.db.family_name(&attrs.family).to_string(),
+                fonts
+            });
 
-        FontMatches {
-            locale: &self.locale,
-            default_family: self.db.family_name(default_family).to_string(),
-            fonts
-        }
-    }
+            let elapsed = now.elapsed();
+            log::debug!("font matches for {:?} in {:?}", attrs, elapsed);
 
-    pub fn matches_attrs(&'a self, attrs: &Attrs) -> FontMatches<'_> {
-        self.matches(&attrs.family, |face| {
-            let matched = attrs.matches(face);
-
-            if matched {
-                log::debug!(
-                    "{:?}: family '{}' postscript name '{}' style {:?} weight {:?} stretch {:?} monospaced {:?}",
-                    face.id,
-                    face.family,
-                    face.post_script_name,
-                    face.style,
-                    face.weight,
-                    face.stretch,
-                    face.monospaced
-                );
-            }
-
-            matched
-        })
+            font_matches
+        }).clone()
     }
 }

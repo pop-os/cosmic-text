@@ -64,7 +64,7 @@ pub struct Window {
     theme: Theme,
     path_opt: Option<PathBuf>,
     buffer: Mutex<TextBuffer<'static>>,
-    cache: Mutex<SwashCache>,
+    cache: Mutex<SwashCache<'static>>,
     bold: bool,
     italic: bool,
     monospaced: bool,
@@ -117,11 +117,13 @@ impl Application for Window {
             FONT_SIZES[font_size_i],
         );
 
+        let cache = SwashCache::new(&FONT_SYSTEM);
+
         let mut window = Window {
             theme: Theme::Dark,
             path_opt: None,
             buffer: Mutex::new(buffer),
-            cache: Mutex::new(SwashCache::new()),
+            cache: Mutex::new(cache),
             bold: false,
             italic: false,
             monospaced: true,
@@ -178,7 +180,7 @@ impl Application for Window {
                 } else {
                     cosmic_text::Weight::NORMAL
                 });
-                buffer.set_attrs(&FONT_SYSTEM, attrs);
+                buffer.set_attrs(attrs);
             },
             Message::Italic(italic) => {
                 self.italic = italic;
@@ -189,7 +191,7 @@ impl Application for Window {
                 } else {
                     cosmic_text::Style::Normal
                 });
-                buffer.set_attrs(&FONT_SYSTEM, attrs);
+                buffer.set_attrs(attrs);
             },
             Message::Monospaced(monospaced) => {
                 self.monospaced = monospaced;
@@ -202,7 +204,7 @@ impl Application for Window {
                         cosmic_text::Family::SansSerif
                     })
                     .monospaced(monospaced);
-                buffer.set_attrs(&FONT_SYSTEM, attrs);
+                buffer.set_attrs(attrs);
             },
             Message::MetricsChanged(metrics) => {
                 let mut buffer = self.buffer.lock().unwrap();

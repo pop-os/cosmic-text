@@ -71,7 +71,7 @@ fn main() {
         window.height() as i32
     );
 
-    let mut swash_cache = SwashCache::new();
+    let mut swash_cache = SwashCache::new(&font_system);
 
     let text = if let Some(arg) = env::args().nth(1) {
         fs::read_to_string(&arg).expect("failed to open file")

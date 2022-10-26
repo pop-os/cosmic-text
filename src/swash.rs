@@ -5,12 +5,12 @@ use swash::scale::{ScaleContext, image::Content};
 use swash::scale::{Render, Source, StrikeWith};
 use swash::zeno::{Format, Vector};
 
-use crate::{CacheKey, FontMatches};
+use crate::{CacheKey, FontSystem};
 
 pub use swash::scale::image::{Content as SwashContent, Image as SwashImage};
 
-fn swash_image(context: &mut ScaleContext, matches: &FontMatches, cache_key: CacheKey) -> Option<SwashImage> {
-    let font = match matches.get_font(&cache_key.font_id) {
+fn swash_image<'a>(font_system: &'a FontSystem<'a>, context: &mut ScaleContext, cache_key: CacheKey) -> Option<SwashImage> {
+    let font = match font_system.get_font(cache_key.font_id) {
         Some(some) => some,
         None => {
             log::warn!("did not find font {:?}", cache_key.font_id);
@@ -47,41 +47,42 @@ fn swash_image(context: &mut ScaleContext, matches: &FontMatches, cache_key: Cac
     .render(&mut scaler, cache_key.glyph_id)
 }
 
-pub struct SwashCache {
+pub struct SwashCache<'a> {
+    font_system: &'a FontSystem<'a>,
     context: ScaleContext,
     pub image_cache: HashMap<CacheKey, Option<SwashImage>>,
 }
 
-impl SwashCache {
+impl<'a> SwashCache<'a> {
     /// Create a new swash cache
-    pub fn new() -> Self {
+    pub fn new(font_system: &'a FontSystem<'a>) -> Self {
         Self {
+            font_system: font_system,
             context: ScaleContext::new(),
             image_cache: HashMap::new()
         }
     }
 
     /// Create a swash Image from a cache key, without caching results
-    pub fn get_image_uncached(&mut self, matches: &FontMatches, cache_key: CacheKey) -> Option<SwashImage> {
-        swash_image(&mut self.context, matches, cache_key)
+    pub fn get_image_uncached(&mut self, cache_key: CacheKey) -> Option<SwashImage> {
+        swash_image(self.font_system, &mut self.context, cache_key)
     }
 
     /// Create a swash Image from a cache key, caching results
-    pub fn get_image(&mut self, matches: &FontMatches, cache_key: CacheKey) -> &Option<SwashImage> {
+    pub fn get_image(&mut self, cache_key: CacheKey) -> &Option<SwashImage> {
         self.image_cache.entry(cache_key).or_insert_with(|| {
-            swash_image(&mut self.context, matches, cache_key)
+            swash_image(self.font_system, &mut self.context, cache_key)
         })
     }
 
     /// Enumerate pixels in an Image, use `with_image` for better performance
     pub fn with_pixels<F: FnMut(i32, i32, u32)>(
         &mut self,
-        matches: &FontMatches<'_>,
         cache_key: CacheKey,
         base: u32,
         mut f: F
     ) {
-        if let Some(image) = self.get_image(matches, cache_key) {
+        if let Some(image) = self.get_image(cache_key) {
             let x = image.placement.left;
             let y = -image.placement.top;
 

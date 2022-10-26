@@ -53,7 +53,7 @@ fn main() {
         default_text.to_string()
     };
 
-    let mut swash_cache = SwashCache::new();
+    let mut swash_cache = SwashCache::new(&font_system);
 
     let line_x = 8 * display_scale;
     let attrs = cosmic_text::Attrs::new().monospaced(cfg!(feature = "mono"));

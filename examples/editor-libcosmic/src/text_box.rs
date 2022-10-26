@@ -63,16 +63,16 @@ impl StyleSheet for Theme {
 
 pub struct TextBox<'a> {
     buffer: &'a Mutex<TextBuffer<'static>>,
-    cache: &'a Mutex<SwashCache>,
+    cache: &'a Mutex<SwashCache<'static>>,
 }
 
 impl<'a> TextBox<'a> {
-    pub fn new(buffer: &'a Mutex<TextBuffer<'static>>, cache: &'a Mutex<SwashCache>) -> Self {
+    pub fn new(buffer: &'a Mutex<TextBuffer<'static>>, cache: &'a Mutex<SwashCache<'static>>) -> Self {
         Self { buffer, cache }
     }
 }
 
-pub fn text_box<'a>(buffer: &'a Mutex<TextBuffer<'static>>, cache: &'a Mutex<SwashCache>) -> TextBox<'a> {
+pub fn text_box<'a>(buffer: &'a Mutex<TextBuffer<'static>>, cache: &'a Mutex<SwashCache<'static>>) -> TextBox<'a> {
     TextBox::new(buffer, cache)
 }
 

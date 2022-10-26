@@ -3,6 +3,7 @@
 use std::{
     cmp,
     fmt,
+    sync::Arc,
     time::Instant,
 };
 use unicode_segmentation::UnicodeSegmentation;
@@ -52,32 +53,32 @@ pub enum TextAction {
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct TextCursor {
     /// Text line the cursor is on
-    pub line: TextLineIndex,
+    pub line: usize,
     /// Index of glyph at cursor (will insert behind this glyph)
     pub index: usize,
 }
 
 impl TextCursor {
-    pub const fn new(line: TextLineIndex, index: usize) -> Self {
+    pub const fn new(line: usize, index: usize) -> Self {
         Self { line, index }
     }
 }
 
 struct TextLayoutCursor {
-    line: TextLineIndex,
+    line: usize,
     layout: usize,
     glyph: usize,
 }
 
 impl TextLayoutCursor {
-    fn new(line: TextLineIndex, layout: usize, glyph: usize) -> Self {
+    fn new(line: usize, layout: usize, glyph: usize) -> Self {
         Self { line, layout, glyph }
     }
 }
 
 pub struct TextLayoutRun<'a> {
     /// The index of the original text line
-    pub line_i: TextLineIndex,
+    pub line_i: usize,
     /// The original text line
     pub text: &'a str,
     /// True if the original paragraph direction is RTL
@@ -130,7 +131,7 @@ impl<'a, 'b> Iterator for TextLayoutRunIter<'a, 'b> {
                 }
 
                 return Some(TextLayoutRun {
-                    line_i: TextLineIndex::new(self.line_i),
+                    line_i: self.line_i,
                     text: line.text.as_str(),
                     rtl: shape.rtl,
                     glyphs: &layout_line.glyphs,
@@ -142,20 +143,6 @@ impl<'a, 'b> Iterator for TextLayoutRunIter<'a, 'b> {
         }
 
         None
-    }
-}
-
-/// Index of a text line
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Ord, PartialOrd)]
-pub struct TextLineIndex(usize);
-
-impl TextLineIndex {
-    pub fn new(index: usize) -> Self {
-        Self(index)
-    }
-
-    pub fn get(&self) -> usize {
-        self.0
     }
 }
 
@@ -237,8 +224,10 @@ impl TextBufferLine {
 
 /// A buffer of text that is shaped and laid out
 pub struct TextBuffer<'a> {
-    font_matches: FontMatches<'a>,
+    font_system: &'a FontSystem<'a>,
+    font_matches: Arc<FontMatches<'a>>,
     attrs: Attrs<'a>,
+    attr_spans: Vec<(TextCursor, usize, Attrs<'a>)>,
     lines: Vec<TextBufferLine>,
     metrics: TextMetrics,
     width: i32,
@@ -256,10 +245,12 @@ impl<'a> TextBuffer<'a> {
         attrs: Attrs<'a>,
         metrics: TextMetrics,
     ) -> Self {
-        let font_matches = font_system.matches_attrs(&attrs);
+        let font_matches = font_system.get_font_matches(attrs);
         let mut buffer = Self {
+            font_system,
             font_matches,
             attrs,
+            attr_spans: Vec::new(),
             lines: Vec::new(),
             metrics,
             width: 0,
@@ -312,7 +303,7 @@ impl<'a> TextBuffer<'a> {
         let mut reshaped = 0;
         let mut layout_i = 0;
         for (line_i, line) in self.lines.iter_mut().enumerate() {
-            if line_i > self.cursor.line.get() {
+            if line_i > self.cursor.line {
                 break;
             }
 
@@ -324,7 +315,7 @@ impl<'a> TextBuffer<'a> {
                 self.metrics.font_size,
                 self.width
             );
-            if line_i == self.cursor.line.get() {
+            if line_i == self.cursor.line {
                 let layout_cursor = self.layout_cursor(&self.cursor);
                 layout_i += layout_cursor.layout as i32;
                 break;
@@ -385,7 +376,7 @@ impl<'a> TextBuffer<'a> {
     }
 
     fn layout_cursor(&self, cursor: &TextCursor) -> TextLayoutCursor {
-        let line = &self.lines[cursor.line.get()];
+        let line = &self.lines[cursor.line];
 
         let layout = line.layout_opt.as_ref().unwrap(); //TODO: ensure layout is done?
         for (layout_i, layout_line) in layout.iter().enumerate() {
@@ -428,7 +419,7 @@ impl<'a> TextBuffer<'a> {
     }
 
     fn set_layout_cursor(&mut self, cursor: TextLayoutCursor) {
-        let line = &mut self.lines[cursor.line.get()];
+        let line = &mut self.lines[cursor.line];
         let layout = line.layout(
             &self.font_matches,
             self.metrics.font_size,
@@ -516,9 +507,9 @@ impl<'a> TextBuffer<'a> {
     }
 
     /// Set attributes
-    pub fn set_attrs(&mut self, font_system: &'a FontSystem<'a>, attrs: Attrs<'a>) {
+    pub fn set_attrs(&mut self, attrs: Attrs<'a>) {
         if attrs != self.attrs {
-            self.font_matches = font_system.matches_attrs(&attrs);
+            self.font_matches = self.font_system.get_font_matches(attrs);
             self.attrs = attrs;
 
             for line in self.lines.iter_mut() {
@@ -527,6 +518,10 @@ impl<'a> TextBuffer<'a> {
 
             self.shape_until_scroll();
         }
+    }
+
+    pub fn add_attr_span(&mut self, cursor: TextCursor, len: usize, attrs: Attrs<'a>) {
+        self.attr_spans.push((cursor, len, attrs));
     }
 
     /// Set text of buffer
@@ -558,7 +553,7 @@ impl<'a> TextBuffer<'a> {
 
         match action {
             TextAction::Previous => {
-                let line = &mut self.lines[self.cursor.line.get()];
+                let line = &mut self.lines[self.cursor.line];
 
                 if self.cursor.index > 0 {
                     // Find previous character index
@@ -573,14 +568,14 @@ impl<'a> TextBuffer<'a> {
 
                     self.cursor.index = prev_index;
                     self.redraw = true;
-                } else if self.cursor.line.get() > 0 {
-                    self.cursor.line = TextLineIndex::new(self.cursor.line.get() - 1);
-                    self.cursor.index = self.lines[self.cursor.line.get()].text.len();
+                } else if self.cursor.line > 0 {
+                    self.cursor.line -= 1;
+                    self.cursor.index = self.lines[self.cursor.line].text.len();
                     self.redraw = true;
                 }
             },
             TextAction::Next => {
-                let line = &mut self.lines[self.cursor.line.get()];
+                let line = &mut self.lines[self.cursor.line];
 
                 if self.cursor.index < line.text.len() {
                     for (i, c) in line.text.grapheme_indices(true) {
@@ -590,14 +585,14 @@ impl<'a> TextBuffer<'a> {
                             break;
                         }
                     }
-                } else if self.cursor.line.get() + 1 < self.lines.len() {
-                    self.cursor.line = TextLineIndex::new(self.cursor.line.get() + 1);
+                } else if self.cursor.line + 1 < self.lines.len() {
+                    self.cursor.line += 1;
                     self.cursor.index = 0;
                     self.redraw = true;
                 }
             },
             TextAction::Left => {
-                let rtl_opt = self.lines[self.cursor.line.get()].shape_opt.as_ref().map(|shape| shape.rtl);
+                let rtl_opt = self.lines[self.cursor.line].shape_opt.as_ref().map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
                         self.action(TextAction::Next);
@@ -607,7 +602,7 @@ impl<'a> TextBuffer<'a> {
                 }
             },
             TextAction::Right => {
-                let rtl_opt = self.lines[self.cursor.line.get()].shape_opt.as_ref().map(|shape| shape.rtl);
+                let rtl_opt = self.lines[self.cursor.line].shape_opt.as_ref().map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
                         self.action(TextAction::Previous);
@@ -621,8 +616,8 @@ impl<'a> TextBuffer<'a> {
                 let mut cursor = self.layout_cursor(&self.cursor);
                 if cursor.layout > 0 {
                     cursor.layout -= 1;
-                } else if cursor.line.get() > 0 {
-                    cursor.line = TextLineIndex::new(cursor.line.get() - 1);
+                } else if cursor.line > 0 {
+                    cursor.line -= 1;
                     cursor.layout = usize::max_value();
                 }
                 self.set_layout_cursor(cursor);
@@ -631,7 +626,7 @@ impl<'a> TextBuffer<'a> {
                 //TODO: make this preserve X as best as possible!
                 let mut cursor = self.layout_cursor(&self.cursor);
                 let layout_len = {
-                    let line = &mut self.lines[cursor.line.get()];
+                    let line = &mut self.lines[cursor.line];
                     let layout = line.layout(
                         &self.font_matches,
                         self.metrics.font_size,
@@ -641,8 +636,8 @@ impl<'a> TextBuffer<'a> {
                 };
                 if cursor.layout + 1 < layout_len {
                     cursor.layout += 1;
-                } else if cursor.line.get() + 1 < self.lines.len() {
-                    cursor.line = TextLineIndex::new(cursor.line.get() + 1);
+                } else if cursor.line + 1 < self.lines.len() {
+                    cursor.line += 1;
                     cursor.layout = 0;
                 }
                 self.set_layout_cursor(cursor);
@@ -678,7 +673,7 @@ impl<'a> TextBuffer<'a> {
                     // Filter out special chars (except for tab), use TextAction instead
                     log::debug!("Refusing to insert control character {:?}", character);
                 } else {
-                    let line = &mut self.lines[self.cursor.line.get()];
+                    let line = &mut self.lines[self.cursor.line];
                     line.reset();
                     line.text.insert(self.cursor.index, character);
 
@@ -687,20 +682,20 @@ impl<'a> TextBuffer<'a> {
             },
             TextAction::Enter => {
                 let new_line = {
-                    let line = &mut self.lines[self.cursor.line.get()];
+                    let line = &mut self.lines[self.cursor.line];
                     line.reset();
                     line.text.split_off(self.cursor.index)
                 };
 
-                let next_line = self.cursor.line.get() + 1;
+                let next_line = self.cursor.line + 1;
                 self.lines.insert(next_line, TextBufferLine::new(new_line));
 
-                self.cursor.line = TextLineIndex::new(next_line);
+                self.cursor.line = next_line;
                 self.cursor.index = 0;
             },
             TextAction::Backspace => {
                 if self.cursor.index > 0 {
-                    let line = &mut self.lines[self.cursor.line.get()];
+                    let line = &mut self.lines[self.cursor.line];
                     line.reset();
 
                     // Find previous character index
@@ -716,23 +711,23 @@ impl<'a> TextBuffer<'a> {
                     self.cursor.index = prev_index;
 
                     line.text.remove(self.cursor.index);
-                } else if self.cursor.line.get() > 0 {
-                    let mut line_index = self.cursor.line.get();
+                } else if self.cursor.line > 0 {
+                    let mut line_index = self.cursor.line;
                     let old_line = self.lines.remove(line_index);
                     line_index -= 1;
 
                     let line = &mut self.lines[line_index];
                     line.reset();
 
-                    self.cursor.line = TextLineIndex::new(line_index);
+                    self.cursor.line = line_index;
                     self.cursor.index = line.text.len();
 
                     line.text.push_str(&old_line.text);
                 }
             },
             TextAction::Delete => {
-                if self.cursor.index < self.lines[self.cursor.line.get()].text.len() {
-                    let line = &mut self.lines[self.cursor.line.get()];
+                if self.cursor.index < self.lines[self.cursor.line].text.len() {
+                    let line = &mut self.lines[self.cursor.line];
                     line.reset();
 
                     if let Some((i, c)) = line
@@ -744,10 +739,10 @@ impl<'a> TextBuffer<'a> {
                         line.text.replace_range(i..(i + c.len()), "");
                         self.cursor.index = i;
                     }
-                } else if self.cursor.line.get() + 1 < self.lines.len() {
-                    let old_line = self.lines.remove(self.cursor.line.get() + 1);
+                } else if self.cursor.line + 1 < self.lines.len() {
+                    let old_line = self.lines.remove(self.cursor.line + 1);
 
-                    let line = &mut self.lines[self.cursor.line.get()];
+                    let line = &mut self.lines[self.cursor.line];
                     line.reset();
 
                     line.text.push_str(&old_line.text);
@@ -860,7 +855,7 @@ impl<'a> TextBuffer<'a> {
                         let text_glyph = &run.text[glyph.start..glyph.end];
                         log::debug!(
                             "{}, {}: '{}' ('{}'): '{}' ({:?})",
-                            self.cursor.line.get(),
+                            self.cursor.line,
                             self.cursor.index,
                             font_opt.as_ref().map_or("?", |font| font.info.family.as_str()),
                             font_opt.as_ref().map_or("?", |font| font.info.post_script_name.as_str()),
@@ -1045,7 +1040,7 @@ impl<'a> TextBuffer<'a> {
 
             for glyph in run.glyphs.iter() {
                 let (cache_key, x_int, y_int) = (glyph.cache_key, glyph.x_int, glyph.y_int);
-                cache.with_pixels(&self.font_matches, cache_key, color, |x, y, color| {
+                cache.with_pixels(cache_key, color, |x, y, color| {
                     f(x_int + x, line_y + y_int + y, 1, 1, color)
                 });
             }
