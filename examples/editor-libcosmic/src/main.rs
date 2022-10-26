@@ -192,7 +192,13 @@ impl Application for Window {
                 self.monospaced = monospaced;
 
                 let mut buffer = self.buffer.lock().unwrap();
-                let attrs = buffer.attrs().clone().monospaced(monospaced);
+                let attrs = buffer.attrs().clone()
+                    .family(if monospaced {
+                        cosmic_text::Family::Monospace
+                    } else {
+                        cosmic_text::Family::SansSerif
+                    })
+                    .monospaced(monospaced);
                 buffer.set_attrs(&FONT_SYSTEM, attrs);
             },
             Message::MetricsChanged(metrics) => {
