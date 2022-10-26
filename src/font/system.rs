@@ -10,7 +10,7 @@ use crate::{Attrs, Font, FontMatches};
 /// Access system fonts
 pub struct FontSystem<'a> {
     pub locale: String,
-    db: fontdb::Database,
+    pub db: fontdb::Database,
     pub font_cache: Mutex<HashMap<fontdb::ID, Option<Arc<Font<'a>>>>>,
 }
 
