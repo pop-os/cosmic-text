@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use super::CacheKey;
+use crate::{CacheKey, Color};
 
 /// A laid out glyph
 pub struct LayoutGlyph {
@@ -20,6 +20,8 @@ pub struct LayoutGlyph {
     pub x_int: i32,
     /// Integer component of Y offset in line
     pub y_int: i32,
+    /// Optional color override
+    pub color_opt: Option<Color>,
 }
 
 /// A line of laid out glyphs

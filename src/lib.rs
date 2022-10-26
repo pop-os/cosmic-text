@@ -15,6 +15,9 @@ mod font;
 pub use self::layout::*;
 mod layout;
 
+pub use self::shape::*;
+mod shape;
+
 #[cfg(feature = "swash")]
 pub use self::swash::*;
 #[cfg(feature = "swash")]

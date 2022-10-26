@@ -3,12 +3,11 @@
 use std::{
     cmp,
     fmt,
-    sync::Arc,
     time::Instant,
 };
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::{Attrs, LayoutGlyph, LayoutLine, FontMatches, FontShapeLine, FontSystem};
+use crate::{Attrs, AttrsSpan, FontSystem, LayoutGlyph, LayoutLine, ShapeLine};
 
 /// An action to perform on a [TextBuffer]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -174,16 +173,23 @@ impl fmt::Display for TextMetrics {
     }
 }
 
-pub struct TextBufferLine {
-    text: String,
-    shape_opt: Option<FontShapeLine>,
+pub struct TextBufferLine<'a> {
+    pub text: String,
+    pub attrs_spans: Vec<AttrsSpan<'a>>,
+    shape_opt: Option<ShapeLine>,
     layout_opt: Option<Vec<LayoutLine>>,
 }
 
-impl TextBufferLine {
-    pub fn new(text: String) -> Self {
+impl<'a> TextBufferLine<'a> {
+    pub fn new(text: String, attrs: Attrs<'a>) -> Self {
+        let attrs_spans = vec![AttrsSpan {
+            start: 0,
+            end: text.len(),
+            attrs
+        }];
         Self {
             text,
+            attrs_spans,
             shape_opt: None,
             layout_opt: None,
         }
@@ -198,18 +204,18 @@ impl TextBufferLine {
         self.layout_opt = None;
     }
 
-    pub fn shape(&mut self, font_matches: &FontMatches<'_>) -> &FontShapeLine {
+    pub fn shape(&mut self, font_system: &'a FontSystem<'a>) -> &ShapeLine {
         if self.shape_opt.is_none() {
-            self.shape_opt = Some(font_matches.shape_line(&self.text));
+            self.shape_opt = Some(ShapeLine::new(font_system, &self.text, &self.attrs_spans));
             self.layout_opt = None;
         }
         self.shape_opt.as_ref().unwrap()
     }
 
-    pub fn layout(&mut self, font_matches: &FontMatches<'_>, font_size: i32, width: i32) -> &[LayoutLine] {
+    pub fn layout(&mut self, font_system: &'a FontSystem<'a>, font_size: i32, width: i32) -> &[LayoutLine] {
         if self.layout_opt.is_none() {
             let mut layout = Vec::new();
-            let shape = self.shape(font_matches);
+            let shape = self.shape(font_system);
             shape.layout(
                 font_size,
                 width,
@@ -225,10 +231,8 @@ impl TextBufferLine {
 /// A buffer of text that is shaped and laid out
 pub struct TextBuffer<'a> {
     font_system: &'a FontSystem<'a>,
-    font_matches: Arc<FontMatches<'a>>,
     attrs: Attrs<'a>,
-    attr_spans: Vec<(TextCursor, usize, Attrs<'a>)>,
-    lines: Vec<TextBufferLine>,
+    pub lines: Vec<TextBufferLine<'a>>,
     metrics: TextMetrics,
     width: i32,
     height: i32,
@@ -245,12 +249,9 @@ impl<'a> TextBuffer<'a> {
         attrs: Attrs<'a>,
         metrics: TextMetrics,
     ) -> Self {
-        let font_matches = font_system.get_font_matches(attrs);
         let mut buffer = Self {
             font_system,
-            font_matches,
             attrs,
-            attr_spans: Vec::new(),
             lines: Vec::new(),
             metrics,
             width: 0,
@@ -280,7 +281,7 @@ impl<'a> TextBuffer<'a> {
                 reshaped += 1;
             }
             let layout = line.layout(
-                &self.font_matches,
+                self.font_system,
                 self.metrics.font_size,
                 self.width
             );
@@ -311,7 +312,7 @@ impl<'a> TextBuffer<'a> {
                 reshaped += 1;
             }
             let layout = line.layout(
-                &self.font_matches,
+                self.font_system,
                 self.metrics.font_size,
                 self.width
             );
@@ -362,7 +363,7 @@ impl<'a> TextBuffer<'a> {
             if line.shape_opt.is_some() {
                 line.layout_opt = None;
                 line.layout(
-                    &self.font_matches,
+                    self.font_system,
                     self.metrics.font_size,
                     self.width
                 );
@@ -421,7 +422,7 @@ impl<'a> TextBuffer<'a> {
     fn set_layout_cursor(&mut self, cursor: TextLayoutCursor) {
         let line = &mut self.lines[cursor.line];
         let layout = line.layout(
-            &self.font_matches,
+            self.font_system,
             self.metrics.font_size,
             self.width
         );
@@ -498,10 +499,6 @@ impl<'a> TextBuffer<'a> {
         self.height / self.metrics.line_height
     }
 
-    pub fn font_matches(&self) -> &FontMatches<'a> {
-        &self.font_matches
-    }
-
     pub fn attrs(&self) -> &Attrs<'a> {
         &self.attrs
     }
@@ -509,30 +506,30 @@ impl<'a> TextBuffer<'a> {
     /// Set attributes
     pub fn set_attrs(&mut self, attrs: Attrs<'a>) {
         if attrs != self.attrs {
-            self.font_matches = self.font_system.get_font_matches(attrs);
             self.attrs = attrs;
 
             for line in self.lines.iter_mut() {
                 line.reset();
+                line.attrs_spans = vec![AttrsSpan {
+                    start: 0,
+                    end: line.text.len(),
+                    attrs
+                }];
             }
 
             self.shape_until_scroll();
         }
     }
 
-    pub fn add_attr_span(&mut self, cursor: TextCursor, len: usize, attrs: Attrs<'a>) {
-        self.attr_spans.push((cursor, len, attrs));
-    }
-
     /// Set text of buffer
     pub fn set_text(&mut self, text: &str) {
         self.lines.clear();
         for line in text.lines() {
-            self.lines.push(TextBufferLine::new(line.to_string()));
+            self.lines.push(TextBufferLine::new(line.to_string(), self.attrs));
         }
         // Make sure there is always one line
         if self.lines.is_empty() {
-            self.lines.push(TextBufferLine::new(String::new()));
+            self.lines.push(TextBufferLine::new(String::new(), self.attrs));
         }
 
         self.scroll = 0;
@@ -628,7 +625,7 @@ impl<'a> TextBuffer<'a> {
                 let layout_len = {
                     let line = &mut self.lines[cursor.line];
                     let layout = line.layout(
-                        &self.font_matches,
+                        self.font_system,
                         self.metrics.font_size,
                         self.width
                     );
@@ -688,7 +685,7 @@ impl<'a> TextBuffer<'a> {
                 };
 
                 let next_line = self.cursor.line + 1;
-                self.lines.insert(next_line, TextBufferLine::new(new_line));
+                self.lines.insert(next_line, TextBufferLine::new(new_line, self.attrs));
 
                 self.cursor.line = next_line;
                 self.cursor.index = 0;
@@ -851,7 +848,7 @@ impl<'a> TextBuffer<'a> {
 
                 if new_cursor != self.cursor {
                     if let Some(glyph) = run.glyphs.get(new_cursor_glyph) {
-                        let font_opt = self.font_matches.get_font(&glyph.cache_key.font_id);
+                        let font_opt = self.font_system.get_font(glyph.cache_key.font_id);
                         let text_glyph = &run.text[glyph.start..glyph.end];
                         log::debug!(
                             "{}, {}: '{}' ('{}'): '{}' ({:?})",
@@ -1040,7 +1037,13 @@ impl<'a> TextBuffer<'a> {
 
             for glyph in run.glyphs.iter() {
                 let (cache_key, x_int, y_int) = (glyph.cache_key, glyph.x_int, glyph.y_int);
-                cache.with_pixels(cache_key, color, |x, y, color| {
+
+                let glyph_color = match glyph.color_opt {
+                    Some(some) => some.0,
+                    None => color,
+                };
+
+                cache.with_pixels(cache_key, glyph_color, |x, y, color| {
                     f(x_int + x, line_y + y_int + y, 1, 1, color)
                 });
             }

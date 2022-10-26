@@ -8,8 +8,5 @@ mod font;
 pub use self::matches::*;
 mod matches;
 
-pub(crate) use self::shape::*;
-mod shape;
-
 pub use self::system::*;
 mod system;
