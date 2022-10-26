@@ -36,7 +36,7 @@ impl SwashCache {
 
             // Build the scaler
             let mut scaler = self.context
-                .builder(font.swash)
+                .builder(font.as_swash())
                 .size(cache_key.font_size as f32)
                 .hint(true)
                 .build();

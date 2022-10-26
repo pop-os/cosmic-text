@@ -8,7 +8,7 @@ pub struct Font<'a> {
     pub index: u32,
     pub rustybuzz: rustybuzz::Face<'a>,
     #[cfg(feature = "swash")]
-    pub swash: swash::FontRef<'a>,
+    pub swash: (u32, swash::CacheKey),
 }
 
 impl<'a> Font<'a> {
@@ -28,7 +28,19 @@ impl<'a> Font<'a> {
             index: info.index,
             rustybuzz: rustybuzz::Face::from_slice(data, info.index)?,
             #[cfg(feature = "swash")]
-            swash: swash::FontRef::from_index(data, info.index as usize)?,
+            swash: {
+                let swash = swash::FontRef::from_index(data, info.index as usize)?;
+                (swash.offset, swash.key)
+            },
         })
+    }
+
+    #[cfg(feature = "swash")]
+    pub fn as_swash(&self) -> swash::FontRef {
+        swash::FontRef {
+            data: self.data,
+            offset: self.swash.0,
+            key: self.swash.1,
+        }
     }
 }
