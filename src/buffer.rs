@@ -1008,7 +1008,6 @@ impl<'a> TextBuffer<'a> {
             }
 
             // Draw cursor
-            //TODO: draw at end of line but not start of next line
             if let Some((cursor_glyph, cursor_glyph_offset)) = cursor_glyph_opt(&self.cursor) {
                 let x = match run.glyphs.get(cursor_glyph) {
                     Some(glyph) => {
