@@ -9,6 +9,44 @@ use crate::{CacheKey, FontMatches};
 
 pub use swash::scale::image::Image as SwashImage;
 
+fn swash_image(context: &mut ScaleContext, matches: &FontMatches, cache_key: CacheKey) -> Option<SwashImage> {
+    let font = match matches.get_font(&cache_key.font_id) {
+        Some(some) => some,
+        None => {
+            log::warn!("did not find font {:?}", cache_key.font_id);
+            return None;
+        },
+    };
+
+    // Build the scaler
+    let mut scaler = context
+        .builder(font.as_swash())
+        .size(cache_key.font_size as f32)
+        .hint(true)
+        .build();
+
+    // Compute the fractional offset-- you'll likely want to quantize this
+    // in a real renderer
+    let offset =
+        Vector::new(cache_key.x_bin.as_float(), cache_key.y_bin.as_float());
+
+    // Select our source order
+    Render::new(&[
+        // Color outline with the first palette
+        Source::ColorOutline(0),
+        // Color bitmap with best fit selection mode
+        Source::ColorBitmap(StrikeWith::BestFit),
+        // Standard scalable outline
+        Source::Outline,
+    ])
+    // Select a subpixel format
+    .format(Format::Alpha)
+    // Apply the fractional offset
+    .offset(offset)
+    // Render the image
+    .render(&mut scaler, cache_key.glyph_id)
+}
+
 pub struct SwashCache {
     context: ScaleContext,
     pub image_cache: HashMap<CacheKey, Option<SwashImage>>,
@@ -23,44 +61,15 @@ impl SwashCache {
         }
     }
 
+    /// Create a swash Image from a cache key, without caching results
+    pub fn get_image_uncached(&mut self, matches: &FontMatches, cache_key: CacheKey) -> Option<SwashImage> {
+        swash_image(&mut self.context, matches, cache_key)
+    }
+
     /// Create a swash Image from a cache key, caching results
-    pub fn get_image(&mut self, matches: &FontMatches<'_>, cache_key: CacheKey) -> &Option<SwashImage> {
+    pub fn get_image(&mut self, matches: &FontMatches, cache_key: CacheKey) -> &Option<SwashImage> {
         self.image_cache.entry(cache_key).or_insert_with(|| {
-            let font = match matches.get_font(&cache_key.font_id) {
-                Some(some) => some,
-                None => {
-                    log::warn!("did not find font {:?}", cache_key.font_id);
-                    return None;
-                },
-            };
-
-            // Build the scaler
-            let mut scaler = self.context
-                .builder(font.as_swash())
-                .size(cache_key.font_size as f32)
-                .hint(true)
-                .build();
-
-            // Compute the fractional offset-- you'll likely want to quantize this
-            // in a real renderer
-            let offset =
-                Vector::new(cache_key.x_bin.as_float(), cache_key.y_bin.as_float());
-
-            // Select our source order
-            Render::new(&[
-                // Color outline with the first palette
-                Source::ColorOutline(0),
-                // Color bitmap with best fit selection mode
-                Source::ColorBitmap(StrikeWith::BestFit),
-                // Standard scalable outline
-                Source::Outline,
-            ])
-            // Select a subpixel format
-            .format(Format::Alpha)
-            // Apply the fractional offset
-            .offset(offset)
-            // Render the image
-            .render(&mut scaler, cache_key.glyph_id)
+            swash_image(&mut self.context, matches, cache_key)
         })
     }
 
