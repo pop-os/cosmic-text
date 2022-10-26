@@ -3,7 +3,7 @@ name = "rich-text"
 version = "0.1.0"
 authors = ["Jeremy Soller <jeremy@system76.com>"]
 edition = "2021"
-license = "MPL2"
+license = "MIT OR Apache-2.0"
 publish = false
 
 [dependencies]
@@ -12,7 +12,3 @@ env_logger = "0.9"
 fontdb = "0.9"
 log = "0.4"
 orbclient = "0.3.35"
-unicode-segmentation = "1.7"
-
-[features]
-mono = []

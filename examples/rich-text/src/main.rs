@@ -4,7 +4,6 @@ use cosmic_text::{Attrs, Color, Family, FontSystem, Style, SwashCache,
     TextAction, TextBuffer, TextBufferLine, TextMetrics, Weight};
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{env, fs, process, thread, time::{Duration, Instant}};
-use unicode_segmentation::UnicodeSegmentation;
 
 fn main() {
     env_logger::init();

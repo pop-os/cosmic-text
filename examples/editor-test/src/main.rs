@@ -3,7 +3,6 @@
 use cosmic_text::{FontSystem, SwashCache, TextAction, TextBuffer, TextMetrics};
 use orbclient::{Color, EventOption, Renderer, Window, WindowFlag};
 use std::{env, fs, process, thread, time::{Duration, Instant}};
-use unicode_segmentation::UnicodeSegmentation;
 
 fn redraw(window: &mut Window, buffer: &mut TextBuffer<'_>, swash_cache: &mut SwashCache) {
     let bg_color = Color::rgb(0x34, 0x34, 0x34);
