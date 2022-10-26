@@ -88,16 +88,16 @@ pub struct TextLayoutRun<'a> {
     pub line_y: i32,
 }
 
-pub struct TextLayoutRunIter<'a> {
-    buffer: &'a TextBuffer<'a>,
+pub struct TextLayoutRunIter<'a, 'b> {
+    buffer: &'b TextBuffer<'a>,
     line_i: usize,
     layout_i: usize,
     line_y: i32,
     total_layout: i32,
 }
 
-impl<'a> TextLayoutRunIter<'a> {
-    pub fn new(buffer: &'a TextBuffer<'a>) -> Self {
+impl<'a, 'b> TextLayoutRunIter<'a, 'b> {
+    pub fn new(buffer: &'b TextBuffer<'a>) -> Self {
         Self {
             buffer,
             line_i: 0,
@@ -108,8 +108,8 @@ impl<'a> TextLayoutRunIter<'a> {
     }
 }
 
-impl<'a> Iterator for TextLayoutRunIter<'a> {
-    type Item = TextLayoutRun<'a>;
+impl<'a, 'b> Iterator for TextLayoutRunIter<'a, 'b> {
+    type Item = TextLayoutRun<'b>;
 
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(line) = self.buffer.lines.get(self.line_i) {
@@ -759,7 +759,12 @@ impl<'a> TextBuffer<'a> {
             TextAction::Click { x, y } => {
                 self.select_opt = None;
 
-                self.click(x, y);
+                if let Some(new_cursor) = self.hit(x, y) {
+                    if new_cursor != self.cursor {
+                        self.cursor = new_cursor;
+                        self.redraw = true;
+                    }
+                }
             },
             TextAction::Drag { x, y } => {
                 if self.select_opt.is_none() {
@@ -767,7 +772,12 @@ impl<'a> TextBuffer<'a> {
                     self.redraw = true;
                 }
 
-                self.click(x, y);
+                if let Some(new_cursor) = self.hit(x, y) {
+                    if new_cursor != self.cursor {
+                        self.cursor = new_cursor;
+                        self.redraw = true;
+                    }
+                }
             },
             TextAction::Scroll { lines } => {
                 self.scroll += lines;
@@ -778,25 +788,26 @@ impl<'a> TextBuffer<'a> {
         }
     }
 
-    fn click(&mut self, mouse_x: i32, mouse_y: i32) {
+    /// Convert x, y position to TextCursor (hit detection)
+    pub fn hit(&self, x: i32, y: i32) -> Option<TextCursor> {
         let instant = Instant::now();
 
         let font_size = self.metrics.font_size;
         let line_height = self.metrics.line_height;
 
-        let mut new_cursor = self.cursor;
+        let mut new_cursor_opt = None;
 
         for run in self.layout_runs() {
             let line_y = run.line_y;
 
-            if mouse_y >= line_y - font_size
-            && mouse_y < line_y - font_size + line_height
+            if y >= line_y - font_size
+            && y < line_y - font_size + line_height
             {
                 let mut new_cursor_glyph = run.glyphs.len();
                 let mut new_cursor_char = 0;
                 'hit: for (glyph_i, glyph) in run.glyphs.iter().enumerate() {
-                    if mouse_x >= glyph.x as i32
-                    && mouse_x <= (glyph.x + glyph.w) as i32
+                    if x >= glyph.x as i32
+                    && x <= (glyph.x + glyph.w) as i32
                     {
                         new_cursor_glyph = glyph_i;
 
@@ -805,12 +816,12 @@ impl<'a> TextBuffer<'a> {
                         let mut egc_x = glyph.x;
                         let egc_w = glyph.w / (total as f32);
                         for (egc_i, egc) in cluster.grapheme_indices(true) {
-                            if mouse_x >= egc_x as i32
-                            && mouse_x <= (egc_x + egc_w) as i32
+                            if x >= egc_x as i32
+                            && x <= (egc_x + egc_w) as i32
                             {
                                 new_cursor_char = egc_i;
 
-                                let right_half = mouse_x >= (egc_x + egc_w / 2.0) as i32;
+                                let right_half = x >= (egc_x + egc_w / 2.0) as i32;
                                 if right_half != glyph.rtl {
                                     // If clicking on last half of glyph, move cursor past glyph
                                     new_cursor_char += egc.len();
@@ -820,7 +831,7 @@ impl<'a> TextBuffer<'a> {
                             egc_x += egc_w;
                         }
 
-                        let right_half = mouse_x >= (glyph.x + glyph.w / 2.0) as i32;
+                        let right_half = x >= (glyph.x + glyph.w / 2.0) as i32;
                         if right_half != glyph.rtl {
                             // If clicking on last half of glyph, move cursor past glyph
                             new_cursor_char = cluster.len();
@@ -829,8 +840,7 @@ impl<'a> TextBuffer<'a> {
                     }
                 }
 
-                new_cursor.line = run.line_i;
-                new_cursor.index = 0;
+                let mut new_cursor = TextCursor::new(run.line_i, 0);
 
                 match run.glyphs.get(new_cursor_glyph) {
                     Some(glyph) => {
@@ -859,21 +869,20 @@ impl<'a> TextBuffer<'a> {
                     }
                 }
 
+                new_cursor_opt = Some(new_cursor);
+
                 break;
             }
         }
 
-        if new_cursor != self.cursor {
-            self.cursor = new_cursor;
-            self.redraw = true;
-        }
-
         let duration = instant.elapsed();
-        log::trace!("click({}, {}): {:?}", mouse_x, mouse_y, duration);
+        log::trace!("click({}, {}): {:?}", x, y, duration);
+
+        new_cursor_opt
     }
 
     /// Get the visible layout runs for rendering and other tasks
-    pub fn layout_runs(&self) -> TextLayoutRunIter {
+    pub fn layout_runs<'b>(&'b self) -> TextLayoutRunIter<'a, 'b> {
         TextLayoutRunIter::new(self)
     }
 
