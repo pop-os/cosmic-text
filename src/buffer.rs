@@ -970,6 +970,11 @@ impl<'a> TextBuffer<'a> {
                         }
                     }
 
+                    if run.glyphs.is_empty() && end.line > line_i{
+                        // Highlight all of internal empty lines
+                        range_opt = Some((0, self.width));
+                    }
+
                     if let Some((mut min, mut max)) = range_opt.take() {
                         if end.line > line_i {
                             // Draw to end of line
