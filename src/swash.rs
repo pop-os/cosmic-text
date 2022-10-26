@@ -7,7 +7,7 @@ use swash::zeno::{Format, Vector};
 
 use crate::{CacheKey, FontMatches};
 
-pub use swash::scale::image::Image as SwashImage;
+pub use swash::scale::image::{Content as SwashContent, Image as SwashImage};
 
 fn swash_image(context: &mut ScaleContext, matches: &FontMatches, cache_key: CacheKey) -> Option<SwashImage> {
     let font = match matches.get_font(&cache_key.font_id) {
