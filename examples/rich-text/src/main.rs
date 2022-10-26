@@ -25,7 +25,7 @@ fn main() {
     let mut buffer = TextBuffer::new(
         &font_system,
         attrs,
-        TextMetrics::new(20, 28)
+        TextMetrics::new(32, 44)
     );
 
     buffer.set_size(
@@ -42,7 +42,13 @@ fn main() {
         ("B", attrs.weight(Weight::BOLD)),
         ("old ", attrs),
         ("I", attrs.style(Style::Italic)),
-        ("talic", attrs),
+        ("talic ", attrs),
+        ("f", attrs),
+        ("i ", attrs),
+        ("f", attrs.weight(Weight::BOLD)),
+        ("i ", attrs),
+        ("f", attrs.style(Style::Italic)),
+        ("i ", attrs),
         ("\n", attrs),
         ("Sans-Serif Normal ", attrs),
         ("Sans-Serif Bold ", attrs.weight(Weight::BOLD)),
