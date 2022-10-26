@@ -237,7 +237,7 @@ impl TextBufferLine {
 
 /// A buffer of text that is shaped and laid out
 pub struct TextBuffer<'a> {
-    font_matches: FontMatches<'a>,
+    pub font_matches: FontMatches<'a>,
     attrs: Attrs<'a>,
     lines: Vec<TextBufferLine>,
     metrics: TextMetrics,
