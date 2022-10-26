@@ -3,7 +3,7 @@
 use cosmic_text::{Attrs, Color, Family, FontSystem, Style, SwashCache,
     TextAction, TextBuffer, TextBufferLine, TextMetrics, Weight};
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
-use std::{env, fs, process, thread, time::{Duration, Instant}};
+use std::{env, fs, process, time::Instant};
 
 fn main() {
     env_logger::init();
@@ -40,6 +40,8 @@ fn main() {
         window.height() as i32
     );
 
+    let mut bg_color = orbclient::Color::rgb(0x00, 0x00, 0x00);
+    let mut font_color = orbclient::Color::rgb(0xFF, 0xFF, 0xFF);
     {
         use syntect::easy::HighlightLines;
         use syntect::parsing::SyntaxSet;
@@ -49,12 +51,28 @@ fn main() {
         // Load these once at the start of your program
         let ps = SyntaxSet::load_defaults_newlines();
         let ts = ThemeSet::load_defaults();
+        let theme = &ts.themes["base16-eighties.dark"];
+
+        if let Some(background) = theme.settings.background {
+            bg_color = orbclient::Color::rgba(
+                background.r,
+                background.g,
+                background.b,
+                background.a,
+            );
+        }
+
+        if let Some(foreground) = theme.settings.foreground {
+            font_color = orbclient::Color::rgba(
+                foreground.r,
+                foreground.g,
+                foreground.b,
+                foreground.a,
+            );
+        }
 
         let syntax = ps.find_syntax_by_extension("rs").unwrap();
-        for (name, _) in ts.themes.iter() {
-            println!("{}", name);
-        }
-        let mut h = HighlightLines::new(syntax, &ts.themes["base16-eighties.dark"]);
+        let mut h = HighlightLines::new(syntax, &theme);
         for (line_i, highlight_line) in LinesWithEndings::from(&text).enumerate() { // LinesWithEndings enables use of newlines mode
             while line_i >= buffer.lines.len() {
                 buffer.lines.push(TextBufferLine::new(String::new(), attrs));
@@ -107,9 +125,6 @@ fn main() {
     let mut mouse_y = -1;
     let mut mouse_left = false;
     loop {
-        let bg_color = orbclient::Color::rgb(0x2d, 0x2d, 0x2d);
-        let font_color = orbclient::Color::rgb(0xFF, 0xFF, 0xFF);
-
         if buffer.cursor_moved {
             buffer.shape_until_cursor();
             buffer.cursor_moved = false;
@@ -174,7 +189,5 @@ fn main() {
                 _ => (),
             }
         }
-
-        thread::sleep(Duration::from_millis(1));
     }
 }
