@@ -108,9 +108,12 @@ impl Application for Window {
 
     fn new(_flags: ()) -> (Self, Command<Self::Message>) {
         let font_size_i = 1; // Body
+        let attrs = cosmic_text::Attrs::new()
+            .monospaced(true)
+            .family(cosmic_text::Family::Monospace);
         let buffer = TextBuffer::new(
             &FONT_SYSTEM,
-            cosmic_text::Attrs::new(),
+            attrs,
             FONT_SIZES[font_size_i],
         );
 
@@ -121,7 +124,7 @@ impl Application for Window {
             cache: Mutex::new(SwashCache::new()),
             bold: false,
             italic: false,
-            monospaced: false,
+            monospaced: true,
         };
         if let Some(arg) = env::args().nth(1) {
             window.open(PathBuf::from(arg));
