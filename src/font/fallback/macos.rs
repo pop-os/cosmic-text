@@ -6,6 +6,7 @@ use unicode_script::Script;
 pub fn common_fallback() -> &'static [&'static str] {
     &[
         ".SF NS",
+        "Menlo",
         "Apple Color Emoji",
         "Geneva",
         "Arial Unicode MS",
