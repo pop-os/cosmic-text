@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use cosmic_text::{Attrs, AttrsSpan, Color, Family, FontSystem, Style, SwashCache,
+use cosmic_text::{Attrs, Color, Family, FontSystem, Style, SwashCache,
     TextAction, TextBuffer, TextBufferLine, TextMetrics, Weight};
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{env, fs, process, thread, time::{Duration, Instant}};
@@ -39,6 +39,11 @@ fn main() {
 
     let mut line_i = 0;
     for &(text, attrs) in &[
+        ("B", attrs.weight(Weight::BOLD)),
+        ("old ", attrs),
+        ("I", attrs.style(Style::Italic)),
+        ("talic", attrs),
+        ("\n", attrs),
         ("Sans-Serif Normal ", attrs),
         ("Sans-Serif Bold ", attrs.weight(Weight::BOLD)),
         ("Sans-Serif Italic ", attrs.style(Style::Italic)),
@@ -73,6 +78,13 @@ fn main() {
         ("Blue ", attrs.color(Color::rgb(0x00, 0x00, 0xFF))),
         ("Indigo ", attrs.color(Color::rgb(0x4B, 0x00, 0x82))),
         ("Violet ", attrs.color(Color::rgb(0x94, 0x00, 0xD3))),
+        ("U", attrs.color(Color::rgb(0x94, 0x00, 0xD3))),
+        ("N", attrs.color(Color::rgb(0x4B, 0x00, 0x82))),
+        ("I", attrs.color(Color::rgb(0x00, 0x00, 0xFF))),
+        ("C", attrs.color(Color::rgb(0x00, 0xFF, 0x00))),
+        ("O", attrs.color(Color::rgb(0xFF, 0xFF, 0x00))),
+        ("R", attrs.color(Color::rgb(0xFF, 0x7F, 0x00))),
+        ("N", attrs.color(Color::rgb(0xFF, 0x00, 0x00))),
     ] {
         if text == "\n" {
             line_i += 1;
@@ -86,11 +98,7 @@ fn main() {
         let start = line.text.len();
         line.text.push_str(text);
         let end = line.text.len();
-        line.attrs_spans.push(AttrsSpan {
-            start,
-            end,
-            attrs,
-        });
+        line.attrs_list.add_span(start, end, attrs);
         line.reset();
     }
 

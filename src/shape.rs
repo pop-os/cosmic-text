@@ -1,19 +1,20 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use unicode_script::{Script, UnicodeScript};
+use unicode_segmentation::UnicodeSegmentation;
 
-use crate::{Attrs, AttrsSpan, CacheKey, Color, Font, FontSystem, LayoutGlyph, LayoutLine};
+use crate::{AttrsList, CacheKey, Color, Font, FontSystem, LayoutGlyph, LayoutLine};
 use crate::fallback::FontFallbackIter;
 
 fn shape_fallback(
     font: &Font,
     line: &str,
-    attrs_spans: &[AttrsSpan],
-    start_word: usize,
-    end_word: usize,
+    attrs_list: &AttrsList,
+    start_run: usize,
+    end_run: usize,
     span_rtl: bool,
 ) -> (Vec<ShapeGlyph>, Vec<usize>) {
-    let word = &line[start_word..end_word];
+    let run = &line[start_run..end_run];
 
     let font_scale = font.rustybuzz.units_per_em() as f32;
 
@@ -23,7 +24,7 @@ fn shape_fallback(
     } else {
         rustybuzz::Direction::LeftToRight
     });
-    buffer.push_str(word);
+    buffer.push_str(run);
     buffer.guess_segment_properties();
 
     let rtl = match buffer.direction() {
@@ -45,32 +46,23 @@ fn shape_fallback(
         let x_offset = pos.x_offset as f32 / font_scale;
         let y_offset = pos.y_offset as f32 / font_scale;
 
-        let start_glyph = start_word + info.cluster as usize;
+        let start_glyph = start_run + info.cluster as usize;
 
         //println!("  {:?} {:?}", info, pos);
         if info.glyph_id == 0 {
             missing.push(start_glyph);
         }
 
-        let mut attrs = Attrs::new();
-        for attrs_span in attrs_spans.iter() {
-            //TODO: BETTER SUPPORT ATTRIBUTES PER GLYPH
-            if attrs_span.start <= start_glyph && attrs_span.end > start_glyph {
-                attrs = attrs_span.attrs;
-                break;
-            }
-        }
-
         glyphs.push(ShapeGlyph {
             start: start_glyph,
-            end: end_word, // Set later
+            end: end_run, // Set later
             x_advance,
             y_advance,
             x_offset,
             y_offset,
             font_id: font.info.id,
             glyph_id: info.glyph_id.try_into().unwrap(),
-            color_opt: attrs.color_opt,
+            color_opt: None,
         });
     }
 
@@ -99,7 +91,147 @@ fn shape_fallback(
         }
     }
 
+    // Set color
+    //TODO: these attributes should not be related to shaping
+    for glyph in glyphs.iter_mut() {
+        let attrs = attrs_list.get_span(glyph.start, glyph.end);
+        glyph.color_opt = attrs.color_opt;
+    }
+
     (glyphs, missing)
+}
+
+fn shape_run<'a>(
+    font_system: &'a FontSystem<'a>,
+    line: &str,
+    attrs_list: &AttrsList<'a>,
+    start_run: usize,
+    end_run: usize,
+    span_rtl: bool,
+) -> Vec<ShapeGlyph> {
+    //TODO: use smallvec?
+    let mut scripts = Vec::new();
+    for c in line[start_run..end_run].chars() {
+        match c.script() {
+            Script::Common |
+            Script::Inherited |
+            Script::Latin |
+            Script::Unknown => (),
+            script => if ! scripts.contains(&script) {
+                scripts.push(script);
+            },
+        }
+    }
+
+    log::trace!(
+        "      Run {:?}: '{}'",
+        scripts,
+        &line[start_run..end_run],
+    );
+
+    let attrs = attrs_list.get_span(start_run, end_run);
+
+    let font_matches = font_system.get_font_matches(attrs);
+
+    let default_families = [font_matches.default_family.as_str()];
+    let mut font_iter = FontFallbackIter::new(
+        &font_matches.fonts,
+        &default_families,
+        scripts,
+        font_matches.locale
+    );
+
+    let (mut glyphs, mut missing) = shape_fallback(
+        font_iter.next().unwrap(),
+        line,
+        attrs_list,
+        start_run,
+        end_run,
+        span_rtl,
+    );
+
+    //TODO: improve performance!
+    while !missing.is_empty() {
+        let font = match font_iter.next() {
+            Some(some) => some,
+            None => break,
+        };
+
+        log::trace!("Evaluating fallback with font '{}'", font.info.family);
+        let (mut fb_glyphs, fb_missing) = shape_fallback(
+            font,
+            line,
+            attrs_list,
+            start_run,
+            end_run,
+            span_rtl,
+        );
+
+        // Insert all matching glyphs
+        let mut fb_i = 0;
+        while fb_i < fb_glyphs.len() {
+            let start = fb_glyphs[fb_i].start;
+            let end = fb_glyphs[fb_i].end;
+
+            // Skip clusters that are not missing, or where the fallback font is missing
+            if !missing.contains(&start) || fb_missing.contains(&start) {
+                fb_i += 1;
+                continue;
+            }
+
+            let mut missing_i = 0;
+            while missing_i < missing.len() {
+                if missing[missing_i] >= start && missing[missing_i] < end {
+                    // println!("No longer missing {}", missing[missing_i]);
+                    missing.remove(missing_i);
+                } else {
+                    missing_i += 1;
+                }
+            }
+
+            // Find prior glyphs
+            let mut i = 0;
+            while i < glyphs.len() {
+                if glyphs[i].start >= start && glyphs[i].end <= end {
+                    break;
+                } else {
+                    i += 1;
+                }
+            }
+
+            // Remove prior glyphs
+            while i < glyphs.len() {
+                if glyphs[i].start >= start && glyphs[i].end <= end {
+                    let _glyph = glyphs.remove(i);
+                    // log::trace!("Removed {},{} from {}", _glyph.start, _glyph.end, i);
+                } else {
+                    break;
+                }
+            }
+
+            while fb_i < fb_glyphs.len() {
+                if fb_glyphs[fb_i].start >= start && fb_glyphs[fb_i].end <= end {
+                    let fb_glyph = fb_glyphs.remove(fb_i);
+                    // log::trace!("Insert {},{} from font {} at {}", fb_glyph.start, fb_glyph.end, font_i, i);
+                    glyphs.insert(i, fb_glyph);
+                    i += 1;
+                } else {
+                    break;
+                }
+            }
+        }
+    }
+
+    // Debug missing font fallbacks
+    font_iter.check_missing(&line[start_run..end_run]);
+
+    /*
+    for glyph in glyphs.iter() {
+        log::trace!("'{}': {}, {}, {}, {}", &line[glyph.start..glyph.end], glyph.x_advance, glyph.y_advance, glyph.x_offset, glyph.y_offset);
+    }
+    */
+
+    glyphs
 }
 
 pub struct ShapeGlyph {
@@ -149,141 +281,54 @@ impl ShapeWord {
     pub fn new<'a>(
         font_system: &'a FontSystem<'a>,
         line: &str,
-        attrs_spans: &[AttrsSpan<'a>],
+        attrs_list: &AttrsList<'a>,
         start_word: usize,
         end_word: usize,
         span_rtl: bool,
         blank: bool,
     ) -> Self {
-        //TODO: use smallvec?
-        let mut scripts = Vec::new();
-        for c in line[start_word..end_word].chars() {
-            match c.script() {
-                Script::Common |
-                Script::Inherited |
-                Script::Latin |
-                Script::Unknown => (),
-                script => if ! scripts.contains(&script) {
-                    scripts.push(script);
-                },
-            }
-        }
+        let word = &line[start_word..end_word];
 
         log::trace!(
-            "    Word {:?}{}: '{}'",
-            scripts,
+            "      Word{}: '{}'",
             if blank { " BLANK" } else { "" },
-            &line[start_word..end_word],
+            word
         );
 
-        let mut attrs = Attrs::new();
-        for attrs_span in attrs_spans.iter() {
-            //TODO: BETTER SUPPORT ATTRIBUTES PER GLYPH
-            if attrs_span.start <= start_word && attrs_span.end >= end_word {
-                attrs = attrs_span.attrs;
-                break;
+        let mut glyphs = Vec::new();
+
+        let mut start_run = start_word;
+        let mut attrs = attrs_list.defaults();
+        for (egc_i, egc) in word.grapheme_indices(true) {
+            let start_egc = start_word + egc_i;
+            let end_egc = start_egc + egc.len();
+            let attrs_egc = attrs_list.get_span(start_egc, end_egc);
+            if ! attrs.compatible(&attrs_egc) {
+                //TODO: more efficient
+                glyphs.append(&mut shape_run(
+                    font_system,
+                    line,
+                    attrs_list,
+                    start_run,
+                    start_egc,
+                    span_rtl
+                ));
+
+                start_run = start_egc;
+                attrs = attrs_egc;
             }
         }
-
-        let font_matches = font_system.get_font_matches(attrs);
-
-        let default_families = [font_matches.default_family.as_str()];
-        let mut font_iter = FontFallbackIter::new(
-            &font_matches.fonts,
-            &default_families,
-            scripts,
-            font_matches.locale
-        );
-
-        let (mut glyphs, mut missing) = shape_fallback(
-            font_iter.next().unwrap(),
-            line,
-            attrs_spans,
-            start_word,
-            end_word,
-            span_rtl,
-        );
-
-        //TODO: improve performance!
-        while !missing.is_empty() {
-            let font = match font_iter.next() {
-                Some(some) => some,
-                None => break,
-            };
-
-            log::trace!("Evaluating fallback with font '{}'", font.info.family);
-            let (mut fb_glyphs, fb_missing) = shape_fallback(
-                font,
+        if start_run < end_word {
+            //TODO: more efficient
+            glyphs.append(&mut shape_run(
+                font_system,
                 line,
-                attrs_spans,
-                start_word,
+                attrs_list,
+                start_run,
                 end_word,
-                span_rtl,
-            );
-
-            // Insert all matching glyphs
-            let mut fb_i = 0;
-            while fb_i < fb_glyphs.len() {
-                let start = fb_glyphs[fb_i].start;
-                let end = fb_glyphs[fb_i].end;
-
-                // Skip clusters that are not missing, or where the fallback font is missing
-                if !missing.contains(&start) || fb_missing.contains(&start) {
-                    fb_i += 1;
-                    continue;
-                }
-
-                let mut missing_i = 0;
-                while missing_i < missing.len() {
-                    if missing[missing_i] >= start && missing[missing_i] < end {
-                        // println!("No longer missing {}", missing[missing_i]);
-                        missing.remove(missing_i);
-                    } else {
-                        missing_i += 1;
-                    }
-                }
-
-                // Find prior glyphs
-                let mut i = 0;
-                while i < glyphs.len() {
-                    if glyphs[i].start >= start && glyphs[i].end <= end {
-                        break;
-                    } else {
-                        i += 1;
-                    }
-                }
-
-                // Remove prior glyphs
-                while i < glyphs.len() {
-                    if glyphs[i].start >= start && glyphs[i].end <= end {
-                        let _glyph = glyphs.remove(i);
-                        // log::trace!("Removed {},{} from {}", _glyph.start, _glyph.end, i);
-                    } else {
-                        break;
-                    }
-                }
-
-                while fb_i < fb_glyphs.len() {
-                    if fb_glyphs[fb_i].start >= start && fb_glyphs[fb_i].end <= end {
-                        let fb_glyph = fb_glyphs.remove(fb_i);
-                        // log::trace!("Insert {},{} from font {} at {}", fb_glyph.start, fb_glyph.end, font_i, i);
-                        glyphs.insert(i, fb_glyph);
-                        i += 1;
-                    } else {
-                        break;
-                    }
-                }
-            }
+                span_rtl
+            ));
         }
-
-        // Debug missing font fallbacks
-        font_iter.check_missing(&line[start_word..end_word]);
-
-        /*
-        for glyph in glyphs.iter() {
-            log::trace!("'{}': {}, {}, {}, {}", &line[glyph.start..glyph.end], glyph.x_advance, glyph.y_advance, glyph.x_offset, glyph.y_offset);
-        }
-        */
 
         Self { blank, glyphs }
     }
@@ -298,7 +343,7 @@ impl ShapeSpan {
     pub fn new<'a>(
         font_system: &'a FontSystem<'a>,
         line: &str,
-        attrs_spans: &[AttrsSpan<'a>],
+        attrs_list: &AttrsList<'a>,
         start_span: usize,
         end_span: usize,
         line_rtl: bool,
@@ -328,7 +373,7 @@ impl ShapeSpan {
                 words.push(ShapeWord::new(
                     font_system,
                     line,
-                    attrs_spans,
+                    attrs_list,
                     start_span + start_word,
                     start_span + start_lb,
                     span_rtl,
@@ -339,7 +384,7 @@ impl ShapeSpan {
                 words.push(ShapeWord::new(
                     font_system,
                     line,
-                    attrs_spans,
+                    attrs_list,
                     start_span + start_lb,
                     start_span + end_lb,
                     span_rtl,
@@ -377,7 +422,7 @@ impl ShapeLine {
     pub fn new<'a>(
         font_system: &'a FontSystem<'a>,
         line: &str,
-        attrs_spans: &[AttrsSpan<'a>]
+        attrs_list: &AttrsList<'a>
     ) -> Self {
         let mut spans = Vec::new();
 
@@ -401,7 +446,7 @@ impl ShapeLine {
                     spans.push(ShapeSpan::new(
                         font_system,
                         line,
-                        attrs_spans,
+                        attrs_list,
                         start,
                         i,
                         line_rtl,
@@ -414,7 +459,7 @@ impl ShapeLine {
             spans.push(ShapeSpan::new(
                 font_system,
                 line,
-                attrs_spans,
+                attrs_list,
                 start,
                 line.len(),
                 line_rtl,

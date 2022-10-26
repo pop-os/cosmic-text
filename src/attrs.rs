@@ -80,10 +80,52 @@ impl<'a> Attrs<'a> {
         //TODO: smarter way of including emoji
         (face.monospaced == self.monospaced || face.post_script_name.contains("Emoji"))
     }
+
+    pub fn compatible(&self, other: &Self) -> bool {
+        self.family == other.family
+        && self.monospaced == other.monospaced
+        && self.stretch == other.stretch
+        && self.style == other.style
+        && self.weight == other.weight
+    }
 }
 
-pub struct AttrsSpan<'a> {
-    pub start: usize,
-    pub end: usize,
-    pub attrs: Attrs<'a>
+pub struct AttrsList<'a> {
+    defaults: Attrs<'a>,
+    spans: Vec<(usize, usize, Attrs<'a>)>,
+}
+
+impl<'a> AttrsList<'a> {
+    pub fn new(defaults: Attrs<'a>) -> Self {
+        Self {
+            defaults,
+            spans: Vec::new(),
+        }
+    }
+
+    pub fn defaults(&self) -> Attrs<'a> {
+        self.defaults
+    }
+
+    pub fn spans(&self) -> &Vec<(usize, usize, Attrs<'a>)> {
+        &self.spans
+    }
+
+    pub fn clear_spans(&mut self) {
+        self.spans.clear();
+    }
+
+    pub fn add_span(&mut self, start: usize, end: usize, attrs: Attrs<'a>) {
+        self.spans.push((start, end, attrs));
+    }
+
+    pub fn get_span(&self, start: usize, end: usize) -> Attrs<'a> {
+        let mut attrs = self.defaults;
+        for span in self.spans.iter() {
+            if start >= span.0 && end <= span.1 {
+                attrs = span.2;
+            }
+        }
+        attrs
+    }
 }

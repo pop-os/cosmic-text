@@ -7,7 +7,7 @@ use std::{
 };
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::{Attrs, AttrsSpan, FontSystem, LayoutGlyph, LayoutLine, ShapeLine};
+use crate::{Attrs, AttrsList, FontSystem, LayoutGlyph, LayoutLine, ShapeLine};
 
 /// An action to perform on a [TextBuffer]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -175,21 +175,16 @@ impl fmt::Display for TextMetrics {
 
 pub struct TextBufferLine<'a> {
     pub text: String,
-    pub attrs_spans: Vec<AttrsSpan<'a>>,
+    pub attrs_list: AttrsList<'a>,
     shape_opt: Option<ShapeLine>,
     layout_opt: Option<Vec<LayoutLine>>,
 }
 
 impl<'a> TextBufferLine<'a> {
     pub fn new(text: String, attrs: Attrs<'a>) -> Self {
-        let attrs_spans = vec![AttrsSpan {
-            start: 0,
-            end: text.len(),
-            attrs
-        }];
         Self {
             text,
-            attrs_spans,
+            attrs_list: AttrsList::new(attrs),
             shape_opt: None,
             layout_opt: None,
         }
@@ -206,7 +201,7 @@ impl<'a> TextBufferLine<'a> {
 
     pub fn shape(&mut self, font_system: &'a FontSystem<'a>) -> &ShapeLine {
         if self.shape_opt.is_none() {
-            self.shape_opt = Some(ShapeLine::new(font_system, &self.text, &self.attrs_spans));
+            self.shape_opt = Some(ShapeLine::new(font_system, &self.text, &self.attrs_list));
             self.layout_opt = None;
         }
         self.shape_opt.as_ref().unwrap()
@@ -509,12 +504,8 @@ impl<'a> TextBuffer<'a> {
             self.attrs = attrs;
 
             for line in self.lines.iter_mut() {
+                line.attrs_list = AttrsList::new(attrs);
                 line.reset();
-                line.attrs_spans = vec![AttrsSpan {
-                    start: 0,
-                    end: line.text.len(),
-                    attrs
-                }];
             }
 
             self.shape_until_scroll();
