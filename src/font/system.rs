@@ -5,7 +5,7 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use crate::{Attrs, Font, FontMatches};
+use crate::{Attrs, Family, Font, FontMatches};
 
 /// Access system fonts
 pub struct FontSystem<'a> {
@@ -79,6 +79,7 @@ impl<'a> FontSystem<'a> {
 
     pub fn matches<F: Fn(&fontdb::FaceInfo) -> bool>(
         &'a self,
+        default_family: &Family,
         f: F,
     ) -> FontMatches<'_> {
         let mut fonts = Vec::new();
@@ -95,12 +96,13 @@ impl<'a> FontSystem<'a> {
 
         FontMatches {
             locale: &self.locale,
+            default_family: self.db.family_name(default_family).to_string(),
             fonts
         }
     }
 
     pub fn matches_attrs(&'a self, attrs: &Attrs) -> FontMatches<'_> {
-        self.matches(|face| {
+        self.matches(&attrs.family, |face| {
             let matched = attrs.matches(face);
 
             if matched {

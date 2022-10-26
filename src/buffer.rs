@@ -550,7 +550,7 @@ impl<'a> TextBuffer<'a> {
 
     /// Perform a [TextAction] on the buffer
     pub fn action(&mut self, action: TextAction) {
-        let mut old_cursor = self.cursor;
+        let old_cursor = self.cursor;
 
         match action {
             TextAction::Previous => {

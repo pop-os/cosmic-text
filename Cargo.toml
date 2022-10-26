@@ -7,7 +7,7 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-fontdb = "0.9"
+fontdb = { version = "0.9", git = "https://github.com/jackpot51/fontdb" }
 log = "0.4"
 rustybuzz = "0.5"
 swash = { version = "0.1", optional = true }

@@ -3,12 +3,13 @@
 use std::sync::Arc;
 use unicode_script::{Script, UnicodeScript};
 
-use super::{Font, FontShapeGlyph, FontShapeLine, FontShapeSpan, FontShapeWord};
-use super::fallback::{FontFallbackIter};
+use crate::{Font, FontShapeGlyph, FontShapeLine, FontShapeSpan, FontShapeWord};
+use crate::fallback::{FontFallbackIter};
 
 /// Fonts that match a pattern
 pub struct FontMatches<'a> {
     pub locale: &'a str,
+    pub default_family: String,
     pub fonts: Vec<Arc<Font<'a>>>,
 }
 
@@ -127,10 +128,10 @@ impl<'a> FontMatches<'a> {
             &line[start_word..end_word],
         );
 
-        //TODO: configure default family
+        let default_families = [self.default_family.as_str()];
         let mut font_iter = FontFallbackIter::new(
             &self.fonts,
-            &["Fira Sans", "Fira Mono"],
+            &default_families,
             scripts,
             self.locale
         );
