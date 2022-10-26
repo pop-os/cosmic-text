@@ -5,7 +5,6 @@ use std::ops::Deref;
 pub struct Font<'a> {
     pub info: &'a fontdb::FaceInfo,
     pub data: &'a [u8],
-    pub index: u32,
     pub rustybuzz: rustybuzz::Face<'a>,
     #[cfg(feature = "swash")]
     pub swash: (u32, swash::CacheKey),
@@ -25,7 +24,6 @@ impl<'a> Font<'a> {
         Some(Self {
             info,
             data,
-            index: info.index,
             rustybuzz: rustybuzz::Face::from_slice(data, info.index)?,
             #[cfg(feature = "swash")]
             swash: {
