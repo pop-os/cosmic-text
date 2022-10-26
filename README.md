@@ -15,10 +15,12 @@ feature set. Other platforms may need to implement font fallback capabilities.
 
 The following features must be supported before this is "ready":
 
-- [x] Font loading
+- [x] Font loading (using fontdb)
   - [x] Preset fonts
   - [x] System fonts
-- [ ] Text styles (bold, italic, etc.)
+- [x] Text styles (bold, italic, etc.)
+  - [x] Per-buffer
+  - [ ] Per-span
 - [x] Font shaping (using rustybuzz)
   - [x] Cache results
   - [x] RTL
