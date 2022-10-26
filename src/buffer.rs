@@ -237,7 +237,7 @@ impl TextBufferLine {
 
 /// A buffer of text that is shaped and laid out
 pub struct TextBuffer<'a> {
-    pub font_matches: FontMatches<'a>,
+    font_matches: FontMatches<'a>,
     attrs: Attrs<'a>,
     lines: Vec<TextBufferLine>,
     metrics: TextMetrics,
@@ -505,6 +505,10 @@ impl<'a> TextBuffer<'a> {
     /// Get the number of lines that can be viewed in the buffer
     pub fn lines(&self) -> i32 {
         self.height / self.metrics.line_height
+    }
+
+    pub fn font_matches(&self) -> &FontMatches<'a> {
+        &self.font_matches
     }
 
     pub fn attrs(&self) -> &Attrs<'a> {
