@@ -157,7 +157,12 @@ where
         let mut buffer = self.buffer.lock().unwrap();
         let mut cache = self.cache.lock().unwrap();
 
-        buffer.shape_until_cursor();
+        if buffer.cursor_moved {
+            buffer.shape_until_cursor();
+            buffer.cursor_moved = false;
+        } else {
+            buffer.shape_until_scroll();
+        }
 
         let buffer_x = layout.bounds().x;
         let buffer_y = layout.bounds().y;

@@ -246,6 +246,7 @@ pub struct TextBuffer<'a> {
     scroll: i32,
     cursor: TextCursor,
     select_opt: Option<TextCursor>,
+    pub cursor_moved: bool,
     pub redraw: bool,
 }
 
@@ -266,6 +267,7 @@ impl<'a> TextBuffer<'a> {
             scroll: 0,
             cursor: TextCursor::default(),
             select_opt: None,
+            cursor_moved: false,
             redraw: false,
         };
         buffer.set_text("");
@@ -323,20 +325,9 @@ impl<'a> TextBuffer<'a> {
                 self.width
             );
             if line_i == self.cursor.line.get() {
-                for layout_line in layout {
-                    let mut found = false;
-                    for glyph in layout_line.glyphs.iter() {
-                        if glyph.start <= self.cursor.index {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if found {
-                        layout_i += 1;
-                    } else {
-                        break;
-                    }
-                }
+                let layout_cursor = self.layout_cursor(&self.cursor);
+                layout_i += layout_cursor.layout as i32;
+                break;
             } else {
                 layout_i += layout.len() as i32;
             }
@@ -559,6 +550,8 @@ impl<'a> TextBuffer<'a> {
 
     /// Perform a [TextAction] on the buffer
     pub fn action(&mut self, action: TextAction) {
+        let mut old_cursor = self.cursor;
+
         match action {
             TextAction::Previous => {
                 let line = &mut self.lines[self.cursor.line.get()];
@@ -785,6 +778,10 @@ impl<'a> TextBuffer<'a> {
 
                 self.shape_until_scroll();
             }
+        }
+
+        if old_cursor != self.cursor {
+            self.cursor_moved = true;
         }
     }
 

@@ -73,13 +73,15 @@ fn main() {
     let mut mouse_y = -1;
     let mut mouse_left = false;
 
-    //Lets do this once and rely on events for the rest.
-    buffer.shape_until_cursor();
-
     loop {
         let mut force_drag = true;
 
-        buffer.shape_until_scroll();
+        if buffer.cursor_moved {
+            buffer.shape_until_cursor();
+            buffer.cursor_moved = false;
+        } else {
+            buffer.shape_until_scroll();
+        }
 
         if buffer.redraw {
             let instant = Instant::now();
@@ -203,8 +205,6 @@ fn main() {
                         } else if mouse_y + 5 >= window.height() as i32 {
                             buffer.action(TextAction::Scroll { lines: 3 });
                             window_async = true;
-                        } else {
-                            buffer.shape_until_cursor()
                         }
 
                         force_drag = false;
@@ -218,8 +218,6 @@ fn main() {
                                 x: mouse_x - line_x,
                                 y: mouse_y,
                             });
-
-                            buffer.shape_until_cursor()
                         }
                         force_drag = false;
                     }

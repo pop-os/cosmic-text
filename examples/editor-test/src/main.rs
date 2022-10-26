@@ -9,7 +9,12 @@ fn redraw(window: &mut Window, buffer: &mut TextBuffer<'_>, swash_cache: &mut Sw
     let bg_color = Color::rgb(0x34, 0x34, 0x34);
     let font_color = Color::rgb(0xFF, 0xFF, 0xFF);
 
-    buffer.shape_until_cursor();
+    if buffer.cursor_moved {
+        buffer.shape_until_cursor();
+        buffer.cursor_moved = false;
+    } else {
+        buffer.shape_until_scroll();
+    }
 
     if buffer.redraw {
         let instant = Instant::now();
