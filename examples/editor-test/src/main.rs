@@ -43,8 +43,8 @@ fn main() {
     let mut window = Window::new_flags(
         -1,
         -1,
-        1920,
-        1080,
+        1024,
+        768,
         &format!("COSMIC TEXT - {}", font_system.locale),
         &[WindowFlag::Async],
     )
