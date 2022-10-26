@@ -13,7 +13,7 @@ fn main() {
     let text = if let Some(arg) = env::args().nth(1) {
         fs::read_to_string(&arg).expect("failed to open file")
     } else {
-        "Markdown can have **bold**, *italic*, and `code` styles".to_string()
+        String::new()
     };
 
     let mut window = Window::new_flags(
@@ -51,7 +51,10 @@ fn main() {
         let ts = ThemeSet::load_defaults();
 
         let syntax = ps.find_syntax_by_extension("rs").unwrap();
-        let mut h = HighlightLines::new(syntax, &ts.themes["base16-ocean.dark"]);
+        for (name, _) in ts.themes.iter() {
+            println!("{}", name);
+        }
+        let mut h = HighlightLines::new(syntax, &ts.themes["base16-eighties.dark"]);
         for (line_i, highlight_line) in LinesWithEndings::from(&text).enumerate() { // LinesWithEndings enables use of newlines mode
             while line_i >= buffer.lines.len() {
                 buffer.lines.push(TextBufferLine::new(String::new(), attrs));
@@ -104,7 +107,7 @@ fn main() {
     let mut mouse_y = -1;
     let mut mouse_left = false;
     loop {
-        let bg_color = orbclient::Color::rgb(0x34, 0x34, 0x34);
+        let bg_color = orbclient::Color::rgb(0x2d, 0x2d, 0x2d);
         let font_color = orbclient::Color::rgb(0xFF, 0xFF, 0xFF);
 
         if buffer.cursor_moved {
@@ -133,22 +136,40 @@ fn main() {
 
         for event in window.events() {
             match event.to_option() {
-                EventOption::Mouse(mouse) => {
-                    mouse_x = mouse.x;
-                    mouse_y = mouse.y;
+                EventOption::Key(event) => match event.scancode {
+                    orbclient::K_LEFT if event.pressed => buffer.action(TextAction::Left),
+                    orbclient::K_RIGHT if event.pressed => buffer.action(TextAction::Right),
+                    orbclient::K_UP if event.pressed => buffer.action(TextAction::Up),
+                    orbclient::K_DOWN if event.pressed => buffer.action(TextAction::Down),
+                    orbclient::K_HOME if event.pressed => buffer.action(TextAction::Home),
+                    orbclient::K_END if event.pressed => buffer.action(TextAction::End),
+                    orbclient::K_PGUP if event.pressed => buffer.action(TextAction::PageUp),
+                    orbclient::K_PGDN if event.pressed => buffer.action(TextAction::PageDown),
+                    _ => (),
+                },
+                EventOption::Mouse(event) => {
+                    mouse_x = event.x;
+                    mouse_y = event.y;
                     if mouse_left {
                         buffer.action(TextAction::Drag { x: mouse_x, y: mouse_y });
                     }
                 },
-                EventOption::Button(button) => {
-                    mouse_left = button.left;
-                    if mouse_left {
-                        buffer.action(TextAction::Click { x: mouse_x, y: mouse_y });
+                EventOption::Button(event) => {
+                    if event.left != mouse_left {
+                        mouse_left = event.left;
+                        if mouse_left {
+                            buffer.action(TextAction::Click { x: mouse_x, y: mouse_y });
+                        }
                     }
                 },
-                EventOption::Resize(resize) => {
-                    buffer.set_size(resize.width as i32, resize.height as i32);
+                EventOption::Resize(event) => {
+                    buffer.set_size(event.width as i32, event.height as i32);
                 },
+                EventOption::Scroll(event) => {
+                    buffer.action(TextAction::Scroll {
+                        lines: -event.y * 3,
+                    });
+                }
                 EventOption::Quit(_) => process::exit(0),
                 _ => (),
             }
