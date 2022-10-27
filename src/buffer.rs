@@ -233,6 +233,7 @@ pub struct TextBuffer<'a> {
     height: i32,
     scroll: i32,
     cursor: TextCursor,
+    cursor_x_opt: Option<i32>,
     select_opt: Option<TextCursor>,
     pub cursor_moved: bool,
     pub redraw: bool,
@@ -253,6 +254,7 @@ impl<'a> TextBuffer<'a> {
             height: 0,
             scroll: 0,
             cursor: TextCursor::default(),
+            cursor_x_opt: None,
             select_opt: None,
             cursor_moved: false,
             redraw: false,
@@ -542,7 +544,6 @@ impl<'a> TextBuffer<'a> {
         match action {
             TextAction::Previous => {
                 let line = &mut self.lines[self.cursor.line];
-
                 if self.cursor.index > 0 {
                     // Find previous character index
                     let mut prev_index = 0;
@@ -561,10 +562,10 @@ impl<'a> TextBuffer<'a> {
                     self.cursor.index = self.lines[self.cursor.line].text.len();
                     self.redraw = true;
                 }
+                self.cursor_x_opt = None;
             },
             TextAction::Next => {
                 let line = &mut self.lines[self.cursor.line];
-
                 if self.cursor.index < line.text.len() {
                     for (i, c) in line.text.grapheme_indices(true) {
                         if i == self.cursor.index {
@@ -578,6 +579,7 @@ impl<'a> TextBuffer<'a> {
                     self.cursor.index = 0;
                     self.redraw = true;
                 }
+                self.cursor_x_opt = None;
             },
             TextAction::Left => {
                 let rtl_opt = self.lines[self.cursor.line].shape_opt.as_ref().map(|shape| shape.rtl);
@@ -602,17 +604,30 @@ impl<'a> TextBuffer<'a> {
             TextAction::Up => {
                 //TODO: make this preserve X as best as possible!
                 let mut cursor = self.layout_cursor(&self.cursor);
+
+                if self.cursor_x_opt.is_none() {
+                    self.cursor_x_opt = Some(
+                        cursor.glyph as i32 //TODO: glyph x position
+                    );
+                }
+
                 if cursor.layout > 0 {
                     cursor.layout -= 1;
                 } else if cursor.line > 0 {
                     cursor.line -= 1;
                     cursor.layout = usize::max_value();
                 }
+
+                if let Some(cursor_x) = self.cursor_x_opt {
+                    cursor.glyph = cursor_x as usize; //TODO: glyph x position
+                }
+
                 self.set_layout_cursor(cursor);
             },
             TextAction::Down => {
                 //TODO: make this preserve X as best as possible!
                 let mut cursor = self.layout_cursor(&self.cursor);
+
                 let layout_len = {
                     let line = &mut self.lines[cursor.line];
                     let layout = line.layout(
@@ -622,23 +637,37 @@ impl<'a> TextBuffer<'a> {
                     );
                     layout.len()
                 };
+
+                if self.cursor_x_opt.is_none() {
+                    self.cursor_x_opt = Some(
+                        cursor.glyph as i32 //TODO: glyph x position
+                    );
+                }
+
                 if cursor.layout + 1 < layout_len {
                     cursor.layout += 1;
                 } else if cursor.line + 1 < self.lines.len() {
                     cursor.line += 1;
                     cursor.layout = 0;
                 }
+
+                if let Some(cursor_x) = self.cursor_x_opt {
+                    cursor.glyph = cursor_x as usize; //TODO: glyph x position
+                }
+
                 self.set_layout_cursor(cursor);
             },
             TextAction::Home => {
                 let mut cursor = self.layout_cursor(&self.cursor);
                 cursor.glyph = 0;
                 self.set_layout_cursor(cursor);
+                self.cursor_x_opt = None;
             },
             TextAction::End => {
                 let mut cursor = self.layout_cursor(&self.cursor);
                 cursor.glyph = usize::max_value();
                 self.set_layout_cursor(cursor);
+                self.cursor_x_opt = None;
             }
             TextAction::PageUp => {
                 //TODO: move cursor
