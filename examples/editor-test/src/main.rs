@@ -60,10 +60,8 @@ fn main() {
     ];
     let font_size_default = 1; // Body
 
-    let attrs = cosmic_text::Attrs::new().monospaced(cfg!(feature = "mono"));
     let mut buffer = TextBuffer::new(
         &font_system,
-        attrs,
         font_sizes[font_size_default]
     );
     buffer.set_size(
@@ -151,9 +149,8 @@ fn main() {
     log::info!("Test completed in {:?}", test_elapsed);
 
     let mut wrong = 0;
-    let buffer_lines = buffer.text_lines();
     for (line_i, line) in text.lines().enumerate() {
-        let buffer_line = &buffer_lines[line_i];
+        let buffer_line = &buffer.lines[line_i];
         if buffer_line.text() != line {
             log::error!("line {}: {:?} != {:?}", line_i, buffer_line.text(), line);
             wrong += 1;

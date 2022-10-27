@@ -13,6 +13,3 @@ fontdb = "0.9"
 log = "0.4"
 orbclient = "0.3.35"
 unicode-segmentation = "1.7"
-
-[features]
-mono = []
