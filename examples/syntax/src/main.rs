@@ -10,10 +10,16 @@ fn main() {
 
     let font_system = FontSystem::new();
 
-    let text = if let Some(arg) = env::args().nth(1) {
-        fs::read_to_string(&arg).expect("failed to open file")
+    let (path, text) = if let Some(arg) = env::args().nth(1) {
+        (
+            arg.clone(),
+            fs::read_to_string(&arg).expect("failed to open file")
+        )
     } else {
-        String::new()
+        (
+            String::new(),
+            String::new()
+        )
     };
 
     let display_scale = match orbclient::get_display_size() {
@@ -84,7 +90,10 @@ fn main() {
             );
         }
 
-        let syntax = ps.find_syntax_by_extension("rs").unwrap();
+        let syntax = match ps.find_syntax_for_file(&path).unwrap() {
+            Some(some) => some,
+            None => ps.find_syntax_plain_text(),
+        };
 
         buffer.lines.clear();
 
