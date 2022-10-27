@@ -201,6 +201,10 @@ impl<'a> TextBufferLine<'a> {
         self.layout_opt = None;
     }
 
+    pub fn is_reset(&self) -> bool {
+        self.shape_opt.is_none()
+    }
+
     pub fn shape(&mut self, font_system: &'a FontSystem<'a>) -> &ShapeLine {
         if self.shape_opt.is_none() {
             self.shape_opt = Some(ShapeLine::new(font_system, &self.text, &self.attrs_list));

@@ -1,12 +1,32 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use cosmic_text::{Attrs, AttrsList, Color, Family, FontSystem, Style, SwashCache,
-    TextAction, TextBuffer, TextMetrics, Weight};
+use cosmic_text::{
+    Attrs,
+    AttrsList,
+    Color,
+    Family,
+    FontSystem,
+    Style,
+    SwashCache,
+    TextAction,
+    TextBuffer,
+    TextMetrics,
+    Weight
+};
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{env, fs, process, time::Instant};
-use syntect::easy::HighlightLines;
-use syntect::parsing::SyntaxSet;
-use syntect::highlighting::{ThemeSet, FontStyle, Style as SyntectStyle};
+use syntect::highlighting::{
+    FontStyle,
+    Highlighter,
+    HighlightState,
+    RangedHighlightIterator,
+    ThemeSet,
+};
+use syntect::parsing::{
+    ParseState,
+    ScopeStack,
+    SyntaxSet,
+};
 
 fn main() {
     env_logger::init();
@@ -74,6 +94,7 @@ fn main() {
     let ps = SyntaxSet::load_defaults_nonewlines();
     let ts = ThemeSet::load_defaults();
     let theme = &ts.themes["base16-eighties.dark"];
+    let highlighter = Highlighter::new(theme);
 
     if let Some(background) = theme.settings.background {
         bg_color = orbclient::Color::rgba(
@@ -109,7 +130,8 @@ fn main() {
 
     let mut swash_cache = SwashCache::new(&font_system);
 
-    //TODO: make window not async?
+    let mut syntax_cache = Vec::<(ParseState, HighlightState)>::new();
+
     let mut rehighlight = true;
     let mut mouse_x = -1;
     let mut mouse_y = -1;
@@ -118,20 +140,34 @@ fn main() {
         if rehighlight {
             let now = Instant::now();
 
-            let mut h = HighlightLines::new(syntax, &theme);
-            for line in buffer.lines.iter_mut() {
-                let ranges: Vec<(SyntectStyle, &str)> = h.highlight_line(
-                    line.text(),
-                    &ps
-                ).unwrap();
+            for line_i in 0..buffer.lines.len() {
+                let line = &mut buffer.lines[line_i];
+                if ! line.is_reset() && line_i < syntax_cache.len() {
+                    continue;
+                }
 
-                let mut start = 0;
+                let (mut parse_state, mut highlight_state) = if line_i > 0 && line_i <= syntax_cache.len() {
+                    syntax_cache[line_i - 1].clone()
+                } else {
+                    (
+                        ParseState::new(syntax),
+                        HighlightState::new(&highlighter, ScopeStack::new())
+                    )
+                };
+
+                let ops = parse_state.parse_line(line.text(), &ps).unwrap();
+                let ranges = RangedHighlightIterator::new(
+                    &mut highlight_state,
+                    &ops,
+                    line.text(),
+                    &highlighter,
+                );
+
                 let mut attrs_list = AttrsList::new(attrs);
-                for (style, string) in ranges.iter() {
-                    let end = start + string.len();
+                for (style, _, range) in ranges {
                     attrs_list.add_span(
-                        start,
-                        end,
+                        range.start,
+                        range.end,
                         attrs
                             .color(Color::rgba(
                                 style.foreground.r,
@@ -152,15 +188,30 @@ fn main() {
                             })
                             //TODO: underline
                     );
-                    start = end;
                 }
 
                 if attrs_list != line.attrs_list {
                     line.attrs_list = attrs_list;
                     line.reset();
                 }
+
+                //TODO: efficiently do syntax highlighting without having to shape whole buffer
+                line.shape(&font_system);
+
+                let cache_item = (parse_state.clone(), highlight_state.clone());
+                if line_i < syntax_cache.len() {
+                    if syntax_cache[line_i] != cache_item {
+                        syntax_cache[line_i] = cache_item;
+                        if line_i + 1 < buffer.lines.len() {
+                            buffer.lines[line_i + 1].reset();
+                        }
+                    }
+                } else {
+                    syntax_cache.push(cache_item);
+                }
             }
 
+            buffer.redraw = true;
             rehighlight = false;
 
             log::info!("Syntax highlighted in {:?}", now.elapsed());
