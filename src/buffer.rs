@@ -175,7 +175,7 @@ impl fmt::Display for TextMetrics {
 
 pub struct TextBufferLine<'a> {
     text: String,
-    attrs_list: AttrsList<'a>,
+    pub attrs_list: AttrsList<'a>,
     shape_opt: Option<ShapeLine>,
     layout_opt: Option<Vec<LayoutLine>>,
 }
