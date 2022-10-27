@@ -175,10 +175,10 @@ impl fmt::Display for TextMetrics {
 
 pub struct TextBufferLine<'a> {
     text: String,
-    pub attrs_list: AttrsList<'a>,
+    attrs_list: AttrsList<'a>,
+    wrap_simple: bool,
     shape_opt: Option<ShapeLine>,
     layout_opt: Option<Vec<LayoutLine>>,
-    pub wrap_simple: bool,
 }
 
 impl<'a> TextBufferLine<'a> {
@@ -186,25 +186,78 @@ impl<'a> TextBufferLine<'a> {
         Self {
             text,
             attrs_list,
+            wrap_simple: false,
             shape_opt: None,
             layout_opt: None,
-            wrap_simple: false,
         }
     }
 
+    /// Get current text
     pub fn text(&self) -> &str {
         &self.text
     }
 
+    /// Set text
+    /// Will reset shape and layout if it differs from current text
+    /// Returns true if the line was reset
+    pub fn set_text<T: AsRef<str> + Into<String>>(&mut self, text: T) -> bool {
+        if text.as_ref() != &self.text {
+            self.text = text.into();
+            self.reset();
+            true
+        } else {
+            false
+        }
+    }
+
+    /// Get attributes list
+    pub fn attrs_list(&self) -> &AttrsList<'a> {
+        &self.attrs_list
+    }
+
+    /// Set attributes list.
+    /// Will reset shape and layout if it differs from current attributes list
+    /// Returns true if the line was reset
+    pub fn set_attrs_list(&mut self, attrs_list: AttrsList<'a>) -> bool {
+        if attrs_list != self.attrs_list {
+            self.attrs_list = attrs_list;
+            self.reset();
+            true
+        } else {
+            false
+        }
+    }
+
+    /// Get simple wrapping setting (wrap by characters only)
+    pub fn wrap_simple(&self) -> bool {
+        self.wrap_simple
+    }
+
+    /// Set simple wrapping setting (wrap by characters only)
+    /// Will reset shape and layout if it differs from current simple wrapping setting
+    /// Returns true if the line was reset
+    pub fn set_wrap_simple(&mut self, wrap_simple: bool) -> bool {
+        if wrap_simple != self.wrap_simple {
+            self.wrap_simple = wrap_simple;
+            self.reset();
+            true
+        } else {
+            false
+        }
+    }
+
+    /// Reset shaping and layout information
     pub fn reset(&mut self) {
         self.shape_opt = None;
         self.layout_opt = None;
     }
 
+    /// Check if shaping and layout information is cleared
     pub fn is_reset(&self) -> bool {
         self.shape_opt.is_none()
     }
 
+    /// Shape line, will cache results
     pub fn shape(&mut self, font_system: &'a FontSystem<'a>) -> &ShapeLine {
         if self.shape_opt.is_none() {
             self.shape_opt = Some(ShapeLine::new(font_system, &self.text, &self.attrs_list));
@@ -213,6 +266,7 @@ impl<'a> TextBufferLine<'a> {
         self.shape_opt.as_ref().unwrap()
     }
 
+    /// Layout line, will cache results
     pub fn layout(&mut self, font_system: &'a FontSystem<'a>, font_size: i32, width: i32) -> &[LayoutLine] {
         if self.layout_opt.is_none() {
             let mut layout = Vec::new();

@@ -81,9 +81,6 @@ fn main() {
     );
 
     buffer.set_text(&text);
-    for line in buffer.lines.iter_mut() {
-        line.wrap_simple = true;
-    }
 
     let mut bg_color = orbclient::Color::rgb(0x00, 0x00, 0x00);
     let mut font_color = orbclient::Color::rgb(0xFF, 0xFF, 0xFF);
@@ -190,10 +187,9 @@ fn main() {
                     );
                 }
 
-                if attrs_list != line.attrs_list {
-                    line.attrs_list = attrs_list;
-                    line.reset();
-                }
+                // Update line attributes. This operation only resets if the line changes
+                line.set_attrs_list(attrs_list);
+                line.set_wrap_simple(true);
 
                 //TODO: efficiently do syntax highlighting without having to shape whole buffer
                 line.shape(&font_system);
