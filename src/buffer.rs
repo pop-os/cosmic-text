@@ -116,8 +116,8 @@ impl<'a, 'b> Iterator for TextLayoutRunIter<'a, 'b> {
 
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(line) = self.buffer.lines.get(self.line_i) {
-            let shape = line.shape_opt.as_ref()?;
-            let layout = line.layout_opt.as_ref()?;
+            let shape = line.shape_opt().as_ref()?;
+            let layout = line.layout_opt().as_ref()?;
             while let Some(layout_line) = layout.get(self.layout_i) {
                 self.layout_i += 1;
 
@@ -230,7 +230,7 @@ impl<'a> TextBuffer<'a> {
                 break;
             }
 
-            if line.shape_opt.is_none() {
+            if line.shape_opt().is_none() {
                 reshaped += 1;
             }
             let layout = line.layout(
@@ -261,7 +261,7 @@ impl<'a> TextBuffer<'a> {
                 break;
             }
 
-            if line.shape_opt.is_none() {
+            if line.shape_opt().is_none() {
                 reshaped += 1;
             }
             let layout = line.layout(
@@ -314,8 +314,8 @@ impl<'a> TextBuffer<'a> {
         let instant = Instant::now();
 
         for line in self.lines.iter_mut() {
-            if line.shape_opt.is_some() {
-                line.layout_opt = None;
+            if line.shape_opt().is_some() {
+                line.reset_layout();
                 line.layout(
                     self.font_system,
                     self.metrics.font_size,
@@ -333,7 +333,7 @@ impl<'a> TextBuffer<'a> {
     fn layout_cursor(&self, cursor: &TextCursor) -> TextLayoutCursor {
         let line = &self.lines[cursor.line];
 
-        let layout = line.layout_opt.as_ref().unwrap(); //TODO: ensure layout is done?
+        let layout = line.layout_opt().as_ref().unwrap(); //TODO: ensure layout is done?
         for (layout_i, layout_line) in layout.iter().enumerate() {
             for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
                 if cursor.index == glyph.start {
@@ -516,7 +516,7 @@ impl<'a> TextBuffer<'a> {
                 self.cursor_x_opt = None;
             },
             TextAction::Left => {
-                let rtl_opt = self.lines[self.cursor.line].shape_opt.as_ref().map(|shape| shape.rtl);
+                let rtl_opt = self.lines[self.cursor.line].shape_opt().as_ref().map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
                         self.action(TextAction::Next);
@@ -526,7 +526,7 @@ impl<'a> TextBuffer<'a> {
                 }
             },
             TextAction::Right => {
-                let rtl_opt = self.lines[self.cursor.line].shape_opt.as_ref().map(|shape| shape.rtl);
+                let rtl_opt = self.lines[self.cursor.line].shape_opt().as_ref().map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
                         self.action(TextAction::Previous);

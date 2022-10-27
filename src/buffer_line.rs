@@ -6,8 +6,8 @@ pub struct TextBufferLine<'a> {
     text: String,
     attrs_list: AttrsList<'a>,
     wrap_simple: bool,
-    pub(crate) shape_opt: Option<ShapeLine>,
-    pub(crate) layout_opt: Option<Vec<LayoutLine>>,
+    shape_opt: Option<ShapeLine>,
+    layout_opt: Option<Vec<LayoutLine>>,
 }
 
 impl<'a> TextBufferLine<'a> {
@@ -121,6 +121,11 @@ impl<'a> TextBufferLine<'a> {
         self.layout_opt = None;
     }
 
+    /// Reset only layout information
+    pub fn reset_layout(&mut self) {
+        self.layout_opt = None;
+    }
+
     /// Check if shaping and layout information is cleared
     pub fn is_reset(&self) -> bool {
         self.shape_opt.is_none()
@@ -133,6 +138,11 @@ impl<'a> TextBufferLine<'a> {
             self.layout_opt = None;
         }
         self.shape_opt.as_ref().unwrap()
+    }
+
+    /// Get line shaping cache
+    pub fn shape_opt(&self) -> &Option<ShapeLine> {
+        &self.shape_opt
     }
 
     /// Layout line, will cache results
@@ -151,5 +161,10 @@ impl<'a> TextBufferLine<'a> {
             self.layout_opt = Some(layout);
         }
         self.layout_opt.as_ref().unwrap()
+    }
+
+    /// Get line layout cache
+    pub fn layout_opt(&self) -> &Option<Vec<LayoutLine>> {
+        &self.layout_opt
     }
 }
