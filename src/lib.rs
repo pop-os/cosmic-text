@@ -12,7 +12,7 @@
 //! point, you can use the `SwashCache` to rasterize glyphs into either images or pixels.
 //!
 //! ```
-//! use cosmic_text::{Attrs, FontSystem, SwashCache, TextBuffer, TextMetrics};
+//! use cosmic_text::{Attrs, Color, FontSystem, SwashCache, TextBuffer, TextMetrics};
 //!
 //! // A FontSystem provides access to detected system fonts, create one per application
 //! let font_system = FontSystem::new();
@@ -44,6 +44,14 @@
 //!         println!("{:#?}", glyph);
 //!     }
 //! }
+//!
+//! // Create a default text color
+//! let text_color = Color::rgb(0xFF, 0xFF, 0xFF);
+//!
+//! // Draw the buffer (for perfomance, instead use SwashCache directly)
+//! text_buffer.draw(&mut swash_cache, text_color, |x, y, w, h, color| {
+//!     // Fill in your code here for drawing rectangles
+//! });
 //! ```
 
 pub use self::attrs::*;
