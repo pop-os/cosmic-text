@@ -472,79 +472,13 @@ impl ShapeLine {
         Self { rtl, spans }
     }
 
-    //TODO: combine with layout function
-    pub fn layout_simple(
-        &self,
-        font_size: i32,
-        line_width: i32,
-        layout_lines: &mut Vec<LayoutLine>,
-        mut layout_i: usize,
-    ) {
-        let mut push_line = true;
-        let mut glyphs = Vec::new();
-
-        let start_x = if self.rtl { line_width as f32 } else { 0.0 };
-        let end_x = if self.rtl { 0.0 } else { line_width as f32 };
-        let mut x = start_x;
-        let mut y = 0.0;
-        for span in self.spans.iter() {
-            for word in span.words.iter() {
-                for glyph in word.glyphs.iter() {
-                    let x_advance = font_size as f32 * glyph.x_advance;
-                    let y_advance = font_size as f32 * glyph.y_advance;
-
-                    let wrap = if self.rtl {
-                        x - x_advance < end_x
-                    } else {
-                        x + x_advance > end_x
-                    };
-
-                    if wrap {
-                        let mut glyphs_swap = Vec::new();
-                        std::mem::swap(&mut glyphs, &mut glyphs_swap);
-                        layout_lines.insert(
-                            layout_i,
-                            LayoutLine {
-                                glyphs: glyphs_swap,
-                            },
-                        );
-                        layout_i += 1;
-
-                        x = start_x;
-                        y = 0.0;
-                    }
-
-                    if self.rtl {
-                        x -= x_advance
-                    }
-
-                    glyphs.push(glyph.layout(font_size, x, y, span.rtl));
-                    push_line = true;
-
-                    if !self.rtl {
-                        x += x_advance;
-                    }
-                    y += y_advance;
-                }
-            }
-        }
-
-        if push_line {
-            layout_lines.insert(
-                layout_i,
-                LayoutLine {
-                    glyphs,
-                },
-            );
-        }
-    }
-
     pub fn layout(
         &self,
         font_size: i32,
         line_width: i32,
         layout_lines: &mut Vec<LayoutLine>,
         mut layout_i: usize,
+        wrap_simple: bool,
     ) {
         let mut push_line = true;
         let mut glyphs = Vec::new();
@@ -556,7 +490,9 @@ impl ShapeLine {
         for span in self.spans.iter() {
             //TODO: improve performance!
             let mut word_ranges = Vec::new();
-            if self.rtl != span.rtl {
+            if wrap_simple {
+                word_ranges.push((0..span.words.len(), false));
+            } else if self.rtl != span.rtl {
                 let mut fit_x = x;
                 let mut fitting_end = span.words.len();
                 for i in (0..span.words.len()).rev() {
@@ -645,13 +581,12 @@ impl ShapeLine {
                         word_size += font_size as f32 * glyph.x_advance;
                     }
 
-                    //TODO: make wrapping optional
-                    let wrap = if self.rtl {
+                    let word_wrap = if self.rtl {
                         x - word_size < end_x
                     } else {
                         x + word_size > end_x
                     };
-                    if wrap && !glyphs.is_empty() {
+                    if word_wrap && !wrap_simple && !glyphs.is_empty() {
                         let mut glyphs_swap = Vec::new();
                         std::mem::swap(&mut glyphs, &mut glyphs_swap);
                         layout_lines.insert(
@@ -669,6 +604,27 @@ impl ShapeLine {
                     for glyph in word.glyphs.iter() {
                         let x_advance = font_size as f32 * glyph.x_advance;
                         let y_advance = font_size as f32 * glyph.y_advance;
+
+                        let glyph_wrap = if self.rtl {
+                            x - x_advance < end_x
+                        } else {
+                            x + x_advance > end_x
+                        };
+
+                        if glyph_wrap {
+                            let mut glyphs_swap = Vec::new();
+                            std::mem::swap(&mut glyphs, &mut glyphs_swap);
+                            layout_lines.insert(
+                                layout_i,
+                                LayoutLine {
+                                    glyphs: glyphs_swap,
+                                },
+                            );
+                            layout_i += 1;
+
+                            x = start_x;
+                            y = 0.0;
+                        }
 
                         if self.rtl {
                             x -= x_advance

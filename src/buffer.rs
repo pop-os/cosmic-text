@@ -212,21 +212,15 @@ impl<'a> TextBufferLine<'a> {
     pub fn layout(&mut self, font_system: &'a FontSystem<'a>, font_size: i32, width: i32) -> &[LayoutLine] {
         if self.layout_opt.is_none() {
             let mut layout = Vec::new();
-            if self.wrap_simple {
-                self.shape(font_system).layout_simple(
-                    font_size,
-                    width,
-                    &mut layout,
-                    0,
-                );
-            } else {
-                self.shape(font_system).layout(
-                    font_size,
-                    width,
-                    &mut layout,
-                    0,
-                );
-            }
+            let wrap_simple = self.wrap_simple;
+            let shape = self.shape(font_system);
+            shape.layout(
+                font_size,
+                width,
+                &mut layout,
+                0,
+                wrap_simple
+            );
             self.layout_opt = Some(layout);
         }
         self.layout_opt.as_ref().unwrap()
