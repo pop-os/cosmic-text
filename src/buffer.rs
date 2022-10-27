@@ -178,6 +178,7 @@ pub struct TextBufferLine<'a> {
     pub attrs_list: AttrsList<'a>,
     shape_opt: Option<ShapeLine>,
     layout_opt: Option<Vec<LayoutLine>>,
+    pub wrap_simple: bool,
 }
 
 impl<'a> TextBufferLine<'a> {
@@ -187,6 +188,7 @@ impl<'a> TextBufferLine<'a> {
             attrs_list,
             shape_opt: None,
             layout_opt: None,
+            wrap_simple: false,
         }
     }
 
@@ -210,13 +212,21 @@ impl<'a> TextBufferLine<'a> {
     pub fn layout(&mut self, font_system: &'a FontSystem<'a>, font_size: i32, width: i32) -> &[LayoutLine] {
         if self.layout_opt.is_none() {
             let mut layout = Vec::new();
-            let shape = self.shape(font_system);
-            shape.layout(
-                font_size,
-                width,
-                &mut layout,
-                0,
-            );
+            if self.wrap_simple {
+                self.shape(font_system).layout_simple(
+                    font_size,
+                    width,
+                    &mut layout,
+                    0,
+                );
+            } else {
+                self.shape(font_system).layout(
+                    font_size,
+                    width,
+                    &mut layout,
+                    0,
+                );
+            }
             self.layout_opt = Some(layout);
         }
         self.layout_opt.as_ref().unwrap()

@@ -153,6 +153,7 @@ fn main() {
                 }
 
                 line.attrs_list = attrs_list;
+                line.wrap_simple = true;
                 line.reset();
             }
 
