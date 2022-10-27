@@ -242,46 +242,31 @@ fn main() {
                 window.rect(line_x + x, y, w, h, orbclient::Color { data: color.0 })
             });
 
-            /*TODO
-            let mut line_y = font_size;
             let mut start_line_opt = None;
-            let mut end_line = TextLineIndex::new(0);
-            for (line_i, line) in buffer
-                .layout_lines()
-                .iter()
-                .skip(buffer.scroll() as usize)
-                .take(buffer.lines() as usize)
-                .enumerate()
-            {
-                if line_y >= window.height() as i32 {
-                    break;
-                }
-
-                end_line = line.line_i;
+            let mut end_line = 0;
+            for run in buffer.layout_runs() {
+                end_line = run.line_i;
                 if start_line_opt == None {
                     start_line_opt = Some(end_line);
                 }
-
-                line_y += line_height;
             }
 
             // Draw scrollbar
             {
                 let start_line = start_line_opt.unwrap_or(end_line);
                 let lines = buffer.text_lines().len();
-                let start_y = (start_line.get() * window.height() as usize) / lines;
-                let end_y = (end_line.get() * window.height() as usize) / lines;
+                let start_y = (start_line * window.height() as usize) / lines;
+                let end_y = (end_line * window.height() as usize) / lines;
                 if end_y > start_y {
                     window.rect(
                         window.width() as i32 - line_x as i32,
                         start_y as i32,
                         line_x as u32,
                         (end_y - start_y) as u32,
-                        Color::rgba(0xFF, 0xFF, 0xFF, 0x40),
+                        orbclient::Color::rgba(0xFF, 0xFF, 0xFF, 0x40),
                     );
                 }
             }
-            */
 
             window.sync();
 
