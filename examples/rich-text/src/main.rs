@@ -169,6 +169,7 @@ fn main() {
                 },
                 EventOption::Resize(resize) => {
                     buffer.set_size(resize.width as i32, resize.height as i32);
+                    buffer.redraw = true;
                 },
                 EventOption::Quit(_) => process::exit(0),
                 _ => (),

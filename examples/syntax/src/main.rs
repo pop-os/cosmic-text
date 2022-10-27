@@ -190,6 +190,7 @@ fn main() {
                 },
                 EventOption::Resize(event) => {
                     buffer.set_size(event.width as i32, event.height as i32);
+                    buffer.redraw = true;
                 },
                 EventOption::Scroll(event) => {
                     buffer.action(TextAction::Scroll {
