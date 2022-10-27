@@ -1,5 +1,10 @@
 # COSMIC Text
 
+[![crates.io](https://img.shields.io/crates/v/cosmic-text.svg)](https://crates.io/crates/cosmic-text)
+[![docs.rs](https://docs.rs/cosmic-text/badge.svg)](https://docs.rs/cosmic-text)
+![license](https://img.shields.io/crates/l/cosmic-text.svg)
+[![Rust workflow](https://github.com/pop-os/cosmic-text/workflows/Rust/badge.svg?event=push)](https://github.com/pop-os/cosmic-text/actions)
+
 Pure Rust multi-line text handling.
 
 COSMIC Text provides advanced text shaping, layout, and rendering wrapped up
