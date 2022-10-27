@@ -74,11 +74,14 @@ impl<'a> Attrs<'a> {
     }
 
     pub fn matches(&self, face: &fontdb::FaceInfo) -> bool {
-        face.style == self.style &&
-        face.weight == self.weight &&
-        face.stretch == self.stretch &&
         //TODO: smarter way of including emoji
-        (face.monospaced == self.monospaced || face.post_script_name.contains("Emoji"))
+        face.post_script_name.contains("Emoji") ||
+        (
+            face.style == self.style &&
+            face.weight == self.weight &&
+            face.stretch == self.stretch &&
+            face.monospaced == self.monospaced
+        )
     }
 
     pub fn compatible(&self, other: &Self) -> bool {
