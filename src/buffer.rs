@@ -174,17 +174,17 @@ impl fmt::Display for TextMetrics {
 }
 
 pub struct TextBufferLine<'a> {
-    pub text: String,
-    pub attrs_list: AttrsList<'a>,
+    text: String,
+    attrs_list: AttrsList<'a>,
     shape_opt: Option<ShapeLine>,
     layout_opt: Option<Vec<LayoutLine>>,
 }
 
 impl<'a> TextBufferLine<'a> {
-    pub fn new(text: String, attrs: Attrs<'a>) -> Self {
+    pub fn new(text: String, attrs_list: AttrsList<'a>) -> Self {
         Self {
             text,
-            attrs_list: AttrsList::new(attrs),
+            attrs_list,
             shape_opt: None,
             layout_opt: None,
         }
@@ -516,11 +516,11 @@ impl<'a> TextBuffer<'a> {
     pub fn set_text(&mut self, text: &str) {
         self.lines.clear();
         for line in text.lines() {
-            self.lines.push(TextBufferLine::new(line.to_string(), self.attrs));
+            self.lines.push(TextBufferLine::new(line.to_string(), AttrsList::new(self.attrs)));
         }
         // Make sure there is always one line
         if self.lines.is_empty() {
-            self.lines.push(TextBufferLine::new(String::new(), self.attrs));
+            self.lines.push(TextBufferLine::new(String::new(), AttrsList::new(self.attrs)));
         }
 
         self.scroll = 0;
@@ -676,7 +676,7 @@ impl<'a> TextBuffer<'a> {
                 };
 
                 let next_line = self.cursor.line + 1;
-                self.lines.insert(next_line, TextBufferLine::new(new_line, self.attrs));
+                self.lines.insert(next_line, TextBufferLine::new(new_line, AttrsList::new(self.attrs)));
 
                 self.cursor.line = next_line;
                 self.cursor.index = 0;

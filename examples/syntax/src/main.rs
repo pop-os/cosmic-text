@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use cosmic_text::{Attrs, Color, Family, FontSystem, Style, SwashCache,
+use cosmic_text::{Attrs, AttrsList, Color, Family, FontSystem, Style, SwashCache,
     TextAction, TextBuffer, TextBufferLine, TextMetrics, Weight};
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{env, fs, process, time::Instant};
@@ -59,6 +59,8 @@ fn main() {
         use syntect::highlighting::{ThemeSet, FontStyle, Style as SyntectStyle};
         use syntect::util::LinesWithEndings;
 
+        let now = Instant::now();
+
         // Load these once at the start of your program
         let ps = SyntaxSet::load_defaults_newlines();
         let ts = ThemeSet::load_defaults();
@@ -83,25 +85,25 @@ fn main() {
         }
 
         let syntax = ps.find_syntax_by_extension("rs").unwrap();
-        let mut h = HighlightLines::new(syntax, &theme);
-        for (line_i, highlight_line) in LinesWithEndings::from(&text).enumerate() { // LinesWithEndings enables use of newlines mode
-            while line_i >= buffer.lines.len() {
-                buffer.lines.push(TextBufferLine::new(String::new(), attrs));
-            }
 
+        buffer.lines.clear();
+
+        let mut h = HighlightLines::new(syntax, &theme);
+        for highlight_line in LinesWithEndings::from(&text) { // LinesWithEndings enables use of newlines mode
             let ranges: Vec<(SyntectStyle, &str)> = h.highlight_line(highlight_line, &ps).unwrap();
 
-            let line = &mut buffer.lines[line_i];
+            let mut line_text = String::new();
+            let mut attrs_list = AttrsList::new(attrs);
             for (style, string) in ranges.iter() {
                 let string_trim = match string.lines().next() {
                     Some(some) => some,
                     None => continue,
                 };
 
-                let start = line.text.len();
-                line.text.push_str(string_trim);
-                let end = line.text.len();
-                line.attrs_list.add_span(
+                let start = line_text.len();
+                line_text.push_str(string_trim);
+                let end = line_text.len();
+                attrs_list.add_span(
                     start,
                     end,
                     attrs
@@ -124,9 +126,13 @@ fn main() {
                         })
                         //TODO: underline
                 );
-                line.reset();
             }
+
+            buffer.lines.push(TextBufferLine::new(line_text, attrs_list));
         }
+
+        let elapsed = now.elapsed();
+        log::info!("Syntax highlighted in {:?}", elapsed);
     }
 
     let mut swash_cache = SwashCache::new(&font_system);
