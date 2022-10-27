@@ -12,9 +12,9 @@ use crate::{Attrs, AttrsList, Color, FontSystem, LayoutGlyph, LayoutLine, ShapeL
 /// An action to perform on a [TextBuffer]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TextAction {
-    /// Move cursor to previous character ([Left] in LTR, [Right] in RTL)
+    /// Move cursor to previous character ([Self::Left] in LTR, [Self::Right] in RTL)
     Previous,
-    /// Move cursor to next character ([Right] in LTR, [Left] in RTL)
+    /// Move cursor to next character ([Self::Right] in LTR, [Self::Left] in RTL)
     Next,
     /// Move cursor left
     Left,
@@ -58,6 +58,7 @@ pub struct TextCursor {
 }
 
 impl TextCursor {
+    /// Create a new cursor
     pub const fn new(line: usize, index: usize) -> Self {
         Self { line, index }
     }
@@ -75,6 +76,7 @@ impl TextLayoutCursor {
     }
 }
 
+/// A line of visible text for rendering
 pub struct TextLayoutRun<'a> {
     /// The index of the original text line
     pub line_i: usize,
@@ -88,6 +90,7 @@ pub struct TextLayoutRun<'a> {
     pub line_y: i32,
 }
 
+/// An iterator of visible text lines, see [TextLayoutRun]
 pub struct TextLayoutRunIter<'a, 'b> {
     buffer: &'b TextBuffer<'a>,
     line_i: usize,

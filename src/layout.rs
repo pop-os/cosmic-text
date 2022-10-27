@@ -3,6 +3,7 @@
 use crate::{CacheKey, Color};
 
 /// A laid out glyph
+#[derive(Debug)]
 pub struct LayoutGlyph {
     /// Start index of cluster in original line
     pub start: usize,
