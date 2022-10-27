@@ -90,10 +90,18 @@ fn main() {
             );
         }
 
-        let syntax = match ps.find_syntax_for_file(&path).unwrap() {
-            Some(some) => some,
-            None => ps.find_syntax_plain_text(),
+        let syntax = match ps.find_syntax_for_file(&path) {
+            Ok(Some(some)) => some,
+            Ok(None) => {
+                log::warn!("no syntax found for {:?}", path);
+                ps.find_syntax_plain_text()
+            }
+            Err(err) => {
+                log::warn!("failed to determine syntax for {:?}: {:?}", path, err);
+                ps.find_syntax_plain_text()
+            }
         };
+        log::info!("using syntax {:?}", syntax.name);
 
         buffer.lines.clear();
 
