@@ -16,11 +16,22 @@ fn main() {
         String::new()
     };
 
+    let display_scale = match orbclient::get_display_size() {
+        Ok((w, h)) => {
+            log::info!("Display size: {}, {}", w, h);
+            (h as i32 / 1600) + 1
+        }
+        Err(err) => {
+            log::warn!("Failed to get display size: {}", err);
+            1
+        }
+    };
+
     let mut window = Window::new_flags(
         -1,
         -1,
-        1024,
-        768,
+        1024 * display_scale as u32,
+        768 * display_scale as u32,
         &format!("COSMIC TEXT - {}", font_system.locale),
         &[WindowFlag::Resizable],
     )
@@ -32,7 +43,7 @@ fn main() {
     let mut buffer = TextBuffer::new(
         &font_system,
         attrs,
-        TextMetrics::new(14, 20)
+        TextMetrics::new(14, 20).scale(display_scale)
     );
 
     buffer.set_size(

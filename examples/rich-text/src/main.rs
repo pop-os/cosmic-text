@@ -1,20 +1,31 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use cosmic_text::{Attrs, Color, Family, FontSystem, Style, SwashCache,
+use cosmic_text::{Color, Family, FontSystem, Style, SwashCache,
     TextAction, TextBuffer, TextBufferLine, TextMetrics, Weight};
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
-use std::{env, fs, process, thread, time::{Duration, Instant}};
+use std::{process, thread, time::{Duration, Instant}};
 
 fn main() {
     env_logger::init();
 
     let font_system = FontSystem::new();
 
+    let display_scale = match orbclient::get_display_size() {
+        Ok((w, h)) => {
+            log::info!("Display size: {}, {}", w, h);
+            (h as i32 / 1600) + 1
+        }
+        Err(err) => {
+            log::warn!("Failed to get display size: {}", err);
+            1
+        }
+    };
+
     let mut window = Window::new_flags(
         -1,
         -1,
-        1024,
-        768,
+        1024 * display_scale as u32,
+        768 * display_scale as u32,
         &format!("COSMIC TEXT - {}", font_system.locale),
         &[WindowFlag::Resizable],
     )
@@ -24,7 +35,7 @@ fn main() {
     let mut buffer = TextBuffer::new(
         &font_system,
         attrs,
-        TextMetrics::new(32, 44)
+        TextMetrics::new(32, 44).scale(display_scale)
     );
 
     buffer.set_size(
