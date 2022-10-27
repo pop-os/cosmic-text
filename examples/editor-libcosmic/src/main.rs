@@ -5,6 +5,7 @@ use cosmic::{
         self,
         Alignment,
         Application,
+        Color,
         Command,
         Element,
         Length,
@@ -40,6 +41,9 @@ use std::{
 
 use self::text_box::text_box;
 mod text_box;
+
+use self::text_new::text as text_new;
+mod text_new;
 
 lazy_static::lazy_static! {
     static ref FONT_SYSTEM: FontSystem<'static> = FontSystem::new();
@@ -240,7 +244,7 @@ impl Application for Window {
             )
         };
 
-        column![
+        let content: Element<_> = column![
             row![
                 button!("Open").on_press(Message::Open),
                 button!("Save").on_press(Message::Save),
@@ -251,7 +255,7 @@ impl Application for Window {
                 toggler(None, self.attrs.style == cosmic_text::Style::Italic, Message::Italic),
                 text("Monospaced:"),
                 toggler(None, self.attrs.monospaced, Message::Monospaced),
-                text("Theme:"),
+                text_new("Theme:"),
                 theme_picker,
                 text("Font Size:"),
                 font_size_picker,
@@ -263,6 +267,9 @@ impl Application for Window {
         ]
         .spacing(8)
         .padding(16)
-        .into()
+        .into();
+
+        // Uncomment to debug layout: content.explain(Color::WHITE)
+        content
     }
 }
