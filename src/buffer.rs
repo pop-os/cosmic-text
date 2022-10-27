@@ -7,7 +7,7 @@ use std::{
 };
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::{Attrs, AttrsList, FontSystem, LayoutGlyph, LayoutLine, ShapeLine};
+use crate::{Attrs, AttrsList, Color, FontSystem, LayoutGlyph, LayoutLine, ShapeLine};
 
 /// An action to perform on a [TextBuffer]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -963,8 +963,8 @@ impl<'a> TextBuffer<'a> {
 
     /// Draw the buffer
     #[cfg(feature = "swash")]
-    pub fn draw<F>(&self, cache: &mut crate::SwashCache, color: u32, mut f: F)
-        where F: FnMut(i32, i32, u32, u32, u32)
+    pub fn draw<F>(&self, cache: &mut crate::SwashCache, color: Color, mut f: F)
+        where F: FnMut(i32, i32, u32, u32, Color)
     {
         let font_size = self.metrics.font_size;
         let line_height = self.metrics.line_height;
@@ -1054,7 +1054,7 @@ impl<'a> TextBuffer<'a> {
                                     line_y - font_size,
                                     cmp::max(0, max - min) as u32,
                                     line_height as u32,
-                                    0x33_00_00_00 | (color & 0xFF_FF_FF)
+                                    Color::rgba(color.r(), color.g(), color.b(), 0x33)
                                 );
                             }
                             c_x += c_w;
@@ -1080,7 +1080,7 @@ impl<'a> TextBuffer<'a> {
                             line_y - font_size,
                             cmp::max(0, max - min) as u32,
                             line_height as u32,
-                            0x33_00_00_00 | (color & 0xFF_FF_FF)
+                            Color::rgba(color.r(), color.g(), color.b(), 0x33)
                         );
                     }
                 }
@@ -1126,7 +1126,7 @@ impl<'a> TextBuffer<'a> {
                 let (cache_key, x_int, y_int) = (glyph.cache_key, glyph.x_int, glyph.y_int);
 
                 let glyph_color = match glyph.color_opt {
-                    Some(some) => some.0,
+                    Some(some) => some,
                     None => color,
                 };
 

@@ -83,7 +83,7 @@ fn main() {
     buffer.set_text(&text);
 
     let mut bg_color = orbclient::Color::rgb(0x00, 0x00, 0x00);
-    let mut font_color = orbclient::Color::rgb(0xFF, 0xFF, 0xFF);
+    let mut font_color = Color::rgb(0xFF, 0xFF, 0xFF);
 
     let now = Instant::now();
 
@@ -103,7 +103,7 @@ fn main() {
     }
 
     if let Some(foreground) = theme.settings.foreground {
-        font_color = orbclient::Color::rgba(
+        font_color = Color::rgba(
             foreground.r,
             foreground.g,
             foreground.b,
@@ -225,8 +225,8 @@ fn main() {
 
             window.set(bg_color);
 
-            buffer.draw(&mut swash_cache, font_color.data, |x, y, w, h, color| {
-                window.rect(x, y, w, h, orbclient::Color { data: color });
+            buffer.draw(&mut swash_cache, font_color, |x, y, w, h, color| {
+                window.rect(x, y, w, h, orbclient::Color { data: color.0 });
             });
 
             window.sync();

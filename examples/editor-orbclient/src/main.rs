@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use cosmic_text::{FontSystem, SwashCache, TextAction, TextBuffer, TextMetrics};
-use orbclient::{Color, EventOption, Renderer, Window, WindowFlag};
+use cosmic_text::{Color, FontSystem, SwashCache, TextAction, TextBuffer, TextMetrics};
+use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{env, fs, thread, time::{Duration, Instant}};
 
 fn main() {
@@ -30,7 +30,7 @@ fn main() {
     )
     .unwrap();
 
-    let bg_color = Color::rgb(0x34, 0x34, 0x34);
+    let bg_color = orbclient::Color::rgb(0x34, 0x34, 0x34);
     let font_color = Color::rgb(0xFF, 0xFF, 0xFF);
     let font_sizes = [
         TextMetrics::new(10, 14).scale(display_scale), // Caption
@@ -88,8 +88,8 @@ fn main() {
 
             window.set(bg_color);
 
-            buffer.draw(&mut swash_cache, font_color.data, |x, y, w, h, color| {
-                window.rect(line_x + x, y, w, h, Color { data: color });
+            buffer.draw(&mut swash_cache, font_color, |x, y, w, h, color| {
+                window.rect(line_x + x, y, w, h, orbclient::Color { data: color.0 })
             });
 
             /*TODO

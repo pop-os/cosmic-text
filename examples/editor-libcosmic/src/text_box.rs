@@ -29,19 +29,6 @@ pub struct Appearance {
     text_color: Color,
 }
 
-impl Appearance {
-    fn text_color_u32(&self) -> u32 {
-        let channel = |f: f32, shift: i32| -> u32 {
-            (cmp::max(0, cmp::min(255, (f * 255.0) as i32)) << shift) as u32
-        };
-
-        channel(self.text_color.b, 0) |
-        channel(self.text_color.g, 8) |
-        channel(self.text_color.r, 16) |
-        channel(self.text_color.a, 24)
-    }
-}
-
 pub trait StyleSheet {
     fn appearance(&self) -> Appearance;
 }
@@ -138,7 +125,12 @@ where
         _viewport: &Rectangle,
     ) {
         let appearance = theme.appearance();
-        let text_color_u32 = appearance.text_color_u32();
+        let text_color = cosmic_text::Color::rgba(
+            cmp::max(0, cmp::min(255, (appearance.text_color.r * 255.0) as i32)) as u8,
+            cmp::max(0, cmp::min(255, (appearance.text_color.g * 255.0) as i32)) as u8,
+            cmp::max(0, cmp::min(255, (appearance.text_color.b * 255.0) as i32)) as u8,
+            cmp::max(0, cmp::min(255, (appearance.text_color.a * 255.0) as i32)) as u8,
+        );
 
         let instant = Instant::now();
 
@@ -166,12 +158,12 @@ where
 
         let buffer_x = layout.bounds().x;
         let buffer_y = layout.bounds().y;
-        buffer.draw(&mut cache, text_color_u32, |x, y, w, h, color| {
-            let a = (color >> 24) as u8;
+        buffer.draw(&mut cache, text_color, |x, y, w, h, color| {
+            let a = color.a();
             if a > 0 {
-                let r = (color >> 16) as u8;
-                let g = (color >> 8) as u8;
-                let b = color as u8;
+                let r = color.r();
+                let g = color.g();
+                let b = color.b();
                 renderer.fill_quad(
                     renderer::Quad {
                         bounds: Rectangle::new(

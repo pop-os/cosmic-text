@@ -5,7 +5,7 @@ use swash::scale::{ScaleContext, image::Content};
 use swash::scale::{Render, Source, StrikeWith};
 use swash::zeno::{Format, Vector};
 
-use crate::{CacheKey, FontSystem};
+use crate::{CacheKey, Color, FontSystem};
 
 pub use swash::scale::image::{Content as SwashContent, Image as SwashImage};
 
@@ -76,10 +76,10 @@ impl<'a> SwashCache<'a> {
     }
 
     /// Enumerate pixels in an Image, use `with_image` for better performance
-    pub fn with_pixels<F: FnMut(i32, i32, u32)>(
+    pub fn with_pixels<F: FnMut(i32, i32, Color)>(
         &mut self,
         cache_key: CacheKey,
-        base: u32,
+        base: Color,
         mut f: F
     ) {
         if let Some(image) = self.get_image(cache_key) {
@@ -92,8 +92,14 @@ impl<'a> SwashCache<'a> {
                     for off_y in 0..image.placement.height as i32 {
                         for off_x in 0..image.placement.width as i32 {
                             //TODO: blend base alpha?
-                            let color = (image.data[i] as u32) << 24 | base & 0xFFFFFF;
-                            f(x + off_x, y + off_y, color);
+                            f(
+                                x + off_x,
+                                y + off_y,
+                                Color(
+                                    ((image.data[i] as u32) << 24) |
+                                    base.0 & 0xFFFFFF
+                                )
+                            );
                             i += 1;
                         }
                     }
@@ -103,11 +109,16 @@ impl<'a> SwashCache<'a> {
                     for off_y in 0..image.placement.height as i32 {
                         for off_x in 0..image.placement.width as i32 {
                             //TODO: blend base alpha?
-                            let color = (image.data[i + 3] as u32) << 24
-                                | (image.data[i] as u32) << 16
-                                | (image.data[i + 1] as u32) << 8
-                                | (image.data[i + 2] as u32);
-                            f(x + off_x, y + off_y, color);
+                            f(
+                                x + off_x,
+                                y + off_y,
+                                Color::rgba(
+                                    image.data[i + 2],
+                                    image.data[i + 1],
+                                    image.data[i],
+                                    image.data[i + 3]
+                                )
+                            );
                             i += 4;
                         }
                     }

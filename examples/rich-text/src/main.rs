@@ -130,7 +130,7 @@ fn main() {
     let mut mouse_left = false;
     loop {
         let bg_color = orbclient::Color::rgb(0x34, 0x34, 0x34);
-        let font_color = orbclient::Color::rgb(0xFF, 0xFF, 0xFF);
+        let font_color = Color::rgb(0xFF, 0xFF, 0xFF);
 
         if buffer.cursor_moved {
             buffer.shape_until_cursor();
@@ -144,8 +144,8 @@ fn main() {
 
             window.set(bg_color);
 
-            buffer.draw(&mut swash_cache, font_color.data, |x, y, w, h, color| {
-                window.rect(x, y, w, h, orbclient::Color { data: color });
+            buffer.draw(&mut swash_cache, font_color, |x, y, w, h, color| {
+                window.rect(x, y, w, h, orbclient::Color { data: color.0 });
             });
 
             window.sync();
