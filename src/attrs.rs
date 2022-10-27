@@ -90,6 +90,7 @@ impl<'a> Attrs<'a> {
     }
 }
 
+#[derive(Eq, PartialEq)]
 pub struct AttrsList<'a> {
     defaults: Attrs<'a>,
     spans: Vec<(usize, usize, Attrs<'a>)>,

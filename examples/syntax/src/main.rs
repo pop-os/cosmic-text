@@ -61,6 +61,9 @@ fn main() {
     );
 
     buffer.set_text(&text);
+    for line in buffer.lines.iter_mut() {
+        line.wrap_simple = true;
+    }
 
     let mut bg_color = orbclient::Color::rgb(0x00, 0x00, 0x00);
     let mut font_color = orbclient::Color::rgb(0xFF, 0xFF, 0xFF);
@@ -152,9 +155,10 @@ fn main() {
                     start = end;
                 }
 
-                line.attrs_list = attrs_list;
-                line.wrap_simple = true;
-                line.reset();
+                if attrs_list != line.attrs_list {
+                    line.attrs_list = attrs_list;
+                    line.reset();
+                }
             }
 
             rehighlight = false;
