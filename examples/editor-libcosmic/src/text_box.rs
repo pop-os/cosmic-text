@@ -48,7 +48,6 @@ impl StyleSheet for Theme {
 pub struct TextBox<'a> {
     buffer: &'a Mutex<TextBuffer<'static>>,
     cache: &'a Mutex<SwashCache<'static>>,
-    pixels_opt: Option<(u32, u32, Vec<u8>)>,
 }
 
 impl<'a> TextBox<'a> {
@@ -56,7 +55,6 @@ impl<'a> TextBox<'a> {
         Self {
             buffer,
             cache,
-            pixels_opt: None,
         }
     }
 }
@@ -111,7 +109,7 @@ where
 
     fn draw(
         &self,
-        _tree: &widget::Tree,
+        tree: &widget::Tree,
         renderer: &mut Renderer,
         theme: &Renderer::Theme,
         _style: &renderer::Style,
@@ -119,6 +117,8 @@ where
         _cursor_position: Point,
         _viewport: &Rectangle,
     ) {
+        let state = tree.state.downcast_ref::<State>();
+
         if let Some(background_color) = theme.appearance().background_color {
             renderer.fill_quad(
                 renderer::Quad {
@@ -131,7 +131,7 @@ where
             );
         }
 
-        if let Some((w, h, pixels)) = &self.pixels_opt {
+        if let Some((w, h, pixels)) = &state.pixels_opt {
             let handle = image::Handle::from_pixels(*w, *h, pixels.clone());
             image::Renderer::draw(renderer, handle, layout.bounds());
         }
@@ -251,8 +251,8 @@ where
 
         if layout_w < 0 || layout_h < 0 {
             // Invalid size, clear pixels
-            self.pixels_opt = None;
-        } else if buffer.redraw {
+            state.pixels_opt = None;
+        } else if buffer.redraw || state.pixels_opt.is_none() {
             // Redraw buffer to image
 
             let instant = Instant::now();
@@ -309,7 +309,7 @@ where
                 }
             });
 
-            self.pixels_opt = Some((layout_w as u32, layout_h as u32, pixels));
+            state.pixels_opt = Some((layout_w as u32, layout_h as u32, pixels));
 
             buffer.redraw = false;
 
@@ -331,9 +331,10 @@ where
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct State {
     is_dragging: bool,
+    pixels_opt: Option<(u32, u32, Vec<u8>)>,
 }
 
 impl State {
