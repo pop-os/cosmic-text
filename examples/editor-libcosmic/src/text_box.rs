@@ -3,10 +3,7 @@
 use cosmic::iced_native::{
     {Color, Element, Length, Point, Rectangle, Shell, Theme},
     clipboard::Clipboard,
-    event::{
-        Event,
-        Status,
-    },
+    event::{Event, Status},
     image,
     keyboard::{Event as KeyEvent, KeyCode},
     layout::{self, Layout},

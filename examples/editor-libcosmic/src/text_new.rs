@@ -36,20 +36,31 @@ impl StyleSheet for Theme {
 }
 
 pub struct Text {
-    line: Mutex<TextBufferLine<'static>>,
+    line: TextBufferLine<'static>,
     metrics: TextMetrics,
 }
 
 impl Text {
     pub fn new(string: &str) -> Self {
-        Self {
-            //TODO: make it possible to set attrs
-            line: Mutex::new(TextBufferLine::new(
-                string,
-                AttrsList::new(Attrs::new())
-            )),
+        let instant = Instant::now();
+
+        //TODO: make it possible to set attrs
+        let mut line = TextBufferLine::new(
+            string,
+            AttrsList::new(Attrs::new())
+        );
+
+        //TODO: do we have to immediately chape?
+        line.shape(&crate::FONT_SYSTEM);
+
+        let text = Self {
+            line,
             metrics: TextMetrics::new(14, 20),
-        }
+        };
+
+        log::debug!("Text::new in {:?}", instant.elapsed());
+
+        text
     }
 }
 
@@ -83,26 +94,35 @@ where
         _renderer: &Renderer,
         limits: &layout::Limits,
     ) -> layout::Node {
-        println!("layout");
+        let instant = Instant::now();
 
-        let mut line = self.line.lock().unwrap();
+        let shape = self.line.shape_opt().as_ref().unwrap();
+
+        //TODO: can we cache this?
+        let mut layout_lines = Vec::new();
+        shape.layout(
+            self.metrics.font_size,
+            limits.max().width as i32,
+            &mut layout_lines,
+            0,
+            self.line.wrap_simple()
+        );
 
         let mut max_x = 0;
         let mut line_y = 0;
-        for layout_line in line.layout(
-            &crate::FONT_SYSTEM,
-            self.metrics.font_size,
-            limits.max().width as i32
-        ) {
+
+        for layout_line in layout_lines {
             for glyph in layout_line.glyphs.iter() {
                 max_x = cmp::max(max_x, (glyph.x + glyph.w) as i32);
             }
             line_y += self.metrics.line_height;
         }
 
-        println!("{}, {}", max_x, line_y);
+        let size = Size::new(max_x as f32, line_y as f32);
 
-        layout::Node::new(Size::new(max_x as f32, line_y as f32))
+        log::debug!("layout {:?} in {:?}", size, instant.elapsed());
+
+        layout::Node::new(size)
     }
 
     fn draw(
@@ -115,6 +135,8 @@ where
         _cursor_position: Point,
         _viewport: &Rectangle,
     ) {
+        let instant = Instant::now();
+
         let state = tree.state.downcast_ref::<State>();
 
         if let Some(background_color) = theme.appearance().background_color {
@@ -129,15 +151,22 @@ where
             );
         }
 
-        let mut line = self.line.lock().unwrap();
+        let shape = self.line.shape_opt().as_ref().unwrap();
+
+        //TODO: can we cache this?
+        let mut layout_lines = Vec::new();
+        shape.layout(
+            self.metrics.font_size,
+            layout.bounds().width as i32 + 1 /*TODO: why this off by one error*/,
+            &mut layout_lines,
+            0,
+            self.line.wrap_simple()
+        );
+
         let mut cache = state.cache.lock().unwrap();
 
         let mut line_y = self.metrics.font_size;
-        for layout_line in line.layout(
-            &crate::FONT_SYSTEM,
-            self.metrics.font_size,
-            layout.bounds().width as i32
-        ) {
+        for layout_line in layout_lines {
             for glyph in layout_line.glyphs.iter() {
                 let (cache_key, x_int, y_int) = (glyph.cache_key, glyph.x_int, glyph.y_int);
 
@@ -172,6 +201,8 @@ where
             }
             line_y += self.metrics.line_height;
         }
+
+        log::debug!("draw {:?} in {:?}", layout.bounds(), instant.elapsed());
     }
 }
 
@@ -198,7 +229,7 @@ impl State {
             cache: Mutex::new(SwashCache::new(&crate::FONT_SYSTEM)),
         };
 
-        log::info!("Created state in {:?}", instant.elapsed());
+        log::debug!("created state in {:?}", instant.elapsed());
 
         state
     }
