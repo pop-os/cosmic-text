@@ -31,10 +31,8 @@ fn main() {
     )
     .unwrap();
 
-    let attrs = Attrs::new();
     let mut buffer = TextBuffer::new(
         &font_system,
-        attrs,
         TextMetrics::new(32, 44).scale(display_scale)
     );
 
@@ -43,6 +41,7 @@ fn main() {
         window.height() as i32
     );
 
+    let attrs = Attrs::new();
     let serif_attrs = attrs.family(Family::Serif);
     let mono_attrs = attrs.monospaced(true).family(Family::Monospace);
     let comic_attrs = attrs.family(Family::Name("Comic Neue"));
@@ -117,7 +116,7 @@ fn main() {
             let start = line_text.len();
             line_text.push_str(text);
             let end = line_text.len();
-            attrs_list.add_span(start, end, attrs);
+            attrs_list.add_span(start..end, attrs);
         }
         buffer.lines.push(TextBufferLine::new(line_text, attrs_list));
     }

@@ -173,6 +173,7 @@ impl fmt::Display for TextMetrics {
     }
 }
 
+/// A line (or paragraph) of text that is shaped and laid out
 pub struct TextBufferLine<'a> {
     text: String,
     attrs_list: AttrsList<'a>,
@@ -182,9 +183,12 @@ pub struct TextBufferLine<'a> {
 }
 
 impl<'a> TextBufferLine<'a> {
-    pub fn new(text: String, attrs_list: AttrsList<'a>) -> Self {
+    /// Create a new line with the given text and attributes list
+    /// Cached shaping and layout can be done using the [Self::shape] and
+    /// [Self::layout] functions
+    pub fn new<T: Into<String>>(text: T, attrs_list: AttrsList<'a>) -> Self {
         Self {
-            text,
+            text: text.into(),
             attrs_list,
             wrap_simple: false,
             shape_opt: None,
@@ -198,7 +202,8 @@ impl<'a> TextBufferLine<'a> {
     }
 
     /// Set text
-    /// Will reset shape and layout if it differs from current text
+    ///
+    /// Will reset shape and layout if it differs from current text.
     /// Returns true if the line was reset
     pub fn set_text<T: AsRef<str> + Into<String>>(&mut self, text: T) -> bool {
         if text.as_ref() != &self.text {
@@ -215,8 +220,9 @@ impl<'a> TextBufferLine<'a> {
         &self.attrs_list
     }
 
-    /// Set attributes list.
-    /// Will reset shape and layout if it differs from current attributes list
+    /// Set attributes list
+    ///
+    /// Will reset shape and layout if it differs from current attributes list.
     /// Returns true if the line was reset
     pub fn set_attrs_list(&mut self, attrs_list: AttrsList<'a>) -> bool {
         if attrs_list != self.attrs_list {
@@ -234,7 +240,8 @@ impl<'a> TextBufferLine<'a> {
     }
 
     /// Set simple wrapping setting (wrap by characters only)
-    /// Will reset shape and layout if it differs from current simple wrapping setting
+    ///
+    /// Will reset shape and layout if it differs from current simple wrapping setting.
     /// Returns true if the line was reset
     pub fn set_wrap_simple(&mut self, wrap_simple: bool) -> bool {
         if wrap_simple != self.wrap_simple {
@@ -288,7 +295,7 @@ impl<'a> TextBufferLine<'a> {
 /// A buffer of text that is shaped and laid out
 pub struct TextBuffer<'a> {
     font_system: &'a FontSystem<'a>,
-    attrs: Attrs<'a>,
+    /// Lines (or paragraphs) of text in the buffer
     pub lines: Vec<TextBufferLine<'a>>,
     metrics: TextMetrics,
     width: i32,
@@ -297,19 +304,22 @@ pub struct TextBuffer<'a> {
     cursor: TextCursor,
     cursor_x_opt: Option<i32>,
     select_opt: Option<TextCursor>,
+    /// True if the cursor has been moved. Set to false after processing
+    ///
+    /// Usually, if this is true, you should run [Self::shape_until_cursor] before redrawing.
+    /// Otherwise, you should run [Self::shape_until_scroll]
     pub cursor_moved: bool,
+    /// True if a redraw is requires. Set to false after processing
     pub redraw: bool,
 }
 
 impl<'a> TextBuffer<'a> {
     pub fn new(
         font_system: &'a FontSystem<'a>,
-        attrs: Attrs<'a>,
         metrics: TextMetrics,
     ) -> Self {
         let mut buffer = Self {
             font_system,
-            attrs,
             lines: Vec::new(),
             metrics,
             width: 0,
@@ -321,7 +331,7 @@ impl<'a> TextBuffer<'a> {
             cursor_moved: false,
             redraw: false,
         };
-        buffer.set_text("");
+        buffer.set_text("", Attrs::new());
         buffer
     }
 
@@ -400,6 +410,7 @@ impl<'a> TextBuffer<'a> {
         self.shape_until_scroll();
     }
 
+    /// Shape lines until scroll
     pub fn shape_until_scroll(&mut self) {
         let lines = self.lines();
 
@@ -558,33 +569,15 @@ impl<'a> TextBuffer<'a> {
         self.height / self.metrics.line_height
     }
 
-    pub fn attrs(&self) -> &Attrs<'a> {
-        &self.attrs
-    }
-
-    /// Set attributes
-    pub fn set_attrs(&mut self, attrs: Attrs<'a>) {
-        if attrs != self.attrs {
-            self.attrs = attrs;
-
-            for line in self.lines.iter_mut() {
-                line.attrs_list = AttrsList::new(attrs);
-                line.reset();
-            }
-
-            self.shape_until_scroll();
-        }
-    }
-
-    /// Set text of buffer
-    pub fn set_text(&mut self, text: &str) {
+    /// Set text of buffer, using provided attributes for each line by default
+    pub fn set_text(&mut self, text: &str, attrs: Attrs<'a>) {
         self.lines.clear();
         for line in text.lines() {
-            self.lines.push(TextBufferLine::new(line.to_string(), AttrsList::new(self.attrs)));
+            self.lines.push(TextBufferLine::new(line.to_string(), AttrsList::new(attrs)));
         }
         // Make sure there is always one line
         if self.lines.is_empty() {
-            self.lines.push(TextBufferLine::new(String::new(), AttrsList::new(self.attrs)));
+            self.lines.push(TextBufferLine::new(String::new(), AttrsList::new(attrs)));
         }
 
         self.scroll = 0;
@@ -592,11 +585,6 @@ impl<'a> TextBuffer<'a> {
         self.select_opt = None;
 
         self.shape_until_scroll();
-    }
-
-    /// Get the lines of the original text
-    pub fn text_lines(&self) -> &[TextBufferLine] {
-        &self.lines
     }
 
     /// Perform a [TextAction] on the buffer
@@ -763,14 +751,16 @@ impl<'a> TextBuffer<'a> {
                 let new_line = {
                     let line = &mut self.lines[self.cursor.line];
                     line.reset();
-                    line.text.split_off(self.cursor.index)
+                    TextBufferLine::new(
+                        line.text.split_off(self.cursor.index),
+                        line.attrs_list.split_off(self.cursor.index)
+                    )
                 };
 
-                let next_line = self.cursor.line + 1;
-                self.lines.insert(next_line, TextBufferLine::new(new_line, AttrsList::new(self.attrs)));
-
-                self.cursor.line = next_line;
+                self.cursor.line += 1;
                 self.cursor.index = 0;
+
+                self.lines.insert(self.cursor.line, new_line);
             },
             TextAction::Backspace => {
                 if self.cursor.index > 0 {

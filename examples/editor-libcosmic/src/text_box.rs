@@ -179,27 +179,6 @@ where
             }
         });
 
-        /*
-        // Draw scrollbar
-        {
-            let start_line = start_line_opt.unwrap_or(end_line);
-            let lines = buffer.text_lines().len();
-            let start_y = (start_line.get() * window.height() as usize) / lines;
-            let end_y = (end_line.get() * window.height() as usize) / lines;
-            if end_y > start_y {
-                window.rect(
-                    window.width() as i32 - line_x as i32,
-                    start_y as i32,
-                    line_x as u32,
-                    (end_y - start_y) as u32,
-                    Color::from_rgba8(0xFF, 0xFF, 0xFF, 0.25),
-                );
-            }
-        }
-
-        buffer.redraw = false;
-        */
-
         let duration = instant.elapsed();
         log::trace!("redraw: {:?}", duration);
     }

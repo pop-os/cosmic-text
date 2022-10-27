@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+use std::ops::Range;
+
 pub use fontdb::{Family, Stretch, Style, Weight};
 
+/// Text color
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct Color(pub u32);
 
@@ -48,6 +51,7 @@ impl Color {
     }
 }
 
+/// Text attributes
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct Attrs<'a> {
     //TODO: should this be an option?
@@ -60,6 +64,9 @@ pub struct Attrs<'a> {
 }
 
 impl<'a> Attrs<'a> {
+    /// Create a new set of attributes with sane defaults
+    ///
+    /// This defaults to a regular Sans-Serif font.
     pub fn new() -> Self {
         Self {
             color_opt: None,
@@ -71,36 +78,43 @@ impl<'a> Attrs<'a> {
         }
     }
 
+    /// Set [Color]
     pub fn color(mut self, color: Color) -> Self {
         self.color_opt = Some(color);
         self
     }
 
+    /// Set [Family]
     pub fn family(mut self, family: Family<'a>) -> Self {
         self.family = family;
         self
     }
 
+    /// Set monospaced
     pub fn monospaced(mut self, monospaced: bool) -> Self {
         self.monospaced = monospaced;
         self
     }
 
+    /// Set [Stretch]
     pub fn stretch(mut self, stretch: Stretch) -> Self {
         self.stretch = stretch;
         self
     }
 
+    /// Set [Style]
     pub fn style(mut self, style: Style) -> Self {
         self.style = style;
         self
     }
 
+    /// Set [Weight]
     pub fn weight(mut self, weight: Weight) -> Self {
         self.weight = weight;
         self
     }
 
+    /// Check if font matches
     pub fn matches(&self, face: &fontdb::FaceInfo) -> bool {
         //TODO: smarter way of including emoji
         face.post_script_name.contains("Emoji") ||
@@ -112,6 +126,7 @@ impl<'a> Attrs<'a> {
         )
     }
 
+    /// Check if this set of attributes can be shaped with another
     pub fn compatible(&self, other: &Self) -> bool {
         self.family == other.family
         && self.monospaced == other.monospaced
@@ -121,13 +136,15 @@ impl<'a> Attrs<'a> {
     }
 }
 
+/// List of text attributes to apply to a line
 #[derive(Eq, PartialEq)]
 pub struct AttrsList<'a> {
     defaults: Attrs<'a>,
-    spans: Vec<(usize, usize, Attrs<'a>)>,
+    spans: Vec<(Range<usize>, Attrs<'a>)>,
 }
 
 impl<'a> AttrsList<'a> {
+    /// Create a new attributes list with a set of default [Attrs]
     pub fn new(defaults: Attrs<'a>) -> Self {
         Self {
             defaults,
@@ -135,29 +152,65 @@ impl<'a> AttrsList<'a> {
         }
     }
 
+    /// Get the default [Attrs]
     pub fn defaults(&self) -> Attrs<'a> {
         self.defaults
     }
 
-    pub fn spans(&self) -> &Vec<(usize, usize, Attrs<'a>)> {
+    /// Get the current attribute spans
+    pub fn spans(&self) -> &Vec<(Range<usize>, Attrs<'a>)> {
         &self.spans
     }
 
+    /// Clear the current attribute spans
     pub fn clear_spans(&mut self) {
         self.spans.clear();
     }
 
-    pub fn add_span(&mut self, start: usize, end: usize, attrs: Attrs<'a>) {
-        self.spans.push((start, end, attrs));
+    /// Add an attribute span
+    pub fn add_span(&mut self, range: Range<usize>, attrs: Attrs<'a>) {
+        self.spans.push((range, attrs));
     }
 
-    pub fn get_span(&self, start: usize, end: usize) -> Attrs<'a> {
+    /// Get the highest priority attribute span for a range
+    ///
+    /// This returns the latest added span that contains the range
+    pub fn get_span(&self, range: Range<usize>) -> Attrs<'a> {
         let mut attrs = self.defaults;
         for span in self.spans.iter() {
-            if start >= span.0 && end <= span.1 {
-                attrs = span.2;
+            if range.start >= span.0.start && range.end <= span.0.end {
+                attrs = span.1;
             }
         }
         attrs
+    }
+
+    /// Split attributes list at an offset
+    pub fn split_off(&mut self, index: usize) -> Self {
+        let mut new = Self::new(self.defaults);
+        let mut i = 0;
+        while i < self.spans.len() {
+            if self.spans[i].0.end <= index {
+                // Leave this in the previous attributes list
+                i += 1;
+            } else if self.spans[i].0.start >= index {
+                // Move this to the new attributes list
+                let (range, attrs) = self.spans.remove(i);
+                new.spans.push((
+                    range.start - index..range.end - index,
+                    attrs
+                ));
+            } else {
+                // New span has index..end
+                new.spans.push((
+                    0..self.spans[i].0.end - index,
+                    self.spans[i].1
+                ));
+                // Old span has start..index
+                self.spans[i].0.end = index;
+                i += 1;
+            }
+        }
+        new
     }
 }

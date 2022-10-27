@@ -78,12 +78,8 @@ fn main() {
     let mut font_size_i = font_size_default;
 
     let line_x = 8 * display_scale;
-    let attrs = Attrs::new()
-        .monospaced(true)
-        .family(Family::Monospace);
     let mut buffer = TextBuffer::new(
         &font_system,
-        attrs,
         font_sizes[font_size_i]
     );
 
@@ -92,7 +88,10 @@ fn main() {
         window.height() as i32
     );
 
-    buffer.set_text(&text);
+    let attrs = Attrs::new()
+        .monospaced(true)
+        .family(Family::Monospace);
+    buffer.set_text(&text, attrs);
 
     let mut bg_color = orbclient::Color::rgb(0x00, 0x00, 0x00);
     let mut font_color = Color::rgb(0xFF, 0xFF, 0xFF);
@@ -176,8 +175,7 @@ fn main() {
                 let mut attrs_list = AttrsList::new(attrs);
                 for (style, _, range) in ranges {
                     attrs_list.add_span(
-                        range.start,
-                        range.end,
+                        range,
                         attrs
                             .color(Color::rgba(
                                 style.foreground.r,
@@ -242,19 +240,19 @@ fn main() {
                 window.rect(line_x + x, y, w, h, orbclient::Color { data: color.0 })
             });
 
-            let mut start_line_opt = None;
-            let mut end_line = 0;
-            for run in buffer.layout_runs() {
-                end_line = run.line_i;
-                if start_line_opt == None {
-                    start_line_opt = Some(end_line);
-                }
-            }
-
             // Draw scrollbar
             {
+                let mut start_line_opt = None;
+                let mut end_line = 0;
+                for run in buffer.layout_runs() {
+                    end_line = run.line_i;
+                    if start_line_opt == None {
+                        start_line_opt = Some(end_line);
+                    }
+                }
+
                 let start_line = start_line_opt.unwrap_or(end_line);
-                let lines = buffer.text_lines().len();
+                let lines = buffer.lines.len();
                 let start_y = (start_line * window.height() as usize) / lines;
                 let end_y = (end_line * window.height() as usize) / lines;
                 if end_y > start_y {

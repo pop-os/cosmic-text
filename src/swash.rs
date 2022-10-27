@@ -47,6 +47,7 @@ fn swash_image<'a>(font_system: &'a FontSystem<'a>, context: &mut ScaleContext, 
     .render(&mut scaler, cache_key.glyph_id)
 }
 
+/// Cache for rasterizing with the swash scaler
 pub struct SwashCache<'a> {
     font_system: &'a FontSystem<'a>,
     context: ScaleContext,

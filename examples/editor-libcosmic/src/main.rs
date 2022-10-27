@@ -24,6 +24,8 @@ use cosmic::{
     },
 };
 use cosmic_text::{
+    Attrs,
+    AttrsList,
     FontSystem,
     SwashCache,
     TextBuffer,
@@ -63,11 +65,9 @@ fn main() -> cosmic::iced::Result {
 pub struct Window {
     theme: Theme,
     path_opt: Option<PathBuf>,
+    attrs: Attrs<'static>,
     buffer: Mutex<TextBuffer<'static>>,
     cache: Mutex<SwashCache<'static>>,
-    bold: bool,
-    italic: bool,
-    monospaced: bool,
 }
 
 #[allow(dead_code)]
@@ -88,12 +88,12 @@ impl Window {
         match fs::read_to_string(&path) {
             Ok(text) => {
                 log::info!("opened '{}'", path.display());
-                buffer.set_text(&text);
+                buffer.set_text(&text, self.attrs);
                 self.path_opt = Some(path);
             },
             Err(err) => {
                 log::error!("failed to open '{}': {}", path.display(), err);
-                buffer.set_text("");
+                buffer.set_text("", self.attrs);
                 self.path_opt = None;
             }
         }
@@ -107,14 +107,13 @@ impl Application for Window {
     type Theme = Theme;
 
     fn new(_flags: ()) -> (Self, Command<Self::Message>) {
-        let font_size_i = 1; // Body
         let attrs = cosmic_text::Attrs::new()
             .monospaced(true)
             .family(cosmic_text::Family::Monospace);
+
         let buffer = TextBuffer::new(
             &FONT_SYSTEM,
-            attrs,
-            FONT_SIZES[font_size_i],
+            FONT_SIZES[1 /* Body */],
         );
 
         let cache = SwashCache::new(&FONT_SYSTEM);
@@ -122,11 +121,9 @@ impl Application for Window {
         let mut window = Window {
             theme: Theme::Dark,
             path_opt: None,
+            attrs,
             buffer: Mutex::new(buffer),
             cache: Mutex::new(cache),
-            bold: false,
-            italic: false,
-            monospaced: true,
         };
         if let Some(arg) = env::args().nth(1) {
             window.open(PathBuf::from(arg));
@@ -157,7 +154,7 @@ impl Application for Window {
                 if let Some(path) = &self.path_opt {
                     let buffer = self.buffer.lock().unwrap();
                     let mut text = String::new();
-                    for line in buffer.text_lines() {
+                    for line in buffer.lines.iter() {
                         text.push_str(line.text());
                         text.push('\n');
                     }
@@ -172,39 +169,42 @@ impl Application for Window {
                 }
             },
             Message::Bold(bold) => {
-                self.bold = bold;
-
-                let mut buffer = self.buffer.lock().unwrap();
-                let attrs = buffer.attrs().clone().weight(if bold {
+                self.attrs = self.attrs.weight(if bold {
                     cosmic_text::Weight::BOLD
                 } else {
                     cosmic_text::Weight::NORMAL
                 });
-                buffer.set_attrs(attrs);
-            },
-            Message::Italic(italic) => {
-                self.italic = italic;
 
                 let mut buffer = self.buffer.lock().unwrap();
-                let attrs = buffer.attrs().clone().style(if italic {
+                for line in buffer.lines.iter_mut() {
+                    line.set_attrs_list(AttrsList::new(self.attrs));
+                }
+            },
+            Message::Italic(italic) => {
+                self.attrs = self.attrs.style(if italic {
                     cosmic_text::Style::Italic
                 } else {
                     cosmic_text::Style::Normal
                 });
-                buffer.set_attrs(attrs);
-            },
-            Message::Monospaced(monospaced) => {
-                self.monospaced = monospaced;
 
                 let mut buffer = self.buffer.lock().unwrap();
-                let attrs = buffer.attrs().clone()
+                for line in buffer.lines.iter_mut() {
+                    line.set_attrs_list(AttrsList::new(self.attrs));
+                }
+            },
+            Message::Monospaced(monospaced) => {
+                self.attrs = self.attrs
                     .family(if monospaced {
                         cosmic_text::Family::Monospace
                     } else {
                         cosmic_text::Family::SansSerif
                     })
                     .monospaced(monospaced);
-                buffer.set_attrs(attrs);
+
+                let mut buffer = self.buffer.lock().unwrap();
+                for line in buffer.lines.iter_mut() {
+                    line.set_attrs_list(AttrsList::new(self.attrs));
+                }
             },
             Message::MetricsChanged(metrics) => {
                 let mut buffer = self.buffer.lock().unwrap();
@@ -246,11 +246,11 @@ impl Application for Window {
                 button!("Save").on_press(Message::Save),
                 horizontal_space(Length::Fill),
                 text("Bold:"),
-                toggler(None, self.bold, Message::Bold),
+                toggler(None, self.attrs.weight == cosmic_text::Weight::BOLD, Message::Bold),
                 text("Italic:"),
-                toggler(None, self.italic, Message::Italic),
+                toggler(None, self.attrs.style == cosmic_text::Style::Italic, Message::Italic),
                 text("Monospaced:"),
-                toggler(None, self.monospaced, Message::Monospaced),
+                toggler(None, self.attrs.monospaced, Message::Monospaced),
                 text("Theme:"),
                 theme_picker,
                 text("Font Size:"),
