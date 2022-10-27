@@ -25,7 +25,7 @@ The following features must be supported before this is "ready":
   - [x] System fonts
 - [x] Text styles (bold, italic, etc.)
   - [x] Per-buffer
-  - [ ] Per-span
+  - [x] Per-span
 - [x] Font shaping (using rustybuzz)
   - [x] Cache results
   - [x] RTL
