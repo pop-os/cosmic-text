@@ -137,6 +137,7 @@ impl<'a> Attrs<'a> {
 }
 
 /// List of text attributes to apply to a line
+//TODO: have this clean up the spans when changes are made
 #[derive(Eq, PartialEq)]
 pub struct AttrsList<'a> {
     defaults: Attrs<'a>,
@@ -176,13 +177,12 @@ impl<'a> AttrsList<'a> {
     ///
     /// This returns the latest added span that contains the range
     pub fn get_span(&self, range: Range<usize>) -> Attrs<'a> {
-        let mut attrs = self.defaults;
-        for span in self.spans.iter() {
+        for span in self.spans.iter().rev() {
             if range.start >= span.0.start && range.end <= span.0.end {
-                attrs = span.1;
+                return span.1;
             }
         }
-        attrs
+        self.defaults
     }
 
     /// Split attributes list at an offset
