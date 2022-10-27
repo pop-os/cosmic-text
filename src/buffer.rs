@@ -7,7 +7,7 @@ use std::{
 };
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::{Attrs, AttrsList, Color, FontSystem, LayoutGlyph, LayoutLine, ShapeLine};
+use crate::{Attrs, AttrsList, Color, FontSystem, LayoutGlyph, TextBufferLine};
 
 /// An action to perform on a [TextBuffer]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -134,7 +134,7 @@ impl<'a, 'b> Iterator for TextLayoutRunIter<'a, 'b> {
 
                 return Some(TextLayoutRun {
                     line_i: self.line_i,
-                    text: line.text.as_str(),
+                    text: line.text(),
                     rtl: shape.rtl,
                     glyphs: &layout_line.glyphs,
                     line_y: self.line_y,
@@ -173,125 +173,6 @@ impl TextMetrics {
 impl fmt::Display for TextMetrics {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}px / {}px", self.font_size, self.line_height)
-    }
-}
-
-/// A line (or paragraph) of text that is shaped and laid out
-pub struct TextBufferLine<'a> {
-    text: String,
-    attrs_list: AttrsList<'a>,
-    wrap_simple: bool,
-    shape_opt: Option<ShapeLine>,
-    layout_opt: Option<Vec<LayoutLine>>,
-}
-
-impl<'a> TextBufferLine<'a> {
-    /// Create a new line with the given text and attributes list
-    /// Cached shaping and layout can be done using the [Self::shape] and
-    /// [Self::layout] functions
-    pub fn new<T: Into<String>>(text: T, attrs_list: AttrsList<'a>) -> Self {
-        Self {
-            text: text.into(),
-            attrs_list,
-            wrap_simple: false,
-            shape_opt: None,
-            layout_opt: None,
-        }
-    }
-
-    /// Get current text
-    pub fn text(&self) -> &str {
-        &self.text
-    }
-
-    /// Set text
-    ///
-    /// Will reset shape and layout if it differs from current text.
-    /// Returns true if the line was reset
-    pub fn set_text<T: AsRef<str> + Into<String>>(&mut self, text: T) -> bool {
-        if text.as_ref() != &self.text {
-            self.text = text.into();
-            self.reset();
-            true
-        } else {
-            false
-        }
-    }
-
-    /// Get attributes list
-    pub fn attrs_list(&self) -> &AttrsList<'a> {
-        &self.attrs_list
-    }
-
-    /// Set attributes list
-    ///
-    /// Will reset shape and layout if it differs from current attributes list.
-    /// Returns true if the line was reset
-    pub fn set_attrs_list(&mut self, attrs_list: AttrsList<'a>) -> bool {
-        if attrs_list != self.attrs_list {
-            self.attrs_list = attrs_list;
-            self.reset();
-            true
-        } else {
-            false
-        }
-    }
-
-    /// Get simple wrapping setting (wrap by characters only)
-    pub fn wrap_simple(&self) -> bool {
-        self.wrap_simple
-    }
-
-    /// Set simple wrapping setting (wrap by characters only)
-    ///
-    /// Will reset shape and layout if it differs from current simple wrapping setting.
-    /// Returns true if the line was reset
-    pub fn set_wrap_simple(&mut self, wrap_simple: bool) -> bool {
-        if wrap_simple != self.wrap_simple {
-            self.wrap_simple = wrap_simple;
-            self.reset();
-            true
-        } else {
-            false
-        }
-    }
-
-    /// Reset shaping and layout information
-    pub fn reset(&mut self) {
-        self.shape_opt = None;
-        self.layout_opt = None;
-    }
-
-    /// Check if shaping and layout information is cleared
-    pub fn is_reset(&self) -> bool {
-        self.shape_opt.is_none()
-    }
-
-    /// Shape line, will cache results
-    pub fn shape(&mut self, font_system: &'a FontSystem<'a>) -> &ShapeLine {
-        if self.shape_opt.is_none() {
-            self.shape_opt = Some(ShapeLine::new(font_system, &self.text, &self.attrs_list));
-            self.layout_opt = None;
-        }
-        self.shape_opt.as_ref().unwrap()
-    }
-
-    /// Layout line, will cache results
-    pub fn layout(&mut self, font_system: &'a FontSystem<'a>, font_size: i32, width: i32) -> &[LayoutLine] {
-        if self.layout_opt.is_none() {
-            let mut layout = Vec::new();
-            let wrap_simple = self.wrap_simple;
-            let shape = self.shape(font_system);
-            shape.layout(
-                font_size,
-                width,
-                &mut layout,
-                0,
-                wrap_simple
-            );
-            self.layout_opt = Some(layout);
-        }
-        self.layout_opt.as_ref().unwrap()
     }
 }
 
@@ -600,7 +481,7 @@ impl<'a> TextBuffer<'a> {
                 if self.cursor.index > 0 {
                     // Find previous character index
                     let mut prev_index = 0;
-                    for (i, _) in line.text.grapheme_indices(true) {
+                    for (i, _) in line.text().grapheme_indices(true) {
                         if i < self.cursor.index {
                             prev_index = i;
                         } else {
@@ -612,15 +493,15 @@ impl<'a> TextBuffer<'a> {
                     self.redraw = true;
                 } else if self.cursor.line > 0 {
                     self.cursor.line -= 1;
-                    self.cursor.index = self.lines[self.cursor.line].text.len();
+                    self.cursor.index = self.lines[self.cursor.line].text().len();
                     self.redraw = true;
                 }
                 self.cursor_x_opt = None;
             },
             TextAction::Next => {
                 let line = &mut self.lines[self.cursor.line];
-                if self.cursor.index < line.text.len() {
-                    for (i, c) in line.text.grapheme_indices(true) {
+                if self.cursor.index < line.text().len() {
+                    for (i, c) in line.text().grapheme_indices(true) {
                         if i == self.cursor.index {
                             self.cursor.index += c.len();
                             self.redraw = true;
@@ -744,21 +625,34 @@ impl<'a> TextBuffer<'a> {
                     log::debug!("Refusing to insert control character {:?}", character);
                 } else {
                     let line = &mut self.lines[self.cursor.line];
-                    line.reset();
-                    line.text.insert(self.cursor.index, character);
+
+                    println!("Before");
+                    for span in line.attrs_list().spans() {
+                        println!("{:?}", span);
+                    }
+
+                    // Collect text after insertion as a line
+                    let after = line.split_off(self.cursor.index);
+
+                    // Append the inserted text
+                    line.append(TextBufferLine::new(
+                        character.to_string(),
+                        AttrsList::new(line.attrs_list().defaults() /*TODO: provide attrs?*/)
+                    ));
+
+                    // Append the text after insertion
+                    line.append(after);
+
+                    println!("After");
+                    for span in line.attrs_list().spans() {
+                        println!("{:?}", span);
+                    }
 
                     self.cursor.index += character.len_utf8();
                 }
             },
             TextAction::Enter => {
-                let new_line = {
-                    let line = &mut self.lines[self.cursor.line];
-                    line.reset();
-                    TextBufferLine::new(
-                        line.text.split_off(self.cursor.index),
-                        line.attrs_list.split_off(self.cursor.index)
-                    )
-                };
+                let new_line = self.lines[self.cursor.line].split_off(self.cursor.index);
 
                 self.cursor.line += 1;
                 self.cursor.index = 0;
@@ -768,11 +662,18 @@ impl<'a> TextBuffer<'a> {
             TextAction::Backspace => {
                 if self.cursor.index > 0 {
                     let line = &mut self.lines[self.cursor.line];
-                    line.reset();
+
+                    println!("Before");
+                    for span in line.attrs_list().spans() {
+                        println!("{:?}", span);
+                    }
+
+                    // Get text line after cursor
+                    let after = line.split_off(self.cursor.index);
 
                     // Find previous character index
                     let mut prev_index = 0;
-                    for (i, _) in line.text.char_indices() {
+                    for (i, _) in line.text().char_indices() {
                         if i < self.cursor.index {
                             prev_index = i;
                         } else {
@@ -780,44 +681,61 @@ impl<'a> TextBuffer<'a> {
                         }
                     }
 
+                    println!("Move cursor {} to {}", self.cursor.index, prev_index);
+
                     self.cursor.index = prev_index;
 
-                    line.text.remove(self.cursor.index);
+                    // Remove character
+                    line.split_off(self.cursor.index);
+
+                    // Add text after cursor
+                    line.append(after);
+
+                    println!("After");
+                    for span in line.attrs_list().spans() {
+                        println!("{:?}", span);
+                    }
                 } else if self.cursor.line > 0 {
                     let mut line_index = self.cursor.line;
                     let old_line = self.lines.remove(line_index);
                     line_index -= 1;
 
                     let line = &mut self.lines[line_index];
-                    line.reset();
 
                     self.cursor.line = line_index;
-                    self.cursor.index = line.text.len();
+                    self.cursor.index = line.text().len();
 
-                    line.text.push_str(&old_line.text);
+                    line.append(old_line);
                 }
             },
             TextAction::Delete => {
-                if self.cursor.index < self.lines[self.cursor.line].text.len() {
+                if self.cursor.index < self.lines[self.cursor.line].text().len() {
                     let line = &mut self.lines[self.cursor.line];
-                    line.reset();
 
-                    if let Some((i, c)) = line
-                        .text
+                    let range_opt = line
+                        .text()
                         .grapheme_indices(true)
                         .take_while(|(i, _)| *i <= self.cursor.index)
                         .last()
-                    {
-                        line.text.replace_range(i..(i + c.len()), "");
-                        self.cursor.index = i;
+                        .map(|(i, c)| {
+                            i..(i + c.len())
+                        });
+
+                    if let Some(range) = range_opt {
+                        self.cursor.index = range.start;
+
+                        // Get text after deleted EGC
+                        let after = line.split_off(range.end);
+
+                        // Delete EGC
+                        line.split_off(range.start);
+
+                        // Add text after deleted EGC
+                        line.append(after);
                     }
                 } else if self.cursor.line + 1 < self.lines.len() {
                     let old_line = self.lines.remove(self.cursor.line + 1);
-
-                    let line = &mut self.lines[self.cursor.line];
-                    line.reset();
-
-                    line.text.push_str(&old_line.text);
+                    self.lines[self.cursor.line].append(old_line);
                 }
             },
             TextAction::Click { x, y } => {

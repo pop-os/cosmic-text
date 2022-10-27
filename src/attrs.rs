@@ -168,9 +168,22 @@ impl<'a> AttrsList<'a> {
         self.spans.clear();
     }
 
-    /// Add an attribute span
+    /// Add an attribute span, removes any previous matching parts of spans
     pub fn add_span(&mut self, range: Range<usize>, attrs: Attrs<'a>) {
         self.spans.push((range, attrs));
+
+        // Condense spans
+        //TODO: more advanced merging
+        let mut i = 0;
+        while i + 1 < self.spans.len() {
+            if self.spans[i].0.end == self.spans[i + 1].0.start
+            && self.spans[i].1 == self.spans[i + 1].1 {
+                let next = self.spans.remove(i + 1);
+                self.spans[i].0.end = next.0.end;
+            } else {
+                i += 1;
+            }
+        }
     }
 
     /// Get the highest priority attribute span for a range

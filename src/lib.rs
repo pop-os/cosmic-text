@@ -60,6 +60,9 @@ mod attrs;
 pub use self::buffer::*;
 mod buffer;
 
+pub use self::buffer_line::*;
+mod buffer_line;
+
 pub use self::cache::*;
 mod cache;
 
