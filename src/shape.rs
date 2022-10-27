@@ -605,6 +605,7 @@ impl ShapeLine {
                         let x_advance = font_size as f32 * glyph.x_advance;
                         let y_advance = font_size as f32 * glyph.y_advance;
 
+                        //TODO: fix ordering when in bidi text
                         let glyph_wrap = if self.rtl {
                             x - x_advance < end_x
                         } else {
