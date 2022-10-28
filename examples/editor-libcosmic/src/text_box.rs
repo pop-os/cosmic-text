@@ -17,12 +17,14 @@ use cosmic_text::{
     TextBuffer,
 };
 use std::{
+    cmp,
     sync::Mutex,
     time::Instant,
 };
 
 pub struct Appearance {
     background_color: Option<Color>,
+    text_color: Color,
 }
 
 pub trait StyleSheet {
@@ -34,9 +36,11 @@ impl StyleSheet for Theme {
         match self {
             Theme::Dark => Appearance {
                 background_color: Some(Color::from_rgb8(0x34, 0x34, 0x34)),
+                text_color: Color::from_rgb8(0xFF, 0xFF, 0xFF),
             },
             Theme::Light => Appearance {
                 background_color: Some(Color::from_rgb8(0xFC, 0xFC, 0xFC)),
+                text_color: Color::from_rgb8(0x00, 0x00, 0x00),
             },
         }
     }
@@ -116,7 +120,9 @@ where
     ) {
         let state = tree.state.downcast_ref::<State>();
 
-        if let Some(background_color) = theme.appearance().background_color {
+        let appearance = theme.appearance();
+
+        if let Some(background_color) = appearance.background_color {
             renderer.fill_quad(
                 renderer::Quad {
                     bounds: layout.bounds(),
@@ -128,7 +134,93 @@ where
             );
         }
 
-        if let Some((w, h, pixels)) = &state.pixels_opt {
+        let text_color = cosmic_text::Color::rgba(
+            cmp::max(0, cmp::min(255, (appearance.text_color.r * 255.0) as i32)) as u8,
+            cmp::max(0, cmp::min(255, (appearance.text_color.g * 255.0) as i32)) as u8,
+            cmp::max(0, cmp::min(255, (appearance.text_color.b * 255.0) as i32)) as u8,
+            cmp::max(0, cmp::min(255, (appearance.text_color.a * 255.0) as i32)) as u8,
+        );
+
+        let mut pixels_opt = state.pixels_opt.lock().unwrap();
+
+        let mut buffer = self.buffer.lock().unwrap();
+
+        let layout_w = layout.bounds().width as i32;
+        let layout_h = layout.bounds().height as i32;
+        buffer.set_size(layout_w, layout_h);
+
+        if buffer.cursor_moved {
+            buffer.shape_until_cursor();
+            buffer.cursor_moved = false;
+        } else {
+            buffer.shape_until_scroll();
+        }
+
+        //TODO: redraw on color change
+        if buffer.redraw || pixels_opt.is_none() {
+            // Redraw buffer to image
+
+            let instant = Instant::now();
+
+            let mut pixels = vec![0; layout_w as usize * layout_h as usize * 4];
+
+            buffer.draw(&mut self.cache.lock().unwrap(), text_color, |start_x, start_y, w, h, color| {
+                let alpha = (color.0 >> 24) & 0xFF;
+                if alpha == 0 {
+                    // Do not draw if alpha is zero
+                    return;
+                }
+
+                for y in start_y..start_y + h as i32{
+                    if y < 0 || y >= layout_h {
+                        // Skip if y out of bounds
+                        continue;
+                    }
+
+                    let offset_y = y as usize * layout_w as usize * 4;
+                    for x in start_x..start_x + w as i32 {
+                        if x < 0 || x >= layout_w {
+                            // Skip if x out of bounds
+                            continue;
+                        }
+
+                        let offset = offset_y + x as usize * 4;
+
+                        let mut current =
+                            pixels[offset] as u32 |
+                            (pixels[offset + 1] as u32) << 8 |
+                            (pixels[offset + 2] as u32) << 16 |
+                            (pixels[offset + 3] as u32) << 24;
+
+                        if alpha >= 255 || current == 0 {
+                            // Alpha is 100% or current is null, replace with no blending
+                            current = color.0;
+                        } else {
+                            // Alpha blend with current value
+                            let n_alpha = 255 - alpha;
+                            let rb = ((n_alpha * (current & 0x00FF00FF)) + (alpha * (color.0 & 0x00FF00FF))) >> 8;
+                            let ag = (n_alpha * ((current & 0xFF00FF00) >> 8))
+                                + (alpha * (0x01000000 | ((color.0 & 0x0000FF00) >> 8)));
+                            current = (rb & 0x00FF00FF) | (ag & 0xFF00FF00);
+                        }
+
+                        pixels[offset] = current as u8;
+                        pixels[offset + 1] = (current >> 8) as u8;
+                        pixels[offset + 2] = (current >> 16) as u8;
+                        pixels[offset + 3] = (current >> 24) as u8;
+                    }
+                }
+            });
+
+            *pixels_opt = Some((layout_w as u32, layout_h as u32, pixels));
+
+            buffer.redraw = false;
+
+            let duration = instant.elapsed();
+            log::debug!("redraw: {:?}", duration);
+        }
+
+        if let Some((w, h, pixels)) = &*pixels_opt {
             let handle = image::Handle::from_pixels(*w, *h, pixels.clone());
             image::Renderer::draw(renderer, handle, layout.bounds());
         }
@@ -146,10 +238,6 @@ where
     ) -> Status {
         let state = tree.state.downcast_mut::<State>();
         let mut buffer = self.buffer.lock().unwrap();
-
-        let layout_w = layout.bounds().width as i32;
-        let layout_h = layout.bounds().height as i32;
-        buffer.set_size(layout_w, layout_h);
 
         let mut status = Status::Ignored;
         match event {
@@ -239,81 +327,6 @@ where
             _ => ()
         }
 
-        if buffer.cursor_moved {
-            buffer.shape_until_cursor();
-            buffer.cursor_moved = false;
-        } else {
-            buffer.shape_until_scroll();
-        }
-
-        if layout_w < 0 || layout_h < 0 {
-            // Invalid size, clear pixels
-            state.pixels_opt = None;
-        } else if buffer.redraw || state.pixels_opt.is_none() {
-            // Redraw buffer to image
-
-            let instant = Instant::now();
-
-            let mut pixels = vec![0; layout_w as usize * layout_h as usize * 4];
-
-            //TODO: load from theme somehow
-            let text_color = cosmic_text::Color::rgb(0xFF, 0xFF, 0xFF);
-            buffer.draw(&mut self.cache.lock().unwrap(), text_color, |start_x, start_y, w, h, color| {
-                let alpha = (color.0 >> 24) & 0xFF;
-                if alpha == 0 {
-                    // Do not draw if alpha is zero
-                    return;
-                }
-
-                for y in start_y..start_y + h as i32{
-                    if y < 0 || y >= layout_h {
-                        // Skip if y out of bounds
-                        continue;
-                    }
-
-                    let offset_y = y as usize * layout_w as usize * 4;
-                    for x in start_x..start_x + w as i32 {
-                        if x < 0 || x >= layout_w {
-                            // Skip if x out of bounds
-                            continue;
-                        }
-
-                        let offset = offset_y + x as usize * 4;
-
-                        let mut current =
-                            pixels[offset] as u32 |
-                            (pixels[offset + 1] as u32) << 8 |
-                            (pixels[offset + 2] as u32) << 16 |
-                            (pixels[offset + 3] as u32) << 24;
-
-                        if alpha >= 255 || current == 0 {
-                            // Alpha is 100% or current is null, replace with no blending
-                            current = color.0;
-                        } else {
-                            // Alpha blend with current value
-                            let n_alpha = 255 - alpha;
-                            let rb = ((n_alpha * (current & 0x00FF00FF)) + (alpha * (color.0 & 0x00FF00FF))) >> 8;
-                            let ag = (n_alpha * ((current & 0xFF00FF00) >> 8))
-                                + (alpha * (0x01000000 | ((color.0 & 0x0000FF00) >> 8)));
-                            current = (rb & 0x00FF00FF) | (ag & 0xFF00FF00);
-                        }
-
-                        pixels[offset] = current as u8;
-                        pixels[offset + 1] = (current >> 8) as u8;
-                        pixels[offset + 2] = (current >> 16) as u8;
-                        pixels[offset + 3] = (current >> 24) as u8;
-                    }
-                }
-            });
-
-            state.pixels_opt = Some((layout_w as u32, layout_h as u32, pixels));
-
-            buffer.redraw = false;
-
-            let duration = instant.elapsed();
-            log::debug!("redraw: {:?}", duration);
-        }
-
         status
     }
 }
@@ -328,15 +341,17 @@ where
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct State {
     is_dragging: bool,
-    pixels_opt: Option<(u32, u32, Vec<u8>)>,
+    pixels_opt: Mutex<Option<(u32, u32, Vec<u8>)>>,
 }
 
 impl State {
     /// Creates a new [`State`].
     pub fn new() -> State {
-        State::default()
+        State {
+            is_dragging: false,
+            pixels_opt: Mutex::new(None),
+        }
     }
 }
