@@ -170,10 +170,8 @@ impl<'a> AttrsList<'a> {
 
     /// Add an attribute span, removes any previous matching parts of spans
     pub fn add_span(&mut self, range: Range<usize>, attrs: Attrs<'a>) {
-        // Condense spans
-        //TODO: more advanced merging
-
-        let mut rework_spans = Vec::with_capacity(5);
+        //there should only be at most 2 that can be resized. the rest would be removed.
+        let mut rework_spans = Vec::with_capacity(3);
         let mut i = 0;
 
         //grab intersecting parts that are not fully intersected. remove those that are.
@@ -210,6 +208,7 @@ impl<'a> AttrsList<'a> {
             }
         }
 
+        //Finally lets add the new span. it should fit now.
         self.spans.push((range, attrs));
     }
 
