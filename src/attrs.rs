@@ -200,7 +200,7 @@ impl<'a> AttrsList<'a> {
         // will need to do loop handling to support this.
         for (isfront, isback, rework) in rework_spans {
             let ranges = match (isfront, isback) {
-                (true, false) => vec!(rework.0.start..range.start),
+                (true, false) => vec!(rework.0.start..range.start - 1),
                 (false, true) => vec!(range.end + 1..rework.0.end),
                 _ => vec!(rework.0.start..range.start, range.end..rework.0.end),
             };
