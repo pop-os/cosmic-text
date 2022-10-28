@@ -114,9 +114,9 @@ impl<'a> SwashCache<'a> {
                                 x + off_x,
                                 y + off_y,
                                 Color::rgba(
-                                    image.data[i + 2],
-                                    image.data[i + 1],
                                     image.data[i],
+                                    image.data[i + 1],
+                                    image.data[i + 2],
                                     image.data[i + 3]
                                 )
                             );

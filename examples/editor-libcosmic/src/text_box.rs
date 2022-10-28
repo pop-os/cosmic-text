@@ -281,9 +281,9 @@ where
                         let offset = offset_y + x as usize * 4;
 
                         let mut current =
-                            pixels[offset + 2] as u32 |
+                            pixels[offset] as u32 |
                             (pixels[offset + 1] as u32) << 8 |
-                            (pixels[offset] as u32) << 16 |
+                            (pixels[offset + 2] as u32) << 16 |
                             (pixels[offset + 3] as u32) << 24;
 
                         if alpha >= 255 || current == 0 {
@@ -298,9 +298,9 @@ where
                             current = (rb & 0x00FF00FF) | (ag & 0xFF00FF00);
                         }
 
-                        pixels[offset + 2] = current as u8;
+                        pixels[offset] = current as u8;
                         pixels[offset + 1] = (current >> 8) as u8;
-                        pixels[offset] = (current >> 16) as u8;
+                        pixels[offset + 2] = (current >> 16) as u8;
                         pixels[offset + 3] = (current >> 24) as u8;
                     }
                 }
