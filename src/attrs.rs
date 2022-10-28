@@ -170,20 +170,47 @@ impl<'a> AttrsList<'a> {
 
     /// Add an attribute span, removes any previous matching parts of spans
     pub fn add_span(&mut self, range: Range<usize>, attrs: Attrs<'a>) {
-        self.spans.push((range, attrs));
-
         // Condense spans
         //TODO: more advanced merging
+
+        let mut rework_spans = Vec::with_capacity(5);
         let mut i = 0;
-        while i + 1 < self.spans.len() {
-            if self.spans[i].0.end == self.spans[i + 1].0.start
-            && self.spans[i].1 == self.spans[i + 1].1 {
-                let next = self.spans.remove(i + 1);
-                self.spans[i].0.end = next.0.end;
+
+        //grab intersecting parts that are not fully intersected. remove those that are.
+        while i < self.spans.len() {
+            if self.spans[i].0.end <= range.end && self.spans[i].0.start >= range.start {
+                let _ = self.spans.remove(i);
+            } else if self.spans[i].0.end > range.end && self.spans[i].0.start >= range.start && self.spans[i].0.start <= range.end {
+                let rework = self.spans.remove(i);
+                rework_spans.push((false, true, rework));
+            } else if self.spans[i].0.end <= range.end && self.spans[i].0.end >= range.start && self.spans[i].0.start < range.start {
+                let rework = self.spans.remove(i);
+                rework_spans.push((true, false, rework));
+            } else if self.spans[i].0.end > range.end && self.spans[i].0.start < range.start {
+                let rework = self.spans.remove(i);
+                rework_spans.push((true, true, rework));
             } else {
                 i += 1;
             }
         }
+
+        //1,2,3,4,5,6,7,8
+      //0,1,2           8,9,10
+        // get the new ranges from anything that can be reworked.
+        // will need to do loop handling to support this.
+        for (isfront, isback, rework) in rework_spans {
+            let ranges = match (isfront, isback) {
+                (true, false) => vec!(rework.0.start..range.start),
+                (false, true) => vec!(range.end..rework.0.end),
+                _ => vec!(rework.0.start..range.start, range.end..rework.0.end),
+            };
+            
+            for range in ranges {
+                self.spans.push((range, rework.1));
+            }
+        }
+
+        self.spans.push((range, attrs));
     }
 
     /// Get the highest priority attribute span for a range
