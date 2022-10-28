@@ -116,17 +116,17 @@ where
             self.line.wrap_simple()
         );
 
-        let mut max_x = 0;
-        let mut line_y = 0;
+        let mut width = 0;
+        let mut height = 0;
 
         for layout_line in layout_lines {
             for glyph in layout_line.glyphs.iter() {
-                max_x = cmp::max(max_x, (glyph.x + glyph.w) as i32);
+                width = cmp::max(width, (glyph.x + glyph.w) as i32 + 1);
             }
-            line_y += self.metrics.line_height;
+            height += self.metrics.line_height;
         }
 
-        let size = Size::new(max_x as f32, line_y as f32);
+        let size = Size::new(width as f32, height as f32);
 
         log::debug!("layout {:?} in {:?}", size, instant.elapsed());
 
@@ -174,7 +174,7 @@ where
         let mut layout_lines = Vec::new();
         shape.layout(
             self.metrics.font_size,
-            layout.bounds().width as i32 + 1 /*TODO: why this off by one error*/,
+            layout.bounds().width as i32,
             &mut layout_lines,
             0,
             self.line.wrap_simple()
@@ -219,7 +219,7 @@ where
             line_y += self.metrics.line_height;
         }
 
-        log::debug!("draw {:?} in {:?}", layout.bounds(), instant.elapsed());
+        log::trace!("draw {:?} in {:?}", layout.bounds(), instant.elapsed());
     }
 }
 
