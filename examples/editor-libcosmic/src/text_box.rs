@@ -48,20 +48,18 @@ impl StyleSheet for Theme {
 
 pub struct TextBox<'a> {
     buffer: &'a Mutex<TextBuffer<'static>>,
-    cache: &'a Mutex<SwashCache<'static>>,
 }
 
 impl<'a> TextBox<'a> {
-    pub fn new(buffer: &'a Mutex<TextBuffer<'static>>, cache: &'a Mutex<SwashCache<'static>>) -> Self {
+    pub fn new(buffer: &'a Mutex<TextBuffer<'static>>) -> Self {
         Self {
             buffer,
-            cache,
         }
     }
 }
 
-pub fn text_box<'a>(buffer: &'a Mutex<TextBuffer<'static>>, cache: &'a Mutex<SwashCache<'static>>) -> TextBox<'a> {
-    TextBox::new(buffer, cache)
+pub fn text_box<'a>(buffer: &'a Mutex<TextBuffer<'static>>) -> TextBox<'a> {
+    TextBox::new(buffer)
 }
 
 impl<'a, Message, Renderer> Widget<Message, Renderer> for TextBox<'a>
@@ -164,7 +162,7 @@ where
 
             let mut pixels = vec![0; layout_w as usize * layout_h as usize * 4];
 
-            buffer.draw(&mut self.cache.lock().unwrap(), text_color, |start_x, start_y, w, h, color| {
+            buffer.draw(&mut state.cache.lock().unwrap(), text_color, |start_x, start_y, w, h, color| {
                 let alpha = (color.0 >> 24) & 0xFF;
                 if alpha == 0 {
                     // Do not draw if alpha is zero
@@ -343,6 +341,7 @@ where
 
 pub struct State {
     is_dragging: bool,
+    cache: Mutex<SwashCache<'static>>,
     pixels_opt: Mutex<Option<(u32, u32, Vec<u8>)>>,
 }
 
@@ -351,6 +350,7 @@ impl State {
     pub fn new() -> State {
         State {
             is_dragging: false,
+            cache: Mutex::new(SwashCache::new(&crate::FONT_SYSTEM)),
             pixels_opt: Mutex::new(None),
         }
     }

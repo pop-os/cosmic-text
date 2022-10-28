@@ -14,7 +14,6 @@ use cosmic::{
             horizontal_space,
             pick_list,
             row,
-            text,
         },
     },
     settings,
@@ -27,7 +26,6 @@ use cosmic_text::{
     Attrs,
     AttrsList,
     FontSystem,
-    SwashCache,
     TextBuffer,
     TextMetrics,
 };
@@ -70,7 +68,6 @@ pub struct Window {
     path_opt: Option<PathBuf>,
     attrs: Attrs<'static>,
     buffer: Mutex<TextBuffer<'static>>,
-    cache: Mutex<SwashCache<'static>>,
 }
 
 #[allow(dead_code)]
@@ -119,14 +116,11 @@ impl Application for Window {
             FONT_SIZES[1 /* Body */],
         );
 
-        let cache = SwashCache::new(&FONT_SYSTEM);
-
         let mut window = Window {
             theme: Theme::Dark,
             path_opt: None,
             attrs,
             buffer: Mutex::new(buffer),
-            cache: Mutex::new(cache),
         };
         if let Some(arg) = env::args().nth(1) {
             window.open(PathBuf::from(arg));
@@ -262,7 +256,7 @@ impl Application for Window {
             .align_items(Alignment::Center)
             .spacing(8)
             ,
-            text_box(&self.buffer, &self.cache)
+            text_box(&self.buffer)
         ]
         .spacing(8)
         .padding(16)
