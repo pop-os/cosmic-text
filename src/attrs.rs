@@ -170,6 +170,11 @@ impl<'a> AttrsList<'a> {
 
     /// Add an attribute span, removes any previous matching parts of spans
     pub fn add_span(&mut self, range: Range<usize>, attrs: Attrs<'a>) {
+        //if range == itself then there is no range avoid adding it to save space.
+        if range.start == range.end {
+            return;
+        }
+
         //there should only be at most 2 that can be resized. the rest would be removed.
         let mut rework_spans = Vec::with_capacity(3);
         let mut i = 0;
@@ -202,9 +207,11 @@ impl<'a> AttrsList<'a> {
                 (false, true) => vec!(range.end..rework.0.end),
                 _ => vec!(rework.0.start..range.start, range.end..rework.0.end),
             };
-            
+
             for range in ranges {
-                self.spans.push((range, rework.1));
+                if range.start != range.end {
+                    self.spans.push((range, rework.1));
+                }
             }
         }
 
