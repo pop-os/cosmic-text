@@ -21,6 +21,7 @@ use std::{
 
 pub struct Appearance {
     background_color: Option<Color>,
+    text_color: Color,
 }
 
 pub trait StyleSheet {
@@ -29,8 +30,15 @@ pub trait StyleSheet {
 
 impl StyleSheet for Theme {
     fn appearance(&self) -> Appearance {
-        Appearance {
-            background_color: None,
+        match self {
+            Theme::Dark => Appearance {
+                background_color: None,
+                text_color: Color::from_rgb8(0xFF, 0xFF, 0xFF),
+            },
+            Theme::Light => Appearance {
+                background_color: None,
+                text_color: Color::from_rgb8(0x00, 0x00, 0x00),
+            },
         }
     }
 }
@@ -139,7 +147,9 @@ where
 
         let state = tree.state.downcast_ref::<State>();
 
-        if let Some(background_color) = theme.appearance().background_color {
+        let appearance = theme.appearance();
+
+        if let Some(background_color) = appearance.background_color {
             renderer.fill_quad(
                 renderer::Quad {
                     bounds: layout.bounds(),
@@ -150,6 +160,13 @@ where
                 background_color
             );
         }
+
+        let text_color = cosmic_text::Color::rgba(
+            cmp::max(0, cmp::min(255, (appearance.text_color.r * 255.0) as i32)) as u8,
+            cmp::max(0, cmp::min(255, (appearance.text_color.g * 255.0) as i32)) as u8,
+            cmp::max(0, cmp::min(255, (appearance.text_color.b * 255.0) as i32)) as u8,
+            cmp::max(0, cmp::min(255, (appearance.text_color.a * 255.0) as i32)) as u8,
+        );
 
         let shape = self.line.shape_opt().as_ref().unwrap();
 
@@ -172,7 +189,7 @@ where
 
                 let glyph_color = match glyph.color_opt {
                     Some(some) => some,
-                    None => cosmic_text::Color::rgb(0xFF, 0xFF, 0xFF), //TODO: get from theme
+                    None => text_color,
                 };
 
                 cache.with_pixels(cache_key, glyph_color, |x, y, color| {
