@@ -170,23 +170,29 @@ impl<'a> AttrsList<'a> {
 
     /// Add an attribute span, removes any previous matching parts of spans
     pub fn add_span(&mut self, range: Range<usize>, attrs: Attrs<'a>) {
-        //there should only be at most 2 that can be resized. the rest would be removed.
+        //do not support 1..1 even if by accident.
+        if range.start == range.end {
+            return;
+        }
+
         let mut rework_spans = Vec::with_capacity(3);
         let mut i = 0;
 
-        //grab intersecting parts that are not fully intersected. remove those that are.
+        //Grab intersecting parts that are not fully intersected. remove those that are.
+        //This clips or splits the parts that are outside of the range.
         while i < self.spans.len() {
             if self.spans[i].0.end <= range.end && self.spans[i].0.start >= range.start {
                 let _ = self.spans.remove(i);
             } else if self.spans[i].0.end > range.end && self.spans[i].0.start >= range.start && self.spans[i].0.start <= range.end {
                 let rework = self.spans.remove(i);
-                rework_spans.push((false, true, rework));
+                rework_spans.push((range.end..rework.0.end, rework.1))
             } else if self.spans[i].0.end <= range.end && self.spans[i].0.end >= range.start && self.spans[i].0.start < range.start {
                 let rework = self.spans.remove(i);
-                rework_spans.push((true, false, rework));
+                rework_spans.push((rework.0.start..range.start, rework.1))
             } else if self.spans[i].0.end > range.end && self.spans[i].0.start < range.start {
                 let rework = self.spans.remove(i);
-                rework_spans.push((true, true, rework));
+                rework_spans.push((rework.0.start..range.start, rework.1));
+                rework_spans.push((range.end..rework.0.end, rework.1));
             } else if self.spans[i].0.start > range.end {
                 break;
             } else {
@@ -194,20 +200,9 @@ impl<'a> AttrsList<'a> {
             }
         }
 
-        //1,2,3,4,5,6,7,8
-      //0,1,2           8,9,10
-        // get the new ranges from anything that can be reworked.
-        // will need to do loop handling to support this.
-        for (isfront, isback, rework) in rework_spans {
-            let ranges = match (isfront, isback) {
-                (true, false) => vec!(rework.0.start..range.start - 1),
-                (false, true) => vec!(range.end + 1..rework.0.end),
-                _ => vec!(rework.0.start..range.start, range.end..rework.0.end),
-            };
-
-            for range in ranges {
-                self.spans.push((range, rework.1));
-            }
+        // Readd reworked arrays back.
+        for reworked in rework_spans {
+            self.spans.push(reworked);
         }
 
         //Finally lets add the new span. it should fit now.
