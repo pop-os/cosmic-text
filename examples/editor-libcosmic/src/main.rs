@@ -3,6 +3,7 @@
 use cosmic::{
     iced::{
         self,
+        Color,
         Alignment,
         Application,
         Command,
@@ -202,10 +203,19 @@ impl Application for Window {
                 let mut buffer = self.buffer.lock().unwrap();
                 buffer.set_metrics(metrics);
             },
-            Message::ThemeChanged(theme) => match theme {
-                "Dark" => self.theme = Theme::Dark,
-                "Light" => self.theme = Theme::Light,
-                _ => (),
+            Message::ThemeChanged(theme) => {
+                self.theme = match theme {
+                    "Dark" => Theme::Dark,
+                    "Light" => Theme::Light,
+                    _ => return Command::none(),
+                };
+
+                let Color { r, g, b, a } = self.theme.palette().text;
+                let as_u8 = |component: f32| (component * 255.0) as u8;
+                self.attrs = self.attrs.color(cosmic_text::Color::rgba(as_u8(r), as_u8(g), as_u8(b), as_u8(a)));
+
+                let mut buffer = self.buffer.lock().unwrap();
+                update_attrs(&mut buffer, self.attrs);
             },
         }
 
