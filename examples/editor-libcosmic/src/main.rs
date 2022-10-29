@@ -111,10 +111,11 @@ impl Application for Window {
             .monospaced(true)
             .family(cosmic_text::Family::Monospace);
 
-        let buffer = TextBuffer::new(
+        let mut buffer = TextBuffer::new(
             &FONT_SYSTEM,
             FONT_SIZES[1 /* Body */],
         );
+        update_attrs(&mut buffer, attrs);
 
         let mut window = Window {
             theme: Theme::Dark,
@@ -173,9 +174,7 @@ impl Application for Window {
                 });
 
                 let mut buffer = self.buffer.lock().unwrap();
-                for line in buffer.lines.iter_mut() {
-                    line.set_attrs_list(AttrsList::new(self.attrs));
-                }
+                update_attrs(&mut buffer, self.attrs);
             },
             Message::Italic(italic) => {
                 self.attrs = self.attrs.style(if italic {
@@ -185,9 +184,7 @@ impl Application for Window {
                 });
 
                 let mut buffer = self.buffer.lock().unwrap();
-                for line in buffer.lines.iter_mut() {
-                    line.set_attrs_list(AttrsList::new(self.attrs));
-                }
+                update_attrs(&mut buffer, self.attrs);
             },
             Message::Monospaced(monospaced) => {
                 self.attrs = self.attrs
@@ -199,9 +196,7 @@ impl Application for Window {
                     .monospaced(monospaced);
 
                 let mut buffer = self.buffer.lock().unwrap();
-                for line in buffer.lines.iter_mut() {
-                    line.set_attrs_list(AttrsList::new(self.attrs));
-                }
+                update_attrs(&mut buffer, self.attrs);
             },
             Message::MetricsChanged(metrics) => {
                 let mut buffer = self.buffer.lock().unwrap();
@@ -265,4 +260,10 @@ impl Application for Window {
         // Uncomment to debug layout: content.explain(Color::WHITE)
         content
     }
+}
+
+fn update_attrs<'a>(buffer: &mut TextBuffer<'a>, attrs: Attrs<'a>) {
+    buffer.lines.iter_mut().for_each(|line| {
+        line.set_attrs_list(AttrsList::new(attrs));
+    });
 }
