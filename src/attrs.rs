@@ -170,27 +170,53 @@ impl<'a> AttrsList<'a> {
 
     /// Add an attribute span, removes any previous matching parts of spans
     pub fn add_span(&mut self, range: Range<usize>, attrs: Attrs<'a>) {
-        self.spans.push((range, attrs));
+        //do not support 1..1 even if by accident.
+        if range.start == range.end {
+            return;
+        }
 
-        // Condense spans
-        //TODO: more advanced merging
+        let mut rework_spans = Vec::with_capacity(3);
         let mut i = 0;
-        while i + 1 < self.spans.len() {
-            if self.spans[i].0.end == self.spans[i + 1].0.start
-            && self.spans[i].1 == self.spans[i + 1].1 {
-                let next = self.spans.remove(i + 1);
-                self.spans[i].0.end = next.0.end;
+
+        //Grab intersecting parts that are not fully intersected. remove those that are.
+        //This clips or splits the parts that are outside of the range.
+        while i < self.spans.len() {
+            if self.spans[i].0.end <= range.end && self.spans[i].0.start >= range.start {
+                let _ = self.spans.remove(i);
+            } else if self.spans[i].0.end > range.end && self.spans[i].0.start >= range.start && self.spans[i].0.start <= range.end {
+                let rework = self.spans.remove(i);
+                rework_spans.push((range.end..rework.0.end, rework.1))
+            } else if self.spans[i].0.end <= range.end && self.spans[i].0.end >= range.start && self.spans[i].0.start < range.start {
+                let rework = self.spans.remove(i);
+                rework_spans.push((rework.0.start..range.start, rework.1))
+            } else if self.spans[i].0.end > range.end && self.spans[i].0.start < range.start {
+                let rework = self.spans.remove(i);
+                rework_spans.push((rework.0.start..range.start, rework.1));
+                rework_spans.push((range.end..rework.0.end, rework.1));
+            } else if self.spans[i].0.start > range.end {
+                break;
             } else {
                 i += 1;
             }
         }
+
+        // Readd reworked arrays back.
+        for reworked in rework_spans {
+            self.spans.push(reworked);
+        }
+
+        //Finally lets add the new span. it should fit now.
+        self.spans.push((range, attrs));
+
+        //sort by start to speed up further additions
+        self.spans.sort_by(|a, b| a.0.start.partial_cmp(&b.0.start).unwrap())
     }
 
     /// Get the highest priority attribute span for a range
     ///
-    /// This returns the latest added span that contains the range
+    /// This returns the first span that contains the range
     pub fn get_span(&self, range: Range<usize>) -> Attrs<'a> {
-        for span in self.spans.iter().rev() {
+        for span in self.spans.iter() {
             if range.start >= span.0.start && range.end <= span.0.end {
                 return span.1;
             }
