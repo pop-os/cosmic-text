@@ -30,7 +30,7 @@ fn main() {
     buffer.set_text(" Hi, Rust! 🦀", attrs);
 
     // Perform shaping as desired
-    buffer.shape_until_cursor();
+    buffer.shape_until_scroll();
 
     // Default text color (0xFF, 0xFF, 0xFF is white)
     let text_color = Color::rgb(0xFF, 0xFF, 0xFF);

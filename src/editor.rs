@@ -50,11 +50,7 @@ pub struct Editor<'a> {
     cursor: Cursor,
     cursor_x_opt: Option<i32>,
     select_opt: Option<Cursor>,
-    /// True if the cursor has been moved. Set to false after processing
-    ///
-    /// Usually, if this is true, you should run [Self::shape_until_cursor] before redrawing.
-    /// Otherwise, you should run [Self::shape_until_scroll]
-    pub cursor_moved: bool,
+    cursor_moved: bool,
 }
 
 impl<'a> Editor<'a> {
