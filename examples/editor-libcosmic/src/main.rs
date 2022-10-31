@@ -38,11 +38,11 @@ use std::{
     sync::Mutex,
 };
 
+use self::text::text;
+mod text;
+
 use self::text_box::text_box;
 mod text_box;
-
-use self::text_new::text as text_new;
-mod text_new;
 
 lazy_static::lazy_static! {
     static ref FONT_SYSTEM: FontSystem<'static> = FontSystem::new();
@@ -248,15 +248,15 @@ impl Application for Window {
                 button!("Open").on_press(Message::Open),
                 button!("Save").on_press(Message::Save),
                 horizontal_space(Length::Fill),
-                text_new("Bold:"),
+                text("Bold:"),
                 toggler(None, self.attrs.weight == cosmic_text::Weight::BOLD, Message::Bold),
-                text_new("Italic:"),
+                text("Italic:"),
                 toggler(None, self.attrs.style == cosmic_text::Style::Italic, Message::Italic),
-                text_new("Monospaced:"),
+                text("Monospaced:"),
                 toggler(None, self.attrs.monospaced, Message::Monospaced),
-                text_new("Theme:"),
+                text("Theme:"),
                 theme_picker,
-                text_new("Font Size:"),
+                text("Font Size:"),
                 font_size_picker,
             ]
             .align_items(Alignment::Center)

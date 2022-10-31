@@ -2,6 +2,7 @@
 
 use cosmic::iced_native::{
     {Color, Element, Length, Point, Rectangle, Size, Theme},
+    image,
     layout::{self, Layout},
     renderer,
     widget::{self, tree, Widget},
@@ -78,7 +79,7 @@ pub fn text(string: &str) -> Text {
 
 impl<Message, Renderer> Widget<Message, Renderer> for Text
 where
-    Renderer: renderer::Renderer,
+    Renderer: renderer::Renderer + image::Renderer<Handle = image::Handle>,
     Renderer::Theme: StyleSheet,
 {
     fn tag(&self) -> tree::Tag {
@@ -107,12 +108,9 @@ where
         let shape = self.line.shape_opt().as_ref().unwrap();
 
         //TODO: can we cache this?
-        let mut layout_lines = Vec::new();
-        shape.layout(
+        let layout_lines = shape.layout(
             self.metrics.font_size,
             limits.max().width as i32,
-            &mut layout_lines,
-            0,
             self.line.wrap_simple()
         );
 
@@ -168,19 +166,21 @@ where
             cmp::max(0, cmp::min(255, (appearance.text_color.a * 255.0) as i32)) as u8,
         );
 
+        let layout_w = layout.bounds().width as i32;
+        let layout_h = layout.bounds().height as i32;
+
         let shape = self.line.shape_opt().as_ref().unwrap();
 
         //TODO: can we cache this?
-        let mut layout_lines = Vec::new();
-        shape.layout(
+        let layout_lines = shape.layout(
             self.metrics.font_size,
-            layout.bounds().width as i32,
-            &mut layout_lines,
-            0,
+            layout_w,
             self.line.wrap_simple()
         );
 
         let mut cache = state.cache.lock().unwrap();
+
+        let mut pixels = vec![0; layout_w as usize * layout_h as usize * 4];
 
         let mut line_y = self.metrics.font_size;
         for layout_line in layout_lines {
@@ -192,32 +192,56 @@ where
                     None => text_color,
                 };
 
-                cache.with_pixels(cache_key, glyph_color, |x, y, color| {
-                    let a = color.a();
-                    if a > 0 {
-                        let r = color.r();
-                        let g = color.g();
-                        let b = color.b();
-                        renderer.fill_quad(
-                            renderer::Quad {
-                                bounds: Rectangle::new(
-                                    Point::new(
-                                        layout.bounds().x + (x_int + x) as f32,
-                                        layout.bounds().y + (line_y + y_int + y) as f32
-                                    ),
-                                    Size::new(1.0, 1.0)
-                                ),
-                                border_radius: 0.0,
-                                border_width: 0.0,
-                                border_color: Color::TRANSPARENT,
-                            },
-                            Color::from_rgba8(r, g, b, a as f32 / 255.0),
-                        );
+                cache.with_pixels(cache_key, glyph_color, |pixel_x, pixel_y, color| {
+                    let alpha = (color.0 >> 24) & 0xFF;
+                    if alpha == 0 {
+                        // Do not draw if alpha is zero
+                        return;
                     }
+
+                    let y = line_y + y_int + pixel_y;
+                    if y < 0 || y >= layout_h {
+                        // Skip if y out of bounds
+                        return;
+                    }
+
+                    let x = x_int + pixel_x;
+                    if x < 0 || x >= layout_w {
+                        // Skip if x out of bounds
+                        return;
+                    }
+
+                    let offset = (y as usize * layout_w as usize + x as usize) * 4;
+
+                    let mut current =
+                        pixels[offset] as u32 |
+                        (pixels[offset + 1] as u32) << 8 |
+                        (pixels[offset + 2] as u32) << 16 |
+                        (pixels[offset + 3] as u32) << 24;
+
+                    if alpha >= 255 || current == 0 {
+                        // Alpha is 100% or current is null, replace with no blending
+                        current = color.0;
+                    } else {
+                        // Alpha blend with current value
+                        let n_alpha = 255 - alpha;
+                        let rb = ((n_alpha * (current & 0x00FF00FF)) + (alpha * (color.0 & 0x00FF00FF))) >> 8;
+                        let ag = (n_alpha * ((current & 0xFF00FF00) >> 8))
+                            + (alpha * (0x01000000 | ((color.0 & 0x0000FF00) >> 8)));
+                        current = (rb & 0x00FF00FF) | (ag & 0xFF00FF00);
+                    }
+
+                    pixels[offset] = current as u8;
+                    pixels[offset + 1] = (current >> 8) as u8;
+                    pixels[offset + 2] = (current >> 16) as u8;
+                    pixels[offset + 3] = (current >> 24) as u8;
                 });
             }
             line_y += self.metrics.line_height;
         }
+
+        let handle = image::Handle::from_pixels(layout_w as u32, layout_h as u32, pixels);
+        image::Renderer::draw(renderer, handle, layout.bounds());
 
         log::trace!("draw {:?} in {:?}", layout.bounds(), instant.elapsed());
     }
@@ -225,7 +249,7 @@ where
 
 impl<'a, Message, Renderer> From<Text> for Element<'a, Message, Renderer>
 where
-    Renderer: renderer::Renderer,
+    Renderer: renderer::Renderer + image::Renderer<Handle = image::Handle>,
     Renderer::Theme: StyleSheet,
 {
     fn from(text: Text) -> Self {

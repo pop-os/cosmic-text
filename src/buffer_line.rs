@@ -148,14 +148,11 @@ impl<'a> BufferLine<'a> {
     /// Layout line, will cache results
     pub fn layout(&mut self, font_system: &'a FontSystem<'a>, font_size: i32, width: i32) -> &[LayoutLine] {
         if self.layout_opt.is_none() {
-            let mut layout = Vec::new();
             let wrap_simple = self.wrap_simple;
             let shape = self.shape(font_system);
-            shape.layout(
+            let layout = shape.layout(
                 font_size,
                 width,
-                &mut layout,
-                0,
                 wrap_simple
             );
             self.layout_opt = Some(layout);

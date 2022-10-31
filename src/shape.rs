@@ -480,10 +480,10 @@ impl ShapeLine {
         &self,
         font_size: i32,
         line_width: i32,
-        layout_lines: &mut Vec<LayoutLine>,
-        mut layout_i: usize,
         wrap_simple: bool,
-    ) {
+    ) -> Vec<LayoutLine> {
+        let mut layout_lines = Vec::with_capacity(1);
+
         let mut push_line = true;
         let mut glyphs = Vec::new();
 
@@ -593,13 +593,11 @@ impl ShapeLine {
                     if word_wrap && !wrap_simple && !glyphs.is_empty() {
                         let mut glyphs_swap = Vec::new();
                         std::mem::swap(&mut glyphs, &mut glyphs_swap);
-                        layout_lines.insert(
-                            layout_i,
+                        layout_lines.push(
                             LayoutLine {
                                 glyphs: glyphs_swap,
                             },
                         );
-                        layout_i += 1;
 
                         x = start_x;
                         y = 0.0;
@@ -619,13 +617,11 @@ impl ShapeLine {
                         if glyph_wrap {
                             let mut glyphs_swap = Vec::new();
                             std::mem::swap(&mut glyphs, &mut glyphs_swap);
-                            layout_lines.insert(
-                                layout_i,
+                            layout_lines.push(
                                 LayoutLine {
                                     glyphs: glyphs_swap,
                                 },
                             );
-                            layout_i += 1;
 
                             x = start_x;
                             y = 0.0;
@@ -648,13 +644,11 @@ impl ShapeLine {
                 if wrap {
                     let mut glyphs_swap = Vec::new();
                     std::mem::swap(&mut glyphs, &mut glyphs_swap);
-                    layout_lines.insert(
-                        layout_i,
+                    layout_lines.push(
                         LayoutLine {
                             glyphs: glyphs_swap,
                         },
                     );
-                    layout_i += 1;
 
                     x = start_x;
                     y = 0.0;
@@ -663,12 +657,13 @@ impl ShapeLine {
         }
 
         if push_line {
-            layout_lines.insert(
-                layout_i,
+            layout_lines.push(
                 LayoutLine {
                     glyphs,
                 },
             );
         }
+
+        layout_lines
     }
 }
