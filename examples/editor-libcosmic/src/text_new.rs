@@ -58,7 +58,7 @@ impl Text {
             AttrsList::new(Attrs::new())
         );
 
-        //TODO: do we have to immediately chape?
+        //TODO: do we have to immediately shape?
         line.shape(&crate::FONT_SYSTEM);
 
         let text = Self {
