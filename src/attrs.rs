@@ -205,11 +205,36 @@ impl<'a> AttrsList<'a> {
             self.spans.push(reworked);
         }
 
-        //Finally lets add the new span. it should fit now.
-        self.spans.push((range, attrs));
+        // Combine span if possible
+        let mut combined = false;
+        for span in self.spans.iter_mut() {
+            if span.1 != attrs {
+                // Ignore not matching attrs
+                continue;
+            }
+
+            if span.0.end == range.start {
+                // Extend span with range at end
+                span.0.end = range.end;
+                combined = true;
+                break;
+            }
+
+            if span.0.start == range.end {
+                // Extend span with range at start
+                span.0.start = range.start;
+                combined = true;
+                break;
+            }
+        }
+
+        if ! combined {
+            //Finally lets add the new span. it should fit now.
+            self.spans.push((range, attrs));
+        }
 
         //sort by start to speed up further additions
-        self.spans.sort_by(|a, b| a.0.start.partial_cmp(&b.0.start).unwrap())
+        self.spans.sort_by(|a, b| a.0.start.partial_cmp(&b.0.start).unwrap());
     }
 
     /// Get the highest priority attribute span for a range
