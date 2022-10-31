@@ -12,9 +12,10 @@ use cosmic::iced_native::{
     widget::{self, tree, Widget},
 };
 use cosmic_text::{
+    Action,
+    Buffer,
+    Editor,
     SwashCache,
-    TextAction,
-    TextBuffer,
 };
 use std::{
     cmp,
@@ -47,19 +48,19 @@ impl StyleSheet for Theme {
 }
 
 pub struct TextBox<'a> {
-    buffer: &'a Mutex<TextBuffer<'static>>,
+    editor: &'a Mutex<Editor<'static>>,
 }
 
 impl<'a> TextBox<'a> {
-    pub fn new(buffer: &'a Mutex<TextBuffer<'static>>) -> Self {
+    pub fn new(editor: &'a Mutex<Editor<'static>>) -> Self {
         Self {
-            buffer,
+            editor,
         }
     }
 }
 
-pub fn text_box<'a>(buffer: &'a Mutex<TextBuffer<'static>>) -> TextBox<'a> {
-    TextBox::new(buffer)
+pub fn text_box<'a>(editor: &'a Mutex<Editor<'static>>) -> TextBox<'a> {
+    TextBox::new(editor)
 }
 
 impl<'a, Message, Renderer> Widget<Message, Renderer> for TextBox<'a>
@@ -141,28 +142,22 @@ where
 
         let mut pixels_opt = state.pixels_opt.lock().unwrap();
 
-        let mut buffer = self.buffer.lock().unwrap();
+        let mut editor = self.editor.lock().unwrap();
 
         let layout_w = layout.bounds().width as i32;
         let layout_h = layout.bounds().height as i32;
-        buffer.set_size(layout_w, layout_h);
+        editor.buffer.set_size(layout_w, layout_h);
 
-        if buffer.cursor_moved {
-            buffer.shape_until_cursor();
-            buffer.cursor_moved = false;
-        } else {
-            buffer.shape_until_scroll();
-        }
-
+        editor.shape_as_needed();
         //TODO: redraw on color change
-        if buffer.redraw || pixels_opt.is_none() {
+        if editor.buffer.redraw || pixels_opt.is_none() {
             // Redraw buffer to image
 
             let instant = Instant::now();
 
             let mut pixels = vec![0; layout_w as usize * layout_h as usize * 4];
 
-            buffer.draw(&mut state.cache.lock().unwrap(), text_color, |start_x, start_y, w, h, color| {
+            editor.draw(&mut state.cache.lock().unwrap(), text_color, |start_x, start_y, w, h, color| {
                 let alpha = (color.0 >> 24) & 0xFF;
                 if alpha == 0 {
                     // Do not draw if alpha is zero
@@ -212,7 +207,7 @@ where
 
             *pixels_opt = Some((layout_w as u32, layout_h as u32, pixels));
 
-            buffer.redraw = false;
+            editor.buffer.redraw = false;
 
             let duration = instant.elapsed();
             log::debug!("redraw: {:?}", duration);
@@ -235,64 +230,64 @@ where
         _shell: &mut Shell<'_, Message>,
     ) -> Status {
         let state = tree.state.downcast_mut::<State>();
-        let mut buffer = self.buffer.lock().unwrap();
+        let mut editor = self.editor.lock().unwrap();
 
         let mut status = Status::Ignored;
         match event {
             Event::Keyboard(KeyEvent::KeyPressed { key_code, modifiers }) => match key_code {
                 KeyCode::Left => {
-                    buffer.action(TextAction::Left);
+                    editor.action(Action::Left);
                     status = Status::Captured;
                 },
                 KeyCode::Right => {
-                    buffer.action(TextAction::Right);
+                    editor.action(Action::Right);
                     status = Status::Captured;
                 },
                 KeyCode::Up => {
-                    buffer.action(TextAction::Up);
+                    editor.action(Action::Up);
                     status = Status::Captured;
                 },
                 KeyCode::Down => {
-                    buffer.action(TextAction::Down);
+                    editor.action(Action::Down);
                     status = Status::Captured;
                 },
                 KeyCode::Home => {
-                    buffer.action(TextAction::Home);
+                    editor.action(Action::Home);
                     status = Status::Captured;
                 },
                 KeyCode::End => {
-                    buffer.action(TextAction::End);
+                    editor.action(Action::End);
                     status = Status::Captured;
                 },
                 KeyCode::PageUp => {
-                    buffer.action(TextAction::PageUp);
+                    editor.action(Action::PageUp);
                     status = Status::Captured;
                 },
                 KeyCode::PageDown => {
-                    buffer.action(TextAction::PageDown);
+                    editor.action(Action::PageDown);
                     status = Status::Captured;
                 },
                 KeyCode::Enter => {
-                    buffer.action(TextAction::Enter);
+                    editor.action(Action::Enter);
                     status = Status::Captured;
                 },
                 KeyCode::Backspace => {
-                    buffer.action(TextAction::Backspace);
+                    editor.action(Action::Backspace);
                     status = Status::Captured;
                 },
                 KeyCode::Delete => {
-                    buffer.action(TextAction::Delete);
+                    editor.action(Action::Delete);
                     status = Status::Captured;
                 },
                 _ => ()
             },
             Event::Keyboard(KeyEvent::CharacterReceived(character)) => {
-                buffer.action(TextAction::Insert(character));
+                editor.action(Action::Insert(character));
                 status = Status::Captured;
             },
             Event::Mouse(MouseEvent::ButtonPressed(Button::Left)) => {
                 if layout.bounds().contains(cursor_position) {
-                    buffer.action(TextAction::Click {
+                    editor.action(Action::Click {
                         x: (cursor_position.x - layout.bounds().x) as i32,
                         y: (cursor_position.y - layout.bounds().y) as i32,
                     });
@@ -306,7 +301,7 @@ where
             },
             Event::Mouse(MouseEvent::CursorMoved { .. }) => {
                 if state.is_dragging {
-                    buffer.action(TextAction::Drag {
+                    editor.action(Action::Drag {
                         x: (cursor_position.x - layout.bounds().x) as i32,
                         y: (cursor_position.y - layout.bounds().y) as i32,
                     });
@@ -315,7 +310,7 @@ where
             },
             Event::Mouse(MouseEvent::WheelScrolled { delta }) => match delta {
                 ScrollDelta::Lines { x, y } => {
-                    buffer.action(TextAction::Scroll {
+                    editor.action(Action::Scroll {
                         lines: (-y * 6.0) as i32,
                     });
                     status = Status::Captured;

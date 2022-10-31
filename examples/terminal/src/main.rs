@@ -1,4 +1,4 @@
-use cosmic_text::{Attrs, Color, FontSystem, SwashCache, TextBuffer, TextMetrics};
+use cosmic_text::{Attrs, Color, FontSystem, SwashCache, Buffer, Metrics};
 use std::cmp;
 use termion::{
     color,
@@ -13,24 +13,24 @@ fn main() {
     let mut swash_cache = SwashCache::new(&font_system);
 
     // Text metrics indicate the font size and line height of a buffer
-    let metrics = TextMetrics::new(14, 20);
+    let metrics = Metrics::new(14, 20);
 
-    // A TextBuffer provides shaping and layout for a UTF-8 string, create one per text widget
-    let mut text_buffer = TextBuffer::new(&font_system, metrics);
+    // A Buffer provides shaping and layout for a UTF-8 string, create one per text widget
+    let mut buffer = Buffer::new(&font_system, metrics);
 
     // Set a size for the text buffer, in pixels
     let width = 80u16;
     let height = 25u16;
-    text_buffer.set_size(width as i32, height as i32);
+    buffer.set_size(width as i32, height as i32);
 
     // Attributes indicate what font to choose
     let attrs = Attrs::new();
 
     // Add some text!
-    text_buffer.set_text(" Hi, Rust! 🦀", attrs);
+    buffer.set_text(" Hi, Rust! 🦀", attrs);
 
     // Perform shaping as desired
-    text_buffer.shape_until_cursor();
+    buffer.shape_until_cursor();
 
     // Default text color (0xFF, 0xFF, 0xFF is white)
     let text_color = Color::rgb(0xFF, 0xFF, 0xFF);
@@ -40,7 +40,7 @@ fn main() {
 
     // Clear buffer with black background
     for _y in 0..height {
-        for _x in 0..text_buffer.size().0 {
+        for _x in 0..buffer.size().0 {
             print!(
                 "{} {}",
                 color::Bg(color::Rgb(0, 0, 0)),
@@ -56,7 +56,7 @@ fn main() {
     // Print the buffer
     let mut last_x = 0;
     let mut last_y = 0;
-    text_buffer.draw(&mut swash_cache, text_color, |x, y, w, h, color| {
+    buffer.draw(&mut swash_cache, text_color, |x, y, w, h, color| {
         let a = color.a();
         if a == 0 || x < 0 || y < 0 || w != 1 || h != 1 {
             // Ignore alphas of 0, or invalid x, y coordinates, or unimplemented sizes

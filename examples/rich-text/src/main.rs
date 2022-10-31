@@ -1,7 +1,20 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use cosmic_text::{Attrs, AttrsList, Color, Family, FontSystem, Style, SwashCache,
-    TextAction, TextBuffer, TextBufferLine, TextMetrics, Weight};
+use cosmic_text::{
+    Action,
+    Attrs,
+    AttrsList,
+    Buffer,
+    BufferLine,
+    Color,
+    Editor,
+    Family,
+    FontSystem,
+    Metrics,
+    Style,
+    SwashCache,
+    Weight,
+};
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{process, thread, time::{Duration, Instant}};
 
@@ -31,12 +44,12 @@ fn main() {
     )
     .unwrap();
 
-    let mut buffer = TextBuffer::new(
+    let mut editor = Editor::new(Buffer::new(
         &font_system,
-        TextMetrics::new(32, 44).scale(display_scale)
-    );
+        Metrics::new(32, 44).scale(display_scale)
+    ));
 
-    buffer.set_size(
+    editor.buffer.set_size(
         window.width() as i32,
         window.height() as i32
     );
@@ -46,7 +59,7 @@ fn main() {
     let mono_attrs = attrs.monospaced(true).family(Family::Monospace);
     let comic_attrs = attrs.family(Family::Name("Comic Neue"));
 
-    buffer.lines.clear();
+    editor.buffer.lines.clear();
 
     let lines: &[&[(&str, Attrs)]] = &[
         &[
@@ -118,7 +131,7 @@ fn main() {
             let end = line_text.len();
             attrs_list.add_span(start..end, attrs);
         }
-        buffer.lines.push(TextBufferLine::new(line_text, attrs_list));
+        editor.buffer.lines.push(BufferLine::new(line_text, attrs_list));
     }
 
     let mut swash_cache = SwashCache::new(&font_system);
@@ -131,25 +144,19 @@ fn main() {
         let bg_color = orbclient::Color::rgb(0x34, 0x34, 0x34);
         let font_color = Color::rgb(0xFF, 0xFF, 0xFF);
 
-        if buffer.cursor_moved {
-            buffer.shape_until_cursor();
-            buffer.cursor_moved = false;
-        } else {
-            buffer.shape_until_scroll();
-        }
-
-        if buffer.redraw {
+        editor.shape_as_needed();
+        if editor.buffer.redraw {
             let instant = Instant::now();
 
             window.set(bg_color);
 
-            buffer.draw(&mut swash_cache, font_color, |x, y, w, h, color| {
+            editor.draw(&mut swash_cache, font_color, |x, y, w, h, color| {
                 window.rect(x, y, w, h, orbclient::Color { data: color.0 });
             });
 
             window.sync();
 
-            buffer.redraw = false;
+            editor.buffer.redraw = false;
 
             let duration = instant.elapsed();
             log::debug!("redraw: {:?}", duration);
@@ -158,36 +165,35 @@ fn main() {
         for event in window.events() {
             match event.to_option() {
                 EventOption::Key(event) => match event.scancode {
-                    orbclient::K_LEFT if event.pressed => buffer.action(TextAction::Left),
-                    orbclient::K_RIGHT if event.pressed => buffer.action(TextAction::Right),
-                    orbclient::K_UP if event.pressed => buffer.action(TextAction::Up),
-                    orbclient::K_DOWN if event.pressed => buffer.action(TextAction::Down),
-                    orbclient::K_HOME if event.pressed => buffer.action(TextAction::Home),
-                    orbclient::K_END if event.pressed => buffer.action(TextAction::End),
-                    orbclient::K_PGUP if event.pressed => buffer.action(TextAction::PageUp),
-                    orbclient::K_PGDN if event.pressed => buffer.action(TextAction::PageDown),
-                    orbclient::K_ENTER if event.pressed => buffer.action(TextAction::Enter),
-                    orbclient::K_BKSP if event.pressed => buffer.action(TextAction::Backspace),
-                    orbclient::K_DEL if event.pressed => buffer.action(TextAction::Delete),
+                    orbclient::K_LEFT if event.pressed => editor.action(Action::Left),
+                    orbclient::K_RIGHT if event.pressed => editor.action(Action::Right),
+                    orbclient::K_UP if event.pressed => editor.action(Action::Up),
+                    orbclient::K_DOWN if event.pressed => editor.action(Action::Down),
+                    orbclient::K_HOME if event.pressed => editor.action(Action::Home),
+                    orbclient::K_END if event.pressed => editor.action(Action::End),
+                    orbclient::K_PGUP if event.pressed => editor.action(Action::PageUp),
+                    orbclient::K_PGDN if event.pressed => editor.action(Action::PageDown),
+                    orbclient::K_ENTER if event.pressed => editor.action(Action::Enter),
+                    orbclient::K_BKSP if event.pressed => editor.action(Action::Backspace),
+                    orbclient::K_DEL if event.pressed => editor.action(Action::Delete),
                     _ => (),
                 },
-                EventOption::TextInput(event) => buffer.action(TextAction::Insert(event.character)),
+                EventOption::TextInput(event) => editor.action(Action::Insert(event.character)),
                 EventOption::Mouse(mouse) => {
                     mouse_x = mouse.x;
                     mouse_y = mouse.y;
                     if mouse_left {
-                        buffer.action(TextAction::Drag { x: mouse_x, y: mouse_y });
+                        editor.action(Action::Drag { x: mouse_x, y: mouse_y });
                     }
                 },
                 EventOption::Button(button) => {
                     mouse_left = button.left;
                     if mouse_left {
-                        buffer.action(TextAction::Click { x: mouse_x, y: mouse_y });
+                        editor.action(Action::Click { x: mouse_x, y: mouse_y });
                     }
                 },
                 EventOption::Resize(resize) => {
-                    buffer.set_size(resize.width as i32, resize.height as i32);
-                    buffer.redraw = true;
+                    editor.buffer.set_size(resize.width as i32, resize.height as i32);
                 },
                 EventOption::Quit(_) => process::exit(0),
                 _ => (),

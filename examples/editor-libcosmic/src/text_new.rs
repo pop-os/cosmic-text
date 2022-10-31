@@ -10,8 +10,8 @@ use cosmic_text::{
     Attrs,
     AttrsList,
     SwashCache,
-    TextBufferLine,
-    TextMetrics,
+    BufferLine,
+    Metrics,
 };
 use std::{
     cmp,
@@ -44,8 +44,8 @@ impl StyleSheet for Theme {
 }
 
 pub struct Text {
-    line: TextBufferLine<'static>,
-    metrics: TextMetrics,
+    line: BufferLine<'static>,
+    metrics: Metrics,
 }
 
 impl Text {
@@ -53,7 +53,7 @@ impl Text {
         let instant = Instant::now();
 
         //TODO: make it possible to set attrs
-        let mut line = TextBufferLine::new(
+        let mut line = BufferLine::new(
             string,
             AttrsList::new(Attrs::new())
         );
@@ -63,7 +63,7 @@ impl Text {
 
         let text = Self {
             line,
-            metrics: TextMetrics::new(14, 20),
+            metrics: Metrics::new(14, 20),
         };
 
         log::debug!("Text::new in {:?}", instant.elapsed());

@@ -1,7 +1,7 @@
 use crate::{AttrsList, FontSystem, LayoutLine, ShapeLine};
 
 /// A line (or paragraph) of text that is shaped and laid out
-pub struct TextBufferLine<'a> {
+pub struct BufferLine<'a> {
     //TODO: make this not pub(crate)
     text: String,
     attrs_list: AttrsList<'a>,
@@ -10,7 +10,7 @@ pub struct TextBufferLine<'a> {
     layout_opt: Option<Vec<LayoutLine>>,
 }
 
-impl<'a> TextBufferLine<'a> {
+impl<'a> BufferLine<'a> {
     /// Create a new line with the given text and attributes list
     /// Cached shaping and layout can be done using the [Self::shape] and
     /// [Self::layout] functions

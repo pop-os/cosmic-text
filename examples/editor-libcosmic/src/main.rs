@@ -26,9 +26,10 @@ use cosmic::{
 use cosmic_text::{
     Attrs,
     AttrsList,
+    Buffer,
+    Editor,
     FontSystem,
-    TextBuffer,
-    TextMetrics,
+    Metrics,
 };
 use std::{
     env,
@@ -47,13 +48,13 @@ lazy_static::lazy_static! {
     static ref FONT_SYSTEM: FontSystem<'static> = FontSystem::new();
 }
 
-static FONT_SIZES: &'static [TextMetrics] = &[
-    TextMetrics::new(10, 14), // Caption
-    TextMetrics::new(14, 20), // Body
-    TextMetrics::new(20, 28), // Title 4
-    TextMetrics::new(24, 32), // Title 3
-    TextMetrics::new(28, 36), // Title 2
-    TextMetrics::new(32, 44), // Title 1
+static FONT_SIZES: &'static [Metrics] = &[
+    Metrics::new(10, 14), // Caption
+    Metrics::new(14, 20), // Body
+    Metrics::new(20, 28), // Title 4
+    Metrics::new(24, 32), // Title 3
+    Metrics::new(28, 36), // Title 2
+    Metrics::new(32, 44), // Title 1
 ];
 
 fn main() -> cosmic::iced::Result {
@@ -68,7 +69,7 @@ pub struct Window {
     theme: Theme,
     path_opt: Option<PathBuf>,
     attrs: Attrs<'static>,
-    buffer: Mutex<TextBuffer<'static>>,
+    editor: Mutex<Editor<'static>>,
 }
 
 #[allow(dead_code)]
@@ -79,22 +80,22 @@ pub enum Message {
     Bold(bool),
     Italic(bool),
     Monospaced(bool),
-    MetricsChanged(TextMetrics),
+    MetricsChanged(Metrics),
     ThemeChanged(&'static str),
 }
 
 impl Window {
     pub fn open(&mut self, path: PathBuf) {
-        let mut buffer = self.buffer.lock().unwrap();
+        let mut editor = self.editor.lock().unwrap();
         match fs::read_to_string(&path) {
             Ok(text) => {
                 log::info!("opened '{}'", path.display());
-                buffer.set_text(&text, self.attrs);
+                editor.buffer.set_text(&text, self.attrs);
                 self.path_opt = Some(path);
             },
             Err(err) => {
                 log::error!("failed to open '{}': {}", path.display(), err);
-                buffer.set_text("", self.attrs);
+                editor.buffer.set_text("", self.attrs);
                 self.path_opt = None;
             }
         }
@@ -112,17 +113,17 @@ impl Application for Window {
             .monospaced(true)
             .family(cosmic_text::Family::Monospace);
 
-        let mut buffer = TextBuffer::new(
+        let mut editor = Editor::new(Buffer::new(
             &FONT_SYSTEM,
             FONT_SIZES[1 /* Body */],
-        );
-        update_attrs(&mut buffer, attrs);
+        ));
+        update_attrs(&mut editor, attrs);
 
         let mut window = Window {
             theme: Theme::Dark,
             path_opt: None,
             attrs,
-            buffer: Mutex::new(buffer),
+            editor: Mutex::new(editor),
         };
         if let Some(arg) = env::args().nth(1) {
             window.open(PathBuf::from(arg));
@@ -151,9 +152,9 @@ impl Application for Window {
             },
             Message::Save => {
                 if let Some(path) = &self.path_opt {
-                    let buffer = self.buffer.lock().unwrap();
+                    let editor = self.editor.lock().unwrap();
                     let mut text = String::new();
-                    for line in buffer.lines.iter() {
+                    for line in editor.buffer.lines.iter() {
                         text.push_str(line.text());
                         text.push('\n');
                     }
@@ -174,8 +175,8 @@ impl Application for Window {
                     cosmic_text::Weight::NORMAL
                 });
 
-                let mut buffer = self.buffer.lock().unwrap();
-                update_attrs(&mut buffer, self.attrs);
+                let mut editor = self.editor.lock().unwrap();
+                update_attrs(&mut editor, self.attrs);
             },
             Message::Italic(italic) => {
                 self.attrs = self.attrs.style(if italic {
@@ -184,8 +185,8 @@ impl Application for Window {
                     cosmic_text::Style::Normal
                 });
 
-                let mut buffer = self.buffer.lock().unwrap();
-                update_attrs(&mut buffer, self.attrs);
+                let mut editor = self.editor.lock().unwrap();
+                update_attrs(&mut editor, self.attrs);
             },
             Message::Monospaced(monospaced) => {
                 self.attrs = self.attrs
@@ -196,12 +197,12 @@ impl Application for Window {
                     })
                     .monospaced(monospaced);
 
-                let mut buffer = self.buffer.lock().unwrap();
-                update_attrs(&mut buffer, self.attrs);
+                let mut editor = self.editor.lock().unwrap();
+                update_attrs(&mut editor, self.attrs);
             },
             Message::MetricsChanged(metrics) => {
-                let mut buffer = self.buffer.lock().unwrap();
-                buffer.set_metrics(metrics);
+                let mut editor = self.editor.lock().unwrap();
+                editor.buffer.set_metrics(metrics);
             },
             Message::ThemeChanged(theme) => {
                 self.theme = match theme {
@@ -214,8 +215,8 @@ impl Application for Window {
                 let as_u8 = |component: f32| (component * 255.0) as u8;
                 self.attrs = self.attrs.color(cosmic_text::Color::rgba(as_u8(r), as_u8(g), as_u8(b), as_u8(a)));
 
-                let mut buffer = self.buffer.lock().unwrap();
-                update_attrs(&mut buffer, self.attrs);
+                let mut editor = self.editor.lock().unwrap();
+                update_attrs(&mut editor, self.attrs);
             },
         }
 
@@ -234,10 +235,10 @@ impl Application for Window {
         );
 
         let font_size_picker = {
-            let buffer = self.buffer.lock().unwrap();
+            let editor = self.editor.lock().unwrap();
             pick_list(
                 FONT_SIZES,
-                Some(buffer.metrics()),
+                Some(editor.buffer.metrics()),
                 Message::MetricsChanged
             )
         };
@@ -261,7 +262,7 @@ impl Application for Window {
             .align_items(Alignment::Center)
             .spacing(8)
             ,
-            text_box(&self.buffer)
+            text_box(&self.editor)
         ]
         .spacing(8)
         .padding(16)
@@ -272,8 +273,8 @@ impl Application for Window {
     }
 }
 
-fn update_attrs<'a>(buffer: &mut TextBuffer<'a>, attrs: Attrs<'a>) {
-    buffer.lines.iter_mut().for_each(|line| {
+fn update_attrs<'a>(editor: &mut Editor<'a>, attrs: Attrs<'a>) {
+    editor.buffer.lines.iter_mut().for_each(|line| {
         line.set_attrs_list(AttrsList::new(attrs));
     });
 }

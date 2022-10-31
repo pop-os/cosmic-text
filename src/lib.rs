@@ -8,11 +8,11 @@
 //! swash. The other features are developed internal to this library.
 //!
 //! It is recommended that you start by creating a [FontSystem], after which you can create a
-//! [TextBuffer], provide it with some text, and then inspect the layout it produces. At this
+//! [Buffer], provide it with some text, and then inspect the layout it produces. At this
 //! point, you can use the `SwashCache` to rasterize glyphs into either images or pixels.
 //!
 //! ```
-//! use cosmic_text::{Attrs, Color, FontSystem, SwashCache, TextBuffer, TextMetrics};
+//! use cosmic_text::{Attrs, Color, FontSystem, SwashCache, Buffer, Metrics};
 //!
 //! // A FontSystem provides access to detected system fonts, create one per application
 //! let font_system = FontSystem::new();
@@ -21,25 +21,25 @@
 //! let mut swash_cache = SwashCache::new(&font_system);
 //!
 //! // Text metrics indicate the font size and line height of a buffer
-//! let metrics = TextMetrics::new(14, 20);
+//! let metrics = Metrics::new(14, 20);
 //!
-//! // A TextBuffer provides shaping and layout for a UTF-8 string, create one per text widget
-//! let mut text_buffer = TextBuffer::new(&font_system, metrics);
+//! // A Buffer provides shaping and layout for a UTF-8 string, create one per text widget
+//! let mut buffer = Buffer::new(&font_system, metrics);
 //!
 //! // Set a size for the text buffer, in pixels
-//! text_buffer.set_size(80, 25);
+//! buffer.set_size(80, 25);
 //!
 //! // Attributes indicate what font to choose
 //! let attrs = Attrs::new();
 //!
 //! // Add some text!
-//! text_buffer.set_text("Hello, Rust! 🦀\n", attrs);
+//! buffer.set_text("Hello, Rust! 🦀\n", attrs);
 //!
 //! // Perform shaping as desired
-//! text_buffer.shape_until_scroll();
+//! buffer.shape_until_scroll();
 //!
 //! // Inspect the output runs
-//! for run in text_buffer.layout_runs() {
+//! for run in buffer.layout_runs() {
 //!     for glyph in run.glyphs.iter() {
 //!         println!("{:#?}", glyph);
 //!     }
@@ -49,7 +49,7 @@
 //! let text_color = Color::rgb(0xFF, 0xFF, 0xFF);
 //!
 //! // Draw the buffer (for perfomance, instead use SwashCache directly)
-//! text_buffer.draw(&mut swash_cache, text_color, |x, y, w, h, color| {
+//! buffer.draw(&mut swash_cache, text_color, |x, y, w, h, color| {
 //!     // Fill in your code here for drawing rectangles
 //! });
 //! ```
@@ -65,6 +65,9 @@ mod buffer_line;
 
 pub use self::cache::*;
 mod cache;
+
+pub use self::editor::*;
+mod editor;
 
 pub use self::font::*;
 mod font;

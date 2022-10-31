@@ -3,14 +3,15 @@
 use cosmic_text::{
     Attrs,
     AttrsList,
+    Buffer,
     Color,
+    Editor,
     Family,
     FontSystem,
+    Metrics,
     Style,
     SwashCache,
-    TextAction,
-    TextBuffer,
-    TextMetrics,
+    Action,
     Weight
 };
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
@@ -67,23 +68,23 @@ fn main() {
     let font_system = FontSystem::new();
 
     let font_sizes = [
-        TextMetrics::new(10, 14).scale(display_scale), // Caption
-        TextMetrics::new(14, 20).scale(display_scale), // Body
-        TextMetrics::new(20, 28).scale(display_scale), // Title 4
-        TextMetrics::new(24, 32).scale(display_scale), // Title 3
-        TextMetrics::new(28, 36).scale(display_scale), // Title 2
-        TextMetrics::new(32, 44).scale(display_scale), // Title 1
+        Metrics::new(10, 14).scale(display_scale), // Caption
+        Metrics::new(14, 20).scale(display_scale), // Body
+        Metrics::new(20, 28).scale(display_scale), // Title 4
+        Metrics::new(24, 32).scale(display_scale), // Title 3
+        Metrics::new(28, 36).scale(display_scale), // Title 2
+        Metrics::new(32, 44).scale(display_scale), // Title 1
     ];
     let font_size_default = 1; // Body
     let mut font_size_i = font_size_default;
 
     let line_x = 8 * display_scale;
-    let mut buffer = TextBuffer::new(
+    let mut editor = Editor::new(Buffer::new(
         &font_system,
         font_sizes[font_size_i]
-    );
+    ));
 
-    buffer.set_size(
+    editor.buffer.set_size(
         window.width() as i32 - line_x * 2,
         window.height() as i32
     );
@@ -91,7 +92,7 @@ fn main() {
     let attrs = Attrs::new()
         .monospaced(true)
         .family(Family::Monospace);
-    buffer.set_text(&text, attrs);
+    editor.buffer.set_text(&text, attrs);
 
     let mut bg_color = orbclient::Color::rgb(0x00, 0x00, 0x00);
     let mut font_color = Color::rgb(0xFF, 0xFF, 0xFF);
@@ -149,8 +150,8 @@ fn main() {
         if rehighlight {
             let now = Instant::now();
 
-            for line_i in 0..buffer.lines.len() {
-                let line = &mut buffer.lines[line_i];
+            for line_i in 0..editor.buffer.lines.len() {
+                let line = &mut editor.buffer.lines[line_i];
                 if ! line.is_reset() && line_i < syntax_cache.len() {
                     continue;
                 }
@@ -209,8 +210,8 @@ fn main() {
                 if line_i < syntax_cache.len() {
                     if syntax_cache[line_i] != cache_item {
                         syntax_cache[line_i] = cache_item;
-                        if line_i + 1 < buffer.lines.len() {
-                            buffer.lines[line_i + 1].reset();
+                        if line_i + 1 < editor.buffer.lines.len() {
+                            editor.buffer.lines[line_i + 1].reset();
                         }
                     }
                 } else {
@@ -218,25 +219,19 @@ fn main() {
                 }
             }
 
-            buffer.redraw = true;
+            editor.buffer.redraw = true;
             rehighlight = false;
 
             log::info!("Syntax highlighted in {:?}", now.elapsed());
         }
 
-        if buffer.cursor_moved {
-            buffer.shape_until_cursor();
-            buffer.cursor_moved = false;
-        } else {
-            buffer.shape_until_scroll();
-        }
-
-        if buffer.redraw {
+        editor.shape_as_needed();
+        if editor.buffer.redraw {
             let instant = Instant::now();
 
             window.set(bg_color);
 
-            buffer.draw(&mut swash_cache, font_color, |x, y, w, h, color| {
+            editor.draw(&mut swash_cache, font_color, |x, y, w, h, color| {
                 window.rect(line_x + x, y, w, h, orbclient::Color { data: color.0 })
             });
 
@@ -244,7 +239,7 @@ fn main() {
             {
                 let mut start_line_opt = None;
                 let mut end_line = 0;
-                for run in buffer.layout_runs() {
+                for run in editor.buffer.layout_runs() {
                     end_line = run.line_i;
                     if start_line_opt == None {
                         start_line_opt = Some(end_line);
@@ -252,7 +247,7 @@ fn main() {
                 }
 
                 let start_line = start_line_opt.unwrap_or(end_line);
-                let lines = buffer.lines.len();
+                let lines = editor.buffer.lines.len();
                 let start_y = (start_line * window.height() as usize) / lines;
                 let end_y = (end_line * window.height() as usize) / lines;
                 if end_y > start_y {
@@ -268,7 +263,7 @@ fn main() {
 
             window.sync();
 
-            buffer.redraw = false;
+            editor.buffer.redraw = false;
 
             let duration = instant.elapsed();
             log::debug!("redraw: {:?}", duration);
@@ -282,62 +277,62 @@ fn main() {
             match event.to_option() {
                 EventOption::Key(event) => match event.scancode {
                     orbclient::K_CTRL => ctrl_pressed = event.pressed,
-                    orbclient::K_LEFT if event.pressed => buffer.action(TextAction::Left),
-                    orbclient::K_RIGHT if event.pressed => buffer.action(TextAction::Right),
-                    orbclient::K_UP if event.pressed => buffer.action(TextAction::Up),
-                    orbclient::K_DOWN if event.pressed => buffer.action(TextAction::Down),
-                    orbclient::K_HOME if event.pressed => buffer.action(TextAction::Home),
-                    orbclient::K_END if event.pressed => buffer.action(TextAction::End),
-                    orbclient::K_PGUP if event.pressed => buffer.action(TextAction::PageUp),
-                    orbclient::K_PGDN if event.pressed => buffer.action(TextAction::PageDown),
+                    orbclient::K_LEFT if event.pressed => editor.action(Action::Left),
+                    orbclient::K_RIGHT if event.pressed => editor.action(Action::Right),
+                    orbclient::K_UP if event.pressed => editor.action(Action::Up),
+                    orbclient::K_DOWN if event.pressed => editor.action(Action::Down),
+                    orbclient::K_HOME if event.pressed => editor.action(Action::Home),
+                    orbclient::K_END if event.pressed => editor.action(Action::End),
+                    orbclient::K_PGUP if event.pressed => editor.action(Action::PageUp),
+                    orbclient::K_PGDN if event.pressed => editor.action(Action::PageDown),
                     orbclient::K_ENTER if event.pressed => {
-                        buffer.action(TextAction::Enter);
+                        editor.action(Action::Enter);
                         rehighlight = true;
                     },
                     orbclient::K_BKSP if event.pressed => {
-                        buffer.action(TextAction::Backspace);
+                        editor.action(Action::Backspace);
                         rehighlight = true;
                     },
                     orbclient::K_DEL if event.pressed => {
-                        buffer.action(TextAction::Delete);
+                        editor.action(Action::Delete);
                         rehighlight = true;
                     },
                     orbclient::K_0 if event.pressed && ctrl_pressed => {
                         font_size_i = font_size_default;
-                        buffer.set_metrics(font_sizes[font_size_i]);
+                        editor.buffer.set_metrics(font_sizes[font_size_i]);
                     }
                     orbclient::K_MINUS if event.pressed && ctrl_pressed => {
                         if font_size_i > 0 {
                             font_size_i -= 1;
-                            buffer.set_metrics(font_sizes[font_size_i]);
+                            editor.buffer.set_metrics(font_sizes[font_size_i]);
                         }
                     }
                     orbclient::K_EQUALS if event.pressed && ctrl_pressed => {
                         if font_size_i + 1 < font_sizes.len() {
                             font_size_i += 1;
-                            buffer.set_metrics(font_sizes[font_size_i]);
+                            editor.buffer.set_metrics(font_sizes[font_size_i]);
                         }
                     }
                     _ => (),
                 },
                 EventOption::TextInput(event) if !ctrl_pressed => {
-                    buffer.action(TextAction::Insert(event.character));
+                    editor.action(Action::Insert(event.character));
                     rehighlight = true;
                 }
                 EventOption::Mouse(event) => {
                     mouse_x = event.x;
                     mouse_y = event.y;
                     if mouse_left {
-                        buffer.action(TextAction::Drag {
+                        editor.action(Action::Drag {
                             x: mouse_x - line_x,
                             y: mouse_y,
                         });
 
                         if mouse_y <= 5 {
-                            buffer.action(TextAction::Scroll { lines: -3 });
+                            editor.action(Action::Scroll { lines: -3 });
                             window_async = true;
                         } else if mouse_y + 5 >= window.height() as i32 {
-                            buffer.action(TextAction::Scroll { lines: 3 });
+                            editor.action(Action::Scroll { lines: 3 });
                             window_async = true;
                         }
 
@@ -348,7 +343,7 @@ fn main() {
                     if event.left != mouse_left {
                         mouse_left = event.left;
                         if mouse_left {
-                            buffer.action(TextAction::Click {
+                            editor.action(Action::Click {
                                 x: mouse_x - line_x,
                                 y: mouse_y,
                             });
@@ -357,11 +352,10 @@ fn main() {
                     }
                 }
                 EventOption::Resize(event) => {
-                    buffer.set_size(event.width as i32 - line_x * 2, event.height as i32);
-                    buffer.redraw = true;
+                    editor.buffer.set_size(event.width as i32 - line_x * 2, event.height as i32);
                 }
                 EventOption::Scroll(event) => {
-                    buffer.action(TextAction::Scroll {
+                    editor.action(Action::Scroll {
                         lines: -event.y * 3,
                     });
                 }
@@ -371,16 +365,16 @@ fn main() {
         }
 
         if mouse_left && force_drag {
-            buffer.action(TextAction::Drag {
+            editor.action(Action::Drag {
                 x: mouse_x - line_x,
                 y: mouse_y,
             });
 
             if mouse_y <= 5 {
-                buffer.action(TextAction::Scroll { lines: -3 });
+                editor.action(Action::Scroll { lines: -3 });
                 window_async = true;
             } else if mouse_y + 5 >= window.height() as i32 {
-                buffer.action(TextAction::Scroll { lines: 3 });
+                editor.action(Action::Scroll { lines: 3 });
                 window_async = true;
             }
         }
