@@ -151,6 +151,7 @@ pub struct Buffer<'a> {
 }
 
 impl<'a> Buffer<'a> {
+    /// Create a new [Buffer] with the provided [FontSystem] and [Metrics]
     pub fn new(
         font_system: &'a FontSystem<'a>,
         metrics: Metrics,
@@ -322,11 +323,13 @@ impl<'a> Buffer<'a> {
         )
     }
 
+    /// Shape the provided line index and return the result
     pub fn line_shape(&mut self, line_i: usize) -> Option<&ShapeLine> {
         let line = self.lines.get_mut(line_i)?;
         Some(line.shape(&self.font_system))
     }
 
+    /// Lay out the provided line index and return the result
     pub fn line_layout(&mut self, line_i: usize) -> Option<&[LayoutLine]> {
         let line = self.lines.get_mut(line_i)?;
         Some(line.layout(&self.font_system, self.metrics.font_size, self.width))
@@ -370,6 +373,7 @@ impl<'a> Buffer<'a> {
         self.scroll
     }
 
+    /// Set the current scroll location
     pub fn set_scroll(&mut self, scroll: i32) {
         if scroll != self.scroll {
             self.scroll = scroll;

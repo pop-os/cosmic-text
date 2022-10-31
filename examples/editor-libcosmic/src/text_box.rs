@@ -13,7 +13,6 @@ use cosmic::iced_native::{
 };
 use cosmic_text::{
     Action,
-    Buffer,
     Editor,
     SwashCache,
 };

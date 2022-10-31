@@ -54,6 +54,7 @@ pub struct Editor<'a> {
 }
 
 impl<'a> Editor<'a> {
+    /// Create a new [Editor] with the provided [Buffer]
     pub fn new(buffer: Buffer<'a>) -> Self {
         Self {
             buffer,
@@ -64,6 +65,7 @@ impl<'a> Editor<'a> {
         }
     }
 
+    /// Shape lines until scroll, after adjusting scroll if the cursor moved
     pub fn shape_as_needed(&mut self) {
         if self.cursor_moved {
             self.buffer.shape_until_cursor(self.cursor);
