@@ -105,6 +105,8 @@ where
     ) -> layout::Node {
         let instant = Instant::now();
 
+        let limits = limits.width(Length::Shrink).height(Length::Shrink);
+
         let shape = self.line.shape_opt().as_ref().unwrap();
 
         //TODO: can we cache this?
@@ -128,7 +130,7 @@ where
 
         log::debug!("layout {:?} in {:?}", size, instant.elapsed());
 
-        layout::Node::new(size)
+        layout::Node::new(limits.resolve(size))
     }
 
     fn draw(
