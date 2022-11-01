@@ -21,6 +21,7 @@ use std::{
     sync::Mutex,
     time::Instant,
 };
+use super::text;
 
 pub struct Appearance {
     background_color: Option<Color>,
@@ -194,49 +195,9 @@ where
                         (color.a() as f32) / 255.0
                     )
                 );
-                return;
-            }
-
-            if y < 0 || y >= view_h {
-                // Do not draw if y out of bounds
-                return;
-            }
-
-            if x < 0 || x >= view_w {
-                // Do not draw if x out of bounds
-                return;
-            }
-
-            let alpha = (color.0 >> 24) & 0xFF;
-            if alpha == 0 {
-                // Do not draw if alpha is zero
-                return;
-            }
-
-            let offset = (y as usize * view_w as usize + x as usize) * 4;
-
-            let mut current =
-                pixels[offset] as u32 |
-                (pixels[offset + 1] as u32) << 8 |
-                (pixels[offset + 2] as u32) << 16 |
-                (pixels[offset + 3] as u32) << 24;
-
-            if alpha >= 255 || current == 0 {
-                // Alpha is 100% or current is null, replace with no blending
-                current = color.0;
             } else {
-                // Alpha blend with current value
-                let n_alpha = 255 - alpha;
-                let rb = ((n_alpha * (current & 0x00FF00FF)) + (alpha * (color.0 & 0x00FF00FF))) >> 8;
-                let ag = (n_alpha * ((current & 0xFF00FF00) >> 8))
-                    + (alpha * (0x01000000 | ((color.0 & 0x0000FF00) >> 8)));
-                current = (rb & 0x00FF00FF) | (ag & 0xFF00FF00);
+                text::draw_pixel(&mut pixels, view_w, view_h, x, y, color);
             }
-
-            pixels[offset] = current as u8;
-            pixels[offset + 1] = (current >> 8) as u8;
-            pixels[offset + 2] = (current >> 16) as u8;
-            pixels[offset + 3] = (current >> 24) as u8;
         });
 
         let handle = image::Handle::from_pixels(view_w as u32, view_h as u32, pixels);
