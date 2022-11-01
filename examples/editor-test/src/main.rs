@@ -2,7 +2,7 @@
 
 use cosmic_text::{Action, Buffer, Color, Editor, FontSystem, Metrics, SwashCache};
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
-use std::{env, fs, process, thread, time::{Duration, Instant}};
+use std::{env, fs, process, time::Instant};
 use unicode_segmentation::UnicodeSegmentation;
 
 fn redraw(window: &mut Window, editor: &mut Editor<'_>, swash_cache: &mut SwashCache) {
@@ -154,19 +154,9 @@ fn main() {
     }
     if wrong == 0 {
         log::info!("All lines matched!");
+        process::exit(0);
     } else {
         log::error!("{} lines did not match!", wrong);
-    }
-
-    //TODO: make window not async?
-    loop {
-        for event in window.events() {
-            match event.to_option() {
-                EventOption::Quit(_) => process::exit(0),
-                _ => (),
-            }
-        }
-
-        thread::sleep(Duration::from_millis(1));
+        process::exit(1);
     }
 }

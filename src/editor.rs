@@ -252,11 +252,6 @@ impl<'a> Editor<'a> {
                 } else {
                     let line = &mut self.buffer.lines[self.cursor.line];
 
-                    println!("Before");
-                    for span in line.attrs_list().spans() {
-                        println!("{:?}", span);
-                    }
-
                     // Collect text after insertion as a line
                     let after = line.split_off(self.cursor.index);
 
@@ -268,11 +263,6 @@ impl<'a> Editor<'a> {
 
                     // Append the text after insertion
                     line.append(after);
-
-                    println!("After");
-                    for span in line.attrs_list().spans() {
-                        println!("{:?}", span);
-                    }
 
                     self.cursor.index += character.len_utf8();
                 }
@@ -289,11 +279,6 @@ impl<'a> Editor<'a> {
                 if self.cursor.index > 0 {
                     let line = &mut self.buffer.lines[self.cursor.line];
 
-                    println!("Before");
-                    for span in line.attrs_list().spans() {
-                        println!("{:?}", span);
-                    }
-
                     // Get text line after cursor
                     let after = line.split_off(self.cursor.index);
 
@@ -307,8 +292,6 @@ impl<'a> Editor<'a> {
                         }
                     }
 
-                    println!("Move cursor {} to {}", self.cursor.index, prev_index);
-
                     self.cursor.index = prev_index;
 
                     // Remove character
@@ -316,11 +299,6 @@ impl<'a> Editor<'a> {
 
                     // Add text after cursor
                     line.append(after);
-
-                    println!("After");
-                    for span in line.attrs_list().spans() {
-                        println!("{:?}", span);
-                    }
                 } else if self.cursor.line > 0 {
                     let mut line_index = self.cursor.line;
                     let old_line = self.buffer.lines.remove(line_index);
