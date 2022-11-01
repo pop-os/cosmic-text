@@ -193,48 +193,9 @@ where
                 };
 
                 cache.with_pixels(cache_key, glyph_color, |pixel_x, pixel_y, color| {
-                    let alpha = (color.0 >> 24) & 0xFF;
-                    if alpha == 0 {
-                        // Do not draw if alpha is zero
-                        return;
-                    }
-
-                    let y = line_y + y_int + pixel_y;
-                    if y < 0 || y >= layout_h {
-                        // Skip if y out of bounds
-                        return;
-                    }
-
                     let x = x_int + pixel_x;
-                    if x < 0 || x >= layout_w {
-                        // Skip if x out of bounds
-                        return;
-                    }
-
-                    let offset = (y as usize * layout_w as usize + x as usize) * 4;
-
-                    let mut current =
-                        pixels[offset] as u32 |
-                        (pixels[offset + 1] as u32) << 8 |
-                        (pixels[offset + 2] as u32) << 16 |
-                        (pixels[offset + 3] as u32) << 24;
-
-                    if alpha >= 255 || current == 0 {
-                        // Alpha is 100% or current is null, replace with no blending
-                        current = color.0;
-                    } else {
-                        // Alpha blend with current value
-                        let n_alpha = 255 - alpha;
-                        let rb = ((n_alpha * (current & 0x00FF00FF)) + (alpha * (color.0 & 0x00FF00FF))) >> 8;
-                        let ag = (n_alpha * ((current & 0xFF00FF00) >> 8))
-                            + (alpha * (0x01000000 | ((color.0 & 0x0000FF00) >> 8)));
-                        current = (rb & 0x00FF00FF) | (ag & 0xFF00FF00);
-                    }
-
-                    pixels[offset] = current as u8;
-                    pixels[offset + 1] = (current >> 8) as u8;
-                    pixels[offset + 2] = (current >> 16) as u8;
-                    pixels[offset + 3] = (current >> 24) as u8;
+                    let y = line_y + y_int + pixel_y;
+                    draw_pixel(&mut pixels, layout_w, layout_h, x, y, color);
                 });
             }
             line_y += self.metrics.line_height;
@@ -245,6 +206,56 @@ where
 
         log::trace!("draw {:?} in {:?}", layout.bounds(), instant.elapsed());
     }
+}
+
+pub fn draw_pixel(
+    buffer: &mut [u8],
+    width: i32,
+    height: i32,
+    x: i32,
+    y: i32,
+    color: cosmic_text::Color
+) {
+    let alpha = (color.0 >> 24) & 0xFF;
+    if alpha == 0 {
+        // Do not draw if alpha is zero
+        return;
+    }
+    
+    if y < 0 || y >= height {
+        // Skip if y out of bounds
+        return;
+    }
+    
+    if x < 0 || x >= width {
+        // Skip if x out of bounds
+        return;
+    }
+    
+    let offset = (y as usize * width as usize + x as usize) * 4;
+    
+    let mut current =
+        buffer[offset] as u32 |
+        (buffer[offset + 1] as u32) << 8 |
+        (buffer[offset + 2] as u32) << 16 |
+        (buffer[offset + 3] as u32) << 24;
+    
+    if alpha >= 255 || current == 0 {
+        // Alpha is 100% or current is null, replace with no blending
+        current = color.0;
+    } else {
+        // Alpha blend with current value
+        let n_alpha = 255 - alpha;
+        let rb = ((n_alpha * (current & 0x00FF00FF)) + (alpha * (color.0 & 0x00FF00FF))) >> 8;
+        let ag = (n_alpha * ((current & 0xFF00FF00) >> 8))
+            + (alpha * (0x01000000 | ((color.0 & 0x0000FF00) >> 8)));
+        current = (rb & 0x00FF00FF) | (ag & 0xFF00FF00);
+    }
+    
+    buffer[offset] = current as u8;
+    buffer[offset + 1] = (current >> 8) as u8;
+    buffer[offset + 2] = (current >> 16) as u8;
+    buffer[offset + 3] = (current >> 24) as u8;
 }
 
 impl<'a, Message, Renderer> From<Text> for Element<'a, Message, Renderer>
