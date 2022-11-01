@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic::iced_native::{
-    {Color, Element, Length, Point, Rectangle, Shell, Theme},
+    {Color, Element, Length, Point, Rectangle, Shell, Size, Theme},
     clipboard::Clipboard,
     event::{Event, Status},
     image,
@@ -88,7 +88,22 @@ where
         _renderer: &Renderer,
         limits: &layout::Limits,
     ) -> layout::Node {
-        layout::Node::new(limits.max())
+        //TODO: allow lazy shape
+        let mut editor = self.editor.lock().unwrap();
+        editor.buffer.shape_until(i32::max_value());
+
+        let mut layout_lines = 0;
+        for line in editor.buffer.lines.iter() {
+            match line.layout_opt() {
+                Some(layout) => layout_lines += layout.len(),
+                None => (),
+            }
+        }
+
+        let height = layout_lines as f32 * editor.buffer.metrics().line_height as f32;
+        let size = Size::new(limits.max().width, height);
+        log::info!("size {:?}", size);
+        layout::Node::new(size)
     }
 
     fn mouse_interaction(
@@ -114,7 +129,7 @@ where
         _style: &renderer::Style,
         layout: Layout<'_>,
         _cursor_position: Point,
-        _viewport: &Rectangle,
+        viewport: &Rectangle,
     ) {
         let state = tree.state.downcast_ref::<State>();
 
@@ -139,83 +154,96 @@ where
             cmp::max(0, cmp::min(255, (appearance.text_color.a * 255.0) as i32)) as u8,
         );
 
-        let mut pixels_opt = state.pixels_opt.lock().unwrap();
-
         let mut editor = self.editor.lock().unwrap();
 
-        let layout_w = layout.bounds().width as i32;
-        let layout_h = layout.bounds().height as i32;
-        editor.buffer.set_size(layout_w, layout_h);
+        let view_w = cmp::min(viewport.width as i32, layout.bounds().width as i32);
+        let view_h = cmp::min(viewport.height as i32, layout.bounds().height as i32);
+        editor.buffer.set_size(view_w, view_h);
 
         editor.shape_as_needed();
-        //TODO: redraw on color change
-        if editor.buffer.redraw || pixels_opt.is_none() {
-            // Redraw buffer to image
 
-            let instant = Instant::now();
+        let instant = Instant::now();
 
-            let mut pixels = vec![0; layout_w as usize * layout_h as usize * 4];
+        let mut pixels = vec![0; view_w as usize * view_h as usize * 4];
 
-            editor.draw(&mut state.cache.lock().unwrap(), text_color, |start_x, start_y, w, h, color| {
-                let alpha = (color.0 >> 24) & 0xFF;
-                if alpha == 0 {
-                    // Do not draw if alpha is zero
-                    return;
-                }
+        editor.draw(&mut state.cache.lock().unwrap(), text_color, |x, y, w, h, color| {
+            if w <= 0 || h <= 0 {
+                // Do not draw invalid sized rectangles
+                return;
+            }
 
-                for y in start_y..start_y + h as i32{
-                    if y < 0 || y >= layout_h {
-                        // Skip if y out of bounds
-                        continue;
-                    }
+            if w > 1 || h > 1 {
+                // Draw rectangles with optimized quad renderer
+                renderer.fill_quad(
+                    renderer::Quad {
+                        bounds: Rectangle::new(
+                            Point::new(layout.position().x + x as f32, layout.position().y + y as f32),
+                            Size::new(w as f32, h as f32)
+                        ),
+                        border_radius: 0.0,
+                        border_width: 0.0,
+                        border_color: Color::TRANSPARENT,
+                    },
+                    Color::from_rgba8(
+                        color.r(),
+                        color.g(),
+                        color.b(),
+                        (color.a() as f32) / 255.0
+                    )
+                );
+                return;
+            }
 
-                    let offset_y = y as usize * layout_w as usize * 4;
-                    for x in start_x..start_x + w as i32 {
-                        if x < 0 || x >= layout_w {
-                            // Skip if x out of bounds
-                            continue;
-                        }
+            if y < 0 || y >= view_h {
+                // Do not draw if y out of bounds
+                return;
+            }
 
-                        let offset = offset_y + x as usize * 4;
+            if x < 0 || x >= view_w {
+                // Do not draw if x out of bounds
+                return;
+            }
 
-                        let mut current =
-                            pixels[offset] as u32 |
-                            (pixels[offset + 1] as u32) << 8 |
-                            (pixels[offset + 2] as u32) << 16 |
-                            (pixels[offset + 3] as u32) << 24;
+            let alpha = (color.0 >> 24) & 0xFF;
+            if alpha == 0 {
+                // Do not draw if alpha is zero
+                return;
+            }
 
-                        if alpha >= 255 || current == 0 {
-                            // Alpha is 100% or current is null, replace with no blending
-                            current = color.0;
-                        } else {
-                            // Alpha blend with current value
-                            let n_alpha = 255 - alpha;
-                            let rb = ((n_alpha * (current & 0x00FF00FF)) + (alpha * (color.0 & 0x00FF00FF))) >> 8;
-                            let ag = (n_alpha * ((current & 0xFF00FF00) >> 8))
-                                + (alpha * (0x01000000 | ((color.0 & 0x0000FF00) >> 8)));
-                            current = (rb & 0x00FF00FF) | (ag & 0xFF00FF00);
-                        }
+            let offset = (y as usize * view_w as usize + x as usize) * 4;
 
-                        pixels[offset] = current as u8;
-                        pixels[offset + 1] = (current >> 8) as u8;
-                        pixels[offset + 2] = (current >> 16) as u8;
-                        pixels[offset + 3] = (current >> 24) as u8;
-                    }
-                }
-            });
+            let mut current =
+                pixels[offset] as u32 |
+                (pixels[offset + 1] as u32) << 8 |
+                (pixels[offset + 2] as u32) << 16 |
+                (pixels[offset + 3] as u32) << 24;
 
-            *pixels_opt = Some((layout_w as u32, layout_h as u32, pixels));
+            if alpha >= 255 || current == 0 {
+                // Alpha is 100% or current is null, replace with no blending
+                current = color.0;
+            } else {
+                // Alpha blend with current value
+                let n_alpha = 255 - alpha;
+                let rb = ((n_alpha * (current & 0x00FF00FF)) + (alpha * (color.0 & 0x00FF00FF))) >> 8;
+                let ag = (n_alpha * ((current & 0xFF00FF00) >> 8))
+                    + (alpha * (0x01000000 | ((color.0 & 0x0000FF00) >> 8)));
+                current = (rb & 0x00FF00FF) | (ag & 0xFF00FF00);
+            }
 
-            editor.buffer.redraw = false;
+            pixels[offset] = current as u8;
+            pixels[offset + 1] = (current >> 8) as u8;
+            pixels[offset + 2] = (current >> 16) as u8;
+            pixels[offset + 3] = (current >> 24) as u8;
+        });
 
-            let duration = instant.elapsed();
-            log::debug!("redraw: {:?}", duration);
-        }
+        let handle = image::Handle::from_pixels(view_w as u32, view_h as u32, pixels);
+        image::Renderer::draw(renderer, handle, Rectangle::new(
+            layout.position(),
+            Size::new(view_w as f32, view_h as f32)
+        ));
 
-        if let Some((w, h, pixels)) = &*pixels_opt {
-            let handle = image::Handle::from_pixels(*w, *h, pixels.clone());
-            image::Renderer::draw(renderer, handle, layout.bounds());
-        }
+        let duration = instant.elapsed();
+        log::debug!("redraw {}, {}: {:?}", view_w, view_h, duration);
     }
 
     fn on_event(
@@ -336,7 +364,6 @@ where
 pub struct State {
     is_dragging: bool,
     cache: Mutex<SwashCache<'static>>,
-    pixels_opt: Mutex<Option<(u32, u32, Vec<u8>)>>,
 }
 
 impl State {
@@ -345,7 +372,6 @@ impl State {
         State {
             is_dragging: false,
             cache: Mutex::new(SwashCache::new(&crate::FONT_SYSTEM)),
-            pixels_opt: Mutex::new(None),
         }
     }
 }
