@@ -88,6 +88,8 @@ where
         _renderer: &Renderer,
         limits: &layout::Limits,
     ) -> layout::Node {
+        let limits = limits.width(Length::Fill).height(Length::Fill);
+
         //TODO: allow lazy shape
         let mut editor = self.editor.lock().unwrap();
         editor.buffer.shape_until(i32::max_value());
@@ -103,7 +105,8 @@ where
         let height = layout_lines as f32 * editor.buffer.metrics().line_height as f32;
         let size = Size::new(limits.max().width, height);
         log::info!("size {:?}", size);
-        layout::Node::new(size)
+
+        layout::Node::new(limits.resolve(size))
     }
 
     fn mouse_interaction(
