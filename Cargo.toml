@@ -5,6 +5,8 @@ version = "0.3.0"
 authors = ["Jeremy Soller <jeremy@system76.com>"]
 edition = "2021"
 license = "MIT OR Apache-2.0"
+documentation = "https://docs.rs/cosmic-text/latest/cosmic_text/"
+repository = "https://github.com/pop-os/cosmic-text"
 
 [dependencies]
 fontdb = "0.9.3"
