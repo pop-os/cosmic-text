@@ -7,15 +7,22 @@ use std::{
 
 use crate::{Attrs, AttrsOwned, Font, FontMatches};
 
-/// Access system fonts
-pub struct FontSystem<'a> {
-    pub locale: String,
-    pub db: fontdb::Database,
-    pub font_cache: Mutex<HashMap<fontdb::ID, Option<Arc<Font<'a>>>>>,
-    pub font_matches_cache: Mutex<HashMap<AttrsOwned, Arc<FontMatches<'a>>>>,
+#[ouroboros::self_referencing]
+struct FontSystemInner {
+    locale: String,
+    db: fontdb::Database,
+    #[borrows(db)]
+    #[not_covariant]
+    font_cache: Mutex<HashMap<fontdb::ID, Option<Arc<Font<'this>>>>>,
+    #[borrows(locale, db)]
+    #[not_covariant]
+    font_matches_cache: Mutex<HashMap<AttrsOwned, Arc<FontMatches<'this>>>>,
 }
 
-impl<'a> FontSystem<'a> {
+/// Access system fonts
+pub struct FontSystem(FontSystemInner);
+
+impl FontSystem {
     pub fn new() -> Self {
         let locale = sys_locale::get_locale().unwrap_or_else(|| {
             log::warn!("failed to get system locale, falling back to en-US");
@@ -57,56 +64,71 @@ impl<'a> FontSystem<'a> {
             );
         }
 
-        Self {
+        Self(FontSystemInnerBuilder {
             locale,
             db,
-            font_cache: Mutex::new(HashMap::new()),
-            font_matches_cache: Mutex::new(HashMap::new()),
+            font_cache_builder: |_| Mutex::new(HashMap::new()),
+            font_matches_cache_builder: |_, _| Mutex::new(HashMap::new())
+        }.build())
+    }
+
+    pub fn locale(&self) -> &str {
+        self.0.borrow_locale()
+    }
+
+    pub fn db(&self) -> &fontdb::Database {
+        self.0.borrow_db()
+    }
+
+    pub fn get_font<'a>(&'a self, id: fontdb::ID) -> Option<Arc<Font<'a>>> {
+        self.0.with(|fields| {
+            get_font(&fields, id)
+        })
+    }
+
+    pub fn get_font_matches<'a>(&'a self, attrs: Attrs) -> Arc<FontMatches<'a>> {
+        self.0.with(|fields| {
+            let mut font_matches_cache = fields.font_matches_cache.lock().unwrap();
+            //TODO: do not create AttrsOwned unless entry does not already exist
+            font_matches_cache.entry(AttrsOwned::new(attrs)).or_insert_with(|| {
+                let now = std::time::Instant::now();
+
+                let mut fonts = Vec::new();
+                for face in fields.db.faces() {
+                    if !attrs.matches(face) {
+                        continue;
+                    }
+
+                    match get_font(&fields, face.id) {
+                        Some(font) => fonts.push(font),
+                        None => (),
+                    }
+                }
+
+                let font_matches = Arc::new(FontMatches {
+                    locale: fields.locale,
+                    default_family: fields.db.family_name(&attrs.family).to_string(),
+                    fonts
+                });
+
+                let elapsed = now.elapsed();
+                log::debug!("font matches for {:?} in {:?}", attrs, elapsed);
+
+                font_matches
+            }).clone()
+        })
+    }
+}
+
+fn get_font<'b>(fields: &ouroboros_impl_font_system_inner::BorrowedFields<'_, 'b>, id: fontdb::ID) -> Option<Arc<Font<'b>>> {
+    fields.font_cache.lock().unwrap().entry(id).or_insert_with(|| {
+        let face = fields.db.face(id)?;
+        match Font::new(face) {
+            Some(font) => Some(Arc::new(font)),
+            None => {
+                log::warn!("failed to load font '{}'", face.post_script_name);
+                None
+            }
         }
-    }
-
-    pub fn get_font(&'a self, id: fontdb::ID) -> Option<Arc<Font<'a>>> {
-        let mut font_cache = self.font_cache.lock().unwrap();
-        font_cache.entry(id).or_insert_with(|| {
-            let face = self.db.face(id)?;
-            match Font::new(face) {
-                Some(font) => Some(Arc::new(font)),
-                None => {
-                    log::warn!("failed to load font '{}'", face.post_script_name);
-                    None
-                }
-            }
-        }).clone()
-    }
-
-    pub fn get_font_matches(&'a self, attrs: Attrs) -> Arc<FontMatches<'a>> {
-        let mut font_matches_cache = self.font_matches_cache.lock().unwrap();
-        //TODO: do not create AttrsOwned unless entry does not already exist
-        font_matches_cache.entry(AttrsOwned::new(attrs)).or_insert_with(|| {
-            let now = std::time::Instant::now();
-
-            let mut fonts = Vec::new();
-            for face in self.db.faces() {
-                if !attrs.matches(face) {
-                    continue;
-                }
-
-                match self.get_font(face.id) {
-                    Some(font) => fonts.push(font),
-                    None => (),
-                }
-            }
-
-            let font_matches = Arc::new(FontMatches {
-                locale: &self.locale,
-                default_family: self.db.family_name(&attrs.family).to_string(),
-                fonts
-            });
-
-            let elapsed = now.elapsed();
-            log::debug!("font matches for {:?} in {:?}", attrs, elapsed);
-
-            font_matches
-        }).clone()
-    }
+    }).clone()
 }

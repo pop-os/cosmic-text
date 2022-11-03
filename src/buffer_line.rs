@@ -132,7 +132,7 @@ impl BufferLine {
     }
 
     /// Shape line, will cache results
-    pub fn shape<'a>(&mut self, font_system: &'a FontSystem<'a>) -> &ShapeLine {
+    pub fn shape(&mut self, font_system: &FontSystem) -> &ShapeLine {
         if self.shape_opt.is_none() {
             self.shape_opt = Some(ShapeLine::new(font_system, &self.text, &self.attrs_list));
             self.layout_opt = None;
@@ -146,7 +146,7 @@ impl BufferLine {
     }
 
     /// Layout line, will cache results
-    pub fn layout<'a>(&mut self, font_system: &'a FontSystem<'a>, font_size: i32, width: i32) -> &[LayoutLine] {
+    pub fn layout(&mut self, font_system: &FontSystem, font_size: i32, width: i32) -> &[LayoutLine] {
         if self.layout_opt.is_none() {
             let wrap_simple = self.wrap_simple;
             let shape = self.shape(font_system);

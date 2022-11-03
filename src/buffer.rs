@@ -139,7 +139,7 @@ impl fmt::Display for Metrics {
 
 /// A buffer of text that is shaped and laid out
 pub struct Buffer<'a> {
-    font_system: &'a FontSystem<'a>,
+    font_system: &'a FontSystem,
     /// Lines (or paragraphs) of text in the buffer
     pub lines: Vec<BufferLine>,
     metrics: Metrics,
@@ -153,7 +153,7 @@ pub struct Buffer<'a> {
 impl<'a> Buffer<'a> {
     /// Create a new [Buffer] with the provided [FontSystem] and [Metrics]
     pub fn new(
-        font_system: &'a FontSystem<'a>,
+        font_system: &'a FontSystem,
         metrics: Metrics,
     ) -> Self {
         let mut buffer = Self {
