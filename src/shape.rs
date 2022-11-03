@@ -102,7 +102,7 @@ fn shape_fallback(
 }
 
 fn shape_run<'a>(
-    font_system: &'a FontSystem<'a>,
+    font_system: &'a FontSystem,
     line: &str,
     attrs_list: &AttrsList,
     start_run: usize,
@@ -281,7 +281,7 @@ pub struct ShapeWord {
 
 impl ShapeWord {
     pub fn new<'a>(
-        font_system: &'a FontSystem<'a>,
+        font_system: &'a FontSystem,
         line: &str,
         attrs_list: &AttrsList,
         start_word: usize,
@@ -344,7 +344,7 @@ pub struct ShapeSpan {
 
 impl ShapeSpan {
     pub fn new<'a>(
-        font_system: &'a FontSystem<'a>,
+        font_system: &'a FontSystem,
         line: &str,
         attrs_list: &AttrsList,
         start_span: usize,
@@ -424,7 +424,7 @@ pub struct ShapeLine {
 
 impl ShapeLine {
     pub fn new<'a>(
-        font_system: &'a FontSystem<'a>,
+        font_system: &'a FontSystem,
         line: &str,
         attrs_list: &AttrsList
     ) -> Self {

@@ -9,7 +9,7 @@ use crate::{CacheKey, Color, FontSystem};
 
 pub use swash::scale::image::{Content as SwashContent, Image as SwashImage};
 
-fn swash_image<'a>(font_system: &'a FontSystem<'a>, context: &mut ScaleContext, cache_key: CacheKey) -> Option<SwashImage> {
+fn swash_image<'a>(font_system: &'a FontSystem, context: &mut ScaleContext, cache_key: CacheKey) -> Option<SwashImage> {
     let font = match font_system.get_font(cache_key.font_id) {
         Some(some) => some,
         None => {
@@ -49,14 +49,14 @@ fn swash_image<'a>(font_system: &'a FontSystem<'a>, context: &mut ScaleContext, 
 
 /// Cache for rasterizing with the swash scaler
 pub struct SwashCache<'a> {
-    font_system: &'a FontSystem<'a>,
+    font_system: &'a FontSystem,
     context: ScaleContext,
     pub image_cache: HashMap<CacheKey, Option<SwashImage>>,
 }
 
 impl<'a> SwashCache<'a> {
     /// Create a new swash cache
-    pub fn new(font_system: &'a FontSystem<'a>) -> Self {
+    pub fn new(font_system: &'a FontSystem) -> Self {
         Self {
             font_system: font_system,
             context: ScaleContext::new(),

@@ -45,7 +45,7 @@ use self::text_box::text_box;
 mod text_box;
 
 lazy_static::lazy_static! {
-    static ref FONT_SYSTEM: FontSystem<'static> = FontSystem::new();
+    static ref FONT_SYSTEM: FontSystem = FontSystem::new();
 }
 
 static FONT_SIZES: &'static [Metrics] = &[
@@ -137,9 +137,9 @@ impl Application for Window {
 
     fn title(&self) -> String {
         if let Some(path) = &self.path_opt {
-            format!("COSMIC Text - {} - {}", FONT_SYSTEM.locale, path.display())
+            format!("COSMIC Text - {} - {}", FONT_SYSTEM.locale(), path.display())
         } else {
-            format!("COSMIC Text - {}", FONT_SYSTEM.locale)
+            format!("COSMIC Text - {}", FONT_SYSTEM.locale())
         }
     }
 
