@@ -39,7 +39,7 @@ fn main() {
         -1,
         1024,
         768,
-        &format!("COSMIC TEXT - {}", font_system.locale),
+        &format!("COSMIC TEXT - {}", font_system.locale()),
         &[WindowFlag::Async],
     )
     .unwrap();
