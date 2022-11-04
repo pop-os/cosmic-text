@@ -477,6 +477,16 @@ impl<'a> Buffer<'a> {
                 break;
             }
         }
+        // Fixes text selection if the user starts dragging from below the last line.
+        if let Some(run) = self.layout_runs().last() {
+            if y > run.line_y {
+                let mut new_cursor = Cursor::new(run.line_i, 0);
+                if let Some(glyph) = run.glyphs.last() {
+                    new_cursor.index = glyph.end;
+                }
+                new_cursor_opt = Some(new_cursor);
+            }
+        }
 
         let duration = instant.elapsed();
         log::trace!("click({}, {}): {:?}", x, y, duration);
