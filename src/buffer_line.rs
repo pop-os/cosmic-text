@@ -1,20 +1,20 @@
 use crate::{AttrsList, FontSystem, LayoutLine, ShapeLine};
 
 /// A line (or paragraph) of text that is shaped and laid out
-pub struct BufferLine<'a> {
+pub struct BufferLine {
     //TODO: make this not pub(crate)
     text: String,
-    attrs_list: AttrsList<'a>,
+    attrs_list: AttrsList,
     wrap_simple: bool,
     shape_opt: Option<ShapeLine>,
     layout_opt: Option<Vec<LayoutLine>>,
 }
 
-impl<'a> BufferLine<'a> {
+impl BufferLine {
     /// Create a new line with the given text and attributes list
     /// Cached shaping and layout can be done using the [Self::shape] and
     /// [Self::layout] functions
-    pub fn new<T: Into<String>>(text: T, attrs_list: AttrsList<'a>) -> Self {
+    pub fn new<T: Into<String>>(text: T, attrs_list: AttrsList) -> Self {
         Self {
             text: text.into(),
             attrs_list,
@@ -33,7 +33,7 @@ impl<'a> BufferLine<'a> {
     ///
     /// Will reset shape and layout if it differs from current text and attributes list.
     /// Returns true if the line was reset
-    pub fn set_text<T: AsRef<str> + Into<String>>(&mut self, text: T, attrs_list: AttrsList<'a>) -> bool {
+    pub fn set_text<T: AsRef<str> + Into<String>>(&mut self, text: T, attrs_list: AttrsList) -> bool {
         if text.as_ref() != &self.text || attrs_list != self.attrs_list {
             self.text = text.into();
             self.attrs_list = attrs_list;
@@ -45,7 +45,7 @@ impl<'a> BufferLine<'a> {
     }
 
     /// Get attributes list
-    pub fn attrs_list(&self) -> &AttrsList<'a> {
+    pub fn attrs_list(&self) -> &AttrsList {
         &self.attrs_list
     }
 
@@ -53,7 +53,7 @@ impl<'a> BufferLine<'a> {
     ///
     /// Will reset shape and layout if it differs from current attributes list.
     /// Returns true if the line was reset
-    pub fn set_attrs_list(&mut self, attrs_list: AttrsList<'a>) -> bool {
+    pub fn set_attrs_list(&mut self, attrs_list: AttrsList) -> bool {
         if attrs_list != self.attrs_list {
             self.attrs_list = attrs_list;
             self.reset();
@@ -97,7 +97,7 @@ impl<'a> BufferLine<'a> {
         for (other_range, attrs) in other.attrs_list.spans() {
             // Add previous attrs spans
             let range = other_range.start + len..other_range.end + len;
-            self.attrs_list.add_span(range, *attrs);
+            self.attrs_list.add_span(range, attrs.as_attrs());
         }
 
         self.reset();
@@ -132,7 +132,7 @@ impl<'a> BufferLine<'a> {
     }
 
     /// Shape line, will cache results
-    pub fn shape(&mut self, font_system: &'a FontSystem<'a>) -> &ShapeLine {
+    pub fn shape<'a>(&mut self, font_system: &'a FontSystem<'a>) -> &ShapeLine {
         if self.shape_opt.is_none() {
             self.shape_opt = Some(ShapeLine::new(font_system, &self.text, &self.attrs_list));
             self.layout_opt = None;
@@ -146,7 +146,7 @@ impl<'a> BufferLine<'a> {
     }
 
     /// Layout line, will cache results
-    pub fn layout(&mut self, font_system: &'a FontSystem<'a>, font_size: i32, width: i32) -> &[LayoutLine] {
+    pub fn layout<'a>(&mut self, font_system: &'a FontSystem<'a>, font_size: i32, width: i32) -> &[LayoutLine] {
         if self.layout_opt.is_none() {
             let wrap_simple = self.wrap_simple;
             let shape = self.shape(font_system);

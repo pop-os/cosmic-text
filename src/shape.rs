@@ -104,7 +104,7 @@ fn shape_fallback(
 fn shape_run<'a>(
     font_system: &'a FontSystem<'a>,
     line: &str,
-    attrs_list: &AttrsList<'a>,
+    attrs_list: &AttrsList,
     start_run: usize,
     end_run: usize,
     span_rtl: bool,
@@ -283,7 +283,7 @@ impl ShapeWord {
     pub fn new<'a>(
         font_system: &'a FontSystem<'a>,
         line: &str,
-        attrs_list: &AttrsList<'a>,
+        attrs_list: &AttrsList,
         start_word: usize,
         end_word: usize,
         span_rtl: bool,
@@ -346,7 +346,7 @@ impl ShapeSpan {
     pub fn new<'a>(
         font_system: &'a FontSystem<'a>,
         line: &str,
-        attrs_list: &AttrsList<'a>,
+        attrs_list: &AttrsList,
         start_span: usize,
         end_span: usize,
         line_rtl: bool,
@@ -426,7 +426,7 @@ impl ShapeLine {
     pub fn new<'a>(
         font_system: &'a FontSystem<'a>,
         line: &str,
-        attrs_list: &AttrsList<'a>
+        attrs_list: &AttrsList
     ) -> Self {
         let mut spans = Vec::new();
 

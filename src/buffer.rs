@@ -141,7 +141,7 @@ impl fmt::Display for Metrics {
 pub struct Buffer<'a> {
     font_system: &'a FontSystem<'a>,
     /// Lines (or paragraphs) of text in the buffer
-    pub lines: Vec<BufferLine<'a>>,
+    pub lines: Vec<BufferLine>,
     metrics: Metrics,
     width: i32,
     height: i32,

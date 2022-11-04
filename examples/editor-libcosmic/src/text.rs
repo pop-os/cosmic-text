@@ -45,7 +45,7 @@ impl StyleSheet for Theme {
 }
 
 pub struct Text {
-    line: BufferLine<'static>,
+    line: BufferLine,
     metrics: Metrics,
 }
 
@@ -223,25 +223,25 @@ pub fn draw_pixel(
         // Do not draw if alpha is zero
         return;
     }
-    
+
     if y < 0 || y >= height {
         // Skip if y out of bounds
         return;
     }
-    
+
     if x < 0 || x >= width {
         // Skip if x out of bounds
         return;
     }
-    
+
     let offset = (y as usize * width as usize + x as usize) * 4;
-    
+
     let mut current =
         buffer[offset] as u32 |
         (buffer[offset + 1] as u32) << 8 |
         (buffer[offset + 2] as u32) << 16 |
         (buffer[offset + 3] as u32) << 24;
-    
+
     if alpha >= 255 || current == 0 {
         // Alpha is 100% or current is null, replace with no blending
         current = color.0;
@@ -253,7 +253,7 @@ pub fn draw_pixel(
             + (alpha * (0x01000000 | ((color.0 & 0x0000FF00) >> 8)));
         current = (rb & 0x00FF00FF) | (ag & 0xFF00FF00);
     }
-    
+
     buffer[offset] = current as u8;
     buffer[offset + 1] = (current >> 8) as u8;
     buffer[offset + 2] = (current >> 16) as u8;

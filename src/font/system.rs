@@ -5,14 +5,14 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use crate::{Attrs, Font, FontMatches};
+use crate::{Attrs, AttrsOwned, Font, FontMatches};
 
 /// Access system fonts
 pub struct FontSystem<'a> {
     pub locale: String,
     pub db: fontdb::Database,
     pub font_cache: Mutex<HashMap<fontdb::ID, Option<Arc<Font<'a>>>>>,
-    pub font_matches_cache: Mutex<HashMap<Attrs<'a>, Arc<FontMatches<'a>>>>,
+    pub font_matches_cache: Mutex<HashMap<AttrsOwned, Arc<FontMatches<'a>>>>,
 }
 
 impl<'a> FontSystem<'a> {
@@ -79,9 +79,10 @@ impl<'a> FontSystem<'a> {
         }).clone()
     }
 
-    pub fn get_font_matches(&'a self, attrs: Attrs<'a>) -> Arc<FontMatches<'a>> {
+    pub fn get_font_matches(&'a self, attrs: Attrs) -> Arc<FontMatches<'a>> {
         let mut font_matches_cache = self.font_matches_cache.lock().unwrap();
-        font_matches_cache.entry(attrs).or_insert_with(|| {
+        //TODO: do not create AttrsOwned unless entry does not already exist
+        font_matches_cache.entry(AttrsOwned::new(attrs)).or_insert_with(|| {
             let now = std::time::Instant::now();
 
             let mut fonts = Vec::new();
