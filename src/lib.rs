@@ -48,7 +48,7 @@
 //! // Create a default text color
 //! let text_color = Color::rgb(0xFF, 0xFF, 0xFF);
 //!
-//! // Draw the buffer (for perfomance, instead use SwashCache directly)
+//! // Draw the buffer (for performance, instead use SwashCache directly)
 //! buffer.draw(&mut swash_cache, text_color, |x, y, w, h, color| {
 //!     // Fill in your code here for drawing rectangles
 //! });
