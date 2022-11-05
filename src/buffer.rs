@@ -416,7 +416,8 @@ impl<'a> Buffer<'a> {
 
         let mut new_cursor_opt = None;
 
-        for run in self.layout_runs() {
+        let mut runs = self.layout_runs().peekable();
+        while let Some(run) = runs.next() {
             let line_y = run.line_y;
 
             if y >= line_y - font_size
@@ -475,11 +476,7 @@ impl<'a> Buffer<'a> {
                 new_cursor_opt = Some(new_cursor);
 
                 break;
-            }
-        }
-        // Fixes text selection if the user starts dragging from below the last line.
-        if let Some(run) = self.layout_runs().last() {
-            if y > run.line_y {
+            } else if runs.peek().is_none() && y > run.line_y {
                 let mut new_cursor = Cursor::new(run.line_i, 0);
                 if let Some(glyph) = run.glyphs.last() {
                     new_cursor.index = glyph.end;
