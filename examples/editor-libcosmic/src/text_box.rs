@@ -49,12 +49,16 @@ impl StyleSheet for Theme {
 
 pub struct TextBox<'a> {
     editor: &'a Mutex<Editor<'static>>,
+    left_margin: i32,
+    right_margin: i32,
 }
 
 impl<'a> TextBox<'a> {
     pub fn new(editor: &'a Mutex<Editor<'static>>) -> Self {
         Self {
             editor,
+            left_margin: 0,
+            right_margin: 0,
         }
     }
 }
@@ -160,7 +164,7 @@ where
 
         let mut editor = self.editor.lock().unwrap();
 
-        let view_w = cmp::min(viewport.width as i32, layout.bounds().width as i32);
+        let view_w = cmp::min(viewport.width as i32, layout.bounds().width as i32) - (self.left_margin + self.right_margin);
         let view_h = cmp::min(viewport.height as i32, layout.bounds().height as i32);
         editor.buffer.set_size(view_w, view_h);
 
@@ -181,8 +185,8 @@ where
                 renderer.fill_quad(
                     renderer::Quad {
                         bounds: Rectangle::new(
-                            Point::new(layout.position().x + x as f32, layout.position().y + y as f32),
-                            Size::new(w as f32, h as f32)
+                            Point::new(layout.position().x + x as f32 + self.left_margin as f32 , layout.position().y + y as f32),
+                            Size::new(w as f32 , h as f32)
                         ),
                         border_radius: 0.0,
                         border_width: 0.0,
@@ -202,7 +206,7 @@ where
 
         let handle = image::Handle::from_pixels(view_w as u32, view_h as u32, pixels);
         image::Renderer::draw(renderer, handle, Rectangle::new(
-            layout.position(),
+    Point::new(layout.position().x + self.left_margin as f32, layout.position().y),
             Size::new(view_w as f32, view_h as f32)
         ));
 
@@ -279,7 +283,7 @@ where
             Event::Mouse(MouseEvent::ButtonPressed(Button::Left)) => {
                 if layout.bounds().contains(cursor_position) {
                     editor.action(Action::Click {
-                        x: (cursor_position.x - layout.bounds().x) as i32,
+                        x: (cursor_position.x - layout.bounds().x) as i32 - self.left_margin,
                         y: (cursor_position.y - layout.bounds().y) as i32,
                     });
                     state.is_dragging = true;
@@ -293,7 +297,7 @@ where
             Event::Mouse(MouseEvent::CursorMoved { .. }) => {
                 if state.is_dragging {
                     editor.action(Action::Drag {
-                        x: (cursor_position.x - layout.bounds().x) as i32,
+                        x: (cursor_position.x - layout.bounds().x) as i32 - self.left_margin,
                         y: (cursor_position.y - layout.bounds().y) as i32,
                     });
                     status = Status::Captured;
