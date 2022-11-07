@@ -57,8 +57,8 @@ impl<'a> TextBox<'a> {
     pub fn new(editor: &'a Mutex<Editor<'static>>) -> Self {
         Self {
             editor,
-            left_margin: 0,
-            right_margin: 0,
+            left_margin: 40,
+            right_margin: 40,
         }
     }
 }
