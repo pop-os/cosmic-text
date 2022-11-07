@@ -57,10 +57,20 @@ impl<'a> TextBox<'a> {
     pub fn new(editor: &'a Mutex<Editor<'static>>) -> Self {
         Self {
             editor,
-            left_margin: 40,
-            right_margin: 40,
+            left_margin: 0,
+            right_margin: 0,
         }
     }
+    pub fn left_margin(mut self,  left_margin: i32) -> Self {
+        self.left_margin = left_margin;
+        self
+    }
+
+    pub fn right_margin(mut self,  right_margin: i32) -> Self {
+        self.right_margin = right_margin;
+        self
+    }
+    
 }
 
 pub fn text_box<'a>(editor: &'a Mutex<Editor<'static>>) -> TextBox<'a> {
