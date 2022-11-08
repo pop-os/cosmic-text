@@ -434,13 +434,14 @@ impl<'a> Buffer<'a> {
                 let mut first_glyph = true;
                 
                 'hit: for (glyph_i, glyph) in run.glyphs.iter().enumerate() {
-                    if first_glyph {
+                    if first_glyph {  
                         first_glyph = false;
                         if (run.rtl && x > glyph.x as i32) || (!run.rtl && x < 0) {
                             new_cursor_glyph = 0;
                             new_cursor_char = 0;
                         }
-                    } else if x >= glyph.x as i32
+                    } 
+                    if x >= glyph.x as i32
                     && x <= (glyph.x + glyph.w) as i32
                     {
                         new_cursor_glyph = glyph_i;
