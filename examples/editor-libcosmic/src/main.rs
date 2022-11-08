@@ -262,7 +262,7 @@ impl Application for Window {
             .align_items(Alignment::Center)
             .spacing(8)
             ,
-            text_box(&self.editor).left_margin(40).right_margin(40)
+            text_box(&self.editor).padding(40)
         ]
         .spacing(8)
         .padding(16)
