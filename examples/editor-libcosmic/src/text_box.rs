@@ -170,7 +170,7 @@ where
         let mut editor = self.editor.lock().unwrap();
 
         let view_w = cmp::min(viewport.width as i32, layout.bounds().width as i32) - self.padding.horizontal() as i32;
-        let view_h = cmp::min(viewport.height as i32, layout.bounds().height as i32);
+        let view_h = cmp::min(viewport.height as i32, layout.bounds().height as i32) - self.padding.vertical() as i32;
         editor.buffer.set_size(view_w, view_h);
 
         editor.shape_as_needed();
@@ -190,7 +190,7 @@ where
                 renderer.fill_quad(
                     renderer::Quad {
                         bounds: Rectangle::new(
-                            Point::new(layout.position().x + x as f32 + self.padding.left as f32 , layout.position().y + y as f32),
+                            layout.position() + [x as f32, y as f32].into() + [self.padding.left as f32, self.padding.top as f32].into(),
                             Size::new(w as f32 , h as f32)
                         ),
                         border_radius: 0.0,
@@ -211,7 +211,7 @@ where
 
         let handle = image::Handle::from_pixels(view_w as u32, view_h as u32, pixels);
         image::Renderer::draw(renderer, handle, Rectangle::new(
-    Point::new(layout.position().x + self.padding.left as f32, layout.position().y),
+  layout.position() + [self.padding.left as f32, self.padding.top as f32].into(),
             Size::new(view_w as f32, view_h as f32)
         ));
 
@@ -289,7 +289,7 @@ where
                 if layout.bounds().contains(cursor_position) {
                     editor.action(Action::Click {
                         x: (cursor_position.x - layout.bounds().x) as i32 - self.padding.left as i32,
-                        y: (cursor_position.y - layout.bounds().y) as i32,
+                        y: (cursor_position.y - layout.bounds().y) as i32 - self.padding.top as i32,
                     });
                     state.is_dragging = true;
                     status = Status::Captured;
@@ -303,7 +303,7 @@ where
                 if state.is_dragging {
                     editor.action(Action::Drag {
                         x: (cursor_position.x - layout.bounds().x) as i32 - self.padding.left as i32,
-                        y: (cursor_position.y - layout.bounds().y) as i32,
+                        y: (cursor_position.y - layout.bounds().y) as i32 - self.padding.top as i32,
                     });
                     status = Status::Captured;
                 }
