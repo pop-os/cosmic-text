@@ -65,7 +65,7 @@ fn main() {
     )
     .unwrap();
 
-    let font_system = FontSystem::new();
+    let mut font_system = FontSystem::new();
 
     let font_sizes = [
         Metrics::new(10, 14).scale(display_scale), // Caption
@@ -80,11 +80,12 @@ fn main() {
 
     let line_x = 8 * display_scale;
     let mut editor = Editor::new(Buffer::new(
-        &font_system,
+        &mut font_system,
         font_sizes[font_size_i]
     ));
 
     editor.buffer.set_size(
+        &mut font_system,
         window.width() as i32 - line_x * 2,
         window.height() as i32
     );
@@ -92,7 +93,7 @@ fn main() {
     let attrs = Attrs::new()
         .monospaced(true)
         .family(Family::Monospace);
-    editor.buffer.set_text(&text, attrs);
+    editor.buffer.set_text(&mut font_system, &text, attrs);
 
     let mut bg_color = orbclient::Color::rgb(0x00, 0x00, 0x00);
     let mut font_color = Color::rgb(0xFF, 0xFF, 0xFF);
@@ -137,7 +138,7 @@ fn main() {
 
     log::info!("using syntax {:?}, loaded in {:?}", syntax.name, now.elapsed());
 
-    let mut swash_cache = SwashCache::new(&font_system);
+    let mut swash_cache = SwashCache::new();
 
     let mut syntax_cache = Vec::<(ParseState, HighlightState)>::new();
 
@@ -204,7 +205,7 @@ fn main() {
                 line.set_wrap_simple(true);
 
                 //TODO: efficiently do syntax highlighting without having to shape whole buffer
-                line.shape(&font_system);
+                line.shape(&mut font_system);
 
                 let cache_item = (parse_state.clone(), highlight_state.clone());
                 if line_i < syntax_cache.len() {
@@ -225,13 +226,13 @@ fn main() {
             log::info!("Syntax highlighted in {:?}", now.elapsed());
         }
 
-        editor.shape_as_needed();
+        editor.shape_as_needed(&mut font_system);
         if editor.buffer.redraw {
             let instant = Instant::now();
 
             window.set(bg_color);
 
-            editor.draw(&mut swash_cache, font_color, |x, y, w, h, color| {
+            editor.draw(&mut font_system, &mut swash_cache, font_color, |x, y, w, h, color| {
                 window.rect(line_x + x, y, w, h, orbclient::Color { data: color.0 })
             });
 
@@ -277,62 +278,62 @@ fn main() {
             match event.to_option() {
                 EventOption::Key(event) => match event.scancode {
                     orbclient::K_CTRL => ctrl_pressed = event.pressed,
-                    orbclient::K_LEFT if event.pressed => editor.action(Action::Left),
-                    orbclient::K_RIGHT if event.pressed => editor.action(Action::Right),
-                    orbclient::K_UP if event.pressed => editor.action(Action::Up),
-                    orbclient::K_DOWN if event.pressed => editor.action(Action::Down),
-                    orbclient::K_HOME if event.pressed => editor.action(Action::Home),
-                    orbclient::K_END if event.pressed => editor.action(Action::End),
-                    orbclient::K_PGUP if event.pressed => editor.action(Action::PageUp),
-                    orbclient::K_PGDN if event.pressed => editor.action(Action::PageDown),
+                    orbclient::K_LEFT if event.pressed => editor.action(&mut font_system, Action::Left),
+                    orbclient::K_RIGHT if event.pressed => editor.action(&mut font_system, Action::Right),
+                    orbclient::K_UP if event.pressed => editor.action(&mut font_system, Action::Up),
+                    orbclient::K_DOWN if event.pressed => editor.action(&mut font_system, Action::Down),
+                    orbclient::K_HOME if event.pressed => editor.action(&mut font_system, Action::Home),
+                    orbclient::K_END if event.pressed => editor.action(&mut font_system, Action::End),
+                    orbclient::K_PGUP if event.pressed => editor.action(&mut font_system, Action::PageUp),
+                    orbclient::K_PGDN if event.pressed => editor.action(&mut font_system, Action::PageDown),
                     orbclient::K_ENTER if event.pressed => {
-                        editor.action(Action::Enter);
+                        editor.action(&mut font_system, Action::Enter);
                         rehighlight = true;
                     },
                     orbclient::K_BKSP if event.pressed => {
-                        editor.action(Action::Backspace);
+                        editor.action(&mut font_system, Action::Backspace);
                         rehighlight = true;
                     },
                     orbclient::K_DEL if event.pressed => {
-                        editor.action(Action::Delete);
+                        editor.action(&mut font_system, Action::Delete);
                         rehighlight = true;
                     },
                     orbclient::K_0 if event.pressed && ctrl_pressed => {
                         font_size_i = font_size_default;
-                        editor.buffer.set_metrics(font_sizes[font_size_i]);
+                        editor.buffer.set_metrics(&mut font_system, font_sizes[font_size_i]);
                     }
                     orbclient::K_MINUS if event.pressed && ctrl_pressed => {
                         if font_size_i > 0 {
                             font_size_i -= 1;
-                            editor.buffer.set_metrics(font_sizes[font_size_i]);
+                            editor.buffer.set_metrics(&mut font_system, font_sizes[font_size_i]);
                         }
                     }
                     orbclient::K_EQUALS if event.pressed && ctrl_pressed => {
                         if font_size_i + 1 < font_sizes.len() {
                             font_size_i += 1;
-                            editor.buffer.set_metrics(font_sizes[font_size_i]);
+                            editor.buffer.set_metrics(&mut font_system, font_sizes[font_size_i]);
                         }
                     }
                     _ => (),
                 },
                 EventOption::TextInput(event) if !ctrl_pressed => {
-                    editor.action(Action::Insert(event.character));
+                    editor.action(&mut font_system, Action::Insert(event.character));
                     rehighlight = true;
                 }
                 EventOption::Mouse(event) => {
                     mouse_x = event.x;
                     mouse_y = event.y;
                     if mouse_left {
-                        editor.action(Action::Drag {
+                        editor.action(&mut font_system, Action::Drag {
                             x: mouse_x - line_x,
                             y: mouse_y,
                         });
 
                         if mouse_y <= 5 {
-                            editor.action(Action::Scroll { lines: -3 });
+                            editor.action(&mut font_system, Action::Scroll { lines: -3 });
                             window_async = true;
                         } else if mouse_y + 5 >= window.height() as i32 {
-                            editor.action(Action::Scroll { lines: 3 });
+                            editor.action(&mut font_system, Action::Scroll { lines: 3 });
                             window_async = true;
                         }
 
@@ -343,7 +344,7 @@ fn main() {
                     if event.left != mouse_left {
                         mouse_left = event.left;
                         if mouse_left {
-                            editor.action(Action::Click {
+                            editor.action(&mut font_system, Action::Click {
                                 x: mouse_x - line_x,
                                 y: mouse_y,
                             });
@@ -352,10 +353,10 @@ fn main() {
                     }
                 }
                 EventOption::Resize(event) => {
-                    editor.buffer.set_size(event.width as i32 - line_x * 2, event.height as i32);
+                    editor.buffer.set_size(&mut font_system, event.width as i32 - line_x * 2, event.height as i32);
                 }
                 EventOption::Scroll(event) => {
-                    editor.action(Action::Scroll {
+                    editor.action(&mut font_system, Action::Scroll {
                         lines: -event.y * 3,
                     });
                 }
@@ -365,16 +366,16 @@ fn main() {
         }
 
         if mouse_left && force_drag {
-            editor.action(Action::Drag {
+            editor.action(&mut font_system, Action::Drag {
                 x: mouse_x - line_x,
                 y: mouse_y,
             });
 
             if mouse_y <= 5 {
-                editor.action(Action::Scroll { lines: -3 });
+                editor.action(&mut font_system, Action::Scroll { lines: -3 });
                 window_async = true;
             } else if mouse_y + 5 >= window.height() as i32 {
-                editor.action(Action::Scroll { lines: 3 });
+                editor.action(&mut font_system, Action::Scroll { lines: 3 });
                 window_async = true;
             }
         }
