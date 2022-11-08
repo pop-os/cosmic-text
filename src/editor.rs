@@ -182,6 +182,7 @@ impl<'a> Editor<'a> {
             // Get part of line after selection
             let after = self.buffer.lines[end.line].split_off(end.index);
 
+            // Remove end line
             self.buffer.lines.remove(end.line);
 
             Some(after)
