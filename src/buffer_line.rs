@@ -1,3 +1,9 @@
+#[cfg(not(feature = "std"))]
+use alloc::{
+    string::String,
+    vec::Vec,
+};
+
 use crate::{AttrsList, FontSystem, LayoutLine, ShapeLine};
 
 /// A line (or paragraph) of text that is shaped and laid out

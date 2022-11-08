@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use std::ops::Range;
+#[cfg(not(feature = "std"))]
+use alloc::{
+    string::{String, ToString},
+    vec::Vec,
+};
+use core::ops::Range;
 
 pub use fontdb::{Family, Stretch, Style, Weight};
 

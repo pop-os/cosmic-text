@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
+use core::mem;
 use unicode_script::{Script, UnicodeScript};
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -592,7 +595,7 @@ impl ShapeLine {
                     };
                     if word_wrap && !wrap_simple && !glyphs.is_empty() {
                         let mut glyphs_swap = Vec::new();
-                        std::mem::swap(&mut glyphs, &mut glyphs_swap);
+                        mem::swap(&mut glyphs, &mut glyphs_swap);
                         layout_lines.push(
                             LayoutLine {
                                 glyphs: glyphs_swap,
@@ -616,7 +619,7 @@ impl ShapeLine {
 
                         if glyph_wrap {
                             let mut glyphs_swap = Vec::new();
-                            std::mem::swap(&mut glyphs, &mut glyphs_swap);
+                            mem::swap(&mut glyphs, &mut glyphs_swap);
                             layout_lines.push(
                                 LayoutLine {
                                     glyphs: glyphs_swap,
@@ -643,7 +646,7 @@ impl ShapeLine {
 
                 if wrap {
                     let mut glyphs_swap = Vec::new();
-                    std::mem::swap(&mut glyphs, &mut glyphs_swap);
+                    mem::swap(&mut glyphs, &mut glyphs_swap);
                     layout_lines.push(
                         LayoutLine {
                             glyphs: glyphs_swap,

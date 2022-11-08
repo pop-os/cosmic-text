@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use std::ops::Deref;
+use core::ops::Deref;
 
 pub struct Font<'a> {
     pub info: &'a fontdb::FaceInfo,
@@ -14,10 +14,12 @@ impl<'a> Font<'a> {
     pub fn new(info: &'a fontdb::FaceInfo) -> Option<Self> {
         let data = match &info.source {
             fontdb::Source::Binary(data) => data.deref().as_ref(),
+            #[cfg(feature = "std")]
             fontdb::Source::File(path) => {
                 log::warn!("Unsupported fontdb Source::File('{}')", path.display());
                 return None;
             }
+            #[cfg(feature = "std")]
             fontdb::Source::SharedFile(_path, data) => data.deref().as_ref(),
         };
 

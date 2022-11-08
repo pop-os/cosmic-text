@@ -1,9 +1,14 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use std::cmp;
+#[cfg(not(feature = "std"))]
+use alloc::string::ToString;
+#[cfg(feature = "swash")]
+use core::cmp;
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::{AttrsList, Buffer, BufferLine, Color, Cursor, LayoutCursor};
+use crate::{AttrsList, Buffer, BufferLine, Cursor, LayoutCursor};
+#[cfg(feature = "swash")]
+use crate::Color;
 
 /// An action to perform on an [Editor]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
