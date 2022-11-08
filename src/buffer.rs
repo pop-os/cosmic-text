@@ -58,16 +58,16 @@ pub struct LayoutRun<'a> {
 }
 
 /// An iterator of visible text lines, see [LayoutRun]
-pub struct LayoutRunIter<'a, 'b> {
-    buffer: &'b Buffer<'a>,
+pub struct LayoutRunIter<'a> {
+    buffer: &'a Buffer,
     line_i: usize,
     layout_i: usize,
     line_y: i32,
     total_layout: i32,
 }
 
-impl<'a, 'b> LayoutRunIter<'a, 'b> {
-    pub fn new(buffer: &'b Buffer<'a>) -> Self {
+impl<'a> LayoutRunIter<'a> {
+    pub fn new(buffer: &'a Buffer) -> Self {
         Self {
             buffer,
             line_i: 0,
@@ -78,8 +78,8 @@ impl<'a, 'b> LayoutRunIter<'a, 'b> {
     }
 }
 
-impl<'a, 'b> Iterator for LayoutRunIter<'a, 'b> {
-    type Item = LayoutRun<'b>;
+impl<'a> Iterator for LayoutRunIter<'a> {
+    type Item = LayoutRun<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(line) = self.buffer.lines.get(self.line_i) {
@@ -144,8 +144,7 @@ impl fmt::Display for Metrics {
 }
 
 /// A buffer of text that is shaped and laid out
-pub struct Buffer<'a> {
-    font_system: &'a FontSystem,
+pub struct Buffer {
     /// Lines (or paragraphs) of text in the buffer
     pub lines: Vec<BufferLine>,
     metrics: Metrics,
@@ -156,14 +155,13 @@ pub struct Buffer<'a> {
     pub redraw: bool,
 }
 
-impl<'a> Buffer<'a> {
+impl Buffer {
     /// Create a new [Buffer] with the provided [FontSystem] and [Metrics]
     pub fn new(
-        font_system: &'a FontSystem,
+        font_system: &mut FontSystem,
         metrics: Metrics,
     ) -> Self {
         let mut buffer = Self {
-            font_system,
             lines: Vec::new(),
             metrics,
             width: 0,
@@ -171,11 +169,11 @@ impl<'a> Buffer<'a> {
             scroll: 0,
             redraw: false,
         };
-        buffer.set_text("", Attrs::new());
+        buffer.set_text(font_system, "", Attrs::new());
         buffer
     }
 
-    fn relayout(&mut self) {
+    fn relayout(&mut self, font_system: &mut FontSystem) {
         #[cfg(feature = "std")]
         let instant = std::time::Instant::now();
 
@@ -183,7 +181,7 @@ impl<'a> Buffer<'a> {
             if line.shape_opt().is_some() {
                 line.reset_layout();
                 line.layout(
-                    self.font_system,
+                    font_system,
                     self.metrics.font_size,
                     self.width
                 );
@@ -197,7 +195,7 @@ impl<'a> Buffer<'a> {
     }
 
     /// Pre-shape lines in the buffer, up to `lines`, return actual number of layout lines
-    pub fn shape_until(&mut self, lines: i32) -> i32 {
+    pub fn shape_until(&mut self, font_system: &mut FontSystem, lines: i32) -> i32 {
         #[cfg(feature = "std")]
         let instant = std::time::Instant::now();
 
@@ -212,7 +210,7 @@ impl<'a> Buffer<'a> {
                 reshaped += 1;
             }
             let layout = line.layout(
-                self.font_system,
+                font_system,
                 self.metrics.font_size,
                 self.width
             );
@@ -229,7 +227,7 @@ impl<'a> Buffer<'a> {
     }
 
     /// Shape lines until cursor, also scrolling to include cursor in view
-    pub fn shape_until_cursor(&mut self, cursor: Cursor) {
+    pub fn shape_until_cursor(&mut self, font_system: &mut FontSystem, cursor: Cursor) {
         #[cfg(feature = "std")]
         let instant = std::time::Instant::now();
 
@@ -244,7 +242,7 @@ impl<'a> Buffer<'a> {
                 reshaped += 1;
             }
             let layout = line.layout(
-                self.font_system,
+                font_system,
                 self.metrics.font_size,
                 self.width
             );
@@ -270,15 +268,15 @@ impl<'a> Buffer<'a> {
             self.scroll = layout_i - (lines - 1);
         }
 
-        self.shape_until_scroll();
+        self.shape_until_scroll(font_system);
     }
 
     /// Shape lines until scroll
-    pub fn shape_until_scroll(&mut self) {
+    pub fn shape_until_scroll(&mut self, font_system: &mut FontSystem) {
         let lines = self.visible_lines();
 
         let scroll_end = self.scroll + lines;
-        let total_layout = self.shape_until(scroll_end);
+        let total_layout = self.shape_until(font_system, scroll_end);
 
         self.scroll = cmp::max(
             0,
@@ -333,15 +331,15 @@ impl<'a> Buffer<'a> {
     }
 
     /// Shape the provided line index and return the result
-    pub fn line_shape(&mut self, line_i: usize) -> Option<&ShapeLine> {
+    pub fn line_shape(&mut self, font_system: &mut FontSystem, line_i: usize) -> Option<&ShapeLine> {
         let line = self.lines.get_mut(line_i)?;
-        Some(line.shape(&self.font_system))
+        Some(line.shape(font_system))
     }
 
     /// Lay out the provided line index and return the result
-    pub fn line_layout(&mut self, line_i: usize) -> Option<&[LayoutLine]> {
+    pub fn line_layout(&mut self, font_system: &mut FontSystem, line_i: usize) -> Option<&[LayoutLine]> {
         let line = self.lines.get_mut(line_i)?;
-        Some(line.layout(&self.font_system, self.metrics.font_size, self.width))
+        Some(line.layout(font_system, self.metrics.font_size, self.width))
     }
 
     /// Get the current [Metrics]
@@ -350,11 +348,11 @@ impl<'a> Buffer<'a> {
     }
 
     /// Set the current [Metrics]
-    pub fn set_metrics(&mut self, metrics: Metrics) {
+    pub fn set_metrics(&mut self, font_system: &mut FontSystem, metrics: Metrics) {
         if metrics != self.metrics {
             self.metrics = metrics;
-            self.relayout();
-            self.shape_until_scroll();
+            self.relayout(font_system);
+            self.shape_until_scroll(font_system);
         }
     }
 
@@ -364,16 +362,16 @@ impl<'a> Buffer<'a> {
     }
 
     /// Set the current buffer dimensions
-    pub fn set_size(&mut self, width: i32, height: i32) {
+    pub fn set_size(&mut self, font_system: &mut FontSystem, width: i32, height: i32) {
         if width != self.width {
             self.width = width;
-            self.relayout();
-            self.shape_until_scroll();
+            self.relayout(font_system);
+            self.shape_until_scroll(font_system);
         }
 
         if height != self.height {
             self.height = height;
-            self.shape_until_scroll();
+            self.shape_until_scroll(font_system);
         }
     }
 
@@ -396,7 +394,7 @@ impl<'a> Buffer<'a> {
     }
 
     /// Set text of buffer, using provided attributes for each line by default
-    pub fn set_text(&mut self, text: &str, attrs: Attrs<'a>) {
+    pub fn set_text(&mut self, font_system: &mut FontSystem, text: &str, attrs: Attrs<'_>) {
         self.lines.clear();
         for line in text.lines() {
             self.lines.push(BufferLine::new(line.to_string(), AttrsList::new(attrs)));
@@ -408,11 +406,11 @@ impl<'a> Buffer<'a> {
 
         self.scroll = 0;
 
-        self.shape_until_scroll();
+        self.shape_until_scroll(font_system);
     }
 
     /// Get the visible layout runs for rendering and other tasks
-    pub fn layout_runs<'b>(&'b self) -> LayoutRunIter<'a, 'b> {
+    pub fn layout_runs<'a>(&'a self) -> LayoutRunIter<'a> {
         LayoutRunIter::new(self)
     }
 
@@ -503,7 +501,7 @@ impl<'a> Buffer<'a> {
 
     /// Draw the buffer
     #[cfg(feature = "swash")]
-    pub fn draw<F>(&self, cache: &mut crate::SwashCache, color: Color, mut f: F)
+    pub fn draw<F>(&self, font_system: &mut FontSystem, cache: &mut crate::SwashCache, color: Color, mut f: F)
         where F: FnMut(i32, i32, u32, u32, Color)
     {
         for run in self.layout_runs() {
@@ -515,7 +513,7 @@ impl<'a> Buffer<'a> {
                     None => color,
                 };
 
-                cache.with_pixels(cache_key, glyph_color, |x, y, color| {
+                cache.with_pixels(font_system, cache_key, glyph_color, |x, y, color| {
                     f(x_int + x, run.line_y + y_int + y, 1, 1, color)
                 });
             }
