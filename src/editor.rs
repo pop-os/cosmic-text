@@ -6,7 +6,7 @@ use alloc::string::ToString;
 use core::cmp;
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::{AttrsList, Buffer, BufferLine, Cursor, LayoutCursor};
+use crate::{AttrsList, Buffer, BufferLine, Cursor, FontSystem, LayoutCursor};
 #[cfg(feature = "swash")]
 use crate::Color;
 
@@ -50,17 +50,17 @@ pub enum Action {
 }
 
 /// A wrapper of [Buffer] for easy editing
-pub struct Editor<'a> {
-    pub buffer: Buffer<'a>,
+pub struct Editor {
+    pub buffer: Buffer,
     cursor: Cursor,
     cursor_x_opt: Option<i32>,
     select_opt: Option<Cursor>,
     cursor_moved: bool,
 }
 
-impl<'a> Editor<'a> {
+impl Editor {
     /// Create a new [Editor] with the provided [Buffer]
-    pub fn new(buffer: Buffer<'a>) -> Self {
+    pub fn new(buffer: Buffer) -> Self {
         Self {
             buffer,
             cursor: Cursor::default(),
@@ -71,17 +71,17 @@ impl<'a> Editor<'a> {
     }
 
     /// Shape lines until scroll, after adjusting scroll if the cursor moved
-    pub fn shape_as_needed(&mut self) {
+    pub fn shape_as_needed(&mut self, font_system: &mut FontSystem) {
         if self.cursor_moved {
-            self.buffer.shape_until_cursor(self.cursor);
+            self.buffer.shape_until_cursor(font_system, self.cursor);
             self.cursor_moved = false;
         } else {
-            self.buffer.shape_until_scroll();
+            self.buffer.shape_until_scroll(font_system);
         }
     }
 
-    fn set_layout_cursor(&mut self, cursor: LayoutCursor) {
-        let layout = self.buffer.line_layout(cursor.line).unwrap();
+    fn set_layout_cursor(&mut self, font_system: &mut FontSystem, cursor: LayoutCursor) {
+        let layout = self.buffer.line_layout(font_system, cursor.line).unwrap();
 
         let layout_line = match layout.get(cursor.layout) {
             Some(some) => some,
@@ -113,7 +113,7 @@ impl<'a> Editor<'a> {
     }
 
     /// Perform a [Action] on the editor
-    pub fn action(&mut self, action: Action) {
+    pub fn action(&mut self, font_system: &mut FontSystem, action: Action) {
         let old_cursor = self.cursor;
 
         match action {
@@ -160,9 +160,9 @@ impl<'a> Editor<'a> {
                 let rtl_opt = self.buffer.lines[self.cursor.line].shape_opt().as_ref().map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
-                        self.action(Action::Next);
+                        self.action(font_system, Action::Next);
                     } else {
-                        self.action(Action::Previous);
+                        self.action(font_system, Action::Previous);
                     }
                 }
             },
@@ -170,9 +170,9 @@ impl<'a> Editor<'a> {
                 let rtl_opt = self.buffer.lines[self.cursor.line].shape_opt().as_ref().map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
-                        self.action(Action::Previous);
+                        self.action(font_system, Action::Previous);
                     } else {
-                        self.action(Action::Next);
+                        self.action(font_system, Action::Next);
                     }
                 }
             },
@@ -197,13 +197,13 @@ impl<'a> Editor<'a> {
                     cursor.glyph = cursor_x as usize; //TODO: glyph x position
                 }
 
-                self.set_layout_cursor(cursor);
+                self.set_layout_cursor(font_system, cursor);
             },
             Action::Down => {
                 //TODO: make this preserve X as best as possible!
                 let mut cursor = self.buffer.layout_cursor(&self.cursor);
 
-                let layout_len = self.buffer.line_layout(cursor.line).unwrap().len();
+                let layout_len = self.buffer.line_layout(font_system, cursor.line).unwrap().len();
 
                 if self.cursor_x_opt.is_none() {
                     self.cursor_x_opt = Some(
@@ -222,18 +222,18 @@ impl<'a> Editor<'a> {
                     cursor.glyph = cursor_x as usize; //TODO: glyph x position
                 }
 
-                self.set_layout_cursor(cursor);
+                self.set_layout_cursor(font_system, cursor);
             },
             Action::Home => {
                 let mut cursor = self.buffer.layout_cursor(&self.cursor);
                 cursor.glyph = 0;
-                self.set_layout_cursor(cursor);
+                self.set_layout_cursor(font_system, cursor);
                 self.cursor_x_opt = None;
             },
             Action::End => {
                 let mut cursor = self.buffer.layout_cursor(&self.cursor);
                 cursor.glyph = usize::max_value();
-                self.set_layout_cursor(cursor);
+                self.set_layout_cursor(font_system, cursor);
                 self.cursor_x_opt = None;
             }
             Action::PageUp => {
@@ -400,7 +400,7 @@ impl<'a> Editor<'a> {
 
     /// Draw the editor
     #[cfg(feature = "swash")]
-    pub fn draw<F>(&self, cache: &mut crate::SwashCache, color: Color, mut f: F)
+    pub fn draw<F>(&self, font_system: &mut FontSystem, cache: &mut crate::SwashCache, color: Color, mut f: F)
         where F: FnMut(i32, i32, u32, u32, Color)
     {
         let font_size = self.buffer.metrics().font_size;
@@ -567,7 +567,7 @@ impl<'a> Editor<'a> {
                     None => color,
                 };
 
-                cache.with_pixels(cache_key, glyph_color, |x, y, color| {
+                cache.with_pixels(font_system, cache_key, glyph_color, |x, y, color| {
                     f(x_int + x, line_y + y_int + y, 1, 1, color)
                 });
             }

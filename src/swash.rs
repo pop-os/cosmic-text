@@ -12,7 +12,7 @@ use crate::{CacheKey, Color, FontSystem};
 
 pub use swash::scale::image::{Content as SwashContent, Image as SwashImage};
 
-fn swash_image<'a>(font_system: &'a FontSystem, context: &mut ScaleContext, cache_key: CacheKey) -> Option<SwashImage> {
+fn swash_image(font_system: &mut FontSystem, context: &mut ScaleContext, cache_key: CacheKey) -> Option<SwashImage> {
     let font = match font_system.get_font(cache_key.font_id) {
         Some(some) => some,
         None => {
@@ -51,42 +51,41 @@ fn swash_image<'a>(font_system: &'a FontSystem, context: &mut ScaleContext, cach
 }
 
 /// Cache for rasterizing with the swash scaler
-pub struct SwashCache<'a> {
-    font_system: &'a FontSystem,
+pub struct SwashCache {
     context: ScaleContext,
     pub image_cache: Map<CacheKey, Option<SwashImage>>,
 }
 
-impl<'a> SwashCache<'a> {
+impl SwashCache {
     /// Create a new swash cache
-    pub fn new(font_system: &'a FontSystem) -> Self {
+    pub fn new() -> Self {
         Self {
-            font_system: font_system,
             context: ScaleContext::new(),
             image_cache: Map::new()
         }
     }
 
     /// Create a swash Image from a cache key, without caching results
-    pub fn get_image_uncached(&mut self, cache_key: CacheKey) -> Option<SwashImage> {
-        swash_image(self.font_system, &mut self.context, cache_key)
+    pub fn get_image_uncached(&mut self, font_system: &mut FontSystem, cache_key: CacheKey) -> Option<SwashImage> {
+        swash_image(font_system, &mut self.context, cache_key)
     }
 
     /// Create a swash Image from a cache key, caching results
-    pub fn get_image(&mut self, cache_key: CacheKey) -> &Option<SwashImage> {
+    pub fn get_image(&mut self, font_system: &mut FontSystem, cache_key: CacheKey) -> &Option<SwashImage> {
         self.image_cache.entry(cache_key).or_insert_with(|| {
-            swash_image(self.font_system, &mut self.context, cache_key)
+            swash_image(font_system, &mut self.context, cache_key)
         })
     }
 
     /// Enumerate pixels in an Image, use `with_image` for better performance
     pub fn with_pixels<F: FnMut(i32, i32, Color)>(
         &mut self,
+        font_system: &mut FontSystem,
         cache_key: CacheKey,
         base: Color,
         mut f: F
     ) {
-        if let Some(image) = self.get_image(cache_key) {
+        if let Some(image) = self.get_image(font_system, cache_key) {
             let x = image.placement.left;
             let y = -image.placement.top;
 

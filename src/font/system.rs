@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use std::{
-    collections::HashMap,
-    sync::{Arc, Mutex},
-};
+use alloc::sync::Arc;
+#[cfg(not(feature = "std"))]
+use alloc::collections::BTreeMap as Map;
+#[cfg(feature = "std")]
+use std::collections::HashMap as Map;
 
 use crate::{Attrs, AttrsOwned, Font, FontMatches};
 
@@ -12,11 +13,11 @@ struct FontSystemInner {
     locale: String,
     db: fontdb::Database,
     #[borrows(db)]
-    #[not_covariant]
-    font_cache: Mutex<HashMap<fontdb::ID, Option<Arc<Font<'this>>>>>,
+    #[covariant]
+    font_cache: Map<fontdb::ID, Option<Arc<Font<'this>>>>,
     #[borrows(locale, db)]
-    #[not_covariant]
-    font_matches_cache: Mutex<HashMap<AttrsOwned, Arc<FontMatches<'this>>>>,
+    #[covariant]
+    font_matches_cache: Map<AttrsOwned, Arc<FontMatches<'this>>>,
 }
 
 /// Access system fonts
@@ -67,8 +68,8 @@ impl FontSystem {
         Self(FontSystemInnerBuilder {
             locale,
             db,
-            font_cache_builder: |_| Mutex::new(HashMap::new()),
-            font_matches_cache_builder: |_, _| Mutex::new(HashMap::new())
+            font_cache_builder: |_| Map::new(),
+            font_matches_cache_builder: |_, _| Map::new()
         }.build())
     }
 
@@ -80,17 +81,16 @@ impl FontSystem {
         self.0.borrow_db()
     }
 
-    pub fn get_font<'a>(&'a self, id: fontdb::ID) -> Option<Arc<Font<'a>>> {
-        self.0.with(|fields| {
-            get_font(&fields, id)
+    pub fn get_font<'a>(&'a mut self, id: fontdb::ID) -> Option<Arc<Font<'a>>> {
+        self.0.with_mut(|fields| {
+            get_font(fields.font_cache, fields.db, id)
         })
     }
 
-    pub fn get_font_matches<'a>(&'a self, attrs: Attrs) -> Arc<FontMatches<'a>> {
-        self.0.with(|fields| {
-            let mut font_matches_cache = fields.font_matches_cache.lock().unwrap();
+    pub fn get_font_matches<'a>(&'a mut self, attrs: Attrs) -> Arc<FontMatches<'a>> {
+        self.0.with_mut(|fields| {
             //TODO: do not create AttrsOwned unless entry does not already exist
-            font_matches_cache.entry(AttrsOwned::new(attrs)).or_insert_with(|| {
+            fields.font_matches_cache.entry(AttrsOwned::new(attrs)).or_insert_with(|| {
                 let now = std::time::Instant::now();
 
                 let mut fonts = Vec::new();
@@ -99,7 +99,7 @@ impl FontSystem {
                         continue;
                     }
 
-                    match get_font(&fields, face.id) {
+                    match get_font(fields.font_cache, fields.db, face.id) {
                         Some(font) => fonts.push(font),
                         None => (),
                     }
@@ -120,9 +120,9 @@ impl FontSystem {
     }
 }
 
-fn get_font<'b>(fields: &ouroboros_impl_font_system_inner::BorrowedFields<'_, 'b>, id: fontdb::ID) -> Option<Arc<Font<'b>>> {
-    fields.font_cache.lock().unwrap().entry(id).or_insert_with(|| {
-        let face = fields.db.face(id)?;
+fn get_font<'b>(font_cache: &mut Map<fontdb::ID, Option<Arc<Font<'b>>>>, db: &'b fontdb::Database, id: fontdb::ID) -> Option<Arc<Font<'b>>> {
+    font_cache.entry(id).or_insert_with(|| {
+        let face = db.face(id)?;
         match Font::new(face) {
             Some(font) => Some(Arc::new(font)),
             None => {
