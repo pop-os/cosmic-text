@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use std::collections::HashMap;
+#[cfg(not(feature = "std"))]
+use alloc::collections::BTreeMap as Map;
+#[cfg(feature = "std")]
+use std::collections::HashMap as Map;
 use swash::scale::{ScaleContext, image::Content};
 use swash::scale::{Render, Source, StrikeWith};
 use swash::zeno::{Format, Vector};
@@ -51,7 +54,7 @@ fn swash_image<'a>(font_system: &'a FontSystem, context: &mut ScaleContext, cach
 pub struct SwashCache<'a> {
     font_system: &'a FontSystem,
     context: ScaleContext,
-    pub image_cache: HashMap<CacheKey, Option<SwashImage>>,
+    pub image_cache: Map<CacheKey, Option<SwashImage>>,
 }
 
 impl<'a> SwashCache<'a> {
@@ -60,7 +63,7 @@ impl<'a> SwashCache<'a> {
         Self {
             font_system: font_system,
             context: ScaleContext::new(),
-            image_cache: HashMap::new()
+            image_cache: Map::new()
         }
     }
 

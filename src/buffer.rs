@@ -1,13 +1,19 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use std::{
+#[cfg(not(feature = "std"))]
+use alloc::{
+    string::{String, ToString},
+    vec::Vec,
+};
+use core::{
     cmp,
     fmt,
-    time::Instant,
 };
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::{Attrs, AttrsList, BufferLine, Color, FontSystem, LayoutGlyph, LayoutLine, ShapeLine};
+use crate::{Attrs, AttrsList, BufferLine, FontSystem, LayoutGlyph, LayoutLine, ShapeLine};
+#[cfg(feature = "swash")]
+use crate::Color;
 
 /// Current cursor location
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -170,7 +176,8 @@ impl<'a> Buffer<'a> {
     }
 
     fn relayout(&mut self) {
-        let instant = Instant::now();
+        #[cfg(feature = "std")]
+        let instant = std::time::Instant::now();
 
         for line in self.lines.iter_mut() {
             if line.shape_opt().is_some() {
@@ -185,13 +192,14 @@ impl<'a> Buffer<'a> {
 
         self.redraw = true;
 
-        let duration = instant.elapsed();
-        log::debug!("relayout: {:?}", duration);
+        #[cfg(feature = "std")]
+        log::debug!("relayout: {:?}", instant.elapsed());
     }
 
     /// Pre-shape lines in the buffer, up to `lines`, return actual number of layout lines
     pub fn shape_until(&mut self, lines: i32) -> i32 {
-        let instant = Instant::now();
+        #[cfg(feature = "std")]
+        let instant = std::time::Instant::now();
 
         let mut reshaped = 0;
         let mut total_layout = 0;
@@ -211,9 +219,9 @@ impl<'a> Buffer<'a> {
             total_layout += layout.len() as i32;
         }
 
-        let duration = instant.elapsed();
         if reshaped > 0 {
-            log::debug!("shape_until {}: {:?}", reshaped, duration);
+            #[cfg(feature = "std")]
+            log::debug!("shape_until {}: {:?}", reshaped, instant.elapsed());
             self.redraw = true;
         }
 
@@ -222,7 +230,8 @@ impl<'a> Buffer<'a> {
 
     /// Shape lines until cursor, also scrolling to include cursor in view
     pub fn shape_until_cursor(&mut self, cursor: Cursor) {
-        let instant = Instant::now();
+        #[cfg(feature = "std")]
+        let instant = std::time::Instant::now();
 
         let mut reshaped = 0;
         let mut layout_i = 0;
@@ -248,9 +257,9 @@ impl<'a> Buffer<'a> {
             }
         }
 
-        let duration = instant.elapsed();
         if reshaped > 0 {
-            log::debug!("shape_until_cursor {}: {:?}", reshaped, duration);
+            #[cfg(feature = "std")]
+            log::debug!("shape_until_cursor {}: {:?}", reshaped, instant.elapsed());
             self.redraw = true;
         }
 
@@ -409,7 +418,8 @@ impl<'a> Buffer<'a> {
 
     /// Convert x, y position to Cursor (hit detection)
     pub fn hit(&self, x: i32, y: i32) -> Option<Cursor> {
-        let instant = Instant::now();
+        #[cfg(feature = "std")]
+        let instant = std::time::Instant::now();
 
         let font_size = self.metrics.font_size;
         let line_height = self.metrics.line_height;
@@ -485,8 +495,8 @@ impl<'a> Buffer<'a> {
             }
         }
 
-        let duration = instant.elapsed();
-        log::trace!("click({}, {}): {:?}", x, y, duration);
+        #[cfg(feature = "std")]
+        log::trace!("click({}, {}): {:?}", x, y, instant.elapsed());
 
         new_cursor_opt
     }
