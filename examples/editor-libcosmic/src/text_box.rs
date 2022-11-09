@@ -1,15 +1,18 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use cosmic::iced_native::{
-    {Color, Element, Length, Point, Rectangle, Shell, Size, Theme},
-    clipboard::Clipboard,
-    event::{Event, Status},
-    image,
-    keyboard::{Event as KeyEvent, KeyCode},
-    layout::{self, Layout},
-    mouse::{self, Button, Event as MouseEvent, ScrollDelta},
-    renderer,
-    widget::{self, tree, Widget},
+use cosmic::{
+    iced_native::{
+        {Color, Element, Length, Point, Rectangle, Shell, Size},
+        clipboard::Clipboard,
+        event::{Event, Status},
+        image,
+        keyboard::{Event as KeyEvent, KeyCode},
+        layout::{self, Layout},
+        mouse::{self, Button, Event as MouseEvent, ScrollDelta},
+        renderer,
+        widget::{self, tree, Widget},
+    },
+    theme::Theme,
 };
 use cosmic_text::{
     Action,

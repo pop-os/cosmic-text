@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic::{
+    Element,
     iced::{
         self,
         Color,
         Alignment,
         Application,
         Command,
-        Element,
         Length,
-        Theme,
         widget::{
             column,
             horizontal_space,
@@ -18,6 +17,7 @@ use cosmic::{
         },
     },
     settings,
+    theme::Theme,
     widget::{
         button,
         toggler,

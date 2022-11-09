@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use cosmic::iced_native::{
-    {Color, Element, Length, Point, Rectangle, Size, Theme},
-    image,
-    layout::{self, Layout},
-    renderer,
-    widget::{self, tree, Widget},
+use cosmic::{
+    iced_native::{
+        {Color, Element, Length, Point, Rectangle, Size},
+        image,
+        layout::{self, Layout},
+        renderer,
+        widget::{self, tree, Widget},
+    },
+    theme::Theme,
 };
 use cosmic_text::{
     Attrs,
