@@ -13,11 +13,10 @@ use cosmic::{
         widget::{self, tree, Widget},
         Padding
     },
-    theme::Theme,
 };
 use cosmic_text::{
     Action,
-    Editor,
+    SyntaxEditor,
     SwashCache,
 };
 use std::{
@@ -27,58 +26,32 @@ use std::{
 };
 use super::text;
 
-pub struct Appearance {
-    background_color: Option<Color>,
-    text_color: Color,
-}
-
-pub trait StyleSheet {
-    fn appearance(&self) -> Appearance;
-}
-
-impl StyleSheet for Theme {
-    fn appearance(&self) -> Appearance {
-        match self {
-            Theme::Dark => Appearance {
-                background_color: Some(Color::from_rgb8(0x34, 0x34, 0x34)),
-                text_color: Color::from_rgb8(0xFF, 0xFF, 0xFF),
-            },
-            Theme::Light => Appearance {
-                background_color: Some(Color::from_rgb8(0xFC, 0xFC, 0xFC)),
-                text_color: Color::from_rgb8(0x00, 0x00, 0x00),
-            },
-        }
-    }
-}
-
-pub struct TextBox<'a> {
-    editor: &'a Mutex<Editor<'static>>,
+pub struct SyntaxTextBox<'a> {
+    editor: &'a Mutex<SyntaxEditor<'static>>,
     padding: Padding,
 }
 
-impl<'a> TextBox<'a> {
-    pub fn new(editor: &'a Mutex<Editor<'static>>) -> Self {
+impl<'a> SyntaxTextBox<'a> {
+    pub fn new(editor: &'a Mutex<SyntaxEditor<'static>>) -> Self {
         Self {
             editor,
             padding: Padding::new(0),
         }
     }
-    
+
     pub fn padding<P: Into<Padding>>(mut self, padding: P) -> Self {
         self.padding = padding.into();
         self
     }
-    
 }
 
-pub fn text_box<'a>(editor: &'a Mutex<Editor<'static>>) -> TextBox<'a> {
-    TextBox::new(editor)
+pub fn syntax_text_box<'a>(editor: &'a Mutex<SyntaxEditor<'static>>) -> SyntaxTextBox<'a> {
+    SyntaxTextBox::new(editor)
 }
 
-impl<'a, Message, Renderer> Widget<Message, Renderer> for TextBox<'a>
+impl<'a, Message, Renderer> Widget<Message, Renderer> for SyntaxTextBox<'a>
 where
     Renderer: renderer::Renderer + image::Renderer<Handle = image::Handle>,
-    Renderer::Theme: StyleSheet,
 {
     fn tag(&self) -> tree::Tag {
         tree::Tag::of::<State>()
@@ -105,17 +78,17 @@ where
 
         //TODO: allow lazy shape
         let mut editor = self.editor.lock().unwrap();
-        editor.buffer.shape_until(i32::max_value());
+        editor.buffer_mut().shape_until(i32::max_value());
 
         let mut layout_lines = 0;
-        for line in editor.buffer.lines.iter() {
+        for line in editor.buffer().lines.iter() {
             match line.layout_opt() {
                 Some(layout) => layout_lines += layout.len(),
                 None => (),
             }
         }
 
-        let height = layout_lines as f32 * editor.buffer.metrics().line_height as f32;
+        let height = layout_lines as f32 * editor.buffer().metrics().line_height as f32;
         let size = Size::new(limits.max().width, height);
         log::info!("size {:?}", size);
 
@@ -141,7 +114,7 @@ where
         &self,
         tree: &widget::Tree,
         renderer: &mut Renderer,
-        theme: &Renderer::Theme,
+        _theme: &Renderer::Theme,
         _style: &renderer::Style,
         layout: Layout<'_>,
         _cursor_position: Point,
@@ -149,32 +122,11 @@ where
     ) {
         let state = tree.state.downcast_ref::<State>();
 
-        let appearance = theme.appearance();
-
-        if let Some(background_color) = appearance.background_color {
-            renderer.fill_quad(
-                renderer::Quad {
-                    bounds: layout.bounds(),
-                    border_radius: 0.0,
-                    border_width: 0.0,
-                    border_color: Color::TRANSPARENT,
-                },
-                background_color
-            );
-        }
-
-        let text_color = cosmic_text::Color::rgba(
-            cmp::max(0, cmp::min(255, (appearance.text_color.r * 255.0) as i32)) as u8,
-            cmp::max(0, cmp::min(255, (appearance.text_color.g * 255.0) as i32)) as u8,
-            cmp::max(0, cmp::min(255, (appearance.text_color.b * 255.0) as i32)) as u8,
-            cmp::max(0, cmp::min(255, (appearance.text_color.a * 255.0) as i32)) as u8,
-        );
-
         let mut editor = self.editor.lock().unwrap();
 
         let view_w = cmp::min(viewport.width as i32, layout.bounds().width as i32) - self.padding.horizontal() as i32;
-        let view_h = cmp::min(viewport.height as i32, layout.bounds().height as i32) - self.padding.vertical() as i32;
-        editor.buffer.set_size(view_w, view_h);
+        let view_h = cmp::min(viewport.height as i32, layout.bounds().height as i32)- self.padding.vertical() as i32;
+        editor.buffer_mut().set_size(view_w, view_h);
 
         editor.shape_as_needed();
 
@@ -182,7 +134,7 @@ where
 
         let mut pixels = vec![0; view_w as usize * view_h as usize * 4];
 
-        editor.draw(&mut state.cache.lock().unwrap(), text_color, |x, y, w, h, color| {
+        editor.draw(&mut state.cache.lock().unwrap(), |x, y, w, h, color| {
             if w <= 0 || h <= 0 {
                 // Do not draw invalid sized rectangles
                 return;
@@ -194,7 +146,7 @@ where
                     renderer::Quad {
                         bounds: Rectangle::new(
                             layout.position() + [x as f32, y as f32].into() + [self.padding.left as f32, self.padding.top as f32].into(),
-                            Size::new(w as f32 , h as f32)
+                            Size::new(w as f32, h as f32)
                         ),
                         border_radius: 0.0,
                         border_width: 0.0,
@@ -214,7 +166,7 @@ where
 
         let handle = image::Handle::from_pixels(view_w as u32, view_h as u32, pixels);
         image::Renderer::draw(renderer, handle, Rectangle::new(
-  layout.position() + [self.padding.left as f32, self.padding.top as f32].into(),
+            layout.position() + [self.padding.left as f32, self.padding.top as f32].into(),
             Size::new(view_w as f32, view_h as f32)
         ));
 
@@ -327,12 +279,11 @@ where
     }
 }
 
-impl<'a, Message, Renderer> From<TextBox<'a>> for Element<'a, Message, Renderer>
+impl<'a, Message, Renderer> From<SyntaxTextBox<'a>> for Element<'a, Message, Renderer>
 where
     Renderer: renderer::Renderer + image::Renderer<Handle = image::Handle>,
-    Renderer::Theme: StyleSheet,
 {
-    fn from(text_box: TextBox<'a>) -> Self {
+    fn from(text_box: SyntaxTextBox<'a>) -> Self {
         Self::new(text_box)
     }
 }

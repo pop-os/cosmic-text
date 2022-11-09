@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 /// Key for building a glyph cache
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct CacheKey {
     /// Font ID
     pub font_id: fontdb::ID,
@@ -39,7 +39,7 @@ impl CacheKey {
 }
 
 /// Binning of subpixel position for cache optimization
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum SubpixelBin {
     Zero,
     One,
@@ -49,8 +49,8 @@ pub enum SubpixelBin {
 
 impl SubpixelBin {
     pub fn new(pos: f32) -> (i32, Self) {
-        let trunc = pos.trunc() as i32;
-        let fract = pos.fract();
+        let (fract, truncf) = libm::modff(pos);
+        let trunc = truncf as i32;
         if pos.is_sign_negative() {
             if fract > -0.125 {
                 (trunc, Self::Zero)

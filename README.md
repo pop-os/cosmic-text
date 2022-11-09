@@ -16,6 +16,17 @@ implementation, reusing some of the static fallback lists in browsers such as
 Chromium and Firefox. Linux, macOS, and Windows are supported with the full
 feature set. Other platforms may need to implement font fallback capabilities.
 
+## Screenshots
+
+Arabic translation of Universal Declaration of Human Rights
+[![Arabic screenshot](screenshots/arabic.png)](screenshots/arabic.png)
+
+Hindi translation of Universal Declaration of Human Rights
+[![Hindi screenshot](screenshots/hindi.png)](screenshots/hindi.png)
+
+Simplified Chinese translation of Universal Declaration of Human Rights
+[![Simplified Chinses screenshot](screenshots/chinese-simplified.png)](screenshots/chinese-simplified.png)
+
 ## Roadmap
 
 The following features must be supported before this is "ready":
@@ -51,14 +62,19 @@ The following features must be supported before this is "ready":
     - [x] Can automatically recreate https://unicode.org/udhr/ without errors (see below)
     - [x] Bidirectional selection
     - [ ] Copy/paste
+- [x] no_std support (with `default-features = false`)
+    - [ ] no_std font loading
+    - [x] no_std shaping
+    - [x] no_std layout
+    - [ ] no_std rendering
 
-The UDHR (UN Declaration of Human Rights) test involves taking the entire set of
-UDHR translations (almost 500 languages), concatenating them as one file (which
-ends up being 8 megabytes!), then via the `editor-test` example, automatically
-simulating the entry of that file into cosmic-text per-character, with the use
-of backspace and delete tested per character and per line. Then, the final
-contents of the buffer is compared to the original file. All of the 106746
-lines are correct.
+The UDHR (Universal Declaration of Human Rights) test involves taking the entire
+set of UDHR translations (almost 500 languages), concatenating them as one file
+(which ends up being 8 megabytes!), then via the `editor-test` example,
+automatically simulating the entry of that file into cosmic-text per-character,
+with the use of backspace and delete tested per character and per line. Then,
+the final contents of the buffer is compared to the original file. All of the
+106746 lines are correct.
 
 ## License
 

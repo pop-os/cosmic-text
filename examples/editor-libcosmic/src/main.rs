@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic::{
+    Element,
     iced::{
         self,
         Color,
         Alignment,
         Application,
         Command,
-        Element,
         Length,
-        Theme,
         widget::{
             column,
             horizontal_space,
@@ -18,6 +17,7 @@ use cosmic::{
         },
     },
     settings,
+    theme::Theme,
     widget::{
         button,
         toggler,
@@ -27,9 +27,10 @@ use cosmic_text::{
     Attrs,
     AttrsList,
     Buffer,
-    Editor,
     FontSystem,
     Metrics,
+    SyntaxEditor,
+    SyntaxSystem,
 };
 use std::{
     env,
@@ -37,6 +38,9 @@ use std::{
     path::PathBuf,
     sync::Mutex,
 };
+
+use self::syntax_text_box::syntax_text_box;
+mod syntax_text_box;
 
 use self::text::text;
 mod text;
@@ -46,6 +50,7 @@ mod text_box;
 
 lazy_static::lazy_static! {
     static ref FONT_SYSTEM: FontSystem = FontSystem::new();
+    static ref SYNTAX_SYSTEM: SyntaxSystem = SyntaxSystem::new();
 }
 
 static FONT_SIZES: &'static [Metrics] = &[
@@ -69,7 +74,7 @@ pub struct Window {
     theme: Theme,
     path_opt: Option<PathBuf>,
     attrs: Attrs<'static>,
-    editor: Mutex<Editor<'static>>,
+    editor: Mutex<SyntaxEditor<'static>>,
 }
 
 #[allow(dead_code)]
@@ -87,15 +92,13 @@ pub enum Message {
 impl Window {
     pub fn open(&mut self, path: PathBuf) {
         let mut editor = self.editor.lock().unwrap();
-        match fs::read_to_string(&path) {
-            Ok(text) => {
+        match editor.load_text(&path, self.attrs) {
+            Ok(()) => {
                 log::info!("opened '{}'", path.display());
-                editor.buffer.set_text(&text, self.attrs);
                 self.path_opt = Some(path);
             },
             Err(err) => {
                 log::error!("failed to open '{}': {}", path.display(), err);
-                editor.buffer.set_text("", self.attrs);
                 self.path_opt = None;
             }
         }
@@ -113,10 +116,11 @@ impl Application for Window {
             .monospaced(true)
             .family(cosmic_text::Family::Monospace);
 
-        let mut editor = Editor::new(Buffer::new(
-            &FONT_SYSTEM,
-            FONT_SIZES[1 /* Body */],
-        ));
+        let mut editor = SyntaxEditor::new(
+            Buffer::new(&FONT_SYSTEM, FONT_SIZES[1 /* Body */]),
+            &SYNTAX_SYSTEM,
+            "base16-eighties.dark"
+        ).unwrap();
         update_attrs(&mut editor, attrs);
 
         let mut window = Window {
@@ -154,7 +158,7 @@ impl Application for Window {
                 if let Some(path) = &self.path_opt {
                     let editor = self.editor.lock().unwrap();
                     let mut text = String::new();
-                    for line in editor.buffer.lines.iter() {
+                    for line in editor.buffer().lines.iter() {
                         text.push_str(line.text());
                         text.push('\n');
                     }
@@ -202,7 +206,7 @@ impl Application for Window {
             },
             Message::MetricsChanged(metrics) => {
                 let mut editor = self.editor.lock().unwrap();
-                editor.buffer.set_metrics(metrics);
+                editor.buffer_mut().set_metrics(metrics);
             },
             Message::ThemeChanged(theme) => {
                 self.theme = match theme {
@@ -238,7 +242,7 @@ impl Application for Window {
             let editor = self.editor.lock().unwrap();
             pick_list(
                 FONT_SIZES,
-                Some(editor.buffer.metrics()),
+                Some(editor.buffer().metrics()),
                 Message::MetricsChanged
             )
         };
@@ -262,7 +266,7 @@ impl Application for Window {
             .align_items(Alignment::Center)
             .spacing(8)
             ,
-            text_box(&self.editor).padding(40)
+            syntax_text_box(&self.editor)
         ]
         .spacing(8)
         .padding(16)
@@ -273,8 +277,8 @@ impl Application for Window {
     }
 }
 
-fn update_attrs<'a>(editor: &mut Editor<'a>, attrs: Attrs<'a>) {
-    editor.buffer.lines.iter_mut().for_each(|line| {
+fn update_attrs<'a>(editor: &mut SyntaxEditor<'a>, attrs: Attrs<'a>) {
+    editor.buffer_mut().lines.iter_mut().for_each(|line| {
         line.set_attrs_list(AttrsList::new(attrs));
     });
 }

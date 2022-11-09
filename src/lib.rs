@@ -54,6 +54,10 @@
 //! });
 //! ```
 
+#![cfg_attr(not(feature = "std"), no_std)]
+
+extern crate alloc;
+
 pub use self::attrs::*;
 mod attrs;
 
@@ -82,3 +86,8 @@ mod shape;
 pub use self::swash::*;
 #[cfg(feature = "swash")]
 mod swash;
+
+#[cfg(feature = "syntect")]
+pub use self::syntect::*;
+#[cfg(feature = "syntect")]
+mod syntect;

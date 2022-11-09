@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use std::cmp;
+#[cfg(not(feature = "std"))]
+use alloc::string::{String, ToString};
+use core::cmp;
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::{AttrsList, Buffer, BufferLine, Color, Cursor, LayoutCursor};
+use crate::{AttrsList, Buffer, BufferLine, Cursor, LayoutCursor};
+#[cfg(feature = "swash")]
+use crate::Color;
 
 /// An action to perform on an [Editor]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -102,12 +106,136 @@ impl<'a> Editor<'a> {
         }
     }
 
+    /// Get the internal [Buffer]
+    pub fn buffer(&self) -> &Buffer<'a> {
+        &self.buffer
+    }
+
+    /// Get the internal [Buffer], mutably
+    pub fn buffer_mut(&mut self) -> &mut Buffer<'a> {
+        &mut self.buffer
+    }
+
     /// Get the current cursor position
     pub fn cursor(&self) -> Cursor {
         self.cursor
     }
 
-    /// Perform a [Action] on the editor
+    /// Copy selection
+    pub fn copy_selection(&mut self) -> Option<String> {
+        let select = self.select_opt?;
+
+        let (start, end) = match select.line.cmp(&self.cursor.line) {
+            cmp::Ordering::Greater => (self.cursor, select),
+            cmp::Ordering::Less => (select, self.cursor),
+            cmp::Ordering::Equal => {
+                /* select.line == self.cursor.line */
+                if select.index < self.cursor.index {
+                    (select, self.cursor)
+                } else {
+                    /* select.index >= self.cursor.index */
+                    (self.cursor, select)
+                }
+            }
+        };
+
+        let mut selection = String::new();
+        // Take the selection from the first line
+        {
+            // Add selected part of line to string
+            if start.line == end.line {
+                selection.push_str(&self.buffer.lines[start.line].text()[start.index..end.index]);
+            } else {
+                selection.push_str(&self.buffer.lines[start.line].text()[start.index..]);
+                selection.push('\n');
+            }
+        }
+
+        // Take the selection from all interior lines (if they exist)
+        for line_i in start.line + 1..end.line {
+            selection.push_str(self.buffer.lines[line_i].text());
+            selection.push('\n');
+        }
+
+        // Take the selection from the last line
+        if end.line > start.line {
+            // Add selected part of line to string
+            selection.push_str(&self.buffer.lines[end.line].text()[..end.index]);
+        }
+
+        Some(selection)
+    }
+
+    /// Delete selection, adjusting cursor and returning true if there was a selection
+    // Helper function for backspace, delete, insert, and enter when there is a selection
+    pub fn delete_selection(&mut self) -> bool {
+        let select = match self.select_opt.take() {
+            Some(some) => some,
+            None => return false,
+        };
+
+        let (start, end) = match select.line.cmp(&self.cursor.line) {
+            cmp::Ordering::Greater => (self.cursor, select),
+            cmp::Ordering::Less => (select, self.cursor),
+            cmp::Ordering::Equal => {
+                /* select.line == self.cursor.line */
+                if select.index < self.cursor.index {
+                    (select, self.cursor)
+                } else {
+                    /* select.index >= self.cursor.index */
+                    (self.cursor, select)
+                }
+            }
+        };
+
+        // Reset cursor to start of selection
+        self.cursor = start;
+
+        // Delete the selection from the last line
+        let end_line_opt = if end.line > start.line {
+            // Get part of line after selection
+            let after = self.buffer.lines[end.line].split_off(end.index);
+
+            // Remove end line
+            self.buffer.lines.remove(end.line);
+
+            Some(after)
+        } else {
+            None
+        };
+
+        // Delete interior lines (in reverse for safety)
+        for line_i in (start.line + 1..end.line).rev() {
+            self.buffer.lines.remove(line_i);
+        }
+
+        // Delete the selection from the first line
+        {
+            // Get part after selection if start line is also end line
+            let after_opt = if start.line == end.line {
+                Some(self.buffer.lines[start.line].split_off(end.index))
+            } else {
+                None
+            };
+
+            // Delete selected part of line
+            self.buffer.lines[start.line].split_off(start.index);
+
+            // Re-add part of line after selection
+            if let Some(after) = after_opt {
+                self.buffer.lines[start.line].append(after);
+            }
+
+            // Re-add valid parts of end line
+            if let Some(end_line) = end_line_opt {
+                self.buffer.lines[start.line].append(end_line);
+            }
+        }
+
+        true
+    }
+
+    /// Perform an [Action] on the editor
     pub fn action(&mut self, action: Action) {
         let old_cursor = self.cursor;
 
@@ -250,6 +378,8 @@ impl<'a> Editor<'a> {
                     // Filter out special chars (except for tab), use Action instead
                     log::debug!("Refusing to insert control character {:?}", character);
                 } else {
+                    self.delete_selection();
+
                     let line = &mut self.buffer.lines[self.cursor.line];
 
                     // Collect text after insertion as a line
@@ -268,6 +398,8 @@ impl<'a> Editor<'a> {
                 }
             },
             Action::Enter => {
+                self.delete_selection();
+
                 let new_line = self.buffer.lines[self.cursor.line].split_off(self.cursor.index);
 
                 self.cursor.line += 1;
@@ -276,7 +408,9 @@ impl<'a> Editor<'a> {
                 self.buffer.lines.insert(self.cursor.line, new_line);
             },
             Action::Backspace => {
-                if self.cursor.index > 0 {
+                if self.delete_selection() {
+                    // Deleted selection
+                } else if self.cursor.index > 0 {
                     let line = &mut self.buffer.lines[self.cursor.line];
 
                     // Get text line after cursor
@@ -313,7 +447,9 @@ impl<'a> Editor<'a> {
                 }
             },
             Action::Delete => {
-                if self.cursor.index < self.buffer.lines[self.cursor.line].text().len() {
+                if self.delete_selection() {
+                    // Deleted selection
+                } else if self.cursor.index < self.buffer.lines[self.cursor.line].text().len() {
                     let line = &mut self.buffer.lines[self.cursor.line];
 
                     let range_opt = line

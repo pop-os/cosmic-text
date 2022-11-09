@@ -1,47 +1,26 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic_text::{
+    Action,
     Attrs,
-    AttrsList,
     Buffer,
-    Color,
-    Editor,
     Family,
     FontSystem,
     Metrics,
-    Style,
     SwashCache,
-    Action,
-    Weight
+    SyntaxEditor,
+    SyntaxSystem,
 };
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
-use std::{env, fs, thread, time::{Duration, Instant}};
-use syntect::highlighting::{
-    FontStyle,
-    Highlighter,
-    HighlightState,
-    RangedHighlightIterator,
-    ThemeSet,
-};
-use syntect::parsing::{
-    ParseState,
-    ScopeStack,
-    SyntaxSet,
-};
+use std::{env, thread, time::{Duration, Instant}};
 
 fn main() {
     env_logger::init();
 
-    let (path, text) = if let Some(arg) = env::args().nth(1) {
-        (
-            arg.clone(),
-            fs::read_to_string(&arg).expect("failed to open file")
-        )
+    let path = if let Some(arg) = env::args().nth(1) {
+        arg.clone()
     } else {
-        (
-            String::new(),
-            String::new()
-        )
+        String::new()
     };
 
     let display_scale = match orbclient::get_display_size() {
@@ -67,6 +46,8 @@ fn main() {
 
     let font_system = FontSystem::new();
 
+    let syntax_system = SyntaxSystem::new();
+
     let font_sizes = [
         Metrics::new(10, 14).scale(display_scale), // Caption
         Metrics::new(14, 20).scale(display_scale), // Body
@@ -79,12 +60,13 @@ fn main() {
     let mut font_size_i = font_size_default;
 
     let line_x = 8 * display_scale;
-    let mut editor = Editor::new(Buffer::new(
-        &font_system,
-        font_sizes[font_size_i]
-    ));
+    let mut editor = SyntaxEditor::new(
+        Buffer::new(&font_system, font_sizes[font_size_i]),
+        &syntax_system,
+        "base16-eighties.dark"
+    ).unwrap();
 
-    editor.buffer.set_size(
+    editor.buffer_mut().set_size(
         window.width() as i32 - line_x * 2,
         window.height() as i32
     );
@@ -92,146 +74,28 @@ fn main() {
     let attrs = Attrs::new()
         .monospaced(true)
         .family(Family::Monospace);
-    editor.buffer.set_text(&text, attrs);
-
-    let mut bg_color = orbclient::Color::rgb(0x00, 0x00, 0x00);
-    let mut font_color = Color::rgb(0xFF, 0xFF, 0xFF);
-
-    let now = Instant::now();
-
-    //TODO: store newlines in buffer
-    let ps = SyntaxSet::load_defaults_nonewlines();
-    let ts = ThemeSet::load_defaults();
-    let theme = &ts.themes["base16-eighties.dark"];
-    let highlighter = Highlighter::new(theme);
-
-    if let Some(background) = theme.settings.background {
-        bg_color = orbclient::Color::rgba(
-            background.r,
-            background.g,
-            background.b,
-            background.a,
-        );
-    }
-
-    if let Some(foreground) = theme.settings.foreground {
-        font_color = Color::rgba(
-            foreground.r,
-            foreground.g,
-            foreground.b,
-            foreground.a,
-        );
-    }
-
-    let syntax = match ps.find_syntax_for_file(&path) {
-        Ok(Some(some)) => some,
-        Ok(None) => {
-            log::warn!("no syntax found for {:?}", path);
-            ps.find_syntax_plain_text()
-        }
+    match editor.load_text(&path, attrs) {
+        Ok(()) => (),
         Err(err) => {
-            log::warn!("failed to determine syntax for {:?}: {:?}", path, err);
-            ps.find_syntax_plain_text()
+            log::error!("failed to load {:?}: {}", path, err);
         }
-    };
-
-    log::info!("using syntax {:?}, loaded in {:?}", syntax.name, now.elapsed());
+    }
 
     let mut swash_cache = SwashCache::new(&font_system);
-
-    let mut syntax_cache = Vec::<(ParseState, HighlightState)>::new();
 
     let mut ctrl_pressed = false;
     let mut mouse_x = -1;
     let mut mouse_y = -1;
     let mut mouse_left = false;
-    let mut rehighlight = true;
     loop {
-        if rehighlight {
-            let now = Instant::now();
-
-            for line_i in 0..editor.buffer.lines.len() {
-                let line = &mut editor.buffer.lines[line_i];
-                if ! line.is_reset() && line_i < syntax_cache.len() {
-                    continue;
-                }
-
-                let (mut parse_state, mut highlight_state) = if line_i > 0 && line_i <= syntax_cache.len() {
-                    syntax_cache[line_i - 1].clone()
-                } else {
-                    (
-                        ParseState::new(syntax),
-                        HighlightState::new(&highlighter, ScopeStack::new())
-                    )
-                };
-
-                let ops = parse_state.parse_line(line.text(), &ps).unwrap();
-                let ranges = RangedHighlightIterator::new(
-                    &mut highlight_state,
-                    &ops,
-                    line.text(),
-                    &highlighter,
-                );
-
-                let mut attrs_list = AttrsList::new(attrs);
-                for (style, _, range) in ranges {
-                    attrs_list.add_span(
-                        range,
-                        attrs
-                            .color(Color::rgba(
-                                style.foreground.r,
-                                style.foreground.g,
-                                style.foreground.b,
-                                style.foreground.a,
-                            ))
-                            //TODO: background
-                            .style(if style.font_style.contains(FontStyle::ITALIC) {
-                                Style::Italic
-                            } else {
-                                Style::Normal
-                            })
-                            .weight(if style.font_style.contains(FontStyle::BOLD) {
-                                Weight::BOLD
-                            } else {
-                                Weight::NORMAL
-                            })
-                            //TODO: underline
-                    );
-                }
-
-                // Update line attributes. This operation only resets if the line changes
-                line.set_attrs_list(attrs_list);
-                line.set_wrap_simple(true);
-
-                //TODO: efficiently do syntax highlighting without having to shape whole buffer
-                line.shape(&font_system);
-
-                let cache_item = (parse_state.clone(), highlight_state.clone());
-                if line_i < syntax_cache.len() {
-                    if syntax_cache[line_i] != cache_item {
-                        syntax_cache[line_i] = cache_item;
-                        if line_i + 1 < editor.buffer.lines.len() {
-                            editor.buffer.lines[line_i + 1].reset();
-                        }
-                    }
-                } else {
-                    syntax_cache.push(cache_item);
-                }
-            }
-
-            editor.buffer.redraw = true;
-            rehighlight = false;
-
-            log::info!("Syntax highlighted in {:?}", now.elapsed());
-        }
-
         editor.shape_as_needed();
-        if editor.buffer.redraw {
+        if editor.buffer_mut().redraw {
             let instant = Instant::now();
 
-            window.set(bg_color);
+            let bg = editor.background_color();
+            window.set(orbclient::Color::rgb(bg.r(), bg.g(), bg.b()));
 
-            editor.draw(&mut swash_cache, font_color, |x, y, w, h, color| {
+            editor.draw(&mut swash_cache, |x, y, w, h, color| {
                 window.rect(line_x + x, y, w, h, orbclient::Color { data: color.0 })
             });
 
@@ -239,7 +103,7 @@ fn main() {
             {
                 let mut start_line_opt = None;
                 let mut end_line = 0;
-                for run in editor.buffer.layout_runs() {
+                for run in editor.buffer().layout_runs() {
                     end_line = run.line_i;
                     if start_line_opt == None {
                         start_line_opt = Some(end_line);
@@ -247,7 +111,7 @@ fn main() {
                 }
 
                 let start_line = start_line_opt.unwrap_or(end_line);
-                let lines = editor.buffer.lines.len();
+                let lines = editor.buffer().lines.len();
                 let start_y = (start_line * window.height() as usize) / lines;
                 let end_y = (end_line * window.height() as usize) / lines;
                 if end_y > start_y {
@@ -263,10 +127,9 @@ fn main() {
 
             window.sync();
 
-            editor.buffer.redraw = false;
+            editor.buffer_mut().redraw = false;
 
-            let duration = instant.elapsed();
-            log::debug!("redraw: {:?}", duration);
+            log::debug!("redraw: {:?}", instant.elapsed());
         }
 
         let mut found_event = false;
@@ -285,39 +148,29 @@ fn main() {
                     orbclient::K_END if event.pressed => editor.action(Action::End),
                     orbclient::K_PGUP if event.pressed => editor.action(Action::PageUp),
                     orbclient::K_PGDN if event.pressed => editor.action(Action::PageDown),
-                    orbclient::K_ENTER if event.pressed => {
-                        editor.action(Action::Enter);
-                        rehighlight = true;
-                    },
-                    orbclient::K_BKSP if event.pressed => {
-                        editor.action(Action::Backspace);
-                        rehighlight = true;
-                    },
-                    orbclient::K_DEL if event.pressed => {
-                        editor.action(Action::Delete);
-                        rehighlight = true;
-                    },
+                    orbclient::K_ENTER if event.pressed => editor.action(Action::Enter),
+                    orbclient::K_BKSP if event.pressed => editor.action(Action::Backspace),
+                    orbclient::K_DEL if event.pressed => editor.action(Action::Delete),
                     orbclient::K_0 if event.pressed && ctrl_pressed => {
                         font_size_i = font_size_default;
-                        editor.buffer.set_metrics(font_sizes[font_size_i]);
+                        editor.buffer_mut().set_metrics(font_sizes[font_size_i]);
                     }
                     orbclient::K_MINUS if event.pressed && ctrl_pressed => {
                         if font_size_i > 0 {
                             font_size_i -= 1;
-                            editor.buffer.set_metrics(font_sizes[font_size_i]);
+                            editor.buffer_mut().set_metrics(font_sizes[font_size_i]);
                         }
                     }
                     orbclient::K_EQUALS if event.pressed && ctrl_pressed => {
                         if font_size_i + 1 < font_sizes.len() {
                             font_size_i += 1;
-                            editor.buffer.set_metrics(font_sizes[font_size_i]);
+                            editor.buffer_mut().set_metrics(font_sizes[font_size_i]);
                         }
                     }
                     _ => (),
                 },
                 EventOption::TextInput(event) if !ctrl_pressed => {
                     editor.action(Action::Insert(event.character));
-                    rehighlight = true;
                 }
                 EventOption::Mouse(event) => {
                     mouse_x = event.x;
@@ -352,7 +205,7 @@ fn main() {
                     }
                 }
                 EventOption::Resize(event) => {
-                    editor.buffer.set_size(event.width as i32 - line_x * 2, event.height as i32);
+                    editor.buffer_mut().set_size(event.width as i32 - line_x * 2, event.height as i32);
                 }
                 EventOption::Scroll(event) => {
                     editor.action(Action::Scroll {

@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
+
 use crate::{CacheKey, Color};
 
 /// A laid out glyph

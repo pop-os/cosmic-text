@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 use cosmic_text::{Attrs, Color, FontSystem, SwashCache, Buffer, Metrics};
 use std::cmp;
 use termion::{
@@ -92,9 +94,9 @@ fn main() {
         print!(
             "{} {}",
             color::Bg(color::Rgb(
-                scale(color.b()),
-                scale(color.g()),
                 scale(color.r()),
+                scale(color.g()),
+                scale(color.b()),
             )),
             color::Bg(color::Reset),
         );
