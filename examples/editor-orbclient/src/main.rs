@@ -3,7 +3,7 @@
 use cosmic_text::{
     Action,
     Attrs,
-    Color,
+    Buffer,
     Family,
     FontSystem,
     Metrics,
@@ -46,7 +46,7 @@ fn main() {
 
     let font_system = FontSystem::new();
 
-    let syntax_system = SyntaxSystem::new(&font_system);
+    let syntax_system = SyntaxSystem::new();
 
     let font_sizes = [
         Metrics::new(10, 14).scale(display_scale), // Caption
@@ -61,8 +61,8 @@ fn main() {
 
     let line_x = 8 * display_scale;
     let mut editor = SyntaxEditor::new(
+        Buffer::new(&font_system, font_sizes[font_size_i]),
         &syntax_system,
-        font_sizes[font_size_i],
         "base16-eighties.dark"
     ).unwrap();
 
@@ -81,27 +81,6 @@ fn main() {
         }
     }
 
-    let mut bg_color = orbclient::Color::rgb(0x00, 0x00, 0x00);
-    let mut font_color = Color::rgb(0xFF, 0xFF, 0xFF);
-
-    if let Some(background) = editor.theme.settings.background {
-        bg_color = orbclient::Color::rgba(
-            background.r,
-            background.g,
-            background.b,
-            background.a,
-        );
-    }
-
-    if let Some(foreground) = editor.theme.settings.foreground {
-        font_color = Color::rgba(
-            foreground.r,
-            foreground.g,
-            foreground.b,
-            foreground.a,
-        );
-    }
-
     let mut swash_cache = SwashCache::new(&font_system);
 
     let mut ctrl_pressed = false;
@@ -113,9 +92,10 @@ fn main() {
         if editor.buffer_mut().redraw {
             let instant = Instant::now();
 
-            window.set(bg_color);
+            let bg = editor.background_color();
+            window.set(orbclient::Color::rgb(bg.r(), bg.g(), bg.b()));
 
-            editor.draw(&mut swash_cache, font_color, |x, y, w, h, color| {
+            editor.draw(&mut swash_cache, |x, y, w, h, color| {
                 window.rect(line_x + x, y, w, h, orbclient::Color { data: color.0 })
             });
 

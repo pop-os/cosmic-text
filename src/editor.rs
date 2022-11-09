@@ -106,6 +106,16 @@ impl<'a> Editor<'a> {
         }
     }
 
+    /// Get the internal [Buffer]
+    pub fn buffer(&self) -> &Buffer<'a> {
+        &self.buffer
+    }
+
+    /// Get the internal [Buffer], mutably
+    pub fn buffer_mut(&mut self) -> &mut Buffer<'a> {
+        &mut self.buffer
+    }
+
     /// Get the current cursor position
     pub fn cursor(&self) -> Cursor {
         self.cursor

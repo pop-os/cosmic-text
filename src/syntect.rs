@@ -31,23 +31,19 @@ use crate::{
     Color,
     Cursor,
     Editor,
-    FontSystem,
-    Metrics,
     Style,
     Weight,
 };
 
-pub struct SyntaxSystem<'a> {
-    pub font_system: &'a FontSystem,
+pub struct SyntaxSystem {
     pub syntax_set: SyntaxSet,
     pub theme_set: ThemeSet,
 }
 
-impl<'a> SyntaxSystem<'a> {
+impl SyntaxSystem {
     /// Create a new [SyntaxSystem]
-    pub fn new(font_system: &'a FontSystem) -> Self {
+    pub fn new() -> Self {
         Self {
-            font_system,
             //TODO: store newlines in buffer
             syntax_set: SyntaxSet::load_defaults_nonewlines(),
             theme_set: ThemeSet::load_defaults(),
@@ -57,22 +53,22 @@ impl<'a> SyntaxSystem<'a> {
 
 /// A wrapper of [Editor] with syntax highlighting provided by [SyntaxSystem]
 pub struct SyntaxEditor<'a> {
-    //TODO: should this be pub?
     editor: Editor<'a>,
-    syntax_system: &'a SyntaxSystem<'a>,
+    syntax_system: &'a SyntaxSystem,
     syntax: &'a SyntaxReference,
-    //TODO: should this be pub?
-    pub theme: &'a Theme,
+    theme: &'a Theme,
     highlighter: Highlighter<'a>,
     syntax_cache: Vec<(ParseState, HighlightState)>,
 }
 
 impl<'a> SyntaxEditor<'a> {
-    /// Create a new [SyntaxEditor] with the provided [SyntaxSystem], [Metrics], and theme name.
+    /// Create a new [SyntaxEditor] with the provided [Buffer], [SyntaxSystem], and theme name.
+    ///
     /// A good default theme name is "base16-eighties.dark".
-    /// Returns None will be returned if theme not found
-    pub fn new(syntax_system: &'a SyntaxSystem<'a>, metrics: Metrics, theme_name: &str) -> Option<Self> {
-        let editor = Editor::new(Buffer::new(syntax_system.font_system, metrics));
+    ///
+    /// Returns None if theme not found
+    pub fn new(buffer: Buffer<'a>, syntax_system: &'a SyntaxSystem, theme_name: &str) -> Option<Self> {
+        let editor = Editor::new(buffer);
         let syntax = syntax_system.syntax_set.find_syntax_plain_text();
         let theme = syntax_system.theme_set.themes.get(theme_name)?;
         let highlighter = Highlighter::new(theme);
@@ -107,6 +103,9 @@ impl<'a> SyntaxEditor<'a> {
                 self.syntax_system.syntax_set.find_syntax_plain_text()
             }
         };
+
+        // Clear syntax cache
+        self.syntax_cache.clear();
 
         Ok(())
     }
@@ -173,7 +172,7 @@ impl<'a> SyntaxEditor<'a> {
             line.set_wrap_simple(true);
 
             //TODO: efficiently do syntax highlighting without having to shape whole buffer
-            line.shape(&self.syntax_system.font_system);
+            line.shape(self.editor.buffer.font_system);
 
             let cache_item = (parse_state.clone(), highlight_state.clone());
             if line_i < self.syntax_cache.len() {
@@ -212,6 +211,34 @@ impl<'a> SyntaxEditor<'a> {
         self.editor.cursor()
     }
 
+    /// Get the default background color
+    pub fn background_color(&self) -> Color {
+        if let Some(background) = self.theme.settings.background {
+            Color::rgba(
+                background.r,
+                background.g,
+                background.b,
+                background.a,
+            )
+        } else {
+            Color::rgb(0, 0, 0)
+        }
+    }
+
+    /// Get the default foreground (text) color
+    pub fn foreground_color(&self) -> Color {
+        if let Some(foreground) = self.theme.settings.foreground {
+            Color::rgba(
+                foreground.r,
+                foreground.g,
+                foreground.b,
+                foreground.a,
+            )
+        } else {
+            Color::rgb(0xFF, 0xFF, 0xFF)
+        }
+    }
+
     /// Copy selection
     pub fn copy_selection(&mut self) -> Option<String> {
         self.editor.copy_selection()
@@ -229,9 +256,11 @@ impl<'a> SyntaxEditor<'a> {
 
     /// Draw the editor
     #[cfg(feature = "swash")]
-    pub fn draw<F>(&self, cache: &mut crate::SwashCache, color: Color, f: F)
+    pub fn draw<F>(&self, cache: &mut crate::SwashCache, mut f: F)
         where F: FnMut(i32, i32, u32, u32, Color)
     {
-        self.editor.draw(cache, color, f);
+        let size = self.buffer().size();
+        f(0, 0, size.0 as u32, size.1 as u32, self.background_color());
+        self.editor.draw(cache, self.foreground_color(), f);
     }
 }

@@ -145,8 +145,9 @@ impl fmt::Display for Metrics {
 
 /// A buffer of text that is shaped and laid out
 pub struct Buffer<'a> {
-    font_system: &'a FontSystem,
-    /// Lines (or paragraphs) of text in the buffer
+    /// The [FontSystem] used by this [Buffer]
+    pub font_system: &'a FontSystem,
+    /// [BufferLine]s (or paragraphs) of text in the buffer
     pub lines: Vec<BufferLine>,
     metrics: Metrics,
     width: i32,
@@ -365,14 +366,10 @@ impl<'a> Buffer<'a> {
 
     /// Set the current buffer dimensions
     pub fn set_size(&mut self, width: i32, height: i32) {
-        if width != self.width {
+        if width != self.width || height != self.height {
             self.width = width;
-            self.relayout();
-            self.shape_until_scroll();
-        }
-
-        if height != self.height {
             self.height = height;
+            self.relayout();
             self.shape_until_scroll();
         }
     }
