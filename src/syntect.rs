@@ -53,7 +53,7 @@ impl SyntaxSystem {
 
 /// A wrapper of [Editor] with syntax highlighting provided by [SyntaxSystem]
 pub struct SyntaxEditor<'a> {
-    editor: Editor<'a>,
+    pub editor: Editor<'a>,
     syntax_system: &'a SyntaxSystem,
     syntax: &'a SyntaxReference,
     theme: &'a Theme,

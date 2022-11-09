@@ -57,6 +57,7 @@ pub struct Editor<'a> {
     cursor_x_opt: Option<i32>,
     select_opt: Option<Cursor>,
     cursor_moved: bool,
+    pub cursor_block: bool,
 }
 
 impl<'a> Editor<'a> {
@@ -68,6 +69,7 @@ impl<'a> Editor<'a> {
             cursor_x_opt: None,
             select_opt: None,
             cursor_moved: false,
+            cursor_block: false,
         }
     }
 
@@ -688,13 +690,23 @@ impl<'a> Editor<'a> {
                     }
                 };
 
-                f(
-                    x,
-                    line_y - font_size,
-                    1,
-                    line_height as u32,
-                    color,
-                );
+                if self.cursor_block {
+                    f(
+                        x,
+                        line_y - font_size,
+                        font_size as u32 / 2 /*TODO*/,
+                        line_height as u32,
+                        Color::rgba(color.r(), color.g(), color.b(), 0x33),
+                    );
+                } else {
+                    f(
+                        x,
+                        line_y - font_size,
+                        1,
+                        line_height as u32,
+                        color,
+                    );
+                }
             }
 
             for glyph in run.glyphs.iter() {

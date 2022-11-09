@@ -24,7 +24,8 @@ pub struct Vi<'a> {
 }
 
 impl<'a> Vi<'a> {
-    pub fn new(editor: SyntaxEditor<'a>) -> Self {
+    pub fn new(mut editor: SyntaxEditor<'a>) -> Self {
+        editor.editor.cursor_block = true;
         Self {
             editor,
             mode: Mode::Normal,
@@ -147,6 +148,11 @@ impl<'a> Vi<'a> {
             },
             Mode::Insert => match action {
                 Action::Escape => {
+                    let cursor = self.cursor();
+                    let layout_cursor = self.buffer().layout_cursor(&cursor);
+                    if layout_cursor.glyph > 0 {
+                        self.editor.action(Action::Left);
+                    }
                     self.mode = Mode::Normal;
                 },
                 _ => self.editor.action(action),
@@ -156,11 +162,21 @@ impl<'a> Vi<'a> {
                 self.mode = Mode::Normal;
             },
         }
+
+        let cursor_block = match self.mode {
+            Mode::Normal => true,
+            _ => false,
+        };
+        if cursor_block != self.editor.editor.cursor_block {
+            self.editor.editor.cursor_block = cursor_block;
+            self.editor.buffer_mut().redraw = true;
+        }
     }
 
     pub fn draw<F>(&self, cache: &mut crate::SwashCache, f: F)
         where F: FnMut(i32, i32, u32, u32, Color)
     {
+        //TODO: block cursor in normal mode?
         self.editor.draw(cache, f);
     }
 }
