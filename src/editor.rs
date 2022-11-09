@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 #[cfg(not(feature = "std"))]
-use alloc::string::ToString;
-#[cfg(feature = "swash")]
+use alloc::string::{String, ToString};
 use core::cmp;
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -226,7 +225,7 @@ impl<'a> Editor<'a> {
         true
     }
 
-    /// Perform a [Action] on the editor
+    /// Perform an [Action] on the editor
     pub fn action(&mut self, action: Action) {
         let old_cursor = self.cursor;
 

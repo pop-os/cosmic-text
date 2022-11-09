@@ -7,9 +7,8 @@ license = "MIT OR Apache-2.0"
 publish = false
 
 [dependencies]
-cosmic-text = { path = "../../" }
+cosmic-text = { path = "../..", features = ["syntect"] }
 env_logger = "0.9"
 fontdb = "0.9"
 log = "0.4"
 orbclient = "0.3.35"
-syntect = "5.0"
