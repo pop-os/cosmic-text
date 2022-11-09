@@ -32,6 +32,8 @@ pub enum Action {
     PageUp,
     /// Scroll down one page
     PageDown,
+    /// Escape, clears selection
+    Escape,
     /// Insert character at cursor
     Insert(char),
     /// Create new line
@@ -370,6 +372,11 @@ impl<'a> Editor<'a> {
                 let mut scroll = self.buffer.scroll();
                 scroll += self.buffer.visible_lines();
                 self.buffer.set_scroll(scroll);
+            },
+            Action::Escape => {
+                if self.select_opt.take().is_some() {
+                    self.buffer.redraw = true;
+                }
             },
             Action::Insert(character) => {
                 if character.is_control()

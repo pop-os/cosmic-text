@@ -14,6 +14,9 @@ use cosmic_text::{
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{env, thread, time::{Duration, Instant}};
 
+use self::vi::Vi;
+mod vi;
+
 fn main() {
     env_logger::init();
 
@@ -60,11 +63,11 @@ fn main() {
     let mut font_size_i = font_size_default;
 
     let line_x = 8 * display_scale;
-    let mut editor = SyntaxEditor::new(
+    let mut editor = Vi::new(SyntaxEditor::new(
         Buffer::new(&font_system, font_sizes[font_size_i]),
         &syntax_system,
         "base16-eighties.dark"
-    ).unwrap();
+    ).unwrap());
 
     editor.buffer_mut().set_size(
         window.width() as i32 - line_x * 2,
@@ -148,6 +151,7 @@ fn main() {
                     orbclient::K_END if event.pressed => editor.action(Action::End),
                     orbclient::K_PGUP if event.pressed => editor.action(Action::PageUp),
                     orbclient::K_PGDN if event.pressed => editor.action(Action::PageDown),
+                    orbclient::K_ESC if event.pressed => editor.action(Action::Escape),
                     orbclient::K_ENTER if event.pressed => editor.action(Action::Enter),
                     orbclient::K_BKSP if event.pressed => editor.action(Action::Backspace),
                     orbclient::K_DEL if event.pressed => editor.action(Action::Delete),
