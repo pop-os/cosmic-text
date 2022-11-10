@@ -30,11 +30,7 @@ fn shape_fallback(
     buffer.push_str(run);
     buffer.guess_segment_properties();
 
-    let rtl = match buffer.direction() {
-        rustybuzz::Direction::RightToLeft => true,
-        //TODO: other directions?
-        _ => false,
-    };
+    let rtl = matches!(buffer.direction(), rustybuzz::Direction::RightToLeft);
     assert_eq!(rtl, span_rtl);
 
     let glyph_buffer = rustybuzz::shape(&font.rustybuzz, &[], buffer);
@@ -64,7 +60,7 @@ fn shape_fallback(
             x_offset,
             y_offset,
             font_id: font.info.id,
-            glyph_id: info.glyph_id.try_into().unwrap(),
+            glyph_id: info.glyph_id.try_into().expect("failed to cast glyph ID"),
             color_opt: None,
         });
     }
@@ -145,7 +141,7 @@ fn shape_run<'a>(
     );
 
     let (mut glyphs, mut missing) = shape_fallback(
-        font_iter.next().unwrap(),
+        font_iter.next().expect("no default font found"),
         line,
         attrs_list,
         start_run,

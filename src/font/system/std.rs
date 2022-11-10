@@ -80,6 +80,8 @@ impl FontSystem {
         self.0.borrow_db()
     }
 
+    // Clippy false positive
+    #[allow(clippy::needless_lifetimes)]
     pub fn get_font<'a>(&'a self, id: fontdb::ID) -> Option<Arc<Font<'a>>> {
         self.0.with(|fields| {
             get_font(&fields, id)
@@ -88,7 +90,7 @@ impl FontSystem {
 
     pub fn get_font_matches<'a>(&'a self, attrs: Attrs) -> Arc<FontMatches<'a>> {
         self.0.with(|fields| {
-            let mut font_matches_cache = fields.font_matches_cache.lock().unwrap();
+            let mut font_matches_cache = fields.font_matches_cache.lock().expect("failed to lock font matches cache");
             //TODO: do not create AttrsOwned unless entry does not already exist
             font_matches_cache.entry(AttrsOwned::new(attrs)).or_insert_with(|| {
                 let now = std::time::Instant::now();
@@ -99,9 +101,8 @@ impl FontSystem {
                         continue;
                     }
 
-                    match get_font(&fields, face.id) {
-                        Some(font) => fonts.push(font),
-                        None => (),
+                    if let Some(font) = get_font(&fields, face.id) {
+                        fonts.push(font);
                     }
                 }
 
@@ -121,7 +122,7 @@ impl FontSystem {
 }
 
 fn get_font<'b>(fields: &ouroboros_impl_font_system_inner::BorrowedFields<'_, 'b>, id: fontdb::ID) -> Option<Arc<Font<'b>>> {
-    fields.font_cache.lock().unwrap().entry(id).or_insert_with(|| {
+    fields.font_cache.lock().expect("failed to lock font cache").entry(id).or_insert_with(|| {
         let face = fields.db.face(id)?;
         match Font::new(face) {
             Some(font) => Some(Arc::new(font)),

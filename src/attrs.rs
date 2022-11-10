@@ -81,7 +81,7 @@ impl FamilyOwned {
 
     pub fn as_family(&self) -> Family {
         match self {
-            FamilyOwned::Name(name) => Family::Name(&name),
+            FamilyOwned::Name(name) => Family::Name(name),
             FamilyOwned::Serif => Family::Serif,
             FamilyOwned::SansSerif => Family::SansSerif,
             FamilyOwned::Cursive => Family::Cursive,

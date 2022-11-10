@@ -31,7 +31,7 @@ impl<'a> Editor<'a> {
     }
 
     fn set_layout_cursor(&mut self, cursor: LayoutCursor) {
-        let layout = self.buffer.line_layout(cursor.line).unwrap();
+        let layout = self.buffer.line_layout(cursor.line).expect("layout not found");
 
         let layout_line = match layout.get(cursor.layout) {
             Some(some) => some,
@@ -285,7 +285,7 @@ impl<'a> Edit<'a> for Editor<'a> {
                 //TODO: make this preserve X as best as possible!
                 let mut cursor = self.buffer.layout_cursor(&self.cursor);
 
-                let layout_len = self.buffer.line_layout(cursor.line).unwrap().len();
+                let layout_len = self.buffer.line_layout(cursor.line).expect("layout not found").len();
 
                 if self.cursor_x_opt.is_none() {
                     self.cursor_x_opt = Some(

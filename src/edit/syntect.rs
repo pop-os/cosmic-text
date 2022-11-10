@@ -152,7 +152,7 @@ impl<'a> Edit<'a> for SyntaxEditor<'a> {
     fn cursor(&self) -> Cursor {
         self.editor.cursor()
     }
-    
+
     fn select_opt(&self) -> Option<Cursor> {
         self.editor.select_opt()
     }
@@ -180,7 +180,7 @@ impl<'a> Edit<'a> for SyntaxEditor<'a> {
                 )
             };
 
-            let ops = parse_state.parse_line(line.text(), &self.syntax_system.syntax_set).unwrap();
+            let ops = parse_state.parse_line(line.text(), &self.syntax_system.syntax_set).expect("failed to parse syntax");
             let ranges = RangedHighlightIterator::new(
                 &mut highlight_state,
                 &ops,

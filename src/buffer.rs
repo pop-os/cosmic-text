@@ -292,7 +292,8 @@ impl<'a> Buffer<'a> {
     pub fn layout_cursor(&self, cursor: &Cursor) -> LayoutCursor {
         let line = &self.lines[cursor.line];
 
-        let layout = line.layout_opt().as_ref().unwrap(); //TODO: ensure layout is done?
+        //TODO: ensure layout is done?
+        let layout = line.layout_opt().as_ref().expect("layout not found");
         for (layout_i, layout_line) in layout.iter().enumerate() {
             for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
                 if cursor.index == glyph.start {
@@ -340,13 +341,13 @@ impl<'a> Buffer<'a> {
     /// Shape the provided line index and return the result
     pub fn line_shape(&mut self, line_i: usize) -> Option<&ShapeLine> {
         let line = self.lines.get_mut(line_i)?;
-        Some(line.shape(&self.font_system))
+        Some(line.shape(self.font_system))
     }
 
     /// Lay out the provided line index and return the result
     pub fn line_layout(&mut self, line_i: usize) -> Option<&[LayoutLine]> {
         let line = self.lines.get_mut(line_i)?;
-        Some(line.layout(&self.font_system, self.metrics.font_size, self.width))
+        Some(line.layout(self.font_system, self.metrics.font_size, self.width))
     }
 
     /// Get the current [Metrics]
@@ -453,15 +454,15 @@ impl<'a> Buffer<'a> {
                 let mut new_cursor_char = 0;
 
                 let mut first_glyph = true;
-                
+
                 'hit: for (glyph_i, glyph) in run.glyphs.iter().enumerate() {
-                    if first_glyph {  
+                    if first_glyph {
                         first_glyph = false;
                         if (run.rtl && x > glyph.x as i32) || (!run.rtl && x < 0) {
                             new_cursor_glyph = 0;
                             new_cursor_char = 0;
                         }
-                    } 
+                    }
                     if x >= glyph.x as i32
                     && x <= (glyph.x + glyph.w) as i32
                     {

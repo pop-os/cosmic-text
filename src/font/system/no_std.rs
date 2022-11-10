@@ -42,6 +42,8 @@ impl FontSystem {
         &self.db
     }
 
+    // Clippy false positive
+    #[allow(clippy::needless_lifetimes)]
     pub fn get_font<'a>(&'a self, id: fontdb::ID) -> Option<Arc<Font<'a>>> {
         let face = self.db.face(id)?;
         match Font::new(face) {
@@ -60,9 +62,8 @@ impl FontSystem {
                 continue;
             }
 
-            match self.get_font(face.id) {
-                Some(font) => fonts.push(font),
-                None => (),
+            if let Some(font) = self.get_font(face.id) {
+                fonts.push(font);
             }
         }
 
