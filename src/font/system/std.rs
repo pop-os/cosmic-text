@@ -23,6 +23,7 @@ struct FontSystemInner {
 pub struct FontSystem(FontSystemInner);
 
 impl FontSystem {
+    /// Create a new [`FontSystem`], that allows access to any installed system fonts
     pub fn new() -> Self {
         let locale = sys_locale::get_locale().unwrap_or_else(|| {
             log::warn!("failed to get system locale, falling back to en-US");
@@ -51,8 +52,7 @@ impl FontSystem {
             let now = std::time::Instant::now();
 
             //TODO only do this on demand!
-            assert_eq!(db.len(), db.faces().len());
-            for i in 0..db.len() {
+            for i in 0..db.faces().len() {
                 let id = db.faces()[i].id;
                 unsafe { db.make_shared_face_data(id); }
             }

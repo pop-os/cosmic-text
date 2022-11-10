@@ -44,7 +44,7 @@ fn han_unification(locale: &str) -> &'static [&'static str] {
 }
 
 // Fallbacks to use per script
-pub fn script_fallback(script: &Script, locale: &str) -> &'static [&'static str] {
+pub fn script_fallback(script: Script, locale: &str) -> &'static [&'static str] {
     //TODO: abstract style (sans/serif/monospaced)
     match script {
         Script::Adlam => &["Noto Sans Adlam", "Noto Sans Adlam Unjoined"],

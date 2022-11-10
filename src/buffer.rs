@@ -57,7 +57,7 @@ pub struct LayoutRun<'a> {
     pub line_y: i32,
 }
 
-/// An iterator of visible text lines, see [LayoutRun]
+/// An iterator of visible text lines, see [`LayoutRun`]
 pub struct LayoutRunIter<'a, 'b> {
     buffer: &'b Buffer<'a>,
     line_i: usize,
@@ -157,7 +157,7 @@ pub struct Buffer<'a> {
 }
 
 impl<'a> Buffer<'a> {
-    /// Create a new [Buffer] with the provided [FontSystem] and [Metrics]
+    /// Create a new [`Buffer`] with the provided [`FontSystem`] and [`Metrics`]
     pub fn new(
         font_system: &'a FontSystem,
         metrics: Metrics,
@@ -179,7 +179,7 @@ impl<'a> Buffer<'a> {
         #[cfg(feature = "std")]
         let instant = std::time::Instant::now();
 
-        for line in self.lines.iter_mut() {
+        for line in &mut self.lines {
             if line.shape_opt().is_some() {
                 line.reset_layout();
                 line.layout(
@@ -203,7 +203,7 @@ impl<'a> Buffer<'a> {
 
         let mut reshaped = 0;
         let mut total_layout = 0;
-        for line in self.lines.iter_mut() {
+        for line in &mut self.lines {
             if total_layout >= lines {
                 break;
             }
@@ -333,7 +333,7 @@ impl<'a> Buffer<'a> {
         )
     }
 
-    /// Get [FontSystem] used by this [Buffer]
+    /// Get [`FontSystem`] used by this [`Buffer`]
     pub fn font_system(&self) -> &'a FontSystem {
         self.font_system
     }
@@ -350,12 +350,12 @@ impl<'a> Buffer<'a> {
         Some(line.layout(self.font_system, self.metrics.font_size, self.width))
     }
 
-    /// Get the current [Metrics]
+    /// Get the current [`Metrics`]
     pub fn metrics(&self) -> Metrics {
         self.metrics
     }
 
-    /// Set the current [Metrics]
+    /// Set the current [`Metrics`]
     pub fn set_metrics(&mut self, metrics: Metrics) {
         if metrics != self.metrics {
             self.metrics = metrics;
@@ -543,7 +543,7 @@ impl<'a> Buffer<'a> {
                 };
 
                 cache.with_pixels(cache_key, glyph_color, |x, y, color| {
-                    f(x_int + x, run.line_y + y_int + y, 1, 1, color)
+                    f(x_int + x, run.line_y + y_int + y, 1, 1, color);
                 });
             }
         }

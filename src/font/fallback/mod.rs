@@ -108,7 +108,7 @@ impl<'a> Iterator for FontFallbackIter<'a> {
         while self.script_i.0 < self.scripts.len() {
             let script = self.scripts[self.script_i.0];
 
-            let script_families = script_fallback(&script, self.locale);
+            let script_families = script_fallback(script, self.locale);
             while self.script_i.1 < script_families.len() {
                 let script_family = script_families[self.script_i.1];
                 self.script_i.1 += 1;
@@ -133,7 +133,7 @@ impl<'a> Iterator for FontFallbackIter<'a> {
                     return Some(font);
                 }
             }
-            log::warn!("failed to find family '{}'", common_family)
+            log::warn!("failed to find family '{}'", common_family);
         }
 
         //TODO: do we need to do this?

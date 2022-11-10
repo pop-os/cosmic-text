@@ -42,7 +42,7 @@ pub struct SyntaxSystem {
 }
 
 impl SyntaxSystem {
-    /// Create a new [SyntaxSystem]
+    /// Create a new [`SyntaxSystem`]
     pub fn new() -> Self {
         Self {
             //TODO: store newlines in buffer
@@ -52,7 +52,7 @@ impl SyntaxSystem {
     }
 }
 
-/// A wrapper of [Editor] with syntax highlighting provided by [SyntaxSystem]
+/// A wrapper of [`Editor`] with syntax highlighting provided by [`SyntaxSystem`]
 pub struct SyntaxEditor<'a> {
     editor: Editor<'a>,
     syntax_system: &'a SyntaxSystem,
@@ -63,7 +63,7 @@ pub struct SyntaxEditor<'a> {
 }
 
 impl<'a> SyntaxEditor<'a> {
-    /// Create a new [SyntaxEditor] with the provided [Buffer], [SyntaxSystem], and theme name.
+    /// Create a new [`SyntaxEditor`] with the provided [`Buffer`], [`SyntaxSystem`], and theme name.
     ///
     /// A good default theme name is "base16-eighties.dark".
     ///
@@ -85,6 +85,10 @@ impl<'a> SyntaxEditor<'a> {
     }
 
     /// Load text from a file, and also set syntax to the best option
+    ///
+    /// ## Errors
+    ///
+    /// Returns an [`io::Error`] if reading the file fails
     #[cfg(feature = "std")]
     pub fn load_text<P: AsRef<Path>>(&mut self, path: P, attrs: crate::Attrs<'a>) -> io::Result<()> {
         let path = path.as_ref();

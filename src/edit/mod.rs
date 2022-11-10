@@ -13,7 +13,7 @@ pub use self::syntect::*;
 #[cfg(feature = "syntect")]
 mod syntect;
 
-/// An action to perform on an [Editor]
+/// An action to perform on an [`Editor`]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Action {
     /// Move cursor to previous character ([Self::Left] in LTR, [Self::Right] in RTL)
@@ -54,12 +54,12 @@ pub enum Action {
     Scroll { lines: i32 },
 }
 
-/// A trait to allow easy replacements of [Editor], like SyntaxEditor
+/// A trait to allow easy replacements of [`Editor`], like `SyntaxEditor`
 pub trait Edit<'a> {
-    /// Get the internal [Buffer]
+    /// Get the internal [`Buffer`]
     fn buffer(&self) -> &Buffer<'a>;
 
-    /// Get the internal [Buffer], mutably
+    /// Get the internal [`Buffer`], mutably
     fn buffer_mut(&mut self) -> &mut Buffer<'a>;
 
     /// Get the current cursor position

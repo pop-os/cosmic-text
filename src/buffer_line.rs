@@ -18,8 +18,8 @@ pub struct BufferLine {
 
 impl BufferLine {
     /// Create a new line with the given text and attributes list
-    /// Cached shaping and layout can be done using the [Self::shape] and
-    /// [Self::layout] functions
+    /// Cached shaping and layout can be done using the [`Self::shape`] and
+    /// [`Self::layout`] functions
     pub fn new<T: Into<String>>(text: T, attrs_list: AttrsList) -> Self {
         Self {
             text: text.into(),

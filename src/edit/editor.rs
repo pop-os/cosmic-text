@@ -9,7 +9,7 @@ use crate::{Action, AttrsList, Buffer, BufferLine, Cursor, Edit, LayoutCursor};
 #[cfg(feature = "swash")]
 use crate::Color;
 
-/// A wrapper of [Buffer] for easy editing
+/// A wrapper of [`Buffer`] for easy editing
 pub struct Editor<'a> {
     buffer: Buffer<'a>,
     cursor: Cursor,
@@ -19,7 +19,7 @@ pub struct Editor<'a> {
 }
 
 impl<'a> Editor<'a> {
-    /// Create a new [Editor] with the provided [Buffer]
+    /// Create a new [`Editor`] with the provided [`Buffer`]
     pub fn new(buffer: Buffer<'a>) -> Self {
         Self {
             buffer,
@@ -663,7 +663,7 @@ impl<'a> Edit<'a> for Editor<'a> {
                 };
 
                 cache.with_pixels(cache_key, glyph_color, |x, y, color| {
-                    f(x_int + x, line_y + y_int + y, 1, 1, color)
+                    f(x_int + x, line_y + y_int + y, 1, 1, color);
                 });
             }
         }

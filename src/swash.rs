@@ -101,7 +101,7 @@ impl<'a> SwashCache<'a> {
                                 y + off_y,
                                 Color(
                                     ((image.data[i] as u32) << 24) |
-                                    base.0 & 0xFFFFFF
+                                    base.0 & 0xFF_FF_FF
                                 )
                             );
                             i += 1;
