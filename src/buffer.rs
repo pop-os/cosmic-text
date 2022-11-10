@@ -424,15 +424,30 @@ impl<'a> Buffer<'a> {
         let mut new_cursor_opt = None;
 
         let mut runs = self.layout_runs().peekable();
+        let mut first_run = true;
         while let Some(run) = runs.next() {
             let line_y = run.line_y;
 
-            if y >= line_y - font_size
-            && y < line_y - font_size + line_height
+            if first_run && y < line_y - font_size {
+                first_run = false;
+                let new_cursor = Cursor::new(run.line_i, 0);
+                new_cursor_opt = Some(new_cursor);
+            } else if y >= line_y - font_size
+                    && y < line_y - font_size + line_height
             {
                 let mut new_cursor_glyph = run.glyphs.len();
                 let mut new_cursor_char = 0;
+
+                let mut first_glyph = true;
+                
                 'hit: for (glyph_i, glyph) in run.glyphs.iter().enumerate() {
+                    if first_glyph {  
+                        first_glyph = false;
+                        if (run.rtl && x > glyph.x as i32) || (!run.rtl && x < 0) {
+                            new_cursor_glyph = 0;
+                            new_cursor_char = 0;
+                        }
+                    } 
                     if x >= glyph.x as i32
                     && x <= (glyph.x + glyph.w) as i32
                     {
