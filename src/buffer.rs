@@ -145,8 +145,7 @@ impl fmt::Display for Metrics {
 
 /// A buffer of text that is shaped and laid out
 pub struct Buffer<'a> {
-    /// The [FontSystem] used by this [Buffer]
-    pub font_system: &'a FontSystem,
+    font_system: &'a FontSystem,
     /// [BufferLine]s (or paragraphs) of text in the buffer
     pub lines: Vec<BufferLine>,
     metrics: Metrics,
@@ -154,7 +153,7 @@ pub struct Buffer<'a> {
     height: i32,
     scroll: i32,
     /// True if a redraw is requires. Set to false after processing
-    pub redraw: bool,
+    redraw: bool,
 }
 
 impl<'a> Buffer<'a> {
@@ -333,6 +332,11 @@ impl<'a> Buffer<'a> {
         )
     }
 
+    /// Get [FontSystem] used by this [Buffer]
+    pub fn font_system(&self) -> &'a FontSystem {
+        self.font_system
+    }
+
     /// Shape the provided line index and return the result
     pub fn line_shape(&mut self, line_i: usize) -> Option<&ShapeLine> {
         let line = self.lines.get_mut(line_i)?;
@@ -406,6 +410,16 @@ impl<'a> Buffer<'a> {
         self.scroll = 0;
 
         self.shape_until_scroll();
+    }
+
+    /// True if a redraw is needed
+    pub fn redraw(&self) -> bool {
+        self.redraw
+    }
+
+    /// Set redraw needed flag
+    pub fn set_redraw(&mut self, redraw: bool) {
+        self.redraw = redraw;
     }
 
     /// Get the visible layout runs for rendering and other tasks

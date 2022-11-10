@@ -2,13 +2,17 @@
 
 set -ex
 
+echo Run CI script
+./ci.sh
+
+echo Build documentation
 cargo doc
-cargo test
-cargo build --release --no-default-features
-cargo build --release --no-default-features --features std
-cargo build --release --no-default-features --features swash
-cargo build --release --no-default-features --features syntect
-cargo build --release --all-features
+
+echo Build all examples
 cargo build --release --all
+
+echo Run terminal example
 target/release/terminal
+
+echo Run editor-test example
 env RUST_LOG=editor_test=info target/release/editor-test

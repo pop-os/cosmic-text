@@ -27,6 +27,7 @@ use cosmic_text::{
     Attrs,
     AttrsList,
     Buffer,
+    Edit,
     FontSystem,
     Metrics,
     SyntaxEditor,
@@ -38,9 +39,6 @@ use std::{
     path::PathBuf,
     sync::Mutex,
 };
-
-use self::syntax_text_box::syntax_text_box;
-mod syntax_text_box;
 
 use self::text::text;
 mod text;
@@ -266,7 +264,7 @@ impl Application for Window {
             .align_items(Alignment::Center)
             .spacing(8)
             ,
-            syntax_text_box(&self.editor)
+            text_box(&self.editor)
         ]
         .spacing(8)
         .padding(16)

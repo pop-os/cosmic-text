@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use cosmic_text::{Action, Buffer, Color, Editor, FontSystem, Metrics, SwashCache};
+use cosmic_text::{Action, Buffer, Color, Edit, Editor, FontSystem, Metrics, SwashCache};
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{env, fs, process, time::Instant};
 use unicode_segmentation::UnicodeSegmentation;
@@ -10,7 +10,7 @@ fn redraw(window: &mut Window, editor: &mut Editor<'_>, swash_cache: &mut SwashC
     let font_color = Color::rgb(0xFF, 0xFF, 0xFF);
 
     editor.shape_as_needed();
-    if editor.buffer.redraw {
+    if editor.buffer().redraw() {
         let instant = Instant::now();
 
         window.set(bg_color);
@@ -21,7 +21,7 @@ fn redraw(window: &mut Window, editor: &mut Editor<'_>, swash_cache: &mut SwashC
 
         window.sync();
 
-        editor.buffer.redraw = false;
+        editor.buffer_mut().set_redraw(false);
 
         let duration = instant.elapsed();
         log::debug!("redraw: {:?}", duration);
@@ -146,7 +146,7 @@ fn main() {
 
     let mut wrong = 0;
     for (line_i, line) in text.lines().enumerate() {
-        let buffer_line = &editor.buffer.lines[line_i];
+        let buffer_line = &editor.buffer().lines[line_i];
         if buffer_line.text() != line {
             log::error!("line {}: {:?} != {:?}", line_i, buffer_line.text(), line);
             wrong += 1;

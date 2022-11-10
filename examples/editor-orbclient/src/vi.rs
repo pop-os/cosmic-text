@@ -3,6 +3,7 @@ use cosmic_text::{
     Buffer,
     Color,
     Cursor,
+    Edit,
     SyntaxEditor,
 };
 use std::{
@@ -24,8 +25,7 @@ pub struct Vi<'a> {
 }
 
 impl<'a> Vi<'a> {
-    pub fn new(mut editor: SyntaxEditor<'a>) -> Self {
-        editor.editor.cursor_block = true;
+    pub fn new(editor: SyntaxEditor<'a>) -> Self {
         Self {
             editor,
             mode: Mode::Normal,
@@ -37,26 +37,6 @@ impl<'a> Vi<'a> {
         self.editor.load_text(path, attrs)
     }
 
-    /// Shape as needed, also doing syntax highlighting
-    pub fn shape_as_needed(&mut self) {
-        self.editor.shape_as_needed()
-    }
-
-    /// Get the internal [Buffer]
-    pub fn buffer(&self) -> &Buffer<'a> {
-        self.editor.buffer()
-    }
-
-    /// Get the internal [Buffer], mutably
-    pub fn buffer_mut(&mut self) -> &mut Buffer<'a> {
-        self.editor.buffer_mut()
-    }
-
-    /// Get the current [Cursor] position
-    pub fn cursor(&self) -> Cursor {
-        self.editor.cursor()
-    }
-
     /// Get the default background color
     pub fn background_color(&self) -> Color {
         self.editor.background_color()
@@ -66,8 +46,34 @@ impl<'a> Vi<'a> {
     pub fn foreground_color(&self) -> Color {
         self.editor.foreground_color()
     }
+}
 
-    pub fn action(&mut self, action: Action) {
+impl<'a> Edit<'a> for Vi<'a> {
+    fn buffer(&self) -> &Buffer<'a> {
+        self.editor.buffer()
+    }
+
+    fn buffer_mut(&mut self) -> &mut Buffer<'a> {
+        self.editor.buffer_mut()
+    }
+
+    fn cursor(&self) -> Cursor {
+        self.editor.cursor()
+    }
+
+    fn shape_as_needed(&mut self) {
+        self.editor.shape_as_needed()
+    }
+
+    fn copy_selection(&mut self) -> Option<String> {
+        self.editor.copy_selection()
+    }
+
+    fn delete_selection(&mut self) -> bool {
+        self.editor.delete_selection()
+    }
+
+    fn action(&mut self, action: Action) {
         match self.mode {
             Mode::Normal => match action {
                 Action::Insert(c) => match c {
@@ -162,21 +168,12 @@ impl<'a> Vi<'a> {
                 self.mode = Mode::Normal;
             },
         }
-
-        let cursor_block = match self.mode {
-            Mode::Normal => true,
-            _ => false,
-        };
-        if cursor_block != self.editor.editor.cursor_block {
-            self.editor.editor.cursor_block = cursor_block;
-            self.editor.buffer_mut().redraw = true;
-        }
     }
 
-    pub fn draw<F>(&self, cache: &mut crate::SwashCache, f: F)
+    fn draw<F>(&self, cache: &mut crate::SwashCache, color: Color, f: F)
         where F: FnMut(i32, i32, u32, u32, Color)
     {
         //TODO: block cursor in normal mode?
-        self.editor.draw(cache, f);
+        self.editor.draw(cache, color, f);
     }
 }

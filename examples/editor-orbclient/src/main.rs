@@ -4,6 +4,7 @@ use cosmic_text::{
     Action,
     Attrs,
     Buffer,
+    Edit,
     Family,
     FontSystem,
     Metrics,
@@ -92,13 +93,14 @@ fn main() {
     let mut mouse_left = false;
     loop {
         editor.shape_as_needed();
-        if editor.buffer_mut().redraw {
+        if editor.buffer().redraw() {
             let instant = Instant::now();
 
             let bg = editor.background_color();
             window.set(orbclient::Color::rgb(bg.r(), bg.g(), bg.b()));
 
-            editor.draw(&mut swash_cache, |x, y, w, h, color| {
+            let fg = editor.foreground_color();
+            editor.draw(&mut swash_cache, fg, |x, y, w, h, color| {
                 window.rect(line_x + x, y, w, h, orbclient::Color { data: color.0 })
             });
 
@@ -130,7 +132,7 @@ fn main() {
 
             window.sync();
 
-            editor.buffer_mut().redraw = false;
+            editor.buffer_mut().set_redraw(false);
 
             log::debug!("redraw: {:?}", instant.elapsed());
         }

@@ -17,7 +17,7 @@ use cosmic::{
 };
 use cosmic_text::{
     Action,
-    Editor,
+    Edit,
     SwashCache,
 };
 use std::{
@@ -51,13 +51,13 @@ impl StyleSheet for Theme {
     }
 }
 
-pub struct TextBox<'a> {
-    editor: &'a Mutex<Editor<'static>>,
+pub struct TextBox<'a, Editor> {
+    editor: &'a Mutex<Editor>,
     padding: Padding,
 }
 
-impl<'a> TextBox<'a> {
-    pub fn new(editor: &'a Mutex<Editor<'static>>) -> Self {
+impl<'a, Editor> TextBox<'a, Editor> {
+    pub fn new(editor: &'a Mutex<Editor>) -> Self {
         Self {
             editor,
             padding: Padding::new(0),
@@ -71,14 +71,15 @@ impl<'a> TextBox<'a> {
     
 }
 
-pub fn text_box<'a>(editor: &'a Mutex<Editor<'static>>) -> TextBox<'a> {
+pub fn text_box<'a, Editor>(editor: &'a Mutex<Editor>) -> TextBox<'a, Editor> {
     TextBox::new(editor)
 }
 
-impl<'a, Message, Renderer> Widget<Message, Renderer> for TextBox<'a>
+impl<'a, 'editor, Editor, Message, Renderer> Widget<Message, Renderer> for TextBox<'a, Editor>
 where
     Renderer: renderer::Renderer + image::Renderer<Handle = image::Handle>,
     Renderer::Theme: StyleSheet,
+    Editor: Edit<'editor>,
 {
     fn tag(&self) -> tree::Tag {
         tree::Tag::of::<State>()
@@ -105,17 +106,17 @@ where
 
         //TODO: allow lazy shape
         let mut editor = self.editor.lock().unwrap();
-        editor.buffer.shape_until(i32::max_value());
+        editor.buffer_mut().shape_until(i32::max_value());
 
         let mut layout_lines = 0;
-        for line in editor.buffer.lines.iter() {
+        for line in editor.buffer().lines.iter() {
             match line.layout_opt() {
                 Some(layout) => layout_lines += layout.len(),
                 None => (),
             }
         }
 
-        let height = layout_lines as f32 * editor.buffer.metrics().line_height as f32;
+        let height = layout_lines as f32 * editor.buffer().metrics().line_height as f32;
         let size = Size::new(limits.max().width, height);
         log::info!("size {:?}", size);
 
@@ -174,7 +175,7 @@ where
 
         let view_w = cmp::min(viewport.width as i32, layout.bounds().width as i32) - self.padding.horizontal() as i32;
         let view_h = cmp::min(viewport.height as i32, layout.bounds().height as i32) - self.padding.vertical() as i32;
-        editor.buffer.set_size(view_w, view_h);
+        editor.buffer_mut().set_size(view_w, view_h);
 
         editor.shape_as_needed();
 
@@ -327,12 +328,13 @@ where
     }
 }
 
-impl<'a, Message, Renderer> From<TextBox<'a>> for Element<'a, Message, Renderer>
+impl<'a, 'editor, Editor, Message, Renderer> From<TextBox<'a, Editor>> for Element<'a, Message, Renderer>
 where
     Renderer: renderer::Renderer + image::Renderer<Handle = image::Handle>,
     Renderer::Theme: StyleSheet,
+    Editor: Edit<'editor>,
 {
-    fn from(text_box: TextBox<'a>) -> Self {
+    fn from(text_box: TextBox<'a, Editor>) -> Self {
         Self::new(text_box)
     }
 }

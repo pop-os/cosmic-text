@@ -70,8 +70,8 @@ mod buffer_line;
 pub use self::cache::*;
 mod cache;
 
-pub use self::editor::*;
-mod editor;
+pub use self::edit::*;
+mod edit;
 
 pub use self::font::*;
 mod font;
@@ -86,8 +86,3 @@ mod shape;
 pub use self::swash::*;
 #[cfg(feature = "swash")]
 mod swash;
-
-#[cfg(feature = "syntect")]
-pub use self::syntect::*;
-#[cfg(feature = "syntect")]
-mod syntect;
