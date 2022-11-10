@@ -71,6 +71,10 @@ impl<'a> Edit<'a> for Editor<'a> {
         self.cursor
     }
 
+    fn select_opt(&self) -> Option<Cursor> {
+        self.select_opt
+    }
+
     fn shape_as_needed(&mut self) {
         if self.cursor_moved {
             self.buffer.shape_until_cursor(self.cursor);

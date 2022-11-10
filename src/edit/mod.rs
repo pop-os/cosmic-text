@@ -65,6 +65,9 @@ pub trait Edit<'a> {
     /// Get the current cursor position
     fn cursor(&self) -> Cursor;
 
+    /// Get the current selection position
+    fn select_opt(&self) -> Option<Cursor>;
+
     /// Shape lines until scroll, after adjusting scroll if the cursor moved
     fn shape_as_needed(&mut self);
 
