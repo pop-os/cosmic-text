@@ -20,6 +20,7 @@ sys-locale = { version = "0.2", optional = true }
 unicode-linebreak = "0.1"
 unicode-script = "0.5"
 unicode-segmentation = "1.7"
+rangemap = "1.1.0"
 
 [dependencies.unicode-bidi]
 version = "0.3"
