@@ -257,8 +257,8 @@ impl AttrsList {
     /// Get the highest priority attribute span for a range
     ///
     /// This returns the first span that contains the range
-    pub fn get_span(&self, range: Range<usize>) -> Attrs {
-        self.spans.get(&range.start).map(|v| v.as_attrs()).unwrap_or(self.defaults.as_attrs())
+    pub fn get_span(&self, index: usize) -> Attrs {
+        self.spans.get(&index).map(|v| v.as_attrs()).unwrap_or(self.defaults.as_attrs())
     }
 
     /// Split attributes list at an offset

@@ -97,7 +97,7 @@ fn shape_fallback(
     // Set color
     //TODO: these attributes should not be related to shaping
     for glyph in glyphs.iter_mut() {
-        let attrs = attrs_list.get_span(glyph.start..glyph.end);
+        let attrs = attrs_list.get_span(glyph.start);
         glyph.color_opt = attrs.color_opt;
     }
 
@@ -132,7 +132,7 @@ fn shape_run<'a>(
         &line[start_run..end_run],
     );
 
-    let attrs = attrs_list.get_span(start_run..end_run);
+    let attrs = attrs_list.get_span(start_run);
 
     let font_matches = font_system.get_font_matches(attrs);
 
@@ -304,10 +304,9 @@ impl ShapeWord {
 
         let mut start_run = start_word;
         let mut attrs = attrs_list.defaults();
-        for (egc_i, egc) in word.grapheme_indices(true) {
+        for (egc_i, _egc) in word.grapheme_indices(true) {
             let start_egc = start_word + egc_i;
-            let end_egc = start_egc + egc.len();
-            let attrs_egc = attrs_list.get_span(start_egc..end_egc);
+            let attrs_egc = attrs_list.get_span(start_egc);
             if ! attrs.compatible(&attrs_egc) {
                 //TODO: more efficient
                 glyphs.append(&mut shape_run(
