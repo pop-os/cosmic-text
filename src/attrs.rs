@@ -278,7 +278,7 @@ impl AttrsList {
         }
 
         for (key, resize) in removes {
-            let (range, attrs) =  self.spans.get_key_value(&key.start).map(|v| (v.0.clone(), v.1.clone())).unwrap();
+            let (range, attrs) =  self.spans.get_key_value(&key.start).map(|v| (v.0.clone(), v.1.clone())).expect("attrs span not found");
             self.spans.remove(key);
 
             if resize {
