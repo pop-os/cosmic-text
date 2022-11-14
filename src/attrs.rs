@@ -254,9 +254,9 @@ impl AttrsList {
         self.spans.insert(range, AttrsOwned::new(attrs));
     }
 
-    /// Get the highest priority attribute span for a range
+    /// Get the attribute span for an index
     ///
-    /// This returns the first span that contains the range
+    /// This returns a span that contains the index
     pub fn get_span(&self, index: usize) -> Attrs {
         self.spans.get(&index).map(|v| v.as_attrs()).unwrap_or(self.defaults.as_attrs())
     }
