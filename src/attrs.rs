@@ -8,6 +8,7 @@ use alloc::{
 use core::ops::Range;
 
 pub use fontdb::{Family, Stretch, Style, Weight};
+use rangemap::RangeMap;
 
 /// Text color
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
@@ -215,7 +216,7 @@ impl AttrsOwned {
 #[derive(Eq, PartialEq)]
 pub struct AttrsList {
     defaults: AttrsOwned,
-    spans: Vec<(Range<usize>, AttrsOwned)>,
+    spans: RangeMap<usize, AttrsOwned>,
 }
 
 impl AttrsList {
@@ -223,7 +224,7 @@ impl AttrsList {
     pub fn new(defaults: Attrs) -> Self {
         Self {
             defaults: AttrsOwned::new(defaults),
-            spans: Vec::new(),
+            spans: RangeMap::new(),
         }
     }
 
@@ -233,13 +234,14 @@ impl AttrsList {
     }
 
     /// Get the current attribute spans
-    pub fn spans(&self) -> &Vec<(Range<usize>, AttrsOwned)> {
-        &self.spans
+    pub fn spans(&self) -> Vec<(&Range<usize>, &AttrsOwned)> {
+        self.spans.iter().collect()
     }
 
     /// Clear the current attribute spans
     pub fn clear_spans(&mut self) {
-        self.spans.clear();
+        //Todo: Once clear is added Change this back to clear.
+        self.spans = RangeMap::new();
     }
 
     /// Add an attribute span, removes any previous matching parts of spans
@@ -249,104 +251,47 @@ impl AttrsList {
             return;
         }
 
-        let mut rework_spans = Vec::with_capacity(3);
-        let mut i = 0;
-
-        //Grab intersecting parts that are not fully intersected. remove those that are.
-        //This clips or splits the parts that are outside of the range.
-        while i < self.spans.len() {
-            if self.spans[i].0.end <= range.end && self.spans[i].0.start >= range.start {
-                let _ = self.spans.remove(i);
-            } else if self.spans[i].0.end > range.end && self.spans[i].0.start >= range.start && self.spans[i].0.start <= range.end {
-                let rework = self.spans.remove(i);
-                rework_spans.push((range.end..rework.0.end, rework.1))
-            } else if self.spans[i].0.end <= range.end && self.spans[i].0.end >= range.start && self.spans[i].0.start < range.start {
-                let rework = self.spans.remove(i);
-                rework_spans.push((rework.0.start..range.start, rework.1))
-            } else if self.spans[i].0.end > range.end && self.spans[i].0.start < range.start {
-                let rework = self.spans.remove(i);
-                rework_spans.push((rework.0.start..range.start, rework.1.clone()));
-                rework_spans.push((range.end..rework.0.end, rework.1));
-            } else if self.spans[i].0.start > range.end {
-                break;
-            } else {
-                i += 1;
-            }
-        }
-
-        // Readd reworked arrays back.
-        for reworked in rework_spans {
-            self.spans.push(reworked);
-        }
-
-        // Combine span if possible
-        let mut combined = false;
-        for span in self.spans.iter_mut() {
-            if span.1.as_attrs() != attrs {
-                // Ignore not matching attrs
-                continue;
-            }
-
-            if span.0.end == range.start {
-                // Extend span with range at end
-                span.0.end = range.end;
-                combined = true;
-                break;
-            }
-
-            if span.0.start == range.end {
-                // Extend span with range at start
-                span.0.start = range.start;
-                combined = true;
-                break;
-            }
-        }
-
-        if ! combined {
-            //Finally lets add the new span. it should fit now.
-            self.spans.push((range, AttrsOwned::new(attrs)));
-        }
-
-        //sort by start to speed up further additions
-        self.spans.sort_by(|a, b| a.0.start.partial_cmp(&b.0.start).unwrap());
+        self.spans.insert(range, AttrsOwned::new(attrs));
     }
 
-    /// Get the highest priority attribute span for a range
+    /// Get the attribute span for an index
     ///
-    /// This returns the first span that contains the range
-    pub fn get_span(&self, range: Range<usize>) -> Attrs {
-        for span in self.spans.iter() {
-            if range.start >= span.0.start && range.end <= span.0.end {
-                return span.1.as_attrs();
-            }
-        }
-        self.defaults.as_attrs()
+    /// This returns a span that contains the index
+    pub fn get_span(&self, index: usize) -> Attrs {
+        self.spans.get(&index).map(|v| v.as_attrs()).unwrap_or(self.defaults.as_attrs())
     }
 
     /// Split attributes list at an offset
     pub fn split_off(&mut self, index: usize) -> Self {
         let mut new = Self::new(self.defaults.as_attrs());
-        let mut i = 0;
-        while i < self.spans.len() {
-            if self.spans[i].0.end <= index {
-                // Leave this in the previous attributes list
-                i += 1;
-            } else if self.spans[i].0.start >= index {
-                // Move this to the new attributes list
-                let (range, attrs) = self.spans.remove(i);
-                new.spans.push((
+        let mut removes = Vec::new();
+
+        //get the keys we need to remove or fix.
+        for span in self.spans.iter() {
+            if span.0.end <= index {
+                continue;
+            } else if span.0.start >= index {
+                removes.push((span.0.clone(), false));
+            } else {
+                removes.push((span.0.clone(), true));
+            }
+        }
+
+        for (key, resize) in removes {
+            let (range, attrs) =  self.spans.get_key_value(&key.start).map(|v| (v.0.clone(), v.1.clone())).unwrap();
+            self.spans.remove(key);
+
+            if resize {
+                new.spans.insert(
+                    0..range.end - index,
+                    attrs.clone()
+                );
+                self.spans.insert(range.start..index, attrs);
+            } else {
+                new.spans.insert(
                     range.start - index..range.end - index,
                     attrs
-                ));
-            } else {
-                // New span has index..end
-                new.spans.push((
-                    0..self.spans[i].0.end - index,
-                    self.spans[i].1.clone()
-                ));
-                // Old span has start..index
-                self.spans[i].0.end = index;
-                i += 1;
+                );
             }
         }
         new
