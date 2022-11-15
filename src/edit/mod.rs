@@ -13,6 +13,11 @@ pub use self::syntect::*;
 #[cfg(feature = "syntect")]
 mod syntect;
 
+#[cfg(feature = "vi")]
+pub use self::vi::*;
+#[cfg(feature = "vi")]
+mod vi;
+
 /// An action to perform on an [`Editor`]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Action {

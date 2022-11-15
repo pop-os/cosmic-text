@@ -15,9 +15,6 @@ use cosmic_text::{
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{env, thread, time::{Duration, Instant}};
 
-use self::vi::Vi;
-mod vi;
-
 fn main() {
     env_logger::init();
 
@@ -64,11 +61,15 @@ fn main() {
     let mut font_size_i = font_size_default;
 
     let line_x = 8 * display_scale;
-    let mut editor = Vi::new(SyntaxEditor::new(
+
+    let mut editor = SyntaxEditor::new(
         Buffer::new(&font_system, font_sizes[font_size_i]),
         &syntax_system,
         "base16-eighties.dark"
-    ).unwrap());
+    ).unwrap();
+
+    #[cfg(feature = "vi")]
+    let mut editor = cosmic_text::ViEditor::new(editor);
 
     editor.buffer_mut().set_size(
         window.width() as i32 - line_x * 2,

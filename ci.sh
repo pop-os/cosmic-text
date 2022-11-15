@@ -22,6 +22,9 @@ build --no-default-features --features swash
 echo Build with only syntect feature
 build --no-default-features --features syntect
 
+echo Build with only vi feature
+build --no-default-features --features vi
+
 echo Build with all features
 build --all-features
 

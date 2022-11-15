@@ -39,6 +39,7 @@ std = [
   "sys-locale",
   "unicode-bidi/std",
 ]
+vi = ["syntect"]
 
 [workspace]
 members = [

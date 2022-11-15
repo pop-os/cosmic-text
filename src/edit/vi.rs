@@ -1,4 +1,8 @@
-use cosmic_text::{
+use alloc::string::String;
+use core::cmp;
+use unicode_segmentation::UnicodeSegmentation;
+
+use crate::{
     Action,
     Buffer,
     Color,
@@ -6,12 +10,6 @@ use cosmic_text::{
     Edit,
     SyntaxEditor,
 };
-use std::{
-    cmp,
-    io,
-    path::Path,
-};
-use unicode_segmentation::UnicodeSegmentation;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Mode {
@@ -22,12 +20,12 @@ enum Mode {
     SearchBackwards,
 }
 
-pub struct Vi<'a> {
+pub struct ViEditor<'a> {
     editor: SyntaxEditor<'a>,
     mode: Mode,
 }
 
-impl<'a> Vi<'a> {
+impl<'a> ViEditor<'a> {
     pub fn new(editor: SyntaxEditor<'a>) -> Self {
         Self {
             editor,
@@ -36,7 +34,8 @@ impl<'a> Vi<'a> {
     }
 
     /// Load text from a file, and also set syntax to the best option
-    pub fn load_text<P: AsRef<Path>>(&mut self, path: P, attrs: crate::Attrs<'a>) -> io::Result<()> {
+    #[cfg(feature = "std")]
+    pub fn load_text<P: AsRef<std::path::Path>>(&mut self, path: P, attrs: crate::Attrs<'a>) -> std::io::Result<()> {
         self.editor.load_text(path, attrs)
     }
 
@@ -51,7 +50,7 @@ impl<'a> Vi<'a> {
     }
 }
 
-impl<'a> Edit<'a> for Vi<'a> {
+impl<'a> Edit<'a> for ViEditor<'a> {
     fn buffer(&self) -> &Buffer<'a> {
         self.editor.buffer()
     }
@@ -183,6 +182,7 @@ impl<'a> Edit<'a> for Vi<'a> {
         }
     }
 
+    #[cfg(feature = "swash")]
     fn draw<F>(&self, cache: &mut crate::SwashCache, color: Color, mut f: F)
         where F: FnMut(i32, i32, u32, u32, Color)
     {
