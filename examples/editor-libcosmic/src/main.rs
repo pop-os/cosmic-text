@@ -27,6 +27,7 @@ use cosmic_text::{
     Attrs,
     AttrsList,
     Buffer,
+    Edit,
     FontSystem,
     Metrics,
     SyntaxEditor,
@@ -38,9 +39,6 @@ use std::{
     path::PathBuf,
     sync::Mutex,
 };
-
-use self::syntax_text_box::syntax_text_box;
-mod syntax_text_box;
 
 use self::text::text;
 mod text;
@@ -74,7 +72,10 @@ pub struct Window {
     theme: Theme,
     path_opt: Option<PathBuf>,
     attrs: Attrs<'static>,
+    #[cfg(not(feature = "vi"))]
     editor: Mutex<SyntaxEditor<'static>>,
+    #[cfg(feature = "vi")]
+    editor: Mutex<cosmic_text::ViEditor<'static>>,
 }
 
 #[allow(dead_code)]
@@ -121,6 +122,10 @@ impl Application for Window {
             &SYNTAX_SYSTEM,
             "base16-eighties.dark"
         ).unwrap();
+
+        #[cfg(feature = "vi")]
+        let mut editor = cosmic_text::ViEditor::new(editor);
+
         update_attrs(&mut editor, attrs);
 
         let mut window = Window {
@@ -180,7 +185,7 @@ impl Application for Window {
                 });
 
                 let mut editor = self.editor.lock().unwrap();
-                update_attrs(&mut editor, self.attrs);
+                update_attrs(&mut *editor, self.attrs);
             },
             Message::Italic(italic) => {
                 self.attrs = self.attrs.style(if italic {
@@ -190,7 +195,7 @@ impl Application for Window {
                 });
 
                 let mut editor = self.editor.lock().unwrap();
-                update_attrs(&mut editor, self.attrs);
+                update_attrs(&mut *editor, self.attrs);
             },
             Message::Monospaced(monospaced) => {
                 self.attrs = self.attrs
@@ -202,7 +207,7 @@ impl Application for Window {
                     .monospaced(monospaced);
 
                 let mut editor = self.editor.lock().unwrap();
-                update_attrs(&mut editor, self.attrs);
+                update_attrs(&mut *editor, self.attrs);
             },
             Message::MetricsChanged(metrics) => {
                 let mut editor = self.editor.lock().unwrap();
@@ -220,7 +225,7 @@ impl Application for Window {
                 self.attrs = self.attrs.color(cosmic_text::Color::rgba(as_u8(r), as_u8(g), as_u8(b), as_u8(a)));
 
                 let mut editor = self.editor.lock().unwrap();
-                update_attrs(&mut editor, self.attrs);
+                update_attrs(&mut *editor, self.attrs);
             },
         }
 
@@ -266,7 +271,7 @@ impl Application for Window {
             .align_items(Alignment::Center)
             .spacing(8)
             ,
-            syntax_text_box(&self.editor)
+            text_box(&self.editor)
         ]
         .spacing(8)
         .padding(16)
@@ -277,7 +282,7 @@ impl Application for Window {
     }
 }
 
-fn update_attrs<'a>(editor: &mut SyntaxEditor<'a>, attrs: Attrs<'a>) {
+fn update_attrs<'a, T: Edit<'a>>(editor: &mut T, attrs: Attrs<'a>) {
     editor.buffer_mut().lines.iter_mut().for_each(|line| {
         line.set_attrs_list(AttrsList::new(attrs));
     });

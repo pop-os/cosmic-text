@@ -12,7 +12,7 @@ use crate::{CacheKey, Color, FontSystem};
 
 pub use swash::scale::image::{Content as SwashContent, Image as SwashImage};
 
-fn swash_image<'a>(font_system: &'a FontSystem, context: &mut ScaleContext, cache_key: CacheKey) -> Option<SwashImage> {
+fn swash_image(font_system: &FontSystem, context: &mut ScaleContext, cache_key: CacheKey) -> Option<SwashImage> {
     let font = match font_system.get_font(cache_key.font_id) {
         Some(some) => some,
         None => {
@@ -61,7 +61,7 @@ impl<'a> SwashCache<'a> {
     /// Create a new swash cache
     pub fn new(font_system: &'a FontSystem) -> Self {
         Self {
-            font_system: font_system,
+            font_system,
             context: ScaleContext::new(),
             image_cache: Map::new()
         }
@@ -101,7 +101,7 @@ impl<'a> SwashCache<'a> {
                                 y + off_y,
                                 Color(
                                     ((image.data[i] as u32) << 24) |
-                                    base.0 & 0xFFFFFF
+                                    base.0 & 0xFF_FF_FF
                                 )
                             );
                             i += 1;

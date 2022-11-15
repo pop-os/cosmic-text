@@ -18,8 +18,8 @@ pub struct BufferLine {
 
 impl BufferLine {
     /// Create a new line with the given text and attributes list
-    /// Cached shaping and layout can be done using the [Self::shape] and
-    /// [Self::layout] functions
+    /// Cached shaping and layout can be done using the [`Self::shape`] and
+    /// [`Self::layout`] functions
     pub fn new<T: Into<String>>(text: T, attrs_list: AttrsList) -> Self {
         Self {
             text: text.into(),
@@ -40,7 +40,7 @@ impl BufferLine {
     /// Will reset shape and layout if it differs from current text and attributes list.
     /// Returns true if the line was reset
     pub fn set_text<T: AsRef<str> + Into<String>>(&mut self, text: T, attrs_list: AttrsList) -> bool {
-        if text.as_ref() != &self.text || attrs_list != self.attrs_list {
+        if text.as_ref() != self.text || attrs_list != self.attrs_list {
             self.text = text.into();
             self.attrs_list = attrs_list;
             self.reset();
@@ -143,7 +143,7 @@ impl BufferLine {
             self.shape_opt = Some(ShapeLine::new(font_system, &self.text, &self.attrs_list));
             self.layout_opt = None;
         }
-        self.shape_opt.as_ref().unwrap()
+        self.shape_opt.as_ref().expect("shape not found")
     }
 
     /// Get line shaping cache
@@ -163,7 +163,7 @@ impl BufferLine {
             );
             self.layout_opt = Some(layout);
         }
-        self.layout_opt.as_ref().unwrap()
+        self.layout_opt.as_ref().expect("layout not found")
     }
 
     /// Get line layout cache

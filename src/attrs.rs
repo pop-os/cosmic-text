@@ -35,25 +35,25 @@ impl Color {
     /// Get the red component
     #[inline]
     pub fn r(&self) -> u8 {
-        ((self.0 & 0x00FF0000) >> 16) as u8
+        ((self.0 & 0x00_FF_00_00) >> 16) as u8
     }
 
     /// Get the green component
     #[inline]
     pub fn g(&self) -> u8 {
-        ((self.0 & 0x0000FF00) >> 8) as u8
+        ((self.0 & 0x00_00_FF_00) >> 8) as u8
     }
 
     /// Get the blue component
     #[inline]
     pub fn b(&self) -> u8 {
-        (self.0 & 0x000000FF) as u8
+        (self.0 & 0x00_00_00_FF) as u8
     }
 
     /// Get the alpha component
     #[inline]
     pub fn a(&self) -> u8 {
-        ((self.0 & 0xFF000000) >> 24) as u8
+        ((self.0 & 0xFF_00_00_00) >> 24) as u8
     }
 }
 
@@ -81,7 +81,7 @@ impl FamilyOwned {
 
     pub fn as_family(&self) -> Family {
         match self {
-            FamilyOwned::Name(name) => Family::Name(&name),
+            FamilyOwned::Name(name) => Family::Name(name),
             FamilyOwned::Serif => Family::Serif,
             FamilyOwned::SansSerif => Family::SansSerif,
             FamilyOwned::Cursive => Family::Cursive,
@@ -278,7 +278,7 @@ impl AttrsList {
         }
 
         for (key, resize) in removes {
-            let (range, attrs) =  self.spans.get_key_value(&key.start).map(|v| (v.0.clone(), v.1.clone())).unwrap();
+            let (range, attrs) =  self.spans.get_key_value(&key.start).map(|v| (v.0.clone(), v.1.clone())).expect("attrs span not found");
             self.spans.remove(key);
 
             if resize {

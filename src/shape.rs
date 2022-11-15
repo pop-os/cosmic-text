@@ -30,11 +30,7 @@ fn shape_fallback(
     buffer.push_str(run);
     buffer.guess_segment_properties();
 
-    let rtl = match buffer.direction() {
-        rustybuzz::Direction::RightToLeft => true,
-        //TODO: other directions?
-        _ => false,
-    };
+    let rtl = matches!(buffer.direction(), rustybuzz::Direction::RightToLeft);
     assert_eq!(rtl, span_rtl);
 
     let glyph_buffer = rustybuzz::shape(&font.rustybuzz, &[], buffer);
@@ -64,7 +60,7 @@ fn shape_fallback(
             x_offset,
             y_offset,
             font_id: font.info.id,
-            glyph_id: info.glyph_id.try_into().unwrap(),
+            glyph_id: info.glyph_id.try_into().expect("failed to cast glyph ID"),
             color_opt: None,
         });
     }
@@ -96,7 +92,7 @@ fn shape_fallback(
 
     // Set color
     //TODO: these attributes should not be related to shaping
-    for glyph in glyphs.iter_mut() {
+    for glyph in &mut glyphs {
         let attrs = attrs_list.get_span(glyph.start);
         glyph.color_opt = attrs.color_opt;
     }
@@ -145,7 +141,7 @@ fn shape_run<'a>(
     );
 
     let (mut glyphs, mut missing) = shape_fallback(
-        font_iter.next().unwrap(),
+        font_iter.next().expect("no default font found"),
         line,
         attrs_list,
         start_run,
@@ -401,7 +397,7 @@ impl ShapeSpan {
 
         // Reverse glyphs in RTL lines
         if line_rtl {
-            for word in words.iter_mut() {
+            for word in &mut words {
                 word.glyphs.reverse();
             }
         }
@@ -493,7 +489,7 @@ impl ShapeLine {
         let end_x = if self.rtl { 0.0 } else { line_width as f32 };
         let mut x = start_x;
         let mut y = 0.0;
-        for span in self.spans.iter() {
+        for span in &self.spans {
             //TODO: improve performance!
             let mut word_ranges = Vec::new();
             if wrap_simple {
@@ -505,7 +501,7 @@ impl ShapeLine {
                     let word = &span.words[i];
 
                     let mut word_size = 0.0;
-                    for glyph in word.glyphs.iter() {
+                    for glyph in &word.glyphs {
                         word_size += font_size as f32 * glyph.x_advance;
                     }
 
@@ -553,7 +549,7 @@ impl ShapeLine {
                     let word = &span.words[i];
 
                     let mut word_size = 0.0;
-                    for glyph in word.glyphs.iter() {
+                    for glyph in &word.glyphs {
                         word_size += font_size as f32 * glyph.x_advance;
                     }
 
@@ -583,7 +579,7 @@ impl ShapeLine {
             for (range, wrap) in word_ranges {
                 for word in span.words[range].iter() {
                     let mut word_size = 0.0;
-                    for glyph in word.glyphs.iter() {
+                    for glyph in &word.glyphs {
                         word_size += font_size as f32 * glyph.x_advance;
                     }
 
@@ -605,7 +601,7 @@ impl ShapeLine {
                         y = 0.0;
                     }
 
-                    for glyph in word.glyphs.iter() {
+                    for glyph in &word.glyphs {
                         let x_advance = font_size as f32 * glyph.x_advance;
                         let y_advance = font_size as f32 * glyph.y_advance;
 
@@ -630,7 +626,7 @@ impl ShapeLine {
                         }
 
                         if self.rtl {
-                            x -= x_advance
+                            x -= x_advance;
                         }
 
                         glyphs.push(glyph.layout(font_size, x, y, span.rtl));

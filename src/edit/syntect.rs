@@ -30,6 +30,7 @@ use crate::{
     Buffer,
     Color,
     Cursor,
+    Edit,
     Editor,
     Style,
     Weight,
@@ -41,7 +42,7 @@ pub struct SyntaxSystem {
 }
 
 impl SyntaxSystem {
-    /// Create a new [SyntaxSystem]
+    /// Create a new [`SyntaxSystem`]
     pub fn new() -> Self {
         Self {
             //TODO: store newlines in buffer
@@ -51,7 +52,7 @@ impl SyntaxSystem {
     }
 }
 
-/// A wrapper of [Editor] with syntax highlighting provided by [SyntaxSystem]
+/// A wrapper of [`Editor`] with syntax highlighting provided by [`SyntaxSystem`]
 pub struct SyntaxEditor<'a> {
     editor: Editor<'a>,
     syntax_system: &'a SyntaxSystem,
@@ -62,7 +63,7 @@ pub struct SyntaxEditor<'a> {
 }
 
 impl<'a> SyntaxEditor<'a> {
-    /// Create a new [SyntaxEditor] with the provided [Buffer], [SyntaxSystem], and theme name.
+    /// Create a new [`SyntaxEditor`] with the provided [`Buffer`], [`SyntaxSystem`], and theme name.
     ///
     /// A good default theme name is "base16-eighties.dark".
     ///
@@ -84,12 +85,16 @@ impl<'a> SyntaxEditor<'a> {
     }
 
     /// Load text from a file, and also set syntax to the best option
+    ///
+    /// ## Errors
+    ///
+    /// Returns an [`io::Error`] if reading the file fails
     #[cfg(feature = "std")]
     pub fn load_text<P: AsRef<Path>>(&mut self, path: P, attrs: crate::Attrs<'a>) -> io::Result<()> {
         let path = path.as_ref();
 
         let text = fs::read_to_string(path)?;
-        self.editor.buffer.set_text(&text, attrs);
+        self.editor.buffer_mut().set_text(&text, attrs);
 
         //TODO: re-use text
         self.syntax = match self.syntax_system.syntax_set.find_syntax_for_file(path) {
@@ -110,14 +115,61 @@ impl<'a> SyntaxEditor<'a> {
         Ok(())
     }
 
-    /// Shape as needed, also doing syntax highlighting
-    pub fn shape_as_needed(&mut self) {
+    /// Get the default background color
+    pub fn background_color(&self) -> Color {
+        if let Some(background) = self.theme.settings.background {
+            Color::rgba(
+                background.r,
+                background.g,
+                background.b,
+                background.a,
+            )
+        } else {
+            Color::rgb(0, 0, 0)
+        }
+    }
+
+    /// Get the default foreground (text) color
+    pub fn foreground_color(&self) -> Color {
+        if let Some(foreground) = self.theme.settings.foreground {
+            Color::rgba(
+                foreground.r,
+                foreground.g,
+                foreground.b,
+                foreground.a,
+            )
+        } else {
+            Color::rgb(0xFF, 0xFF, 0xFF)
+        }
+    }
+}
+
+impl<'a> Edit<'a> for SyntaxEditor<'a> {
+    fn buffer(&self) -> &Buffer<'a> {
+        self.editor.buffer()
+    }
+
+    fn buffer_mut(&mut self) -> &mut Buffer<'a> {
+        self.editor.buffer_mut()
+    }
+
+    fn cursor(&self) -> Cursor {
+        self.editor.cursor()
+    }
+
+    fn select_opt(&self) -> Option<Cursor> {
+        self.editor.select_opt()
+    }
+
+    fn shape_as_needed(&mut self) {
         #[cfg(feature = "std")]
         let now = std::time::Instant::now();
 
+        let buffer = self.editor.buffer_mut();
+
         let mut highlighted = 0;
-        for line_i in 0..self.editor.buffer.lines.len() {
-            let line = &mut self.editor.buffer.lines[line_i];
+        for line_i in 0..buffer.lines.len() {
+            let line = &mut buffer.lines[line_i];
             if ! line.is_reset() && line_i < self.syntax_cache.len() {
                 continue;
             }
@@ -132,7 +184,7 @@ impl<'a> SyntaxEditor<'a> {
                 )
             };
 
-            let ops = parse_state.parse_line(line.text(), &self.syntax_system.syntax_set).unwrap();
+            let ops = parse_state.parse_line(line.text(), &self.syntax_system.syntax_set).expect("failed to parse syntax");
             let ranges = RangedHighlightIterator::new(
                 &mut highlight_state,
                 &ops,
@@ -172,14 +224,14 @@ impl<'a> SyntaxEditor<'a> {
             line.set_wrap_simple(true);
 
             //TODO: efficiently do syntax highlighting without having to shape whole buffer
-            line.shape(self.editor.buffer.font_system);
+            buffer.line_shape(line_i);
 
             let cache_item = (parse_state.clone(), highlight_state.clone());
             if line_i < self.syntax_cache.len() {
                 if self.syntax_cache[line_i] != cache_item {
                     self.syntax_cache[line_i] = cache_item;
-                    if line_i + 1 < self.editor.buffer.lines.len() {
-                        self.editor.buffer.lines[line_i + 1].reset();
+                    if line_i + 1 < buffer.lines.len() {
+                        buffer.lines[line_i + 1].reset();
                     }
                 }
             } else {
@@ -188,7 +240,7 @@ impl<'a> SyntaxEditor<'a> {
         }
 
         if highlighted > 0 {
-            self.editor.buffer.redraw = true;
+            buffer.set_redraw(true);
             #[cfg(feature = "std")]
             log::debug!("Syntax highlighted {} lines in {:?}", highlighted, now.elapsed());
         }
@@ -196,67 +248,21 @@ impl<'a> SyntaxEditor<'a> {
         self.editor.shape_as_needed();
     }
 
-    /// Get the internal [Buffer]
-    pub fn buffer(&self) -> &Buffer<'a> {
-        &self.editor.buffer
-    }
-
-    /// Get the internal [Buffer], mutably
-    pub fn buffer_mut(&mut self) -> &mut Buffer<'a> {
-        &mut self.editor.buffer
-    }
-
-    /// Get the current [Cursor] position
-    pub fn cursor(&self) -> Cursor {
-        self.editor.cursor()
-    }
-
-    /// Get the default background color
-    pub fn background_color(&self) -> Color {
-        if let Some(background) = self.theme.settings.background {
-            Color::rgba(
-                background.r,
-                background.g,
-                background.b,
-                background.a,
-            )
-        } else {
-            Color::rgb(0, 0, 0)
-        }
-    }
-
-    /// Get the default foreground (text) color
-    pub fn foreground_color(&self) -> Color {
-        if let Some(foreground) = self.theme.settings.foreground {
-            Color::rgba(
-                foreground.r,
-                foreground.g,
-                foreground.b,
-                foreground.a,
-            )
-        } else {
-            Color::rgb(0xFF, 0xFF, 0xFF)
-        }
-    }
-
-    /// Copy selection
-    pub fn copy_selection(&mut self) -> Option<String> {
+    fn copy_selection(&mut self) -> Option<String> {
         self.editor.copy_selection()
     }
 
-    /// Delete selection, adjusting cursor and returning true if there was a selection
-    pub fn delete_selection(&mut self) -> bool {
+    fn delete_selection(&mut self) -> bool {
         self.editor.delete_selection()
     }
 
-    /// Perform an [Action] on the editor
-    pub fn action(&mut self, action: Action) {
+    fn action(&mut self, action: Action) {
         self.editor.action(action);
     }
 
     /// Draw the editor
     #[cfg(feature = "swash")]
-    pub fn draw<F>(&self, cache: &mut crate::SwashCache, mut f: F)
+    fn draw<F>(&self, cache: &mut crate::SwashCache, _color: Color, mut f: F)
         where F: FnMut(i32, i32, u32, u32, Color)
     {
         let size = self.buffer().size();

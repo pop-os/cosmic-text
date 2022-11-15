@@ -57,7 +57,7 @@ pub struct LayoutRun<'a> {
     pub line_y: i32,
 }
 
-/// An iterator of visible text lines, see [LayoutRun]
+/// An iterator of visible text lines, see [`LayoutRun`]
 pub struct LayoutRunIter<'a, 'b> {
     buffer: &'b Buffer<'a>,
     line_i: usize,
@@ -145,8 +145,7 @@ impl fmt::Display for Metrics {
 
 /// A buffer of text that is shaped and laid out
 pub struct Buffer<'a> {
-    /// The [FontSystem] used by this [Buffer]
-    pub font_system: &'a FontSystem,
+    font_system: &'a FontSystem,
     /// [BufferLine]s (or paragraphs) of text in the buffer
     pub lines: Vec<BufferLine>,
     metrics: Metrics,
@@ -154,11 +153,11 @@ pub struct Buffer<'a> {
     height: i32,
     scroll: i32,
     /// True if a redraw is requires. Set to false after processing
-    pub redraw: bool,
+    redraw: bool,
 }
 
 impl<'a> Buffer<'a> {
-    /// Create a new [Buffer] with the provided [FontSystem] and [Metrics]
+    /// Create a new [`Buffer`] with the provided [`FontSystem`] and [`Metrics`]
     pub fn new(
         font_system: &'a FontSystem,
         metrics: Metrics,
@@ -180,7 +179,7 @@ impl<'a> Buffer<'a> {
         #[cfg(feature = "std")]
         let instant = std::time::Instant::now();
 
-        for line in self.lines.iter_mut() {
+        for line in &mut self.lines {
             if line.shape_opt().is_some() {
                 line.reset_layout();
                 line.layout(
@@ -204,7 +203,7 @@ impl<'a> Buffer<'a> {
 
         let mut reshaped = 0;
         let mut total_layout = 0;
-        for line in self.lines.iter_mut() {
+        for line in &mut self.lines {
             if total_layout >= lines {
                 break;
             }
@@ -293,7 +292,8 @@ impl<'a> Buffer<'a> {
     pub fn layout_cursor(&self, cursor: &Cursor) -> LayoutCursor {
         let line = &self.lines[cursor.line];
 
-        let layout = line.layout_opt().as_ref().unwrap(); //TODO: ensure layout is done?
+        //TODO: ensure layout is done?
+        let layout = line.layout_opt().as_ref().expect("layout not found");
         for (layout_i, layout_line) in layout.iter().enumerate() {
             for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
                 if cursor.index == glyph.start {
@@ -333,24 +333,29 @@ impl<'a> Buffer<'a> {
         )
     }
 
+    /// Get [`FontSystem`] used by this [`Buffer`]
+    pub fn font_system(&self) -> &'a FontSystem {
+        self.font_system
+    }
+
     /// Shape the provided line index and return the result
     pub fn line_shape(&mut self, line_i: usize) -> Option<&ShapeLine> {
         let line = self.lines.get_mut(line_i)?;
-        Some(line.shape(&self.font_system))
+        Some(line.shape(self.font_system))
     }
 
     /// Lay out the provided line index and return the result
     pub fn line_layout(&mut self, line_i: usize) -> Option<&[LayoutLine]> {
         let line = self.lines.get_mut(line_i)?;
-        Some(line.layout(&self.font_system, self.metrics.font_size, self.width))
+        Some(line.layout(self.font_system, self.metrics.font_size, self.width))
     }
 
-    /// Get the current [Metrics]
+    /// Get the current [`Metrics`]
     pub fn metrics(&self) -> Metrics {
         self.metrics
     }
 
-    /// Set the current [Metrics]
+    /// Set the current [`Metrics`]
     pub fn set_metrics(&mut self, metrics: Metrics) {
         if metrics != self.metrics {
             self.metrics = metrics;
@@ -408,6 +413,16 @@ impl<'a> Buffer<'a> {
         self.shape_until_scroll();
     }
 
+    /// True if a redraw is needed
+    pub fn redraw(&self) -> bool {
+        self.redraw
+    }
+
+    /// Set redraw needed flag
+    pub fn set_redraw(&mut self, redraw: bool) {
+        self.redraw = redraw;
+    }
+
     /// Get the visible layout runs for rendering and other tasks
     pub fn layout_runs<'b>(&'b self) -> LayoutRunIter<'a, 'b> {
         LayoutRunIter::new(self)
@@ -439,15 +454,15 @@ impl<'a> Buffer<'a> {
                 let mut new_cursor_char = 0;
 
                 let mut first_glyph = true;
-                
+
                 'hit: for (glyph_i, glyph) in run.glyphs.iter().enumerate() {
-                    if first_glyph {  
+                    if first_glyph {
                         first_glyph = false;
                         if (run.rtl && x > glyph.x as i32) || (!run.rtl && x < 0) {
                             new_cursor_glyph = 0;
                             new_cursor_char = 0;
                         }
-                    } 
+                    }
                     if x >= glyph.x as i32
                     && x <= (glyph.x + glyph.w) as i32
                     {
@@ -528,7 +543,7 @@ impl<'a> Buffer<'a> {
                 };
 
                 cache.with_pixels(cache_key, glyph_color, |x, y, color| {
-                    f(x_int + x, run.line_y + y_int + y, 1, 1, color)
+                    f(x_int + x, run.line_y + y_int + y, 1, 1, color);
                 });
             }
         }

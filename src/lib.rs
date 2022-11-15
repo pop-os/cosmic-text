@@ -7,8 +7,8 @@
 //! rustybuzz, font discovery utilizes fontdb, and the rasterization is optional and utilizes
 //! swash. The other features are developed internal to this library.
 //!
-//! It is recommended that you start by creating a [FontSystem], after which you can create a
-//! [Buffer], provide it with some text, and then inspect the layout it produces. At this
+//! It is recommended that you start by creating a [`FontSystem`], after which you can create a
+//! [`Buffer`], provide it with some text, and then inspect the layout it produces. At this
 //! point, you can use the `SwashCache` to rasterize glyphs into either images or pixels.
 //!
 //! ```
@@ -54,6 +54,41 @@
 //! });
 //! ```
 
+// Not interested in these lints
+#![allow(clippy::new_without_default)]
+
+// TODO: address ocurrances and then deny
+//
+// Indexing a slice can cause panics and that is something we always want to avoid
+#![allow(clippy::indexing_slicing)]
+// Overflows can produce unpredictable results and are only checked in debug builds
+#![allow(clippy::integer_arithmetic)]
+
+// Soundness issues
+//
+// Dereferencing unalinged pointers may be undefined behavior
+#![deny(clippy::cast_ptr_alignment)]
+// Avoid panicking in without information about the panic. Use expect
+#![deny(clippy::unwrap_used)]
+// This is usually a serious issue - a missing import of a define where it is interpreted
+// as a catch-all variable in a match, for example
+#![deny(unreachable_patterns)]
+// Ensure that all must_use results are used
+#![deny(unused_must_use)]
+
+// Style issues
+//
+// Documentation not ideal
+#![warn(clippy::doc_markdown)]
+// Document possible errors
+#![warn(clippy::missing_errors_doc)]
+// Document possible panics
+#![warn(clippy::missing_panics_doc)]
+// Ensure semicolons are present
+#![warn(clippy::semicolon_if_nothing_returned)]
+// Ensure numbers are readable
+#![warn(clippy::unreadable_literal)]
+
 #![cfg_attr(not(feature = "std"), no_std)]
 
 extern crate alloc;
@@ -70,8 +105,8 @@ mod buffer_line;
 pub use self::cache::*;
 mod cache;
 
-pub use self::editor::*;
-mod editor;
+pub use self::edit::*;
+mod edit;
 
 pub use self::font::*;
 mod font;
@@ -86,8 +121,3 @@ mod shape;
 pub use self::swash::*;
 #[cfg(feature = "swash")]
 mod swash;
-
-#[cfg(feature = "syntect")]
-pub use self::syntect::*;
-#[cfg(feature = "syntect")]
-mod syntect;

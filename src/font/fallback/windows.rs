@@ -36,7 +36,7 @@ fn han_unification(locale: &str) -> &'static [&'static str] {
 }
 
 // Fallbacks to use per script
-pub fn script_fallback(script: &Script, locale: &str) -> &'static [&'static str] {
+pub fn script_fallback(script: Script, locale: &str) -> &'static [&'static str] {
     //TODO: better match https://github.com/chromium/chromium/blob/master/third_party/blink/renderer/platform/fonts/win/font_fallback_win.cc#L99
     match script {
         Script::Adlam => &["Ebrima"],

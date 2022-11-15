@@ -5,52 +5,13 @@ use alloc::string::{String, ToString};
 use core::cmp;
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::{AttrsList, Buffer, BufferLine, Cursor, LayoutCursor};
+use crate::{Action, AttrsList, Buffer, BufferLine, Cursor, Edit, LayoutCursor};
 #[cfg(feature = "swash")]
 use crate::Color;
 
-/// An action to perform on an [Editor]
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Action {
-    /// Move cursor to previous character ([Self::Left] in LTR, [Self::Right] in RTL)
-    Previous,
-    /// Move cursor to next character ([Self::Right] in LTR, [Self::Left] in RTL)
-    Next,
-    /// Move cursor left
-    Left,
-    /// Move cursor right
-    Right,
-    /// Move cursor up
-    Up,
-    /// Move cursor down
-    Down,
-    /// Move cursor to start of line
-    Home,
-    /// Move cursor to end of line
-    End,
-    /// Scroll up one page
-    PageUp,
-    /// Scroll down one page
-    PageDown,
-    /// Insert character at cursor
-    Insert(char),
-    /// Create new line
-    Enter,
-    /// Delete text behind cursor
-    Backspace,
-    /// Delete text in front of cursor
-    Delete,
-    /// Mouse click at specified position
-    Click { x: i32, y: i32 },
-    /// Mouse drag to specified position
-    Drag { x: i32, y: i32 },
-    /// Scroll specified number of lines
-    Scroll { lines: i32 },
-}
-
-/// A wrapper of [Buffer] for easy editing
+/// A wrapper of [`Buffer`] for easy editing
 pub struct Editor<'a> {
-    pub buffer: Buffer<'a>,
+    buffer: Buffer<'a>,
     cursor: Cursor,
     cursor_x_opt: Option<i32>,
     select_opt: Option<Cursor>,
@@ -58,7 +19,7 @@ pub struct Editor<'a> {
 }
 
 impl<'a> Editor<'a> {
-    /// Create a new [Editor] with the provided [Buffer]
+    /// Create a new [`Editor`] with the provided [`Buffer`]
     pub fn new(buffer: Buffer<'a>) -> Self {
         Self {
             buffer,
@@ -69,18 +30,8 @@ impl<'a> Editor<'a> {
         }
     }
 
-    /// Shape lines until scroll, after adjusting scroll if the cursor moved
-    pub fn shape_as_needed(&mut self) {
-        if self.cursor_moved {
-            self.buffer.shape_until_cursor(self.cursor);
-            self.cursor_moved = false;
-        } else {
-            self.buffer.shape_until_scroll();
-        }
-    }
-
     fn set_layout_cursor(&mut self, cursor: LayoutCursor) {
-        let layout = self.buffer.line_layout(cursor.line).unwrap();
+        let layout = self.buffer.line_layout(cursor.line).expect("layout not found");
 
         let layout_line = match layout.get(cursor.layout) {
             Some(some) => some,
@@ -102,27 +53,38 @@ impl<'a> Editor<'a> {
         if self.cursor.line != cursor.line || self.cursor.index != new_index {
             self.cursor.line = cursor.line;
             self.cursor.index = new_index;
-            self.buffer.redraw = true;
+            self.buffer.set_redraw(true);
         }
     }
+}
 
-    /// Get the internal [Buffer]
-    pub fn buffer(&self) -> &Buffer<'a> {
+impl<'a> Edit<'a> for Editor<'a> {
+    fn buffer(&self) -> &Buffer<'a> {
         &self.buffer
     }
 
-    /// Get the internal [Buffer], mutably
-    pub fn buffer_mut(&mut self) -> &mut Buffer<'a> {
+    fn buffer_mut(&mut self) -> &mut Buffer<'a> {
         &mut self.buffer
     }
 
-    /// Get the current cursor position
-    pub fn cursor(&self) -> Cursor {
+    fn cursor(&self) -> Cursor {
         self.cursor
     }
 
-    /// Copy selection
-    pub fn copy_selection(&mut self) -> Option<String> {
+    fn select_opt(&self) -> Option<Cursor> {
+        self.select_opt
+    }
+
+    fn shape_as_needed(&mut self) {
+        if self.cursor_moved {
+            self.buffer.shape_until_cursor(self.cursor);
+            self.cursor_moved = false;
+        } else {
+            self.buffer.shape_until_scroll();
+        }
+    }
+
+    fn copy_selection(&mut self) -> Option<String> {
         let select = self.select_opt?;
 
         let (start, end) = match select.line.cmp(&self.cursor.line) {
@@ -166,9 +128,7 @@ impl<'a> Editor<'a> {
         Some(selection)
     }
 
-    /// Delete selection, adjusting cursor and returning true if there was a selection
-    // Helper function for backspace, delete, insert, and enter when there is a selection
-    pub fn delete_selection(&mut self) -> bool {
+    fn delete_selection(&mut self) -> bool {
         let select = match self.select_opt.take() {
             Some(some) => some,
             None => return false,
@@ -235,8 +195,7 @@ impl<'a> Editor<'a> {
         true
     }
 
-    /// Perform an [Action] on the editor
-    pub fn action(&mut self, action: Action) {
+    fn action(&mut self, action: Action) {
         let old_cursor = self.cursor;
 
         match action {
@@ -254,11 +213,11 @@ impl<'a> Editor<'a> {
                     }
 
                     self.cursor.index = prev_index;
-                    self.buffer.redraw = true;
+                    self.buffer.set_redraw(true);
                 } else if self.cursor.line > 0 {
                     self.cursor.line -= 1;
                     self.cursor.index = self.buffer.lines[self.cursor.line].text().len();
-                    self.buffer.redraw = true;
+                    self.buffer.set_redraw(true);
                 }
                 self.cursor_x_opt = None;
             },
@@ -268,14 +227,14 @@ impl<'a> Editor<'a> {
                     for (i, c) in line.text().grapheme_indices(true) {
                         if i == self.cursor.index {
                             self.cursor.index += c.len();
-                            self.buffer.redraw = true;
+                            self.buffer.set_redraw(true);
                             break;
                         }
                     }
                 } else if self.cursor.line + 1 < self.buffer.lines.len() {
                     self.cursor.line += 1;
                     self.cursor.index = 0;
-                    self.buffer.redraw = true;
+                    self.buffer.set_redraw(true);
                 }
                 self.cursor_x_opt = None;
             },
@@ -326,7 +285,7 @@ impl<'a> Editor<'a> {
                 //TODO: make this preserve X as best as possible!
                 let mut cursor = self.buffer.layout_cursor(&self.cursor);
 
-                let layout_len = self.buffer.line_layout(cursor.line).unwrap().len();
+                let layout_len = self.buffer.line_layout(cursor.line).expect("layout not found").len();
 
                 if self.cursor_x_opt.is_none() {
                     self.cursor_x_opt = Some(
@@ -370,6 +329,11 @@ impl<'a> Editor<'a> {
                 let mut scroll = self.buffer.scroll();
                 scroll += self.buffer.visible_lines();
                 self.buffer.set_scroll(scroll);
+            },
+            Action::Escape => {
+                if self.select_opt.take().is_some() {
+                    self.buffer.set_redraw(true);
+                }
             },
             Action::Insert(character) => {
                 if character.is_control()
@@ -484,20 +448,20 @@ impl<'a> Editor<'a> {
                 if let Some(new_cursor) = self.buffer.hit(x, y) {
                     if new_cursor != self.cursor {
                         self.cursor = new_cursor;
-                        self.buffer.redraw = true;
+                        self.buffer.set_redraw(true);
                     }
                 }
             },
             Action::Drag { x, y } => {
                 if self.select_opt.is_none() {
                     self.select_opt = Some(self.cursor);
-                    self.buffer.redraw = true;
+                    self.buffer.set_redraw(true);
                 }
 
                 if let Some(new_cursor) = self.buffer.hit(x, y) {
                     if new_cursor != self.cursor {
                         self.cursor = new_cursor;
-                        self.buffer.redraw = true;
+                        self.buffer.set_redraw(true);
                     }
                 }
             },
@@ -531,7 +495,7 @@ impl<'a> Editor<'a> {
 
     /// Draw the editor
     #[cfg(feature = "swash")]
-    pub fn draw<F>(&self, cache: &mut crate::SwashCache, color: Color, mut f: F)
+    fn draw<F>(&self, cache: &mut crate::SwashCache, color: Color, mut f: F)
         where F: FnMut(i32, i32, u32, u32, Color)
     {
         let font_size = self.buffer.metrics().font_size;
@@ -699,7 +663,7 @@ impl<'a> Editor<'a> {
                 };
 
                 cache.with_pixels(cache_key, glyph_color, |x, y, color| {
-                    f(x_int + x, line_y + y_int + y, 1, 1, color)
+                    f(x_int + x, line_y + y_int + y, 1, 1, color);
                 });
             }
         }

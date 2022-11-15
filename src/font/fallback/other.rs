@@ -13,6 +13,6 @@ pub fn forbidden_fallback() -> &'static [&'static str] {
 }
 
 // Fallbacks to use per script
-pub fn script_fallback(script: &Script, locale: &str) -> &'static [&'static str] {
+pub fn script_fallback(_script: Script, _locale: &str) -> &'static [&'static str] {
     &[]
 }

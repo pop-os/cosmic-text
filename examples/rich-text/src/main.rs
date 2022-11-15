@@ -7,6 +7,7 @@ use cosmic_text::{
     Buffer,
     BufferLine,
     Color,
+    Edit,
     Editor,
     Family,
     FontSystem,
@@ -49,7 +50,7 @@ fn main() {
         Metrics::new(32, 44).scale(display_scale)
     ));
 
-    editor.buffer.set_size(
+    editor.buffer_mut().set_size(
         window.width() as i32,
         window.height() as i32
     );
@@ -59,7 +60,7 @@ fn main() {
     let mono_attrs = attrs.monospaced(true).family(Family::Monospace);
     let comic_attrs = attrs.family(Family::Name("Comic Neue"));
 
-    editor.buffer.lines.clear();
+    editor.buffer_mut().lines.clear();
 
     let lines: &[&[(&str, Attrs)]] = &[
         &[
@@ -131,7 +132,7 @@ fn main() {
             let end = line_text.len();
             attrs_list.add_span(start..end, attrs);
         }
-        editor.buffer.lines.push(BufferLine::new(line_text, attrs_list));
+        editor.buffer_mut().lines.push(BufferLine::new(line_text, attrs_list));
     }
 
     let mut swash_cache = SwashCache::new(&font_system);
@@ -145,7 +146,7 @@ fn main() {
         let font_color = Color::rgb(0xFF, 0xFF, 0xFF);
 
         editor.shape_as_needed();
-        if editor.buffer.redraw {
+        if editor.buffer().redraw() {
             let instant = Instant::now();
 
             window.set(bg_color);
@@ -156,7 +157,7 @@ fn main() {
 
             window.sync();
 
-            editor.buffer.redraw = false;
+            editor.buffer_mut().set_redraw(false);
 
             let duration = instant.elapsed();
             log::debug!("redraw: {:?}", duration);
@@ -193,7 +194,7 @@ fn main() {
                     }
                 },
                 EventOption::Resize(resize) => {
-                    editor.buffer.set_size(resize.width as i32, resize.height as i32);
+                    editor.buffer_mut().set_size(resize.width as i32, resize.height as i32);
                 },
                 EventOption::Quit(_) => process::exit(0),
                 _ => (),
