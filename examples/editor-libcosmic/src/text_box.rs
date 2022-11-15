@@ -63,12 +63,12 @@ impl<'a, Editor> TextBox<'a, Editor> {
             padding: Padding::new(0),
         }
     }
-    
+
     pub fn padding<P: Into<Padding>>(mut self, padding: P) -> Self {
         self.padding = padding.into();
         self
     }
-    
+
 }
 
 pub fn text_box<'a, Editor>(editor: &'a Mutex<Editor>) -> TextBox<'a, Editor> {
@@ -269,6 +269,10 @@ where
                 },
                 KeyCode::PageDown => {
                     editor.action(Action::PageDown);
+                    status = Status::Captured;
+                },
+                KeyCode::Escape => {
+                    editor.action(Action::Escape);
                     status = Status::Captured;
                 },
                 KeyCode::Enter => {
