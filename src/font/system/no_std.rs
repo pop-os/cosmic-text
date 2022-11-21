@@ -16,13 +16,10 @@ pub struct FontSystem{
 
 impl FontSystem {
     pub fn new() -> Self {
-        //TODO: get locale from argument?
         let locale = "en-US".to_string();
 
-        //TODO: allow loading fonts from memory
         let mut db = fontdb::Database::new();
         {
-            //TODO: configurable default fonts
             db.set_monospace_family("Fira Mono");
             db.set_sans_serif_family("Fira Sans");
             db.set_serif_family("DejaVu Serif");
@@ -31,6 +28,13 @@ impl FontSystem {
         Self {
             locale,
             db,
+        }
+    }
+
+    pub fn new_with_locale_and_db(locale: &str, db: fontdb::Database) -> Self {
+        Self {
+            locale: locale.to_string(),
+            db
         }
     }
 
