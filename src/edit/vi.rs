@@ -67,6 +67,10 @@ impl<'a> Edit<'a> for ViEditor<'a> {
         self.editor.select_opt()
     }
 
+    fn set_select_opt(&mut self, select_opt: Option<Cursor>) {
+        self.editor.set_select_opt(select_opt);
+    }
+
     fn shape_as_needed(&mut self) {
         self.editor.shape_as_needed()
     }
@@ -94,6 +98,23 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                     'A' => {
                         self.editor.action(Action::End);
                         self.mode = Mode::Insert;
+                    },
+                    // Change mode
+                    'c' => {
+                        if self.editor.select_opt().is_some() {
+                            self.editor.action(Action::Delete);
+                            self.mode = Mode::Insert;
+                        } else {
+                            //TODO: change to next cursor movement
+                        }
+                    },
+                    // Delete mode
+                    'd' => {
+                        if self.editor.select_opt().is_some() {
+                            self.editor.action(Action::Delete);
+                        } else {
+                            //TODO: delete to next cursor movement
+                        }
                     },
                     // Enter insert mode at cursor
                     'i' => {
@@ -133,6 +154,25 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                     //TODO: 'L' => self.editor.action(Action::ScreenLow),
                     // Middle of screen
                     //TODO: 'M' => self.editor.action(Action::ScreenMiddle),
+                    // Enter visual mode
+                    'v' => {
+                        if self.editor.select_opt().is_some() {
+                            self.editor.set_select_opt(None);
+                        } else {
+                            self.editor.set_select_opt(Some(self.editor.cursor()));
+                        }
+                    },
+                    // Enter line visual mode
+                    'V' => {
+                        if self.editor.select_opt().is_some() {
+                            self.editor.set_select_opt(None);
+                        } else {
+                            self.editor.action(Action::Home);
+                            self.editor.set_select_opt(Some(self.editor.cursor()));
+                            //TODO: set cursor_x_opt to max
+                            self.editor.action(Action::End);
+                        }
+                    },
                     // Remove character at cursor
                     'x' => self.editor.action(Action::Delete),
                     // Remove character before cursor

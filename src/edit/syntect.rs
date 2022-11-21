@@ -160,6 +160,10 @@ impl<'a> Edit<'a> for SyntaxEditor<'a> {
     fn select_opt(&self) -> Option<Cursor> {
         self.editor.select_opt()
     }
+    
+    fn set_select_opt(&mut self, select_opt: Option<Cursor>) {
+        self.editor.set_select_opt(select_opt);
+    }
 
     fn shape_as_needed(&mut self) {
         #[cfg(feature = "std")]
