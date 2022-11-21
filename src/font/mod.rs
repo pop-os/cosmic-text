@@ -29,8 +29,6 @@ impl<'a> Font<'a> {
             }
             #[cfg(feature = "std")]
             fontdb::Source::SharedFile(_path, data) => data.deref().as_ref(),
-            #[cfg(not(feature = "std"))]
-            _ => { todo!(""); }
         };
 
         Some(Self {
