@@ -2,7 +2,9 @@
 
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
+use unicode_bidi::Level;
 use core::mem;
+use core::ops::Range;
 use unicode_script::{Script, UnicodeScript};
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -418,6 +420,8 @@ impl ShapeSpan {
 pub struct ShapeLine {
     pub rtl: bool,
     pub spans: Vec<ShapeSpan>,
+    pub levels: Vec<Level>,
+    pub runs: Vec<Range<usize>>,
 }
 
 impl ShapeLine {
@@ -427,6 +431,8 @@ impl ShapeLine {
         attrs_list: &AttrsList
     ) -> Self {
         let mut spans = Vec::new();
+        let levels = Vec::new();
+        let runs = Vec::new();
 
         let bidi = unicode_bidi::BidiInfo::new(line, None);
         let rtl = if bidi.paragraphs.is_empty() {
@@ -438,40 +444,43 @@ impl ShapeLine {
 
             log::trace!("Line {}: '{}'", if line_rtl { "RTL" } else { "LTR" }, line);
 
-            let paragraph = unicode_bidi::Paragraph::new(&bidi, para_info);
+            let line_range = para_info.range.clone();
+            let (levels, runs) = bidi.visual_runs(para_info, line_range);
 
-            let mut start = 0;
-            let mut span_rtl = line_rtl;
-            for i in paragraph.para.range.clone() {
-                let next_rtl = paragraph.info.levels[i].is_rtl();
-                if span_rtl != next_rtl {
+            if line_rtl {
+                for range in runs.into_iter().rev() {
+                    let span_rtl = levels[range.start].is_rtl(); //paragraph.info.levels[i].is_rtl();
                     spans.push(ShapeSpan::new(
                         font_system,
                         line,
                         attrs_list,
-                        start,
-                        i,
+                        range.start,
+                        range.end,
                         line_rtl,
                         span_rtl
                     ));
-                    span_rtl = next_rtl;
-                    start = i;
+                }
+
+            }
+            else {
+                for range in runs.into_iter() {
+                    let span_rtl = levels[range.start].is_rtl(); //paragraph.info.levels[i].is_rtl();
+                    spans.push(ShapeSpan::new(
+                        font_system,
+                        line,
+                        attrs_list,
+                        range.start,
+                        range.end,
+                        line_rtl,
+                        span_rtl
+                    ));
                 }
             }
-            spans.push(ShapeSpan::new(
-                font_system,
-                line,
-                attrs_list,
-                start,
-                line.len(),
-                line_rtl,
-                span_rtl
-            ));
 
             line_rtl
         };
 
-        Self { rtl, spans }
+        Self { rtl, spans, levels, runs }
     }
 
     pub fn layout(
