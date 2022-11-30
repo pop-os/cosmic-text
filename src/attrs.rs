@@ -156,7 +156,6 @@ impl<'a> Attrs<'a> {
 
     /// Check if font matches
     pub fn matches(&self, face: &fontdb::FaceInfo) -> bool {
-        //TODO: smarter way of including emoji
         face.post_script_name.contains("Emoji") ||
         (
             face.style == self.style &&

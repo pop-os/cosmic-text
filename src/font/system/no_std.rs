@@ -61,15 +61,24 @@ impl FontSystem {
 
     pub fn get_font_matches<'a>(&'a self, attrs: Attrs) -> Arc<FontMatches<'a>> {
         let mut fonts = Vec::new();
-        for face in self.db.faces() {
-            if !attrs.matches(face) {
-                continue;
-            }
+        // for face in self.db.faces() {
+        //     log::info!("{:?}", face.family);
+        //     if !attrs.matches(face) {
+        //         continue;
+        //     }
 
-            if let Some(font) = self.get_font(face.id) {
-                fonts.push(font);
+        //     if let Some(font) = self.get_font(face.id) {
+        //         fonts.push(font);
+        //     }
+        // }
+
+        fonts.push(self.get_font(self.db.query(
+            &fontdb::Query {
+                families: &[fontdb::Family::SansSerif],
+                weight: attrs.weight,
+                ..fontdb::Query::default()
             }
-        }
+         ).unwrap() ).unwrap());
 
         Arc::new(FontMatches {
             locale: &self.locale,
