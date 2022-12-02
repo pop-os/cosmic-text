@@ -420,8 +420,6 @@ impl ShapeSpan {
 pub struct ShapeLine {
     pub rtl: bool,
     pub spans: Vec<ShapeSpan>,
-    pub levels: Vec<Level>,
-    pub runs: Vec<Range<usize>>,
 }
 
 impl ShapeLine {
@@ -431,8 +429,6 @@ impl ShapeLine {
         attrs_list: &AttrsList
     ) -> Self {
         let mut spans = Vec::new();
-        let levels = Vec::new();
-        let runs = Vec::new();
 
         let bidi = unicode_bidi::BidiInfo::new(line, None);
         let rtl = if bidi.paragraphs.is_empty() {
@@ -449,7 +445,7 @@ impl ShapeLine {
 
             if line_rtl {
                 for range in runs.into_iter().rev() {
-                    let span_rtl = levels[range.start].is_rtl(); //paragraph.info.levels[i].is_rtl();
+                    let span_rtl = levels[range.start].is_rtl(); 
                     spans.push(ShapeSpan::new(
                         font_system,
                         line,
@@ -480,7 +476,7 @@ impl ShapeLine {
             line_rtl
         };
 
-        Self { rtl, spans, levels, runs }
+        Self { rtl, spans}
     }
 
     pub fn layout(

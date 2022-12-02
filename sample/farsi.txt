@@ -7,4 +7,5 @@
 ویرگول (؛).
 تای تأنیث یا ه دو نقطه (ة).
 علامت تشدید (ــّـ).
-
+Testing LEFT‑TO‑RIGHT ISOLATE (U+2066) and POP DIRECTIONAL ISOLATE (U+2069):
+He said: "بهتره از  ⁦Rust⁩ استفاده کنی".
