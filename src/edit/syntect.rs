@@ -225,7 +225,7 @@ impl<'a> Edit<'a> for SyntaxEditor<'a> {
 
             // Update line attributes. This operation only resets if the line changes
             line.set_attrs_list(attrs_list);
-            line.set_wrap_simple(true);
+            line.set_wrap_simple(false);
 
             //TODO: efficiently do syntax highlighting without having to shape whole buffer
             buffer.line_shape(line_i);
@@ -246,7 +246,7 @@ impl<'a> Edit<'a> for SyntaxEditor<'a> {
         if highlighted > 0 {
             buffer.set_redraw(true);
             #[cfg(feature = "std")]
-            log::debug!("Syntax highlighted {} lines in {:?}", highlighted, now.elapsed());
+            log::debug!("Syntax highlighted {} lines in {:?}", highlighted, now.elapsed()); 
         }
 
         self.editor.shape_as_needed();
