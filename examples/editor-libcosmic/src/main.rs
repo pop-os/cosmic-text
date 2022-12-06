@@ -17,7 +17,7 @@ use cosmic::{
         },
     },
     settings,
-    theme::Theme,
+    theme::{self, Theme},
     widget::{
         button,
         toggler,
@@ -254,8 +254,12 @@ impl Application for Window {
 
         let content: Element<_> = column![
             row![
-                button!("Open").on_press(Message::Open),
-                button!("Save").on_press(Message::Save),
+                button(theme::Button::Secondary)
+                    .text("Open")
+                    .on_press(Message::Open),
+                button(theme::Button::Secondary)
+                    .text("Save")
+                    .on_press(Message::Save),
                 horizontal_space(Length::Fill),
                 text("Bold:"),
                 toggler(None, self.attrs.weight == cosmic_text::Weight::BOLD, Message::Bold),
