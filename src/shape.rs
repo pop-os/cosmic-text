@@ -607,6 +607,7 @@ impl ShapeLine {
                     }
 
                     if x == start_x && word.blank {
+                        // Skip blank words at start of line
                         continue;
                     }
 
