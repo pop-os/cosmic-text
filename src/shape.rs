@@ -445,7 +445,7 @@ impl ShapeLine {
 
             if line_rtl {
                 for range in runs.into_iter().rev() {
-                    let span_rtl = levels[range.start].is_rtl(); 
+                    let span_rtl = levels[range.start].is_rtl();
                     spans.push(ShapeSpan::new(
                         font_system,
                         line,
@@ -604,6 +604,10 @@ impl ShapeLine {
 
                         x = start_x;
                         y = 0.0;
+                    }
+
+                    if x == start_x && word.blank {
+                        continue;
                     }
 
                     for glyph in &word.glyphs {
