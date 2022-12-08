@@ -2,9 +2,7 @@
 
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
-use unicode_bidi::Level;
 use core::mem;
-use core::ops::Range;
 use unicode_script::{Script, UnicodeScript};
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -622,7 +620,7 @@ impl ShapeLine {
                             x + x_advance > end_x
                         };
 
-                        if glyph_wrap {
+                        if glyph_wrap && ! glyphs.is_empty() {
                             let mut glyphs_swap = Vec::new();
                             mem::swap(&mut glyphs, &mut glyphs_swap);
                             layout_lines.push(
@@ -649,7 +647,7 @@ impl ShapeLine {
                     }
                 }
 
-                if wrap {
+                if wrap && ! glyphs.is_empty() {
                     let mut glyphs_swap = Vec::new();
                     mem::swap(&mut glyphs, &mut glyphs_swap);
                     layout_lines.push(
