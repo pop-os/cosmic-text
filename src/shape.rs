@@ -620,7 +620,7 @@ impl ShapeLine {
                             x + x_advance > end_x
                         };
 
-                        if glyph_wrap && ! glyphs.is_empty() {
+                        if glyph_wrap && wrap_simple && ! glyphs.is_empty() {
                             let mut glyphs_swap = Vec::new();
                             mem::swap(&mut glyphs, &mut glyphs_swap);
                             layout_lines.push(
