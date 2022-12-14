@@ -26,6 +26,8 @@ pub struct LayoutGlyph {
     pub y_int: i32,
     /// Optional color override
     pub color_opt: Option<Color>,
+    /// Metadata from `Attrs`
+    pub metadata: usize,
 }
 
 /// A line of laid out glyphs

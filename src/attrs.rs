@@ -101,6 +101,7 @@ pub struct Attrs<'a> {
     pub stretch: Stretch,
     pub style: Style,
     pub weight: Weight,
+    pub metadata: usize,
 }
 
 impl<'a> Attrs<'a> {
@@ -115,6 +116,7 @@ impl<'a> Attrs<'a> {
             stretch: Stretch::Normal,
             style: Style::Normal,
             weight: Weight::NORMAL,
+            metadata: 0,
         }
     }
 
@@ -154,6 +156,12 @@ impl<'a> Attrs<'a> {
         self
     }
 
+    /// Set metadata
+    pub fn metadata(mut self, metadata: usize) -> Self {
+        self.metadata = metadata;
+        self
+    }
+
     /// Check if font matches
     pub fn matches(&self, face: &fontdb::FaceInfo) -> bool {
         //TODO: smarter way of including emoji
@@ -185,6 +193,7 @@ pub struct AttrsOwned {
     pub stretch: Stretch,
     pub style: Style,
     pub weight: Weight,
+    pub metadata: usize,
 }
 
 impl AttrsOwned {
@@ -196,6 +205,7 @@ impl AttrsOwned {
             stretch: attrs.stretch,
             style: attrs.style,
             weight: attrs.weight,
+            metadata: attrs.metadata,
         }
     }
 
@@ -207,6 +217,7 @@ impl AttrsOwned {
             stretch: self.stretch,
             style: self.style,
             weight: self.weight,
+            metadata: self.metadata,
         }
     }
 }

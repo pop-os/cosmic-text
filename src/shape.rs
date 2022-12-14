@@ -52,6 +52,7 @@ fn shape_fallback(
             missing.push(start_glyph);
         }
 
+        let attrs = attrs_list.get_span(start_glyph);
         glyphs.push(ShapeGlyph {
             start: start_glyph,
             end: end_run, // Set later
@@ -61,7 +62,9 @@ fn shape_fallback(
             y_offset,
             font_id: font.info.id,
             glyph_id: info.glyph_id.try_into().expect("failed to cast glyph ID"),
-            color_opt: None,
+            //TODO: color should not be related to shaping
+            color_opt: attrs.color_opt,
+            metadata: attrs.metadata,
         });
     }
 
@@ -88,13 +91,6 @@ fn shape_fallback(
                 prev.end = next_start;
             }
         }
-    }
-
-    // Set color
-    //TODO: these attributes should not be related to shaping
-    for glyph in &mut glyphs {
-        let attrs = attrs_list.get_span(glyph.start);
-        glyph.color_opt = attrs.color_opt;
     }
 
     (glyphs, missing)
@@ -244,6 +240,7 @@ pub struct ShapeGlyph {
     pub font_id: fontdb::ID,
     pub glyph_id: u16,
     pub color_opt: Option<Color>,
+    pub metadata: usize,
 }
 
 impl ShapeGlyph {
@@ -268,6 +265,7 @@ impl ShapeGlyph {
             x_int,
             y_int,
             color_opt: self.color_opt,
+            metadata: self.metadata,
         }
     }
 }
