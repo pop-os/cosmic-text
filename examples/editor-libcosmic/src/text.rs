@@ -240,9 +240,9 @@ pub fn draw_pixel(
     let offset = (y as usize * width as usize + x as usize) * 4;
 
     let mut current =
-        buffer[offset] as u32 |
+        buffer[offset + 2] as u32 |
         (buffer[offset + 1] as u32) << 8 |
-        (buffer[offset + 2] as u32) << 16 |
+        (buffer[offset + 0] as u32) << 16 |
         (buffer[offset + 3] as u32) << 24;
 
     if alpha >= 255 || current == 0 {
@@ -257,9 +257,9 @@ pub fn draw_pixel(
         current = (rb & 0x00FF00FF) | (ag & 0xFF00FF00);
     }
 
-    buffer[offset] = current as u8;
+    buffer[offset + 2] = current as u8;
     buffer[offset + 1] = (current >> 8) as u8;
-    buffer[offset + 2] = (current >> 16) as u8;
+    buffer[offset + 0] = (current >> 16) as u8;
     buffer[offset + 3] = (current >> 24) as u8;
 }
 
