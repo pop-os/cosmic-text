@@ -594,6 +594,7 @@ impl ShapeLine {
                         mem::swap(&mut glyphs, &mut glyphs_swap);
                         layout_lines.push(
                             LayoutLine {
+                                w: x,
                                 glyphs: glyphs_swap,
                             },
                         );
@@ -623,6 +624,7 @@ impl ShapeLine {
                             mem::swap(&mut glyphs, &mut glyphs_swap);
                             layout_lines.push(
                                 LayoutLine {
+                                    w: x,
                                     glyphs: glyphs_swap,
                                 },
                             );
@@ -650,6 +652,7 @@ impl ShapeLine {
                     mem::swap(&mut glyphs, &mut glyphs_swap);
                     layout_lines.push(
                         LayoutLine {
+                            w: x,
                             glyphs: glyphs_swap,
                         },
                     );
@@ -663,6 +666,7 @@ impl ShapeLine {
         if push_line {
             layout_lines.push(
                 LayoutLine {
+                    w: x,
                     glyphs,
                 },
             );

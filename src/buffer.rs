@@ -55,6 +55,8 @@ pub struct LayoutRun<'a> {
     pub glyphs: &'a [LayoutGlyph],
     /// Y offset of line
     pub line_y: i32,
+    /// width of line
+    pub line_w: f32,
 }
 
 /// An iterator of visible text lines, see [`LayoutRun`]
@@ -105,6 +107,7 @@ impl<'a, 'b> Iterator for LayoutRunIter<'a, 'b> {
                     rtl: shape.rtl,
                     glyphs: &layout_line.glyphs,
                     line_y: self.line_y,
+                    line_w: layout_line.w,
                 });
             }
             self.line_i += 1;
