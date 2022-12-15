@@ -15,7 +15,9 @@ log = "0.4"
 
 [dependencies.libcosmic]
 git = "https://github.com/pop-os/libcosmic"
-branch = "cosmic-design-system"
+rev = "5fe44511"
+default-features = false
+features = ["wgpu", "winit"]
 #path = "../../../libcosmic"
 
 [dependencies.rfd]
