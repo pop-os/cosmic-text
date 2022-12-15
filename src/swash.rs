@@ -10,6 +10,7 @@ use swash::zeno::{Format, Vector};
 
 use crate::{CacheKey, Color, FontSystem};
 
+pub use swash::zeno::Command;
 pub use swash::scale::image::{Content as SwashContent, Image as SwashImage};
 
 fn swash_image(font_system: &FontSystem, context: &mut ScaleContext, cache_key: CacheKey) -> Option<SwashImage> {
@@ -33,6 +34,7 @@ fn swash_image(font_system: &FontSystem, context: &mut ScaleContext, cache_key: 
     let offset =
         Vector::new(cache_key.x_bin.as_float(), cache_key.y_bin.as_float());
 
+
     // Select our source order
     Render::new(&[
         // Color outline with the first palette
@@ -50,11 +52,40 @@ fn swash_image(font_system: &FontSystem, context: &mut ScaleContext, cache_key: 
     .render(&mut scaler, cache_key.glyph_id)
 }
 
+fn swash_outline_commands(font_system: &FontSystem, context: &mut ScaleContext, cache_key: CacheKey) -> Option<Vec<swash::zeno::Command>> {
+    use swash::zeno::PathData as _;
+
+    let font = match font_system.get_font(cache_key.font_id) {
+        Some(some) => some,
+        None => {
+            log::warn!("did not find font {:?}", cache_key.font_id);
+            return None;
+        },
+    };
+
+
+    // Build the scaler
+    let mut scaler = context
+        .builder(font.as_swash())
+        .size(cache_key.font_size as f32)
+        .build();
+
+    // Scale the outline
+    let outline = scaler.scale_outline(cache_key.glyph_id).or_else(|| scaler.scale_color_outline(cache_key.glyph_id))?;
+
+    // Get the path information of the outline
+    let path = outline.path();
+
+    // Return the commands
+    Some(path.commands().collect())
+}
+
 /// Cache for rasterizing with the swash scaler
 pub struct SwashCache<'a> {
     font_system: &'a FontSystem,
     context: ScaleContext,
     pub image_cache: Map<CacheKey, Option<SwashImage>>,
+    pub outline_command_cache: Map<CacheKey, Option<Vec<swash::zeno::Command>>>,
 }
 
 impl<'a> SwashCache<'a> {
@@ -63,7 +94,8 @@ impl<'a> SwashCache<'a> {
         Self {
             font_system,
             context: ScaleContext::new(),
-            image_cache: Map::new()
+            image_cache: Map::new(),
+            outline_command_cache: Map::new()
         }
     }
 
@@ -77,6 +109,12 @@ impl<'a> SwashCache<'a> {
         self.image_cache.entry(cache_key).or_insert_with(|| {
             swash_image(self.font_system, &mut self.context, cache_key)
         })
+    }
+
+    pub fn get_outline_commands(&mut self, cache_key: CacheKey) -> Option<&[swash::zeno::Command]> {
+        self.outline_command_cache.entry(cache_key).or_insert_with(|| {
+            swash_outline_commands(self.font_system, &mut self.context, cache_key)
+        }).as_deref()
     }
 
     /// Enumerate pixels in an Image, use `with_image` for better performance
