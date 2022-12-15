@@ -2,6 +2,8 @@
 
 #[cfg(not(feature = "std"))]
 use alloc::collections::BTreeMap as Map;
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
 #[cfg(feature = "std")]
 use std::collections::HashMap as Map;
 use swash::scale::{ScaleContext, image::Content};
