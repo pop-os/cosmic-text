@@ -262,6 +262,8 @@ impl ShapeGlyph {
             w: x_advance,
             rtl,
             cache_key,
+            x_offset,
+            y_offset,
             x_int,
             y_int,
             color_opt: self.color_opt,

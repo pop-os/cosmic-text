@@ -20,6 +20,10 @@ pub struct LayoutGlyph {
     pub rtl: bool,
     /// Cache key, see [CacheKey]
     pub cache_key: CacheKey,
+    // X offset in line
+    pub x_offset: f32,
+    // Y offset in line
+    pub y_offset: f32,
     /// Integer component of X offset in line
     pub x_int: i32,
     /// Integer component of Y offset in line
