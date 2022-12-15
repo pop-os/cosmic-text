@@ -32,6 +32,8 @@ pub struct LayoutGlyph {
 
 /// A line of laid out glyphs
 pub struct LayoutLine {
+    /// Width of the line
+    pub w: f32,
     /// Glyphs in line
     pub glyphs: Vec<LayoutGlyph>,
 }
