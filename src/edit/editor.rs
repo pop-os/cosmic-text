@@ -630,7 +630,7 @@ impl<'a> Edit<'a> for Editor<'a> {
                 let x = match run.glyphs.get(cursor_glyph) {
                     Some(glyph) => {
                         // Start of detected glyph
-                        if glyph.rtl {
+                        if glyph.level.is_rtl() {
                             (glyph.x + glyph.w - cursor_glyph_offset) as i32
                         } else {
                             (glyph.x + cursor_glyph_offset) as i32
@@ -639,7 +639,7 @@ impl<'a> Edit<'a> for Editor<'a> {
                     None => match run.glyphs.last() {
                         Some(glyph) => {
                             // End of last glyph
-                            if glyph.rtl {
+                            if glyph.level.is_rtl() {
                                 glyph.x as i32
                             } else {
                                 (glyph.x + glyph.w) as i32

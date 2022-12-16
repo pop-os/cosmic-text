@@ -482,7 +482,7 @@ impl<'a> Buffer<'a> {
                                 new_cursor_char = egc_i;
 
                                 let right_half = x >= (egc_x + egc_w / 2.0) as i32;
-                                if right_half != glyph.rtl {
+                                if right_half != glyph.level.is_rtl() {
                                     // If clicking on last half of glyph, move cursor past glyph
                                     new_cursor_char += egc.len();
                                 }
@@ -492,7 +492,7 @@ impl<'a> Buffer<'a> {
                         }
 
                         let right_half = x >= (glyph.x + glyph.w / 2.0) as i32;
-                        if right_half != glyph.rtl {
+                        if right_half != glyph.level.is_rtl() {
                             // If clicking on last half of glyph, move cursor past glyph
                             new_cursor_char = cluster.len();
                         }
