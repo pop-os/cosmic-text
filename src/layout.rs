@@ -22,7 +22,7 @@ pub struct LayoutGlyph {
     pub cache_key: CacheKey,
     /// X offset in line
     ///
-    /// Unless you are not dealing with physical coordinates, you will want to use [`Self::x_int`]
+    /// If you are dealing with physical coordinates, you will want to use [`Self::x_int`]
     /// together with [`CacheKey::x_bin`] instead. This will ensure the best alignment of the
     /// rasterized glyphs with the pixel grid.
     ///
@@ -32,7 +32,7 @@ pub struct LayoutGlyph {
     pub x_offset: f32,
     /// Y offset in line
     ///
-    /// Unless you are not dealing with physical coordinates, you will want to use [`Self::y_int`]
+    /// If you are dealing with physical coordinates, you will want to use [`Self::y_int`]
     /// together with [`CacheKey::y_bin`] instead. This will ensure the best alignment of the
     /// rasterized glyphs with the pixel grid.
     ///
