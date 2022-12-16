@@ -20,9 +20,25 @@ pub struct LayoutGlyph {
     pub rtl: bool,
     /// Cache key, see [CacheKey]
     pub cache_key: CacheKey,
-    // X offset in line
+    /// X offset in line
+    ///
+    /// Unless you are not dealing with physical coordinates, you will want to use [`Self::x_int`]
+    /// together with [`CacheKey::x_bin`] instead. This will ensure the best alignment of the
+    /// rasterized glyphs with the pixel grid.
+    ///
+    /// This offset is useful when you are dealing with logical units and you do not care or
+    /// cannot guarantee pixel grid alignment. For instance, when you want to use the glyphs
+    /// for vectorial text, apply linear transformations to the layout, etc.
     pub x_offset: f32,
-    // Y offset in line
+    /// Y offset in line
+    ///
+    /// Unless you are not dealing with physical coordinates, you will want to use [`Self::y_int`]
+    /// together with [`CacheKey::y_bin`] instead. This will ensure the best alignment of the
+    /// rasterized glyphs with the pixel grid.
+    ///
+    /// This offset is useful when you are dealing with logical units and you do not care or
+    /// cannot guarantee pixel grid alignment. For instance, when you want to use the glyphs
+    /// for vectorial text, apply linear transformations to the layout, etc.
     pub y_offset: f32,
     /// Integer component of X offset in line
     pub x_int: i32,
