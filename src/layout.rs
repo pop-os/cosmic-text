@@ -17,7 +17,7 @@ pub struct LayoutGlyph {
     /// width of hitbox
     pub w: f32,
     /// True if the character is from an RTL script
-    pub rtl: bool,
+    pub level: unicode_bidi::Level,
     /// Cache key, see [CacheKey]
     pub cache_key: CacheKey,
     /// X offset in line
