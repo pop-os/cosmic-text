@@ -278,8 +278,8 @@ impl ShapeGlyph {
 pub struct ShapeWord {
     pub blank: bool,
     pub glyphs: Vec<ShapeGlyph>,
-    x_advance: f32,
-    y_advance: f32,
+    pub x_advance: f32,
+    pub y_advance: f32,
 }
 
 impl ShapeWord {
