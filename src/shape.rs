@@ -658,9 +658,8 @@ impl ShapeLine {
                                     break;
                                 }
                             }
-                        word_ranges.push((fitting_start..fitting_end, true));
+                            word_ranges.push((fitting_start..fitting_end, true));
                             fitting_end = i + 1;
-
                             fit_x = start_x;
                         }
 
@@ -701,15 +700,18 @@ impl ShapeLine {
                         };
 
                         if wrap {
-                                word_ranges.push((fitting_start..i, true));
-
-                                if word.blank {
+                            if fitting_start == i { // One word is bigger than the linewidth
+                                i += 1;
+                            }
+                            word_ranges.push((fitting_start..i, true));
+                            if let Some(next_word) = &span.words.get(i) {
+                                if next_word.blank {
                                     i += 1;
                                 }
-                                fitting_start = i;
-
-                                fit_x = start_x;
                             }
+                            fitting_start = i;
+                            fit_x = start_x;
+                        }
 
                         if self.rtl {
                             fit_x -= word_size;
@@ -723,7 +725,9 @@ impl ShapeLine {
                         }
                     }
                 }
-                word_ranges.push((fitting_start..span.words.len(), false));
+                if fitting_start < span.words.len() {
+                    word_ranges.push((fitting_start..span.words.len(), false));
+                }
             }
 
             // Calculate the actual size 
@@ -737,7 +741,6 @@ impl ShapeLine {
                     } else {
                         x + word_size > end_x
                     };
-                    
                     if word_wrap && !wrap_simple  {
                         current_visual_line.push((span_index, range.clone()));
                         vl_range_of_spans.push(current_visual_line);
@@ -768,7 +771,6 @@ impl ShapeLine {
         if !current_visual_line.is_empty() {
             vl_range_of_spans.push(current_visual_line);
         }
-
 
         for visual_line in &vl_range_of_spans {
             let new_order = self.reorder(visual_line);
