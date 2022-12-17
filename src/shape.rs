@@ -378,6 +378,7 @@ impl ShapeSpan {
                     break;
                 } else if c.is_whitespace() {
                     start_lb = start_word + i;
+                    break;
                 }
             }
             if start_word < start_lb {
@@ -391,14 +392,17 @@ impl ShapeSpan {
                 ));
             }
             if start_lb < end_lb {
-                words.push(ShapeWord::new(
-                    font_system,
-                    line,
-                    attrs_list,
-                    (span_range.start + start_lb)..(span_range.start + end_lb),
-                    level,
-                    true,
-                ));
+                for (i, c) in span[start_lb..end_lb].char_indices() {
+                    // assert!(c.is_whitespace());
+                    words.push(ShapeWord::new(
+                        font_system,
+                        line,
+                        attrs_list,
+                        (span_range.start + start_lb + i)..(span_range.start + start_lb + i + c.len_utf8()),
+                        level,
+                        true,
+                    ));
+                }
             }
             start_word = end_lb;
         }
