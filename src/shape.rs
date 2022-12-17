@@ -498,10 +498,9 @@ impl ShapeLine {
 
         // Reset some whitespace chars to paragraph level.
         // <http://www.unicode.org/reports/tr9/#L1>
-        let line_str: &str = &text[..];
         let mut reset_from: Option<usize> = Some(0);
         let mut reset_to: Option<usize> = None;
-        for (i, c) in line_str.char_indices() {
+        for (i, c) in text.char_indices() {
             match line_classes[i] {
                 // Ignored by X9
                 RLE | LRE | RLO | LRO | PDF | BN => {}
@@ -509,13 +508,13 @@ impl ShapeLine {
                 B | S => {
                     assert_eq!(reset_to, None);
                     reset_to = Some(i + c.len_utf8());
-                    if reset_from == None {
+                    if reset_from.is_none() {
                         reset_from = Some(i);
                     }
                 }
                 // Whitespace, isolate formatting
                 WS | FSI | LRI | RLI | PDI => {
-                    if reset_from == None {
+                    if reset_from.is_none() {
                         reset_from = Some(i);
                     }
                 }
@@ -540,7 +539,7 @@ impl ShapeLine {
     }
 
     // A modified version of second part of unicode_bidi::bidi_info::visual run
-    fn reorder(&self, line_range: &Vec<(usize, Range<usize>)>) -> Vec<Range<usize>> {
+    fn reorder(&self, line_range: &[(usize, Range<usize>)]) -> Vec<Range<usize>> {
         let line : Vec<unicode_bidi::Level> = line_range.iter().map(|(span_index, _)| self.spans[*span_index].level).collect();
         // Find consecutive level runs.
         let mut runs = Vec::new();
@@ -744,13 +743,13 @@ impl ShapeLine {
             }
         }
 
-        if current_visual_line.len() > 0 {
+        if !current_visual_line.is_empty() {
             vl_range_of_spans.push(current_visual_line);
         }
 
 
         for visual_line in &vl_range_of_spans {
-            let new_order = self.reorder(&visual_line);
+            let new_order = self.reorder(visual_line);
             let mut glyphs = Vec::with_capacity(1);
             x = start_x;
             y = 0.;
@@ -807,7 +806,7 @@ impl ShapeLine {
         }
 
         if push_line {
-            layout_lines.push(LayoutLine { w: 0.0 , glyphs: vec![] });
+            layout_lines.push(LayoutLine { w: 0.0 , glyphs: Default::default() });
         }
 
         layout_lines
