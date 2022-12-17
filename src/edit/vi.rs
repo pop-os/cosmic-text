@@ -358,7 +358,7 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                 let (start_x, end_x) = match run.glyphs.get(cursor_glyph) {
                     Some(glyph) => {
                         // Start of detected glyph
-                        if glyph.rtl {
+                        if glyph.level.is_rtl() {
                             (
                                 (glyph.x + glyph.w - cursor_glyph_offset) as i32,
                                 (glyph.x + glyph.w - cursor_glyph_offset - cursor_glyph_width) as i32,
@@ -373,7 +373,7 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                     None => match run.glyphs.last() {
                         Some(glyph) => {
                             // End of last glyph
-                            if glyph.rtl {
+                            if glyph.level.is_rtl() {
                                 (
                                     glyph.x as i32,
                                     (glyph.x - cursor_glyph_width) as i32
