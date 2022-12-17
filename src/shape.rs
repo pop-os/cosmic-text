@@ -633,35 +633,42 @@ impl ShapeLine {
             if self.rtl != span.level.is_rtl() {
                 let mut fit_x = x;
                 let mut fitting_end = span.words.len();
-                for i in (0..span.words.len()).rev() {
-                    let word = &span.words[i];
-                    let word_size = font_size as f32 * word.x_advance;
+                if !span.words.is_empty() {
+                    let mut i = span.words.len()-1;
+                    loop {
+                        let word = &span.words[i];
+                        let word_size = font_size as f32 * word.x_advance;
 
-                    let wrap = if self.rtl {
-                        fit_x - word_size < end_x
-                    } else {
-                        fit_x + word_size > end_x
-                    };
+                        let wrap = if self.rtl {
+                            fit_x - word_size < end_x
+                        } else {
+                            fit_x + word_size > end_x
+                        };
 
-                    if wrap {
-                        let mut fitting_start = i + 1;
-                        while fitting_start < fitting_end {
-                            if span.words[fitting_start].blank {
-                                fitting_start += 1;
-                            } else {
-                                break;
+                        if wrap {
+                            let mut fitting_start = i + 1;
+                            while fitting_start < fitting_end {
+                                if span.words[fitting_start].blank {
+                                    fitting_start += 1;
+                                } else {
+                                    break;
+                                }
                             }
-                        }
                         word_ranges.push((fitting_start..fitting_end, true));
-                        fitting_end = i + 1;
+                            fitting_end = i + 1;
 
-                        fit_x = start_x;
-                    }
+                            fit_x = start_x;
+                        }
 
-                    if self.rtl {
-                        fit_x -= word_size;
-                    } else {
-                        fit_x += word_size;
+                        if self.rtl {
+                            fit_x -= word_size;
+                        } else {
+                            fit_x += word_size;
+                        }
+                        if i == 0 {
+                            break;
+                        }
+                        i -= 1;
                     }
                 }
                 if !word_ranges.is_empty() {
@@ -677,28 +684,39 @@ impl ShapeLine {
             } else {
                 let mut fit_x = x;
                 let mut fitting_start = 0;
-                for i in 0..span.words.len() {
-                    let word = &span.words[i];
-                    let word_size = font_size as f32 * word.x_advance;
+                if !span.words.is_empty() {
+                    let mut i = 0;
+                    loop {
+                        let word = &span.words[i];
+                        let word_size = font_size as f32 * word.x_advance;
 
-                    let wrap = if self.rtl {
-                        fit_x - word_size < end_x
-                    } else {
-                        fit_x + word_size > end_x
-                    };
+                        let wrap = if self.rtl {
+                            fit_x - word_size < end_x
+                        } else {
+                            fit_x + word_size > end_x
+                        };
 
-                    if wrap {
-                        //TODO: skip blanks
-                        word_ranges.push((fitting_start..i, true));
-                        fitting_start = i;
+                        if wrap {
+                                word_ranges.push((fitting_start..i, true));
 
-                        fit_x = start_x;
-                    }
+                                if word.blank {
+                                    i += 1;
+                                }
+                                fitting_start = i;
 
-                    if self.rtl {
-                        fit_x -= word_size;
-                    } else {
-                        fit_x += word_size;
+                                fit_x = start_x;
+                            }
+
+                        if self.rtl {
+                            fit_x -= word_size;
+                        } else {
+                            fit_x += word_size;
+                        }
+
+                        i += 1;
+                        if i >= span.words.len() {
+                            break;
+                        }
                     }
                 }
                 word_ranges.push((fitting_start..span.words.len(), false));
@@ -715,7 +733,7 @@ impl ShapeLine {
                     } else {
                         x + word_size > end_x
                     };
-
+                    
                     if word_wrap && !wrap_simple  {
                         current_visual_line.push((span_index, range.clone()));
                         vl_range_of_spans.push(current_visual_line);
