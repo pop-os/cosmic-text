@@ -711,6 +711,10 @@ impl ShapeLine {
                             }
                             fitting_start = i;
                             fit_x = start_x;
+                            if i >= span.words.len() {
+                                break;
+                            }
+                            continue;
                         }
 
                         if self.rtl {
