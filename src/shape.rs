@@ -651,6 +651,9 @@ impl ShapeLine {
 
                         if wrap {
                             let mut fitting_start = i + 1;
+                            if fitting_start == fitting_end { //long single word
+                                fitting_start -= 1;
+                            }
                             while fitting_start < fitting_end {
                                 if span.words[fitting_start].blank {
                                     fitting_start += 1;
@@ -659,8 +662,22 @@ impl ShapeLine {
                                 }
                             }
                             word_ranges.push((fitting_start..fitting_end, true));
-                            fitting_end = i + 1;
+
+                            // This is here to handle a single long word
+                            if word_size > line_width as f32 && fitting_start != i {
+                                word_ranges.push((i..i+1, true));
+                                fitting_end = i;
+                                break;
+                            }
+
+                            fitting_end = i;
                             fit_x = start_x;
+
+                            if i == 0 {
+                                break;
+                            }
+                            i -= 1;
+                            continue;
                         }
 
                         if self.rtl {
@@ -683,7 +700,9 @@ impl ShapeLine {
                         }
                     }
                 }
-                word_ranges.push((0..fitting_end, false));
+                if fitting_end > 0 {
+                    word_ranges.push((0..fitting_end, false));
+                }
             } else {
                 let mut fit_x = x;
                 let mut fitting_start = 0;
@@ -735,7 +754,13 @@ impl ShapeLine {
             }
 
             // Calculate the actual size 
+            let mut wrapped;
             for (range, wrap) in word_ranges {
+                // This is used to avoid creating an empty line if the word
+                // causing the line break is very long itself
+                // we should change the algorithm to not need this
+                wrapped = wrap; 
+
                 for word_index in range.clone() {
                     let word  =  &span.words[word_index];
                     let word_size = font_size as f32 * word.x_advance;
@@ -746,12 +771,18 @@ impl ShapeLine {
                         x + word_size > end_x
                     };
                     if word_wrap && !wrap_simple  {
+                        if range.len() == 1 && !current_visual_line.is_empty(){
+                            vl_range_of_spans.push(current_visual_line);
+                            current_visual_line = Vec::with_capacity(1);
+                            wrapped = false;
+                        }
                         current_visual_line.push((span_index, range.clone()));
                         vl_range_of_spans.push(current_visual_line);
                         current_visual_line = Vec::with_capacity(1);
                         x = start_x;
                         y = 0.0;
-                    }
+                        continue;
+                    } 
 
                     if self.rtl {
                         x -= word_size;
@@ -761,9 +792,23 @@ impl ShapeLine {
                     y += font_size as f32 * word.y_advance;
                 }
 
-                current_visual_line.push((span_index, range));
+                if let Some(v) = vl_range_of_spans.last() {
+                    if let Some((s,r)) = v.last() {
+                        if *s ==  span_index && *r == range {
+                            // this avoid duplicating if the range alrady is pushed
+                            // we should change the algorithm to not need to check
+                            // for the last range
+                        } else {
+                        current_visual_line.push((span_index, range));
+                        }
+                    } else {
+                        current_visual_line.push((span_index, range));
+                    }
+                } else {
+                    current_visual_line.push((span_index, range));
+                }
 
-                if wrap {
+                if wrapped && !current_visual_line.is_empty(){
                     vl_range_of_spans.push(current_visual_line);
                     current_visual_line = Vec::with_capacity(1);
                     x = start_x;
