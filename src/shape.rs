@@ -543,8 +543,8 @@ impl ShapeLine {
     }
 
     // A modified version of second part of unicode_bidi::bidi_info::visual run
-    fn reorder(&self, line_range: &[(usize, Range<usize>)]) -> Vec<Range<usize>> {
-        let line : Vec<unicode_bidi::Level> = line_range.iter().map(|(span_index, _)| self.spans[*span_index].level).collect();
+    fn reorder(&self, line_range: &[(usize, (usize, usize), (usize, usize))]) -> Vec<Range<usize>> {
+        let line : Vec<unicode_bidi::Level> = line_range.iter().map(|(span_index, _, _)| self.spans[*span_index].level).collect();
         // Find consecutive level runs.
         let mut runs = Vec::new();
         let mut start = 0;
@@ -627,18 +627,18 @@ impl ShapeLine {
         // This would keep the maximum number of spans that would fit on a visual line
         // If one span is too large, this variable will hold the range of words inside that span
         // that fits on a line.
-        let mut current_visual_line = Vec::with_capacity(1);
+        let mut current_visual_line: Vec<(usize, (usize, usize), (usize, usize))> = Vec::with_capacity(1);
 
         let mut fit_x = line_width as f32;
 
         for (span_index, span) in self.spans.iter().enumerate() {
 
-            let mut word_ranges: Vec<(Range<usize>, f32)> = Vec::new();
+            let mut word_ranges: Vec<((usize, usize), (usize, usize), f32)> = Vec::new();
             let mut word_range_width = 0.;
 
             // Create the word ranges that fits in a visual line
             if self.rtl != span.level.is_rtl() { // incongruent directions
-                let mut fitting_start = span.words.len();
+                let mut fitting_start = (span.words.len(), 0);
                 for (i, word) in span.words.iter().enumerate().rev() {
                     let word_size = font_size as f32 * word.x_advance;
                     if fit_x - word_size >= 0.  { // fits
@@ -646,60 +646,85 @@ impl ShapeLine {
                         word_range_width += word_size;
                         continue;
                     } else {
-                        word_ranges.push((i+1..fitting_start, word_range_width));
-
-                        if word.blank {
-                            fit_x = line_width as f32;
-                            word_range_width = 0.;
-                            fitting_start = i + 1; 
+                        if wrap_simple {
+                            for (glyph_i, glyph) in word.glyphs.iter().enumerate().rev() {
+                                let glyph_size = font_size as f32 * glyph.x_advance;
+                                if fit_x - glyph_size >= 0. {
+                                    fit_x -= glyph_size;
+                                    word_range_width += glyph_size;
+                                    continue;
+                                } else {
+                                    word_ranges.push(((i, glyph_i+1), fitting_start, word_range_width));
+                                    fit_x = line_width as f32 - glyph_size;
+                                    word_range_width = glyph_size;
+                                    fitting_start = (i, glyph_i+1);
+                                }
+                            }
                         } else {
-                            fit_x = line_width as f32 - word_size;
-                            word_range_width = word_size;
-                            fitting_start = i+1;
+                            word_ranges.push(((i+1, 0), fitting_start, word_range_width));
+
+                            if word.blank {
+                                fit_x = line_width as f32;
+                                word_range_width = 0.;
+                                fitting_start = (i+1, 0); 
+                            } else {
+                                fit_x = line_width as f32 - word_size;
+                                word_range_width = word_size;
+                                fitting_start = (i+1, 0);
+                            }
                         }
                     }
                 }
-                word_ranges.push((0..fitting_start, word_range_width));
+                word_ranges.push(((0,0),fitting_start, word_range_width));
 
             } else { // congruent direction
-                let mut fitting_start = 0;
+                let mut fitting_start = (0,0);
                 for (i, word) in span.words.iter().enumerate() {
                     let word_size = font_size as f32 * word.x_advance;
                     if fit_x - word_size >= 0.  { // fits
-
                         fit_x -= word_size;
                         word_range_width += word_size;
                         continue;
                     } else {
-                        word_ranges.push((fitting_start..i, word_range_width));
-
-                        if word.blank {
-                            fit_x = line_width as f32;
-                            word_range_width = 0.;
-                            fitting_start = i + 1;
+                        if wrap_simple {
+                            for (glyph_i, glyph) in word.glyphs.iter().enumerate() {
+                                let glyph_size = font_size as f32 * glyph.x_advance;
+                                if fit_x - glyph_size >= 0. {
+                                    fit_x -= glyph_size;
+                                    word_range_width += glyph_size;
+                                    continue;
+                                } else {
+                                    word_ranges.push((fitting_start, (i, glyph_i),  word_range_width));
+                                    fit_x = line_width as f32 - glyph_size;
+                                    word_range_width = glyph_size;
+                                    fitting_start = (i, glyph_i);
+                                }
+                            }
                         } else {
-                            fit_x = line_width as f32 - word_size;
-                            word_range_width = word_size;
-                            fitting_start = i;
+                            word_ranges.push((fitting_start,(i,0), word_range_width));
+
+                            if word.blank {
+                                fit_x = line_width as f32;
+                                word_range_width = 0.;
+                                fitting_start = (i+1, 0);
+                            } else {
+                                fit_x = line_width as f32 - word_size;
+                                word_range_width = word_size;
+                                fitting_start = (i, 0);
+                            }
                         }
                     }
                 }
-                word_ranges.push((fitting_start..span.words.len(), word_range_width));
+                word_ranges.push((fitting_start, (span.words.len(), 0), word_range_width));
             }
 
             // Create a visual line
-            for (range, word_range_width) in word_ranges {
+            for ((starting_word, starting_glyph), (ending_word, ending_glyph), word_range_width) in word_ranges {
                 // To simplify the algorithm above, we might push empty ranges but we ignore them here
-                if range.len() == 0 { 
+                if ending_word == starting_word && starting_glyph == ending_glyph { 
                     continue;
                 }
                 
-
-                let (span_x_advance, span_y_advance) = span.words[range.clone()]
-                                            .iter()
-                                            .fold((0., 0.), |sum, word| {
-                    (sum.0 + font_size as f32 * word.x_advance, sum.0 + font_size as f32 * word.y_advance)
-                });
 
                 let fits = !if self.rtl {
                     x - word_range_width < end_x
@@ -709,32 +734,28 @@ impl ShapeLine {
 
 
                 if fits {
-                    current_visual_line.push((span_index, range.clone()));
+                    current_visual_line.push((span_index, (starting_word, starting_glyph), (ending_word, ending_glyph)));
                     if self.rtl {
                         x -= word_range_width;
                     } else {
                         x += word_range_width;
                     }
-                    y +=  span_y_advance;
                 } else {
                     if !current_visual_line.is_empty(){
                         vl_range_of_spans.push(current_visual_line);
                         current_visual_line = Vec::with_capacity(1);
                         x = start_x;
-                        y = 0.0;
                     }
-                    current_visual_line.push((span_index, range.clone()));
+                    current_visual_line.push((span_index, (starting_word, starting_glyph), (ending_word, ending_glyph)));
                     if self.rtl {
                         x -= word_range_width;
                     } else {
                         x += word_range_width;
                     }
-                    y +=  span_y_advance;
-                    if span_x_advance > line_width as f32 { // single word is bigger than line_width
+                    if word_range_width > line_width as f32 { // single word is bigger than line_width
                         vl_range_of_spans.push(current_visual_line);
                         current_visual_line = Vec::with_capacity(1);
                         x = start_x;
-                        y = 0.0;
                     }
                 }
             }
@@ -752,10 +773,10 @@ impl ShapeLine {
             y = 0.;
             if self.rtl {
                 for range in new_order.iter().rev() {
-                    for (span_index, word_range)  in visual_line[range.clone()].iter() {
+                    for (span_index, (starting_word, starting_glyph), (ending_word, ending_glyph))  in visual_line[range.clone()].iter() {
                         let span = &self.spans[*span_index];
-                        for word in span.words[word_range.clone()].iter() {
-                            for glyph in &word.glyphs {
+                        if starting_word == ending_word {
+                            for glyph in span.words[*starting_word].glyphs[*starting_glyph..*ending_glyph].iter() {
                                 let x_advance = font_size as f32 * glyph.x_advance;
                                 let y_advance = font_size as f32 * glyph.y_advance;
                                 if self.rtl {
@@ -767,15 +788,40 @@ impl ShapeLine {
                                 }
                                 y += y_advance;
                             }
+                        } else {
+                            for i in *starting_word..*ending_word+1 {
+                                if let Some(word) = span.words.get(i) {
+                                    let (g1, g2) = if i == *starting_word {
+                                        (*starting_glyph, word.glyphs.len())
+                                    } else if i == *ending_word {
+                                        (0, *ending_glyph)
+                                    } else {
+                                        (0, word.glyphs.len())
+                                    };
+
+                                    for glyph in &word.glyphs[g1..g2] {
+                                        let x_advance = font_size as f32 * glyph.x_advance;
+                                        let y_advance = font_size as f32 * glyph.y_advance;
+                                        if self.rtl {
+                                            x -= x_advance;
+                                        }
+                                        glyphs.push(glyph.layout(font_size, x, y, span.level));
+                                        if !self.rtl {
+                                            x += x_advance;
+                                        }
+                                        y += y_advance;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             } else {
                 for range in new_order {
-                    for (span_index, word_range)  in visual_line[range].iter() {
+                    for (span_index, (starting_word, starting_glyph), (ending_word, ending_glyph))  in visual_line[range.clone()].iter() {
                         let span = &self.spans[*span_index];
-                        for word in span.words[word_range.clone()].iter() {
-                            for glyph in &word.glyphs {
+                        if starting_word == ending_word {
+                            for glyph in span.words[*starting_word].glyphs[*starting_glyph..*ending_glyph].iter() {
                                 let x_advance = font_size as f32 * glyph.x_advance;
                                 let y_advance = font_size as f32 * glyph.y_advance;
                                 if self.rtl {
@@ -786,6 +832,31 @@ impl ShapeLine {
                                     x += x_advance;
                                 }
                                 y += y_advance;
+                            }
+                        } else {
+                            for i in *starting_word..*ending_word+1 {
+                                if let Some(word) = span.words.get(i) {
+                                    let (g1, g2) = if i == *starting_word {
+                                        (*starting_glyph, word.glyphs.len())
+                                    } else if i == *ending_word {
+                                        (0, *ending_glyph)
+                                    } else {
+                                        (0, word.glyphs.len())
+                                    };
+
+                                    for glyph in &word.glyphs[g1..g2] {
+                                        let x_advance = font_size as f32 * glyph.x_advance;
+                                        let y_advance = font_size as f32 * glyph.y_advance;
+                                        if self.rtl {
+                                            x -= x_advance;
+                                        }
+                                        glyphs.push(glyph.layout(font_size, x, y, span.level));
+                                        if !self.rtl {
+                                            x += x_advance;
+                                        }
+                                        y += y_advance;
+                                    }
+                                }
                             }
                         }
                     }
