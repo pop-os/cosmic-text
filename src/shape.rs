@@ -629,191 +629,114 @@ impl ShapeLine {
         // that fits on a line.
         let mut current_visual_line = Vec::with_capacity(1);
 
-        for span_index in 0..self.spans.len() {
-            let span = &self.spans[span_index];
+        let mut fit_x = line_width as f32;
 
-            let mut word_ranges = Vec::new();
+        for (span_index, span) in self.spans.iter().enumerate() {
 
-            if self.rtl != span.level.is_rtl() {
-                let mut fit_x = x;
-                let mut fitting_end = span.words.len();
-                if !span.words.is_empty() {
-                    let mut i = span.words.len()-1;
-                    loop {
-                        let word = &span.words[i];
-                        let word_size = font_size as f32 * word.x_advance;
+            let mut word_ranges: Vec<(Range<usize>, f32)> = Vec::new();
+            let mut word_range_width = 0.;
 
-                        let wrap = if self.rtl {
-                            fit_x - word_size < end_x
+            // Create the word ranges that fits in a visual line
+            if self.rtl != span.level.is_rtl() { // incongruent directions
+                let mut fitting_start = span.words.len();
+                for (i, word) in span.words.iter().enumerate().rev() {
+                    let word_size = font_size as f32 * word.x_advance;
+                    if fit_x - word_size >= 0.  { // fits
+                        fit_x -= word_size;
+                        word_range_width += word_size;
+                        continue;
+                    } else {
+                        word_ranges.push((i+1..fitting_start, word_range_width));
+
+                        if word.blank {
+                            fit_x = line_width as f32;
+                            word_range_width = 0.;
+                            fitting_start = i + 1; 
                         } else {
-                            fit_x + word_size > end_x
-                        };
-
-                        if wrap {
-                            let mut fitting_start = i + 1;
-                            if fitting_start == fitting_end { //long single word
-                                fitting_start -= 1;
-                            }
-                            while fitting_start < fitting_end {
-                                if span.words[fitting_start].blank {
-                                    fitting_start += 1;
-                                } else {
-                                    break;
-                                }
-                            }
-                            word_ranges.push((fitting_start..fitting_end, true));
-
-                            // This is here to handle a single long word
-                            if word_size > line_width as f32 && fitting_start != i {
-                                word_ranges.push((i..i+1, true));
-                                fitting_end = i;
-                                break;
-                            }
-
-                            fitting_end = i;
-                            fit_x = start_x;
-
-                            if i == 0 {
-                                break;
-                            }
-                            i -= 1;
-                            continue;
-                        }
-
-                        if self.rtl {
-                            fit_x -= word_size;
-                        } else {
-                            fit_x += word_size;
-                        }
-                        if i == 0 {
-                            break;
-                        }
-                        i -= 1;
-                    }
-                }
-                if !word_ranges.is_empty() {
-                    while fitting_end > 0 {
-                        if span.words[fitting_end - 1].blank {
-                            fitting_end -= 1;
-                        } else {
-                            break;
+                            fit_x = line_width as f32 - word_size;
+                            word_range_width = word_size;
+                            fitting_start = i+1;
                         }
                     }
                 }
-                if fitting_end > 0 {
-                    word_ranges.push((0..fitting_end, false));
-                }
-            } else {
-                let mut fit_x = x;
+                word_ranges.push((0..fitting_start, word_range_width));
+
+            } else { // congruent direction
                 let mut fitting_start = 0;
-                if !span.words.is_empty() {
-                    let mut i = 0;
-                    loop {
-                        let word = &span.words[i];
-                        let word_size = font_size as f32 * word.x_advance;
+                for (i, word) in span.words.iter().enumerate() {
+                    let word_size = font_size as f32 * word.x_advance;
+                    if fit_x - word_size >= 0.  { // fits
 
-                        let wrap = if self.rtl {
-                            fit_x - word_size < end_x
+                        fit_x -= word_size;
+                        word_range_width += word_size;
+                        continue;
+                    } else {
+                        word_ranges.push((fitting_start..i, word_range_width));
+
+                        if word.blank {
+                            fit_x = line_width as f32;
+                            word_range_width = 0.;
+                            fitting_start = i + 1;
                         } else {
-                            fit_x + word_size > end_x
-                        };
-
-                        if wrap {
-                            if fitting_start == i { // One word is bigger than the linewidth
-                                i += 1;
-                            }
-                            word_ranges.push((fitting_start..i, true));
-                            if let Some(next_word) = &span.words.get(i) {
-                                if next_word.blank {
-                                    i += 1;
-                                }
-                            }
+                            fit_x = line_width as f32 - word_size;
+                            word_range_width = word_size;
                             fitting_start = i;
-                            fit_x = start_x;
-                            if i >= span.words.len() {
-                                break;
-                            }
-                            continue;
-                        }
-
-                        if self.rtl {
-                            fit_x -= word_size;
-                        } else {
-                            fit_x += word_size;
-                        }
-
-                        i += 1;
-                        if i >= span.words.len() {
-                            break;
                         }
                     }
                 }
-                if fitting_start < span.words.len() {
-                    word_ranges.push((fitting_start..span.words.len(), false));
-                }
+                word_ranges.push((fitting_start..span.words.len(), word_range_width));
             }
 
-            // Calculate the actual size 
-            let mut wrapped;
-            for (range, wrap) in word_ranges {
-                // This is used to avoid creating an empty line if the word
-                // causing the line break is very long itself
-                // we should change the algorithm to not need this
-                wrapped = wrap; 
+            // Create a visual line
+            for (range, word_range_width) in word_ranges {
+                // To simplify the algorithm above, we might push empty ranges but we ignore them here
+                if range.len() == 0 { 
+                    continue;
+                }
+                
 
-                for word_index in range.clone() {
-                    let word  =  &span.words[word_index];
-                    let word_size = font_size as f32 * word.x_advance;
+                let (span_x_advance, span_y_advance) = span.words[range.clone()]
+                                            .iter()
+                                            .fold((0., 0.), |sum, word| {
+                    (sum.0 + font_size as f32 * word.x_advance, sum.0 + font_size as f32 * word.y_advance)
+                });
 
-                    let word_wrap = if self.rtl {
-                        x - word_size < end_x
+                let fits = !if self.rtl {
+                    x - word_range_width < end_x
+                } else {
+                    x + word_range_width > end_x
+                };
+
+
+                if fits {
+                    current_visual_line.push((span_index, range.clone()));
+                    if self.rtl {
+                        x -= word_range_width;
                     } else {
-                        x + word_size > end_x
-                    };
-                    if word_wrap && !wrap_simple  {
-                        if range.len() == 1 && !current_visual_line.is_empty(){
-                            vl_range_of_spans.push(current_visual_line);
-                            current_visual_line = Vec::with_capacity(1);
-                            wrapped = false;
-                        }
-                        current_visual_line.push((span_index, range.clone()));
+                        x += word_range_width;
+                    }
+                    y +=  span_y_advance;
+                } else {
+                    if !current_visual_line.is_empty(){
                         vl_range_of_spans.push(current_visual_line);
                         current_visual_line = Vec::with_capacity(1);
                         x = start_x;
                         y = 0.0;
-                        continue;
-                    } 
-
+                    }
+                    current_visual_line.push((span_index, range.clone()));
                     if self.rtl {
-                        x -= word_size;
+                        x -= word_range_width;
                     } else {
-                        x += word_size;
+                        x += word_range_width;
                     }
-                    y += font_size as f32 * word.y_advance;
-                }
-
-                if let Some(v) = vl_range_of_spans.last() {
-                    if let Some((s,r)) = v.last() {
-                        if *s ==  span_index && *r == range {
-                            // this avoid duplicating if the range alrady is pushed
-                            // we should change the algorithm to not need to check
-                            // for the last range
-                        } else {
-                        current_visual_line.push((span_index, range));
-                        }
-                    } else {
-                        current_visual_line.push((span_index, range));
+                    y +=  span_y_advance;
+                    if span_x_advance > line_width as f32 { // single word is bigger than line_width
+                        vl_range_of_spans.push(current_visual_line);
+                        current_visual_line = Vec::with_capacity(1);
+                        x = start_x;
+                        y = 0.0;
                     }
-                } else {
-                    current_visual_line.push((span_index, range));
                 }
-
-                if wrapped && !current_visual_line.is_empty(){
-                    vl_range_of_spans.push(current_visual_line);
-                    current_visual_line = Vec::with_capacity(1);
-                    x = start_x;
-                    y = 0.0;
-                } 
             }
         }
 
@@ -821,6 +744,7 @@ impl ShapeLine {
             vl_range_of_spans.push(current_visual_line);
         }
 
+        // Create the LayoutLines using the ranges inside visual lines
         for visual_line in &vl_range_of_spans {
             let new_order = self.reorder(visual_line);
             let mut glyphs = Vec::with_capacity(1);
