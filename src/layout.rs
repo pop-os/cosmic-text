@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+use core::fmt::Display;
+
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 
@@ -56,4 +58,25 @@ pub struct LayoutLine {
     pub w: f32,
     /// Glyphs in line
     pub glyphs: Vec<LayoutGlyph>,
+}
+
+/// Wrapping mode
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
+pub enum Wrap {
+    /// No wrapping
+    None,
+    /// Wraps at a glyph level
+    Glyph,
+    /// Word Wrapping
+    Word,
+}
+
+impl Display for Wrap {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::None => write!(f, "No Wrap"),
+            Self::Word => write!(f, "Word Wrap"),
+            Self::Glyph => write!(f, "Character"),
+        }
+    }
 }

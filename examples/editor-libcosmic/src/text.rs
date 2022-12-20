@@ -116,7 +116,7 @@ where
         let layout_lines = shape.layout(
             self.metrics.font_size,
             limits.max().width as i32,
-            self.line.wrap_simple()
+            self.line.wrap()
         );
 
         let mut width = 0;
@@ -180,7 +180,7 @@ where
         let layout_lines = shape.layout(
             self.metrics.font_size,
             layout_w,
-            self.line.wrap_simple()
+            self.line.wrap()
         );
 
         let mut cache = state.cache.lock().unwrap();

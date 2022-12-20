@@ -32,6 +32,7 @@ use cosmic_text::{
     Metrics,
     SyntaxEditor,
     SyntaxSystem,
+    Wrap,
 };
 use std::{
     env,
@@ -58,6 +59,12 @@ static FONT_SIZES: &'static [Metrics] = &[
     Metrics::new(24, 32), // Title 3
     Metrics::new(28, 36), // Title 2
     Metrics::new(32, 44), // Title 1
+];
+
+static WRAP_MODE: &'static [Wrap] = & [
+    Wrap::None, 
+    Wrap::Glyph,
+    Wrap::Word,
 ];
 
 fn main() -> cosmic::iced::Result {
@@ -87,6 +94,7 @@ pub enum Message {
     Italic(bool),
     Monospaced(bool),
     MetricsChanged(Metrics),
+    WrapChanged(Wrap),
     ThemeChanged(&'static str),
 }
 
@@ -213,6 +221,10 @@ impl Application for Window {
                 let mut editor = self.editor.lock().unwrap();
                 editor.buffer_mut().set_metrics(metrics);
             },
+            Message::WrapChanged(wrap) => {
+                let mut editor = self.editor.lock().unwrap();
+                editor.buffer_mut().set_wrap(wrap);
+            },
             Message::ThemeChanged(theme) => {
                 self.theme = match theme {
                     "Dark" => Theme::Dark,
@@ -252,6 +264,15 @@ impl Application for Window {
             )
         };
 
+        let wrap_picker = {
+            let editor = self.editor.lock().unwrap();
+            pick_list(
+                WRAP_MODE,
+                Some(editor.buffer().wrap()),
+                Message::WrapChanged,
+            )
+        };
+
         let content: Element<_> = column![
             row![
                 button(theme::Button::Secondary)
@@ -271,6 +292,8 @@ impl Application for Window {
                 theme_picker,
                 text("Font Size:"),
                 font_size_picker,
+                text("Wrap:"),
+                wrap_picker,
             ]
             .align_items(Alignment::Center)
             .spacing(8)
