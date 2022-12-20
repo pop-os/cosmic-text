@@ -16,7 +16,7 @@ pub struct LayoutGlyph {
     pub x: f32,
     /// width of hitbox
     pub w: f32,
-    /// True if the character is from an RTL script
+    /// Unicode BiDi embedding level, character is left-to-right if `level` is divisible by 2
     pub level: unicode_bidi::Level,
     /// Cache key, see [CacheKey]
     pub cache_key: CacheKey,
