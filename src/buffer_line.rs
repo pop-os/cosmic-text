@@ -4,14 +4,14 @@ use alloc::{
     vec::Vec,
 };
 
-use crate::{AttrsList, FontSystem, LayoutLine, ShapeLine};
+use crate::{AttrsList, FontSystem, LayoutLine, ShapeLine, Wrap};
 
 /// A line (or paragraph) of text that is shaped and laid out
 pub struct BufferLine {
     //TODO: make this not pub(crate)
     text: String,
     attrs_list: AttrsList,
-    wrap_simple: bool,
+    wrap: Wrap,
     shape_opt: Option<ShapeLine>,
     layout_opt: Option<Vec<LayoutLine>>,
 }
@@ -24,7 +24,7 @@ impl BufferLine {
         Self {
             text: text.into(),
             attrs_list,
-            wrap_simple: false,
+            wrap: Wrap::Word,
             shape_opt: None,
             layout_opt: None,
         }
@@ -69,18 +69,18 @@ impl BufferLine {
         }
     }
 
-    /// Get simple wrapping setting (wrap by characters only)
-    pub fn wrap_simple(&self) -> bool {
-        self.wrap_simple
+    /// Get wrapping setting (wrap by characters/words or no wrapping)
+    pub fn wrap(&self) -> Wrap {
+        self.wrap
     }
 
-    /// Set simple wrapping setting (wrap by characters only)
+    /// Set wrapping setting (wrap by characters/words or no wrapping)
     ///
-    /// Will reset shape and layout if it differs from current simple wrapping setting.
+    /// Will reset shape and layout if it differs from current wrapping setting.
     /// Returns true if the line was reset
-    pub fn set_wrap_simple(&mut self, wrap_simple: bool) -> bool {
-        if wrap_simple != self.wrap_simple {
-            self.wrap_simple = wrap_simple;
+    pub fn set_wrap(&mut self, wrap: Wrap) -> bool {
+        if wrap != self.wrap {
+            self.wrap = wrap;
             self.reset();
             true
         } else {
@@ -116,7 +116,7 @@ impl BufferLine {
         self.reset();
 
         let mut new = Self::new(text, attrs_list);
-        new.wrap_simple = self.wrap_simple;
+        new.wrap = self.wrap;
         new
     }
 
@@ -152,14 +152,14 @@ impl BufferLine {
     }
 
     /// Layout line, will cache results
-    pub fn layout(&mut self, font_system: &FontSystem, font_size: i32, width: i32) -> &[LayoutLine] {
+    pub fn layout(&mut self, font_system: &FontSystem, font_size: i32, width: i32, wrap: Wrap) -> &[LayoutLine] {
         if self.layout_opt.is_none() {
-            let wrap_simple = self.wrap_simple;
+            self.wrap = wrap;
             let shape = self.shape(font_system);
             let layout = shape.layout(
                 font_size,
                 width,
-                wrap_simple
+                wrap
             );
             self.layout_opt = Some(layout);
         }

@@ -8,7 +8,7 @@ use core::ops::Range;
 use unicode_script::{Script, UnicodeScript};
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::{AttrsList, CacheKey, Color, Font, FontSystem, LayoutGlyph, LayoutLine};
+use crate::{AttrsList, CacheKey, Color, Font, FontSystem, LayoutGlyph, LayoutLine, Wrap};
 use crate::fallback::FontFallbackIter;
 
 fn shape_fallback(
@@ -432,6 +432,9 @@ pub struct ShapeLine {
     pub spans: Vec<ShapeSpan>,
 }
 
+// Visual Line Ranges: (span_index, (first_word_index, first_glyph_index), (last_word_index, last_glyph_index))
+type VlRange = (usize, (usize, usize), (usize, usize));
+
 impl ShapeLine {
     pub fn new<'a>(
         font_system: &'a FontSystem,
@@ -543,7 +546,7 @@ impl ShapeLine {
     }
 
     // A modified version of second part of unicode_bidi::bidi_info::visual run
-    fn reorder(&self, line_range: &[(usize, (usize, usize), (usize, usize))]) -> Vec<Range<usize>> {
+    fn reorder(&self, line_range: &[VlRange]) -> Vec<Range<usize>> {
         let line : Vec<unicode_bidi::Level> = line_range.iter().map(|(span_index, _, _)| self.spans[*span_index].level).collect();
         // Find consecutive level runs.
         let mut runs = Vec::new();
@@ -608,7 +611,7 @@ impl ShapeLine {
         &self,
         font_size: i32,
         line_width: i32,
-        wrap_simple: bool,
+        wrap: Wrap,
     ) -> Vec<LayoutLine> {
         let mut layout_lines = Vec::with_capacity(1);
 
@@ -622,31 +625,37 @@ impl ShapeLine {
         let start_x = if self.rtl { line_width as f32 } else { 0.0 };
         let end_x = if self.rtl { 0.0 } else { line_width as f32 };
         let mut x = start_x;
-        let mut y = 0.0;
+        let mut y;
+
+
 
         // This would keep the maximum number of spans that would fit on a visual line
         // If one span is too large, this variable will hold the range of words inside that span
         // that fits on a line.
-        let mut current_visual_line: Vec<(usize, (usize, usize), (usize, usize))> = Vec::with_capacity(1);
+        let mut current_visual_line: Vec<VlRange> = Vec::with_capacity(1);
 
-        let mut fit_x = line_width as f32;
+        if wrap == Wrap::None {
+            for (span_index, span) in self.spans.iter().enumerate() {
+                current_visual_line.push((span_index, (0,0), (span.words.len(), 0)));
+            }
+        }
+        else {
+            let mut fit_x = line_width as f32;
+            for (span_index, span) in self.spans.iter().enumerate() {
 
-        for (span_index, span) in self.spans.iter().enumerate() {
+                let mut word_ranges = Vec::new();
+                let mut word_range_width = 0.;
 
-            let mut word_ranges: Vec<((usize, usize), (usize, usize), f32)> = Vec::new();
-            let mut word_range_width = 0.;
-
-            // Create the word ranges that fits in a visual line
-            if self.rtl != span.level.is_rtl() { // incongruent directions
-                let mut fitting_start = (span.words.len(), 0);
-                for (i, word) in span.words.iter().enumerate().rev() {
-                    let word_size = font_size as f32 * word.x_advance;
-                    if fit_x - word_size >= 0.  { // fits
-                        fit_x -= word_size;
-                        word_range_width += word_size;
-                        continue;
-                    } else {
-                        if wrap_simple {
+                // Create the word ranges that fits in a visual line
+                if self.rtl != span.level.is_rtl() { // incongruent directions
+                    let mut fitting_start = (span.words.len(), 0);
+                    for (i, word) in span.words.iter().enumerate().rev() {
+                        let word_size = font_size as f32 * word.x_advance;
+                        if fit_x - word_size >= 0.  { // fits
+                            fit_x -= word_size;
+                            word_range_width += word_size;
+                            continue;
+                        } else if wrap == Wrap::Glyph {
                             for (glyph_i, glyph) in word.glyphs.iter().enumerate().rev() {
                                 let glyph_size = font_size as f32 * glyph.x_advance;
                                 if fit_x - glyph_size >= 0. {
@@ -660,7 +669,7 @@ impl ShapeLine {
                                     fitting_start = (i, glyph_i+1);
                                 }
                             }
-                        } else {
+                        } else { // Wrap::Word
                             word_ranges.push(((i+1, 0), fitting_start, word_range_width));
 
                             if word.blank {
@@ -674,19 +683,17 @@ impl ShapeLine {
                             }
                         }
                     }
-                }
-                word_ranges.push(((0,0),fitting_start, word_range_width));
+                    word_ranges.push(((0,0),fitting_start, word_range_width));
 
-            } else { // congruent direction
-                let mut fitting_start = (0,0);
-                for (i, word) in span.words.iter().enumerate() {
-                    let word_size = font_size as f32 * word.x_advance;
-                    if fit_x - word_size >= 0.  { // fits
-                        fit_x -= word_size;
-                        word_range_width += word_size;
-                        continue;
-                    } else {
-                        if wrap_simple {
+                } else { // congruent direction
+                    let mut fitting_start = (0,0);
+                    for (i, word) in span.words.iter().enumerate() {
+                        let word_size = font_size as f32 * word.x_advance;
+                        if fit_x - word_size >= 0.  { // fits
+                            fit_x -= word_size;
+                            word_range_width += word_size;
+                            continue;
+                        } else if wrap == Wrap::Glyph {
                             for (glyph_i, glyph) in word.glyphs.iter().enumerate() {
                                 let glyph_size = font_size as f32 * glyph.x_advance;
                                 if fit_x - glyph_size >= 0. {
@@ -700,7 +707,7 @@ impl ShapeLine {
                                     fitting_start = (i, glyph_i);
                                 }
                             }
-                        } else {
+                        } else { // Wrap::Word
                             word_ranges.push((fitting_start,(i,0), word_range_width));
 
                             if word.blank {
@@ -714,48 +721,48 @@ impl ShapeLine {
                             }
                         }
                     }
+                    word_ranges.push((fitting_start, (span.words.len(), 0), word_range_width));
                 }
-                word_ranges.push((fitting_start, (span.words.len(), 0), word_range_width));
-            }
 
-            // Create a visual line
-            for ((starting_word, starting_glyph), (ending_word, ending_glyph), word_range_width) in word_ranges {
-                // To simplify the algorithm above, we might push empty ranges but we ignore them here
-                if ending_word == starting_word && starting_glyph == ending_glyph { 
-                    continue;
-                }
-                
+                // Create a visual line
+                for ((starting_word, starting_glyph), (ending_word, ending_glyph), word_range_width) in word_ranges {
+                    // To simplify the algorithm above, we might push empty ranges but we ignore them here
+                    if ending_word == starting_word && starting_glyph == ending_glyph { 
+                        continue;
+                    }
+                    
 
-                let fits = !if self.rtl {
-                    x - word_range_width < end_x
-                } else {
-                    x + word_range_width > end_x
-                };
-
-
-                if fits {
-                    current_visual_line.push((span_index, (starting_word, starting_glyph), (ending_word, ending_glyph)));
-                    if self.rtl {
-                        x -= word_range_width;
+                    let fits = !if self.rtl {
+                        x - word_range_width < end_x
                     } else {
-                        x += word_range_width;
-                    }
-                } else {
-                    if !current_visual_line.is_empty(){
-                        vl_range_of_spans.push(current_visual_line);
-                        current_visual_line = Vec::with_capacity(1);
-                        x = start_x;
-                    }
-                    current_visual_line.push((span_index, (starting_word, starting_glyph), (ending_word, ending_glyph)));
-                    if self.rtl {
-                        x -= word_range_width;
+                        x + word_range_width > end_x
+                    };
+
+
+                    if fits {
+                        current_visual_line.push((span_index, (starting_word, starting_glyph), (ending_word, ending_glyph)));
+                        if self.rtl {
+                            x -= word_range_width;
+                        } else {
+                            x += word_range_width;
+                        }
                     } else {
-                        x += word_range_width;
-                    }
-                    if word_range_width > line_width as f32 { // single word is bigger than line_width
-                        vl_range_of_spans.push(current_visual_line);
-                        current_visual_line = Vec::with_capacity(1);
-                        x = start_x;
+                        if !current_visual_line.is_empty(){
+                            vl_range_of_spans.push(current_visual_line);
+                            current_visual_line = Vec::with_capacity(1);
+                            x = start_x;
+                        }
+                        current_visual_line.push((span_index, (starting_word, starting_glyph), (ending_word, ending_glyph)));
+                        if self.rtl {
+                            x -= word_range_width;
+                        } else {
+                            x += word_range_width;
+                        }
+                        if word_range_width > line_width as f32 { // single word is bigger than line_width
+                            vl_range_of_spans.push(current_visual_line);
+                            current_visual_line = Vec::with_capacity(1);
+                            x = start_x;
+                        }
                     }
                 }
             }

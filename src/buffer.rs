@@ -11,7 +11,7 @@ use core::{
 };
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::{Attrs, AttrsList, BufferLine, FontSystem, LayoutGlyph, LayoutLine, ShapeLine};
+use crate::{Attrs, AttrsList, BufferLine, FontSystem, LayoutGlyph, LayoutLine, ShapeLine, Wrap};
 #[cfg(feature = "swash")]
 use crate::Color;
 
@@ -157,6 +157,7 @@ pub struct Buffer<'a> {
     scroll: i32,
     /// True if a redraw is requires. Set to false after processing
     redraw: bool,
+    wrap: Wrap,
 }
 
 impl<'a> Buffer<'a> {
@@ -173,6 +174,7 @@ impl<'a> Buffer<'a> {
             height: 0,
             scroll: 0,
             redraw: false,
+            wrap: Wrap::Word,
         };
         buffer.set_text("", Attrs::new());
         buffer
@@ -188,7 +190,8 @@ impl<'a> Buffer<'a> {
                 line.layout(
                     self.font_system,
                     self.metrics.font_size,
-                    self.width
+                    self.width,
+                    self.wrap
                 );
             }
         }
@@ -217,7 +220,8 @@ impl<'a> Buffer<'a> {
             let layout = line.layout(
                 self.font_system,
                 self.metrics.font_size,
-                self.width
+                self.width,
+                self.wrap
             );
             total_layout += layout.len() as i32;
         }
@@ -249,7 +253,8 @@ impl<'a> Buffer<'a> {
             let layout = line.layout(
                 self.font_system,
                 self.metrics.font_size,
-                self.width
+                self.width,
+                self.wrap
             );
             if line_i == cursor.line {
                 let layout_cursor = self.layout_cursor(&cursor);
@@ -350,7 +355,7 @@ impl<'a> Buffer<'a> {
     /// Lay out the provided line index and return the result
     pub fn line_layout(&mut self, line_i: usize) -> Option<&[LayoutLine]> {
         let line = self.lines.get_mut(line_i)?;
-        Some(line.layout(self.font_system, self.metrics.font_size, self.width))
+        Some(line.layout(self.font_system, self.metrics.font_size, self.width, self.wrap))
     }
 
     /// Get the current [`Metrics`]
@@ -362,6 +367,20 @@ impl<'a> Buffer<'a> {
     pub fn set_metrics(&mut self, metrics: Metrics) {
         if metrics != self.metrics {
             self.metrics = metrics;
+            self.relayout();
+            self.shape_until_scroll();
+        }
+    }
+
+    /// Get the current [`Wrap`]
+    pub fn wrap(&self) -> Wrap {
+        self.wrap
+    }
+
+    /// Set the current [`Wrap`]
+    pub fn set_wrap(&mut self, wrap: Wrap) {
+        if wrap != self.wrap {
+            self.wrap = wrap;
             self.relayout();
             self.shape_until_scroll();
         }

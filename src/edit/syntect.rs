@@ -33,7 +33,8 @@ use crate::{
     Edit,
     Editor,
     Style,
-    Weight,
+    Weight, 
+    Wrap,
 };
 
 pub struct SyntaxSystem {
@@ -225,7 +226,7 @@ impl<'a> Edit<'a> for SyntaxEditor<'a> {
 
             // Update line attributes. This operation only resets if the line changes
             line.set_attrs_list(attrs_list);
-            line.set_wrap_simple(false);
+            line.set_wrap(Wrap::Word);
 
             //TODO: efficiently do syntax highlighting without having to shape whole buffer
             buffer.line_shape(line_i);
