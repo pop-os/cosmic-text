@@ -50,6 +50,11 @@ impl BufferLine {
         }
     }
 
+    /// Consume this line, returning only its text contents as a String.
+    pub fn into_text(self) -> String {
+        self.text
+    }
+
     /// Get attributes list
     pub fn attrs_list(&self) -> &AttrsList {
         &self.attrs_list
