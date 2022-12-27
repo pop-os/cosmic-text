@@ -48,6 +48,11 @@ impl FontSystem {
             );
         }
 
+        Self::new_with_locale_and_db(&locale, db)
+    }
+
+    /// Create a new [`FontSystem`], manually specifying the current locale and font database.
+    pub fn new_with_locale_and_db(locale: &str, mut db: fontdb::Database) -> Self {
         {
             let now = std::time::Instant::now();
 
