@@ -64,16 +64,26 @@ pub struct LayoutRunIter<'a, 'b> {
     buffer: &'b Buffer<'a>,
     line_i: usize,
     layout_i: usize,
+    remaining_len: usize,
     line_y: i32,
     total_layout: i32,
 }
 
 impl<'a, 'b> LayoutRunIter<'a, 'b> {
     pub fn new(buffer: &'b Buffer<'a>) -> Self {
+        let total_layout_lines: usize = buffer.lines.iter().map(|line| line.layout_opt().as_ref().map(|layout| layout.len()).unwrap_or_default()).sum();
+        let top_cropped_layout_lines = total_layout_lines.saturating_sub(buffer.scroll.try_into().unwrap_or_default());
+        let maximum_lines = buffer.height.checked_div(buffer.metrics.line_height).unwrap_or_default();
+        let bottom_cropped_layout_lines = if top_cropped_layout_lines > maximum_lines.try_into().unwrap_or_default() {
+            maximum_lines.try_into().unwrap_or_default()
+        } else {
+            top_cropped_layout_lines
+        };
         Self {
             buffer,
             line_i: 0,
             layout_i: 0,
+            remaining_len: bottom_cropped_layout_lines as usize,
             line_y: buffer.metrics.font_size - buffer.metrics.line_height,
             total_layout: 0,
         }
@@ -82,6 +92,10 @@ impl<'a, 'b> LayoutRunIter<'a, 'b> {
 
 impl<'a, 'b> Iterator for LayoutRunIter<'a, 'b> {
     type Item = LayoutRun<'b>;
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.remaining_len, Some(self.remaining_len))
+    }
 
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(line) = self.buffer.lines.get(self.line_i) {
@@ -101,6 +115,7 @@ impl<'a, 'b> Iterator for LayoutRunIter<'a, 'b> {
                     return None;
                 }
 
+                self.remaining_len -= 1;
                 return Some(LayoutRun {
                     line_i: self.line_i,
                     text: line.text(),
@@ -117,6 +132,8 @@ impl<'a, 'b> Iterator for LayoutRunIter<'a, 'b> {
         None
     }
 }
+
+impl<'a, 'b> ExactSizeIterator for LayoutRunIter<'a, 'b> { }
 
 /// Metrics of text
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
