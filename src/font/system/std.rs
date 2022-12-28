@@ -85,6 +85,11 @@ impl FontSystem {
         self.0.borrow_db()
     }
 
+    pub fn into_locale_and_db(self) -> (String, fontdb::Database) {
+        let heads = self.0.into_heads();
+        (heads.locale, heads.db)
+    }
+
     // Clippy false positive
     #[allow(clippy::needless_lifetimes)]
     pub fn get_font<'a>(&'a self, id: fontdb::ID) -> Option<Arc<Font<'a>>> {
