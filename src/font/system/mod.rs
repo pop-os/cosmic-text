@@ -13,3 +13,6 @@ mod redox;
 pub use self::std::*;
 #[cfg(all(feature = "std", not(target_os = "redox")))]
 mod std;
+
+// re-export fontdb
+pub use fontdb;
