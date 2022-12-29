@@ -202,6 +202,27 @@ impl<'a> Edit<'a> for Editor<'a> {
         true
     }
 
+    fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>) {
+        let len = data.len();
+
+        self.delete_selection();
+
+        let line: &mut BufferLine = &mut self.buffer.lines[self.cursor.line];
+
+        // Collect text after insertion as a line
+        let after: BufferLine = line.split_off(self.cursor.index);
+
+        // Collect attributes
+        let final_attrs = attrs_list.unwrap_or_else(|| AttrsList::new(line.attrs_list().get_span(line.text().len())));
+
+        // Append the inserted text
+        line.append(BufferLine::new(data, final_attrs));
+
+        // Append the text after insertion
+        line.append(after);
+        self.cursor.index += len;
+    }
+
     fn action(&mut self, action: Action) {
         let old_cursor = self.cursor;
 
@@ -344,28 +365,14 @@ impl<'a> Edit<'a> for Editor<'a> {
             },
             Action::Insert(character) => {
                 if character.is_control()
-                && !['\t', '\u{92}'].contains(&character)
+                    && !['\t', '\u{92}'].contains(&character)
                 {
                     // Filter out special chars (except for tab), use Action instead
                     log::debug!("Refusing to insert control character {:?}", character);
                 } else {
-                    self.delete_selection();
-
-                    let line = &mut self.buffer.lines[self.cursor.line];
-
-                    // Collect text after insertion as a line
-                    let after = line.split_off(self.cursor.index);
-
-                    // Append the inserted text
-                    line.append(BufferLine::new(
-                        character.to_string(),
-                        AttrsList::new(line.attrs_list().defaults() /*TODO: provide attrs?*/)
-                    ));
-
-                    // Append the text after insertion
-                    line.append(after);
-
-                    self.cursor.index += character.len_utf8();
+                    let mut str_buf = [0u8; 8];
+                    let str_ref = character.encode_utf8(&mut str_buf);
+                    self.insert_string(str_ref, None);
                 }
             },
             Action::Enter => {

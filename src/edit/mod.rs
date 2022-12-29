@@ -1,7 +1,7 @@
 #[cfg(not(feature = "std"))]
 use alloc::string::String;
 
-use crate::{Buffer, Cursor};
+use crate::{AttrsList, Buffer, Cursor};
 #[cfg(feature = "swash")]
 use crate::Color;
 
@@ -85,6 +85,10 @@ pub trait Edit<'a> {
     /// Delete selection, adjusting cursor and returning true if there was a selection
     // Also used by backspace, delete, insert, and enter when there is a selection
     fn delete_selection(&mut self) -> bool;
+
+    /// Insert a string at the current cursor or replacing the current selection with the given
+    /// attributes, or with the previous character's attributes if None is given.
+    fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>);
 
     /// Perform an [Action] on the editor
     fn action(&mut self, action: Action);
