@@ -121,6 +121,9 @@ fn main() {
             ("O", attrs.color(Color::rgb(0xFF, 0xFF, 0x00))),
             ("R", attrs.color(Color::rgb(0xFF, 0x7F, 0x00))),
             ("N", attrs.color(Color::rgb(0xFF, 0x00, 0x00))),
+        ], 
+        &[
+            ("生活,삶,जिंदगी 😀 FPS", attrs.color(Color::rgb(0xFF, 0x00, 0x00)))
         ]
     ];
     for &line in lines {

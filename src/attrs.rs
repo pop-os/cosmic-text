@@ -251,8 +251,7 @@ impl AttrsList {
 
     /// Clear the current attribute spans
     pub fn clear_spans(&mut self) {
-        //Todo: Once clear is added Change this back to clear.
-        self.spans = RangeMap::new();
+        self.spans.clear();
     }
 
     /// Add an attribute span, removes any previous matching parts of spans
