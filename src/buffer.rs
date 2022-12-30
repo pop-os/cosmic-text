@@ -16,7 +16,7 @@ use crate::{Attrs, AttrsList, BufferLine, FontSystem, LayoutGlyph, LayoutLine, S
 use crate::Color;
 
 /// Current cursor location
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Ord, PartialOrd)]
 pub struct Cursor {
     /// Text line the cursor is on
     pub line: usize,
@@ -567,6 +567,17 @@ impl<'a> Buffer<'a> {
         new_cursor_opt
     }
 
+    pub fn highlight_blocks<'b>(&'b self, cursor_start: Cursor, cursor_end: Cursor) -> HighlightBlocksIter<'a, 'b> {
+        HighlightBlocksIter {
+            cursor_start,
+            cursor_end,
+            line: 0,
+            layout_line: 0,
+            run_line: 0,
+            buffer: self,
+        }
+    }
+
     /// Draw the buffer
     #[cfg(feature = "swash")]
     pub fn draw<F>(&self, cache: &mut crate::SwashCache, color: Color, mut f: F)
@@ -586,5 +597,76 @@ impl<'a> Buffer<'a> {
                 });
             }
         }
+    }
+}
+
+pub struct HighlightBlocksIter<'a, 'b> {
+    cursor_start: Cursor,
+    cursor_end: Cursor,
+    line: usize,
+    layout_line: usize,
+    run_line: usize,
+    buffer: &'b Buffer<'a>,
+}
+
+impl<'a, 'b> Iterator for HighlightBlocksIter<'a, 'b> {
+    type Item = (i32, i32, u32, u32);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while !self.is_done() {
+            if let Some(result) = self.peek() {
+                self.advance();
+                return Some(result);
+            }
+            self.advance();
+        }
+        None
+    }
+}
+
+impl<'a, 'b> HighlightBlocksIter<'a, 'b> {
+    pub fn peek(&self) -> Option<(i32, i32, u32, u32)> {
+        let Some(line) = self.buffer.lines.get(self.line) else { return None; };
+        let line: &BufferLine = line;
+        let run: &LayoutLine = line.layout_opt().as_ref().unwrap().get(self.run_line).unwrap();
+        let mut x_start = None;
+        let mut x_end = None;
+        for glyph in run.glyphs.iter() {
+            let cursor = Cursor::new(self.line, glyph.start);
+            if cursor >= self.cursor_start && cursor <= self.cursor_end {
+                if x_start.is_none() {
+                    x_start = Some(glyph.x.round() as i32);
+                }
+                x_end = Some(glyph.x.round() as i32);
+            }
+        }
+        let cursor = Cursor::new(self.line, run.glyphs.last().map_or(0, |glyph| glyph.end));
+        if cursor >= self.cursor_start && cursor <= self.cursor_end {
+            if x_start.is_none() {
+                x_start = Some(run.glyphs.last().map_or(0, |glyph| (glyph.x + glyph.w).round() as i32));
+            }
+            x_end = Some(run.glyphs.last().map_or(0, |glyph| (glyph.x + glyph.w).round() as i32));
+        }
+        if let Some(x_start) = x_start {
+            let x_end = x_end.unwrap();
+            Some((x_start, self.layout_line as i32 * self.buffer.metrics.line_height, (x_end - x_start) as u32, self.buffer.metrics.line_height as u32))
+        } else {
+            None
+        }
+    }
+
+    pub fn advance(&mut self) {
+        let Some(line) = self.buffer.lines.get(self.line) else { return; };
+        let line: &BufferLine = line;
+        self.layout_line += 1;
+        self.run_line += 1;
+        if self.run_line >= line.layout_opt().as_ref().unwrap().len() {
+            self.run_line = 0;
+            self.line += 1;
+        }
+    }
+
+    pub fn is_done(&self) -> bool {
+        self.buffer.lines.get(self.line).is_none()
     }
 }
