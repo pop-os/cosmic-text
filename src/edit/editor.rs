@@ -206,6 +206,9 @@ impl<'a> Edit<'a> for Editor<'a> {
     fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>) {
         self.delete_selection();
         let mut remaining_split_len = data.len();
+        if remaining_split_len == 0 {
+            return;
+        }
 
         let line: &mut BufferLine = &mut self.buffer.lines[self.cursor.line];
         let insert_line = self.cursor.line + 1;
