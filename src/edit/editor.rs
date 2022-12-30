@@ -3,6 +3,7 @@
 #[cfg(not(feature = "std"))]
 use alloc::string::{String, ToString};
 use core::cmp;
+use std::iter::once;
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{Action, AttrsList, Buffer, BufferLine, Cursor, Edit, LayoutCursor};
@@ -203,24 +204,51 @@ impl<'a> Edit<'a> for Editor<'a> {
     }
 
     fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>) {
-        let len = data.len();
-
         self.delete_selection();
+        let mut remaining_split_len = data.len();
 
         let line: &mut BufferLine = &mut self.buffer.lines[self.cursor.line];
+        let insert_line = self.cursor.line + 1;
 
         // Collect text after insertion as a line
         let after: BufferLine = line.split_off(self.cursor.index);
+        let after_len = after.text().len();
 
         // Collect attributes
-        let final_attrs = attrs_list.unwrap_or_else(|| AttrsList::new(line.attrs_list().get_span(line.text().len())));
+        let mut final_attrs = attrs_list.unwrap_or_else(|| AttrsList::new(line.attrs_list().get_span(line.text().len())));
 
-        // Append the inserted text
-        line.append(BufferLine::new(data, final_attrs));
+        // Append the inserted text, line by line
+        // we want to see a blank entry if the string ends with a newline
+        let addendum = once("").filter(|_| data.ends_with('\n'));
+        let mut lines_iter = data.split_inclusive('\n').chain(addendum);
+        if let Some(data_line) = lines_iter.next() {
+            let mut these_attrs = final_attrs.split_off(data_line.len());
+            remaining_split_len -= data_line.len();
+            std::mem::swap(&mut these_attrs, &mut final_attrs);
+            line.append(BufferLine::new(data_line.strip_suffix(char::is_control).unwrap_or(data_line), these_attrs));
+        } else {
+            panic!("str::lines() did not yield any elements");
+        }
+        if let Some(data_line) = lines_iter.next_back() {
+            remaining_split_len -= data_line.len();
+            let mut tmp = BufferLine::new(data_line.strip_suffix(char::is_control).unwrap_or(data_line), final_attrs.split_off(remaining_split_len));
+            tmp.append(after);
+            self.buffer.lines.insert(insert_line, tmp);
+            self.cursor.line += 1;
+        } else {
+            line.append(after);
+        }
+        for data_line in lines_iter.rev() {
+            remaining_split_len -= data_line.len();
+            let tmp = BufferLine::new(data_line.strip_suffix(char::is_control).unwrap_or(data_line), final_attrs.split_off(remaining_split_len));
+            self.buffer.lines.insert(insert_line, tmp);
+            self.cursor.line += 1;
+        }
+
+        assert_eq!(remaining_split_len, 0);
 
         // Append the text after insertion
-        line.append(after);
-        self.cursor.index += len;
+        self.cursor.index = self.buffer.lines[self.cursor.line].text().len() - after_len;
     }
 
     fn action(&mut self, action: Action) {
@@ -346,17 +374,34 @@ impl<'a> Edit<'a> for Editor<'a> {
                 self.set_layout_cursor(cursor);
                 self.cursor_x_opt = None;
             }
+            Action::ParagraphStart => {
+                self.cursor.index = 0;
+                self.cursor_x_opt = None;
+                self.buffer.set_redraw(true);
+            }
+            Action::ParagraphEnd => {
+                self.cursor.index = self.buffer.lines[self.cursor.line].text().len();
+                self.cursor_x_opt = None;
+                self.buffer.set_redraw(true);
+            }
             Action::PageUp => {
-                //TODO: move cursor
-                let mut scroll = self.buffer.scroll();
-                scroll -= self.buffer.visible_lines();
-                self.buffer.set_scroll(scroll);
+                self.action(Action::Vertical(-self.buffer.size().1));
             },
             Action::PageDown => {
-                //TODO: move cursor
-                let mut scroll = self.buffer.scroll();
-                scroll += self.buffer.visible_lines();
-                self.buffer.set_scroll(scroll);
+                self.action(Action::Vertical(self.buffer.size().1));
+            },
+            Action::Vertical(px) => {
+                // TODO more efficient
+                let lines = px / self.buffer.metrics().line_height;
+                if lines < 0 {
+                    for _ in 0..-lines {
+                        self.action(Action::Up);
+                    }
+                } else if lines > 0 {
+                    for _ in 0..lines {
+                        self.action(Action::Down);
+                    }
+                }
             },
             Action::Escape => {
                 if self.select_opt.take().is_some() {
@@ -369,6 +414,8 @@ impl<'a> Edit<'a> for Editor<'a> {
                 {
                     // Filter out special chars (except for tab), use Action instead
                     log::debug!("Refusing to insert control character {:?}", character);
+                } else if character == '\n' {
+                    self.action(Action::Enter);
                 } else {
                     let mut str_buf = [0u8; 8];
                     let str_ref = character.encode_utf8(&mut str_buf);
@@ -483,6 +530,75 @@ impl<'a> Edit<'a> for Editor<'a> {
                 let mut scroll = self.buffer.scroll();
                 scroll += lines;
                 self.buffer.set_scroll(scroll);
+            }
+            Action::PreviousWord => {
+                let line: &mut BufferLine = &mut self.buffer.lines[self.cursor.line];
+                if self.cursor.index > 0 {
+                    let mut prev_index = 0;
+                    for (i, _) in line.text().unicode_word_indices() {
+                        if i < self.cursor.index {
+                            prev_index = i;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    self.cursor.index = prev_index;
+                    self.buffer.set_redraw(true);
+                } else if self.cursor.line > 0 {
+                    self.cursor.line -= 1;
+                    self.cursor.index = self.buffer.lines[self.cursor.line].text().len();
+                    self.buffer.set_redraw(true)
+                }
+                self.cursor_x_opt = None;
+            }
+            Action::NextWord => {
+                let line: &mut BufferLine = &mut self.buffer.lines[self.cursor.line];
+                if self.cursor.index < line.text().len() {
+                    for (i, word) in line.text().unicode_word_indices() {
+                        let i = i + word.len();
+                        if i > self.cursor.index {
+                            self.cursor.index = i;
+                            self.buffer.set_redraw(true);
+                            break;
+                        }
+                    }
+                } else if self.cursor.line + 1 < self.buffer.lines.len() {
+                    self.cursor.line += 1;
+                    self.cursor.index = 0;
+                    self.buffer.set_redraw(true);
+                }
+                self.cursor_x_opt = None;
+            }
+            Action::LeftWord => {
+                let rtl_opt = self.buffer.lines[self.cursor.line].shape_opt().as_ref().map(|shape| shape.rtl);
+                if let Some(rtl) = rtl_opt {
+                    if rtl {
+                        self.action(Action::NextWord);
+                    } else {
+                        self.action(Action::PreviousWord);
+                    }
+                }
+            },
+            Action::RightWord => {
+                let rtl_opt = self.buffer.lines[self.cursor.line].shape_opt().as_ref().map(|shape| shape.rtl);
+                if let Some(rtl) = rtl_opt {
+                    if rtl {
+                        self.action(Action::PreviousWord);
+                    } else {
+                        self.action(Action::NextWord);
+                    }
+                }
+            },
+            Action::BufferStart => {
+                self.cursor.line = 0;
+                self.cursor.index = 0;
+                self.cursor_x_opt = None;
+            }
+            Action::BufferEnd => {
+                self.cursor.line = self.buffer.lines.len() - 1;
+                self.cursor.index = self.buffer.lines[self.cursor.line].text().len();
+                self.cursor_x_opt = None;
             }
         }
 

@@ -37,10 +37,16 @@ pub enum Action {
     Home,
     /// Move cursor to end of line
     End,
-    /// Scroll up one page
+    /// Move cursor to start of paragraph
+    ParagraphStart,
+    /// Move cursor to end of paragraph
+    ParagraphEnd,
+    /// Move cursor up one page
     PageUp,
-    /// Scroll down one page
+    /// Move cursor down one page
     PageDown,
+    /// Move cursor up or down by a number of pixels
+    Vertical(i32),
     /// Escape, clears selection
     Escape,
     /// Insert character at cursor
@@ -57,6 +63,18 @@ pub enum Action {
     Drag { x: i32, y: i32 },
     /// Scroll specified number of lines
     Scroll { lines: i32 },
+    /// Move cursor to previous word boundary
+    PreviousWord,
+    /// Move cursor to next word boundary
+    NextWord,
+    /// Move cursor to next word boundary to the left
+    LeftWord,
+    /// Move cursor to next word boundary to the right
+    RightWord,
+    /// Move cursor to the start of the document
+    BufferStart,
+    /// Move cursor to the end of the document
+    BufferEnd,
 }
 
 /// A trait to allow easy replacements of [`Editor`], like `SyntaxEditor`
