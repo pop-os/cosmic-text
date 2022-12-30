@@ -410,7 +410,7 @@ impl<'a> Edit<'a> for Editor<'a> {
             },
             Action::Insert(character) => {
                 if character.is_control()
-                    && !['\t', '\u{92}'].contains(&character)
+                    && !['\t', '\n', '\u{92}'].contains(&character)
                 {
                     // Filter out special chars (except for tab), use Action instead
                     log::debug!("Refusing to insert control character {:?}", character);
