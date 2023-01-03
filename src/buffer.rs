@@ -20,7 +20,7 @@ use crate::Color;
 pub struct Cursor {
     /// Text line the cursor is on
     pub line: usize,
-    /// Index of glyph at cursor (will insert behind this glyph)
+    /// First-byte-index of glyph at cursor (will insert behind this glyph)
     pub index: usize,
 }
 
@@ -57,6 +57,42 @@ pub struct LayoutRun<'a> {
     pub line_y: i32,
     /// width of line
     pub line_w: f32,
+}
+
+impl<'a> LayoutRun<'a> {
+    /// Return the pixel span Some((x_start, x_width)) of the highlighted area between cursor_start
+    /// and cursor_end within this run, or None if the cursor range does not intersect this run.
+    /// This may return widths of zero if cursor_start == cursor_end, if the run is empty, or if the
+    /// region's left start boundary is the same as the cursor's end boundary or vice versa.
+    pub fn highlight(&self, cursor_start: Cursor, cursor_end: Cursor) -> Option<(f32, f32)> {
+        let mut x_start = None;
+        let mut x_end = None;
+        let rtl_factor = if self.rtl { 1. } else { 0. };
+        let ltr_factor = 1. - rtl_factor;
+        for glyph in self.glyphs.iter() {
+            let cursor = Cursor::new(self.line_i, glyph.start);
+            if cursor >= cursor_start && cursor <= cursor_end {
+                if x_start.is_none() {
+                    x_start = Some(glyph.x + glyph.w * rtl_factor);
+                }
+                x_end = Some(glyph.x + glyph.w * rtl_factor);
+            }
+        }
+        let cursor = Cursor::new(self.line_i, self.glyphs.last().map_or(0, |glyph| glyph.end));
+        if cursor >= cursor_start && cursor <= cursor_end {
+            if x_start.is_none() {
+                x_start = Some(self.glyphs.last().map_or(0., |glyph| glyph.x + glyph.w * ltr_factor));
+            }
+            x_end = Some(self.glyphs.last().map_or(0., |glyph| glyph.x + glyph.w * ltr_factor));
+        }
+        if let Some(x_start) = x_start {
+            let x_end = x_end.unwrap();
+            let (x_start, x_end) = if x_start < x_end { (x_start, x_end) } else { (x_end, x_start) };
+            Some((x_start, x_end - x_start))
+        } else {
+            None
+        }
+    }
 }
 
 /// An iterator of visible text lines, see [`LayoutRun`]
@@ -567,17 +603,6 @@ impl<'a> Buffer<'a> {
         new_cursor_opt
     }
 
-    pub fn highlight_blocks<'b>(&'b self, cursor_start: Cursor, cursor_end: Cursor) -> HighlightBlocksIter<'a, 'b> {
-        HighlightBlocksIter {
-            cursor_start,
-            cursor_end,
-            line: 0,
-            layout_line: 0,
-            run_line: 0,
-            buffer: self,
-        }
-    }
-
     /// Draw the buffer
     #[cfg(feature = "swash")]
     pub fn draw<F>(&self, cache: &mut crate::SwashCache, color: Color, mut f: F)
@@ -597,76 +622,5 @@ impl<'a> Buffer<'a> {
                 });
             }
         }
-    }
-}
-
-pub struct HighlightBlocksIter<'a, 'b> {
-    cursor_start: Cursor,
-    cursor_end: Cursor,
-    line: usize,
-    layout_line: usize,
-    run_line: usize,
-    buffer: &'b Buffer<'a>,
-}
-
-impl<'a, 'b> Iterator for HighlightBlocksIter<'a, 'b> {
-    type Item = (i32, i32, u32, u32);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        while !self.is_done() {
-            if let Some(result) = self.peek() {
-                self.advance();
-                return Some(result);
-            }
-            self.advance();
-        }
-        None
-    }
-}
-
-impl<'a, 'b> HighlightBlocksIter<'a, 'b> {
-    pub fn peek(&self) -> Option<(i32, i32, u32, u32)> {
-        let Some(line) = self.buffer.lines.get(self.line) else { return None; };
-        let line: &BufferLine = line;
-        let run: &LayoutLine = line.layout_opt().as_ref().unwrap().get(self.run_line).unwrap();
-        let mut x_start = None;
-        let mut x_end = None;
-        for glyph in run.glyphs.iter() {
-            let cursor = Cursor::new(self.line, glyph.start);
-            if cursor >= self.cursor_start && cursor <= self.cursor_end {
-                if x_start.is_none() {
-                    x_start = Some(glyph.x.round() as i32);
-                }
-                x_end = Some(glyph.x.round() as i32);
-            }
-        }
-        let cursor = Cursor::new(self.line, run.glyphs.last().map_or(0, |glyph| glyph.end));
-        if cursor >= self.cursor_start && cursor <= self.cursor_end {
-            if x_start.is_none() {
-                x_start = Some(run.glyphs.last().map_or(0, |glyph| (glyph.x + glyph.w).round() as i32));
-            }
-            x_end = Some(run.glyphs.last().map_or(0, |glyph| (glyph.x + glyph.w).round() as i32));
-        }
-        if let Some(x_start) = x_start {
-            let x_end = x_end.unwrap();
-            Some((x_start, self.layout_line as i32 * self.buffer.metrics.line_height, (x_end - x_start) as u32, self.buffer.metrics.line_height as u32))
-        } else {
-            None
-        }
-    }
-
-    pub fn advance(&mut self) {
-        let Some(line) = self.buffer.lines.get(self.line) else { return; };
-        let line: &BufferLine = line;
-        self.layout_line += 1;
-        self.run_line += 1;
-        if self.run_line >= line.layout_opt().as_ref().unwrap().len() {
-            self.run_line = 0;
-            self.line += 1;
-        }
-    }
-
-    pub fn is_done(&self) -> bool {
-        self.buffer.lines.get(self.line).is_none()
     }
 }
