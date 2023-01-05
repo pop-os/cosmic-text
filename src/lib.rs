@@ -56,14 +56,12 @@
 
 // Not interested in these lints
 #![allow(clippy::new_without_default)]
-
 // TODO: address ocurrances and then deny
 //
 // Indexing a slice can cause panics and that is something we always want to avoid
 #![allow(clippy::indexing_slicing)]
 // Overflows can produce unpredictable results and are only checked in debug builds
 #![allow(clippy::integer_arithmetic)]
-
 // Soundness issues
 //
 // Dereferencing unalinged pointers may be undefined behavior
@@ -75,7 +73,6 @@
 #![deny(unreachable_patterns)]
 // Ensure that all must_use results are used
 #![deny(unused_must_use)]
-
 // Style issues
 //
 // Documentation not ideal
@@ -88,7 +85,6 @@
 #![warn(clippy::semicolon_if_nothing_returned)]
 // Ensure numbers are readable
 #![warn(clippy::unreadable_literal)]
-
 #![cfg_attr(not(feature = "std"), no_std)]
 
 extern crate alloc;

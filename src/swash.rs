@@ -6,22 +6,26 @@ use alloc::collections::BTreeMap as Map;
 use alloc::vec::Vec;
 #[cfg(feature = "std")]
 use std::collections::HashMap as Map;
-use swash::scale::{ScaleContext, image::Content};
+use swash::scale::{image::Content, ScaleContext};
 use swash::scale::{Render, Source, StrikeWith};
 use swash::zeno::{Format, Vector};
 
 use crate::{CacheKey, Color, FontSystem};
 
-pub use swash::zeno::Command;
 pub use swash::scale::image::{Content as SwashContent, Image as SwashImage};
+pub use swash::zeno::Command;
 
-fn swash_image(font_system: &FontSystem, context: &mut ScaleContext, cache_key: CacheKey) -> Option<SwashImage> {
+fn swash_image(
+    font_system: &FontSystem,
+    context: &mut ScaleContext,
+    cache_key: CacheKey,
+) -> Option<SwashImage> {
     let font = match font_system.get_font(cache_key.font_id) {
         Some(some) => some,
         None => {
             log::warn!("did not find font {:?}", cache_key.font_id);
             return None;
-        },
+        }
     };
 
     // Build the scaler
@@ -33,9 +37,7 @@ fn swash_image(font_system: &FontSystem, context: &mut ScaleContext, cache_key: 
 
     // Compute the fractional offset-- you'll likely want to quantize this
     // in a real renderer
-    let offset =
-        Vector::new(cache_key.x_bin.as_float(), cache_key.y_bin.as_float());
-
+    let offset = Vector::new(cache_key.x_bin.as_float(), cache_key.y_bin.as_float());
 
     // Select our source order
     Render::new(&[
@@ -54,7 +56,11 @@ fn swash_image(font_system: &FontSystem, context: &mut ScaleContext, cache_key: 
     .render(&mut scaler, cache_key.glyph_id)
 }
 
-fn swash_outline_commands(font_system: &FontSystem, context: &mut ScaleContext, cache_key: CacheKey) -> Option<Vec<swash::zeno::Command>> {
+fn swash_outline_commands(
+    font_system: &FontSystem,
+    context: &mut ScaleContext,
+    cache_key: CacheKey,
+) -> Option<Vec<swash::zeno::Command>> {
     use swash::zeno::PathData as _;
 
     let font = match font_system.get_font(cache_key.font_id) {
@@ -62,9 +68,8 @@ fn swash_outline_commands(font_system: &FontSystem, context: &mut ScaleContext, 
         None => {
             log::warn!("did not find font {:?}", cache_key.font_id);
             return None;
-        },
+        }
     };
-
 
     // Build the scaler
     let mut scaler = context
@@ -73,7 +78,9 @@ fn swash_outline_commands(font_system: &FontSystem, context: &mut ScaleContext, 
         .build();
 
     // Scale the outline
-    let outline = scaler.scale_outline(cache_key.glyph_id).or_else(|| scaler.scale_color_outline(cache_key.glyph_id))?;
+    let outline = scaler
+        .scale_outline(cache_key.glyph_id)
+        .or_else(|| scaler.scale_color_outline(cache_key.glyph_id))?;
 
     // Get the path information of the outline
     let path = outline.path();
@@ -97,7 +104,7 @@ impl<'a> SwashCache<'a> {
             font_system,
             context: ScaleContext::new(),
             image_cache: Map::new(),
-            outline_command_cache: Map::new()
+            outline_command_cache: Map::new(),
         }
     }
 
@@ -108,15 +115,18 @@ impl<'a> SwashCache<'a> {
 
     /// Create a swash Image from a cache key, caching results
     pub fn get_image(&mut self, cache_key: CacheKey) -> &Option<SwashImage> {
-        self.image_cache.entry(cache_key).or_insert_with(|| {
-            swash_image(self.font_system, &mut self.context, cache_key)
-        })
+        self.image_cache
+            .entry(cache_key)
+            .or_insert_with(|| swash_image(self.font_system, &mut self.context, cache_key))
     }
 
     pub fn get_outline_commands(&mut self, cache_key: CacheKey) -> Option<&[swash::zeno::Command]> {
-        self.outline_command_cache.entry(cache_key).or_insert_with(|| {
-            swash_outline_commands(self.font_system, &mut self.context, cache_key)
-        }).as_deref()
+        self.outline_command_cache
+            .entry(cache_key)
+            .or_insert_with(|| {
+                swash_outline_commands(self.font_system, &mut self.context, cache_key)
+            })
+            .as_deref()
     }
 
     /// Enumerate pixels in an Image, use `with_image` for better performance
@@ -124,7 +134,7 @@ impl<'a> SwashCache<'a> {
         &mut self,
         cache_key: CacheKey,
         base: Color,
-        mut f: F
+        mut f: F,
     ) {
         if let Some(image) = self.get_image(cache_key) {
             let x = image.placement.left;
@@ -139,10 +149,7 @@ impl<'a> SwashCache<'a> {
                             f(
                                 x + off_x,
                                 y + off_y,
-                                Color(
-                                    ((image.data[i] as u32) << 24) |
-                                    base.0 & 0xFF_FF_FF
-                                )
+                                Color(((image.data[i] as u32) << 24) | base.0 & 0xFF_FF_FF),
                             );
                             i += 1;
                         }
@@ -160,8 +167,8 @@ impl<'a> SwashCache<'a> {
                                     image.data[i],
                                     image.data[i + 1],
                                     image.data[i + 2],
-                                    image.data[i + 3]
-                                )
+                                    image.data[i + 3],
+                                ),
                             );
                             i += 4;
                         }

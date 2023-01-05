@@ -2,15 +2,7 @@ use alloc::string::String;
 use core::cmp;
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::{
-    Action,
-    AttrsList,
-    Buffer,
-    Color,
-    Cursor,
-    Edit,
-    SyntaxEditor,
-};
+use crate::{Action, AttrsList, Buffer, Color, Cursor, Edit, SyntaxEditor};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Mode {
@@ -36,7 +28,11 @@ impl<'a> ViEditor<'a> {
 
     /// Load text from a file, and also set syntax to the best option
     #[cfg(feature = "std")]
-    pub fn load_text<P: AsRef<std::path::Path>>(&mut self, path: P, attrs: crate::Attrs<'a>) -> std::io::Result<()> {
+    pub fn load_text<P: AsRef<std::path::Path>>(
+        &mut self,
+        path: P,
+        attrs: crate::Attrs<'a>,
+    ) -> std::io::Result<()> {
         self.editor.load_text(path, attrs)
     }
 
@@ -98,12 +94,12 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                     'a' => {
                         self.editor.action(Action::Right);
                         self.mode = Mode::Insert;
-                    },
+                    }
                     // Enter insert mode at end of line
                     'A' => {
                         self.editor.action(Action::End);
                         self.mode = Mode::Insert;
-                    },
+                    }
                     // Change mode
                     'c' => {
                         if self.editor.select_opt().is_some() {
@@ -112,7 +108,7 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                         } else {
                             //TODO: change to next cursor movement
                         }
-                    },
+                    }
                     // Delete mode
                     'd' => {
                         if self.editor.select_opt().is_some() {
@@ -120,11 +116,11 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                         } else {
                             //TODO: delete to next cursor movement
                         }
-                    },
+                    }
                     // Enter insert mode at cursor
                     'i' => {
                         self.mode = Mode::Insert;
-                    },
+                    }
                     // Enter insert mode at start of line
                     'I' => {
                         //TODO: soft home, skip whitespace
@@ -136,7 +132,7 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                         self.editor.action(Action::End);
                         self.editor.action(Action::Enter);
                         self.mode = Mode::Insert;
-                    },
+                    }
                     // Create line before and enter insert mode
                     'O' => {
                         self.editor.action(Action::Home);
@@ -144,7 +140,7 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                         self.editor.shape_as_needed(); // TODO: do not require this?
                         self.editor.action(Action::Up);
                         self.mode = Mode::Insert;
-                    },
+                    }
                     // Left
                     'h' => self.editor.action(Action::Left),
                     // Top of screen
@@ -166,7 +162,7 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                         } else {
                             self.editor.set_select_opt(Some(self.editor.cursor()));
                         }
-                    },
+                    }
                     // Enter line visual mode
                     'V' => {
                         if self.editor.select_opt().is_some() {
@@ -177,7 +173,7 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                             //TODO: set cursor_x_opt to max
                             self.editor.action(Action::End);
                         }
-                    },
+                    }
                     // Remove character at cursor
                     'x' => self.editor.action(Action::Delete),
                     // Remove character before cursor
@@ -192,15 +188,15 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                     // Enter command mode
                     ':' => {
                         self.mode = Mode::Command;
-                    },
+                    }
                     // Enter search mode
                     '/' => {
                         self.mode = Mode::Search;
-                    },
+                    }
                     // Enter search backwards mode
                     '?' => {
                         self.mode = Mode::SearchBackwards;
-                    },
+                    }
                     _ => (),
                 },
                 _ => self.editor.action(action),
@@ -213,13 +209,13 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                         self.editor.action(Action::Left);
                     }
                     self.mode = Mode::Normal;
-                },
+                }
                 _ => self.editor.action(action),
             },
             _ => {
                 //TODO: other modes
                 self.mode = Mode::Normal;
-            },
+            }
         }
 
         if self.mode != old_mode {
@@ -229,7 +225,8 @@ impl<'a> Edit<'a> for ViEditor<'a> {
 
     #[cfg(feature = "swash")]
     fn draw<F>(&self, cache: &mut crate::SwashCache, color: Color, mut f: F)
-        where F: FnMut(i32, i32, u32, u32, Color)
+    where
+        F: FnMut(i32, i32, u32, u32, Color),
     {
         let font_size = self.buffer().metrics().font_size;
         let line_height = self.buffer().metrics().line_height;
@@ -266,7 +263,7 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                             if cursor.index == glyph.end {
                                 return Some((run.glyphs.len(), 0.0, default_width));
                             }
-                        },
+                        }
                         None => {
                             return Some((0, 0.0, default_width));
                         }
@@ -303,16 +300,14 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                             let c_start = glyph.start + i;
                             let c_end = glyph.start + i + c.len();
                             if (start.line != line_i || c_end > start.index)
-                            && (end.line != line_i || c_start < end.index) {
+                                && (end.line != line_i || c_start < end.index)
+                            {
                                 range_opt = match range_opt.take() {
                                     Some((min, max)) => Some((
                                         cmp::min(min, c_x as i32),
                                         cmp::max(max, (c_x + c_w) as i32),
                                     )),
-                                    None => Some((
-                                        c_x as i32,
-                                        (c_x + c_w) as i32,
-                                    ))
+                                    None => Some((c_x as i32, (c_x + c_w) as i32)),
                                 };
                             } else if let Some((min, max)) = range_opt.take() {
                                 f(
@@ -320,14 +315,14 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                                     line_y - font_size,
                                     cmp::max(0, max - min) as u32,
                                     line_height as u32,
-                                    Color::rgba(color.r(), color.g(), color.b(), 0x33)
+                                    Color::rgba(color.r(), color.g(), color.b(), 0x33),
                                 );
                             }
                             c_x += c_w;
                         }
                     }
 
-                    if run.glyphs.is_empty() && end.line > line_i{
+                    if run.glyphs.is_empty() && end.line > line_i {
                         // Highlight all of internal empty lines
                         range_opt = Some((0, self.buffer().size().0));
                     }
@@ -346,18 +341,20 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                             line_y - font_size,
                             cmp::max(0, max - min) as u32,
                             line_height as u32,
-                            Color::rgba(color.r(), color.g(), color.b(), 0x33)
+                            Color::rgba(color.r(), color.g(), color.b(), 0x33),
                         );
                     }
                 }
             }
 
             // Draw cursor
-            if let Some((cursor_glyph, cursor_glyph_offset, cursor_glyph_width)) = cursor_glyph_opt(&self.cursor()) {
+            if let Some((cursor_glyph, cursor_glyph_offset, cursor_glyph_width)) =
+                cursor_glyph_opt(&self.cursor())
+            {
                 let block_cursor = match self.mode {
                     Mode::Normal => true,
                     Mode::Insert => false,
-                    _ => true /*TODO: determine block cursor in other modes*/
+                    _ => true, /*TODO: determine block cursor in other modes*/
                 };
 
                 let (start_x, end_x) = match run.glyphs.get(cursor_glyph) {
@@ -366,38 +363,33 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                         if glyph.level.is_rtl() {
                             (
                                 (glyph.x + glyph.w - cursor_glyph_offset) as i32,
-                                (glyph.x + glyph.w - cursor_glyph_offset - cursor_glyph_width) as i32,
+                                (glyph.x + glyph.w - cursor_glyph_offset - cursor_glyph_width)
+                                    as i32,
                             )
                         } else {
                             (
                                 (glyph.x + cursor_glyph_offset) as i32,
-                                (glyph.x + cursor_glyph_offset + cursor_glyph_width) as i32
+                                (glyph.x + cursor_glyph_offset + cursor_glyph_width) as i32,
                             )
                         }
-                    },
+                    }
                     None => match run.glyphs.last() {
                         Some(glyph) => {
                             // End of last glyph
                             if glyph.level.is_rtl() {
-                                (
-                                    glyph.x as i32,
-                                    (glyph.x - cursor_glyph_width) as i32
-                                )
+                                (glyph.x as i32, (glyph.x - cursor_glyph_width) as i32)
                             } else {
                                 (
                                     (glyph.x + glyph.w) as i32,
-                                    (glyph.x + glyph.w + cursor_glyph_width) as i32
+                                    (glyph.x + glyph.w + cursor_glyph_width) as i32,
                                 )
                             }
-                        },
+                        }
                         None => {
                             // Start of empty line
-                            (
-                                0,
-                                cursor_glyph_width as i32
-                            )
+                            (0, cursor_glyph_width as i32)
                         }
-                    }
+                    },
                 };
 
                 if block_cursor {
@@ -411,13 +403,7 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                         Color::rgba(color.r(), color.g(), color.b(), 0x33),
                     );
                 } else {
-                    f(
-                        start_x,
-                        line_y - font_size,
-                        1,
-                        line_height as u32,
-                        color,
-                    );
+                    f(start_x, line_y - font_size, 1, line_height as u32, color);
                 }
             }
 

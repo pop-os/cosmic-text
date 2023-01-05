@@ -5,15 +5,12 @@ use alloc::{
     string::{String, ToString},
     vec::Vec,
 };
-use core::{
-    cmp,
-    fmt,
-};
+use core::{cmp, fmt};
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::{Attrs, AttrsList, BufferLine, FontSystem, LayoutGlyph, LayoutLine, ShapeLine, Wrap};
 #[cfg(feature = "swash")]
 use crate::Color;
+use crate::{Attrs, AttrsList, BufferLine, FontSystem, LayoutGlyph, LayoutLine, ShapeLine, Wrap};
 
 /// Current cursor location
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Ord, PartialOrd)]
@@ -39,7 +36,11 @@ pub struct LayoutCursor {
 
 impl LayoutCursor {
     pub fn new(line: usize, layout: usize, glyph: usize) -> Self {
-        Self { line, layout, glyph }
+        Self {
+            line,
+            layout,
+            glyph,
+        }
     }
 }
 
@@ -81,13 +82,25 @@ impl<'a> LayoutRun<'a> {
         let cursor = Cursor::new(self.line_i, self.glyphs.last().map_or(0, |glyph| glyph.end));
         if cursor >= cursor_start && cursor <= cursor_end {
             if x_start.is_none() {
-                x_start = Some(self.glyphs.last().map_or(0., |glyph| glyph.x + glyph.w * ltr_factor));
+                x_start = Some(
+                    self.glyphs
+                        .last()
+                        .map_or(0., |glyph| glyph.x + glyph.w * ltr_factor),
+                );
             }
-            x_end = Some(self.glyphs.last().map_or(0., |glyph| glyph.x + glyph.w * ltr_factor));
+            x_end = Some(
+                self.glyphs
+                    .last()
+                    .map_or(0., |glyph| glyph.x + glyph.w * ltr_factor),
+            );
         }
         if let Some(x_start) = x_start {
             let x_end = x_end.expect("end of cursor not found");
-            let (x_start, x_end) = if x_start < x_end { (x_start, x_end) } else { (x_end, x_start) };
+            let (x_start, x_end) = if x_start < x_end {
+                (x_start, x_end)
+            } else {
+                (x_end, x_start)
+            };
             Some((x_start, x_end - x_start))
         } else {
             None
@@ -107,14 +120,28 @@ pub struct LayoutRunIter<'a, 'b> {
 
 impl<'a, 'b> LayoutRunIter<'a, 'b> {
     pub fn new(buffer: &'b Buffer<'a>) -> Self {
-        let total_layout_lines: usize = buffer.lines.iter().map(|line| line.layout_opt().as_ref().map(|layout| layout.len()).unwrap_or_default()).sum();
-        let top_cropped_layout_lines = total_layout_lines.saturating_sub(buffer.scroll.try_into().unwrap_or_default());
-        let maximum_lines = buffer.height.checked_div(buffer.metrics.line_height).unwrap_or_default();
-        let bottom_cropped_layout_lines = if top_cropped_layout_lines > maximum_lines.try_into().unwrap_or_default() {
-            maximum_lines.try_into().unwrap_or_default()
-        } else {
-            top_cropped_layout_lines
-        };
+        let total_layout_lines: usize = buffer
+            .lines
+            .iter()
+            .map(|line| {
+                line.layout_opt()
+                    .as_ref()
+                    .map(|layout| layout.len())
+                    .unwrap_or_default()
+            })
+            .sum();
+        let top_cropped_layout_lines =
+            total_layout_lines.saturating_sub(buffer.scroll.try_into().unwrap_or_default());
+        let maximum_lines = buffer
+            .height
+            .checked_div(buffer.metrics.line_height)
+            .unwrap_or_default();
+        let bottom_cropped_layout_lines =
+            if top_cropped_layout_lines > maximum_lines.try_into().unwrap_or_default() {
+                maximum_lines.try_into().unwrap_or_default()
+            } else {
+                top_cropped_layout_lines
+            };
         Self {
             buffer,
             line_i: 0,
@@ -169,7 +196,7 @@ impl<'a, 'b> Iterator for LayoutRunIter<'a, 'b> {
     }
 }
 
-impl<'a, 'b> ExactSizeIterator for LayoutRunIter<'a, 'b> { }
+impl<'a, 'b> ExactSizeIterator for LayoutRunIter<'a, 'b> {}
 
 /// Metrics of text
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -182,7 +209,10 @@ pub struct Metrics {
 
 impl Metrics {
     pub const fn new(font_size: i32, line_height: i32) -> Self {
-        Self { font_size, line_height }
+        Self {
+            font_size,
+            line_height,
+        }
     }
 
     pub const fn scale(self, scale: i32) -> Self {
@@ -215,10 +245,7 @@ pub struct Buffer<'a> {
 
 impl<'a> Buffer<'a> {
     /// Create a new [`Buffer`] with the provided [`FontSystem`] and [`Metrics`]
-    pub fn new(
-        font_system: &'a FontSystem,
-        metrics: Metrics,
-    ) -> Self {
+    pub fn new(font_system: &'a FontSystem, metrics: Metrics) -> Self {
         let mut buffer = Self {
             font_system,
             lines: Vec::new(),
@@ -244,7 +271,7 @@ impl<'a> Buffer<'a> {
                     self.font_system,
                     self.metrics.font_size,
                     self.width,
-                    self.wrap
+                    self.wrap,
                 );
             }
         }
@@ -274,7 +301,7 @@ impl<'a> Buffer<'a> {
                 self.font_system,
                 self.metrics.font_size,
                 self.width,
-                self.wrap
+                self.wrap,
             );
             total_layout += layout.len() as i32;
         }
@@ -307,7 +334,7 @@ impl<'a> Buffer<'a> {
                 self.font_system,
                 self.metrics.font_size,
                 self.width,
-                self.wrap
+                self.wrap,
             );
             if line_i == cursor.line {
                 let layout_cursor = self.layout_cursor(&cursor);
@@ -341,13 +368,7 @@ impl<'a> Buffer<'a> {
         let scroll_end = self.scroll + lines;
         let total_layout = self.shape_until(scroll_end);
 
-        self.scroll = cmp::max(
-            0,
-            cmp::min(
-                total_layout - (lines - 1),
-                self.scroll,
-            ),
-        );
+        self.scroll = cmp::max(0, cmp::min(total_layout - (lines - 1), self.scroll));
     }
 
     pub fn layout_cursor(&self, cursor: &Cursor) -> LayoutCursor {
@@ -358,40 +379,24 @@ impl<'a> Buffer<'a> {
         for (layout_i, layout_line) in layout.iter().enumerate() {
             for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
                 if cursor.index == glyph.start {
-                    return LayoutCursor::new(
-                        cursor.line,
-                        layout_i,
-                        glyph_i
-                    );
+                    return LayoutCursor::new(cursor.line, layout_i, glyph_i);
                 }
             }
             match layout_line.glyphs.last() {
                 Some(glyph) => {
                     if cursor.index == glyph.end {
-                        return LayoutCursor::new(
-                            cursor.line,
-                            layout_i,
-                            layout_line.glyphs.len()
-                        );
+                        return LayoutCursor::new(cursor.line, layout_i, layout_line.glyphs.len());
                     }
-                },
+                }
                 None => {
-                    return LayoutCursor::new(
-                        cursor.line,
-                        layout_i,
-                        0
-                    );
+                    return LayoutCursor::new(cursor.line, layout_i, 0);
                 }
             }
         }
 
         // Fall back to start of line
         //TODO: should this be the end of the line?
-        LayoutCursor::new(
-            cursor.line,
-            0,
-            0
-        )
+        LayoutCursor::new(cursor.line, 0, 0)
     }
 
     /// Get [`FontSystem`] used by this [`Buffer`]
@@ -408,7 +413,12 @@ impl<'a> Buffer<'a> {
     /// Lay out the provided line index and return the result
     pub fn line_layout(&mut self, line_i: usize) -> Option<&[LayoutLine]> {
         let line = self.lines.get_mut(line_i)?;
-        Some(line.layout(self.font_system, self.metrics.font_size, self.width, self.wrap))
+        Some(line.layout(
+            self.font_system,
+            self.metrics.font_size,
+            self.width,
+            self.wrap,
+        ))
     }
 
     /// Get the current [`Metrics`]
@@ -476,11 +486,13 @@ impl<'a> Buffer<'a> {
     pub fn set_text(&mut self, text: &str, attrs: Attrs<'a>) {
         self.lines.clear();
         for line in text.lines() {
-            self.lines.push(BufferLine::new(line.to_string(), AttrsList::new(attrs)));
+            self.lines
+                .push(BufferLine::new(line.to_string(), AttrsList::new(attrs)));
         }
         // Make sure there is always one line
         if self.lines.is_empty() {
-            self.lines.push(BufferLine::new(String::new(), AttrsList::new(attrs)));
+            self.lines
+                .push(BufferLine::new(String::new(), AttrsList::new(attrs)));
         }
 
         self.scroll = 0;
@@ -522,9 +534,7 @@ impl<'a> Buffer<'a> {
                 first_run = false;
                 let new_cursor = Cursor::new(run.line_i, 0);
                 new_cursor_opt = Some(new_cursor);
-            } else if y >= line_y - font_size
-                    && y < line_y - font_size + line_height
-            {
+            } else if y >= line_y - font_size && y < line_y - font_size + line_height {
                 let mut new_cursor_glyph = run.glyphs.len();
                 let mut new_cursor_char = 0;
 
@@ -538,9 +548,7 @@ impl<'a> Buffer<'a> {
                             new_cursor_char = 0;
                         }
                     }
-                    if x >= glyph.x as i32
-                    && x <= (glyph.x + glyph.w) as i32
-                    {
+                    if x >= glyph.x as i32 && x <= (glyph.x + glyph.w) as i32 {
                         new_cursor_glyph = glyph_i;
 
                         let cluster = &run.text[glyph.start..glyph.end];
@@ -548,9 +556,7 @@ impl<'a> Buffer<'a> {
                         let mut egc_x = glyph.x;
                         let egc_w = glyph.w / (total as f32);
                         for (egc_i, egc) in cluster.grapheme_indices(true) {
-                            if x >= egc_x as i32
-                            && x <= (egc_x + egc_w) as i32
-                            {
+                            if x >= egc_x as i32 && x <= (egc_x + egc_w) as i32 {
                                 new_cursor_char = egc_i;
 
                                 let right_half = x >= (egc_x + egc_w / 2.0) as i32;
@@ -578,11 +584,13 @@ impl<'a> Buffer<'a> {
                     Some(glyph) => {
                         // Position at glyph
                         new_cursor.index = glyph.start + new_cursor_char;
-                    },
-                    None => if let Some(glyph) = run.glyphs.last() {
-                        // Position at end of line
-                        new_cursor.index = glyph.end;
-                    },
+                    }
+                    None => {
+                        if let Some(glyph) = run.glyphs.last() {
+                            // Position at end of line
+                            new_cursor.index = glyph.end;
+                        }
+                    }
                 }
 
                 new_cursor_opt = Some(new_cursor);
@@ -606,7 +614,8 @@ impl<'a> Buffer<'a> {
     /// Draw the buffer
     #[cfg(feature = "swash")]
     pub fn draw<F>(&self, cache: &mut crate::SwashCache, color: Color, mut f: F)
-        where F: FnMut(i32, i32, u32, u32, Color)
+    where
+        F: FnMut(i32, i32, u32, u32, Color),
     {
         for run in self.layout_runs() {
             for glyph in run.glyphs.iter() {

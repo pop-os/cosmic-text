@@ -1,19 +1,14 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic_text::{
-    Action,
-    Attrs,
-    Buffer,
-    Edit,
-    Family,
-    FontSystem,
-    Metrics,
-    SwashCache,
-    SyntaxEditor,
+    Action, Attrs, Buffer, Edit, Family, FontSystem, Metrics, SwashCache, SyntaxEditor,
     SyntaxSystem,
 };
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
-use std::{env, thread, time::{Duration, Instant}};
+use std::{
+    env, thread,
+    time::{Duration, Instant},
+};
 
 fn main() {
     env_logger::init();
@@ -65,20 +60,18 @@ fn main() {
     let mut editor = SyntaxEditor::new(
         Buffer::new(&font_system, font_sizes[font_size_i]),
         &syntax_system,
-        "base16-eighties.dark"
-    ).unwrap();
+        "base16-eighties.dark",
+    )
+    .unwrap();
 
     #[cfg(feature = "vi")]
     let mut editor = cosmic_text::ViEditor::new(editor);
 
-    editor.buffer_mut().set_size(
-        window.width() as i32 - line_x * 2,
-        window.height() as i32
-    );
+    editor
+        .buffer_mut()
+        .set_size(window.width() as i32 - line_x * 2, window.height() as i32);
 
-    let attrs = Attrs::new()
-        .monospaced(true)
-        .family(Family::Monospace);
+    let attrs = Attrs::new().monospaced(true).family(Family::Monospace);
     match editor.load_text(&path, attrs) {
         Ok(()) => (),
         Err(err) => {
@@ -212,7 +205,9 @@ fn main() {
                     }
                 }
                 EventOption::Resize(event) => {
-                    editor.buffer_mut().set_size(event.width as i32 - line_x * 2, event.height as i32);
+                    editor
+                        .buffer_mut()
+                        .set_size(event.width as i32 - line_x * 2, event.height as i32);
                 }
                 EventOption::Scroll(event) => {
                     editor.action(Action::Scroll {
@@ -243,7 +238,7 @@ fn main() {
             window.set_async(window_async);
         }
 
-        if window_async && ! found_event {
+        if window_async && !found_event {
             // In async mode and no event found, sleep
             thread::sleep(Duration::from_millis(5));
         }

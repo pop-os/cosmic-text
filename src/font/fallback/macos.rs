@@ -15,9 +15,7 @@ pub fn common_fallback() -> &'static [&'static str] {
 
 // Fallbacks to never use
 pub fn forbidden_fallback() -> &'static [&'static str] {
-    &[
-        ".LastResort",
-    ]
+    &[".LastResort"]
 }
 
 fn han_unification(locale: &str) -> &'static [&'static str] {

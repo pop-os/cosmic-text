@@ -1,23 +1,14 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic_text::{
-    Action,
-    Attrs,
-    AttrsList,
-    Buffer,
-    BufferLine,
-    Color,
-    Edit,
-    Editor,
-    Family,
-    FontSystem,
-    Metrics,
-    Style,
-    SwashCache,
-    Weight,
+    Action, Attrs, AttrsList, Buffer, BufferLine, Color, Edit, Editor, Family, FontSystem, Metrics,
+    Style, SwashCache, Weight,
 };
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
-use std::{process, thread, time::{Duration, Instant}};
+use std::{
+    process, thread,
+    time::{Duration, Instant},
+};
 
 fn main() {
     env_logger::init();
@@ -47,13 +38,12 @@ fn main() {
 
     let mut editor = Editor::new(Buffer::new(
         &font_system,
-        Metrics::new(32, 44).scale(display_scale)
+        Metrics::new(32, 44).scale(display_scale),
     ));
 
-    editor.buffer_mut().set_size(
-        window.width() as i32,
-        window.height() as i32
-    );
+    editor
+        .buffer_mut()
+        .set_size(window.width() as i32, window.height() as i32);
 
     let attrs = Attrs::new();
     let serif_attrs = attrs.family(Family::Serif);
@@ -79,25 +69,37 @@ fn main() {
             ("Sans-Serif Normal ", attrs),
             ("Sans-Serif Bold ", attrs.weight(Weight::BOLD)),
             ("Sans-Serif Italic ", attrs.style(Style::Italic)),
-            ("Sans-Serif Bold Italic", attrs.weight(Weight::BOLD).style(Style::Italic)),
+            (
+                "Sans-Serif Bold Italic",
+                attrs.weight(Weight::BOLD).style(Style::Italic),
+            ),
         ],
         &[
             ("Serif Normal ", serif_attrs),
             ("Serif Bold ", serif_attrs.weight(Weight::BOLD)),
             ("Serif Italic ", serif_attrs.style(Style::Italic)),
-            ("Serif Bold Italic", serif_attrs.weight(Weight::BOLD).style(Style::Italic)),
+            (
+                "Serif Bold Italic",
+                serif_attrs.weight(Weight::BOLD).style(Style::Italic),
+            ),
         ],
         &[
             ("Mono Normal ", mono_attrs),
             ("Mono Bold ", mono_attrs.weight(Weight::BOLD)),
             ("Mono Italic ", mono_attrs.style(Style::Italic)),
-            ("Mono Bold Italic", mono_attrs.weight(Weight::BOLD).style(Style::Italic)),
+            (
+                "Mono Bold Italic",
+                mono_attrs.weight(Weight::BOLD).style(Style::Italic),
+            ),
         ],
         &[
             ("Comic Normal ", comic_attrs),
             ("Comic Bold ", comic_attrs.weight(Weight::BOLD)),
             ("Comic Italic ", comic_attrs.style(Style::Italic)),
-            ("Comic Bold Italic", comic_attrs.weight(Weight::BOLD).style(Style::Italic)),
+            (
+                "Comic Bold Italic",
+                comic_attrs.weight(Weight::BOLD).style(Style::Italic),
+            ),
         ],
         &[
             ("R", attrs.color(Color::rgb(0xFF, 0x00, 0x00))),
@@ -121,10 +123,11 @@ fn main() {
             ("O", attrs.color(Color::rgb(0xFF, 0xFF, 0x00))),
             ("R", attrs.color(Color::rgb(0xFF, 0x7F, 0x00))),
             ("N", attrs.color(Color::rgb(0xFF, 0x00, 0x00))),
-        ], 
-        &[
-            ("生活,삶,जिंदगी 😀 FPS", attrs.color(Color::rgb(0xFF, 0x00, 0x00)))
-        ]
+        ],
+        &[(
+            "生活,삶,जिंदगी 😀 FPS",
+            attrs.color(Color::rgb(0xFF, 0x00, 0x00)),
+        )],
     ];
     for &line in lines {
         let mut line_text = String::new();
@@ -135,7 +138,10 @@ fn main() {
             let end = line_text.len();
             attrs_list.add_span(start..end, attrs);
         }
-        editor.buffer_mut().lines.push(BufferLine::new(line_text, attrs_list));
+        editor
+            .buffer_mut()
+            .lines
+            .push(BufferLine::new(line_text, attrs_list));
     }
 
     let mut swash_cache = SwashCache::new(&font_system);
@@ -187,18 +193,26 @@ fn main() {
                     mouse_x = mouse.x;
                     mouse_y = mouse.y;
                     if mouse_left {
-                        editor.action(Action::Drag { x: mouse_x, y: mouse_y });
+                        editor.action(Action::Drag {
+                            x: mouse_x,
+                            y: mouse_y,
+                        });
                     }
-                },
+                }
                 EventOption::Button(button) => {
                     mouse_left = button.left;
                     if mouse_left {
-                        editor.action(Action::Click { x: mouse_x, y: mouse_y });
+                        editor.action(Action::Click {
+                            x: mouse_x,
+                            y: mouse_y,
+                        });
                     }
-                },
+                }
                 EventOption::Resize(resize) => {
-                    editor.buffer_mut().set_size(resize.width as i32, resize.height as i32);
-                },
+                    editor
+                        .buffer_mut()
+                        .set_size(resize.width as i32, resize.height as i32);
+                }
                 EventOption::Quit(_) => process::exit(0),
                 _ => (),
             }

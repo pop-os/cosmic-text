@@ -1,9 +1,9 @@
 #[cfg(not(feature = "std"))]
 use alloc::string::String;
 
-use crate::{AttrsList, Buffer, Cursor};
 #[cfg(feature = "swash")]
 use crate::Color;
+use crate::{AttrsList, Buffer, Cursor};
 
 pub use self::editor::*;
 mod editor;
@@ -114,5 +114,6 @@ pub trait Edit<'a> {
     /// Draw the editor
     #[cfg(feature = "swash")]
     fn draw<F>(&self, cache: &mut crate::SwashCache, color: Color, f: F)
-        where F: FnMut(i32, i32, u32, u32, Color);
+    where
+        F: FnMut(i32, i32, u32, u32, Color);
 }

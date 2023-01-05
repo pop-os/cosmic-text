@@ -2,10 +2,7 @@
 
 use alloc::sync::Arc;
 #[cfg(not(feature = "std"))]
-use alloc::{
-    string::String,
-    vec::Vec,
-};
+use alloc::{string::String, vec::Vec};
 
 use crate::Font;
 

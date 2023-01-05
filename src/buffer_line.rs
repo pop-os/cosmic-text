@@ -1,8 +1,5 @@
 #[cfg(not(feature = "std"))]
-use alloc::{
-    string::String,
-    vec::Vec,
-};
+use alloc::{string::String, vec::Vec};
 
 use crate::{AttrsList, FontSystem, LayoutLine, ShapeLine, Wrap};
 
@@ -39,7 +36,11 @@ impl BufferLine {
     ///
     /// Will reset shape and layout if it differs from current text and attributes list.
     /// Returns true if the line was reset
-    pub fn set_text<T: AsRef<str> + Into<String>>(&mut self, text: T, attrs_list: AttrsList) -> bool {
+    pub fn set_text<T: AsRef<str> + Into<String>>(
+        &mut self,
+        text: T,
+        attrs_list: AttrsList,
+    ) -> bool {
         if text.as_ref() != self.text || attrs_list != self.attrs_list {
             self.text = text.into();
             self.attrs_list = attrs_list;
@@ -102,7 +103,8 @@ impl BufferLine {
 
         if other.attrs_list.defaults() != self.attrs_list.defaults() {
             // If default formatting does not match, make a new span for it
-            self.attrs_list.add_span(len..len + other.text().len(), other.attrs_list.defaults());
+            self.attrs_list
+                .add_span(len..len + other.text().len(), other.attrs_list.defaults());
         }
 
         for (other_range, attrs) in other.attrs_list.spans() {
@@ -157,15 +159,17 @@ impl BufferLine {
     }
 
     /// Layout line, will cache results
-    pub fn layout(&mut self, font_system: &FontSystem, font_size: i32, width: i32, wrap: Wrap) -> &[LayoutLine] {
+    pub fn layout(
+        &mut self,
+        font_system: &FontSystem,
+        font_size: i32,
+        width: i32,
+        wrap: Wrap,
+    ) -> &[LayoutLine] {
         if self.layout_opt.is_none() {
             self.wrap = wrap;
             let shape = self.shape(font_system);
-            let layout = shape.layout(
-                font_size,
-                width,
-                wrap
-            );
+            let layout = shape.layout(font_size, width, wrap);
             self.layout_opt = Some(layout);
         }
         self.layout_opt.as_ref().expect("layout not found")

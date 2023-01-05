@@ -24,12 +24,7 @@ impl Color {
     /// Create new color with red, green, blue, and alpha components
     #[inline]
     pub const fn rgba(r: u8, g: u8, b: u8, a: u8) -> Self {
-        Self(
-            ((a as u32) << 24) |
-            ((r as u32) << 16) |
-            ((g as u32) << 8) |
-            (b as u32)
-        )
+        Self(((a as u32) << 24) | ((r as u32) << 16) | ((g as u32) << 8) | (b as u32))
     }
 
     /// Get the red component
@@ -165,22 +160,20 @@ impl<'a> Attrs<'a> {
     /// Check if font matches
     pub fn matches(&self, face: &fontdb::FaceInfo) -> bool {
         //TODO: smarter way of including emoji
-        face.post_script_name.contains("Emoji") ||
-        (
-            face.style == self.style &&
-            face.weight == self.weight &&
-            face.stretch == self.stretch &&
-            face.monospaced == self.monospaced
-        )
+        face.post_script_name.contains("Emoji")
+            || (face.style == self.style
+                && face.weight == self.weight
+                && face.stretch == self.stretch
+                && face.monospaced == self.monospaced)
     }
 
     /// Check if this set of attributes can be shaped with another
     pub fn compatible(&self, other: &Self) -> bool {
         self.family == other.family
-        && self.monospaced == other.monospaced
-        && self.stretch == other.stretch
-        && self.style == other.style
-        && self.weight == other.weight
+            && self.monospaced == other.monospaced
+            && self.stretch == other.stretch
+            && self.style == other.style
+            && self.weight == other.weight
     }
 }
 
@@ -268,7 +261,10 @@ impl AttrsList {
     ///
     /// This returns a span that contains the index
     pub fn get_span(&self, index: usize) -> Attrs {
-        self.spans.get(&index).map(|v| v.as_attrs()).unwrap_or(self.defaults.as_attrs())
+        self.spans
+            .get(&index)
+            .map(|v| v.as_attrs())
+            .unwrap_or(self.defaults.as_attrs())
     }
 
     /// Split attributes list at an offset
@@ -288,20 +284,19 @@ impl AttrsList {
         }
 
         for (key, resize) in removes {
-            let (range, attrs) =  self.spans.get_key_value(&key.start).map(|v| (v.0.clone(), v.1.clone())).expect("attrs span not found");
+            let (range, attrs) = self
+                .spans
+                .get_key_value(&key.start)
+                .map(|v| (v.0.clone(), v.1.clone()))
+                .expect("attrs span not found");
             self.spans.remove(key);
 
             if resize {
-                new.spans.insert(
-                    0..range.end - index,
-                    attrs.clone()
-                );
+                new.spans.insert(0..range.end - index, attrs.clone());
                 self.spans.insert(range.start..index, attrs);
             } else {
-                new.spans.insert(
-                    range.start - index..range.end - index,
-                    attrs
-                );
+                new.spans
+                    .insert(range.start - index..range.end - index, attrs);
             }
         }
         new

@@ -9,7 +9,7 @@ use alloc::{
 use crate::{Attrs, Font, FontMatches};
 
 /// Access system fonts
-pub struct FontSystem{
+pub struct FontSystem {
     locale: String,
     db: fontdb::Database,
 }
@@ -46,7 +46,9 @@ impl FontSystem {
             //TODO only do this on demand!
             for i in 0..db.faces().len() {
                 let id = db.faces()[i].id;
-                unsafe { db.make_shared_face_data(id); }
+                unsafe {
+                    db.make_shared_face_data(id);
+                }
             }
 
             log::info!(
@@ -56,10 +58,7 @@ impl FontSystem {
             );
         }
 
-        Self {
-            locale,
-            db,
-        }
+        Self { locale, db }
     }
 
     pub fn locale(&self) -> &str {
@@ -98,7 +97,7 @@ impl FontSystem {
         Arc::new(FontMatches {
             locale: &self.locale,
             default_family: self.db.family_name(&attrs.family).to_string(),
-            fonts
+            fonts,
         })
     }
 }

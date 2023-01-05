@@ -5,9 +5,9 @@ use alloc::string::String;
 use core::{cmp, iter::once};
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::{Action, AttrsList, Buffer, BufferLine, Cursor, Edit, LayoutCursor};
 #[cfg(feature = "swash")]
 use crate::Color;
+use crate::{Action, AttrsList, Buffer, BufferLine, Cursor, Edit, LayoutCursor};
 
 /// A wrapper of [`Buffer`] for easy editing
 pub struct Editor<'a> {
@@ -31,14 +31,17 @@ impl<'a> Editor<'a> {
     }
 
     fn set_layout_cursor(&mut self, cursor: LayoutCursor) {
-        let layout = self.buffer.line_layout(cursor.line).expect("layout not found");
+        let layout = self
+            .buffer
+            .line_layout(cursor.line)
+            .expect("layout not found");
 
         let layout_line = match layout.get(cursor.layout) {
             Some(some) => some,
             None => match layout.last() {
                 Some(some) => some,
                 None => todo!("layout cursor in line with no layouts"),
-            }
+            },
         };
 
         let new_index = match layout_line.glyphs.get(cursor.glyph) {
@@ -47,7 +50,7 @@ impl<'a> Editor<'a> {
                 Some(glyph) => glyph.end,
                 //TODO: is this correct?
                 None => 0,
-            }
+            },
         };
 
         if self.cursor.line != cursor.line || self.cursor.index != new_index {
@@ -217,7 +220,8 @@ impl<'a> Edit<'a> for Editor<'a> {
         let after_len = after.text().len();
 
         // Collect attributes
-        let mut final_attrs = attrs_list.unwrap_or_else(|| AttrsList::new(line.attrs_list().get_span(line.text().len())));
+        let mut final_attrs = attrs_list
+            .unwrap_or_else(|| AttrsList::new(line.attrs_list().get_span(line.text().len())));
 
         // Append the inserted text, line by line
         // we want to see a blank entry if the string ends with a newline
@@ -227,13 +231,23 @@ impl<'a> Edit<'a> for Editor<'a> {
             let mut these_attrs = final_attrs.split_off(data_line.len());
             remaining_split_len -= data_line.len();
             core::mem::swap(&mut these_attrs, &mut final_attrs);
-            line.append(BufferLine::new(data_line.strip_suffix(char::is_control).unwrap_or(data_line), these_attrs));
+            line.append(BufferLine::new(
+                data_line
+                    .strip_suffix(char::is_control)
+                    .unwrap_or(data_line),
+                these_attrs,
+            ));
         } else {
             panic!("str::lines() did not yield any elements");
         }
         if let Some(data_line) = lines_iter.next_back() {
             remaining_split_len -= data_line.len();
-            let mut tmp = BufferLine::new(data_line.strip_suffix(char::is_control).unwrap_or(data_line), final_attrs.split_off(remaining_split_len));
+            let mut tmp = BufferLine::new(
+                data_line
+                    .strip_suffix(char::is_control)
+                    .unwrap_or(data_line),
+                final_attrs.split_off(remaining_split_len),
+            );
             tmp.append(after);
             self.buffer.lines.insert(insert_line, tmp);
             self.cursor.line += 1;
@@ -242,7 +256,12 @@ impl<'a> Edit<'a> for Editor<'a> {
         }
         for data_line in lines_iter.rev() {
             remaining_split_len -= data_line.len();
-            let tmp = BufferLine::new(data_line.strip_suffix(char::is_control).unwrap_or(data_line), final_attrs.split_off(remaining_split_len));
+            let tmp = BufferLine::new(
+                data_line
+                    .strip_suffix(char::is_control)
+                    .unwrap_or(data_line),
+                final_attrs.split_off(remaining_split_len),
+            );
             self.buffer.lines.insert(insert_line, tmp);
             self.cursor.line += 1;
         }
@@ -278,7 +297,7 @@ impl<'a> Edit<'a> for Editor<'a> {
                     self.buffer.set_redraw(true);
                 }
                 self.cursor_x_opt = None;
-            },
+            }
             Action::Next => {
                 let line = &mut self.buffer.lines[self.cursor.line];
                 if self.cursor.index < line.text().len() {
@@ -295,9 +314,12 @@ impl<'a> Edit<'a> for Editor<'a> {
                     self.buffer.set_redraw(true);
                 }
                 self.cursor_x_opt = None;
-            },
+            }
             Action::Left => {
-                let rtl_opt = self.buffer.lines[self.cursor.line].shape_opt().as_ref().map(|shape| shape.rtl);
+                let rtl_opt = self.buffer.lines[self.cursor.line]
+                    .shape_opt()
+                    .as_ref()
+                    .map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
                         self.action(Action::Next);
@@ -305,9 +327,12 @@ impl<'a> Edit<'a> for Editor<'a> {
                         self.action(Action::Previous);
                     }
                 }
-            },
+            }
             Action::Right => {
-                let rtl_opt = self.buffer.lines[self.cursor.line].shape_opt().as_ref().map(|shape| shape.rtl);
+                let rtl_opt = self.buffer.lines[self.cursor.line]
+                    .shape_opt()
+                    .as_ref()
+                    .map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
                         self.action(Action::Previous);
@@ -315,14 +340,14 @@ impl<'a> Edit<'a> for Editor<'a> {
                         self.action(Action::Next);
                     }
                 }
-            },
+            }
             Action::Up => {
                 //TODO: make this preserve X as best as possible!
                 let mut cursor = self.buffer.layout_cursor(&self.cursor);
 
                 if self.cursor_x_opt.is_none() {
                     self.cursor_x_opt = Some(
-                        cursor.glyph as i32 //TODO: glyph x position
+                        cursor.glyph as i32, //TODO: glyph x position
                     );
                 }
 
@@ -338,16 +363,20 @@ impl<'a> Edit<'a> for Editor<'a> {
                 }
 
                 self.set_layout_cursor(cursor);
-            },
+            }
             Action::Down => {
                 //TODO: make this preserve X as best as possible!
                 let mut cursor = self.buffer.layout_cursor(&self.cursor);
 
-                let layout_len = self.buffer.line_layout(cursor.line).expect("layout not found").len();
+                let layout_len = self
+                    .buffer
+                    .line_layout(cursor.line)
+                    .expect("layout not found")
+                    .len();
 
                 if self.cursor_x_opt.is_none() {
                     self.cursor_x_opt = Some(
-                        cursor.glyph as i32 //TODO: glyph x position
+                        cursor.glyph as i32, //TODO: glyph x position
                     );
                 }
 
@@ -363,13 +392,13 @@ impl<'a> Edit<'a> for Editor<'a> {
                 }
 
                 self.set_layout_cursor(cursor);
-            },
+            }
             Action::Home => {
                 let mut cursor = self.buffer.layout_cursor(&self.cursor);
                 cursor.glyph = 0;
                 self.set_layout_cursor(cursor);
                 self.cursor_x_opt = None;
-            },
+            }
             Action::End => {
                 let mut cursor = self.buffer.layout_cursor(&self.cursor);
                 cursor.glyph = usize::max_value();
@@ -388,10 +417,10 @@ impl<'a> Edit<'a> for Editor<'a> {
             }
             Action::PageUp => {
                 self.action(Action::Vertical(-self.buffer.size().1));
-            },
+            }
             Action::PageDown => {
                 self.action(Action::Vertical(self.buffer.size().1));
-            },
+            }
             Action::Vertical(px) => {
                 // TODO more efficient
                 let lines = px / self.buffer.metrics().line_height;
@@ -404,16 +433,14 @@ impl<'a> Edit<'a> for Editor<'a> {
                         self.action(Action::Down);
                     }
                 }
-            },
+            }
             Action::Escape => {
                 if self.select_opt.take().is_some() {
                     self.buffer.set_redraw(true);
                 }
-            },
+            }
             Action::Insert(character) => {
-                if character.is_control()
-                    && !['\t', '\n', '\u{92}'].contains(&character)
-                {
+                if character.is_control() && !['\t', '\n', '\u{92}'].contains(&character) {
                     // Filter out special chars (except for tab), use Action instead
                     log::debug!("Refusing to insert control character {:?}", character);
                 } else if character == '\n' {
@@ -423,7 +450,7 @@ impl<'a> Edit<'a> for Editor<'a> {
                     let str_ref = character.encode_utf8(&mut str_buf);
                     self.insert_string(str_ref, None);
                 }
-            },
+            }
             Action::Enter => {
                 self.delete_selection();
 
@@ -433,7 +460,7 @@ impl<'a> Edit<'a> for Editor<'a> {
                 self.cursor.index = 0;
 
                 self.buffer.lines.insert(self.cursor.line, new_line);
-            },
+            }
             Action::Backspace => {
                 if self.delete_selection() {
                     // Deleted selection
@@ -472,7 +499,7 @@ impl<'a> Edit<'a> for Editor<'a> {
 
                     line.append(old_line);
                 }
-            },
+            }
             Action::Delete => {
                 if self.delete_selection() {
                     // Deleted selection
@@ -484,9 +511,7 @@ impl<'a> Edit<'a> for Editor<'a> {
                         .grapheme_indices(true)
                         .take_while(|(i, _)| *i <= self.cursor.index)
                         .last()
-                        .map(|(i, c)| {
-                            i..(i + c.len())
-                        });
+                        .map(|(i, c)| i..(i + c.len()));
 
                     if let Some(range) = range_opt {
                         self.cursor.index = range.start;
@@ -504,7 +529,7 @@ impl<'a> Edit<'a> for Editor<'a> {
                     let old_line = self.buffer.lines.remove(self.cursor.line + 1);
                     self.buffer.lines[self.cursor.line].append(old_line);
                 }
-            },
+            }
             Action::Click { x, y } => {
                 self.select_opt = None;
 
@@ -514,7 +539,7 @@ impl<'a> Edit<'a> for Editor<'a> {
                         self.buffer.set_redraw(true);
                     }
                 }
-            },
+            }
             Action::Drag { x, y } => {
                 if self.select_opt.is_none() {
                     self.select_opt = Some(self.cursor);
@@ -527,7 +552,7 @@ impl<'a> Edit<'a> for Editor<'a> {
                         self.buffer.set_redraw(true);
                     }
                 }
-            },
+            }
             Action::Scroll { lines } => {
                 let mut scroll = self.buffer.scroll();
                 scroll += lines;
@@ -573,7 +598,10 @@ impl<'a> Edit<'a> for Editor<'a> {
                 self.cursor_x_opt = None;
             }
             Action::LeftWord => {
-                let rtl_opt = self.buffer.lines[self.cursor.line].shape_opt().as_ref().map(|shape| shape.rtl);
+                let rtl_opt = self.buffer.lines[self.cursor.line]
+                    .shape_opt()
+                    .as_ref()
+                    .map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
                         self.action(Action::NextWord);
@@ -581,9 +609,12 @@ impl<'a> Edit<'a> for Editor<'a> {
                         self.action(Action::PreviousWord);
                     }
                 }
-            },
+            }
             Action::RightWord => {
-                let rtl_opt = self.buffer.lines[self.cursor.line].shape_opt().as_ref().map(|shape| shape.rtl);
+                let rtl_opt = self.buffer.lines[self.cursor.line]
+                    .shape_opt()
+                    .as_ref()
+                    .map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
                         self.action(Action::PreviousWord);
@@ -591,7 +622,7 @@ impl<'a> Edit<'a> for Editor<'a> {
                         self.action(Action::NextWord);
                     }
                 }
-            },
+            }
             Action::BufferStart => {
                 self.cursor.line = 0;
                 self.cursor.index = 0;
@@ -628,7 +659,8 @@ impl<'a> Edit<'a> for Editor<'a> {
     /// Draw the editor
     #[cfg(feature = "swash")]
     fn draw<F>(&self, cache: &mut crate::SwashCache, color: Color, mut f: F)
-        where F: FnMut(i32, i32, u32, u32, Color)
+    where
+        F: FnMut(i32, i32, u32, u32, Color),
     {
         let font_size = self.buffer.metrics().font_size;
         let line_height = self.buffer.metrics().line_height;
@@ -664,7 +696,7 @@ impl<'a> Edit<'a> for Editor<'a> {
                             if cursor.index == glyph.end {
                                 return Some((run.glyphs.len(), 0.0));
                             }
-                        },
+                        }
                         None => {
                             return Some((0, 0.0));
                         }
@@ -701,16 +733,14 @@ impl<'a> Edit<'a> for Editor<'a> {
                             let c_start = glyph.start + i;
                             let c_end = glyph.start + i + c.len();
                             if (start.line != line_i || c_end > start.index)
-                            && (end.line != line_i || c_start < end.index) {
+                                && (end.line != line_i || c_start < end.index)
+                            {
                                 range_opt = match range_opt.take() {
                                     Some((min, max)) => Some((
                                         cmp::min(min, c_x as i32),
                                         cmp::max(max, (c_x + c_w) as i32),
                                     )),
-                                    None => Some((
-                                        c_x as i32,
-                                        (c_x + c_w) as i32,
-                                    ))
+                                    None => Some((c_x as i32, (c_x + c_w) as i32)),
                                 };
                             } else if let Some((min, max)) = range_opt.take() {
                                 f(
@@ -718,14 +748,14 @@ impl<'a> Edit<'a> for Editor<'a> {
                                     line_y - font_size,
                                     cmp::max(0, max - min) as u32,
                                     line_height as u32,
-                                    Color::rgba(color.r(), color.g(), color.b(), 0x33)
+                                    Color::rgba(color.r(), color.g(), color.b(), 0x33),
                                 );
                             }
                             c_x += c_w;
                         }
                     }
 
-                    if run.glyphs.is_empty() && end.line > line_i{
+                    if run.glyphs.is_empty() && end.line > line_i {
                         // Highlight all of internal empty lines
                         range_opt = Some((0, self.buffer.size().0));
                     }
@@ -744,7 +774,7 @@ impl<'a> Edit<'a> for Editor<'a> {
                             line_y - font_size,
                             cmp::max(0, max - min) as u32,
                             line_height as u32,
-                            Color::rgba(color.r(), color.g(), color.b(), 0x33)
+                            Color::rgba(color.r(), color.g(), color.b(), 0x33),
                         );
                     }
                 }
@@ -760,7 +790,7 @@ impl<'a> Edit<'a> for Editor<'a> {
                         } else {
                             (glyph.x + cursor_glyph_offset) as i32
                         }
-                    },
+                    }
                     None => match run.glyphs.last() {
                         Some(glyph) => {
                             // End of last glyph
@@ -769,21 +799,15 @@ impl<'a> Edit<'a> for Editor<'a> {
                             } else {
                                 (glyph.x + glyph.w) as i32
                             }
-                        },
+                        }
                         None => {
                             // Start of empty line
                             0
                         }
-                    }
+                    },
                 };
 
-                f(
-                    x,
-                    line_y - font_size,
-                    1,
-                    line_height as u32,
-                    color,
-                );
+                f(x, line_y - font_size, 1, line_height as u32, color);
             }
 
             for glyph in run.glyphs.iter() {

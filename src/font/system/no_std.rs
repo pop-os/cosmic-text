@@ -9,7 +9,7 @@ use alloc::{
 use crate::{Attrs, Font, FontMatches};
 
 /// Access system fonts
-pub struct FontSystem{
+pub struct FontSystem {
     locale: String,
     db: fontdb::Database,
 }
@@ -25,16 +25,13 @@ impl FontSystem {
             db.set_serif_family("DejaVu Serif");
         }
 
-        Self {
-            locale,
-            db,
-        }
+        Self { locale, db }
     }
 
     pub fn new_with_locale_and_db(locale: &str, db: fontdb::Database) -> Self {
         Self {
             locale: locale.to_string(),
-            db
+            db,
         }
     }
 
@@ -74,7 +71,7 @@ impl FontSystem {
         Arc::new(FontMatches {
             locale: &self.locale,
             default_family: self.db.family_name(&attrs.family).to_string(),
-            fonts
+            fonts,
         })
     }
 }

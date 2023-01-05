@@ -2,26 +2,16 @@
 
 use cosmic::{
     iced_native::{
-        {Color, Element, Length, Point, Rectangle, Size},
         image,
         layout::{self, Layout},
         renderer,
         widget::{self, tree, Widget},
+        {Color, Element, Length, Point, Rectangle, Size},
     },
     theme::Theme,
 };
-use cosmic_text::{
-    Attrs,
-    AttrsList,
-    SwashCache,
-    BufferLine,
-    Metrics,
-};
-use std::{
-    cmp,
-    sync::Mutex,
-    time::Instant,
-};
+use cosmic_text::{Attrs, AttrsList, BufferLine, Metrics, SwashCache};
+use std::{cmp, sync::Mutex, time::Instant};
 
 pub struct Appearance {
     background_color: Option<Color>,
@@ -57,10 +47,7 @@ impl Text {
         let instant = Instant::now();
 
         //TODO: make it possible to set attrs
-        let mut line = BufferLine::new(
-            string,
-            AttrsList::new(Attrs::new())
-        );
+        let mut line = BufferLine::new(string, AttrsList::new(Attrs::new()));
 
         //TODO: do we have to immediately shape?
         line.shape(&crate::FONT_SYSTEM);
@@ -101,11 +88,7 @@ where
         Length::Shrink
     }
 
-    fn layout(
-        &self,
-        _renderer: &Renderer,
-        limits: &layout::Limits,
-    ) -> layout::Node {
+    fn layout(&self, _renderer: &Renderer, limits: &layout::Limits) -> layout::Node {
         let instant = Instant::now();
 
         let limits = limits.width(Length::Shrink).height(Length::Shrink);
@@ -116,7 +99,7 @@ where
         let layout_lines = shape.layout(
             self.metrics.font_size,
             limits.max().width as i32,
-            self.line.wrap()
+            self.line.wrap(),
         );
 
         let mut width = 0;
@@ -160,7 +143,7 @@ where
                     border_width: 0.0,
                     border_color: Color::TRANSPARENT,
                 },
-                background_color
+                background_color,
             );
         }
 
@@ -177,11 +160,7 @@ where
         let shape = self.line.shape_opt().as_ref().unwrap();
 
         //TODO: can we cache this?
-        let layout_lines = shape.layout(
-            self.metrics.font_size,
-            layout_w,
-            self.line.wrap()
-        );
+        let layout_lines = shape.layout(self.metrics.font_size, layout_w, self.line.wrap());
 
         let mut cache = state.cache.lock().unwrap();
 
@@ -219,7 +198,7 @@ pub fn draw_pixel(
     height: i32,
     x: i32,
     y: i32,
-    color: cosmic_text::Color
+    color: cosmic_text::Color,
 ) {
     let alpha = (color.0 >> 24) & 0xFF;
     if alpha == 0 {
@@ -239,11 +218,10 @@ pub fn draw_pixel(
 
     let offset = (y as usize * width as usize + x as usize) * 4;
 
-    let mut current =
-        buffer[offset + 2] as u32 |
-        (buffer[offset + 1] as u32) << 8 |
-        (buffer[offset + 0] as u32) << 16 |
-        (buffer[offset + 3] as u32) << 24;
+    let mut current = buffer[offset + 2] as u32
+        | (buffer[offset + 1] as u32) << 8
+        | (buffer[offset + 0] as u32) << 16
+        | (buffer[offset + 3] as u32) << 24;
 
     if alpha >= 255 || current == 0 {
         // Alpha is 100% or current is null, replace with no blending

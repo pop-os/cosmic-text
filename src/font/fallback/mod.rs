@@ -9,11 +9,7 @@ use crate::Font;
 
 use self::platform::*;
 
-#[cfg(not(any(
-    target_os = "linux",
-    target_os = "macos",
-    target_os = "windows",
-)))]
+#[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "windows",)))]
 #[path = "other.rs"]
 mod platform;
 
@@ -46,7 +42,7 @@ impl<'a> FontFallbackIter<'a> {
         fonts: &'a [Arc<Font<'a>>],
         default_families: &'a [&'a str],
         scripts: Vec<Script>,
-        locale: &'a str
+        locale: &'a str,
     ) -> Self {
         Self {
             fonts,
@@ -78,7 +74,7 @@ impl<'a> FontFallbackIter<'a> {
                 font.info.family,
                 word
             );
-        } else if ! self.scripts.is_empty() && self.common_i > 0 {
+        } else if !self.scripts.is_empty() && self.common_i > 0 {
             let family = common_fallback()[self.common_i - 1];
             log::debug!(
                 "Failed to find script fallback for {:?} locale '{}', used '{}': '{}'",
@@ -117,7 +113,12 @@ impl<'a> Iterator for FontFallbackIter<'a> {
                         return Some(font);
                     }
                 }
-                log::warn!("failed to find family '{}' for script {:?} and locale '{}'", script_family, script, self.locale);
+                log::warn!(
+                    "failed to find family '{}' for script {:?} and locale '{}'",
+                    script_family,
+                    script,
+                    self.locale
+                );
             }
 
             self.script_i.0 += 1;
@@ -142,7 +143,7 @@ impl<'a> Iterator for FontFallbackIter<'a> {
         while self.other_i < self.fonts.len() {
             let font = &self.fonts[self.other_i];
             self.other_i += 1;
-            if ! forbidden_families.contains(&font.info.family.as_str()) {
+            if !forbidden_families.contains(&font.info.family.as_str()) {
                 return Some(font);
             }
         }

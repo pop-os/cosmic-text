@@ -1,11 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use cosmic_text::{Attrs, Color, FontSystem, SwashCache, Buffer, Metrics};
+use cosmic_text::{Attrs, Buffer, Color, FontSystem, Metrics, SwashCache};
 use std::cmp;
-use termion::{
-    color,
-    cursor,
-};
+use termion::{color, cursor};
 
 fn main() {
     // A FontSystem provides access to detected system fonts, create one per application
@@ -66,11 +63,7 @@ fn main() {
         }
 
         // Scale by alpha (mimics blending with black)
-        let scale = |c: u8| {
-            cmp::max(0, cmp::min(255,
-                ((c as i32) * (a as i32)) / 255
-            )) as u8
-        };
+        let scale = |c: u8| cmp::max(0, cmp::min(255, ((c as i32) * (a as i32)) / 255)) as u8;
 
         // Navigate to x coordinate
         if x > last_x {

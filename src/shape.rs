@@ -2,14 +2,14 @@
 
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
-use core::cmp::{min, max};
+use core::cmp::{max, min};
 use core::mem;
 use core::ops::Range;
 use unicode_script::{Script, UnicodeScript};
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::{AttrsList, CacheKey, Color, Font, FontSystem, LayoutGlyph, LayoutLine, Wrap};
 use crate::fallback::FontFallbackIter;
+use crate::{AttrsList, CacheKey, Color, Font, FontSystem, LayoutGlyph, LayoutLine, Wrap};
 
 fn shape_fallback(
     font: &Font,
@@ -110,21 +110,16 @@ fn shape_run<'a>(
     let mut scripts = Vec::new();
     for c in line[start_run..end_run].chars() {
         match c.script() {
-            Script::Common |
-            Script::Inherited |
-            Script::Latin |
-            Script::Unknown => (),
-            script => if ! scripts.contains(&script) {
-                scripts.push(script);
-            },
+            Script::Common | Script::Inherited | Script::Latin | Script::Unknown => (),
+            script => {
+                if !scripts.contains(&script) {
+                    scripts.push(script);
+                }
+            }
         }
     }
 
-    log::trace!(
-        "      Run {:?}: '{}'",
-        scripts,
-        &line[start_run..end_run],
-    );
+    log::trace!("      Run {:?}: '{}'", scripts, &line[start_run..end_run],);
 
     let attrs = attrs_list.get_span(start_run);
 
@@ -135,7 +130,7 @@ fn shape_run<'a>(
         &font_matches.fonts,
         &default_families,
         scripts,
-        font_matches.locale
+        font_matches.locale,
     );
 
     let (mut glyphs, mut missing) = shape_fallback(
@@ -155,14 +150,8 @@ fn shape_run<'a>(
         };
 
         log::trace!("Evaluating fallback with font '{}'", font.info.family);
-        let (mut fb_glyphs, fb_missing) = shape_fallback(
-            font,
-            line,
-            attrs_list,
-            start_run,
-            end_run,
-            span_rtl,
-        );
+        let (mut fb_glyphs, fb_missing) =
+            shape_fallback(font, line, attrs_list, start_run, end_run, span_rtl);
 
         // Insert all matching glyphs
         let mut fb_i = 0;
@@ -255,7 +244,7 @@ impl ShapeGlyph {
             self.font_id,
             self.glyph_id,
             font_size,
-            (x + x_offset, y - y_offset)
+            (x + x_offset, y - y_offset),
         );
         LayoutGlyph {
             start: self.start,
@@ -307,7 +296,7 @@ impl ShapeWord {
         for (egc_i, _egc) in word.grapheme_indices(true) {
             let start_egc = word_range.start + egc_i;
             let attrs_egc = attrs_list.get_span(start_egc);
-            if ! attrs.compatible(&attrs_egc) {
+            if !attrs.compatible(&attrs_egc) {
                 //TODO: more efficient
                 glyphs.append(&mut shape_run(
                     font_system,
@@ -315,7 +304,7 @@ impl ShapeWord {
                     attrs_list,
                     start_run,
                     start_egc,
-                    span_rtl
+                    span_rtl,
                 ));
 
                 start_run = start_egc;
@@ -330,7 +319,7 @@ impl ShapeWord {
                 attrs_list,
                 start_run,
                 word_range.end,
-                span_rtl
+                span_rtl,
             ));
         }
 
@@ -341,7 +330,12 @@ impl ShapeWord {
             y_advance += glyph.y_advance;
         }
 
-        Self { blank, glyphs, x_advance, y_advance}
+        Self {
+            blank,
+            glyphs,
+            x_advance,
+            y_advance,
+        }
     }
 }
 
@@ -398,7 +392,8 @@ impl ShapeSpan {
                         font_system,
                         line,
                         attrs_list,
-                        (span_range.start + start_lb + i)..(span_range.start + start_lb + i + c.len_utf8()),
+                        (span_range.start + start_lb + i)
+                            ..(span_range.start + start_lb + i + c.len_utf8()),
                         level,
                         true,
                     ));
@@ -419,10 +414,7 @@ impl ShapeSpan {
             words.reverse();
         }
 
-        ShapeSpan {
-            level,
-            words,
-        }
+        ShapeSpan { level, words }
     }
 }
 
@@ -436,11 +428,7 @@ pub struct ShapeLine {
 type VlRange = (usize, (usize, usize), (usize, usize));
 
 impl ShapeLine {
-    pub fn new<'a>(
-        font_system: &'a FontSystem,
-        line: &str,
-        attrs_list: &AttrsList
-    ) -> Self {
+    pub fn new<'a>(font_system: &'a FontSystem, line: &str, attrs_list: &AttrsList) -> Self {
         let mut spans = Vec::new();
 
         let bidi = unicode_bidi::BidiInfo::new(line, None);
@@ -456,12 +444,17 @@ impl ShapeLine {
             let line_range = para_info.range.clone();
             let levels = Self::adjust_levels(&unicode_bidi::Paragraph::new(&bidi, para_info));
 
-            // Find consecutive level runs. We use this to create Spans. 
+            // Find consecutive level runs. We use this to create Spans.
             // Each span is a set of characters with equal levels.
             let mut start = line_range.start;
             let mut run_level = levels[start];
 
-            for (i, &new_level) in levels.iter().enumerate().take(line_range.end).skip(start + 1) {
+            for (i, &new_level) in levels
+                .iter()
+                .enumerate()
+                .take(line_range.end)
+                .skip(start + 1)
+            {
                 if new_level != run_level {
                     // End of the previous run, start of a new one.
                     spans.push(ShapeSpan::new(
@@ -487,13 +480,11 @@ impl ShapeLine {
             line_rtl
         };
 
-        Self { rtl, spans}
+        Self { rtl, spans }
     }
 
     // A modified version of first part of unicode_bidi::bidi_info::visual_run
-    fn adjust_levels(
-        para: &unicode_bidi::Paragraph,
-    ) -> Vec<unicode_bidi::Level> {
+    fn adjust_levels(para: &unicode_bidi::Paragraph) -> Vec<unicode_bidi::Level> {
         use unicode_bidi::BidiClass::*;
         let text = para.info.text;
         let levels = &para.info.levels;
@@ -547,7 +538,10 @@ impl ShapeLine {
 
     // A modified version of second part of unicode_bidi::bidi_info::visual run
     fn reorder(&self, line_range: &[VlRange]) -> Vec<Range<usize>> {
-        let line : Vec<unicode_bidi::Level> = line_range.iter().map(|(span_index, _, _)| self.spans[*span_index].level).collect();
+        let line: Vec<unicode_bidi::Level> = line_range
+            .iter()
+            .map(|(span_index, _, _)| self.spans[*span_index].level)
+            .collect();
         // Find consecutive level runs.
         let mut runs = Vec::new();
         let mut start = 0;
@@ -605,14 +599,8 @@ impl ShapeLine {
 
         runs
     }
-    
 
-    pub fn layout(
-        &self,
-        font_size: i32,
-        line_width: i32,
-        wrap: Wrap,
-    ) -> Vec<LayoutLine> {
+    pub fn layout(&self, font_size: i32, line_width: i32, wrap: Wrap) -> Vec<LayoutLine> {
         let mut layout_lines = Vec::with_capacity(1);
 
         // This is used to create a visual line for empty lines (e.g. lines with only a <CR>)
@@ -627,8 +615,6 @@ impl ShapeLine {
         let mut x = start_x;
         let mut y;
 
-
-
         // This would keep the maximum number of spans that would fit on a visual line
         // If one span is too large, this variable will hold the range of words inside that span
         // that fits on a line.
@@ -636,22 +622,22 @@ impl ShapeLine {
 
         if wrap == Wrap::None {
             for (span_index, span) in self.spans.iter().enumerate() {
-                current_visual_line.push((span_index, (0,0), (span.words.len(), 0)));
+                current_visual_line.push((span_index, (0, 0), (span.words.len(), 0)));
             }
-        }
-        else {
+        } else {
             let mut fit_x = line_width as f32;
             for (span_index, span) in self.spans.iter().enumerate() {
-
                 let mut word_ranges = Vec::new();
                 let mut word_range_width = 0.;
 
                 // Create the word ranges that fits in a visual line
-                if self.rtl != span.level.is_rtl() { // incongruent directions
+                if self.rtl != span.level.is_rtl() {
+                    // incongruent directions
                     let mut fitting_start = (span.words.len(), 0);
                     for (i, word) in span.words.iter().enumerate().rev() {
                         let word_size = font_size as f32 * word.x_advance;
-                        if fit_x - word_size >= 0.  { // fits
+                        if fit_x - word_size >= 0. {
+                            // fits
                             fit_x -= word_size;
                             word_range_width += word_size;
                             continue;
@@ -663,33 +649,39 @@ impl ShapeLine {
                                     word_range_width += glyph_size;
                                     continue;
                                 } else {
-                                    word_ranges.push(((i, glyph_i+1), fitting_start, word_range_width));
+                                    word_ranges.push((
+                                        (i, glyph_i + 1),
+                                        fitting_start,
+                                        word_range_width,
+                                    ));
                                     fit_x = line_width as f32 - glyph_size;
                                     word_range_width = glyph_size;
-                                    fitting_start = (i, glyph_i+1);
+                                    fitting_start = (i, glyph_i + 1);
                                 }
                             }
-                        } else { // Wrap::Word
-                            word_ranges.push(((i+1, 0), fitting_start, word_range_width));
+                        } else {
+                            // Wrap::Word
+                            word_ranges.push(((i + 1, 0), fitting_start, word_range_width));
 
                             if word.blank {
                                 fit_x = line_width as f32;
                                 word_range_width = 0.;
-                                fitting_start = (i+1, 0); 
+                                fitting_start = (i + 1, 0);
                             } else {
                                 fit_x = line_width as f32 - word_size;
                                 word_range_width = word_size;
-                                fitting_start = (i+1, 0);
+                                fitting_start = (i + 1, 0);
                             }
                         }
                     }
-                    word_ranges.push(((0,0),fitting_start, word_range_width));
-
-                } else { // congruent direction
-                    let mut fitting_start = (0,0);
+                    word_ranges.push(((0, 0), fitting_start, word_range_width));
+                } else {
+                    // congruent direction
+                    let mut fitting_start = (0, 0);
                     for (i, word) in span.words.iter().enumerate() {
                         let word_size = font_size as f32 * word.x_advance;
-                        if fit_x - word_size >= 0.  { // fits
+                        if fit_x - word_size >= 0. {
+                            // fits
                             fit_x -= word_size;
                             word_range_width += word_size;
                             continue;
@@ -701,19 +693,24 @@ impl ShapeLine {
                                     word_range_width += glyph_size;
                                     continue;
                                 } else {
-                                    word_ranges.push((fitting_start, (i, glyph_i),  word_range_width));
+                                    word_ranges.push((
+                                        fitting_start,
+                                        (i, glyph_i),
+                                        word_range_width,
+                                    ));
                                     fit_x = line_width as f32 - glyph_size;
                                     word_range_width = glyph_size;
                                     fitting_start = (i, glyph_i);
                                 }
                             }
-                        } else { // Wrap::Word
-                            word_ranges.push((fitting_start,(i,0), word_range_width));
+                        } else {
+                            // Wrap::Word
+                            word_ranges.push((fitting_start, (i, 0), word_range_width));
 
                             if word.blank {
                                 fit_x = line_width as f32;
                                 word_range_width = 0.;
-                                fitting_start = (i+1, 0);
+                                fitting_start = (i + 1, 0);
                             } else {
                                 fit_x = line_width as f32 - word_size;
                                 word_range_width = word_size;
@@ -725,12 +722,16 @@ impl ShapeLine {
                 }
 
                 // Create a visual line
-                for ((starting_word, starting_glyph), (ending_word, ending_glyph), word_range_width) in word_ranges {
+                for (
+                    (starting_word, starting_glyph),
+                    (ending_word, ending_glyph),
+                    word_range_width,
+                ) in word_ranges
+                {
                     // To simplify the algorithm above, we might push empty ranges but we ignore them here
-                    if ending_word == starting_word && starting_glyph == ending_glyph { 
+                    if ending_word == starting_word && starting_glyph == ending_glyph {
                         continue;
                     }
-                    
 
                     let fits = !if self.rtl {
                         x - word_range_width < end_x
@@ -738,27 +739,35 @@ impl ShapeLine {
                         x + word_range_width > end_x
                     };
 
-
                     if fits {
-                        current_visual_line.push((span_index, (starting_word, starting_glyph), (ending_word, ending_glyph)));
+                        current_visual_line.push((
+                            span_index,
+                            (starting_word, starting_glyph),
+                            (ending_word, ending_glyph),
+                        ));
                         if self.rtl {
                             x -= word_range_width;
                         } else {
                             x += word_range_width;
                         }
                     } else {
-                        if !current_visual_line.is_empty(){
+                        if !current_visual_line.is_empty() {
                             vl_range_of_spans.push(current_visual_line);
                             current_visual_line = Vec::with_capacity(1);
                             x = start_x;
                         }
-                        current_visual_line.push((span_index, (starting_word, starting_glyph), (ending_word, ending_glyph)));
+                        current_visual_line.push((
+                            span_index,
+                            (starting_word, starting_glyph),
+                            (ending_word, ending_glyph),
+                        ));
                         if self.rtl {
                             x -= word_range_width;
                         } else {
                             x += word_range_width;
                         }
-                        if word_range_width > line_width as f32 { // single word is bigger than line_width
+                        if word_range_width > line_width as f32 {
+                            // single word is bigger than line_width
                             vl_range_of_spans.push(current_visual_line);
                             current_visual_line = Vec::with_capacity(1);
                             x = start_x;
@@ -780,10 +789,18 @@ impl ShapeLine {
             y = 0.;
             if self.rtl {
                 for range in new_order.iter().rev() {
-                    for (span_index, (starting_word, starting_glyph), (ending_word, ending_glyph))  in visual_line[range.clone()].iter() {
+                    for (
+                        span_index,
+                        (starting_word, starting_glyph),
+                        (ending_word, ending_glyph),
+                    ) in visual_line[range.clone()].iter()
+                    {
                         let span = &self.spans[*span_index];
                         if starting_word == ending_word {
-                            for glyph in span.words[*starting_word].glyphs[*starting_glyph..*ending_glyph].iter() {
+                            for glyph in span.words[*starting_word].glyphs
+                                [*starting_glyph..*ending_glyph]
+                                .iter()
+                            {
                                 let x_advance = font_size as f32 * glyph.x_advance;
                                 let y_advance = font_size as f32 * glyph.y_advance;
                                 if self.rtl {
@@ -796,7 +813,7 @@ impl ShapeLine {
                                 y += y_advance;
                             }
                         } else {
-                            for i in *starting_word..*ending_word+1 {
+                            for i in *starting_word..*ending_word + 1 {
                                 if let Some(word) = span.words.get(i) {
                                     let (g1, g2) = if i == *starting_word {
                                         (*starting_glyph, word.glyphs.len())
@@ -825,10 +842,18 @@ impl ShapeLine {
                 }
             } else {
                 for range in new_order {
-                    for (span_index, (starting_word, starting_glyph), (ending_word, ending_glyph))  in visual_line[range.clone()].iter() {
+                    for (
+                        span_index,
+                        (starting_word, starting_glyph),
+                        (ending_word, ending_glyph),
+                    ) in visual_line[range.clone()].iter()
+                    {
                         let span = &self.spans[*span_index];
                         if starting_word == ending_word {
-                            for glyph in span.words[*starting_word].glyphs[*starting_glyph..*ending_glyph].iter() {
+                            for glyph in span.words[*starting_word].glyphs
+                                [*starting_glyph..*ending_glyph]
+                                .iter()
+                            {
                                 let x_advance = font_size as f32 * glyph.x_advance;
                                 let y_advance = font_size as f32 * glyph.y_advance;
                                 if self.rtl {
@@ -841,7 +866,7 @@ impl ShapeLine {
                                 y += y_advance;
                             }
                         } else {
-                            for i in *starting_word..*ending_word+1 {
+                            for i in *starting_word..*ending_word + 1 {
                                 if let Some(word) = span.words.get(i) {
                                     let (g1, g2) = if i == *starting_word {
                                         (*starting_glyph, word.glyphs.len())
@@ -871,17 +896,18 @@ impl ShapeLine {
             }
             let mut glyphs_swap = Vec::new();
             mem::swap(&mut glyphs, &mut glyphs_swap);
-            layout_lines.push(
-                LayoutLine {
-                    w: if self.rtl { start_x - x } else { x },
-                   glyphs: glyphs_swap,
-                },
-            );
+            layout_lines.push(LayoutLine {
+                w: if self.rtl { start_x - x } else { x },
+                glyphs: glyphs_swap,
+            });
             push_line = false;
         }
 
         if push_line {
-            layout_lines.push(LayoutLine { w: 0.0 , glyphs: Default::default() });
+            layout_lines.push(LayoutLine {
+                w: 0.0,
+                glyphs: Default::default(),
+            });
         }
 
         layout_lines

@@ -1,41 +1,13 @@
 #[cfg(not(feature = "std"))]
-use alloc::{
-    string::String,
-    vec::Vec,
-};
+use alloc::{string::String, vec::Vec};
 #[cfg(feature = "std")]
-use std::{
-    fs,
-    io,
-    path::Path,
-};
+use std::{fs, io, path::Path};
 use syntect::highlighting::{
-    FontStyle,
-    Highlighter,
-    HighlightState,
-    RangedHighlightIterator,
-    Theme,
-    ThemeSet,
+    FontStyle, HighlightState, Highlighter, RangedHighlightIterator, Theme, ThemeSet,
 };
-use syntect::parsing::{
-    ParseState,
-    ScopeStack,
-    SyntaxReference,
-    SyntaxSet,
-};
+use syntect::parsing::{ParseState, ScopeStack, SyntaxReference, SyntaxSet};
 
-use crate::{
-    Action,
-    AttrsList,
-    Buffer,
-    Color,
-    Cursor,
-    Edit,
-    Editor,
-    Style,
-    Weight,
-    Wrap,
-};
+use crate::{Action, AttrsList, Buffer, Color, Cursor, Edit, Editor, Style, Weight, Wrap};
 
 pub struct SyntaxSystem {
     pub syntax_set: SyntaxSet,
@@ -69,7 +41,11 @@ impl<'a> SyntaxEditor<'a> {
     /// A good default theme name is "base16-eighties.dark".
     ///
     /// Returns None if theme not found
-    pub fn new(buffer: Buffer<'a>, syntax_system: &'a SyntaxSystem, theme_name: &str) -> Option<Self> {
+    pub fn new(
+        buffer: Buffer<'a>,
+        syntax_system: &'a SyntaxSystem,
+        theme_name: &str,
+    ) -> Option<Self> {
         let editor = Editor::new(buffer);
         let syntax = syntax_system.syntax_set.find_syntax_plain_text();
         let theme = syntax_system.theme_set.themes.get(theme_name)?;
@@ -91,7 +67,11 @@ impl<'a> SyntaxEditor<'a> {
     ///
     /// Returns an [`io::Error`] if reading the file fails
     #[cfg(feature = "std")]
-    pub fn load_text<P: AsRef<Path>>(&mut self, path: P, attrs: crate::Attrs<'a>) -> io::Result<()> {
+    pub fn load_text<P: AsRef<Path>>(
+        &mut self,
+        path: P,
+        attrs: crate::Attrs<'a>,
+    ) -> io::Result<()> {
         let path = path.as_ref();
 
         let text = fs::read_to_string(path)?;
@@ -119,12 +99,7 @@ impl<'a> SyntaxEditor<'a> {
     /// Get the default background color
     pub fn background_color(&self) -> Color {
         if let Some(background) = self.theme.settings.background {
-            Color::rgba(
-                background.r,
-                background.g,
-                background.b,
-                background.a,
-            )
+            Color::rgba(background.r, background.g, background.b, background.a)
         } else {
             Color::rgb(0, 0, 0)
         }
@@ -133,12 +108,7 @@ impl<'a> SyntaxEditor<'a> {
     /// Get the default foreground (text) color
     pub fn foreground_color(&self) -> Color {
         if let Some(foreground) = self.theme.settings.foreground {
-            Color::rgba(
-                foreground.r,
-                foreground.g,
-                foreground.b,
-                foreground.a,
-            )
+            Color::rgba(foreground.r, foreground.g, foreground.b, foreground.a)
         } else {
             Color::rgb(0xFF, 0xFF, 0xFF)
         }
@@ -175,21 +145,24 @@ impl<'a> Edit<'a> for SyntaxEditor<'a> {
         let mut highlighted = 0;
         for line_i in 0..buffer.lines.len() {
             let line = &mut buffer.lines[line_i];
-            if ! line.is_reset() && line_i < self.syntax_cache.len() {
+            if !line.is_reset() && line_i < self.syntax_cache.len() {
                 continue;
             }
             highlighted += 1;
 
-            let (mut parse_state, mut highlight_state) = if line_i > 0 && line_i <= self.syntax_cache.len() {
-                self.syntax_cache[line_i - 1].clone()
-            } else {
-                (
-                    ParseState::new(self.syntax),
-                    HighlightState::new(&self.highlighter, ScopeStack::new())
-                )
-            };
+            let (mut parse_state, mut highlight_state) =
+                if line_i > 0 && line_i <= self.syntax_cache.len() {
+                    self.syntax_cache[line_i - 1].clone()
+                } else {
+                    (
+                        ParseState::new(self.syntax),
+                        HighlightState::new(&self.highlighter, ScopeStack::new()),
+                    )
+                };
 
-            let ops = parse_state.parse_line(line.text(), &self.syntax_system.syntax_set).expect("failed to parse syntax");
+            let ops = parse_state
+                .parse_line(line.text(), &self.syntax_system.syntax_set)
+                .expect("failed to parse syntax");
             let ranges = RangedHighlightIterator::new(
                 &mut highlight_state,
                 &ops,
@@ -219,8 +192,7 @@ impl<'a> Edit<'a> for SyntaxEditor<'a> {
                             Weight::BOLD
                         } else {
                             Weight::NORMAL
-                        })
-                        //TODO: underline
+                        }), //TODO: underline
                 );
             }
 
@@ -247,7 +219,11 @@ impl<'a> Edit<'a> for SyntaxEditor<'a> {
         if highlighted > 0 {
             buffer.set_redraw(true);
             #[cfg(feature = "std")]
-            log::debug!("Syntax highlighted {} lines in {:?}", highlighted, now.elapsed());
+            log::debug!(
+                "Syntax highlighted {} lines in {:?}",
+                highlighted,
+                now.elapsed()
+            );
         }
 
         self.editor.shape_as_needed();
@@ -272,7 +248,8 @@ impl<'a> Edit<'a> for SyntaxEditor<'a> {
     /// Draw the editor
     #[cfg(feature = "swash")]
     fn draw<F>(&self, cache: &mut crate::SwashCache, _color: Color, mut f: F)
-        where F: FnMut(i32, i32, u32, u32, Color)
+    where
+        F: FnMut(i32, i32, u32, u32, Color),
     {
         let size = self.buffer().size();
         f(0, 0, size.0 as u32, size.1 as u32, self.background_color());

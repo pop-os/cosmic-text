@@ -1,45 +1,20 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic::{
-    Element,
     iced::{
         self,
-        Color,
-        Alignment,
-        Application,
-        Command,
-        Length,
-        widget::{
-            column,
-            horizontal_space,
-            pick_list,
-            row,
-        },
+        widget::{column, horizontal_space, pick_list, row},
+        Alignment, Application, Color, Command, Length,
     },
     settings,
     theme::{self, Theme},
-    widget::{
-        button,
-        toggler,
-    },
+    widget::{button, toggler},
+    Element,
 };
 use cosmic_text::{
-    Attrs,
-    AttrsList,
-    Buffer,
-    Edit,
-    FontSystem,
-    Metrics,
-    SyntaxEditor,
-    SyntaxSystem,
-    Wrap,
+    Attrs, AttrsList, Buffer, Edit, FontSystem, Metrics, SyntaxEditor, SyntaxSystem, Wrap,
 };
-use std::{
-    env,
-    fs,
-    path::PathBuf,
-    sync::Mutex,
-};
+use std::{env, fs, path::PathBuf, sync::Mutex};
 
 use self::text::text;
 mod text;
@@ -61,11 +36,7 @@ static FONT_SIZES: &'static [Metrics] = &[
     Metrics::new(32, 44), // Title 1
 ];
 
-static WRAP_MODE: &'static [Wrap] = & [
-    Wrap::None, 
-    Wrap::Glyph,
-    Wrap::Word,
-];
+static WRAP_MODE: &'static [Wrap] = &[Wrap::None, Wrap::Glyph, Wrap::Word];
 
 fn main() -> cosmic::iced::Result {
     env_logger::init();
@@ -105,7 +76,7 @@ impl Window {
             Ok(()) => {
                 log::info!("opened '{}'", path.display());
                 self.path_opt = Some(path);
-            },
+            }
             Err(err) => {
                 log::error!("failed to open '{}': {}", path.display(), err);
                 self.path_opt = None;
@@ -128,8 +99,9 @@ impl Application for Window {
         let mut editor = SyntaxEditor::new(
             Buffer::new(&FONT_SYSTEM, FONT_SIZES[1 /* Body */]),
             &SYNTAX_SYSTEM,
-            "base16-eighties.dark"
-        ).unwrap();
+            "base16-eighties.dark",
+        )
+        .unwrap();
 
         #[cfg(feature = "vi")]
         let mut editor = cosmic_text::ViEditor::new(editor);
@@ -154,7 +126,11 @@ impl Application for Window {
 
     fn title(&self) -> String {
         if let Some(path) = &self.path_opt {
-            format!("COSMIC Text - {} - {}", FONT_SYSTEM.locale(), path.display())
+            format!(
+                "COSMIC Text - {} - {}",
+                FONT_SYSTEM.locale(),
+                path.display()
+            )
         } else {
             format!("COSMIC Text - {}", FONT_SYSTEM.locale())
         }
@@ -166,7 +142,7 @@ impl Application for Window {
                 if let Some(path) = rfd::FileDialog::new().pick_file() {
                     self.open(path);
                 }
-            },
+            }
             Message::Save => {
                 if let Some(path) = &self.path_opt {
                     let editor = self.editor.lock().unwrap();
@@ -178,13 +154,13 @@ impl Application for Window {
                     match fs::write(path, text) {
                         Ok(()) => {
                             log::info!("saved '{}'", path.display());
-                        },
+                        }
                         Err(err) => {
                             log::error!("failed to save '{}': {}", path.display(), err);
                         }
                     }
                 }
-            },
+            }
             Message::Bold(bold) => {
                 self.attrs = self.attrs.weight(if bold {
                     cosmic_text::Weight::BOLD
@@ -194,7 +170,7 @@ impl Application for Window {
 
                 let mut editor = self.editor.lock().unwrap();
                 update_attrs(&mut *editor, self.attrs);
-            },
+            }
             Message::Italic(italic) => {
                 self.attrs = self.attrs.style(if italic {
                     cosmic_text::Style::Italic
@@ -204,9 +180,10 @@ impl Application for Window {
 
                 let mut editor = self.editor.lock().unwrap();
                 update_attrs(&mut *editor, self.attrs);
-            },
+            }
             Message::Monospaced(monospaced) => {
-                self.attrs = self.attrs
+                self.attrs = self
+                    .attrs
                     .family(if monospaced {
                         cosmic_text::Family::Monospace
                     } else {
@@ -216,15 +193,15 @@ impl Application for Window {
 
                 let mut editor = self.editor.lock().unwrap();
                 update_attrs(&mut *editor, self.attrs);
-            },
+            }
             Message::MetricsChanged(metrics) => {
                 let mut editor = self.editor.lock().unwrap();
                 editor.buffer_mut().set_metrics(metrics);
-            },
+            }
             Message::WrapChanged(wrap) => {
                 let mut editor = self.editor.lock().unwrap();
                 editor.buffer_mut().set_wrap(wrap);
-            },
+            }
             Message::ThemeChanged(theme) => {
                 self.theme = match theme {
                     "Dark" => Theme::Dark,
@@ -234,11 +211,16 @@ impl Application for Window {
 
                 let Color { r, g, b, a } = self.theme.palette().text;
                 let as_u8 = |component: f32| (component * 255.0) as u8;
-                self.attrs = self.attrs.color(cosmic_text::Color::rgba(as_u8(r), as_u8(g), as_u8(b), as_u8(a)));
+                self.attrs = self.attrs.color(cosmic_text::Color::rgba(
+                    as_u8(r),
+                    as_u8(g),
+                    as_u8(b),
+                    as_u8(a),
+                ));
 
                 let mut editor = self.editor.lock().unwrap();
                 update_attrs(&mut *editor, self.attrs);
-            },
+            }
         }
 
         Command::none()
@@ -252,7 +234,7 @@ impl Application for Window {
                 Theme::Dark => THEMES[0],
                 Theme::Light => THEMES[1],
             }),
-            Message::ThemeChanged
+            Message::ThemeChanged,
         );
 
         let font_size_picker = {
@@ -260,7 +242,7 @@ impl Application for Window {
             pick_list(
                 FONT_SIZES,
                 Some(editor.buffer().metrics()),
-                Message::MetricsChanged
+                Message::MetricsChanged,
             )
         };
 
@@ -283,9 +265,17 @@ impl Application for Window {
                     .on_press(Message::Save),
                 horizontal_space(Length::Fill),
                 text("Bold:"),
-                toggler(None, self.attrs.weight == cosmic_text::Weight::BOLD, Message::Bold),
+                toggler(
+                    None,
+                    self.attrs.weight == cosmic_text::Weight::BOLD,
+                    Message::Bold
+                ),
                 text("Italic:"),
-                toggler(None, self.attrs.style == cosmic_text::Style::Italic, Message::Italic),
+                toggler(
+                    None,
+                    self.attrs.style == cosmic_text::Style::Italic,
+                    Message::Italic
+                ),
                 text("Monospaced:"),
                 toggler(None, self.attrs.monospaced, Message::Monospaced),
                 text("Theme:"),
@@ -296,8 +286,7 @@ impl Application for Window {
                 wrap_picker,
             ]
             .align_items(Alignment::Center)
-            .spacing(8)
-            ,
+            .spacing(8),
             text_box(&self.editor)
         ]
         .spacing(8)

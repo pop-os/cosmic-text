@@ -54,14 +54,8 @@ fn main() {
     ];
     let font_size_default = 1; // Body
 
-    let mut buffer = Buffer::new(
-        &font_system,
-        font_sizes[font_size_default]
-    );
-    buffer.set_size(
-        window.width() as i32,
-        window.height() as i32
-    );
+    let mut buffer = Buffer::new(&font_system, font_sizes[font_size_default]);
+    buffer.set_size(window.width() as i32, window.height() as i32);
 
     let mut editor = Editor::new(buffer);
 
