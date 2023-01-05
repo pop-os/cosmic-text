@@ -33,7 +33,7 @@ use crate::{
     Edit,
     Editor,
     Style,
-    Weight, 
+    Weight,
     Wrap,
 };
 
@@ -161,7 +161,7 @@ impl<'a> Edit<'a> for SyntaxEditor<'a> {
     fn select_opt(&self) -> Option<Cursor> {
         self.editor.select_opt()
     }
-    
+
     fn set_select_opt(&mut self, select_opt: Option<Cursor>) {
         self.editor.set_select_opt(select_opt);
     }
@@ -247,7 +247,7 @@ impl<'a> Edit<'a> for SyntaxEditor<'a> {
         if highlighted > 0 {
             buffer.set_redraw(true);
             #[cfg(feature = "std")]
-            log::debug!("Syntax highlighted {} lines in {:?}", highlighted, now.elapsed()); 
+            log::debug!("Syntax highlighted {} lines in {:?}", highlighted, now.elapsed());
         }
 
         self.editor.shape_as_needed();
@@ -259,6 +259,10 @@ impl<'a> Edit<'a> for SyntaxEditor<'a> {
 
     fn delete_selection(&mut self) -> bool {
         self.editor.delete_selection()
+    }
+
+    fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>) {
+        self.editor.insert_string(data, attrs_list);
     }
 
     fn action(&mut self, action: Action) {

@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 #[cfg(not(feature = "std"))]
-use alloc::string::{String, ToString};
-use core::cmp;
-use std::iter::once;
+use alloc::string::String;
+use core::{cmp, iter::once};
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{Action, AttrsList, Buffer, BufferLine, Cursor, Edit, LayoutCursor};
@@ -227,7 +226,7 @@ impl<'a> Edit<'a> for Editor<'a> {
         if let Some(data_line) = lines_iter.next() {
             let mut these_attrs = final_attrs.split_off(data_line.len());
             remaining_split_len -= data_line.len();
-            std::mem::swap(&mut these_attrs, &mut final_attrs);
+            core::mem::swap(&mut these_attrs, &mut final_attrs);
             line.append(BufferLine::new(data_line.strip_suffix(char::is_control).unwrap_or(data_line), these_attrs));
         } else {
             panic!("str::lines() did not yield any elements");

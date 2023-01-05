@@ -86,7 +86,7 @@ impl<'a> LayoutRun<'a> {
             x_end = Some(self.glyphs.last().map_or(0., |glyph| glyph.x + glyph.w * ltr_factor));
         }
         if let Some(x_start) = x_start {
-            let x_end = x_end.unwrap();
+            let x_end = x_end.expect("end of cursor not found");
             let (x_start, x_end) = if x_start < x_end { (x_start, x_end) } else { (x_end, x_start) };
             Some((x_start, x_end - x_start))
         } else {

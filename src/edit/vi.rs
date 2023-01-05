@@ -4,6 +4,7 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
     Action,
+    AttrsList,
     Buffer,
     Color,
     Cursor,
@@ -81,6 +82,10 @@ impl<'a> Edit<'a> for ViEditor<'a> {
 
     fn delete_selection(&mut self) -> bool {
         self.editor.delete_selection()
+    }
+
+    fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>) {
+        self.editor.insert_string(data, attrs_list);
     }
 
     fn action(&mut self, action: Action) {
