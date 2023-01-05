@@ -7,6 +7,9 @@ function build {
 
 set -ex
 
+echo Check formatting
+cargo fmt --check
+
 echo Build with default features
 build
 
