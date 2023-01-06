@@ -59,7 +59,7 @@ impl<'a> FontFallbackIter<'a> {
 
     pub fn check_missing(&self, word: &str) {
         if self.end {
-            log::warn!(
+            log::debug!(
                 "Failed to find any fallback for {:?} locale '{}': '{}'",
                 self.scripts,
                 self.locale,
@@ -67,7 +67,7 @@ impl<'a> FontFallbackIter<'a> {
             );
         } else if self.other_i > 0 {
             let font = &self.fonts[self.other_i - 1];
-            log::warn!(
+            log::debug!(
                 "Failed to find preset fallback for {:?} locale '{}', used '{}': '{}'",
                 self.scripts,
                 self.locale,
@@ -113,7 +113,7 @@ impl<'a> Iterator for FontFallbackIter<'a> {
                         return Some(font);
                     }
                 }
-                log::warn!(
+                log::debug!(
                     "failed to find family '{}' for script {:?} and locale '{}'",
                     script_family,
                     script,
@@ -134,7 +134,7 @@ impl<'a> Iterator for FontFallbackIter<'a> {
                     return Some(font);
                 }
             }
-            log::warn!("failed to find family '{}'", common_family);
+            log::debug!("failed to find family '{}'", common_family);
         }
 
         //TODO: do we need to do this?
