@@ -29,7 +29,7 @@ impl FontSystem {
             log::warn!("failed to get system locale, falling back to en-US");
             String::from("en-US")
         });
-        log::info!("Locale: {}", locale);
+        log::debug!("Locale: {}", locale);
 
         let mut db = fontdb::Database::new();
         {
