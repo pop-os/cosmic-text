@@ -19,12 +19,24 @@ pub struct Cursor {
     pub line: usize,
     /// First-byte-index of glyph at cursor (will insert behind this glyph)
     pub index: usize,
+    /// Whether to associate the cursor with the run before it (false) or the run after it (true)
+    /// if placed at the boundary between two runs
+    pub affinity: bool,
 }
 
 impl Cursor {
     /// Create a new cursor
     pub const fn new(line: usize, index: usize) -> Self {
-        Self { line, index }
+        Self::new_affinity(line, index, false)
+    }
+
+    /// Create a new cursor, specifying the affinity
+    pub const fn new_affinity(line: usize, index: usize, affinity: bool) -> Self {
+        Self {
+            line,
+            index,
+            affinity,
+        }
     }
 }
 
@@ -61,7 +73,7 @@ pub struct LayoutRun<'a> {
 }
 
 impl<'a> LayoutRun<'a> {
-    /// Return the pixel span Some((x_start, x_width)) of the highlighted area between cursor_start
+    /// Return the pixel span Some((x_left, x_width)) of the highlighted area between cursor_start
     /// and cursor_end within this run, or None if the cursor range does not intersect this run.
     /// This may return widths of zero if cursor_start == cursor_end, if the run is empty, or if the
     /// region's left start boundary is the same as the cursor's end boundary or vice versa.
@@ -71,28 +83,20 @@ impl<'a> LayoutRun<'a> {
         let rtl_factor = if self.rtl { 1. } else { 0. };
         let ltr_factor = 1. - rtl_factor;
         for glyph in self.glyphs.iter() {
-            let cursor = Cursor::new(self.line_i, glyph.start);
+            let cursor = self.cursor_from_glyph_left(glyph);
             if cursor >= cursor_start && cursor <= cursor_end {
                 if x_start.is_none() {
                     x_start = Some(glyph.x + glyph.w * rtl_factor);
                 }
                 x_end = Some(glyph.x + glyph.w * rtl_factor);
             }
-        }
-        let cursor = Cursor::new(self.line_i, self.glyphs.last().map_or(0, |glyph| glyph.end));
-        if cursor >= cursor_start && cursor <= cursor_end {
-            if x_start.is_none() {
-                x_start = Some(
-                    self.glyphs
-                        .last()
-                        .map_or(0., |glyph| glyph.x + glyph.w * ltr_factor),
-                );
+            let cursor = self.cursor_from_glyph_right(glyph);
+            if cursor >= cursor_start && cursor <= cursor_end {
+                if x_start.is_none() {
+                    x_start = Some(glyph.x + glyph.w * ltr_factor);
+                }
+                x_end = Some(glyph.x + glyph.w * ltr_factor);
             }
-            x_end = Some(
-                self.glyphs
-                    .last()
-                    .map_or(0., |glyph| glyph.x + glyph.w * ltr_factor),
-            );
         }
         if let Some(x_start) = x_start {
             let x_end = x_end.expect("end of cursor not found");
@@ -104,6 +108,22 @@ impl<'a> LayoutRun<'a> {
             Some((x_start, x_end - x_start))
         } else {
             None
+        }
+    }
+
+    fn cursor_from_glyph_left(&self, glyph: &LayoutGlyph) -> Cursor {
+        if self.rtl {
+            Cursor::new_affinity(self.line_i, glyph.end, false)
+        } else {
+            Cursor::new_affinity(self.line_i, glyph.start, true)
+        }
+    }
+
+    fn cursor_from_glyph_right(&self, glyph: &LayoutGlyph) -> Cursor {
+        if self.rtl {
+            Cursor::new_affinity(self.line_i, glyph.start, true)
+        } else {
+            Cursor::new_affinity(self.line_i, glyph.end, false)
         }
     }
 }
@@ -378,18 +398,18 @@ impl<'a> Buffer<'a> {
         let layout = line.layout_opt().as_ref().expect("layout not found");
         for (layout_i, layout_line) in layout.iter().enumerate() {
             for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
-                if cursor.index == glyph.start {
+                let cursor_end = Cursor::new_affinity(cursor.line, glyph.end, false);
+                let cursor_start = Cursor::new_affinity(cursor.line, glyph.start, true);
+                let (cursor_left, cursor_right) = if glyph.level.is_ltr() {
+                    (cursor_start, cursor_end)
+                } else {
+                    (cursor_end, cursor_start)
+                };
+                if *cursor == cursor_left {
                     return LayoutCursor::new(cursor.line, layout_i, glyph_i);
                 }
-            }
-            match layout_line.glyphs.last() {
-                Some(glyph) => {
-                    if cursor.index == glyph.end {
-                        return LayoutCursor::new(cursor.line, layout_i, layout_line.glyphs.len());
-                    }
-                }
-                None => {
-                    return LayoutCursor::new(cursor.line, layout_i, 0);
+                if *cursor == cursor_right {
+                    return LayoutCursor::new(cursor.line, layout_i, glyph_i + 1);
                 }
             }
         }
@@ -537,6 +557,7 @@ impl<'a> Buffer<'a> {
             } else if y >= line_y - font_size && y < line_y - font_size + line_height {
                 let mut new_cursor_glyph = run.glyphs.len();
                 let mut new_cursor_char = 0;
+                let mut new_cursor_affinity = true;
 
                 let mut first_glyph = true;
 
@@ -563,6 +584,7 @@ impl<'a> Buffer<'a> {
                                 if right_half != glyph.level.is_rtl() {
                                     // If clicking on last half of glyph, move cursor past glyph
                                     new_cursor_char += egc.len();
+                                    new_cursor_affinity = false;
                                 }
                                 break 'hit;
                             }
@@ -573,6 +595,7 @@ impl<'a> Buffer<'a> {
                         if right_half != glyph.level.is_rtl() {
                             // If clicking on last half of glyph, move cursor past glyph
                             new_cursor_char = cluster.len();
+                            new_cursor_affinity = false;
                         }
                         break 'hit;
                     }
@@ -584,11 +607,13 @@ impl<'a> Buffer<'a> {
                     Some(glyph) => {
                         // Position at glyph
                         new_cursor.index = glyph.start + new_cursor_char;
+                        new_cursor.affinity = new_cursor_affinity;
                     }
                     None => {
                         if let Some(glyph) = run.glyphs.last() {
                             // Position at end of line
                             new_cursor.index = glyph.end;
+                            new_cursor.affinity = false;
                         }
                     }
                 }
@@ -599,7 +624,7 @@ impl<'a> Buffer<'a> {
             } else if runs.peek().is_none() && y > run.line_y {
                 let mut new_cursor = Cursor::new(run.line_i, 0);
                 if let Some(glyph) = run.glyphs.last() {
-                    new_cursor.index = glyph.end;
+                    new_cursor = run.cursor_from_glyph_right(glyph);
                 }
                 new_cursor_opt = Some(new_cursor);
             }

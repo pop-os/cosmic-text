@@ -44,18 +44,22 @@ impl<'a> Editor<'a> {
             },
         };
 
-        let new_index = match layout_line.glyphs.get(cursor.glyph) {
-            Some(glyph) => glyph.start,
+        let (new_index, new_affinity) = match layout_line.glyphs.get(cursor.glyph) {
+            Some(glyph) => (glyph.start, true),
             None => match layout_line.glyphs.last() {
-                Some(glyph) => glyph.end,
+                Some(glyph) => (glyph.end, false),
                 //TODO: is this correct?
-                None => 0,
+                None => (0, true),
             },
         };
 
-        if self.cursor.line != cursor.line || self.cursor.index != new_index {
+        if self.cursor.line != cursor.line
+            || self.cursor.index != new_index
+            || self.cursor.affinity != new_affinity
+        {
             self.cursor.line = cursor.line;
             self.cursor.index = new_index;
+            self.cursor.affinity = new_affinity;
             self.buffer.set_redraw(true);
         }
     }
@@ -290,10 +294,12 @@ impl<'a> Edit<'a> for Editor<'a> {
                     }
 
                     self.cursor.index = prev_index;
+                    self.cursor.affinity = true;
                     self.buffer.set_redraw(true);
                 } else if self.cursor.line > 0 {
                     self.cursor.line -= 1;
                     self.cursor.index = self.buffer.lines[self.cursor.line].text().len();
+                    self.cursor.affinity = true;
                     self.buffer.set_redraw(true);
                 }
                 self.cursor_x_opt = None;
@@ -304,6 +310,7 @@ impl<'a> Edit<'a> for Editor<'a> {
                     for (i, c) in line.text().grapheme_indices(true) {
                         if i == self.cursor.index {
                             self.cursor.index += c.len();
+                            self.cursor.affinity = false;
                             self.buffer.set_redraw(true);
                             break;
                         }
@@ -311,6 +318,7 @@ impl<'a> Edit<'a> for Editor<'a> {
                 } else if self.cursor.line + 1 < self.buffer.lines.len() {
                     self.cursor.line += 1;
                     self.cursor.index = 0;
+                    self.cursor.affinity = false;
                     self.buffer.set_redraw(true);
                 }
                 self.cursor_x_opt = None;
