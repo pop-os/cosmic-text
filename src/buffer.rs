@@ -21,22 +21,60 @@ pub struct Cursor {
     pub index: usize,
     /// Whether to associate the cursor with the run before it (false) or the run after it (true)
     /// if placed at the boundary between two runs
-    pub affinity: bool,
+    pub affinity: Affinity,
 }
 
 impl Cursor {
     /// Create a new cursor
     pub const fn new(line: usize, index: usize) -> Self {
-        Self::new_affinity(line, index, false)
+        Self::new_with_affinity(line, index, Affinity::Before)
     }
 
     /// Create a new cursor, specifying the affinity
-    pub const fn new_affinity(line: usize, index: usize, affinity: bool) -> Self {
+    pub const fn new_with_affinity(line: usize, index: usize, affinity: Affinity) -> Self {
         Self {
             line,
             index,
             affinity,
         }
+    }
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+pub enum Affinity {
+    Before,
+    After,
+}
+
+impl Affinity {
+    pub fn before(&self) -> bool {
+        *self == Self::Before
+    }
+
+    pub fn after(&self) -> bool {
+        *self == Self::After
+    }
+
+    pub fn from_before(before: bool) -> Self {
+        if before {
+            Self::Before
+        } else {
+            Self::After
+        }
+    }
+
+    pub fn from_after(after: bool) -> Self {
+        if after {
+            Self::After
+        } else {
+            Self::Before
+        }
+    }
+}
+
+impl Default for Affinity {
+    fn default() -> Self {
+        Affinity::Before
     }
 }
 
@@ -113,17 +151,17 @@ impl<'a> LayoutRun<'a> {
 
     fn cursor_from_glyph_left(&self, glyph: &LayoutGlyph) -> Cursor {
         if self.rtl {
-            Cursor::new_affinity(self.line_i, glyph.end, false)
+            Cursor::new_with_affinity(self.line_i, glyph.end, Affinity::Before)
         } else {
-            Cursor::new_affinity(self.line_i, glyph.start, true)
+            Cursor::new_with_affinity(self.line_i, glyph.start, Affinity::After)
         }
     }
 
     fn cursor_from_glyph_right(&self, glyph: &LayoutGlyph) -> Cursor {
         if self.rtl {
-            Cursor::new_affinity(self.line_i, glyph.start, true)
+            Cursor::new_with_affinity(self.line_i, glyph.start, Affinity::After)
         } else {
-            Cursor::new_affinity(self.line_i, glyph.end, false)
+            Cursor::new_with_affinity(self.line_i, glyph.end, Affinity::Before)
         }
     }
 }
@@ -398,8 +436,10 @@ impl<'a> Buffer<'a> {
         let layout = line.layout_opt().as_ref().expect("layout not found");
         for (layout_i, layout_line) in layout.iter().enumerate() {
             for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
-                let cursor_end = Cursor::new_affinity(cursor.line, glyph.end, false);
-                let cursor_start = Cursor::new_affinity(cursor.line, glyph.start, true);
+                let cursor_end =
+                    Cursor::new_with_affinity(cursor.line, glyph.end, Affinity::Before);
+                let cursor_start =
+                    Cursor::new_with_affinity(cursor.line, glyph.start, Affinity::After);
                 let (cursor_left, cursor_right) = if glyph.level.is_ltr() {
                     (cursor_start, cursor_end)
                 } else {
@@ -557,7 +597,7 @@ impl<'a> Buffer<'a> {
             } else if y >= line_y - font_size && y < line_y - font_size + line_height {
                 let mut new_cursor_glyph = run.glyphs.len();
                 let mut new_cursor_char = 0;
-                let mut new_cursor_affinity = true;
+                let mut new_cursor_affinity = Affinity::After;
 
                 let mut first_glyph = true;
 
@@ -584,7 +624,7 @@ impl<'a> Buffer<'a> {
                                 if right_half != glyph.level.is_rtl() {
                                     // If clicking on last half of glyph, move cursor past glyph
                                     new_cursor_char += egc.len();
-                                    new_cursor_affinity = false;
+                                    new_cursor_affinity = Affinity::Before;
                                 }
                                 break 'hit;
                             }
@@ -595,7 +635,7 @@ impl<'a> Buffer<'a> {
                         if right_half != glyph.level.is_rtl() {
                             // If clicking on last half of glyph, move cursor past glyph
                             new_cursor_char = cluster.len();
-                            new_cursor_affinity = false;
+                            new_cursor_affinity = Affinity::Before;
                         }
                         break 'hit;
                     }
@@ -613,7 +653,7 @@ impl<'a> Buffer<'a> {
                         if let Some(glyph) = run.glyphs.last() {
                             // Position at end of line
                             new_cursor.index = glyph.end;
-                            new_cursor.affinity = false;
+                            new_cursor.affinity = Affinity::Before;
                         }
                     }
                 }
