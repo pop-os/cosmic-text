@@ -19,8 +19,8 @@ pub struct Cursor {
     pub line: usize,
     /// First-byte-index of glyph at cursor (will insert behind this glyph)
     pub index: usize,
-    /// Whether to associate the cursor with the run before it (false) or the run after it (true)
-    /// if placed at the boundary between two runs
+    /// Whether to associate the cursor with the run before it or the run after it if placed at the
+    /// boundary between two runs
     pub affinity: Affinity,
 }
 
