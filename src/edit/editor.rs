@@ -7,7 +7,7 @@ use unicode_segmentation::UnicodeSegmentation;
 
 #[cfg(feature = "swash")]
 use crate::Color;
-use crate::{Action, AttrsList, Buffer, BufferLine, Cursor, Edit, LayoutCursor};
+use crate::{Action, Affinity, AttrsList, Buffer, BufferLine, Cursor, Edit, LayoutCursor};
 
 /// A wrapper of [`Buffer`] for easy editing
 pub struct Editor<'a> {
@@ -45,11 +45,11 @@ impl<'a> Editor<'a> {
         };
 
         let (new_index, new_affinity) = match layout_line.glyphs.get(cursor.glyph) {
-            Some(glyph) => (glyph.start, true),
+            Some(glyph) => (glyph.start, Affinity::After),
             None => match layout_line.glyphs.last() {
-                Some(glyph) => (glyph.end, false),
+                Some(glyph) => (glyph.end, Affinity::Before),
                 //TODO: is this correct?
-                None => (0, true),
+                None => (0, Affinity::After),
             },
         };
 
@@ -294,12 +294,12 @@ impl<'a> Edit<'a> for Editor<'a> {
                     }
 
                     self.cursor.index = prev_index;
-                    self.cursor.affinity = true;
+                    self.cursor.affinity = Affinity::After;
                     self.buffer.set_redraw(true);
                 } else if self.cursor.line > 0 {
                     self.cursor.line -= 1;
                     self.cursor.index = self.buffer.lines[self.cursor.line].text().len();
-                    self.cursor.affinity = true;
+                    self.cursor.affinity = Affinity::After;
                     self.buffer.set_redraw(true);
                 }
                 self.cursor_x_opt = None;
@@ -310,7 +310,7 @@ impl<'a> Edit<'a> for Editor<'a> {
                     for (i, c) in line.text().grapheme_indices(true) {
                         if i == self.cursor.index {
                             self.cursor.index += c.len();
-                            self.cursor.affinity = false;
+                            self.cursor.affinity = Affinity::Before;
                             self.buffer.set_redraw(true);
                             break;
                         }
@@ -318,7 +318,7 @@ impl<'a> Edit<'a> for Editor<'a> {
                 } else if self.cursor.line + 1 < self.buffer.lines.len() {
                     self.cursor.line += 1;
                     self.cursor.index = 0;
-                    self.cursor.affinity = false;
+                    self.cursor.affinity = Affinity::Before;
                     self.buffer.set_redraw(true);
                 }
                 self.cursor_x_opt = None;
