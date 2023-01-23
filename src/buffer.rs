@@ -319,7 +319,7 @@ impl<'a> Buffer<'a> {
     }
 
     fn relayout(&mut self) {
-        #[cfg(feature = "std")]
+        #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
         let instant = std::time::Instant::now();
 
         for line in &mut self.lines {
@@ -336,13 +336,13 @@ impl<'a> Buffer<'a> {
 
         self.redraw = true;
 
-        #[cfg(feature = "std")]
+        #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
         log::debug!("relayout: {:?}", instant.elapsed());
     }
 
     /// Pre-shape lines in the buffer, up to `lines`, return actual number of layout lines
     pub fn shape_until(&mut self, lines: i32) -> i32 {
-        #[cfg(feature = "std")]
+        #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
         let instant = std::time::Instant::now();
 
         let mut reshaped = 0;
@@ -365,7 +365,7 @@ impl<'a> Buffer<'a> {
         }
 
         if reshaped > 0 {
-            #[cfg(feature = "std")]
+            #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
             log::debug!("shape_until {}: {:?}", reshaped, instant.elapsed());
             self.redraw = true;
         }
@@ -375,7 +375,7 @@ impl<'a> Buffer<'a> {
 
     /// Shape lines until cursor, also scrolling to include cursor in view
     pub fn shape_until_cursor(&mut self, cursor: Cursor) {
-        #[cfg(feature = "std")]
+        #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
         let instant = std::time::Instant::now();
 
         let mut reshaped = 0;
@@ -404,7 +404,7 @@ impl<'a> Buffer<'a> {
         }
 
         if reshaped > 0 {
-            #[cfg(feature = "std")]
+            #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
             log::debug!("shape_until_cursor {}: {:?}", reshaped, instant.elapsed());
             self.redraw = true;
         }
@@ -577,7 +577,7 @@ impl<'a> Buffer<'a> {
 
     /// Convert x, y position to Cursor (hit detection)
     pub fn hit(&self, x: i32, y: i32) -> Option<Cursor> {
-        #[cfg(feature = "std")]
+        #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
         let instant = std::time::Instant::now();
 
         let font_size = self.metrics.font_size;
@@ -670,7 +670,7 @@ impl<'a> Buffer<'a> {
             }
         }
 
-        #[cfg(feature = "std")]
+        #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
         log::trace!("click({}, {}): {:?}", x, y, instant.elapsed());
 
         new_cursor_opt
