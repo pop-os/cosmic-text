@@ -33,6 +33,7 @@ impl FontSystem {
 
         let mut db = fontdb::Database::new();
         {
+            #[cfg(not(target_arch = "wasm32"))]
             let now = std::time::Instant::now();
 
             db.load_system_fonts();
@@ -41,6 +42,7 @@ impl FontSystem {
             db.set_sans_serif_family("Fira Sans");
             db.set_serif_family("DejaVu Serif");
 
+            #[cfg(not(target_arch = "wasm32"))]
             log::info!(
                 "Parsed {} font faces in {}ms.",
                 db.len(),
@@ -54,6 +56,7 @@ impl FontSystem {
     /// Create a new [`FontSystem`], manually specifying the current locale and font database.
     pub fn new_with_locale_and_db(locale: String, mut db: fontdb::Database) -> Self {
         {
+            #[cfg(not(target_arch = "wasm32"))]
             let now = std::time::Instant::now();
 
             //TODO only do this on demand!
@@ -64,6 +67,7 @@ impl FontSystem {
                 }
             }
 
+            #[cfg(not(target_arch = "wasm32"))]
             log::info!(
                 "Mapped {} font faces in {}ms.",
                 db.len(),
@@ -111,6 +115,7 @@ impl FontSystem {
             font_matches_cache
                 .entry(AttrsOwned::new(attrs))
                 .or_insert_with(|| {
+                    #[cfg(not(target_arch = "wasm32"))]
                     let now = std::time::Instant::now();
 
                     let mut fonts = Vec::new();
@@ -130,8 +135,11 @@ impl FontSystem {
                         fonts,
                     });
 
-                    let elapsed = now.elapsed();
-                    log::debug!("font matches for {:?} in {:?}", attrs, elapsed);
+                    #[cfg(not(target_arch = "wasm32"))]
+                    {
+                        let elapsed = now.elapsed();
+                        log::debug!("font matches for {:?} in {:?}", attrs, elapsed);
+                    }
 
                     font_matches
                 })
