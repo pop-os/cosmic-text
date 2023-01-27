@@ -516,9 +516,12 @@ impl<'a> Buffer<'a> {
 
     /// Set the current buffer dimensions
     pub fn set_size(&mut self, width: i32, height: i32) {
-        if width != self.width || height != self.height {
-            self.width = width;
-            self.height = height;
+        let clamped_width = width.max(0);
+        let clamped_height = height.max(0);
+
+        if clamped_width != self.width || clamped_height != self.height {
+            self.width = clamped_width;
+            self.height = clamped_height;
             self.relayout();
             self.shape_until_scroll();
         }
