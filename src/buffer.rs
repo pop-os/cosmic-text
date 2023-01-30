@@ -40,6 +40,7 @@ impl Cursor {
     }
 }
 
+/// Whether to associate cursors placed at a boundary between runs with the run before or after it.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub enum Affinity {
     Before,
@@ -78,6 +79,7 @@ impl Default for Affinity {
     }
 }
 
+/// The position of a cursor within a [`Buffer`].
 pub struct LayoutCursor {
     pub line: usize,
     pub layout: usize,

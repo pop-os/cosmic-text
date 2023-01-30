@@ -56,7 +56,7 @@
 
 // Not interested in these lints
 #![allow(clippy::new_without_default)]
-// TODO: address ocurrances and then deny
+// TODO: address occurrences and then deny
 //
 // Indexing a slice can cause panics and that is something we always want to avoid
 #![allow(clippy::indexing_slicing)]
@@ -64,7 +64,7 @@
 #![allow(clippy::integer_arithmetic)]
 // Soundness issues
 //
-// Dereferencing unalinged pointers may be undefined behavior
+// Dereferencing unaligned pointers may be undefined behavior
 #![deny(clippy::cast_ptr_alignment)]
 // Avoid panicking in without information about the panic. Use expect
 #![deny(clippy::unwrap_used)]

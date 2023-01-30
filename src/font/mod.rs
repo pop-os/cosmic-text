@@ -10,6 +10,7 @@ mod matches;
 pub use self::system::*;
 mod system;
 
+/// A font
 pub struct Font<'a> {
     pub info: &'a fontdb::FaceInfo,
     pub data: &'a [u8],
