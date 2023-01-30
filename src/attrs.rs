@@ -52,6 +52,7 @@ impl Color {
     }
 }
 
+/// An owned version of [`Family`]
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum FamilyOwned {
     Name(String),
@@ -177,6 +178,7 @@ impl<'a> Attrs<'a> {
     }
 }
 
+/// An owned version of [`Attrs`]
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct AttrsOwned {
     //TODO: should this be an option?
