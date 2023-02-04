@@ -424,14 +424,14 @@ impl<'a> Edit<'a> for Editor<'a> {
                 self.buffer.set_redraw(true);
             }
             Action::PageUp => {
-                self.action(Action::Vertical(-self.buffer.size().1));
+                self.action(Action::Vertical(-self.buffer.size().1 as i32));
             }
             Action::PageDown => {
-                self.action(Action::Vertical(self.buffer.size().1));
+                self.action(Action::Vertical(self.buffer.size().1 as i32));
             }
             Action::Vertical(px) => {
                 // TODO more efficient
-                let lines = px / self.buffer.metrics().line_height;
+                let lines = px / self.buffer.metrics().line_height as i32;
                 if lines < 0 {
                     for _ in 0..-lines {
                         self.action(Action::Up);
@@ -541,7 +541,7 @@ impl<'a> Edit<'a> for Editor<'a> {
             Action::Click { x, y } => {
                 self.select_opt = None;
 
-                if let Some(new_cursor) = self.buffer.hit(x, y) {
+                if let Some(new_cursor) = self.buffer.hit(x as f32, y as f32) {
                     if new_cursor != self.cursor {
                         self.cursor = new_cursor;
                         self.buffer.set_redraw(true);
@@ -554,7 +554,7 @@ impl<'a> Edit<'a> for Editor<'a> {
                     self.buffer.set_redraw(true);
                 }
 
-                if let Some(new_cursor) = self.buffer.hit(x, y) {
+                if let Some(new_cursor) = self.buffer.hit(x as f32, y as f32) {
                     if new_cursor != self.cursor {
                         self.cursor = new_cursor;
                         self.buffer.set_redraw(true);
@@ -753,7 +753,7 @@ impl<'a> Edit<'a> for Editor<'a> {
                             } else if let Some((min, max)) = range_opt.take() {
                                 f(
                                     min,
-                                    line_y - font_size,
+                                    (line_y - font_size) as i32,
                                     cmp::max(0, max - min) as u32,
                                     line_height as u32,
                                     Color::rgba(color.r(), color.g(), color.b(), 0x33),
@@ -765,7 +765,7 @@ impl<'a> Edit<'a> for Editor<'a> {
 
                     if run.glyphs.is_empty() && end.line > line_i {
                         // Highlight all of internal empty lines
-                        range_opt = Some((0, self.buffer.size().0));
+                        range_opt = Some((0, self.buffer.size().0 as i32));
                     }
 
                     if let Some((mut min, mut max)) = range_opt.take() {
@@ -774,12 +774,12 @@ impl<'a> Edit<'a> for Editor<'a> {
                             if run.rtl {
                                 min = 0;
                             } else {
-                                max = self.buffer.size().0;
+                                max = self.buffer.size().0 as i32;
                             }
                         }
                         f(
                             min,
-                            line_y - font_size,
+                            (line_y - font_size) as i32,
                             cmp::max(0, max - min) as u32,
                             line_height as u32,
                             Color::rgba(color.r(), color.g(), color.b(), 0x33),
@@ -815,7 +815,7 @@ impl<'a> Edit<'a> for Editor<'a> {
                     },
                 };
 
-                f(x, line_y - font_size, 1, line_height as u32, color);
+                f(x, (line_y - font_size) as i32, 1, line_height as u32, color);
             }
 
             for glyph in run.glyphs.iter() {
@@ -827,7 +827,7 @@ impl<'a> Edit<'a> for Editor<'a> {
                 };
 
                 cache.with_pixels(cache_key, glyph_color, |x, y, color| {
-                    f(x_int + x, line_y + y_int + y, 1, 1, color);
+                    f(x_int + x, line_y as i32 + y_int + y, 1, 1, color);
                 });
             }
         }

@@ -160,10 +160,8 @@ where
 
         let mut editor = self.editor.lock().unwrap();
 
-        let view_w = cmp::min(viewport.width as i32, layout.bounds().width as i32)
-            - self.padding.horizontal() as i32;
-        let view_h = cmp::min(viewport.height as i32, layout.bounds().height as i32)
-            - self.padding.vertical() as i32;
+        let view_w = viewport.width.min(layout.bounds().width) - self.padding.horizontal() as f32;
+        let view_h = viewport.height.min(layout.bounds().height) - self.padding.vertical() as f32;
         editor.buffer_mut().set_size(view_w, view_h);
 
         editor.shape_as_needed();
@@ -203,7 +201,7 @@ where
                         ),
                     );
                 } else {
-                    text::draw_pixel(&mut pixels, view_w, view_h, x, y, color);
+                    text::draw_pixel(&mut pixels, view_w as i32, view_h as i32, x, y, color);
                 }
             },
         );

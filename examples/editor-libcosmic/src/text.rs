@@ -55,7 +55,7 @@ impl Text {
 
         let text = Self {
             line,
-            metrics: Metrics::new(14, 20),
+            metrics: Metrics::new(14.0, 20.0),
         };
 
         log::debug!("Text::new in {:?}", instant.elapsed());
@@ -99,17 +99,17 @@ where
         //TODO: can we cache this?
         let layout_lines = shape.layout(
             self.metrics.font_size,
-            limits.max().width as i32,
+            limits.max().width,
             self.line.wrap(),
             self.line.align(),
         );
 
-        let mut width = 0;
-        let mut height = 0;
+        let mut width = 0.0f32;
+        let mut height = 0.0f32;
 
         for layout_line in layout_lines {
             for glyph in layout_line.glyphs.iter() {
-                width = cmp::max(width, (glyph.x + glyph.w) as i32 + 1);
+                width = width.max((glyph.x + glyph.w) + 1.0);
             }
             height += self.metrics.line_height;
         }
@@ -156,8 +156,8 @@ where
             cmp::max(0, cmp::min(255, (appearance.text_color.a * 255.0) as i32)) as u8,
         );
 
-        let layout_w = layout.bounds().width as i32;
-        let layout_h = layout.bounds().height as i32;
+        let layout_w = layout.bounds().width;
+        let layout_h = layout.bounds().height;
 
         let shape = self.line.shape_opt().as_ref().unwrap();
 
@@ -185,8 +185,8 @@ where
 
                 cache.with_pixels(cache_key, glyph_color, |pixel_x, pixel_y, color| {
                     let x = x_int + pixel_x;
-                    let y = line_y + y_int + pixel_y;
-                    draw_pixel(&mut pixels, layout_w, layout_h, x, y, color);
+                    let y = line_y as i32 + y_int + pixel_y;
+                    draw_pixel(&mut pixels, layout_w as i32, layout_h as i32, x, y, color);
                 });
             }
             line_y += self.metrics.line_height;
