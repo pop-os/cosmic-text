@@ -184,8 +184,8 @@ impl BufferLine {
     pub fn layout(
         &mut self,
         font_system: &FontSystem,
-        font_size: i32,
-        width: i32,
+        font_size: f32,
+        width: f32,
         wrap: Wrap,
         ellipsize: Ellipsize,
     ) -> &[LayoutLine] {

@@ -254,14 +254,14 @@ pub struct ShapeGlyph {
 impl ShapeGlyph {
     fn layout(
         &self,
-        font_size: i32,
+        font_size: f32,
         x: f32,
         y: f32,
         w: f32,
         level: unicode_bidi::Level,
     ) -> LayoutGlyph {
-        let x_offset = font_size as f32 * self.x_offset;
-        let y_offset = font_size as f32 * self.y_offset;
+        let x_offset = font_size * self.x_offset;
+        let y_offset = font_size * self.y_offset;
 
         let (cache_key, x_int, y_int) = CacheKey::new(
             self.font_id,
@@ -704,8 +704,8 @@ impl ShapeLine {
 
     pub fn layout(
         &self,
-        font_size: i32,
-        line_width: i32,
+        font_size: f32,
+        line_width: f32,
         wrap: Wrap,
         align: Option<Align>,
         ellipsize: Ellipsize,
@@ -727,8 +727,8 @@ impl ShapeLine {
         // Note that a BiDi visual line could have multiple spans or parts of them
         let mut visual_paragraph: VisualParagraph = VisualParagraph::default();
 
-        let start_x = if self.rtl { line_width as f32 } else { 0.0 };
-        let end_x = if self.rtl { 0.0 } else { line_width as f32 };
+        let start_x = if self.rtl { line_width } else { 0.0 };
+        let end_x = if self.rtl { 0.0 } else { line_width };
         let mut x = start_x;
         let mut y;
 
@@ -769,7 +769,7 @@ impl ShapeLine {
                 },
             }
         } else {
-            let mut fit_x = line_width as f32;
+            let mut fit_x = line_width;
             for (span_index, span) in self.spans.iter().enumerate() {
                 let mut word_ranges = Vec::new();
                 let mut word_range_width = 0.;
@@ -780,7 +780,7 @@ impl ShapeLine {
                     // incongruent directions
                     let mut fitting_start = (span.words.len(), 0);
                     for (i, word) in span.words.iter().enumerate().rev() {
-                        let word_size = font_size as f32 * word.x_advance;
+                        let word_size = font_size * word.x_advance;
                         if fit_x - word_size >= 0. {
                             // fits
                             fit_x -= word_size;
@@ -791,7 +791,7 @@ impl ShapeLine {
                             continue;
                         } else if wrap == Wrap::Glyph {
                             for (glyph_i, glyph) in word.glyphs.iter().enumerate().rev() {
-                                let glyph_size = font_size as f32 * glyph.x_advance;
+                                let glyph_size = font_size * glyph.x_advance;
                                 if fit_x - glyph_size >= 0. {
                                     fit_x -= glyph_size;
                                     word_range_width += glyph_size;
@@ -804,7 +804,7 @@ impl ShapeLine {
                                         number_of_blanks,
                                     ));
                                     number_of_blanks = 0;
-                                    fit_x = line_width as f32 - glyph_size;
+                                    fit_x = line_width - glyph_size;
                                     word_range_width = glyph_size;
                                     fitting_start = (i, glyph_i + 1);
                                 }
@@ -815,15 +815,12 @@ impl ShapeLine {
                             if word.blank && number_of_blanks > 0 {
                                 // current word causing a wrap is a space so we ignore it
                                 number_of_blanks -= 1;
-                            } else if i > 0 {
-                                if let Some(previous_word) = span.words.get(i - 1) {
-                                    // Current word causing a wrap is not whitespace, so we ignore the
-                                    // previous word if it's a whitespace
-                                    if previous_word.blank {
-                                        number_of_blanks = number_of_blanks.saturating_sub(1_u32);
-                                        prev_word_width =
-                                            Some(previous_word.x_advance * font_size as f32);
-                                    }
+                            } else if let Some(previous_word) = span.words.get(i - 1) {
+                                // Current word causing a wrap is not whitespace, so we ignore the
+                                // previous word if it's a whitespace
+                                if previous_word.blank {
+                                    number_of_blanks -= 1;
+                                    prev_word_width = Some(previous_word.x_advance * font_size);
                                 }
                             }
                             if let Some(width) = prev_word_width {
@@ -843,11 +840,11 @@ impl ShapeLine {
                             }
                             number_of_blanks = 0;
                             if word.blank {
-                                fit_x = line_width as f32;
+                                fit_x = line_width;
                                 word_range_width = 0.;
                                 fitting_start = (i + 1, 0);
                             } else {
-                                fit_x = line_width as f32 - word_size;
+                                fit_x = line_width - word_size;
                                 word_range_width = word_size;
                                 fitting_start = (i + 1, 0);
                             }
@@ -858,7 +855,7 @@ impl ShapeLine {
                     // congruent direction
                     let mut fitting_start = (0, 0);
                     for (i, word) in span.words.iter().enumerate() {
-                        let word_size = font_size as f32 * word.x_advance;
+                        let word_size = font_size * word.x_advance;
                         if fit_x - word_size >= 0. {
                             // fits
                             fit_x -= word_size;
@@ -869,7 +866,7 @@ impl ShapeLine {
                             continue;
                         } else if wrap == Wrap::Glyph {
                             for (glyph_i, glyph) in word.glyphs.iter().enumerate() {
-                                let glyph_size = font_size as f32 * glyph.x_advance;
+                                let glyph_size = font_size * glyph.x_advance;
                                 if fit_x - glyph_size >= 0. {
                                     fit_x -= glyph_size;
                                     word_range_width += glyph_size;
@@ -882,7 +879,7 @@ impl ShapeLine {
                                         number_of_blanks,
                                     ));
                                     number_of_blanks = 0;
-                                    fit_x = line_width as f32 - glyph_size;
+                                    fit_x = line_width - glyph_size;
                                     word_range_width = glyph_size;
                                     fitting_start = (i, glyph_i);
                                 }
@@ -893,15 +890,12 @@ impl ShapeLine {
                             if word.blank && number_of_blanks > 0 {
                                 // current word causing a wrap is a space so we ignore it
                                 number_of_blanks -= 1;
-                            } else if i > 0 {
-                                if let Some(previous_word) = span.words.get(i - 1) {
-                                    // Current word causing a wrap is not whitespace, so we ignore the
-                                    // previous word if it's a whitespace
-                                    if previous_word.blank {
-                                        number_of_blanks = number_of_blanks.saturating_sub(1_u32);
-                                        prev_word_width =
-                                            Some(previous_word.x_advance * font_size as f32);
-                                    }
+                            } else if let Some(previous_word) = span.words.get(i - 1) {
+                                // Current word causing a wrap is not whitespace, so we ignore the
+                                // previous word if it's a whitespace
+                                if previous_word.blank {
+                                    number_of_blanks -= 1;
+                                    prev_word_width = Some(previous_word.x_advance * font_size);
                                 }
                             }
                             if let Some(width) = prev_word_width {
@@ -922,11 +916,11 @@ impl ShapeLine {
                             number_of_blanks = 0;
 
                             if word.blank {
-                                fit_x = line_width as f32;
+                                fit_x = line_width;
                                 word_range_width = 0.;
                                 fitting_start = (i + 1, 0);
                             } else {
-                                fit_x = line_width as f32 - word_size;
+                                fit_x = line_width - word_size;
                                 word_range_width = word_size;
                                 fitting_start = (i, 0);
                             }
@@ -990,7 +984,7 @@ impl ShapeLine {
                         } else {
                             x += word_range_width;
                         }
-                        if word_range_width > line_width as f32 {
+                        if word_range_width > line_width {
                             // single word is bigger than line_width
                             visual_paragraph.visual_lines.push(current_visual_line);
                             current_visual_line = VisualLineInfo::default();
@@ -1013,15 +1007,15 @@ impl ShapeLine {
             x = start_x;
             y = 0.;
             let alignment_correction = match (align, self.rtl) {
-                (Align::Left, true) => line_width as f32 - visual_line.w,
+                (Align::Left, true) => line_width - visual_line.w,
                 (Align::Left, false) => 0.,
                 (Align::Right, true) => 0.,
-                (Align::Right, false) => line_width as f32 - visual_line.w,
-                (Align::Center, _) => (line_width as f32 - visual_line.w) / 2.0,
+                (Align::Right, false) => line_width - visual_line.w,
+                (Align::Center, _) => (line_width - visual_line.w) / 2.0,
                 (Align::Justified, _) => {
                     // Don't justify the last line in a paragraph.
                     if visual_line.spaces > 0 && index != number_of_visual_lines - 1 {
-                        (line_width as f32 - visual_line.w) / visual_line.spaces as f32
+                        (line_width - visual_line.w) / visual_line.spaces as f32
                     } else {
                         0.
                     }
@@ -1045,8 +1039,8 @@ impl ShapeLine {
                                 [*starting_glyph..*ending_glyph]
                                 .iter()
                             {
-                                let x_advance = font_size as f32 * glyph.x_advance;
-                                let y_advance = font_size as f32 * glyph.y_advance;
+                                let x_advance = font_size * glyph.x_advance;
+                                let y_advance = font_size * glyph.y_advance;
                                 x -= x_advance;
                                 if word_blank && align == Align::Justified {
                                     x -= alignment_correction;
@@ -1076,8 +1070,8 @@ impl ShapeLine {
 
                                     let word_blank = word.blank;
                                     for glyph in &word.glyphs[g1..g2] {
-                                        let x_advance = font_size as f32 * glyph.x_advance;
-                                        let y_advance = font_size as f32 * glyph.y_advance;
+                                        let x_advance = font_size * glyph.x_advance;
+                                        let y_advance = font_size * glyph.y_advance;
                                         x -= x_advance;
                                         if word_blank && align == Align::Justified {
                                             x -= alignment_correction;
@@ -1120,8 +1114,8 @@ impl ShapeLine {
                                 [*starting_glyph..*ending_glyph]
                                 .iter()
                             {
-                                let x_advance = font_size as f32 * glyph.x_advance;
-                                let y_advance = font_size as f32 * glyph.y_advance;
+                                let x_advance = font_size * glyph.x_advance;
+                                let y_advance = font_size * glyph.y_advance;
                                 if word_blank && align == Align::Justified {
                                     glyphs.push(glyph.layout(
                                         font_size,
@@ -1151,8 +1145,8 @@ impl ShapeLine {
 
                                     let word_blank = word.blank;
                                     for glyph in &word.glyphs[g1..g2] {
-                                        let x_advance = font_size as f32 * glyph.x_advance;
-                                        let y_advance = font_size as f32 * glyph.y_advance;
+                                        let x_advance = font_size * glyph.x_advance;
+                                        let y_advance = font_size * glyph.y_advance;
                                         if word_blank && align == Align::Justified {
                                             glyphs.push(glyph.layout(
                                                 font_size,

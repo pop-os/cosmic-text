@@ -12,7 +12,7 @@ fn main() {
     let mut swash_cache = SwashCache::new(&font_system);
 
     // Text metrics indicate the font size and line height of a buffer
-    let metrics = Metrics::new(14, 20);
+    let metrics = Metrics::new(14.0, 20.0);
 
     // A Buffer provides shaping and layout for a UTF-8 string, create one per text widget
     let mut buffer = Buffer::new(&font_system, metrics);
@@ -20,7 +20,7 @@ fn main() {
     // Set a size for the text buffer, in pixels
     let width = 80u16;
     let height = 25u16;
-    buffer.set_size(width as i32, height as i32);
+    buffer.set_size(width as f32, height as f32);
 
     // Attributes indicate what font to choose
     let attrs = Attrs::new();
@@ -39,7 +39,7 @@ fn main() {
 
     // Clear buffer with black background
     for _y in 0..height {
-        for _x in 0..buffer.size().0 {
+        for _x in 0..(buffer.size().0 as i32) {
             print!(
                 "{} {}",
                 color::Bg(color::Rgb(0, 0, 0)),

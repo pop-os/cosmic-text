@@ -237,7 +237,7 @@ impl<'a> Edit<'a> for ViEditor<'a> {
 
             let cursor_glyph_opt = |cursor: &Cursor| -> Option<(usize, f32, f32)> {
                 //TODO: better calculation of width
-                let default_width = (font_size as f32) / 2.0;
+                let default_width = font_size / 2.0;
                 if cursor.line == line_i {
                     for (glyph_i, glyph) in run.glyphs.iter().enumerate() {
                         if cursor.index >= glyph.start && cursor.index < glyph.end {
@@ -312,7 +312,7 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                             } else if let Some((min, max)) = range_opt.take() {
                                 f(
                                     min,
-                                    line_y - font_size,
+                                    (line_y - font_size) as i32,
                                     cmp::max(0, max - min) as u32,
                                     line_height as u32,
                                     Color::rgba(color.r(), color.g(), color.b(), 0x33),
@@ -324,7 +324,7 @@ impl<'a> Edit<'a> for ViEditor<'a> {
 
                     if run.glyphs.is_empty() && end.line > line_i {
                         // Highlight all of internal empty lines
-                        range_opt = Some((0, self.buffer().size().0));
+                        range_opt = Some((0, self.buffer().size().0 as i32));
                     }
 
                     if let Some((mut min, mut max)) = range_opt.take() {
@@ -333,12 +333,12 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                             if run.rtl {
                                 min = 0;
                             } else {
-                                max = self.buffer().size().0;
+                                max = self.buffer().size().0 as i32;
                             }
                         }
                         f(
                             min,
-                            line_y - font_size,
+                            (line_y - font_size) as i32,
                             cmp::max(0, max - min) as u32,
                             line_height as u32,
                             Color::rgba(color.r(), color.g(), color.b(), 0x33),
@@ -397,13 +397,19 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                     let right_x = cmp::max(start_x, end_x);
                     f(
                         left_x,
-                        line_y - font_size,
+                        (line_y - font_size) as i32,
                         (right_x - left_x) as u32,
                         line_height as u32,
                         Color::rgba(color.r(), color.g(), color.b(), 0x33),
                     );
                 } else {
-                    f(start_x, line_y - font_size, 1, line_height as u32, color);
+                    f(
+                        start_x,
+                        (line_y - font_size) as i32,
+                        1,
+                        line_height as u32,
+                        color,
+                    );
                 }
             }
 
@@ -416,7 +422,7 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                 };
 
                 cache.with_pixels(cache_key, glyph_color, |x, y, color| {
-                    f(x_int + x, line_y + y_int + y, 1, 1, color)
+                    f(x_int + x, line_y as i32 + y_int + y, 1, 1, color);
                 });
             }
         }

@@ -18,11 +18,11 @@ fn main() {
     let display_scale = match orbclient::get_display_size() {
         Ok((w, h)) => {
             log::info!("Display size: {}, {}", w, h);
-            (h as i32 / 1600) + 1
+            (h as f32 / 1600.0) + 1.0
         }
         Err(err) => {
             log::warn!("Failed to get display size: {}", err);
-            1
+            1.0
         }
     };
 
@@ -38,12 +38,12 @@ fn main() {
 
     let mut editor = Editor::new(Buffer::new(
         &font_system,
-        Metrics::new(32, 44).scale(display_scale),
+        Metrics::new(32.0, 44.0).scale(display_scale),
     ));
 
     editor
         .buffer_mut()
-        .set_size(window.width() as i32, window.height() as i32);
+        .set_size(window.width() as f32, window.height() as f32);
 
     let attrs = Attrs::new();
     let serif_attrs = attrs.family(Family::Serif);
@@ -211,7 +211,7 @@ fn main() {
                 EventOption::Resize(resize) => {
                     editor
                         .buffer_mut()
-                        .set_size(resize.width as i32, resize.height as i32);
+                        .set_size(resize.width as f32, resize.height as f32);
                 }
                 EventOption::Quit(_) => process::exit(0),
                 _ => (),

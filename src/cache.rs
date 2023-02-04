@@ -7,8 +7,8 @@ pub struct CacheKey {
     pub font_id: fontdb::ID,
     /// Glyph ID
     pub glyph_id: u16,
-    /// Font size in pixels
-    pub font_size: i32,
+    /// `f32` bits of font size
+    pub font_size_bits: u32,
     /// Binning of fractional X offset
     pub x_bin: SubpixelBin,
     /// Binning of fractional Y offset
@@ -19,7 +19,7 @@ impl CacheKey {
     pub fn new(
         font_id: fontdb::ID,
         glyph_id: u16,
-        font_size: i32,
+        font_size: f32,
         pos: (f32, f32),
     ) -> (Self, i32, i32) {
         let (x, x_bin) = SubpixelBin::new(pos.0);
@@ -28,7 +28,7 @@ impl CacheKey {
             Self {
                 font_id,
                 glyph_id,
-                font_size,
+                font_size_bits: font_size.to_bits(),
                 x_bin,
                 y_bin,
             },

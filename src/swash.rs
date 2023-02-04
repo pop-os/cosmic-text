@@ -31,7 +31,7 @@ fn swash_image(
     // Build the scaler
     let mut scaler = context
         .builder(font.as_swash())
-        .size(cache_key.font_size as f32)
+        .size(f32::from_bits(cache_key.font_size_bits))
         .hint(true)
         .build();
 
@@ -74,7 +74,7 @@ fn swash_outline_commands(
     // Build the scaler
     let mut scaler = context
         .builder(font.as_swash())
-        .size(cache_key.font_size as f32)
+        .size(f32::from_bits(cache_key.font_size_bits))
         .build();
 
     // Scale the outline
