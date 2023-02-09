@@ -25,6 +25,10 @@ pub struct FontSystem(FontSystemInner);
 impl FontSystem {
     /// Create a new [`FontSystem`], that allows access to any installed system fonts
     pub fn new() -> Self {
+        Self::new_with_fonts(std::iter::empty())
+    }
+
+    pub fn new_with_fonts(fonts: impl Iterator<Item = fontdb::Source>) -> Self {
         let locale = sys_locale::get_locale().unwrap_or_else(|| {
             log::warn!("failed to get system locale, falling back to en-US");
             String::from("en-US")
@@ -37,6 +41,11 @@ impl FontSystem {
             let now = std::time::Instant::now();
 
             db.load_system_fonts();
+
+            for source in fonts {
+                db.load_font_source(source);
+            }
+
             //TODO: configurable default fonts
             db.set_monospace_family("Fira Mono");
             db.set_sans_serif_family("Fira Sans");
