@@ -493,6 +493,7 @@ impl<'a> Buffer<'a> {
     /// Set the current [`Metrics`]
     pub fn set_metrics(&mut self, metrics: Metrics) {
         if metrics != self.metrics {
+            assert_ne!(metrics.font_size, 0, "font size cannot be 0");
             self.metrics = metrics;
             self.relayout();
             self.shape_until_scroll();
