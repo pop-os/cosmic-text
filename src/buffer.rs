@@ -306,6 +306,8 @@ pub struct Buffer<'a> {
 impl<'a> Buffer<'a> {
     /// Create a new [`Buffer`] with the provided [`FontSystem`] and [`Metrics`]
     pub fn new(font_system: &'a FontSystem, metrics: Metrics) -> Self {
+        assert_ne!(metrics.line_height, 0, "line height cannot be 0");
+
         let mut buffer = Self {
             font_system,
             lines: Vec::new(),
