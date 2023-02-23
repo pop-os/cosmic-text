@@ -320,7 +320,7 @@ impl<'a> Buffer<'a> {
             scroll: 0,
             redraw: false,
             wrap: Wrap::Word,
-            align: Align::Center,
+            align: Align::Justified,
         };
         buffer.set_text("", Attrs::new());
         buffer

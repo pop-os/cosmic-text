@@ -645,6 +645,7 @@ impl ShapeLine {
             for (span_index, span) in self.spans.iter().enumerate() {
                 let mut word_ranges = Vec::new();
                 let mut word_range_width = 0.;
+                let mut number_of_blanks = 0;
 
                 // Create the word ranges that fits in a visual line
                 if self.rtl != span.level.is_rtl() {
@@ -656,6 +657,9 @@ impl ShapeLine {
                             // fits
                             fit_x -= word_size;
                             word_range_width += word_size;
+                            if word.blank {
+                                number_of_blanks += 1;
+                            }
                             continue;
                         } else if wrap == Wrap::Glyph {
                             for (glyph_i, glyph) in word.glyphs.iter().enumerate().rev() {
@@ -669,7 +673,9 @@ impl ShapeLine {
                                         (i, glyph_i + 1),
                                         fitting_start,
                                         word_range_width,
+                                        number_of_blanks,
                                     ));
+                                    number_of_blanks = 0;
                                     fit_x = line_width as f32 - glyph_size;
                                     word_range_width = glyph_size;
                                     fitting_start = (i, glyph_i + 1);
@@ -677,8 +683,16 @@ impl ShapeLine {
                             }
                         } else {
                             // Wrap::Word
-                            word_ranges.push(((i + 1, 0), fitting_start, word_range_width));
-
+                            if word.blank && number_of_blanks > 0 {
+                                number_of_blanks -= 1;
+                            }
+                            word_ranges.push((
+                                (i + 1, 0),
+                                fitting_start,
+                                word_range_width,
+                                number_of_blanks,
+                            ));
+                            number_of_blanks = 0;
                             if word.blank {
                                 fit_x = line_width as f32;
                                 word_range_width = 0.;
@@ -690,7 +704,7 @@ impl ShapeLine {
                             }
                         }
                     }
-                    word_ranges.push(((0, 0), fitting_start, word_range_width));
+                    word_ranges.push(((0, 0), fitting_start, word_range_width, number_of_blanks));
                 } else {
                     // congruent direction
                     let mut fitting_start = (0, 0);
@@ -700,6 +714,9 @@ impl ShapeLine {
                             // fits
                             fit_x -= word_size;
                             word_range_width += word_size;
+                            if word.blank {
+                                number_of_blanks += 1;
+                            }
                             continue;
                         } else if wrap == Wrap::Glyph {
                             for (glyph_i, glyph) in word.glyphs.iter().enumerate() {
@@ -713,7 +730,9 @@ impl ShapeLine {
                                         fitting_start,
                                         (i, glyph_i),
                                         word_range_width,
+                                        number_of_blanks,
                                     ));
+                                    number_of_blanks = 0;
                                     fit_x = line_width as f32 - glyph_size;
                                     word_range_width = glyph_size;
                                     fitting_start = (i, glyph_i);
@@ -721,7 +740,16 @@ impl ShapeLine {
                             }
                         } else {
                             // Wrap::Word
-                            word_ranges.push((fitting_start, (i, 0), word_range_width));
+                            if word.blank && number_of_blanks > 0 {
+                                number_of_blanks -= 1;
+                            }
+                            word_ranges.push((
+                                fitting_start,
+                                (i, 0),
+                                word_range_width,
+                                number_of_blanks,
+                            ));
+                            number_of_blanks = 0;
 
                             if word.blank {
                                 fit_x = line_width as f32;
@@ -734,7 +762,12 @@ impl ShapeLine {
                             }
                         }
                     }
-                    word_ranges.push((fitting_start, (span.words.len(), 0), word_range_width));
+                    word_ranges.push((
+                        fitting_start,
+                        (span.words.len(), 0),
+                        word_range_width,
+                        number_of_blanks,
+                    ));
                 }
 
                 // Create a visual line
@@ -742,6 +775,7 @@ impl ShapeLine {
                     (starting_word, starting_glyph),
                     (ending_word, ending_glyph),
                     word_range_width,
+                    number_of_blanks,
                 ) in word_ranges
                 {
                     // To simplify the algorithm above, we might push empty ranges but we ignore them here
@@ -762,6 +796,7 @@ impl ShapeLine {
                             (ending_word, ending_glyph),
                         ));
                         current_visual_line.w += word_range_width;
+                        current_visual_line.spaces += number_of_blanks;
                         if self.rtl {
                             x -= word_range_width;
                         } else {
@@ -779,6 +814,7 @@ impl ShapeLine {
                             (ending_word, ending_glyph),
                         ));
                         current_visual_line.w += word_range_width;
+                        current_visual_line.spaces += number_of_blanks;
                         if self.rtl {
                             x -= word_range_width;
                         } else {
@@ -800,7 +836,8 @@ impl ShapeLine {
         }
 
         // Create the LayoutLines using the ranges inside visual lines
-        for visual_line in vl_range_of_spans {
+        let number_of_visual_lines = vl_range_of_spans.len();
+        for (index, visual_line) in vl_range_of_spans.iter().enumerate() {
             let new_order = self.reorder(&visual_line.ranges);
             let mut glyphs = Vec::with_capacity(1);
             x = start_x;
@@ -811,10 +848,19 @@ impl ShapeLine {
                 (Align::Right, true) => 0.,
                 (Align::Right, false) => line_width as f32 - visual_line.w,
                 (Align::Center, _) => (line_width as f32 - visual_line.w) / 2.0,
-                (Align::Justified, _) => unimplemented!("I need to work on the number of spaces"),
+                (Align::Justified, _) => {
+                    // Don't justify the last line in a paragraph.
+                    if visual_line.spaces > 0 && index != number_of_visual_lines - 1 {
+                        (line_width as f32 - visual_line.w) / visual_line.spaces as f32
+                    } else {
+                        0.
+                    }
+                }
             };
             if self.rtl {
-                x -= alignment_correction;
+                if align != Align::Justified {
+                    x -= alignment_correction;
+                }
                 for range in new_order.iter().rev() {
                     for (
                         span_index,
@@ -824,6 +870,7 @@ impl ShapeLine {
                     {
                         let span = &self.spans[*span_index];
                         if starting_word == ending_word {
+                            let word_blank = span.words[*starting_word].blank;
                             for glyph in span.words[*starting_word].glyphs
                                 [*starting_glyph..*ending_glyph]
                                 .iter()
@@ -831,6 +878,9 @@ impl ShapeLine {
                                 let x_advance = font_size as f32 * glyph.x_advance;
                                 let y_advance = font_size as f32 * glyph.y_advance;
                                 x -= x_advance;
+                                if word_blank && align == Align::Justified {
+                                    x -= alignment_correction;
+                                }
                                 glyphs.push(glyph.layout(font_size, x, y, span.level));
                                 y += y_advance;
                             }
@@ -845,16 +895,15 @@ impl ShapeLine {
                                         (0, word.glyphs.len())
                                     };
 
+                                    let word_blank = word.blank;
                                     for glyph in &word.glyphs[g1..g2] {
                                         let x_advance = font_size as f32 * glyph.x_advance;
                                         let y_advance = font_size as f32 * glyph.y_advance;
-                                        if self.rtl {
-                                            x -= x_advance;
+                                        if word_blank && align == Align::Justified {
+                                            x -= alignment_correction;
                                         }
+                                        x -= x_advance;
                                         glyphs.push(glyph.layout(font_size, x, y, span.level));
-                                        if !self.rtl {
-                                            x += x_advance;
-                                        }
                                         y += y_advance;
                                     }
                                 }
@@ -862,8 +911,12 @@ impl ShapeLine {
                         }
                     }
                 }
-            } else {
-                x += alignment_correction;
+            } else
+            /* LTR */
+            {
+                if align != Align::Justified {
+                    x += alignment_correction;
+                }
                 for range in new_order {
                     for (
                         span_index,
@@ -873,6 +926,7 @@ impl ShapeLine {
                     {
                         let span = &self.spans[*span_index];
                         if starting_word == ending_word {
+                            let word_blank = span.words[*starting_word].blank;
                             for glyph in span.words[*starting_word].glyphs
                                 [*starting_glyph..*ending_glyph]
                                 .iter()
@@ -881,6 +935,9 @@ impl ShapeLine {
                                 let y_advance = font_size as f32 * glyph.y_advance;
                                 glyphs.push(glyph.layout(font_size, x, y, span.level));
                                 x += x_advance;
+                                if word_blank && align == Align::Justified {
+                                    x += alignment_correction;
+                                }
                                 y += y_advance;
                             }
                         } else {
@@ -894,16 +951,15 @@ impl ShapeLine {
                                         (0, word.glyphs.len())
                                     };
 
+                                    let word_blank = word.blank;
                                     for glyph in &word.glyphs[g1..g2] {
                                         let x_advance = font_size as f32 * glyph.x_advance;
                                         let y_advance = font_size as f32 * glyph.y_advance;
-                                        if self.rtl {
-                                            x -= x_advance;
-                                        }
                                         glyphs.push(glyph.layout(font_size, x, y, span.level));
-                                        if !self.rtl {
-                                            x += x_advance;
+                                        if word_blank && align == Align::Justified {
+                                            x += alignment_correction;
                                         }
+                                        x += x_advance;
                                         y += y_advance;
                                     }
                                 }
