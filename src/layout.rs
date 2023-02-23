@@ -80,3 +80,23 @@ impl Display for Wrap {
         }
     }
 }
+
+/// Align or justify
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
+pub enum Align {
+    Left,
+    Right,
+    Center,
+    Justified,
+}
+
+impl Display for Align {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::Left => write!(f, "Left"),
+            Self::Right => write!(f, "Right"),
+            Self::Center => write!(f, "Center"),
+            Self::Justified => write!(f, "Justified"),
+        }
+    }
+}
