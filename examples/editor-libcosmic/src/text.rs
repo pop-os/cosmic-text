@@ -8,6 +8,7 @@ use cosmic::{
         widget::{self, tree, Widget},
         {Color, Element, Length, Point, Rectangle, Size},
     },
+    iced_winit::renderer::BorderRadius,
     theme::Theme,
 };
 use cosmic_text::{Attrs, AttrsList, BufferLine, Metrics, SwashCache};
@@ -140,7 +141,7 @@ where
             renderer.fill_quad(
                 renderer::Quad {
                     bounds: layout.bounds(),
-                    border_radius: 0.0,
+                    border_radius: BorderRadius::default(),
                     border_width: 0.0,
                     border_color: Color::TRANSPARENT,
                 },

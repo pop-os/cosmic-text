@@ -13,6 +13,7 @@ use cosmic::{
         widget::{self, tree, Widget},
         Padding, {Color, Element, Length, Point, Rectangle, Shell, Size},
     },
+    iced_winit::renderer::BorderRadius,
     theme::Theme,
 };
 use cosmic_text::{Action, Edit, SwashCache};
@@ -142,7 +143,7 @@ where
             renderer.fill_quad(
                 renderer::Quad {
                     bounds: layout.bounds(),
-                    border_radius: 0.0,
+                    border_radius: BorderRadius::default(),
                     border_width: 0.0,
                     border_color: Color::TRANSPARENT,
                 },
@@ -190,7 +191,7 @@ where
                                     + [self.padding.left as f32, self.padding.top as f32].into(),
                                 Size::new(w as f32, h as f32),
                             ),
-                            border_radius: 0.0,
+                            border_radius: BorderRadius::default(),
                             border_width: 0.0,
                             border_color: Color::TRANSPARENT,
                         },

@@ -522,6 +522,20 @@ impl<'a> Buffer<'a> {
         }
     }
 
+    /// Get the current [`Align`]
+    pub fn align(&self) -> Align {
+        self.align
+    }
+
+    /// Set the current [`Wrap`]
+    pub fn set_align(&mut self, align: Align) {
+        if align != self.align {
+            self.align = align;
+            self.relayout();
+            self.shape_until_scroll();
+        }
+    }
+
     /// Get the current buffer dimensions (width, height)
     pub fn size(&self) -> (i32, i32) {
         (self.width, self.height)

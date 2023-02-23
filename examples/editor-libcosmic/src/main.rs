@@ -12,7 +12,7 @@ use cosmic::{
     Element,
 };
 use cosmic_text::{
-    Attrs, AttrsList, Buffer, Edit, FontSystem, Metrics, SyntaxEditor, SyntaxSystem, Wrap,
+    Align, Attrs, AttrsList, Buffer, Edit, FontSystem, Metrics, SyntaxEditor, SyntaxSystem, Wrap,
 };
 use std::{env, fs, path::PathBuf, sync::Mutex};
 
@@ -66,6 +66,7 @@ pub enum Message {
     Monospaced(bool),
     MetricsChanged(Metrics),
     WrapChanged(Wrap),
+    AlignmentChanged(Align),
     ThemeChanged(&'static str),
 }
 
@@ -202,6 +203,10 @@ impl Application for Window {
                 let mut editor = self.editor.lock().unwrap();
                 editor.buffer_mut().set_wrap(wrap);
             }
+            Message::AlignmentChanged(align) => {
+                let mut editor = self.editor.lock().unwrap();
+                editor.buffer_mut().set_align(align);
+            }
             Message::ThemeChanged(theme) => {
                 self.theme = match theme {
                     "Dark" => Theme::Dark,
@@ -282,8 +287,24 @@ impl Application for Window {
                 theme_picker,
                 text("Font Size:"),
                 font_size_picker,
+            ]
+            .align_items(Alignment::Center)
+            .spacing(8),
+            row![
                 text("Wrap:"),
                 wrap_picker,
+                button(theme::Button::Text)
+                    .icon(theme::Svg::Default, "format-justify-left", 20)
+                    .on_press(Message::AlignmentChanged(Align::Left)),
+                button(theme::Button::Text)
+                    .icon(theme::Svg::Symbolic, "format-justify-center", 20)
+                    .on_press(Message::AlignmentChanged(Align::Center)),
+                button(theme::Button::Text)
+                    .icon(theme::Svg::Symbolic, "format-justify-right", 20)
+                    .on_press(Message::AlignmentChanged(Align::Right)),
+                button(theme::Button::Text)
+                    .icon(theme::Svg::SymbolicLink, "format-justify-fill", 20)
+                    .on_press(Message::AlignmentChanged(Align::Justified)),
             ]
             .align_items(Alignment::Center)
             .spacing(8),
