@@ -10,9 +10,7 @@ use unicode_segmentation::UnicodeSegmentation;
 
 #[cfg(feature = "swash")]
 use crate::Color;
-use crate::{
-    Align, Attrs, AttrsList, BufferLine, FontSystem, LayoutGlyph, LayoutLine, ShapeLine, Wrap,
-};
+use crate::{Attrs, AttrsList, BufferLine, FontSystem, LayoutGlyph, LayoutLine, ShapeLine, Wrap};
 
 /// Current cursor location
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Ord, PartialOrd)]
@@ -303,7 +301,6 @@ pub struct Buffer<'a> {
     /// True if a redraw is requires. Set to false after processing
     redraw: bool,
     wrap: Wrap,
-    align: Option<Align>,
 }
 
 impl<'a> Buffer<'a> {
@@ -320,7 +317,6 @@ impl<'a> Buffer<'a> {
             scroll: 0,
             redraw: false,
             wrap: Wrap::Word,
-            align: None,
         };
         buffer.set_text("", Attrs::new());
         buffer
@@ -338,7 +334,6 @@ impl<'a> Buffer<'a> {
                     self.metrics.font_size,
                     self.width,
                     self.wrap,
-                    self.align,
                 );
             }
         }
@@ -369,7 +364,6 @@ impl<'a> Buffer<'a> {
                 self.metrics.font_size,
                 self.width,
                 self.wrap,
-                self.align,
             );
             total_layout += layout.len() as i32;
         }
@@ -403,7 +397,6 @@ impl<'a> Buffer<'a> {
                 self.metrics.font_size,
                 self.width,
                 self.wrap,
-                self.align,
             );
             if line_i == cursor.line {
                 let layout_cursor = self.layout_cursor(&cursor);
@@ -489,7 +482,6 @@ impl<'a> Buffer<'a> {
             self.metrics.font_size,
             self.width,
             self.wrap,
-            self.align,
         ))
     }
 
@@ -517,20 +509,6 @@ impl<'a> Buffer<'a> {
     pub fn set_wrap(&mut self, wrap: Wrap) {
         if wrap != self.wrap {
             self.wrap = wrap;
-            self.relayout();
-            self.shape_until_scroll();
-        }
-    }
-
-    /// Get the current [`Align`]
-    pub fn align(&self) -> Option<Align> {
-        self.align
-    }
-
-    /// Set the current [`Wrap`]
-    pub fn set_align(&mut self, align: Align) {
-        if Some(align) != self.align {
-            self.align = Some(align);
             self.relayout();
             self.shape_until_scroll();
         }

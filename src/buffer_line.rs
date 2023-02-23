@@ -89,7 +89,7 @@ impl BufferLine {
     pub fn set_wrap(&mut self, wrap: Wrap) -> bool {
         if wrap != self.wrap {
             self.wrap = wrap;
-            self.reset();
+            self.reset_layout();
             true
         } else {
             false
@@ -108,7 +108,7 @@ impl BufferLine {
     pub fn set_align(&mut self, align: Align) -> bool {
         if Some(align) != self.align {
             self.align = Some(align);
-            self.reset();
+            self.reset_layout();
             true
         } else {
             false
@@ -186,11 +186,10 @@ impl BufferLine {
         font_size: i32,
         width: i32,
         wrap: Wrap,
-        align: Option<Align>,
     ) -> &[LayoutLine] {
         if self.layout_opt.is_none() {
             self.wrap = wrap;
-            self.align = align;
+            let align = self.align;
             let shape = self.shape(font_system);
             let layout = shape.layout(font_size, width, wrap, align);
             self.layout_opt = Some(layout);

@@ -205,7 +205,7 @@ impl Application for Window {
             }
             Message::AlignmentChanged(align) => {
                 let mut editor = self.editor.lock().unwrap();
-                editor.buffer_mut().set_align(align);
+                update_alignment(&mut *editor, align);
             }
             Message::ThemeChanged(theme) => {
                 self.theme = match theme {
@@ -323,4 +323,11 @@ fn update_attrs<'a, T: Edit<'a>>(editor: &mut T, attrs: Attrs<'a>) {
     editor.buffer_mut().lines.iter_mut().for_each(|line| {
         line.set_attrs_list(AttrsList::new(attrs));
     });
+}
+
+fn update_alignment<'a, T: Edit<'a>>(editor: &mut T, align: Align) {
+    let current_line = editor.cursor().line;
+    if let Some(line) = editor.buffer_mut().lines.get_mut(current_line) {
+        line.set_align(align);
+    }
 }

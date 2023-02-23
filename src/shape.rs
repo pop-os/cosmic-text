@@ -605,9 +605,17 @@ impl ShapeLine {
         font_size: i32,
         line_width: i32,
         wrap: Wrap,
-        align: Align,
+        align: Option<Align>,
     ) -> Vec<LayoutLine> {
         let mut layout_lines = Vec::with_capacity(1);
+
+        let align = align.unwrap_or({
+            if self.rtl {
+                Align::Right
+            } else {
+                Align::Left
+            }
+        });
 
         // This is used to create a visual line for empty lines (e.g. lines with only a <CR>)
         let mut push_line = true;
@@ -693,7 +701,7 @@ impl ShapeLine {
                                 if previous_word.blank {
                                     number_of_blanks -= 1;
                                     prev_word_width =
-                                        Some(previous_word.x_advance * font_size as f32)
+                                        Some(previous_word.x_advance * font_size as f32);
                                 }
                             }
                             if let Some(width) = prev_word_width {
@@ -769,7 +777,7 @@ impl ShapeLine {
                                 if previous_word.blank {
                                     number_of_blanks -= 1;
                                     prev_word_width =
-                                        Some(previous_word.x_advance * font_size as f32)
+                                        Some(previous_word.x_advance * font_size as f32);
                                 }
                             }
                             if let Some(width) = prev_word_width {
@@ -949,9 +957,8 @@ impl ShapeLine {
                         }
                     }
                 }
-            } else
-            /* LTR */
-            {
+            } else {
+                /* LTR */
                 if align != Align::Justified {
                     x += alignment_correction;
                 }
