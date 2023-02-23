@@ -9,7 +9,7 @@ pub struct BufferLine {
     text: String,
     attrs_list: AttrsList,
     wrap: Wrap,
-    align: Align,
+    align: Option<Align>,
     shape_opt: Option<ShapeLine>,
     layout_opt: Option<Vec<LayoutLine>>,
 }
@@ -23,7 +23,7 @@ impl BufferLine {
             text: text.into(),
             attrs_list,
             wrap: Wrap::Word,
-            align: Align::Left,
+            align: None,
             shape_opt: None,
             layout_opt: None,
         }
@@ -97,7 +97,7 @@ impl BufferLine {
     }
 
     /// Get the Text alignment
-    pub fn align(&self) -> Align {
+    pub fn align(&self) -> Option<Align> {
         self.align
     }
 
@@ -106,8 +106,8 @@ impl BufferLine {
     /// Will reset shape and layout if it differs from current alignment.
     /// Returns true if the line was reset
     pub fn set_align(&mut self, align: Align) -> bool {
-        if align != self.align {
-            self.align = align;
+        if Some(align) != self.align {
+            self.align = Some(align);
             self.reset();
             true
         } else {
@@ -186,7 +186,7 @@ impl BufferLine {
         font_size: i32,
         width: i32,
         wrap: Wrap,
-        align: Align,
+        align: Option<Align>,
     ) -> &[LayoutLine] {
         if self.layout_opt.is_none() {
             self.wrap = wrap;

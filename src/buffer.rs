@@ -303,7 +303,7 @@ pub struct Buffer<'a> {
     /// True if a redraw is requires. Set to false after processing
     redraw: bool,
     wrap: Wrap,
-    align: Align,
+    align: Option<Align>,
 }
 
 impl<'a> Buffer<'a> {
@@ -320,7 +320,7 @@ impl<'a> Buffer<'a> {
             scroll: 0,
             redraw: false,
             wrap: Wrap::Word,
-            align: Align::Justified,
+            align: None,
         };
         buffer.set_text("", Attrs::new());
         buffer
@@ -523,14 +523,14 @@ impl<'a> Buffer<'a> {
     }
 
     /// Get the current [`Align`]
-    pub fn align(&self) -> Align {
+    pub fn align(&self) -> Option<Align> {
         self.align
     }
 
     /// Set the current [`Wrap`]
     pub fn set_align(&mut self, align: Align) {
-        if align != self.align {
-            self.align = align;
+        if Some(align) != self.align {
+            self.align = Some(align);
             self.relayout();
             self.shape_until_scroll();
         }
