@@ -683,15 +683,34 @@ impl ShapeLine {
                             }
                         } else {
                             // Wrap::Word
+                            let mut prev_word_width = None;
                             if word.blank && number_of_blanks > 0 {
+                                // current word causing a wrap is a space so we ignore it
                                 number_of_blanks -= 1;
+                            } else if let Some(previous_word) = span.words.get(i - 1) {
+                                // Current word causing a wrap is not whitespace, so we ignore the
+                                // previous word if it's a whitespace
+                                if previous_word.blank {
+                                    number_of_blanks -= 1;
+                                    prev_word_width =
+                                        Some(previous_word.x_advance * font_size as f32)
+                                }
                             }
-                            word_ranges.push((
-                                (i + 1, 0),
-                                fitting_start,
-                                word_range_width,
-                                number_of_blanks,
-                            ));
+                            if let Some(width) = prev_word_width {
+                                word_ranges.push((
+                                    (i, 0),
+                                    fitting_start,
+                                    word_range_width - width,
+                                    number_of_blanks,
+                                ));
+                            } else {
+                                word_ranges.push((
+                                    (i + 1, 0),
+                                    fitting_start,
+                                    word_range_width,
+                                    number_of_blanks,
+                                ));
+                            }
                             number_of_blanks = 0;
                             if word.blank {
                                 fit_x = line_width as f32;
@@ -740,15 +759,34 @@ impl ShapeLine {
                             }
                         } else {
                             // Wrap::Word
+                            let mut prev_word_width = None;
                             if word.blank && number_of_blanks > 0 {
+                                // current word causing a wrap is a space so we ignore it
                                 number_of_blanks -= 1;
+                            } else if let Some(previous_word) = span.words.get(i - 1) {
+                                // Current word causing a wrap is not whitespace, so we ignore the
+                                // previous word if it's a whitespace
+                                if previous_word.blank {
+                                    number_of_blanks -= 1;
+                                    prev_word_width =
+                                        Some(previous_word.x_advance * font_size as f32)
+                                }
                             }
-                            word_ranges.push((
-                                fitting_start,
-                                (i, 0),
-                                word_range_width,
-                                number_of_blanks,
-                            ));
+                            if let Some(width) = prev_word_width {
+                                word_ranges.push((
+                                    fitting_start,
+                                    (i - 1, 0),
+                                    word_range_width - width,
+                                    number_of_blanks,
+                                ));
+                            } else {
+                                word_ranges.push((
+                                    fitting_start,
+                                    (i, 0),
+                                    word_range_width,
+                                    number_of_blanks,
+                                ));
+                            }
                             number_of_blanks = 0;
 
                             if word.blank {
