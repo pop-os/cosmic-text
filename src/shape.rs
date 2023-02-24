@@ -235,10 +235,16 @@ pub struct ShapeGlyph {
 }
 
 impl ShapeGlyph {
-    fn layout(&self, font_size: i32, x: f32, y: f32, level: unicode_bidi::Level) -> LayoutGlyph {
+    fn layout(
+        &self,
+        font_size: i32,
+        x: f32,
+        y: f32,
+        w: f32,
+        level: unicode_bidi::Level,
+    ) -> LayoutGlyph {
         let x_offset = font_size as f32 * self.x_offset;
         let y_offset = font_size as f32 * self.y_offset;
-        let x_advance = font_size as f32 * self.x_advance;
 
         let (cache_key, x_int, y_int) = CacheKey::new(
             self.font_id,
@@ -250,7 +256,7 @@ impl ShapeGlyph {
             start: self.start,
             end: self.end,
             x,
-            w: x_advance,
+            w,
             level,
             cache_key,
             x_offset,
@@ -926,8 +932,17 @@ impl ShapeLine {
                                 x -= x_advance;
                                 if word_blank && align == Align::Justified {
                                     x -= alignment_correction;
+                                    glyphs.push(glyph.layout(
+                                        font_size,
+                                        x,
+                                        y,
+                                        x_advance + alignment_correction,
+                                        span.level,
+                                    ));
+                                } else {
+                                    glyphs
+                                        .push(glyph.layout(font_size, x, y, x_advance, span.level));
                                 }
-                                glyphs.push(glyph.layout(font_size, x, y, span.level));
                                 y += y_advance;
                             }
                         } else {
@@ -945,11 +960,22 @@ impl ShapeLine {
                                     for glyph in &word.glyphs[g1..g2] {
                                         let x_advance = font_size as f32 * glyph.x_advance;
                                         let y_advance = font_size as f32 * glyph.y_advance;
+                                        x -= x_advance;
                                         if word_blank && align == Align::Justified {
                                             x -= alignment_correction;
+                                            glyphs.push(glyph.layout(
+                                                font_size,
+                                                x,
+                                                y,
+                                                x_advance + alignment_correction,
+                                                span.level,
+                                            ));
+                                        } else {
+                                            glyphs
+                                                .push(glyph.layout(
+                                                    font_size, x, y, x_advance, span.level,
+                                                ));
                                         }
-                                        x -= x_advance;
-                                        glyphs.push(glyph.layout(font_size, x, y, span.level));
                                         y += y_advance;
                                     }
                                 }
@@ -978,11 +1004,20 @@ impl ShapeLine {
                             {
                                 let x_advance = font_size as f32 * glyph.x_advance;
                                 let y_advance = font_size as f32 * glyph.y_advance;
-                                glyphs.push(glyph.layout(font_size, x, y, span.level));
-                                x += x_advance;
                                 if word_blank && align == Align::Justified {
+                                    glyphs.push(glyph.layout(
+                                        font_size,
+                                        x,
+                                        y,
+                                        x_advance + alignment_correction,
+                                        span.level,
+                                    ));
                                     x += alignment_correction;
+                                } else {
+                                    glyphs
+                                        .push(glyph.layout(font_size, x, y, x_advance, span.level));
                                 }
+                                x += x_advance;
                                 y += y_advance;
                             }
                         } else {
@@ -1000,9 +1035,20 @@ impl ShapeLine {
                                     for glyph in &word.glyphs[g1..g2] {
                                         let x_advance = font_size as f32 * glyph.x_advance;
                                         let y_advance = font_size as f32 * glyph.y_advance;
-                                        glyphs.push(glyph.layout(font_size, x, y, span.level));
                                         if word_blank && align == Align::Justified {
+                                            glyphs.push(glyph.layout(
+                                                font_size,
+                                                x,
+                                                y,
+                                                x_advance + alignment_correction,
+                                                span.level,
+                                            ));
                                             x += alignment_correction;
+                                        } else {
+                                            glyphs
+                                                .push(glyph.layout(
+                                                    font_size, x, y, x_advance, span.level,
+                                                ));
                                         }
                                         x += x_advance;
                                         y += y_advance;
