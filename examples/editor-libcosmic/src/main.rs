@@ -327,7 +327,16 @@ fn update_attrs<'a, T: Edit<'a>>(editor: &mut T, attrs: Attrs<'a>) {
 
 fn update_alignment<'a, T: Edit<'a>>(editor: &mut T, align: Align) {
     let current_line = editor.cursor().line;
-    if let Some(line) = editor.buffer_mut().lines.get_mut(current_line) {
+    if let Some(select) = editor.select_opt() {
+        let (start, end) = match select.line.cmp(&current_line) {
+            std::cmp::Ordering::Greater => (current_line, select.line),
+            std::cmp::Ordering::Less => (select.line, current_line),
+            std::cmp::Ordering::Equal => (current_line, current_line),
+        };
+        for line in editor.buffer_mut().lines[start..=end].iter_mut() {
+            line.set_align(align);
+        }
+    } else if let Some(line) = editor.buffer_mut().lines.get_mut(current_line) {
         line.set_align(align);
     }
 }
