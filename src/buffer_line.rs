@@ -1,7 +1,7 @@
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, vec::Vec};
 
-use crate::{AttrsList, FontSystem, LayoutLine, ShapeLine, Wrap};
+use crate::{Align, AttrsList, FontSystem, LayoutLine, ShapeLine, Wrap};
 
 /// A line (or paragraph) of text that is shaped and laid out
 pub struct BufferLine {
@@ -9,6 +9,7 @@ pub struct BufferLine {
     text: String,
     attrs_list: AttrsList,
     wrap: Wrap,
+    align: Option<Align>,
     shape_opt: Option<ShapeLine>,
     layout_opt: Option<Vec<LayoutLine>>,
 }
@@ -22,6 +23,7 @@ impl BufferLine {
             text: text.into(),
             attrs_list,
             wrap: Wrap::Word,
+            align: None,
             shape_opt: None,
             layout_opt: None,
         }
@@ -87,7 +89,27 @@ impl BufferLine {
     pub fn set_wrap(&mut self, wrap: Wrap) -> bool {
         if wrap != self.wrap {
             self.wrap = wrap;
-            self.reset();
+            self.reset_layout();
+            true
+        } else {
+            false
+        }
+    }
+
+    /// Get the Text alignment
+    pub fn align(&self) -> Option<Align> {
+        self.align
+    }
+
+    /// Set the text alignment
+    ///
+    /// Will reset shape and layout if it differs from current alignment.
+    /// Setting to None will use `Align::Right` for RTL lines, and `Align::Left` for LTR lines.
+    /// Returns true if the line was reset
+    pub fn set_align(&mut self, align: Option<Align>) -> bool {
+        if align != self.align {
+            self.align = align;
+            self.reset_layout();
             true
         } else {
             false
@@ -168,8 +190,9 @@ impl BufferLine {
     ) -> &[LayoutLine] {
         if self.layout_opt.is_none() {
             self.wrap = wrap;
+            let align = self.align;
             let shape = self.shape(font_system);
-            let layout = shape.layout(font_size, width, wrap);
+            let layout = shape.layout(font_size, width, wrap, align);
             self.layout_opt = Some(layout);
         }
         self.layout_opt.as_ref().expect("layout not found")

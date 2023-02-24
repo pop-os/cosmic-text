@@ -12,7 +12,7 @@ use cosmic::{
     Element,
 };
 use cosmic_text::{
-    Attrs, AttrsList, Buffer, Edit, FontSystem, Metrics, SyntaxEditor, SyntaxSystem, Wrap,
+    Align, Attrs, AttrsList, Buffer, Edit, FontSystem, Metrics, SyntaxEditor, SyntaxSystem, Wrap,
 };
 use std::{env, fs, path::PathBuf, sync::Mutex};
 
@@ -66,6 +66,7 @@ pub enum Message {
     Monospaced(bool),
     MetricsChanged(Metrics),
     WrapChanged(Wrap),
+    AlignmentChanged(Align),
     ThemeChanged(&'static str),
 }
 
@@ -202,6 +203,10 @@ impl Application for Window {
                 let mut editor = self.editor.lock().unwrap();
                 editor.buffer_mut().set_wrap(wrap);
             }
+            Message::AlignmentChanged(align) => {
+                let mut editor = self.editor.lock().unwrap();
+                update_alignment(&mut *editor, align);
+            }
             Message::ThemeChanged(theme) => {
                 self.theme = match theme {
                     "Dark" => Theme::Dark,
@@ -282,8 +287,24 @@ impl Application for Window {
                 theme_picker,
                 text("Font Size:"),
                 font_size_picker,
+            ]
+            .align_items(Alignment::Center)
+            .spacing(8),
+            row![
                 text("Wrap:"),
                 wrap_picker,
+                button(theme::Button::Text)
+                    .icon(theme::Svg::Default, "format-justify-left", 20)
+                    .on_press(Message::AlignmentChanged(Align::Left)),
+                button(theme::Button::Text)
+                    .icon(theme::Svg::Symbolic, "format-justify-center", 20)
+                    .on_press(Message::AlignmentChanged(Align::Center)),
+                button(theme::Button::Text)
+                    .icon(theme::Svg::Symbolic, "format-justify-right", 20)
+                    .on_press(Message::AlignmentChanged(Align::Right)),
+                button(theme::Button::Text)
+                    .icon(theme::Svg::SymbolicLink, "format-justify-fill", 20)
+                    .on_press(Message::AlignmentChanged(Align::Justified)),
             ]
             .align_items(Alignment::Center)
             .spacing(8),
@@ -302,4 +323,22 @@ fn update_attrs<'a, T: Edit<'a>>(editor: &mut T, attrs: Attrs<'a>) {
     editor.buffer_mut().lines.iter_mut().for_each(|line| {
         line.set_attrs_list(AttrsList::new(attrs));
     });
+}
+
+fn update_alignment<'a, T: Edit<'a>>(editor: &mut T, align: Align) {
+    let current_line = editor.cursor().line;
+    if let Some(select) = editor.select_opt() {
+        let (start, end) = match select.line.cmp(&current_line) {
+            std::cmp::Ordering::Greater => (current_line, select.line),
+            std::cmp::Ordering::Less => (select.line, current_line),
+            std::cmp::Ordering::Equal => (current_line, current_line),
+        };
+        editor.buffer_mut().lines.get_mut(start..=end).map(|lines| {
+            for line in lines.iter_mut() {
+                line.set_align(Some(align));
+            }
+        });
+    } else if let Some(line) = editor.buffer_mut().lines.get_mut(current_line) {
+        line.set_align(Some(align));
+    }
 }

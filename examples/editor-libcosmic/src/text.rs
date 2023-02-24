@@ -8,6 +8,7 @@ use cosmic::{
         widget::{self, tree, Widget},
         {Color, Element, Length, Point, Rectangle, Size},
     },
+    iced_winit::renderer::BorderRadius,
     theme::Theme,
 };
 use cosmic_text::{Attrs, AttrsList, BufferLine, Metrics, SwashCache};
@@ -100,6 +101,7 @@ where
             self.metrics.font_size,
             limits.max().width as i32,
             self.line.wrap(),
+            self.line.align(),
         );
 
         let mut width = 0;
@@ -139,7 +141,7 @@ where
             renderer.fill_quad(
                 renderer::Quad {
                     bounds: layout.bounds(),
-                    border_radius: 0.0,
+                    border_radius: BorderRadius::default(),
                     border_width: 0.0,
                     border_color: Color::TRANSPARENT,
                 },
@@ -160,7 +162,12 @@ where
         let shape = self.line.shape_opt().as_ref().unwrap();
 
         //TODO: can we cache this?
-        let layout_lines = shape.layout(self.metrics.font_size, layout_w, self.line.wrap());
+        let layout_lines = shape.layout(
+            self.metrics.font_size,
+            layout_w,
+            self.line.wrap(),
+            self.line.align(),
+        );
 
         let mut cache = state.cache.lock().unwrap();
 

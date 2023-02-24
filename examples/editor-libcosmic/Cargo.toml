@@ -15,7 +15,7 @@ log = "0.4"
 
 [dependencies.libcosmic]
 git = "https://github.com/pop-os/libcosmic"
-rev = "5fe44511"
+rev = "2dde95ee"
 default-features = false
 features = ["wgpu", "winit"]
 #path = "../../../libcosmic"
