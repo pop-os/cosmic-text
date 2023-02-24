@@ -207,7 +207,7 @@ impl<'a, 'b> LayoutRunIter<'a, 'b> {
             line_i: 0,
             layout_i: 0,
             remaining_len: bottom_cropped_layout_lines as usize,
-            line_y: buffer.metrics.font_size - buffer.metrics.line_height,
+            line_y: buffer.metrics.y_offset(),
             total_layout: 0,
         }
     }
@@ -234,7 +234,7 @@ impl<'a, 'b> Iterator for LayoutRunIter<'a, 'b> {
                 }
 
                 self.line_y += self.buffer.metrics.line_height;
-                if self.line_y > self.buffer.height {
+                if self.line_y - self.buffer.metrics.y_offset() > self.buffer.height {
                     return None;
                 }
 
@@ -280,6 +280,10 @@ impl Metrics {
             font_size: self.font_size * scale,
             line_height: self.line_height * scale,
         }
+    }
+
+    fn y_offset(&self) -> i32 {
+        self.font_size - self.line_height
     }
 }
 
