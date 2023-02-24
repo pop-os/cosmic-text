@@ -104,10 +104,11 @@ impl BufferLine {
     /// Set the text alignment
     ///
     /// Will reset shape and layout if it differs from current alignment.
+    /// Setting to None will use `Align::Right` for RTL lines, and `Align::Left` for LTR lines.
     /// Returns true if the line was reset
-    pub fn set_align(&mut self, align: Align) -> bool {
-        if Some(align) != self.align {
-            self.align = Some(align);
+    pub fn set_align(&mut self, align: Option<Align>) -> bool {
+        if align != self.align {
+            self.align = align;
             self.reset_layout();
             true
         } else {

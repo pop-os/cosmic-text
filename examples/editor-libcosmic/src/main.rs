@@ -334,9 +334,9 @@ fn update_alignment<'a, T: Edit<'a>>(editor: &mut T, align: Align) {
             std::cmp::Ordering::Equal => (current_line, current_line),
         };
         for line in editor.buffer_mut().lines[start..=end].iter_mut() {
-            line.set_align(align);
+            line.set_align(Some(align));
         }
     } else if let Some(line) = editor.buffer_mut().lines.get_mut(current_line) {
-        line.set_align(align);
+        line.set_align(Some(align));
     }
 }
