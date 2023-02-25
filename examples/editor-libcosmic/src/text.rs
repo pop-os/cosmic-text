@@ -102,6 +102,7 @@ where
             limits.max().width as i32,
             self.line.wrap(),
             self.line.align(),
+            cosmic_text::Ellipsize::None,
         );
 
         let mut width = 0;
@@ -167,6 +168,7 @@ where
             layout_w,
             self.line.wrap(),
             self.line.align(),
+            cosmic_text::Ellipsize::None,
         );
 
         let mut cache = state.cache.lock().unwrap();

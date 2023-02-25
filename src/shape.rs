@@ -9,7 +9,9 @@ use unicode_script::{Script, UnicodeScript};
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::fallback::FontFallbackIter;
-use crate::{Align, AttrsList, CacheKey, Color, Font, FontSystem, LayoutGlyph, LayoutLine, Wrap};
+use crate::{
+    Align, AttrsList, CacheKey, Color, Ellipsize, Font, FontSystem, LayoutGlyph, LayoutLine, Wrap,
+};
 
 fn shape_fallback(
     font: &Font,
@@ -428,6 +430,7 @@ impl ShapeSpan {
 pub struct ShapeLine {
     pub rtl: bool,
     pub spans: Vec<ShapeSpan>,
+    ellipsis: ShapeSpan,
 }
 
 // Visual Line Ranges: (span_index, (first_word_index, first_glyph_index), (last_word_index, last_glyph_index))
@@ -486,7 +489,20 @@ impl ShapeLine {
             line_rtl
         };
 
-        Self { rtl, spans }
+        let ellipsis = ShapeSpan::new(
+            font_system,
+            "…",
+            attrs_list,
+            0..3,
+            false,
+            unicode_bidi::LTR_LEVEL,
+        );
+
+        Self {
+            rtl,
+            spans,
+            ellipsis,
+        }
     }
 
     // A modified version of first part of unicode_bidi::bidi_info::visual_run
@@ -612,6 +628,7 @@ impl ShapeLine {
         line_width: i32,
         wrap: Wrap,
         align: Option<Align>,
+        ellipsize: Ellipsize,
     ) -> Vec<LayoutLine> {
         let mut layout_lines = Vec::with_capacity(1);
 
@@ -634,7 +651,6 @@ impl ShapeLine {
         }
         // For each visual line a list of  (span index,  and range of words in that span)
         // Note that a BiDi visual line could have multiple spans or parts of them
-        // let mut vl_range_of_spans = Vec::with_capacity(1);
         let mut vl_range_of_spans: Vec<VisualLine> = Vec::with_capacity(1);
 
         let start_x = if self.rtl { line_width as f32 } else { 0.0 };
@@ -645,10 +661,9 @@ impl ShapeLine {
         // This would keep the maximum number of spans that would fit on a visual line
         // If one span is too large, this variable will hold the range of words inside that span
         // that fits on a line.
-        // let mut current_visual_line: Vec<VlRange> = Vec::with_capacity(1);
         let mut current_visual_line = VisualLine::default();
 
-        if wrap == Wrap::None {
+        if wrap == Wrap::None && ellipsize == Ellipsize::None {
             for (span_index, span) in self.spans.iter().enumerate() {
                 current_visual_line
                     .ranges
@@ -656,7 +671,7 @@ impl ShapeLine {
             }
         } else {
             let mut fit_x = line_width as f32;
-            for (span_index, span) in self.spans.iter().enumerate() {
+            'out_spans: for (span_index, span) in self.spans.iter().enumerate() {
                 let mut word_ranges = Vec::new();
                 let mut word_range_width = 0.;
                 let mut number_of_blanks = 0;

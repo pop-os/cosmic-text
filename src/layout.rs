@@ -71,6 +71,19 @@ pub enum Wrap {
     Word,
 }
 
+/// Ellipsize mode
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
+pub enum Ellipsize {
+    /// No Ellipsize
+    None,
+    /// Ellipsis at the start
+    Start,
+    /// Ellipsis in the middle
+    Middle,
+    /// Ellipsis at the end
+    End,
+}
+
 impl Display for Wrap {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
