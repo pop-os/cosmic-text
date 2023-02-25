@@ -71,17 +71,30 @@ pub enum Wrap {
     Word,
 }
 
-/// Ellipsize mode
+/// The maximum allowed number of lines before ellipsizing
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
+pub enum HeightLimit {
+    /// Default is a single line
+    Default,
+    /// Number of maximum lines allowed, `Line(0)`, or `Line(1)`, would be the same as `Default`,
+    /// which is a single line. The ellipsis will show at the end of the last line.
+    Lines(u8),
+    /// The amount of text is limited to the current buffer height. Depending on the font size,
+    /// fewer or more lines will be displayed.
+    Height,
+}
+
+/// Ellipsize mode, `Start` and `End` respect the paragraph text direction
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum Ellipsize {
     /// No Ellipsize
     None,
-    /// Ellipsis at the start
+    /// Ellipsis at the start, will create a single line with ellipsis at the start
     Start,
-    /// Ellipsis in the middle
+    /// Ellipsis in the middle, will create a single line with ellipsis in the middle
     Middle,
-    /// Ellipsis at the end
-    End,
+    /// Ellipsis at the end, can create one, or more lines depending on the `HeighLimit`
+    End(HeightLimit),
 }
 
 impl Display for Wrap {
