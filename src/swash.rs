@@ -13,7 +13,7 @@ use swash::zeno::{Format, Vector};
 use crate::{CacheKey, Color, FontSystem};
 
 pub use swash::scale::image::{Content as SwashContent, Image as SwashImage};
-pub use swash::zeno::Command;
+pub use swash::zeno::{Command, Placement};
 
 fn swash_image(
     font_system: &FontSystem,
