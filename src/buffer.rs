@@ -5,7 +5,7 @@ use alloc::{
     string::{String, ToString},
     vec::Vec,
 };
-use core::{cmp, fmt};
+use core::{cmp, fmt, ops::{Deref, DerefMut}};
 use unicode_segmentation::UnicodeSegmentation;
 
 #[cfg(feature = "swash")]
@@ -295,9 +295,8 @@ impl fmt::Display for Metrics {
     }
 }
 
-/// A buffer of text that is shaped and laid out
-pub struct Buffer<'a> {
-    font_system: &'a FontSystem,
+/// Buffer data for a text that is shaped and laid out
+pub struct BufferData {
     /// [BufferLine]s (or paragraphs) of text in the buffer
     pub lines: Vec<BufferLine>,
     metrics: Metrics,
@@ -309,6 +308,14 @@ pub struct Buffer<'a> {
     wrap: Wrap,
 }
 
+/// A buffer of text that is shaped and laid out
+/// 
+/// See [`BufferData`] for publicly accessible fields
+pub struct Buffer<'a> {
+    font_system: &'a FontSystem,
+    data: BufferData,
+}
+
 impl<'a> Buffer<'a> {
     /// Create a new [`Buffer`] with the provided [`FontSystem`] and [`Metrics`]
     ///
@@ -318,8 +325,7 @@ impl<'a> Buffer<'a> {
     pub fn new(font_system: &'a FontSystem, metrics: Metrics) -> Self {
         assert_ne!(metrics.line_height, 0.0, "line height cannot be 0");
 
-        let mut buffer = Self {
-            font_system,
+        let data = BufferData {
             lines: Vec::new(),
             metrics,
             width: 0.0,
@@ -328,22 +334,37 @@ impl<'a> Buffer<'a> {
             redraw: false,
             wrap: Wrap::Word,
         };
+        let mut buffer = Self {
+            font_system,
+            data
+        };
         buffer.set_text("", Attrs::new());
         buffer
     }
+
+    pub fn from_data(font_system: &'a FontSystem, data: BufferData) -> Self {
+        Self {
+            font_system,
+            data
+        }
+    }
+
+    pub fn into_data(self) -> BufferData {
+        self.data
+    } 
 
     fn relayout(&mut self) {
         #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
         let instant = std::time::Instant::now();
 
-        for line in &mut self.lines {
+        for line in &mut self.data.lines {
             if line.shape_opt().is_some() {
                 line.reset_layout();
                 line.layout(
                     self.font_system,
-                    self.metrics.font_size,
-                    self.width,
-                    self.wrap,
+                    self.data.metrics.font_size,
+                    self.data.width,
+                    self.data.wrap,
                 );
             }
         }
@@ -361,7 +382,7 @@ impl<'a> Buffer<'a> {
 
         let mut reshaped = 0;
         let mut total_layout = 0;
-        for line in &mut self.lines {
+        for line in &mut self.data.lines {
             if total_layout >= lines {
                 break;
             }
@@ -371,9 +392,9 @@ impl<'a> Buffer<'a> {
             }
             let layout = line.layout(
                 self.font_system,
-                self.metrics.font_size,
-                self.width,
-                self.wrap,
+                self.data.metrics.font_size,
+                self.data.width,
+                self.data.wrap,
             );
             total_layout += layout.len() as i32;
         }
@@ -394,7 +415,7 @@ impl<'a> Buffer<'a> {
 
         let mut reshaped = 0;
         let mut layout_i = 0;
-        for (line_i, line) in self.lines.iter_mut().enumerate() {
+        for (line_i, line) in self.data.lines.iter_mut().enumerate() {
             if line_i > cursor.line {
                 break;
             }
@@ -404,9 +425,9 @@ impl<'a> Buffer<'a> {
             }
             let layout = line.layout(
                 self.font_system,
-                self.metrics.font_size,
-                self.width,
-                self.wrap,
+                self.data.metrics.font_size,
+                self.data.width,
+                self.data.wrap,
             );
             if line_i == cursor.line {
                 let layout_cursor = self.layout_cursor(&cursor);
@@ -480,18 +501,18 @@ impl<'a> Buffer<'a> {
 
     /// Shape the provided line index and return the result
     pub fn line_shape(&mut self, line_i: usize) -> Option<&ShapeLine> {
-        let line = self.lines.get_mut(line_i)?;
+        let line = self.data.lines.get_mut(line_i)?;
         Some(line.shape(self.font_system))
     }
 
     /// Lay out the provided line index and return the result
     pub fn line_layout(&mut self, line_i: usize) -> Option<&[LayoutLine]> {
-        let line = self.lines.get_mut(line_i)?;
+        let line = self.data.lines.get_mut(line_i)?;
         Some(line.layout(
             self.font_system,
-            self.metrics.font_size,
-            self.width,
-            self.wrap,
+            self.data.metrics.font_size,
+            self.data.width,
+            self.data.wrap,
         ))
     }
 
@@ -718,5 +739,19 @@ impl<'a> Buffer<'a> {
                 });
             }
         }
+    }
+}
+
+impl<'a> Deref for Buffer<'a> {
+    type Target = BufferData;
+
+    fn deref(&self) -> &Self::Target {
+        &self.data
+    }
+}
+
+impl<'a> DerefMut for Buffer<'a> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.data
     }
 }
