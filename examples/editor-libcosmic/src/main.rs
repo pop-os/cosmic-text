@@ -74,7 +74,7 @@ impl fmt::Display for FontSize {
     }
 }
 
-static WRAP_MODE: &'static [Wrap] = &[Wrap::None, Wrap::Glyph, Wrap::Word];
+static WRAP_MODE: &[Wrap] = &[Wrap::None, Wrap::Glyph, Wrap::Word];
 
 fn main() -> cosmic::iced::Result {
     env_logger::init();
@@ -274,7 +274,7 @@ impl Application for Window {
     }
 
     fn view(&self) -> Element<Message> {
-        static THEMES: &'static [&'static str] = &["Dark", "Light"];
+        static THEMES: &[&str] = &["Dark", "Light"];
         let theme_picker = pick_list(
             THEMES,
             Some(match self.theme {
@@ -375,11 +375,11 @@ fn update_alignment<'a, T: Edit<'a>>(editor: &mut T, align: Align) {
             std::cmp::Ordering::Less => (select.line, current_line),
             std::cmp::Ordering::Equal => (current_line, current_line),
         };
-        editor.buffer_mut().lines.get_mut(start..=end).map(|lines| {
+        if let Some(lines) = editor.buffer_mut().lines.get_mut(start..=end) {
             for line in lines.iter_mut() {
                 line.set_align(Some(align));
             }
-        });
+        }
     } else if let Some(line) = editor.buffer_mut().lines.get_mut(current_line) {
         line.set_align(Some(align));
     }
