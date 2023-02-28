@@ -192,7 +192,11 @@ impl<'a, 'b> LayoutRunIter<'a, 'b> {
             .sum();
         let top_cropped_layout_lines =
             total_layout_lines.saturating_sub(buffer.scroll.try_into().unwrap_or_default());
-        let maximum_lines = (buffer.height / buffer.metrics.line_height) as i32;
+        let maximum_lines = if buffer.metrics.line_height == 0.0 {
+            0
+        } else {
+            (buffer.height / buffer.metrics.line_height) as i32
+        };
         let bottom_cropped_layout_lines =
             if top_cropped_layout_lines > maximum_lines.try_into().unwrap_or_default() {
                 maximum_lines.try_into().unwrap_or_default()
