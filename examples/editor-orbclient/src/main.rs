@@ -14,7 +14,7 @@ fn main() {
     env_logger::init();
 
     let path = if let Some(arg) = env::args().nth(1) {
-        arg.clone()
+        arg
     } else {
         String::new()
     };
@@ -35,7 +35,7 @@ fn main() {
         -1,
         1024 * display_scale as u32,
         768 * display_scale as u32,
-        &format!("COSMIC Text - {}", path),
+        &format!("COSMIC Text - {path}"),
         &[WindowFlag::Resizable],
     )
     .unwrap();
@@ -110,7 +110,7 @@ fn main() {
                 let mut end_line = 0;
                 for run in editor.buffer().layout_runs() {
                     end_line = run.line_i;
-                    if start_line_opt == None {
+                    if start_line_opt.is_none() {
                         start_line_opt = Some(end_line);
                     }
                 }

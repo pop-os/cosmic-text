@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic_text::{Attrs, Buffer, Color, FontSystem, Metrics, SwashCache};
-use std::cmp;
+use std::cmp::{self, Ordering};
 use termion::{color, cursor};
 
 fn main() {
@@ -66,21 +66,29 @@ fn main() {
         let scale = |c: u8| cmp::max(0, cmp::min(255, ((c as i32) * (a as i32)) / 255)) as u8;
 
         // Navigate to x coordinate
-        if x > last_x {
-            print!("{}", cursor::Right((x - last_x) as u16));
-            last_x = x;
-        } else if x < last_x {
-            print!("{}", cursor::Left((last_x - x) as u16));
-            last_x = x;
+        match x.cmp(&last_x) {
+            Ordering::Greater => {
+                print!("{}", cursor::Right((x - last_x) as u16));
+                last_x = x;
+            }
+            Ordering::Less => {
+                print!("{}", cursor::Left((last_x - x) as u16));
+                last_x = x;
+            }
+            Ordering::Equal => {}
         }
 
         // Navigate to y coordinate
-        if y > last_y {
-            print!("{}", cursor::Down((y - last_y) as u16));
-            last_y = y;
-        } else if y < last_y {
-            print!("{}", cursor::Up((last_y - y) as u16));
-            last_y = y;
+        match y.cmp(&last_y) {
+            Ordering::Greater => {
+                print!("{}", cursor::Down((y - last_y) as u16));
+                last_y = y;
+            }
+            Ordering::Less => {
+                print!("{}", cursor::Up((last_y - y) as u16));
+                last_y = y;
+            }
+            Ordering::Equal => {}
         }
 
         // Print a space with the expected color as the background

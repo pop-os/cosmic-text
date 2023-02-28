@@ -62,7 +62,7 @@ impl<'a, Editor> TextBox<'a, Editor> {
     }
 }
 
-pub fn text_box<'a, Editor>(editor: &'a Mutex<Editor>) -> TextBox<'a, Editor> {
+pub fn text_box<Editor>(editor: &Mutex<Editor>) -> TextBox<Editor> {
     TextBox::new(editor)
 }
 
@@ -174,7 +174,7 @@ where
             &mut state.cache.lock().unwrap(),
             text_color,
             |x, y, w, h, color| {
-                if w <= 0 || h <= 0 {
+                if w == 0 || h == 0 {
                     // Do not draw invalid sized rectangles
                     return;
                 }
@@ -235,10 +235,7 @@ where
 
         let mut status = Status::Ignored;
         match event {
-            Event::Keyboard(KeyEvent::KeyPressed {
-                key_code,
-                modifiers,
-            }) => match key_code {
+            Event::Keyboard(KeyEvent::KeyPressed { key_code, .. }) => match key_code {
                 KeyCode::Left => {
                     editor.action(Action::Left);
                     status = Status::Captured;
@@ -318,15 +315,14 @@ where
                     status = Status::Captured;
                 }
             }
-            Event::Mouse(MouseEvent::WheelScrolled { delta }) => match delta {
-                ScrollDelta::Lines { x, y } => {
-                    editor.action(Action::Scroll {
-                        lines: (-y * 6.0) as i32,
-                    });
-                    status = Status::Captured;
-                }
-                _ => (),
-            },
+            Event::Mouse(MouseEvent::WheelScrolled {
+                delta: ScrollDelta::Lines { y, .. },
+            }) => {
+                editor.action(Action::Scroll {
+                    lines: (-y * 6.0) as i32,
+                });
+                status = Status::Captured;
+            }
             _ => (),
         }
 

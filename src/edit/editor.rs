@@ -2,7 +2,10 @@
 
 #[cfg(not(feature = "std"))]
 use alloc::string::String;
-use core::{cmp, iter::once};
+use core::{
+    cmp::{self, Ordering},
+    iter::once,
+};
 use unicode_segmentation::UnicodeSegmentation;
 
 #[cfg(feature = "swash")]
@@ -432,14 +435,18 @@ impl<'a> Edit<'a> for Editor<'a> {
             Action::Vertical(px) => {
                 // TODO more efficient
                 let lines = px / self.buffer.metrics().line_height as i32;
-                if lines < 0 {
-                    for _ in 0..-lines {
-                        self.action(Action::Up);
+                match lines.cmp(&0) {
+                    Ordering::Less => {
+                        for _ in 0..-lines {
+                            self.action(Action::Up);
+                        }
                     }
-                } else if lines > 0 {
-                    for _ in 0..lines {
-                        self.action(Action::Down);
+                    Ordering::Greater => {
+                        for _ in 0..lines {
+                            self.action(Action::Down);
+                        }
                     }
+                    Ordering::Equal => {}
                 }
             }
             Action::Escape => {
@@ -583,7 +590,7 @@ impl<'a> Edit<'a> for Editor<'a> {
                 } else if self.cursor.line > 0 {
                     self.cursor.line -= 1;
                     self.cursor.index = self.buffer.lines[self.cursor.line].text().len();
-                    self.buffer.set_redraw(true)
+                    self.buffer.set_redraw(true);
                 }
                 self.cursor_x_opt = None;
             }

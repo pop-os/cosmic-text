@@ -131,9 +131,8 @@ fn main() {
         redraw(&mut window, &mut editor, &mut swash_cache);
 
         for event in window.events() {
-            match event.to_option() {
-                EventOption::Quit(_) => process::exit(1),
-                _ => (),
+            if let EventOption::Quit(_) = event.to_option() {
+                process::exit(1)
             }
         }
     }

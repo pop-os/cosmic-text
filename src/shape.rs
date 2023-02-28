@@ -115,8 +115,8 @@ fn shape_fallback(
     (glyphs, missing)
 }
 
-fn shape_run<'a>(
-    font_system: &'a FontSystem,
+fn shape_run(
+    font_system: &FontSystem,
     line: &str,
     attrs_list: &AttrsList,
     start_run: usize,
@@ -295,8 +295,8 @@ pub struct ShapeWord {
 }
 
 impl ShapeWord {
-    pub fn new<'a>(
-        font_system: &'a FontSystem,
+    pub fn new(
+        font_system: &FontSystem,
         line: &str,
         attrs_list: &AttrsList,
         word_range: Range<usize>,
@@ -370,8 +370,8 @@ pub struct ShapeSpan {
 }
 
 impl ShapeSpan {
-    pub fn new<'a>(
-        font_system: &'a FontSystem,
+    pub fn new(
+        font_system: &FontSystem,
         line: &str,
         attrs_list: &AttrsList,
         span_range: Range<usize>,
@@ -462,7 +462,10 @@ pub struct ShapeLine {
 type VlRange = (usize, (usize, usize), (usize, usize));
 
 impl ShapeLine {
-    pub fn new<'a>(font_system: &'a FontSystem, line: &str, attrs_list: &AttrsList) -> Self {
+    /// # Panics
+    ///
+    /// Will panic if `line` contains more than one paragraph.
+    pub fn new(font_system: &FontSystem, line: &str, attrs_list: &AttrsList) -> Self {
         let mut spans = Vec::new();
 
         let bidi = unicode_bidi::BidiInfo::new(line, None);
