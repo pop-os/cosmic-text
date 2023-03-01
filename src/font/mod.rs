@@ -8,6 +8,7 @@ pub use self::system::*;
 mod system;
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(not(feature = "swash"), repr(transparent))]
 /// Identifies a [`Font`] in a [`FontSystem`]
 pub struct FontKey {
     pub id: fontdb::ID,
