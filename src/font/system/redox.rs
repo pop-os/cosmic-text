@@ -81,11 +81,11 @@ impl FontSystem {
         }
     }
 
-    pub fn get_font_key(&self, id: fontdb::ID) -> Option<FontKey> {
+    pub fn get_font_key(&mut self, id: fontdb::ID) -> Option<FontKey> {
         Some(Font::new(self.db.face(id)?)?.key())
     }
 
-    pub fn get_font_matches<'a>(&'a self, attrs: Attrs) -> Arc<Vec<FontKey>> {
+    pub fn get_font_matches(&mut self, attrs: Attrs) -> Arc<Vec<FontKey>> {
         let mut font_keys = Vec::new();
         for face in self.db.faces() {
             if !attrs.matches(face) {

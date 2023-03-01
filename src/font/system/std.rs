@@ -2,10 +2,7 @@
 
 #[cfg(feature = "swash")]
 use std::collections::hash_map::Entry;
-use std::{
-    collections::HashMap,
-    sync::{Arc, Mutex},
-};
+use std::{collections::HashMap, sync::Arc};
 
 use crate::{Attrs, AttrsOwned, Font, FontKey};
 
@@ -13,9 +10,9 @@ use crate::{Attrs, AttrsOwned, Font, FontKey};
 pub struct FontSystem {
     locale: String,
     db: fontdb::Database,
-    font_matches_cache: Mutex<HashMap<AttrsOwned, Arc<Vec<FontKey>>>>,
+    font_matches_cache: HashMap<AttrsOwned, Arc<Vec<FontKey>>>,
     #[cfg(feature = "swash")]
-    font_key_cache: Mutex<HashMap<fontdb::ID, Option<FontKey>>>,
+    font_key_cache: HashMap<fontdb::ID, Option<FontKey>>,
 }
 
 impl FontSystem {
@@ -88,9 +85,9 @@ impl FontSystem {
         Self {
             locale,
             db,
-            font_matches_cache: Mutex::new(HashMap::new()),
+            font_matches_cache: HashMap::new(),
             #[cfg(feature = "swash")]
-            font_key_cache: Mutex::new(HashMap::new()),
+            font_key_cache: HashMap::new(),
         }
     }
 
@@ -119,34 +116,18 @@ impl FontSystem {
         }
     }
 
-    #[cfg(feature = "swash")]
-    pub fn get_font_key(&self, id: fontdb::ID) -> Option<FontKey> {
-        let mut font_key_cache = self
-            .font_key_cache
-            .lock()
-            .expect("failed to lock font matches cache");
-        match font_key_cache.entry(id) {
-            Entry::Occupied(entry) => *entry.get(),
-            Entry::Vacant(entry) => {
-                let key = self.db.face(id).and_then(Font::new).as_ref().map(Font::key);
-                entry.insert(key);
-                key
-            }
-        }
+    pub fn get_font_key(&mut self, id: fontdb::ID) -> Option<FontKey> {
+        get_font_key(
+            &self.db,
+            id,
+            #[cfg(feature = "swash")]
+            &mut self.font_key_cache,
+        )
     }
 
-    #[cfg(not(feature = "swash"))]
-    pub fn get_font_key(&self, id: fontdb::ID) -> Option<FontKey> {
-        Some(Font::new(self.db.face(id)?)?.key())
-    }
-
-    pub fn get_font_matches(&self, attrs: Attrs) -> Arc<Vec<FontKey>> {
-        let mut font_matches_cache = self
-            .font_matches_cache
-            .lock()
-            .expect("failed to lock font matches cache");
+    pub fn get_font_matches(&mut self, attrs: Attrs) -> Arc<Vec<FontKey>> {
         //TODO: do not create AttrsOwned unless entry does not already exist
-        font_matches_cache
+        self.font_matches_cache
             .entry(AttrsOwned::new(attrs))
             .or_insert_with(|| {
                 #[cfg(not(target_arch = "wasm32"))]
@@ -158,7 +139,12 @@ impl FontSystem {
                         continue;
                     }
 
-                    if let Some(key) = self.get_font_key(face.id) {
+                    if let Some(key) = get_font_key(
+                        &self.db,
+                        face.id,
+                        #[cfg(feature = "swash")]
+                        &mut self.font_key_cache,
+                    ) {
                         font_keys.push(key);
                     }
                 }
@@ -173,4 +159,25 @@ impl FontSystem {
             })
             .clone()
     }
+}
+
+#[cfg(feature = "swash")]
+pub fn get_font_key(
+    db: &fontdb::Database,
+    id: fontdb::ID,
+    font_key_cache: &mut HashMap<fontdb::ID, Option<FontKey>>,
+) -> Option<FontKey> {
+    match font_key_cache.entry(id) {
+        Entry::Occupied(entry) => *entry.get(),
+        Entry::Vacant(entry) => {
+            let key = db.face(id).and_then(Font::new).as_ref().map(Font::key);
+            entry.insert(key);
+            key
+        }
+    }
+}
+
+#[cfg(not(feature = "swash"))]
+pub fn get_font_key(db: &fontdb::Database, id: fontdb::ID) -> Option<FontKey> {
+    Some(Font::new(db.face(id)?)?.key())
 }

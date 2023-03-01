@@ -53,7 +53,7 @@ impl Text {
         let mut line = BufferLine::new(string, AttrsList::new(Attrs::new()));
 
         //TODO: do we have to immediately shape?
-        line.shape(&crate::FONT_SYSTEM.lock().unwrap());
+        line.shape(&mut crate::FONT_SYSTEM.lock().unwrap());
 
         let text = Self {
             line,
