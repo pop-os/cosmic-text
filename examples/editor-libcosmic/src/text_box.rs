@@ -348,7 +348,7 @@ where
 
 pub struct State {
     is_dragging: bool,
-    cache: Mutex<SwashCache<'static>>,
+    cache: Mutex<SwashCache>,
 }
 
 impl State {
@@ -356,7 +356,7 @@ impl State {
     pub fn new() -> State {
         State {
             is_dragging: false,
-            cache: Mutex::new(SwashCache::new(&crate::FONT_SYSTEM)),
+            cache: Mutex::new(SwashCache::new()),
         }
     }
 }

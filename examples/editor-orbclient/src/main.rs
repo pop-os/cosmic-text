@@ -79,7 +79,7 @@ fn main() {
         }
     }
 
-    let mut swash_cache = SwashCache::new(&font_system);
+    let mut swash_cache = SwashCache::new();
 
     let mut ctrl_pressed = false;
     let mut mouse_x = -1;

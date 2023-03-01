@@ -144,7 +144,7 @@ fn main() {
             .push(BufferLine::new(line_text, attrs_list));
     }
 
-    let mut swash_cache = SwashCache::new(&font_system);
+    let mut swash_cache = SwashCache::new();
 
     //TODO: make window not async?
     let mut mouse_x = -1;
