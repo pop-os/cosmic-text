@@ -71,8 +71,7 @@ impl FontSystem {
             let now = std::time::Instant::now();
 
             //TODO only do this on demand!
-            for i in 0..db.faces().len() {
-                let id = db.faces()[i].id;
+            for id in db.faces().map(|face| face.id).collect::<Vec<_>>() {
                 unsafe {
                     db.make_shared_face_data(id);
                 }
