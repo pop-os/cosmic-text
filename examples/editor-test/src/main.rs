@@ -59,7 +59,7 @@ fn main() {
 
     let mut editor = Editor::new(buffer);
 
-    let mut swash_cache = SwashCache::new(&font_system);
+    let mut swash_cache = SwashCache::new();
 
     let text = if let Some(arg) = env::args().nth(1) {
         fs::read_to_string(&arg).expect("failed to open file")

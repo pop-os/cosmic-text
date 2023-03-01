@@ -14,6 +14,8 @@ use cosmic::{
 use cosmic_text::{Attrs, AttrsList, BufferLine, Metrics, SwashCache};
 use std::{cmp, sync::Mutex, time::Instant};
 
+use crate::FONT_SYSTEM;
+
 pub struct Appearance {
     background_color: Option<Color>,
     text_color: Color,
@@ -183,11 +185,16 @@ where
                     None => text_color,
                 };
 
-                cache.with_pixels(cache_key, glyph_color, |pixel_x, pixel_y, color| {
-                    let x = x_int + pixel_x;
-                    let y = line_y as i32 + y_int + pixel_y;
-                    draw_pixel(&mut pixels, layout_w as i32, layout_h as i32, x, y, color);
-                });
+                cache.with_pixels(
+                    &FONT_SYSTEM,
+                    cache_key,
+                    glyph_color,
+                    |pixel_x, pixel_y, color| {
+                        let x = x_int + pixel_x;
+                        let y = line_y as i32 + y_int + pixel_y;
+                        draw_pixel(&mut pixels, layout_w as i32, layout_h as i32, x, y, color);
+                    },
+                );
             }
             line_y += self.metrics.line_height;
         }
@@ -259,7 +266,7 @@ where
 }
 
 pub struct State {
-    cache: Mutex<SwashCache<'static>>,
+    cache: Mutex<SwashCache>,
 }
 
 impl State {
@@ -268,7 +275,7 @@ impl State {
         let instant = Instant::now();
 
         let state = State {
-            cache: Mutex::new(SwashCache::new(&crate::FONT_SYSTEM)),
+            cache: Mutex::new(SwashCache::new()),
         };
 
         log::debug!("created state in {:?}", instant.elapsed());
