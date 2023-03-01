@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use crate::editor;
+use crate::{editor, FONT_SYSTEM};
 
 use super::text;
 use cosmic::{
@@ -94,7 +94,8 @@ where
 
         //TODO: allow lazy shape
         let mut buffer_data = self.buffer_data.lock().unwrap();
-        let mut editor = editor(&mut buffer_data);
+        let mut font_system = FONT_SYSTEM.lock().unwrap();
+        let mut editor = editor(&mut font_system, &mut buffer_data);
         editor.buffer_mut().shape_until(i32::max_value());
 
         let mut layout_lines = 0;
@@ -161,7 +162,8 @@ where
         );
 
         let mut buffer_data = self.buffer_data.lock().unwrap();
-        let mut editor = editor(&mut buffer_data);
+        let mut font_system = FONT_SYSTEM.lock().unwrap();
+        let mut editor = editor(&mut font_system, &mut buffer_data);
 
         let view_w = viewport.width.min(layout.bounds().width) - self.padding.horizontal() as f32;
         let view_h = viewport.height.min(layout.bounds().height) - self.padding.vertical() as f32;
@@ -235,7 +237,8 @@ where
     ) -> Status {
         let state = tree.state.downcast_mut::<State>();
         let mut buffer_data = self.buffer_data.lock().unwrap();
-        let mut editor = editor(&mut buffer_data);
+        let mut font_system = FONT_SYSTEM.lock().unwrap();
+        let mut editor = editor(&mut font_system, &mut buffer_data);
 
         let mut status = Status::Ignored;
         match event {

@@ -13,7 +13,7 @@ use std::{
 fn main() {
     env_logger::init();
 
-    let font_system = FontSystem::new();
+    let mut font_system = FontSystem::new();
 
     let display_scale = match orbclient::get_display_size() {
         Ok((w, h)) => {
@@ -36,10 +36,12 @@ fn main() {
     )
     .unwrap();
 
-    let mut buffer_data =
-        BufferData::new(&font_system, Metrics::new(32.0, 44.0).scale(display_scale));
+    let mut buffer_data = BufferData::new(
+        &mut font_system,
+        Metrics::new(32.0, 44.0).scale(display_scale),
+    );
 
-    let mut editor = Editor::new(Buffer::new(&font_system, &mut buffer_data));
+    let mut editor = Editor::new(Buffer::new(&mut font_system, &mut buffer_data));
 
     editor
         .buffer_mut()

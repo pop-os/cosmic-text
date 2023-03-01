@@ -34,7 +34,7 @@ fn main() {
     env_logger::init();
 
     let display_scale = 1.0;
-    let font_system = FontSystem::new();
+    let mut font_system = FontSystem::new();
 
     let mut window = Window::new_flags(
         -1,
@@ -56,8 +56,8 @@ fn main() {
     ];
     let font_size_default = 1; // Body
 
-    let mut buffer_data = BufferData::new(&font_system, font_sizes[font_size_default]);
-    let mut buffer = Buffer::new(&font_system, &mut buffer_data);
+    let mut buffer_data = BufferData::new(&mut font_system, font_sizes[font_size_default]);
+    let mut buffer = Buffer::new(&mut font_system, &mut buffer_data);
     buffer.set_size(window.width() as f32, window.height() as f32);
 
     let mut editor = Editor::new(buffer);

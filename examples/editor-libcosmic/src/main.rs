@@ -24,7 +24,7 @@ use self::text_box::text_box;
 mod text_box;
 
 lazy_static::lazy_static! {
-    static ref FONT_SYSTEM: FontSystem = FontSystem::new();
+    static ref FONT_SYSTEM: Mutex<FontSystem> = Mutex::new(FontSystem::new());
     static ref SYNTAX_SYSTEM: SyntaxSystem = SyntaxSystem::new();
 }
 
@@ -114,9 +114,9 @@ type Editor<'a> = SyntaxEditor<'a>;
 type Editor<'a> = cosmic_text::ViEditor<'a>;
 
 #[cfg(not(feature = "vi"))]
-fn editor(buffer_data: &mut BufferData) -> Editor {
+fn editor<'a>(font_system: &'a mut FontSystem, buffer_data: &'a mut BufferData) -> Editor<'a> {
     let editor = SyntaxEditor::new(
-        Buffer::new(&FONT_SYSTEM, buffer_data),
+        Buffer::new(font_system, buffer_data),
         &SYNTAX_SYSTEM,
         "base16-eighties.dark",
     )
@@ -131,7 +131,8 @@ fn editor(buffer_data: &mut BufferData) -> Editor {
 impl Window {
     pub fn open(&mut self, path: PathBuf) {
         let mut buffer_data = self.buffer_data.lock().unwrap();
-        let mut editor = editor(&mut buffer_data);
+        let mut font_system = FONT_SYSTEM.lock().unwrap();
+        let mut editor = editor(&mut font_system, &mut buffer_data);
         match editor.load_text(&path, self.attrs) {
             Ok(()) => {
                 log::info!("opened '{}'", path.display());
@@ -156,10 +157,12 @@ impl Application for Window {
             .monospaced(true)
             .family(cosmic_text::Family::Monospace);
 
-        let mut buffer_data = BufferData::new(&FONT_SYSTEM, FontSize::Body.to_metrics());
+        let mut font_system = FONT_SYSTEM.lock().unwrap();
+
+        let mut buffer_data = BufferData::new(&mut font_system, FontSize::Body.to_metrics());
 
         let mut editor = SyntaxEditor::new(
-            Buffer::new(&FONT_SYSTEM, &mut buffer_data),
+            Buffer::new(&mut font_system, &mut buffer_data),
             &SYNTAX_SYSTEM,
             "base16-eighties.dark",
         )
@@ -191,11 +194,11 @@ impl Application for Window {
         if let Some(path) = &self.path_opt {
             format!(
                 "COSMIC Text - {} - {}",
-                FONT_SYSTEM.locale(),
+                FONT_SYSTEM.lock().unwrap().locale(),
                 path.display()
             )
         } else {
-            format!("COSMIC Text - {}", FONT_SYSTEM.locale())
+            format!("COSMIC Text - {}", FONT_SYSTEM.lock().unwrap().locale())
         }
     }
 
@@ -209,7 +212,8 @@ impl Application for Window {
             Message::Save => {
                 if let Some(path) = &self.path_opt {
                     let mut buffer_data = self.buffer_data.lock().unwrap();
-                    let editor = editor(&mut buffer_data);
+                    let mut font_system = FONT_SYSTEM.lock().unwrap();
+                    let editor = editor(&mut font_system, &mut buffer_data);
                     let mut text = String::new();
                     for line in editor.buffer().lines.iter() {
                         text.push_str(line.text());
@@ -233,7 +237,8 @@ impl Application for Window {
                 });
 
                 let mut buffer_data = self.buffer_data.lock().unwrap();
-                let mut editor = editor(&mut buffer_data);
+                let mut font_system = FONT_SYSTEM.lock().unwrap();
+                let mut editor = editor(&mut font_system, &mut buffer_data);
                 update_attrs(&mut editor, self.attrs);
             }
             Message::Italic(italic) => {
@@ -244,7 +249,8 @@ impl Application for Window {
                 });
 
                 let mut buffer_data = self.buffer_data.lock().unwrap();
-                let mut editor = editor(&mut buffer_data);
+                let mut font_system = FONT_SYSTEM.lock().unwrap();
+                let mut editor = editor(&mut font_system, &mut buffer_data);
                 update_attrs(&mut editor, self.attrs);
             }
             Message::Monospaced(monospaced) => {
@@ -258,23 +264,27 @@ impl Application for Window {
                     .monospaced(monospaced);
 
                 let mut buffer_data = self.buffer_data.lock().unwrap();
-                let mut editor = editor(&mut buffer_data);
+                let mut font_system = FONT_SYSTEM.lock().unwrap();
+                let mut editor = editor(&mut font_system, &mut buffer_data);
                 update_attrs(&mut editor, self.attrs);
             }
             Message::FontSizeChanged(font_size) => {
                 self.font_size = font_size;
                 let mut buffer_data = self.buffer_data.lock().unwrap();
-                let mut editor = editor(&mut buffer_data);
+                let mut font_system = FONT_SYSTEM.lock().unwrap();
+                let mut editor = editor(&mut font_system, &mut buffer_data);
                 editor.buffer_mut().set_metrics(font_size.to_metrics());
             }
             Message::WrapChanged(wrap) => {
                 let mut buffer_data = self.buffer_data.lock().unwrap();
-                let mut editor = editor(&mut buffer_data);
+                let mut font_system = FONT_SYSTEM.lock().unwrap();
+                let mut editor = editor(&mut font_system, &mut buffer_data);
                 editor.buffer_mut().set_wrap(wrap);
             }
             Message::AlignmentChanged(align) => {
                 let mut buffer_data = self.buffer_data.lock().unwrap();
-                let mut editor = editor(&mut buffer_data);
+                let mut font_system = FONT_SYSTEM.lock().unwrap();
+                let mut editor = editor(&mut font_system, &mut buffer_data);
                 update_alignment(&mut editor, align);
             }
             Message::ThemeChanged(theme) => {
@@ -294,7 +304,8 @@ impl Application for Window {
                 ));
 
                 let mut buffer_data = self.buffer_data.lock().unwrap();
-                let mut editor = editor(&mut buffer_data);
+                let mut font_system = FONT_SYSTEM.lock().unwrap();
+                let mut editor = editor(&mut font_system, &mut buffer_data);
                 update_attrs(&mut editor, self.attrs);
             }
         }
@@ -315,7 +326,8 @@ impl Application for Window {
 
         let font_size_picker = {
             let mut buffer_data = self.buffer_data.lock().unwrap();
-            let editor = editor(&mut buffer_data);
+            let mut font_system = FONT_SYSTEM.lock().unwrap();
+            let editor = editor(&mut font_system, &mut buffer_data);
             pick_list(
                 FontSize::all(),
                 Some(self.font_size),
@@ -325,7 +337,8 @@ impl Application for Window {
 
         let wrap_picker = {
             let mut buffer_data = self.buffer_data.lock().unwrap();
-            let editor = editor(&mut buffer_data);
+            let mut font_system = FONT_SYSTEM.lock().unwrap();
+            let editor = editor(&mut font_system, &mut buffer_data);
             pick_list(
                 WRAP_MODE,
                 Some(editor.buffer().wrap()),

@@ -315,7 +315,7 @@ pub struct BufferData {
 ///
 /// See [`BufferData`] for publicly accessible fields
 pub struct Buffer<'a> {
-    font_system: &'a FontSystem,
+    font_system: &'a mut FontSystem,
     data: &'a mut BufferData,
 }
 
@@ -325,7 +325,7 @@ impl BufferData {
     /// # Panics
     ///
     /// Will panic if `metrics.line_height` is zero.
-    pub fn new(font_system: &FontSystem, metrics: Metrics) -> Self {
+    pub fn new(font_system: &mut FontSystem, metrics: Metrics) -> Self {
         assert_ne!(metrics.line_height, 0.0, "line height cannot be 0");
 
         let mut data = Self {
@@ -347,7 +347,7 @@ impl BufferData {
 }
 
 impl<'a> Buffer<'a> {
-    pub fn new(font_system: &'a FontSystem, data: &'a mut BufferData) -> Self {
+    pub fn new(font_system: &'a mut FontSystem, data: &'a mut BufferData) -> Self {
         Self { font_system, data }
     }
 
@@ -493,7 +493,7 @@ impl<'a> Buffer<'a> {
     }
 
     /// Get [`FontSystem`] used by this [`Buffer`]
-    pub fn font_system(&self) -> &'a FontSystem {
+    pub fn font_system(&self) -> &FontSystem {
         self.font_system
     }
 

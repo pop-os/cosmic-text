@@ -6,7 +6,7 @@ use termion::{color, cursor};
 
 fn main() {
     // A FontSystem provides access to detected system fonts, create one per application
-    let font_system = FontSystem::new();
+    let mut font_system = FontSystem::new();
 
     // A SwashCache stores rasterized glyphs, create one per application
     let mut swash_cache = SwashCache::new();
@@ -15,9 +15,9 @@ fn main() {
     let metrics = Metrics::new(14.0, 20.0);
 
     // A Buffer provides shaping and layout for a UTF-8 string, create one per text widget
-    let mut buffer_data = BufferData::new(&font_system, metrics);
+    let mut buffer_data = BufferData::new(&mut font_system, metrics);
 
-    let mut buffer = Buffer::new(&font_system, &mut buffer_data);
+    let mut buffer = Buffer::new(&mut font_system, &mut buffer_data);
 
     // Set a size for the text buffer, in pixels
     let width = 80u16;

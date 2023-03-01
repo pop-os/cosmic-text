@@ -40,7 +40,7 @@ fn main() {
     )
     .unwrap();
 
-    let font_system = FontSystem::new();
+    let mut font_system = FontSystem::new();
 
     let syntax_system = SyntaxSystem::new();
 
@@ -57,10 +57,10 @@ fn main() {
 
     let line_x = 8.0 * display_scale;
 
-    let mut buffer_data = BufferData::new(&font_system, font_sizes[font_size_i]);
+    let mut buffer_data = BufferData::new(&mut font_system, font_sizes[font_size_i]);
 
     let mut editor = SyntaxEditor::new(
-        Buffer::new(&font_system, &mut buffer_data),
+        Buffer::new(&mut font_system, &mut buffer_data),
         &syntax_system,
         "base16-eighties.dark",
     )
