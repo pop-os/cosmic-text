@@ -74,7 +74,7 @@ impl<'a> FontFallbackIter<'a> {
                 "Failed to find preset fallback for {:?} locale '{}', used '{}': '{}'",
                 self.scripts,
                 self.locale,
-                font.info.family,
+                font.name(),
                 word
             );
         } else if !self.scripts.is_empty() && self.common_i > 0 {
@@ -99,7 +99,7 @@ impl<'a> Iterator for FontFallbackIter<'a> {
 
             for font_key in self.font_keys.iter().copied() {
                 let font = Font::from_key(self.db, font_key).expect("invalid font key");
-                if font.info.family == default_family {
+                if font.contains_family(default_family) {
                     return Some(font);
                 }
             }
@@ -114,7 +114,7 @@ impl<'a> Iterator for FontFallbackIter<'a> {
                 self.script_i.1 += 1;
                 for font_key in self.font_keys.iter().copied() {
                     let font = Font::from_key(self.db, font_key).expect("invalid font key");
-                    if font.info.family == script_family {
+                    if font.contains_family(script_family) {
                         return Some(font);
                     }
                 }
@@ -136,7 +136,7 @@ impl<'a> Iterator for FontFallbackIter<'a> {
             self.common_i += 1;
             for font_key in self.font_keys.iter().copied() {
                 let font = Font::from_key(self.db, font_key).expect("invalid font key");
-                if font.info.family == common_family {
+                if font.contains_family(common_family) {
                     return Some(font);
                 }
             }
@@ -150,7 +150,10 @@ impl<'a> Iterator for FontFallbackIter<'a> {
             let font_key = self.font_keys[self.other_i];
             let font = Font::from_key(self.db, font_key).expect("invalid font key");
             self.other_i += 1;
-            if !forbidden_families.contains(&font.info.family.as_str()) {
+            if forbidden_families
+                .iter()
+                .all(|family| !font.contains_family(family))
+            {
                 return Some(font);
             }
         }

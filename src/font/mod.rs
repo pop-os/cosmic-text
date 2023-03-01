@@ -80,6 +80,18 @@ impl<'a> Font<'a> {
         }
     }
 
+    pub fn name(&self) -> &str {
+        if let Some((name, _)) = self.info.families.first() {
+            name
+        } else {
+            &self.info.post_script_name
+        }
+    }
+
+    pub fn contains_family(&self, family: &str) -> bool {
+        self.info.families.iter().any(|(name, _)| name == family)
+    }
+
     #[cfg(feature = "swash")]
     pub fn as_swash(&self) -> swash::FontRef {
         swash::FontRef {
