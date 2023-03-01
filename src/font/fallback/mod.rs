@@ -71,7 +71,7 @@ impl<'a> FontFallbackIter<'a> {
                 "Failed to find preset fallback for {:?} locale '{}', used '{}': '{}'",
                 self.scripts,
                 self.locale,
-                font.info.family,
+                font.name(),
                 word
             );
         } else if !self.scripts.is_empty() && self.common_i > 0 {
@@ -95,7 +95,7 @@ impl<'a> Iterator for FontFallbackIter<'a> {
             self.default_i += 1;
 
             for font in self.fonts.iter() {
-                if font.info.family == default_family {
+                if font.contains_family(default_family) {
                     return Some(font);
                 }
             }
@@ -109,7 +109,7 @@ impl<'a> Iterator for FontFallbackIter<'a> {
                 let script_family = script_families[self.script_i.1];
                 self.script_i.1 += 1;
                 for font in self.fonts.iter() {
-                    if font.info.family == script_family {
+                    if font.contains_family(script_family) {
                         return Some(font);
                     }
                 }
@@ -130,7 +130,7 @@ impl<'a> Iterator for FontFallbackIter<'a> {
             let common_family = common_families[self.common_i];
             self.common_i += 1;
             for font in self.fonts.iter() {
-                if font.info.family == common_family {
+                if font.contains_family(common_family) {
                     return Some(font);
                 }
             }
@@ -143,7 +143,10 @@ impl<'a> Iterator for FontFallbackIter<'a> {
         while self.other_i < self.fonts.len() {
             let font = &self.fonts[self.other_i];
             self.other_i += 1;
-            if !forbidden_families.contains(&font.info.family.as_str()) {
+            if forbidden_families
+                .iter()
+                .all(|family| !font.contains_family(family))
+            {
                 return Some(font);
             }
         }
