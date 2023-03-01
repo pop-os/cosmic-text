@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+use crate::FontKey;
+
 /// Key for building a glyph cache
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct CacheKey {
-    /// Font ID
-    pub font_id: fontdb::ID,
+    /// Font key
+    pub font_key: FontKey,
     /// Glyph ID
     pub glyph_id: u16,
     /// `f32` bits of font size
@@ -17,7 +19,7 @@ pub struct CacheKey {
 
 impl CacheKey {
     pub fn new(
-        font_id: fontdb::ID,
+        font_key: FontKey,
         glyph_id: u16,
         font_size: f32,
         pos: (f32, f32),
@@ -26,7 +28,7 @@ impl CacheKey {
         let (y, y_bin) = SubpixelBin::new(pos.1);
         (
             Self {
-                font_id,
+                font_key,
                 glyph_id,
                 font_size_bits: font_size.to_bits(),
                 x_bin,
