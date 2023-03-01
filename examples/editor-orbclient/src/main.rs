@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic_text::{
-    Action, Attrs, Buffer, Edit, Family, FontSystem, Metrics, SwashCache, SyntaxEditor,
+    Action, Attrs, Buffer, BufferData, Edit, Family, FontSystem, Metrics, SwashCache, SyntaxEditor,
     SyntaxSystem,
 };
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
@@ -57,8 +57,10 @@ fn main() {
 
     let line_x = 8.0 * display_scale;
 
+    let mut buffer_data = BufferData::new(&font_system, font_sizes[font_size_i]);
+
     let mut editor = SyntaxEditor::new(
-        Buffer::new(&font_system, font_sizes[font_size_i]),
+        Buffer::new(&font_system, &mut buffer_data),
         &syntax_system,
         "base16-eighties.dark",
     )

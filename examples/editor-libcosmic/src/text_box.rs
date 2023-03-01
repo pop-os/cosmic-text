@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+use crate::editor;
+
 use super::text;
 use cosmic::{
     iced_native::{
@@ -16,7 +18,7 @@ use cosmic::{
     iced_winit::renderer::BorderRadius,
     theme::Theme,
 };
-use cosmic_text::{Action, Edit, SwashCache};
+use cosmic_text::{Action, BufferData, Edit, SwashCache};
 use std::{cmp, sync::Mutex, time::Instant};
 
 pub struct Appearance {
@@ -43,15 +45,15 @@ impl StyleSheet for Theme {
     }
 }
 
-pub struct TextBox<'a, Editor> {
-    editor: &'a Mutex<Editor>,
+pub struct TextBox<'a> {
+    buffer_data: &'a Mutex<BufferData>,
     padding: Padding,
 }
 
-impl<'a, Editor> TextBox<'a, Editor> {
-    pub fn new(editor: &'a Mutex<Editor>) -> Self {
+impl<'a> TextBox<'a> {
+    pub fn new(buffer_data: &'a Mutex<BufferData>) -> Self {
         Self {
-            editor,
+            buffer_data,
             padding: Padding::new(0),
         }
     }
@@ -62,15 +64,14 @@ impl<'a, Editor> TextBox<'a, Editor> {
     }
 }
 
-pub fn text_box<Editor>(editor: &Mutex<Editor>) -> TextBox<Editor> {
-    TextBox::new(editor)
+pub fn text_box(buffer_data: &Mutex<BufferData>) -> TextBox {
+    TextBox::new(buffer_data)
 }
 
-impl<'a, 'editor, Editor, Message, Renderer> Widget<Message, Renderer> for TextBox<'a, Editor>
+impl<'a, Message, Renderer> Widget<Message, Renderer> for TextBox<'a>
 where
     Renderer: renderer::Renderer + image::Renderer<Handle = image::Handle>,
     Renderer::Theme: StyleSheet,
-    Editor: Edit<'editor>,
 {
     fn tag(&self) -> tree::Tag {
         tree::Tag::of::<State>()
@@ -92,7 +93,8 @@ where
         let limits = limits.width(Length::Fill).height(Length::Fill);
 
         //TODO: allow lazy shape
-        let mut editor = self.editor.lock().unwrap();
+        let mut buffer_data = self.buffer_data.lock().unwrap();
+        let mut editor = editor(&mut buffer_data);
         editor.buffer_mut().shape_until(i32::max_value());
 
         let mut layout_lines = 0;
@@ -158,7 +160,8 @@ where
             cmp::max(0, cmp::min(255, (appearance.text_color.a * 255.0) as i32)) as u8,
         );
 
-        let mut editor = self.editor.lock().unwrap();
+        let mut buffer_data = self.buffer_data.lock().unwrap();
+        let mut editor = editor(&mut buffer_data);
 
         let view_w = viewport.width.min(layout.bounds().width) - self.padding.horizontal() as f32;
         let view_h = viewport.height.min(layout.bounds().height) - self.padding.vertical() as f32;
@@ -231,7 +234,8 @@ where
         _shell: &mut Shell<'_, Message>,
     ) -> Status {
         let state = tree.state.downcast_mut::<State>();
-        let mut editor = self.editor.lock().unwrap();
+        let mut buffer_data = self.buffer_data.lock().unwrap();
+        let mut editor = editor(&mut buffer_data);
 
         let mut status = Status::Ignored;
         match event {
@@ -330,14 +334,12 @@ where
     }
 }
 
-impl<'a, 'editor, Editor, Message, Renderer> From<TextBox<'a, Editor>>
-    for Element<'a, Message, Renderer>
+impl<'a, Message, Renderer> From<TextBox<'a>> for Element<'a, Message, Renderer>
 where
     Renderer: renderer::Renderer + image::Renderer<Handle = image::Handle>,
     Renderer::Theme: StyleSheet,
-    Editor: Edit<'editor>,
 {
-    fn from(text_box: TextBox<'a, Editor>) -> Self {
+    fn from(text_box: TextBox<'a>) -> Self {
         Self::new(text_box)
     }
 }

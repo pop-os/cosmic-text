@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic_text::{
-    Action, Attrs, AttrsList, Buffer, BufferLine, Color, Edit, Editor, Family, FontSystem, Metrics,
-    Style, SwashCache, Weight,
+    Action, Attrs, AttrsList, Buffer, BufferData, BufferLine, Color, Edit, Editor, Family,
+    FontSystem, Metrics, Style, SwashCache, Weight,
 };
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{
@@ -36,10 +36,10 @@ fn main() {
     )
     .unwrap();
 
-    let mut editor = Editor::new(Buffer::new(
-        &font_system,
-        Metrics::new(32.0, 44.0).scale(display_scale),
-    ));
+    let mut buffer_data =
+        BufferData::new(&font_system, Metrics::new(32.0, 44.0).scale(display_scale));
+
+    let mut editor = Editor::new(Buffer::new(&font_system, &mut buffer_data));
 
     editor
         .buffer_mut()

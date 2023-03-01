@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use cosmic_text::{Attrs, Buffer, Color, FontSystem, Metrics, SwashCache};
+use cosmic_text::{Attrs, Buffer, BufferData, Color, FontSystem, Metrics, SwashCache};
 use std::cmp::{self, Ordering};
 use termion::{color, cursor};
 
@@ -15,7 +15,9 @@ fn main() {
     let metrics = Metrics::new(14.0, 20.0);
 
     // A Buffer provides shaping and layout for a UTF-8 string, create one per text widget
-    let mut buffer = Buffer::new(&font_system, metrics);
+    let mut buffer_data = BufferData::new(&font_system, metrics);
+
+    let mut buffer = Buffer::new(&font_system, &mut buffer_data);
 
     // Set a size for the text buffer, in pixels
     let width = 80u16;
@@ -106,7 +108,7 @@ fn main() {
         last_x += 1;
     });
 
-    // Skip over output
+    // Skip over output^
     if last_x > 0 {
         print!("{}", cursor::Left(last_x as u16));
     }

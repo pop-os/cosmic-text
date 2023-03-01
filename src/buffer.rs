@@ -5,7 +5,10 @@ use alloc::{
     string::{String, ToString},
     vec::Vec,
 };
-use core::{cmp, fmt, ops::{Deref, DerefMut}};
+use core::{
+    cmp, fmt,
+    ops::{Deref, DerefMut},
+};
 use unicode_segmentation::UnicodeSegmentation;
 
 #[cfg(feature = "swash")]
@@ -309,23 +312,23 @@ pub struct BufferData {
 }
 
 /// A buffer of text that is shaped and laid out
-/// 
+///
 /// See [`BufferData`] for publicly accessible fields
 pub struct Buffer<'a> {
     font_system: &'a FontSystem,
-    data: BufferData,
+    data: &'a mut BufferData,
 }
 
-impl<'a> Buffer<'a> {
-    /// Create a new [`Buffer`] with the provided [`FontSystem`] and [`Metrics`]
+impl BufferData {
+    /// Create a new [`BufferData`] with the provided [`FontSystem`] and [`Metrics`]
     ///
     /// # Panics
     ///
     /// Will panic if `metrics.line_height` is zero.
-    pub fn new(font_system: &'a FontSystem, metrics: Metrics) -> Self {
+    pub fn new(font_system: &FontSystem, metrics: Metrics) -> Self {
         assert_ne!(metrics.line_height, 0.0, "line height cannot be 0");
 
-        let data = BufferData {
+        let mut data = Self {
             lines: Vec::new(),
             metrics,
             width: 0.0,
@@ -334,24 +337,19 @@ impl<'a> Buffer<'a> {
             redraw: false,
             wrap: Wrap::Word,
         };
-        let mut buffer = Self {
+        let mut buffer = Buffer {
             font_system,
-            data
+            data: &mut data,
         };
         buffer.set_text("", Attrs::new());
-        buffer
+        data
     }
+}
 
-    pub fn from_data(font_system: &'a FontSystem, data: BufferData) -> Self {
-        Self {
-            font_system,
-            data
-        }
+impl<'a> Buffer<'a> {
+    pub fn new(font_system: &'a FontSystem, data: &'a mut BufferData) -> Self {
+        Self { font_system, data }
     }
-
-    pub fn into_data(self) -> BufferData {
-        self.data
-    } 
 
     fn relayout(&mut self) {
         #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
@@ -746,12 +744,12 @@ impl<'a> Deref for Buffer<'a> {
     type Target = BufferData;
 
     fn deref(&self) -> &Self::Target {
-        &self.data
+        self.data
     }
 }
 
 impl<'a> DerefMut for Buffer<'a> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.data
+        self.data
     }
 }

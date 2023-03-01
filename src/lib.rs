@@ -12,7 +12,7 @@
 //! point, you can use the `SwashCache` to rasterize glyphs into either images or pixels.
 //!
 //! ```
-//! use cosmic_text::{Attrs, Color, FontSystem, SwashCache, Buffer, Metrics};
+//! use cosmic_text::{Attrs, Color, FontSystem, SwashCache, Buffer, BufferData, Metrics};
 //!
 //! // A FontSystem provides access to detected system fonts, create one per application
 //! let font_system = FontSystem::new();
@@ -24,7 +24,8 @@
 //! let metrics = Metrics::new(14.0, 20.0);
 //!
 //! // A Buffer provides shaping and layout for a UTF-8 string, create one per text widget
-//! let mut buffer = Buffer::new(&font_system, metrics);
+//! let mut buffer_data = BufferData::new(&font_system, metrics);
+//! let mut buffer = Buffer::new(&font_system, &mut buffer_data);
 //!
 //! // Set a size for the text buffer, in pixels
 //! buffer.set_size(80.0, 25.0);
