@@ -22,11 +22,11 @@ fn main() {
     let display_scale = match orbclient::get_display_size() {
         Ok((w, h)) => {
             log::info!("Display size: {}, {}", w, h);
-            (h as i32 / 1600) + 1
+            (h as f32 / 1600.0) + 1.0
         }
         Err(err) => {
             log::warn!("Failed to get display size: {}", err);
-            1
+            1.0
         }
     };
 
@@ -45,17 +45,17 @@ fn main() {
     let syntax_system = SyntaxSystem::new();
 
     let font_sizes = [
-        Metrics::new(10, 14).scale(display_scale), // Caption
-        Metrics::new(14, 20).scale(display_scale), // Body
-        Metrics::new(20, 28).scale(display_scale), // Title 4
-        Metrics::new(24, 32).scale(display_scale), // Title 3
-        Metrics::new(28, 36).scale(display_scale), // Title 2
-        Metrics::new(32, 44).scale(display_scale), // Title 1
+        Metrics::new(10.0, 14.0).scale(display_scale), // Caption
+        Metrics::new(14.0, 20.0).scale(display_scale), // Body
+        Metrics::new(20.0, 28.0).scale(display_scale), // Title 4
+        Metrics::new(24.0, 32.0).scale(display_scale), // Title 3
+        Metrics::new(28.0, 36.0).scale(display_scale), // Title 2
+        Metrics::new(32.0, 44.0).scale(display_scale), // Title 1
     ];
     let font_size_default = 1; // Body
     let mut font_size_i = font_size_default;
 
-    let line_x = 8 * display_scale;
+    let line_x = 8.0 * display_scale;
 
     let mut editor = SyntaxEditor::new(
         Buffer::new(&font_system, font_sizes[font_size_i]),
@@ -69,7 +69,7 @@ fn main() {
 
     editor
         .buffer_mut()
-        .set_size(window.width() as i32 - line_x * 2, window.height() as i32);
+        .set_size(window.width() as f32 - line_x * 2.0, window.height() as f32);
 
     let attrs = Attrs::new().monospaced(true).family(Family::Monospace);
     match editor.load_text(&path, attrs) {
@@ -95,7 +95,13 @@ fn main() {
 
             let fg = editor.foreground_color();
             editor.draw(&mut swash_cache, fg, |x, y, w, h, color| {
-                window.rect(line_x + x, y, w, h, orbclient::Color { data: color.0 })
+                window.rect(
+                    line_x as i32 + x,
+                    y,
+                    w,
+                    h,
+                    orbclient::Color { data: color.0 },
+                )
             });
 
             // Draw scrollbar
@@ -177,7 +183,7 @@ fn main() {
                     mouse_y = event.y;
                     if mouse_left {
                         editor.action(Action::Drag {
-                            x: mouse_x - line_x,
+                            x: mouse_x - line_x as i32,
                             y: mouse_y,
                         });
 
@@ -197,7 +203,7 @@ fn main() {
                         mouse_left = event.left;
                         if mouse_left {
                             editor.action(Action::Click {
-                                x: mouse_x - line_x,
+                                x: mouse_x - line_x as i32,
                                 y: mouse_y,
                             });
                         }
@@ -207,7 +213,7 @@ fn main() {
                 EventOption::Resize(event) => {
                     editor
                         .buffer_mut()
-                        .set_size(event.width as i32 - line_x * 2, event.height as i32);
+                        .set_size(event.width as f32 - line_x * 2.0, event.height as f32);
                 }
                 EventOption::Scroll(event) => {
                     editor.action(Action::Scroll {
@@ -221,7 +227,7 @@ fn main() {
 
         if mouse_left && force_drag {
             editor.action(Action::Drag {
-                x: mouse_x - line_x,
+                x: mouse_x - line_x as i32,
                 y: mouse_y,
             });
 

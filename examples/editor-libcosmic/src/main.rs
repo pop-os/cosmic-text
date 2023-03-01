@@ -14,7 +14,7 @@ use cosmic::{
 use cosmic_text::{
     Align, Attrs, AttrsList, Buffer, Edit, FontSystem, Metrics, SyntaxEditor, SyntaxSystem, Wrap,
 };
-use std::{env, fs, path::PathBuf, sync::Mutex};
+use std::{env, fmt, fs, path::PathBuf, sync::Mutex};
 
 use self::text::text;
 mod text;
@@ -27,14 +27,52 @@ lazy_static::lazy_static! {
     static ref SYNTAX_SYSTEM: SyntaxSystem = SyntaxSystem::new();
 }
 
-static FONT_SIZES: &'static [Metrics] = &[
-    Metrics::new(10, 14), // Caption
-    Metrics::new(14, 20), // Body
-    Metrics::new(20, 28), // Title 4
-    Metrics::new(24, 32), // Title 3
-    Metrics::new(28, 36), // Title 2
-    Metrics::new(32, 44), // Title 1
-];
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FontSize {
+    Caption,
+    Body,
+    Title4,
+    Title3,
+    Title2,
+    Title1,
+}
+
+impl FontSize {
+    pub fn all() -> &'static [Self] {
+        &[
+            Self::Caption,
+            Self::Body,
+            Self::Title4,
+            Self::Title3,
+            Self::Title2,
+            Self::Title1,
+        ]
+    }
+
+    pub fn to_metrics(self) -> Metrics {
+        match self {
+            Self::Caption => Metrics::new(10.0, 14.0), // Caption
+            Self::Body => Metrics::new(14.0, 20.0),    // Body
+            Self::Title4 => Metrics::new(20.0, 28.0),  // Title 4
+            Self::Title3 => Metrics::new(24.0, 32.0),  // Title 3
+            Self::Title2 => Metrics::new(28.0, 36.0),  // Title 2
+            Self::Title1 => Metrics::new(32.0, 44.0),  // Title 1
+        }
+    }
+}
+
+impl fmt::Display for FontSize {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Caption => write!(f, "Caption"),
+            Self::Body => write!(f, "Body"),
+            Self::Title4 => write!(f, "Title 4"),
+            Self::Title3 => write!(f, "Title 3"),
+            Self::Title2 => write!(f, "Title 2"),
+            Self::Title1 => write!(f, "Title 1"),
+        }
+    }
+}
 
 static WRAP_MODE: &'static [Wrap] = &[Wrap::None, Wrap::Glyph, Wrap::Word];
 
@@ -50,6 +88,7 @@ pub struct Window {
     theme: Theme,
     path_opt: Option<PathBuf>,
     attrs: Attrs<'static>,
+    font_size: FontSize,
     #[cfg(not(feature = "vi"))]
     editor: Mutex<SyntaxEditor<'static>>,
     #[cfg(feature = "vi")]
@@ -64,7 +103,7 @@ pub enum Message {
     Bold(bool),
     Italic(bool),
     Monospaced(bool),
-    MetricsChanged(Metrics),
+    FontSizeChanged(FontSize),
     WrapChanged(Wrap),
     AlignmentChanged(Align),
     ThemeChanged(&'static str),
@@ -98,7 +137,7 @@ impl Application for Window {
             .family(cosmic_text::Family::Monospace);
 
         let mut editor = SyntaxEditor::new(
-            Buffer::new(&FONT_SYSTEM, FONT_SIZES[1 /* Body */]),
+            Buffer::new(&FONT_SYSTEM, FontSize::Body.to_metrics()),
             &SYNTAX_SYSTEM,
             "base16-eighties.dark",
         )
@@ -111,6 +150,7 @@ impl Application for Window {
 
         let mut window = Window {
             theme: Theme::Dark,
+            font_size: FontSize::Body,
             path_opt: None,
             attrs,
             editor: Mutex::new(editor),
@@ -195,9 +235,11 @@ impl Application for Window {
                 let mut editor = self.editor.lock().unwrap();
                 update_attrs(&mut *editor, self.attrs);
             }
-            Message::MetricsChanged(metrics) => {
+            Message::FontSizeChanged(font_size) => {
+                self.font_size = font_size;
+
                 let mut editor = self.editor.lock().unwrap();
-                editor.buffer_mut().set_metrics(metrics);
+                editor.buffer_mut().set_metrics(font_size.to_metrics());
             }
             Message::WrapChanged(wrap) => {
                 let mut editor = self.editor.lock().unwrap();
@@ -245,9 +287,9 @@ impl Application for Window {
         let font_size_picker = {
             let editor = self.editor.lock().unwrap();
             pick_list(
-                FONT_SIZES,
-                Some(editor.buffer().metrics()),
-                Message::MetricsChanged,
+                FontSize::all(),
+                Some(self.font_size),
+                Message::FontSizeChanged,
             )
         };
 

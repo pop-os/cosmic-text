@@ -107,7 +107,7 @@ pub struct LayoutRun<'a> {
     /// The array of layout glyphs to draw
     pub glyphs: &'a [LayoutGlyph],
     /// Y offset of line
-    pub line_y: i32,
+    pub line_y: f32,
     /// width of line
     pub line_w: f32,
 }
@@ -174,7 +174,7 @@ pub struct LayoutRunIter<'a, 'b> {
     line_i: usize,
     layout_i: usize,
     remaining_len: usize,
-    line_y: i32,
+    line_y: f32,
     total_layout: i32,
 }
 
@@ -192,16 +192,18 @@ impl<'a, 'b> LayoutRunIter<'a, 'b> {
             .sum();
         let top_cropped_layout_lines =
             total_layout_lines.saturating_sub(buffer.scroll.try_into().unwrap_or_default());
-        let maximum_lines = buffer
-            .height
-            .checked_div(buffer.metrics.line_height)
-            .unwrap_or_default();
+        let maximum_lines = if buffer.metrics.line_height == 0.0 {
+            0
+        } else {
+            (buffer.height / buffer.metrics.line_height) as i32
+        };
         let bottom_cropped_layout_lines =
             if top_cropped_layout_lines > maximum_lines.try_into().unwrap_or_default() {
                 maximum_lines.try_into().unwrap_or_default()
             } else {
                 top_cropped_layout_lines
             };
+
         Self {
             buffer,
             line_i: 0,
@@ -259,30 +261,30 @@ impl<'a, 'b> Iterator for LayoutRunIter<'a, 'b> {
 impl<'a, 'b> ExactSizeIterator for LayoutRunIter<'a, 'b> {}
 
 /// Metrics of text
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Metrics {
     /// Font size in pixels
-    pub font_size: i32,
+    pub font_size: f32,
     /// Line height in pixels
-    pub line_height: i32,
+    pub line_height: f32,
 }
 
 impl Metrics {
-    pub const fn new(font_size: i32, line_height: i32) -> Self {
+    pub const fn new(font_size: f32, line_height: f32) -> Self {
         Self {
             font_size,
             line_height,
         }
     }
 
-    pub const fn scale(self, scale: i32) -> Self {
+    pub fn scale(self, scale: f32) -> Self {
         Self {
             font_size: self.font_size * scale,
             line_height: self.line_height * scale,
         }
     }
 
-    fn y_offset(&self) -> i32 {
+    fn y_offset(&self) -> f32 {
         self.font_size - self.line_height
     }
 }
@@ -299,8 +301,8 @@ pub struct Buffer<'a> {
     /// [BufferLine]s (or paragraphs) of text in the buffer
     pub lines: Vec<BufferLine>,
     metrics: Metrics,
-    width: i32,
-    height: i32,
+    width: f32,
+    height: f32,
     scroll: i32,
     /// True if a redraw is requires. Set to false after processing
     redraw: bool,
@@ -310,14 +312,14 @@ pub struct Buffer<'a> {
 impl<'a> Buffer<'a> {
     /// Create a new [`Buffer`] with the provided [`FontSystem`] and [`Metrics`]
     pub fn new(font_system: &'a FontSystem, metrics: Metrics) -> Self {
-        assert_ne!(metrics.line_height, 0, "line height cannot be 0");
+        assert_ne!(metrics.line_height, 0.0, "line height cannot be 0");
 
         let mut buffer = Self {
             font_system,
             lines: Vec::new(),
             metrics,
-            width: 0,
-            height: 0,
+            width: 0.0,
+            height: 0.0,
             scroll: 0,
             redraw: false,
             wrap: Wrap::Word,
@@ -497,7 +499,7 @@ impl<'a> Buffer<'a> {
     /// Set the current [`Metrics`]
     pub fn set_metrics(&mut self, metrics: Metrics) {
         if metrics != self.metrics {
-            assert_ne!(metrics.font_size, 0, "font size cannot be 0");
+            assert_ne!(metrics.font_size, 0.0, "font size cannot be 0");
             self.metrics = metrics;
             self.relayout();
             self.shape_until_scroll();
@@ -519,14 +521,14 @@ impl<'a> Buffer<'a> {
     }
 
     /// Get the current buffer dimensions (width, height)
-    pub fn size(&self) -> (i32, i32) {
+    pub fn size(&self) -> (f32, f32) {
         (self.width, self.height)
     }
 
     /// Set the current buffer dimensions
-    pub fn set_size(&mut self, width: i32, height: i32) {
-        let clamped_width = width.max(0);
-        let clamped_height = height.max(0);
+    pub fn set_size(&mut self, width: f32, height: f32) {
+        let clamped_width = width.max(0.0);
+        let clamped_height = height.max(0.0);
 
         if clamped_width != self.width || clamped_height != self.height {
             self.width = clamped_width;
@@ -551,7 +553,7 @@ impl<'a> Buffer<'a> {
 
     /// Get the number of lines that can be viewed in the buffer
     pub fn visible_lines(&self) -> i32 {
-        self.height / self.metrics.line_height
+        (self.height / self.metrics.line_height) as i32
     }
 
     /// Set text of buffer, using provided attributes for each line by default
@@ -588,7 +590,7 @@ impl<'a> Buffer<'a> {
     }
 
     /// Convert x, y position to Cursor (hit detection)
-    pub fn hit(&self, x: i32, y: i32) -> Option<Cursor> {
+    pub fn hit(&self, x: f32, y: f32) -> Option<Cursor> {
         #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
         let instant = std::time::Instant::now();
 
@@ -616,12 +618,12 @@ impl<'a> Buffer<'a> {
                 'hit: for (glyph_i, glyph) in run.glyphs.iter().enumerate() {
                     if first_glyph {
                         first_glyph = false;
-                        if (run.rtl && x > glyph.x as i32) || (!run.rtl && x < 0) {
+                        if (run.rtl && x > glyph.x) || (!run.rtl && x < 0.0) {
                             new_cursor_glyph = 0;
                             new_cursor_char = 0;
                         }
                     }
-                    if x >= glyph.x as i32 && x <= (glyph.x + glyph.w) as i32 {
+                    if x >= glyph.x && x <= glyph.x + glyph.w {
                         new_cursor_glyph = glyph_i;
 
                         let cluster = &run.text[glyph.start..glyph.end];
@@ -629,10 +631,10 @@ impl<'a> Buffer<'a> {
                         let mut egc_x = glyph.x;
                         let egc_w = glyph.w / (total as f32);
                         for (egc_i, egc) in cluster.grapheme_indices(true) {
-                            if x >= egc_x as i32 && x <= (egc_x + egc_w) as i32 {
+                            if x >= egc_x && x <= egc_x + egc_w {
                                 new_cursor_char = egc_i;
 
-                                let right_half = x >= (egc_x + egc_w / 2.0) as i32;
+                                let right_half = x >= egc_x + egc_w / 2.0;
                                 if right_half != glyph.level.is_rtl() {
                                     // If clicking on last half of glyph, move cursor past glyph
                                     new_cursor_char += egc.len();
@@ -643,7 +645,7 @@ impl<'a> Buffer<'a> {
                             egc_x += egc_w;
                         }
 
-                        let right_half = x >= (glyph.x + glyph.w / 2.0) as i32;
+                        let right_half = x >= glyph.x + glyph.w / 2.0;
                         if right_half != glyph.level.is_rtl() {
                             // If clicking on last half of glyph, move cursor past glyph
                             new_cursor_char = cluster.len();
@@ -704,7 +706,7 @@ impl<'a> Buffer<'a> {
                 };
 
                 cache.with_pixels(cache_key, glyph_color, |x, y, color| {
-                    f(x_int + x, run.line_y + y_int + y, 1, 1, color);
+                    f(x_int + x, run.line_y as i32 + y_int + y, 1, 1, color);
                 });
             }
         }
