@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use alloc::sync::Arc;
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 use unicode_script::Script;
 
-use crate::Font;
+use crate::{Font, FontKey};
 
 use self::platform::*;
 
@@ -26,7 +25,8 @@ mod platform;
 mod platform;
 
 pub struct FontFallbackIter<'a> {
-    fonts: &'a [Arc<Font<'a>>],
+    db: &'a fontdb::Database,
+    font_keys: &'a [FontKey],
     default_families: &'a [&'a str],
     default_i: usize,
     scripts: Vec<Script>,
@@ -39,13 +39,15 @@ pub struct FontFallbackIter<'a> {
 
 impl<'a> FontFallbackIter<'a> {
     pub fn new(
-        fonts: &'a [Arc<Font<'a>>],
+        db: &'a fontdb::Database,
+        font_keys: &'a [FontKey],
         default_families: &'a [&'a str],
         scripts: Vec<Script>,
         locale: &'a str,
     ) -> Self {
         Self {
-            fonts,
+            db,
+            font_keys,
             default_families,
             default_i: 0,
             scripts,
@@ -66,7 +68,8 @@ impl<'a> FontFallbackIter<'a> {
                 word
             );
         } else if self.other_i > 0 {
-            let font = &self.fonts[self.other_i - 1];
+            let font_key = self.font_keys[self.other_i - 1];
+            let font = Font::from_key(self.db, font_key).expect("invalid font key");
             log::debug!(
                 "Failed to find preset fallback for {:?} locale '{}', used '{}': '{}'",
                 self.scripts,
@@ -88,13 +91,14 @@ impl<'a> FontFallbackIter<'a> {
 }
 
 impl<'a> Iterator for FontFallbackIter<'a> {
-    type Item = &'a Arc<Font<'a>>;
+    type Item = Font<'a>;
     fn next(&mut self) -> Option<Self::Item> {
         while self.default_i < self.default_families.len() {
             let default_family = self.default_families[self.default_i];
             self.default_i += 1;
 
-            for font in self.fonts.iter() {
+            for font_key in self.font_keys.iter().copied() {
+                let font = Font::from_key(self.db, font_key).expect("invalid font key");
                 if font.info.family == default_family {
                     return Some(font);
                 }
@@ -108,7 +112,8 @@ impl<'a> Iterator for FontFallbackIter<'a> {
             while self.script_i.1 < script_families.len() {
                 let script_family = script_families[self.script_i.1];
                 self.script_i.1 += 1;
-                for font in self.fonts.iter() {
+                for font_key in self.font_keys.iter().copied() {
+                    let font = Font::from_key(self.db, font_key).expect("invalid font key");
                     if font.info.family == script_family {
                         return Some(font);
                     }
@@ -129,7 +134,8 @@ impl<'a> Iterator for FontFallbackIter<'a> {
         while self.common_i < common_families.len() {
             let common_family = common_families[self.common_i];
             self.common_i += 1;
-            for font in self.fonts.iter() {
+            for font_key in self.font_keys.iter().copied() {
+                let font = Font::from_key(self.db, font_key).expect("invalid font key");
                 if font.info.family == common_family {
                     return Some(font);
                 }
@@ -140,8 +146,9 @@ impl<'a> Iterator for FontFallbackIter<'a> {
         //TODO: do we need to do this?
         //TODO: do not evaluate fonts more than once!
         let forbidden_families = forbidden_fallback();
-        while self.other_i < self.fonts.len() {
-            let font = &self.fonts[self.other_i];
+        while self.other_i < self.font_keys.len() {
+            let font_key = self.font_keys[self.other_i];
+            let font = Font::from_key(self.db, font_key).expect("invalid font key");
             self.other_i += 1;
             if !forbidden_families.contains(&font.info.family.as_str()) {
                 return Some(font);

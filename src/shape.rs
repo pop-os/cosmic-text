@@ -79,7 +79,7 @@ fn shape_fallback(
             y_advance,
             x_offset,
             y_offset,
-            font_id: font.info.id,
+            font_key: font.key(),
             glyph_id: info.glyph_id.try_into().expect("failed to cast glyph ID"),
             //TODO: color should not be related to shaping
             color_opt: attrs.color_opt,
@@ -142,22 +142,21 @@ fn shape_run(
 
     let font_matches = font_system.get_font_matches(attrs);
 
-    let default_families = [font_matches.default_family.as_str()];
+    let db = font_system.db();
+
+    let default_families = [db.family_name(&attrs.family)];
     let mut font_iter = FontFallbackIter::new(
-        &font_matches.fonts,
+        db,
+        &font_matches,
         &default_families,
         scripts,
-        font_matches.locale,
+        font_system.locale(),
     );
 
-    let (mut glyphs, mut missing) = shape_fallback(
-        font_iter.next().expect("no default font found"),
-        line,
-        attrs_list,
-        start_run,
-        end_run,
-        span_rtl,
-    );
+    let font = font_iter.next().expect("no default font found");
+
+    let (mut glyphs, mut missing) =
+        shape_fallback(&font, line, attrs_list, start_run, end_run, span_rtl);
 
     //TODO: improve performance!
     while !missing.is_empty() {
@@ -168,7 +167,7 @@ fn shape_run(
 
         log::trace!("Evaluating fallback with font '{}'", font.info.family);
         let (mut fb_glyphs, fb_missing) =
-            shape_fallback(font, line, attrs_list, start_run, end_run, span_rtl);
+            shape_fallback(&font, line, attrs_list, start_run, end_run, span_rtl);
 
         // Insert all matching glyphs
         let mut fb_i = 0;
@@ -245,7 +244,7 @@ pub struct ShapeGlyph {
     pub y_advance: f32,
     pub x_offset: f32,
     pub y_offset: f32,
-    pub font_id: fontdb::ID,
+    pub font_key: FontKey,
     pub glyph_id: u16,
     pub color_opt: Option<Color>,
     pub metadata: usize,
@@ -264,7 +263,7 @@ impl ShapeGlyph {
         let y_offset = font_size * self.y_offset;
 
         let (cache_key, x_int, y_int) = CacheKey::new(
-            self.font_id,
+            self.font_key,
             self.glyph_id,
             font_size,
             (x + x_offset, y - y_offset),
