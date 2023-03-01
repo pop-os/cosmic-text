@@ -101,7 +101,10 @@ fn main() {
                 for c in grapheme.chars() {
                     editor.action(Action::Insert(c));
                 }
-                assert_eq!(cursor, editor.cursor());
+                assert_eq!(
+                    (cursor.line, cursor.index),
+                    (editor.cursor().line, editor.cursor().index)
+                );
             }
         }
 
