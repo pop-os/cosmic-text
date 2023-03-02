@@ -113,9 +113,9 @@ pub struct LayoutRun<'a> {
 }
 
 impl<'a> LayoutRun<'a> {
-    /// Return the pixel span Some((x_left, x_width)) of the highlighted area between cursor_start
-    /// and cursor_end within this run, or None if the cursor range does not intersect this run.
-    /// This may return widths of zero if cursor_start == cursor_end, if the run is empty, or if the
+    /// Return the pixel span `Some((x_left, x_width))` of the highlighted area between `cursor_start`
+    /// and `cursor_end` within this run, or None if the cursor range does not intersect this run.
+    /// This may return widths of zero if `cursor_start == cursor_end`, if the run is empty, or if the
     /// region's left start boundary is the same as the cursor's end boundary or vice versa.
     pub fn highlight(&self, cursor_start: Cursor, cursor_end: Cursor) -> Option<(f32, f32)> {
         let mut x_start = None;
@@ -208,7 +208,7 @@ impl<'a, 'b> LayoutRunIter<'a, 'b> {
             buffer,
             line_i: 0,
             layout_i: 0,
-            remaining_len: bottom_cropped_layout_lines as usize,
+            remaining_len: bottom_cropped_layout_lines,
             line_y: buffer.metrics.y_offset(),
             total_layout: 0,
         }
@@ -311,6 +311,10 @@ pub struct Buffer<'a> {
 
 impl<'a> Buffer<'a> {
     /// Create a new [`Buffer`] with the provided [`FontSystem`] and [`Metrics`]
+    ///
+    /// # Panics
+    ///
+    /// Will panic if `metrics.line_height` is zero.
     pub fn new(font_system: &'a FontSystem, metrics: Metrics) -> Self {
         assert_ne!(metrics.line_height, 0.0, "line height cannot be 0");
 
@@ -497,6 +501,10 @@ impl<'a> Buffer<'a> {
     }
 
     /// Set the current [`Metrics`]
+    ///
+    /// # Panics
+    ///
+    /// Will panic if `metrics.font_size` is zero.
     pub fn set_metrics(&mut self, metrics: Metrics) {
         if metrics != self.metrics {
             assert_ne!(metrics.font_size, 0.0, "font size cannot be 0");
