@@ -24,6 +24,12 @@ pub struct FontSystem(FontSystemInner);
 
 impl FontSystem {
     /// Create a new [`FontSystem`], that allows access to any installed system fonts
+    ///
+    /// # Timing
+    ///
+    /// This function takes some time to run. On the release build, it can take up to a second,
+    /// while debug builds can take up to ten times longer. For this reason, it should only be
+    /// called once, and the resulting [`FontSystem`] should be shared.
     pub fn new() -> Self {
         Self::new_with_fonts(std::iter::empty())
     }
