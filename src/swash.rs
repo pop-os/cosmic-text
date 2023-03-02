@@ -90,18 +90,16 @@ fn swash_outline_commands(
 }
 
 /// Cache for rasterizing with the swash scaler
-pub struct SwashCache<'a> {
-    font_system: &'a FontSystem,
+pub struct SwashCache {
     context: ScaleContext,
     pub image_cache: Map<CacheKey, Option<SwashImage>>,
     pub outline_command_cache: Map<CacheKey, Option<Vec<swash::zeno::Command>>>,
 }
 
-impl<'a> SwashCache<'a> {
+impl SwashCache {
     /// Create a new swash cache
-    pub fn new(font_system: &'a FontSystem) -> Self {
+    pub fn new() -> Self {
         Self {
-            font_system,
             context: ScaleContext::new(),
             image_cache: Map::new(),
             outline_command_cache: Map::new(),
@@ -109,34 +107,45 @@ impl<'a> SwashCache<'a> {
     }
 
     /// Create a swash Image from a cache key, without caching results
-    pub fn get_image_uncached(&mut self, cache_key: CacheKey) -> Option<SwashImage> {
-        swash_image(self.font_system, &mut self.context, cache_key)
+    pub fn get_image_uncached(
+        &mut self,
+        font_system: &FontSystem,
+        cache_key: CacheKey,
+    ) -> Option<SwashImage> {
+        swash_image(font_system, &mut self.context, cache_key)
     }
 
     /// Create a swash Image from a cache key, caching results
-    pub fn get_image(&mut self, cache_key: CacheKey) -> &Option<SwashImage> {
+    pub fn get_image(
+        &mut self,
+        font_system: &FontSystem,
+        cache_key: CacheKey,
+    ) -> &Option<SwashImage> {
         self.image_cache
             .entry(cache_key)
-            .or_insert_with(|| swash_image(self.font_system, &mut self.context, cache_key))
+            .or_insert_with(|| swash_image(font_system, &mut self.context, cache_key))
     }
 
-    pub fn get_outline_commands(&mut self, cache_key: CacheKey) -> Option<&[swash::zeno::Command]> {
+    pub fn get_outline_commands(
+        &mut self,
+        font_system: &FontSystem,
+        cache_key: CacheKey,
+    ) -> Option<&[swash::zeno::Command]> {
         self.outline_command_cache
             .entry(cache_key)
-            .or_insert_with(|| {
-                swash_outline_commands(self.font_system, &mut self.context, cache_key)
-            })
+            .or_insert_with(|| swash_outline_commands(font_system, &mut self.context, cache_key))
             .as_deref()
     }
 
     /// Enumerate pixels in an Image, use `with_image` for better performance
     pub fn with_pixels<F: FnMut(i32, i32, Color)>(
         &mut self,
+        font_system: &FontSystem,
         cache_key: CacheKey,
         base: Color,
         mut f: F,
     ) {
-        if let Some(image) = self.get_image(cache_key) {
+        if let Some(image) = self.get_image(font_system, cache_key) {
             let x = image.placement.left;
             let y = -image.placement.top;
 

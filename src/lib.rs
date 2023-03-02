@@ -18,7 +18,7 @@
 //! let font_system = FontSystem::new();
 //!
 //! // A SwashCache stores rasterized glyphs, create one per application
-//! let mut swash_cache = SwashCache::new(&font_system);
+//! let mut swash_cache = SwashCache::new();
 //!
 //! // Text metrics indicate the font size and line height of a buffer
 //! let metrics = Metrics::new(14.0, 20.0);

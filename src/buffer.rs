@@ -705,7 +705,7 @@ impl<'a> Buffer<'a> {
                     None => color,
                 };
 
-                cache.with_pixels(cache_key, glyph_color, |x, y, color| {
+                cache.with_pixels(self.font_system, cache_key, glyph_color, |x, y, color| {
                     f(x_int + x, run.line_y as i32 + y_int + y, 1, 1, color);
                 });
             }
