@@ -421,9 +421,14 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                     None => color,
                 };
 
-                cache.with_pixels(cache_key, glyph_color, |x, y, color| {
-                    f(x_int + x, line_y as i32 + y_int + y, 1, 1, color);
-                });
+                cache.with_pixels(
+                    self.buffer().font_system(),
+                    cache_key,
+                    glyph_color,
+                    |x, y, color| {
+                        f(x_int + x, line_y as i32 + y_int + y, 1, 1, color);
+                    },
+                );
             }
         }
     }
