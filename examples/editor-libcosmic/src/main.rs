@@ -325,9 +325,6 @@ impl Application for Window {
         );
 
         let font_size_picker = {
-            let mut buffer_data = self.buffer_data.lock().unwrap();
-            let mut font_system = FONT_SYSTEM.lock().unwrap();
-            let editor = editor(&mut font_system, &mut buffer_data);
             pick_list(
                 FontSize::all(),
                 Some(self.font_size),

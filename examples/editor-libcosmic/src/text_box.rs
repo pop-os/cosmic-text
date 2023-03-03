@@ -106,7 +106,7 @@ where
             }
         }
 
-        let height = layout_lines as f32 * editor.buffer().metrics().line_height as f32;
+        let height = layout_lines as f32 * editor.buffer().metrics().line_height;
         let size = Size::new(limits.max().width, height);
         log::info!("size {:?}", size);
 
@@ -217,7 +217,7 @@ where
             handle,
             Rectangle::new(
                 layout.position() + [self.padding.left as f32, self.padding.top as f32].into(),
-                Size::new(view_w as f32, view_h as f32),
+                Size::new(view_w, view_h),
             ),
         );
 

@@ -116,7 +116,7 @@ where
             height += self.metrics.line_height;
         }
 
-        let size = Size::new(width as f32, height as f32);
+        let size = Size::new(width, height);
 
         log::debug!("layout {:?} in {:?}", size, instant.elapsed());
 
