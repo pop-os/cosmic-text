@@ -112,6 +112,7 @@ allow = [
     "Apache-2.0",
     "Unicode-DFS-2016",
     "BSD-2-Clause",
+    "Zlib",
     #"Apache-2.0 WITH LLVM-exception",
 ]
 # List of explicitly disallowed licenses
