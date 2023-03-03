@@ -20,10 +20,10 @@ fn swash_image(
     context: &mut ScaleContext,
     cache_key: CacheKey,
 ) -> Option<SwashImage> {
-    let font = match font_system.get_font(cache_key.font_key) {
+    let font = match font_system.get_font(cache_key.font_id) {
         Some(some) => some,
         None => {
-            log::warn!("did not find font {:?}", cache_key.font_key.id);
+            log::warn!("did not find font {:?}", cache_key.font_id);
             return None;
         }
     };
@@ -63,10 +63,10 @@ fn swash_outline_commands(
 ) -> Option<Vec<swash::zeno::Command>> {
     use swash::zeno::PathData as _;
 
-    let font = match font_system.get_font(cache_key.font_key) {
+    let font = match font_system.get_font(cache_key.font_id) {
         Some(some) => some,
         None => {
-            log::warn!("did not find font {:?}", cache_key.font_key.id);
+            log::warn!("did not find font {:?}", cache_key.font_id);
             return None;
         }
     };

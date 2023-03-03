@@ -4,17 +4,11 @@ use core::ops::Deref;
 
 pub(crate) mod fallback;
 
+pub use self::matches::*;
+mod matches;
+
 pub use self::system::*;
 mod system;
-
-#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg_attr(not(feature = "swash"), repr(transparent))]
-/// Identifies a [`Font`] in a [`FontSystem`]
-pub struct FontKey {
-    pub id: fontdb::ID,
-    #[cfg(feature = "swash")]
-    pub swash: (u32, swash::CacheKey),
-}
 
 /// A font
 pub struct Font<'a> {
@@ -48,48 +42,6 @@ impl<'a> Font<'a> {
                 (swash.offset, swash.key)
             },
         })
-    }
-
-    pub fn from_key(db: &'a fontdb::Database, key: FontKey) -> Option<Self> {
-        let info = db.face(key.id)?;
-        let data = match &info.source {
-            fontdb::Source::Binary(data) => data.deref().as_ref(),
-            #[cfg(feature = "std")]
-            fontdb::Source::File(path) => {
-                log::warn!("Unsupported fontdb Source::File('{}')", path.display());
-                return None;
-            }
-            #[cfg(feature = "std")]
-            fontdb::Source::SharedFile(_path, data) => data.deref().as_ref(),
-        };
-
-        Some(Self {
-            info,
-            data,
-            rustybuzz: rustybuzz::Face::from_slice(data, info.index)?,
-            #[cfg(feature = "swash")]
-            swash: key.swash,
-        })
-    }
-
-    pub fn key(&self) -> FontKey {
-        FontKey {
-            id: self.info.id,
-            #[cfg(feature = "swash")]
-            swash: self.swash,
-        }
-    }
-
-    pub fn name(&self) -> &str {
-        if let Some((name, _)) = self.info.families.first() {
-            name
-        } else {
-            &self.info.post_script_name
-        }
-    }
-
-    pub fn contains_family(&self, family: &str) -> bool {
-        self.info.families.iter().any(|(name, _)| name == family)
     }
 
     #[cfg(feature = "swash")]
