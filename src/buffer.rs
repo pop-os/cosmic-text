@@ -11,8 +11,7 @@ use unicode_segmentation::UnicodeSegmentation;
 #[cfg(feature = "swash")]
 use crate::Color;
 use crate::{
-    Attrs, AttrsList, BufferLine, Ellipsize, FontSystem, HeightLimit, LayoutGlyph, LayoutLine,
-    ShapeLine, Wrap,
+    Attrs, AttrsList, BufferLine, Ellipsize, FontSystem, LayoutGlyph, LayoutLine, ShapeLine, Wrap,
 };
 
 /// Current cursor location
@@ -325,7 +324,7 @@ impl<'a> Buffer<'a> {
             scroll: 0,
             redraw: false,
             wrap: Wrap::Word,
-            ellipsize: Ellipsize::End(HeightLimit::Default),
+            ellipsize: Ellipsize::None,
         };
         buffer.set_text("", Attrs::new());
         buffer

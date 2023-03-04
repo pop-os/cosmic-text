@@ -16,6 +16,12 @@ use crate::{
 };
 
 #[derive(Default)]
+struct VisualParagraph {
+    visual_lines: Vec<VisualLineInfo>,
+    overflow: bool,
+}
+
+#[derive(Default)]
 struct VisualLineInfo {
     ranges: Vec<VlRange>,
     spaces: u32,
@@ -508,9 +514,15 @@ impl ShapeLine {
             line_rtl
         };
 
+        // TODO: add to the function signature to make it customizable
+        let ellipsis_str = "…";
+
+        // Mongolian ellipsis
+        // let ellipsis_str = "᠁";
+
         let ellipsis = ShapeSpan::new(
             font_system,
-            "…",
+            ellipsis_str,
             attrs_list,
             0..3,
             false,
@@ -641,50 +653,53 @@ impl ShapeLine {
         runs
     }
 
+    /// Finds as much of the text that fits inside a line with `line_width`
+    /// Returns the `VisualLineInfo` and a bool indicating if an overflow happened.
     fn fit_in_line(
         &self,
         line_width: f32,
         font_size: f32,
         _span_start: (usize, usize),
-    ) -> VisualLineInfo {
+    ) -> (VisualLineInfo, bool) {
         let mut vl = VisualLineInfo::default();
-        let mut fit_x = line_width as f32;
-        fit_x -= self.ellipsis.x_advance * font_size;
+        let mut fit_x = line_width;
+        let ellipsis_size = self.ellipsis.x_advance * font_size;
         for (span_index, span) in self.spans.iter().enumerate() {
-            let span_width = font_size as f32 * span.x_advance;
-            if fit_x - span_width >= 0. {
+            let span_width = font_size * span.x_advance;
+            if (fit_x - ellipsis_size - span_width >= 0.)
+                || (fit_x - span_width >= 0. && span_index == self.spans.len() - 1)
+            {
                 // fits
                 vl.ranges.push((span_index, (0, 0), (span.words.len(), 0)));
                 fit_x -= span_width;
             } else {
                 // the span doesn't fit, fit as many words as you can
-                let last_position = {
-                    for (word_i, word) in span.words.iter().enumerate() {
-                        let word_width = font_size as f32 * word.x_advance;
-                        if fit_x - word_width >= 0. {
-                            fit_x -= word_width;
-                            continue;
-                        } else {
-                            // the word doesn't fit, fit as many glyphs as you can
-                            for (glyph_i, glyph) in word.glyphs.iter().enumerate() {
-                                let glyph_width = font_size as f32 * glyph.x_advance;
-                                if fit_x - glyph_width >= 0. {
-                                    fit_x -= glyph_width;
-                                    continue;
-                                } else {
-                                    // the glyph doesn't fit, return the word and glyph
-                                    // index
-                                    vl.ranges.push((span_index, (0, 0), (word_i, glyph_i)));
-                                    return vl;
-                                }
+                for (word_i, word) in span.words.iter().enumerate() {
+                    let word_width = font_size * word.x_advance;
+                    if fit_x - ellipsis_size - word_width >= 0. {
+                        fit_x -= word_width;
+                        continue;
+                    } else {
+                        // the word doesn't fit, fit as many glyphs as you can
+                        for (glyph_i, glyph) in word.glyphs.iter().enumerate() {
+                            let glyph_width = font_size * glyph.x_advance;
+                            if fit_x - ellipsis_size - glyph_width >= 0. {
+                                fit_x -= glyph_width;
+                                continue;
+                            } else {
+                                // the glyph doesn't fit, return the word and glyph
+                                // index
+                                vl.ranges.push((span_index, (0, 0), (word_i, glyph_i)));
+                                // overflow is true
+                                return (vl, true);
                             }
                         }
                     }
-                };
-                fit_x = line_width as f32 - self.ellipsis.x_advance * font_size as f32;
+                }
             }
         }
-        vl
+        // return the visual line and overflow is false
+        (vl, false)
     }
 
     pub fn layout(
@@ -710,7 +725,7 @@ impl ShapeLine {
 
         // For each visual line a list of  (span index,  and range of words in that span)
         // Note that a BiDi visual line could have multiple spans or parts of them
-        let mut vl_range_of_spans: Vec<VisualLineInfo> = Vec::with_capacity(1);
+        let mut visual_paragraph: VisualParagraph = VisualParagraph::default();
 
         let start_x = if self.rtl { line_width as f32 } else { 0.0 };
         let end_x = if self.rtl { 0.0 } else { line_width as f32 };
@@ -738,8 +753,10 @@ impl ShapeLine {
                 }
                 Ellipsize::End(limit) => match limit {
                     HeightLimit::Default | HeightLimit::Lines(0) | HeightLimit::Lines(1) => {
-                        current_visual_line =
-                            self.fit_in_line(line_width as f32, font_size as f32, (0, 0))
+                        let overflow;
+                        (current_visual_line, overflow) =
+                            self.fit_in_line(line_width as f32, font_size as f32, (0, 0));
+                        visual_paragraph.overflow = overflow;
                     }
                     HeightLimit::Lines(_max_lines) => {
                         unimplemented!(
@@ -756,7 +773,7 @@ impl ShapeLine {
             for (span_index, span) in self.spans.iter().enumerate() {
                 let mut word_ranges = Vec::new();
                 let mut word_range_width = 0.;
-                let mut number_of_blanks = 0;
+                let mut number_of_blanks: u32 = 0;
 
                 // Create the word ranges that fits in a visual line
                 if self.rtl != span.level.is_rtl() {
@@ -798,13 +815,15 @@ impl ShapeLine {
                             if word.blank && number_of_blanks > 0 {
                                 // current word causing a wrap is a space so we ignore it
                                 number_of_blanks -= 1;
-                            } else if let Some(previous_word) = span.words.get(i - 1) {
-                                // Current word causing a wrap is not whitespace, so we ignore the
-                                // previous word if it's a whitespace
-                                if previous_word.blank {
-                                    number_of_blanks -= 1;
-                                    prev_word_width =
-                                        Some(previous_word.x_advance * font_size as f32);
+                            } else if i > 0 {
+                                if let Some(previous_word) = span.words.get(i - 1) {
+                                    // Current word causing a wrap is not whitespace, so we ignore the
+                                    // previous word if it's a whitespace
+                                    if previous_word.blank {
+                                        number_of_blanks = number_of_blanks.saturating_sub(1_u32);
+                                        prev_word_width =
+                                            Some(previous_word.x_advance * font_size as f32);
+                                    }
                                 }
                             }
                             if let Some(width) = prev_word_width {
@@ -874,13 +893,15 @@ impl ShapeLine {
                             if word.blank && number_of_blanks > 0 {
                                 // current word causing a wrap is a space so we ignore it
                                 number_of_blanks -= 1;
-                            } else if let Some(previous_word) = span.words.get(i - 1) {
-                                // Current word causing a wrap is not whitespace, so we ignore the
-                                // previous word if it's a whitespace
-                                if previous_word.blank {
-                                    number_of_blanks -= 1;
-                                    prev_word_width =
-                                        Some(previous_word.x_advance * font_size as f32);
+                            } else if i > 0 {
+                                if let Some(previous_word) = span.words.get(i - 1) {
+                                    // Current word causing a wrap is not whitespace, so we ignore the
+                                    // previous word if it's a whitespace
+                                    if previous_word.blank {
+                                        number_of_blanks = number_of_blanks.saturating_sub(1_u32);
+                                        prev_word_width =
+                                            Some(previous_word.x_advance * font_size as f32);
+                                    }
                                 }
                             }
                             if let Some(width) = prev_word_width {
@@ -953,7 +974,7 @@ impl ShapeLine {
                         }
                     } else {
                         if !current_visual_line.ranges.is_empty() {
-                            vl_range_of_spans.push(current_visual_line);
+                            visual_paragraph.visual_lines.push(current_visual_line);
                             current_visual_line = VisualLineInfo::default();
                             x = start_x;
                         }
@@ -971,7 +992,7 @@ impl ShapeLine {
                         }
                         if word_range_width > line_width as f32 {
                             // single word is bigger than line_width
-                            vl_range_of_spans.push(current_visual_line);
+                            visual_paragraph.visual_lines.push(current_visual_line);
                             current_visual_line = VisualLineInfo::default();
                             x = start_x;
                         }
@@ -981,12 +1002,12 @@ impl ShapeLine {
         }
 
         if !current_visual_line.ranges.is_empty() {
-            vl_range_of_spans.push(current_visual_line);
+            visual_paragraph.visual_lines.push(current_visual_line);
         }
 
         // Create the LayoutLines using the ranges inside visual lines
-        let number_of_visual_lines = vl_range_of_spans.len();
-        for (index, visual_line) in vl_range_of_spans.iter().enumerate() {
+        let number_of_visual_lines = visual_paragraph.visual_lines.len();
+        for (index, visual_line) in visual_paragraph.visual_lines.iter().enumerate() {
             let new_order = self.reorder(&visual_line.ranges);
             let mut glyphs = Vec::with_capacity(1);
             x = start_x;
@@ -1153,6 +1174,18 @@ impl ShapeLine {
                                 }
                             }
                         }
+                    }
+                }
+            }
+            if visual_paragraph.overflow {
+                info!("Overflowed, so adding the ellipsis glyph");
+                for word in &self.ellipsis.words {
+                    for glyph in &word.glyphs {
+                        let x_advance = glyph.x_advance * font_size as f32;
+                        let y_advance = font_size as f32 * glyph.y_advance;
+                        glyphs.push(glyph.layout(font_size, x, y, x_advance, self.ellipsis.level));
+                        x += x_advance;
+                        y += y_advance;
                     }
                 }
             }

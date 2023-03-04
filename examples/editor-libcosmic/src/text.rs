@@ -11,7 +11,7 @@ use cosmic::{
     iced_winit::renderer::BorderRadius,
     theme::Theme,
 };
-use cosmic_text::{Attrs, AttrsList, BufferLine, Metrics, SwashCache};
+use cosmic_text::{Attrs, AttrsList, BufferLine, HeightLimit, Metrics, SwashCache};
 use std::{cmp, sync::Mutex, time::Instant};
 
 pub struct Appearance {
@@ -49,6 +49,7 @@ impl Text {
 
         //TODO: make it possible to set attrs
         let mut line = BufferLine::new(string, AttrsList::new(Attrs::new()));
+        line.set_wrap(cosmic_text::Wrap::None);
 
         //TODO: do we have to immediately shape?
         line.shape(&crate::FONT_SYSTEM);
@@ -102,7 +103,7 @@ where
             limits.max().width as i32,
             self.line.wrap(),
             self.line.align(),
-            cosmic_text::Ellipsize::None,
+            cosmic_text::Ellipsize::End(HeightLimit::Default),
         );
 
         let mut width = 0;
@@ -168,7 +169,7 @@ where
             layout_w,
             self.line.wrap(),
             self.line.align(),
-            cosmic_text::Ellipsize::None,
+            cosmic_text::Ellipsize::End(HeightLimit::Default),
         );
 
         let mut cache = state.cache.lock().unwrap();
