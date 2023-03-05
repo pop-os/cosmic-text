@@ -149,7 +149,7 @@ fn shape_run(
             None => break,
         };
 
-        log::trace!("Evaluating fallback with font '{}'", font.info.family);
+        log::trace!("Evaluating fallback with font '{}'", font.name());
         let (mut fb_glyphs, fb_missing) =
             shape_fallback(font, line, attrs_list, start_run, end_run, span_rtl);
 
