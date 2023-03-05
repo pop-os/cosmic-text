@@ -285,7 +285,6 @@ impl Application for Window {
         );
 
         let font_size_picker = {
-            let editor = self.editor.lock().unwrap();
             pick_list(
                 FontSize::all(),
                 Some(self.font_size),
