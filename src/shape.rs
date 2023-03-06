@@ -684,28 +684,7 @@ impl ShapeLine {
                             }
                             continue;
                         }
-                        if wrap == Wrap::Glyph {
-                            for (glyph_i, glyph) in word.glyphs.iter().enumerate().rev() {
-                                let glyph_size = font_size * glyph.x_advance;
-                                if fit_x - glyph_size >= 0. {
-                                    fit_x -= glyph_size;
-                                    word_range_width += glyph_size;
-                                    continue;
-                                } else {
-                                    word_ranges.push((
-                                        (i, glyph_i + 1),
-                                        fitting_start,
-                                        word_range_width,
-                                        number_of_blanks,
-                                    ));
-                                    number_of_blanks = 0;
-                                    fit_x = line_width - glyph_size;
-                                    word_range_width = glyph_size;
-                                    fitting_start = (i, glyph_i + 1);
-                                }
-                            }
-                        } else {
-                            // Wrap::Word
+                        if wrap == Wrap::Word || wrap == Wrap::WordWithGlyphFallback {
                             if number_of_blanks > 0
                                 && (word.blank || trailing_space_width.is_some())
                             {
@@ -732,10 +711,36 @@ impl ShapeLine {
                                 fit_x = line_width;
                                 word_range_width = 0.;
                                 fitting_start = (i + 1, 0);
-                            } else {
+                                continue;
+                            } else if wrap == Wrap::Word || line_width >= word_width {
                                 fit_x = line_width - word_width;
                                 word_range_width = word_width;
                                 fitting_start = (i, 0);
+                                continue;
+                            } else {
+                                fit_x = line_width;
+                                word_range_width = 0.0;
+                                fitting_start = (i, 0);
+                            }
+                        }
+                        // Wrap::Glyph or non-blank word wider than line
+                        for (glyph_i, glyph) in word.glyphs.iter().enumerate().rev() {
+                            let glyph_size = font_size * glyph.x_advance;
+                            if fit_x - glyph_size >= 0. {
+                                fit_x -= glyph_size;
+                                word_range_width += glyph_size;
+                                continue;
+                            } else {
+                                word_ranges.push((
+                                    (i, glyph_i + 1),
+                                    fitting_start,
+                                    word_range_width,
+                                    number_of_blanks,
+                                ));
+                                number_of_blanks = 0;
+                                fit_x = line_width - glyph_size;
+                                word_range_width = glyph_size;
+                                fitting_start = (i, glyph_i + 1);
                             }
                         }
                     }
@@ -759,28 +764,7 @@ impl ShapeLine {
                             }
                             continue;
                         }
-                        if wrap == Wrap::Glyph {
-                            for (glyph_i, glyph) in word.glyphs.iter().enumerate() {
-                                let glyph_size = font_size * glyph.x_advance;
-                                if fit_x - glyph_size >= 0. {
-                                    fit_x -= glyph_size;
-                                    word_range_width += glyph_size;
-                                    continue;
-                                } else {
-                                    word_ranges.push((
-                                        fitting_start,
-                                        (i, glyph_i),
-                                        word_range_width,
-                                        number_of_blanks,
-                                    ));
-                                    number_of_blanks = 0;
-                                    fit_x = line_width - glyph_size;
-                                    word_range_width = glyph_size;
-                                    fitting_start = (i, glyph_i);
-                                }
-                            }
-                        } else {
-                            // Wrap::Word
+                        if wrap == Wrap::Word || wrap == Wrap::WordWithGlyphFallback {
                             if number_of_blanks > 0
                                 && (word.blank || trailing_space_width.is_some())
                             {
@@ -807,10 +791,36 @@ impl ShapeLine {
                                 fit_x = line_width;
                                 word_range_width = 0.;
                                 fitting_start = (i + 1, 0);
-                            } else {
+                                continue;
+                            } else if wrap == Wrap::Word || line_width >= word_width {
                                 fit_x = line_width - word_width;
                                 word_range_width = word_width;
                                 fitting_start = (i, 0);
+                                continue;
+                            } else {
+                                fit_x = line_width;
+                                word_range_width = 0.;
+                                fitting_start = (i, 0);
+                            }
+                        }
+                        // Wrap::Glyph or non-blank word wider than line
+                        for (glyph_i, glyph) in word.glyphs.iter().enumerate() {
+                            let glyph_size = font_size * glyph.x_advance;
+                            if fit_x - glyph_size >= 0. {
+                                fit_x -= glyph_size;
+                                word_range_width += glyph_size;
+                                continue;
+                            } else {
+                                word_ranges.push((
+                                    fitting_start,
+                                    (i, glyph_i),
+                                    word_range_width,
+                                    number_of_blanks,
+                                ));
+                                number_of_blanks = 0;
+                                fit_x = line_width - glyph_size;
+                                word_range_width = glyph_size;
+                                fitting_start = (i, glyph_i);
                             }
                         }
                     }

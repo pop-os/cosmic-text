@@ -74,7 +74,12 @@ impl fmt::Display for FontSize {
     }
 }
 
-static WRAP_MODE: &[Wrap] = &[Wrap::None, Wrap::Glyph, Wrap::Word];
+static WRAP_MODE: &[Wrap] = &[
+    Wrap::None,
+    Wrap::Glyph,
+    Wrap::Word,
+    Wrap::WordWithGlyphFallback,
+];
 
 fn main() -> cosmic::iced::Result {
     env_logger::init();

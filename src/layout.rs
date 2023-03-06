@@ -69,6 +69,8 @@ pub enum Wrap {
     Glyph,
     /// Word Wrapping
     Word,
+    /// Word Wrapping, with additional glyph level wrapping for large words
+    WordWithGlyphFallback,
 }
 
 impl Display for Wrap {
@@ -76,6 +78,7 @@ impl Display for Wrap {
         match self {
             Self::None => write!(f, "No Wrap"),
             Self::Word => write!(f, "Word Wrap"),
+            Self::WordWithGlyphFallback => write!(f, "Word-Character Wrap"),
             Self::Glyph => write!(f, "Character"),
         }
     }
