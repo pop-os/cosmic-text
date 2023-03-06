@@ -6,6 +6,7 @@ use alloc::{
     vec::Vec,
 };
 use core::{cmp, fmt};
+use unicode_bidi::BidiInfo;
 use unicode_segmentation::UnicodeSegmentation;
 
 #[cfg(feature = "swash")]
@@ -562,9 +563,12 @@ impl Buffer {
     /// Set text of buffer, using provided attributes for each line by default
     pub fn set_text(&mut self, font_system: &mut FontSystem, text: &str, attrs: Attrs) {
         self.lines.clear();
-        for line in text.lines() {
-            self.lines
-                .push(BufferLine::new(line.to_string(), AttrsList::new(attrs)));
+        let bidi_info = BidiInfo::new(text, None);
+        for paragraph in bidi_info.paragraphs {
+            self.lines.push(BufferLine::new(
+                &text[paragraph.range],
+                AttrsList::new(attrs),
+            ));
         }
         // Make sure there is always one line
         if self.lines.is_empty() {

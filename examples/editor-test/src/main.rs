@@ -5,6 +5,7 @@ use cosmic_text::{
 };
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{env, fs, process, time::Instant};
+use unicode_bidi::BidiInfo;
 use unicode_segmentation::UnicodeSegmentation;
 
 fn redraw(
@@ -83,8 +84,9 @@ fn main() {
 
     let test_start = Instant::now();
 
-    //TODO: support bidi
-    for line in text.lines() {
+    let bidi_info = BidiInfo::new(&text, None);
+    for paragraph in bidi_info.paragraphs {
+        let line = &text[paragraph.range];
         log::debug!("Line {:?}", line);
 
         for grapheme in line.graphemes(true) {
