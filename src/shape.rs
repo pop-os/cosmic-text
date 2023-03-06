@@ -668,17 +668,23 @@ impl ShapeLine {
                 if self.rtl != span.level.is_rtl() {
                     // incongruent directions
                     let mut fitting_start = (span.words.len(), 0);
+                    // Keeps track of the width of the last word in the line, if it is blank
+                    let mut trailing_space_width = None;
                     for (i, word) in span.words.iter().enumerate().rev() {
-                        let word_size = font_size * word.x_advance;
-                        if fit_x - word_size >= 0. {
+                        let word_width = font_size * word.x_advance;
+                        if fit_x - word_width >= 0. {
                             // fits
-                            fit_x -= word_size;
-                            word_range_width += word_size;
+                            fit_x -= word_width;
+                            word_range_width += word_width;
                             if word.blank {
                                 number_of_blanks += 1;
+                                trailing_space_width = Some(word_width);
+                            } else {
+                                trailing_space_width = None;
                             }
                             continue;
-                        } else if wrap == Wrap::Glyph {
+                        }
+                        if wrap == Wrap::Glyph {
                             for (glyph_i, glyph) in word.glyphs.iter().enumerate().rev() {
                                 let glyph_size = font_size * glyph.x_advance;
                                 if fit_x - glyph_size >= 0. {
@@ -700,19 +706,13 @@ impl ShapeLine {
                             }
                         } else {
                             // Wrap::Word
-                            let mut prev_word_width = None;
-                            if word.blank && number_of_blanks > 0 {
-                                // current word causing a wrap is a space so we ignore it
+                            if number_of_blanks > 0
+                                && (word.blank || trailing_space_width.is_some())
+                            {
+                                // the current or previous word is a trailing space, so we ignore it
                                 number_of_blanks -= 1;
-                            } else if let Some(previous_word) = span.words.get(i - 1) {
-                                // Current word causing a wrap is not whitespace, so we ignore the
-                                // previous word if it's a whitespace
-                                if previous_word.blank {
-                                    number_of_blanks -= 1;
-                                    prev_word_width = Some(previous_word.x_advance * font_size);
-                                }
                             }
-                            if let Some(width) = prev_word_width {
+                            if let Some(width) = trailing_space_width.take() {
                                 word_ranges.push((
                                     (i, 0),
                                     fitting_start,
@@ -733,9 +733,9 @@ impl ShapeLine {
                                 word_range_width = 0.;
                                 fitting_start = (i + 1, 0);
                             } else {
-                                fit_x = line_width - word_size;
-                                word_range_width = word_size;
-                                fitting_start = (i + 1, 0);
+                                fit_x = line_width - word_width;
+                                word_range_width = word_width;
+                                fitting_start = (i, 0);
                             }
                         }
                     }
@@ -743,17 +743,23 @@ impl ShapeLine {
                 } else {
                     // congruent direction
                     let mut fitting_start = (0, 0);
+                    // Keeps track of the width of the last word in the line, if it is blank
+                    let mut trailing_space_width = None;
                     for (i, word) in span.words.iter().enumerate() {
-                        let word_size = font_size * word.x_advance;
-                        if fit_x - word_size >= 0. {
+                        let word_width = font_size * word.x_advance;
+                        if fit_x - word_width >= 0. {
                             // fits
-                            fit_x -= word_size;
-                            word_range_width += word_size;
+                            fit_x -= word_width;
+                            word_range_width += word_width;
                             if word.blank {
                                 number_of_blanks += 1;
+                                trailing_space_width = Some(word_width);
+                            } else {
+                                trailing_space_width = None;
                             }
                             continue;
-                        } else if wrap == Wrap::Glyph {
+                        }
+                        if wrap == Wrap::Glyph {
                             for (glyph_i, glyph) in word.glyphs.iter().enumerate() {
                                 let glyph_size = font_size * glyph.x_advance;
                                 if fit_x - glyph_size >= 0. {
@@ -775,19 +781,13 @@ impl ShapeLine {
                             }
                         } else {
                             // Wrap::Word
-                            let mut prev_word_width = None;
-                            if word.blank && number_of_blanks > 0 {
-                                // current word causing a wrap is a space so we ignore it
+                            if number_of_blanks > 0
+                                && (word.blank || trailing_space_width.is_some())
+                            {
+                                // the current or previous word is a trailing space, so we ignore it
                                 number_of_blanks -= 1;
-                            } else if let Some(previous_word) = span.words.get(i - 1) {
-                                // Current word causing a wrap is not whitespace, so we ignore the
-                                // previous word if it's a whitespace
-                                if previous_word.blank {
-                                    number_of_blanks -= 1;
-                                    prev_word_width = Some(previous_word.x_advance * font_size);
-                                }
                             }
-                            if let Some(width) = prev_word_width {
+                            if let Some(width) = trailing_space_width.take() {
                                 word_ranges.push((
                                     fitting_start,
                                     (i - 1, 0),
@@ -803,14 +803,13 @@ impl ShapeLine {
                                 ));
                             }
                             number_of_blanks = 0;
-
                             if word.blank {
                                 fit_x = line_width;
                                 word_range_width = 0.;
                                 fitting_start = (i + 1, 0);
                             } else {
-                                fit_x = line_width - word_size;
-                                word_range_width = word_size;
+                                fit_x = line_width - word_width;
+                                word_range_width = word_width;
                                 fitting_start = (i, 0);
                             }
                         }
