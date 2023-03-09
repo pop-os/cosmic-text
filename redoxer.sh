@@ -25,4 +25,4 @@ redoxer exec \
     --gui \
     --folder . \
     /bin/sh -c \
-    "ln -s /ui/fonts /usr/share/fonts && ${cmd}"
+    "${cmd}"
