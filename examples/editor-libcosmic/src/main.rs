@@ -87,7 +87,7 @@ fn main() -> cosmic::iced::Result {
 pub struct Window {
     theme: Theme,
     path_opt: Option<PathBuf>,
-    attrs: Attrs<'static>,
+    attrs: Attrs,
     font_size: FontSize,
     #[cfg(not(feature = "vi"))]
     editor: Mutex<SyntaxEditor<'static>>,
@@ -114,7 +114,7 @@ impl Window {
         let mut editor = self.editor.lock().unwrap();
         let mut font_system = FONT_SYSTEM.lock().unwrap();
         let mut editor = editor.borrow_with(&mut font_system);
-        match editor.load_text(&path, self.attrs) {
+        match editor.load_text(&path, &self.attrs) {
             Ok(()) => {
                 log::info!("opened '{}'", path.display());
                 self.path_opt = Some(path);
@@ -134,10 +134,12 @@ impl Application for Window {
     type Theme = Theme;
 
     fn new(_flags: ()) -> (Self, Command<Self::Message>) {
-        let attrs = cosmic_text::Attrs::new()
+        let attrs = cosmic_text::Attrs::builder()
             .monospaced(true)
-            .family(cosmic_text::Family::Monospace);
+            .family(cosmic_text::Family::Monospace)
+            .build();
 
+        #[cfg_attr(feature = "vi", allow(unused_mut))]
         let mut editor = SyntaxEditor::new(
             Buffer::new(
                 &mut FONT_SYSTEM.lock().unwrap(),
@@ -151,7 +153,7 @@ impl Application for Window {
         #[cfg(feature = "vi")]
         let mut editor = cosmic_text::ViEditor::new(editor);
 
-        update_attrs(&mut editor, attrs);
+        update_attrs(&mut editor, &attrs);
 
         let mut window = Window {
             theme: Theme::Dark,
@@ -208,37 +210,36 @@ impl Application for Window {
                 }
             }
             Message::Bold(bold) => {
-                self.attrs = self.attrs.weight(if bold {
+                self.attrs.weight = if bold {
                     cosmic_text::Weight::BOLD
                 } else {
                     cosmic_text::Weight::NORMAL
-                });
+                };
 
                 let mut editor = self.editor.lock().unwrap();
-                update_attrs(&mut *editor, self.attrs);
+                update_attrs(&mut *editor, &self.attrs);
             }
             Message::Italic(italic) => {
-                self.attrs = self.attrs.style(if italic {
+                self.attrs.style = if italic {
                     cosmic_text::Style::Italic
                 } else {
                     cosmic_text::Style::Normal
-                });
+                };
 
                 let mut editor = self.editor.lock().unwrap();
-                update_attrs(&mut *editor, self.attrs);
+                update_attrs(&mut *editor, &self.attrs);
             }
             Message::Monospaced(monospaced) => {
-                self.attrs = self
-                    .attrs
-                    .family(if monospaced {
-                        cosmic_text::Family::Monospace
-                    } else {
-                        cosmic_text::Family::SansSerif
-                    })
-                    .monospaced(monospaced);
+                self.attrs.family_owned = if monospaced {
+                    cosmic_text::Family::Monospace
+                } else {
+                    cosmic_text::Family::SansSerif
+                }
+                .into();
+                self.attrs.monospaced = monospaced;
 
                 let mut editor = self.editor.lock().unwrap();
-                update_attrs(&mut *editor, self.attrs);
+                update_attrs(&mut *editor, &self.attrs);
             }
             Message::FontSizeChanged(font_size) => {
                 self.font_size = font_size;
@@ -268,7 +269,7 @@ impl Application for Window {
 
                 let Color { r, g, b, a } = self.theme.palette().text;
                 let as_u8 = |component: f32| (component * 255.0) as u8;
-                self.attrs = self.attrs.color(cosmic_text::Color::rgba(
+                self.attrs.color_opt = Some(cosmic_text::Color::rgba(
                     as_u8(r),
                     as_u8(g),
                     as_u8(b),
@@ -276,7 +277,7 @@ impl Application for Window {
                 ));
 
                 let mut editor = self.editor.lock().unwrap();
-                update_attrs(&mut *editor, self.attrs);
+                update_attrs(&mut *editor, &self.attrs);
             }
         }
 
@@ -370,9 +371,9 @@ impl Application for Window {
     }
 }
 
-fn update_attrs<T: Edit>(editor: &mut T, attrs: Attrs) {
+fn update_attrs<T: Edit>(editor: &mut T, attrs: &Attrs) {
     editor.buffer_mut().lines.iter_mut().for_each(|line| {
-        line.set_attrs_list(AttrsList::new(attrs));
+        line.set_attrs_list(AttrsList::new(attrs.clone()));
     });
 }
 

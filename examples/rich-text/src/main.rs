@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic_text::{
-    Action, Attrs, AttrsList, Buffer, BufferLine, Color, Edit, Editor, Family, FontSystem, Metrics,
-    Style, SwashCache, Weight,
+    Action, Attrs, AttrsBuilder, AttrsList, Buffer, BufferLine, Color, Edit, Editor, Family,
+    FontSystem, Metrics, Style, SwashCache, Weight,
 };
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{
@@ -47,98 +47,98 @@ fn main() {
         .buffer_mut()
         .set_size(window.width() as f32, window.height() as f32);
 
-    let attrs = Attrs::new();
-    let serif_attrs = attrs.family(Family::Serif);
-    let mono_attrs = attrs.monospaced(true).family(Family::Monospace);
-    let comic_attrs = attrs.family(Family::Name("Comic Neue"));
+    let attrs = Attrs::builder();
+    let serif_attrs = attrs.clone().family(Family::Serif);
+    let mono_attrs = attrs.clone().monospaced(true).family(Family::Monospace);
+    let comic_attrs = attrs.clone().family(Family::Name("Comic Neue"));
 
     editor.buffer_mut().lines.clear();
 
-    let lines: &[&[(&str, Attrs)]] = &[
+    let lines: &[&[(&str, AttrsBuilder)]] = &[
         &[
-            ("B", attrs.weight(Weight::BOLD)),
-            ("old ", attrs),
-            ("I", attrs.style(Style::Italic)),
-            ("talic ", attrs),
-            ("f", attrs),
-            ("i ", attrs),
-            ("f", attrs.weight(Weight::BOLD)),
-            ("i ", attrs),
-            ("f", attrs.style(Style::Italic)),
-            ("i ", attrs),
+            ("B", attrs.clone().weight(Weight::BOLD)),
+            ("old ", attrs.clone()),
+            ("I", attrs.clone().style(Style::Italic)),
+            ("talic ", attrs.clone()),
+            ("f", attrs.clone()),
+            ("i ", attrs.clone()),
+            ("f", attrs.clone().weight(Weight::BOLD)),
+            ("i ", attrs.clone()),
+            ("f", attrs.clone().style(Style::Italic)),
+            ("i ", attrs.clone()),
         ],
         &[
-            ("Sans-Serif Normal ", attrs),
-            ("Sans-Serif Bold ", attrs.weight(Weight::BOLD)),
-            ("Sans-Serif Italic ", attrs.style(Style::Italic)),
+            ("Sans-Serif Normal ", attrs.clone()),
+            ("Sans-Serif Bold ", attrs.clone().weight(Weight::BOLD)),
+            ("Sans-Serif Italic ", attrs.clone().style(Style::Italic)),
             (
                 "Sans-Serif Bold Italic",
-                attrs.weight(Weight::BOLD).style(Style::Italic),
+                attrs.clone().weight(Weight::BOLD).style(Style::Italic),
             ),
         ],
         &[
-            ("Serif Normal ", serif_attrs),
-            ("Serif Bold ", serif_attrs.weight(Weight::BOLD)),
-            ("Serif Italic ", serif_attrs.style(Style::Italic)),
+            ("Serif Normal ", serif_attrs.clone()),
+            ("Serif Bold ", serif_attrs.clone().weight(Weight::BOLD)),
+            ("Serif Italic ", serif_attrs.clone().style(Style::Italic)),
             (
                 "Serif Bold Italic",
                 serif_attrs.weight(Weight::BOLD).style(Style::Italic),
             ),
         ],
         &[
-            ("Mono Normal ", mono_attrs),
-            ("Mono Bold ", mono_attrs.weight(Weight::BOLD)),
-            ("Mono Italic ", mono_attrs.style(Style::Italic)),
+            ("Mono Normal ", mono_attrs.clone()),
+            ("Mono Bold ", mono_attrs.clone().weight(Weight::BOLD)),
+            ("Mono Italic ", mono_attrs.clone().style(Style::Italic)),
             (
                 "Mono Bold Italic",
                 mono_attrs.weight(Weight::BOLD).style(Style::Italic),
             ),
         ],
         &[
-            ("Comic Normal ", comic_attrs),
-            ("Comic Bold ", comic_attrs.weight(Weight::BOLD)),
-            ("Comic Italic ", comic_attrs.style(Style::Italic)),
+            ("Comic Normal ", comic_attrs.clone()),
+            ("Comic Bold ", comic_attrs.clone().weight(Weight::BOLD)),
+            ("Comic Italic ", comic_attrs.clone().style(Style::Italic)),
             (
                 "Comic Bold Italic",
                 comic_attrs.weight(Weight::BOLD).style(Style::Italic),
             ),
         ],
         &[
-            ("R", attrs.color(Color::rgb(0xFF, 0x00, 0x00))),
-            ("A", attrs.color(Color::rgb(0xFF, 0x7F, 0x00))),
-            ("I", attrs.color(Color::rgb(0xFF, 0xFF, 0x00))),
-            ("N", attrs.color(Color::rgb(0x00, 0xFF, 0x00))),
-            ("B", attrs.color(Color::rgb(0x00, 0x00, 0xFF))),
-            ("O", attrs.color(Color::rgb(0x4B, 0x00, 0x82))),
-            ("W ", attrs.color(Color::rgb(0x94, 0x00, 0xD3))),
-            ("Red ", attrs.color(Color::rgb(0xFF, 0x00, 0x00))),
-            ("Orange ", attrs.color(Color::rgb(0xFF, 0x7F, 0x00))),
-            ("Yellow ", attrs.color(Color::rgb(0xFF, 0xFF, 0x00))),
-            ("Green ", attrs.color(Color::rgb(0x00, 0xFF, 0x00))),
-            ("Blue ", attrs.color(Color::rgb(0x00, 0x00, 0xFF))),
-            ("Indigo ", attrs.color(Color::rgb(0x4B, 0x00, 0x82))),
-            ("Violet ", attrs.color(Color::rgb(0x94, 0x00, 0xD3))),
-            ("U", attrs.color(Color::rgb(0x94, 0x00, 0xD3))),
-            ("N", attrs.color(Color::rgb(0x4B, 0x00, 0x82))),
-            ("I", attrs.color(Color::rgb(0x00, 0x00, 0xFF))),
-            ("C", attrs.color(Color::rgb(0x00, 0xFF, 0x00))),
-            ("O", attrs.color(Color::rgb(0xFF, 0xFF, 0x00))),
-            ("R", attrs.color(Color::rgb(0xFF, 0x7F, 0x00))),
-            ("N", attrs.color(Color::rgb(0xFF, 0x00, 0x00))),
+            ("R", attrs.clone().color(Color::rgb(0xFF, 0x00, 0x00))),
+            ("A", attrs.clone().color(Color::rgb(0xFF, 0x7F, 0x00))),
+            ("I", attrs.clone().color(Color::rgb(0xFF, 0xFF, 0x00))),
+            ("N", attrs.clone().color(Color::rgb(0x00, 0xFF, 0x00))),
+            ("B", attrs.clone().color(Color::rgb(0x00, 0x00, 0xFF))),
+            ("O", attrs.clone().color(Color::rgb(0x4B, 0x00, 0x82))),
+            ("W ", attrs.clone().color(Color::rgb(0x94, 0x00, 0xD3))),
+            ("Red ", attrs.clone().color(Color::rgb(0xFF, 0x00, 0x00))),
+            ("Orange ", attrs.clone().color(Color::rgb(0xFF, 0x7F, 0x00))),
+            ("Yellow ", attrs.clone().color(Color::rgb(0xFF, 0xFF, 0x00))),
+            ("Green ", attrs.clone().color(Color::rgb(0x00, 0xFF, 0x00))),
+            ("Blue ", attrs.clone().color(Color::rgb(0x00, 0x00, 0xFF))),
+            ("Indigo ", attrs.clone().color(Color::rgb(0x4B, 0x00, 0x82))),
+            ("Violet ", attrs.clone().color(Color::rgb(0x94, 0x00, 0xD3))),
+            ("U", attrs.clone().color(Color::rgb(0x94, 0x00, 0xD3))),
+            ("N", attrs.clone().color(Color::rgb(0x4B, 0x00, 0x82))),
+            ("I", attrs.clone().color(Color::rgb(0x00, 0x00, 0xFF))),
+            ("C", attrs.clone().color(Color::rgb(0x00, 0xFF, 0x00))),
+            ("O", attrs.clone().color(Color::rgb(0xFF, 0xFF, 0x00))),
+            ("R", attrs.clone().color(Color::rgb(0xFF, 0x7F, 0x00))),
+            ("N", attrs.clone().color(Color::rgb(0xFF, 0x00, 0x00))),
         ],
         &[(
             "生活,삶,जिंदगी 😀 FPS",
-            attrs.color(Color::rgb(0xFF, 0x00, 0x00)),
+            attrs.clone().color(Color::rgb(0xFF, 0x00, 0x00)),
         )],
     ];
-    for &line in lines {
+    for line in lines {
         let mut line_text = String::new();
-        let mut attrs_list = AttrsList::new(attrs);
-        for &(text, attrs) in line {
+        let mut attrs_list = AttrsList::new(attrs.clone().build());
+        for (text, attrs) in line.iter() {
             let start = line_text.len();
             line_text.push_str(text);
             let end = line_text.len();
-            attrs_list.add_span(start..end, attrs);
+            attrs_list.add_span(start..end, attrs.clone().build());
         }
         editor
             .buffer_mut()
