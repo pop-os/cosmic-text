@@ -41,6 +41,8 @@ fn main() {
         Metrics::new(32.0, 44.0).scale(display_scale),
     ));
 
+    let mut editor = editor.borrow_with(&font_system);
+
     editor
         .buffer_mut()
         .set_size(window.width() as f32, window.height() as f32);

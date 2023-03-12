@@ -67,6 +67,8 @@ fn main() {
     #[cfg(feature = "vi")]
     let mut editor = cosmic_text::ViEditor::new(editor);
 
+    let mut editor = editor.borrow_with(&font_system);
+
     editor
         .buffer_mut()
         .set_size(window.width() as f32 - line_x * 2.0, window.height() as f32);

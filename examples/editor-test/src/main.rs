@@ -5,9 +5,16 @@ use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{env, fs, process, time::Instant};
 use unicode_segmentation::UnicodeSegmentation;
 
-fn redraw(window: &mut Window, editor: &mut Editor<'_>, swash_cache: &mut SwashCache) {
+fn redraw(
+    window: &mut Window,
+    editor: &mut Editor,
+    font_system: &FontSystem,
+    swash_cache: &mut SwashCache,
+) {
     let bg_color = orbclient::Color::rgb(0x34, 0x34, 0x34);
     let font_color = Color::rgb(0xFF, 0xFF, 0xFF);
+
+    let mut editor = editor.borrow_with(font_system);
 
     editor.shape_as_needed();
     if editor.buffer().redraw() {
@@ -55,9 +62,13 @@ fn main() {
     let font_size_default = 1; // Body
 
     let mut buffer = Buffer::new(&font_system, font_sizes[font_size_default]);
-    buffer.set_size(window.width() as f32, window.height() as f32);
+    buffer
+        .borrow_with(&font_system)
+        .set_size(window.width() as f32, window.height() as f32);
 
     let mut editor = Editor::new(buffer);
+
+    let mut editor = editor.borrow_with(&font_system);
 
     let mut swash_cache = SwashCache::new();
 
@@ -128,7 +139,7 @@ fn main() {
         // Finally, normal enter
         editor.action(Action::Enter);
 
-        redraw(&mut window, &mut editor, &mut swash_cache);
+        redraw(&mut window, &mut editor, &font_system, &mut swash_cache);
 
         for event in window.events() {
             if let EventOption::Quit(_) = event.to_option() {

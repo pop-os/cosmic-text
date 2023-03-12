@@ -112,6 +112,7 @@ pub enum Message {
 impl Window {
     pub fn open(&mut self, path: PathBuf) {
         let mut editor = self.editor.lock().unwrap();
+        let mut editor = editor.borrow_with(&FONT_SYSTEM);
         match editor.load_text(&path, self.attrs) {
             Ok(()) => {
                 log::info!("opened '{}'", path.display());
@@ -237,13 +238,15 @@ impl Application for Window {
             }
             Message::FontSizeChanged(font_size) => {
                 self.font_size = font_size;
-
                 let mut editor = self.editor.lock().unwrap();
-                editor.buffer_mut().set_metrics(font_size.to_metrics());
+                editor
+                    .borrow_with(&FONT_SYSTEM)
+                    .buffer_mut()
+                    .set_metrics(font_size.to_metrics());
             }
             Message::WrapChanged(wrap) => {
                 let mut editor = self.editor.lock().unwrap();
-                editor.buffer_mut().set_wrap(wrap);
+                editor.borrow_with(&FONT_SYSTEM).buffer_mut().set_wrap(wrap);
             }
             Message::AlignmentChanged(align) => {
                 let mut editor = self.editor.lock().unwrap();
@@ -360,13 +363,13 @@ impl Application for Window {
     }
 }
 
-fn update_attrs<'a, T: Edit<'a>>(editor: &mut T, attrs: Attrs<'a>) {
+fn update_attrs<T: Edit>(editor: &mut T, attrs: Attrs) {
     editor.buffer_mut().lines.iter_mut().for_each(|line| {
         line.set_attrs_list(AttrsList::new(attrs));
     });
 }
 
-fn update_alignment<'a, T: Edit<'a>>(editor: &mut T, align: Align) {
+fn update_alignment<T: Edit>(editor: &mut T, align: Align) {
     let current_line = editor.cursor().line;
     if let Some(select) = editor.select_opt() {
         let (start, end) = match select.line.cmp(&current_line) {

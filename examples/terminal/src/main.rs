@@ -17,6 +17,8 @@ fn main() {
     // A Buffer provides shaping and layout for a UTF-8 string, create one per text widget
     let mut buffer = Buffer::new(&font_system, metrics);
 
+    let mut buffer = buffer.borrow_with(&font_system);
+
     // Set a size for the text buffer, in pixels
     let width = 80u16;
     let height = 25u16;
