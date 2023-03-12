@@ -35,7 +35,7 @@ impl Editor {
         }
     }
 
-    fn set_layout_cursor(&mut self, font_system: &FontSystem, cursor: LayoutCursor) {
+    pub(crate) fn set_layout_cursor(&mut self, font_system: &mut FontSystem, cursor: LayoutCursor) {
         let layout = self
             .buffer
             .line_layout(font_system, cursor.line)
@@ -94,7 +94,7 @@ impl Edit for Editor {
         }
     }
 
-    fn shape_as_needed(&mut self, font_system: &FontSystem) {
+    fn shape_as_needed(&mut self, font_system: &mut FontSystem) {
         if self.cursor_moved {
             self.buffer.shape_until_cursor(font_system, self.cursor);
             self.cursor_moved = false;
@@ -281,7 +281,7 @@ impl Edit for Editor {
         self.cursor.index = self.buffer.lines[self.cursor.line].text().len() - after_len;
     }
 
-    fn action(&mut self, font_system: &FontSystem, action: Action) {
+    fn action(&mut self, font_system: &mut FontSystem, action: Action) {
         let old_cursor = self.cursor;
 
         match action {
@@ -677,7 +677,7 @@ impl Edit for Editor {
     #[cfg(feature = "swash")]
     fn draw<F>(
         &self,
-        font_system: &FontSystem,
+        font_system: &mut FontSystem,
         cache: &mut crate::SwashCache,
         color: Color,
         mut f: F,

@@ -58,7 +58,7 @@ fn main() {
     let line_x = 8.0 * display_scale;
 
     let mut editor = SyntaxEditor::new(
-        Buffer::new(&font_system, font_sizes[font_size_i]),
+        Buffer::new(&mut font_system, font_sizes[font_size_i]),
         &syntax_system,
         "base16-eighties.dark",
     )

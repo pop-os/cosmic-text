@@ -317,7 +317,7 @@ impl Buffer {
     /// # Panics
     ///
     /// Will panic if `metrics.line_height` is zero.
-    pub fn new(font_system: &FontSystem, metrics: Metrics) -> Self {
+    pub fn new(font_system: &mut FontSystem, metrics: Metrics) -> Self {
         assert_ne!(metrics.line_height, 0.0, "line height cannot be 0");
 
         let mut buffer = Self {
@@ -343,7 +343,7 @@ impl Buffer {
         }
     }
 
-    pub(crate) fn relayout(&mut self, font_system: &FontSystem) {
+    pub(crate) fn relayout(&mut self, font_system: &mut FontSystem) {
         #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
         let instant = std::time::Instant::now();
 
@@ -360,7 +360,7 @@ impl Buffer {
         log::debug!("relayout: {:?}", instant.elapsed());
     }
 
-    pub(crate) fn shape_until(&mut self, font_system: &FontSystem, lines: i32) -> i32 {
+    pub(crate) fn shape_until(&mut self, font_system: &mut FontSystem, lines: i32) -> i32 {
         #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
         let instant = std::time::Instant::now();
 
@@ -387,7 +387,7 @@ impl Buffer {
         total_layout
     }
 
-    pub(crate) fn shape_until_cursor(&mut self, font_system: &FontSystem, cursor: Cursor) {
+    pub(crate) fn shape_until_cursor(&mut self, font_system: &mut FontSystem, cursor: Cursor) {
         #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
         let instant = std::time::Instant::now();
 
@@ -427,7 +427,7 @@ impl Buffer {
         self.shape_until_scroll(font_system);
     }
 
-    pub(crate) fn shape_until_scroll(&mut self, font_system: &FontSystem) {
+    pub(crate) fn shape_until_scroll(&mut self, font_system: &mut FontSystem) {
         let lines = self.visible_lines();
 
         let scroll_end = self.scroll + lines;
@@ -468,7 +468,7 @@ impl Buffer {
 
     pub(crate) fn line_shape(
         &mut self,
-        font_system: &FontSystem,
+        font_system: &mut FontSystem,
         line_i: usize,
     ) -> Option<&ShapeLine> {
         let line = self.lines.get_mut(line_i)?;
@@ -477,7 +477,7 @@ impl Buffer {
 
     pub(crate) fn line_layout(
         &mut self,
-        font_system: &FontSystem,
+        font_system: &mut FontSystem,
         line_i: usize,
     ) -> Option<&[LayoutLine]> {
         let line = self.lines.get_mut(line_i)?;
@@ -489,7 +489,7 @@ impl Buffer {
         self.metrics
     }
 
-    fn set_metrics(&mut self, font_system: &FontSystem, metrics: Metrics) {
+    fn set_metrics(&mut self, font_system: &mut FontSystem, metrics: Metrics) {
         if metrics != self.metrics {
             assert_ne!(metrics.font_size, 0.0, "font size cannot be 0");
             self.metrics = metrics;
@@ -503,7 +503,7 @@ impl Buffer {
         self.wrap
     }
 
-    pub(crate) fn set_wrap(&mut self, font_system: &FontSystem, wrap: Wrap) {
+    pub(crate) fn set_wrap(&mut self, font_system: &mut FontSystem, wrap: Wrap) {
         if wrap != self.wrap {
             self.wrap = wrap;
             self.relayout(font_system);
@@ -516,7 +516,7 @@ impl Buffer {
         (self.width, self.height)
     }
 
-    pub(crate) fn set_size(&mut self, font_system: &FontSystem, width: f32, height: f32) {
+    pub(crate) fn set_size(&mut self, font_system: &mut FontSystem, width: f32, height: f32) {
         let clamped_width = width.max(0.0);
         let clamped_height = height.max(0.0);
 
@@ -546,7 +546,7 @@ impl Buffer {
         (self.height / self.metrics.line_height) as i32
     }
 
-    pub(crate) fn set_text(&mut self, font_system: &FontSystem, text: &str, attrs: Attrs) {
+    pub(crate) fn set_text(&mut self, font_system: &mut FontSystem, text: &str, attrs: Attrs) {
         self.lines.clear();
         for line in text.lines() {
             self.lines
@@ -682,7 +682,7 @@ impl Buffer {
     #[cfg(feature = "swash")]
     pub(crate) fn draw<F>(
         &self,
-        font_system: &FontSystem,
+        font_system: &mut FontSystem,
         cache: &mut crate::SwashCache,
         color: Color,
         mut f: F,
@@ -758,7 +758,7 @@ impl<'a> BorrowedWithFontSystem<'a, Buffer> {
 
     /// Draw the buffer
     #[cfg(feature = "swash")]
-    pub fn draw<F>(&self, cache: &mut crate::SwashCache, color: Color, f: F)
+    pub fn draw<F>(&mut self, cache: &mut crate::SwashCache, color: Color, f: F)
     where
         F: FnMut(i32, i32, u32, u32, Color),
     {

@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use std::{
-    collections::HashMap,
-    sync::{Arc, Mutex},
-};
+use std::{collections::HashMap, sync::Arc};
 
 use crate::{Attrs, AttrsOwned, Font};
 
@@ -11,8 +8,8 @@ use crate::{Attrs, AttrsOwned, Font};
 pub struct FontSystem {
     locale: String,
     db: fontdb::Database,
-    font_cache: Mutex<HashMap<fontdb::ID, Option<Arc<Font>>>>,
-    font_matches_cache: Mutex<HashMap<AttrsOwned, Arc<Vec<Arc<Font>>>>>,
+    font_cache: HashMap<fontdb::ID, Option<Arc<Font>>>,
+    font_matches_cache: HashMap<AttrsOwned, Arc<Vec<Arc<Font>>>>,
 }
 
 impl FontSystem {
@@ -88,8 +85,8 @@ impl FontSystem {
         Self {
             locale,
             db,
-            font_cache: Mutex::new(HashMap::new()),
-            font_matches_cache: Mutex::new(HashMap::new()),
+            font_cache: HashMap::new(),
+            font_matches_cache: HashMap::new(),
         }
     }
 
@@ -105,44 +102,28 @@ impl FontSystem {
         (self.locale, self.db)
     }
 
-    pub fn get_font(&self, id: fontdb::ID) -> Option<Arc<Font>> {
-        self.font_cache
-            .lock()
-            .expect("failed to lock font cache")
-            .entry(id)
-            .or_insert_with(|| {
-                let face = self.db.face(id)?;
-                match Font::new(face) {
-                    Some(font) => Some(Arc::new(font)),
-                    None => {
-                        log::warn!("failed to load font '{}'", face.post_script_name);
-                        None
-                    }
-                }
-            })
-            .clone()
+    pub fn get_font(&mut self, id: fontdb::ID) -> Option<Arc<Font>> {
+        get_font(&mut self.font_cache, &mut self.db, id)
     }
 
-    pub fn get_font_matches(&self, attrs: Attrs) -> Arc<Vec<Arc<Font>>> {
+    pub fn get_font_matches(&mut self, attrs: Attrs) -> Arc<Vec<Arc<Font>>> {
         self.font_matches_cache
-            .lock()
-            .expect("failed to lock font matches cache")
             //TODO: do not create AttrsOwned unless entry does not already exist
             .entry(AttrsOwned::new(attrs))
             .or_insert_with(|| {
                 #[cfg(not(target_arch = "wasm32"))]
                 let now = std::time::Instant::now();
 
-                let mut fonts = Vec::new();
-                for face in self.db.faces() {
-                    if !attrs.matches(face) {
-                        continue;
-                    }
-
-                    if let Some(font) = self.get_font(face.id) {
-                        fonts.push(font);
-                    }
-                }
+                let ids = self
+                    .db
+                    .faces()
+                    .filter(|face| attrs.matches(face))
+                    .map(|face| face.id)
+                    .collect::<Vec<_>>();
+                let fonts = ids
+                    .into_iter()
+                    .filter_map(|id| get_font(&mut self.font_cache, &mut self.db, id))
+                    .collect();
 
                 #[cfg(not(target_arch = "wasm32"))]
                 {
@@ -154,4 +135,24 @@ impl FontSystem {
             })
             .clone()
     }
+}
+
+fn get_font(
+    font_cache: &mut HashMap<fontdb::ID, Option<Arc<Font>>>,
+    db: &mut fontdb::Database,
+    id: fontdb::ID,
+) -> Option<Arc<Font>> {
+    font_cache
+        .entry(id)
+        .or_insert_with(|| {
+            let face = db.face(id)?;
+            match Font::new(face) {
+                Some(font) => Some(Arc::new(font)),
+                None => {
+                    log::warn!("failed to load font '{}'", face.post_script_name);
+                    None
+                }
+            }
+        })
+        .clone()
 }

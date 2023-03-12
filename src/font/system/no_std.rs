@@ -44,28 +44,32 @@ impl FontSystem {
     }
 
     pub fn get_font(&self, id: fontdb::ID) -> Option<Arc<Font>> {
-        let face = self.db.face(id)?;
-        match Font::new(face) {
-            Some(font) => Some(Arc::new(font)),
-            None => {
-                log::warn!("failed to load font '{}'", face.post_script_name);
-                None
-            }
-        }
+        get_font(&self.db, id)
     }
 
-    pub fn get_font_matches(&self, attrs: Attrs) -> Arc<Vec<Arc<Font>>> {
+    pub fn get_font_matches(&mut self, attrs: Attrs) -> Arc<Vec<Arc<Font>>> {
         let mut fonts = Vec::new();
         for face in self.db.faces() {
             if !attrs.matches(face) {
                 continue;
             }
 
-            if let Some(font) = self.get_font(face.id) {
+            if let Some(font) = get_font(&self.db, face.id) {
                 fonts.push(font);
             }
         }
 
         Arc::new(fonts)
+    }
+}
+
+fn get_font(db: &fontdb::Database, id: fontdb::ID) -> Option<Arc<Font>> {
+    let face = db.face(id)?;
+    match Font::new(face) {
+        Some(font) => Some(Arc::new(font)),
+        None => {
+            log::warn!("failed to load font '{}'", face.post_script_name);
+            None
+        }
     }
 }

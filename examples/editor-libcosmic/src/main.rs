@@ -139,7 +139,10 @@ impl Application for Window {
             .family(cosmic_text::Family::Monospace);
 
         let mut editor = SyntaxEditor::new(
-            Buffer::new(&FONT_SYSTEM.lock().unwrap(), FontSize::Body.to_metrics()),
+            Buffer::new(
+                &mut FONT_SYSTEM.lock().unwrap(),
+                FontSize::Body.to_metrics(),
+            ),
             &SYNTAX_SYSTEM,
             "base16-eighties.dark",
         )

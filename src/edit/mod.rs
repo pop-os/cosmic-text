@@ -108,7 +108,7 @@ pub trait Edit {
     fn set_select_opt(&mut self, select_opt: Option<Cursor>);
 
     /// Shape lines until scroll, after adjusting scroll if the cursor moved
-    fn shape_as_needed(&mut self, font_system: &FontSystem);
+    fn shape_as_needed(&mut self, font_system: &mut FontSystem);
 
     /// Copy selection
     fn copy_selection(&mut self) -> Option<String>;
@@ -122,12 +122,17 @@ pub trait Edit {
     fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>);
 
     /// Perform an [Action] on the editor
-    fn action(&mut self, font_system: &FontSystem, action: Action);
+    fn action(&mut self, font_system: &mut FontSystem, action: Action);
 
     /// Draw the editor
     #[cfg(feature = "swash")]
-    fn draw<F>(&self, font_system: &FontSystem, cache: &mut crate::SwashCache, color: Color, f: F)
-    where
+    fn draw<F>(
+        &self,
+        font_system: &mut FontSystem,
+        cache: &mut crate::SwashCache,
+        color: Color,
+        f: F,
+    ) where
         F: FnMut(i32, i32, u32, u32, Color);
 }
 
@@ -152,7 +157,7 @@ impl<'a, T: Edit> BorrowedWithFontSystem<'a, T> {
 
     /// Draw the editor
     #[cfg(feature = "swash")]
-    pub fn draw<F>(&self, cache: &mut crate::SwashCache, color: Color, f: F)
+    pub fn draw<F>(&mut self, cache: &mut crate::SwashCache, color: Color, f: F)
     where
         F: FnMut(i32, i32, u32, u32, Color),
     {

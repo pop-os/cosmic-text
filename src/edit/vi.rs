@@ -32,7 +32,7 @@ impl<'a> ViEditor<'a> {
     #[cfg(feature = "std")]
     pub(crate) fn load_text<P: AsRef<std::path::Path>>(
         &mut self,
-        font_system: &FontSystem,
+        font_system: &mut FontSystem,
         path: P,
         attrs: crate::Attrs,
     ) -> std::io::Result<()> {
@@ -71,7 +71,7 @@ impl<'a> Edit for ViEditor<'a> {
         self.editor.set_select_opt(select_opt);
     }
 
-    fn shape_as_needed(&mut self, font_system: &FontSystem) {
+    fn shape_as_needed(&mut self, font_system: &mut FontSystem) {
         self.editor.shape_as_needed(font_system);
     }
 
@@ -87,7 +87,7 @@ impl<'a> Edit for ViEditor<'a> {
         self.editor.insert_string(data, attrs_list);
     }
 
-    fn action(&mut self, font_system: &FontSystem, action: Action) {
+    fn action(&mut self, font_system: &mut FontSystem, action: Action) {
         let old_mode = self.mode;
 
         match self.mode {
@@ -229,7 +229,7 @@ impl<'a> Edit for ViEditor<'a> {
     #[cfg(feature = "swash")]
     fn draw<F>(
         &self,
-        font_system: &FontSystem,
+        font_system: &mut FontSystem,
         cache: &mut crate::SwashCache,
         color: Color,
         mut f: F,

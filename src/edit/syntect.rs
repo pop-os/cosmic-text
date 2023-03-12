@@ -63,7 +63,7 @@ impl<'a> SyntaxEditor<'a> {
     #[cfg(feature = "std")]
     pub(crate) fn load_text<P: AsRef<Path>>(
         &mut self,
-        font_system: &FontSystem,
+        font_system: &mut FontSystem,
         path: P,
         attrs: crate::Attrs,
     ) -> io::Result<()> {
@@ -131,7 +131,7 @@ impl<'a> Edit for SyntaxEditor<'a> {
         self.editor.set_select_opt(select_opt);
     }
 
-    fn shape_as_needed(&mut self, font_system: &FontSystem) {
+    fn shape_as_needed(&mut self, font_system: &mut FontSystem) {
         #[cfg(feature = "std")]
         let now = std::time::Instant::now();
 
@@ -236,7 +236,7 @@ impl<'a> Edit for SyntaxEditor<'a> {
         self.editor.insert_string(data, attrs_list);
     }
 
-    fn action(&mut self, font_system: &FontSystem, action: Action) {
+    fn action(&mut self, font_system: &mut FontSystem, action: Action) {
         self.editor.action(font_system, action);
     }
 
@@ -244,7 +244,7 @@ impl<'a> Edit for SyntaxEditor<'a> {
     #[cfg(feature = "swash")]
     fn draw<F>(
         &self,
-        font_system: &FontSystem,
+        font_system: &mut FontSystem,
         cache: &mut crate::SwashCache,
         _color: Color,
         mut f: F,
