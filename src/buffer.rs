@@ -599,22 +599,33 @@ impl Buffer {
         &mut self,
         font_system: &mut FontSystem,
         text: &str,
-        attrs: Attrs,
+        attrs: impl AsRef<Attrs> + Into<Attrs>,
         shaping: Shaping,
     ) {
         self.lines.clear();
-        for line in BidiParagraphs::new(text) {
-            self.lines.push(BufferLine::new(
-                line.to_string(),
-                AttrsList::new(attrs),
-                shaping,
-            ));
-        }
-        // Make sure there is always one line
-        if self.lines.is_empty() {
+        let mut lines = BidiParagraphs::new(text).peekable();
+        if lines.peek().is_some() {
+            while let Some(line) = lines.next() {
+                if lines.peek().is_some() {
+                    self.lines.push(BufferLine::new(
+                        line.to_string(),
+                        AttrsList::new(attrs.as_ref().clone()),
+                        shaping,
+                    ));
+                } else {
+                    self.lines.push(BufferLine::new(
+                        line.to_string(),
+                        AttrsList::new(attrs.into()),
+                        shaping,
+                    ));
+                    break;
+                }
+            }
+        } else {
+            // Make sure there is always one line
             self.lines.push(BufferLine::new(
                 String::new(),
-                AttrsList::new(attrs),
+                AttrsList::new(attrs.into()),
                 shaping,
             ));
         }
@@ -825,7 +836,12 @@ impl<'a> BorrowedWithFontSystem<'a, Buffer> {
     }
 
     /// Set text of buffer, using provided attributes for each line by default
-    pub fn set_text(&mut self, text: &str, attrs: Attrs, shaping: Shaping) {
+    pub fn set_text(
+        &mut self,
+        text: &str,
+        attrs: impl AsRef<Attrs> + Into<Attrs>,
+        shaping: Shaping,
+    ) {
         self.inner.set_text(self.font_system, text, attrs, shaping);
     }
 
