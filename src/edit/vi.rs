@@ -3,7 +3,7 @@ use core::cmp;
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
-    Action, AttrsList, BorrowedWithFontSystem, Buffer, Color, Cursor, Edit, FontSystem,
+    Action, AttrsList, BorrowedWithFontSystem, Buffer, Color, Cursor, Edit, FontSystem, Spans,
     SyntaxEditor,
 };
 
@@ -36,8 +36,9 @@ impl<'a> ViEditor<'a> {
         font_system: &mut FontSystem,
         path: impl AsRef<std::path::Path>,
         attrs: impl AsRef<crate::Attrs> + Into<crate::Attrs>,
+        color: Option<Color>,
     ) -> std::io::Result<()> {
-        self.editor.load_text(font_system, path, attrs)
+        self.editor.load_text(font_system, path, attrs, color)
     }
 
     /// Get the default background color
@@ -84,8 +85,13 @@ impl<'a> Edit for ViEditor<'a> {
         self.editor.delete_selection()
     }
 
-    fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>) {
-        self.editor.insert_string(data, attrs_list);
+    fn insert_string(
+        &mut self,
+        data: &str,
+        attrs_list: Option<AttrsList>,
+        color_spans: Option<Spans<Color>>,
+    ) {
+        self.editor.insert_string(data, attrs_list, color_spans);
     }
 
     fn action(&mut self, font_system: &mut FontSystem, action: Action) {
@@ -425,8 +431,11 @@ impl<'a> Edit for ViEditor<'a> {
             for glyph in run.glyphs.iter() {
                 let (cache_key, x_int, y_int) = (glyph.cache_key, glyph.x_int, glyph.y_int);
 
-                let glyph_color = match glyph.color_opt {
-                    Some(some) => some,
+                let glyph_color = match self.editor.buffer().lines[run.line_i]
+                    .color_spans()
+                    .get(glyph.start)
+                {
+                    Some(some) => *some,
                     None => color,
                 };
 
@@ -445,7 +454,8 @@ impl<'a, 'b> BorrowedWithFontSystem<'b, ViEditor<'a>> {
         &mut self,
         path: impl AsRef<std::path::Path>,
         attrs: impl AsRef<crate::Attrs> + Into<crate::Attrs>,
+        color: Option<Color>,
     ) -> std::io::Result<()> {
-        self.inner.load_text(self.font_system, path, attrs)
+        self.inner.load_text(self.font_system, path, attrs, color)
     }
 }

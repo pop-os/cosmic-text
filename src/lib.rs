@@ -35,8 +35,11 @@
 //! // Attributes indicate what font to choose
 //! let attrs = Attrs::new();
 //!
+//! // Optional color override
+//! let color = None;
+//!
 //! // Add some text!
-//! buffer.set_text("Hello, Rust! 🦀\n", attrs);
+//! buffer.set_text("Hello, Rust! 🦀\n", attrs, color);
 //!
 //! // Perform shaping as desired
 //! buffer.shape_until_scroll();

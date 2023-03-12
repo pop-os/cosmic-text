@@ -47,13 +47,15 @@ impl StyleSheet for Theme {
 
 pub struct TextBox<'a, Editor> {
     editor: &'a Mutex<Editor>,
+    color: Option<cosmic_text::Color>,
     padding: Padding,
 }
 
 impl<'a, Editor> TextBox<'a, Editor> {
-    pub fn new(editor: &'a Mutex<Editor>) -> Self {
+    pub fn new(editor: &'a Mutex<Editor>, color: Option<cosmic_text::Color>) -> Self {
         Self {
             editor,
+            color,
             padding: Padding::new(0),
         }
     }
@@ -64,8 +66,11 @@ impl<'a, Editor> TextBox<'a, Editor> {
     }
 }
 
-pub fn text_box<Editor>(editor: &Mutex<Editor>) -> TextBox<Editor> {
-    TextBox::new(editor)
+pub fn text_box<Editor>(
+    editor: &Mutex<Editor>,
+    color: Option<cosmic_text::Color>,
+) -> TextBox<Editor> {
+    TextBox::new(editor, color)
 }
 
 impl<'a, Editor, Message, Renderer> Widget<Message, Renderer> for TextBox<'a, Editor>
@@ -156,12 +161,14 @@ where
             );
         }
 
-        let text_color = cosmic_text::Color::rgba(
-            cmp::max(0, cmp::min(255, (appearance.text_color.r * 255.0) as i32)) as u8,
-            cmp::max(0, cmp::min(255, (appearance.text_color.g * 255.0) as i32)) as u8,
-            cmp::max(0, cmp::min(255, (appearance.text_color.b * 255.0) as i32)) as u8,
-            cmp::max(0, cmp::min(255, (appearance.text_color.a * 255.0) as i32)) as u8,
-        );
+        let text_color = self.color.unwrap_or_else(|| {
+            cosmic_text::Color::rgba(
+                cmp::max(0, cmp::min(255, (appearance.text_color.r * 255.0) as i32)) as u8,
+                cmp::max(0, cmp::min(255, (appearance.text_color.g * 255.0) as i32)) as u8,
+                cmp::max(0, cmp::min(255, (appearance.text_color.b * 255.0) as i32)) as u8,
+                cmp::max(0, cmp::min(255, (appearance.text_color.a * 255.0) as i32)) as u8,
+            )
+        });
 
         let mut editor = self.editor.lock().unwrap();
 

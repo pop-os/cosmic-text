@@ -78,7 +78,7 @@ fn main() {
         .monospaced(true)
         .family(Family::Monospace)
         .build();
-    match editor.load_text(&path, attrs) {
+    match editor.load_text(&path, attrs, None) {
         Ok(()) => (),
         Err(err) => {
             log::error!("failed to load {:?}: {}", path, err);

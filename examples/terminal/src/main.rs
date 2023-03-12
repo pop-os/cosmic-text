@@ -28,7 +28,7 @@ fn main() {
     let attrs = Attrs::new();
 
     // Add some text!
-    buffer.set_text(" Hi, Rust! 🦀", attrs);
+    buffer.set_text(" Hi, Rust! 🦀", attrs, None);
 
     // Perform shaping as desired
     buffer.shape_until_scroll();

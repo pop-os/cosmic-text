@@ -111,12 +111,6 @@ impl AttrsBuilder {
         self.0
     }
 
-    /// Set [Color]
-    pub fn color(mut self, color: Color) -> Self {
-        self.0.color_opt = Some(color);
-        self
-    }
-
     /// Set [Family]
     pub fn family(mut self, family: impl Into<FamilyOwned>) -> Self {
         self.0.family_owned = family.into();
@@ -157,8 +151,6 @@ impl AttrsBuilder {
 /// Text attributes
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Attrs {
-    //TODO: should this be an option?
-    pub color_opt: Option<Color>,
     pub family_owned: FamilyOwned,
     pub monospaced: bool,
     pub stretch: Stretch,
@@ -173,7 +165,6 @@ impl Attrs {
     /// This defaults to a regular Sans-Serif font.
     pub fn new() -> Self {
         Self {
-            color_opt: None,
             family_owned: FamilyOwned::SansSerif,
             monospaced: false,
             stretch: Stretch::Normal,
@@ -219,12 +210,81 @@ impl From<&Attrs> for Attrs {
     }
 }
 
+#[derive(Eq, PartialEq)]
+pub struct Spans<T>(RangeMap<usize, T>);
+
+impl<T: Eq + Clone> Default for Spans<T> {
+    fn default() -> Self {
+        Self(RangeMap::default())
+    }
+}
+
+impl<T: Eq + Clone> Spans<T> {
+    pub fn clear(&mut self) {
+        self.0.clear();
+    }
+
+    pub fn add(&mut self, range: Range<usize>, attrs: impl Into<T>) {
+        //do not support 1..1 even if by accident.
+        if range.start == range.end {
+            return;
+        }
+
+        self.0.insert(range, attrs.into());
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = (&Range<usize>, &T)> {
+        self.0.iter()
+    }
+
+    /// Get the attribute span for an index
+    ///
+    /// This returns a span that contains the index
+    pub fn get(&self, index: usize) -> Option<&T> {
+        self.0.get(&index)
+    }
+
+    /// Split at an offset
+    pub fn split_off(&mut self, index: usize) -> Self {
+        let mut new = Self::default();
+        let mut removes = Vec::new();
+
+        //get the keys we need to remove or fix.
+        for span in self.0.iter() {
+            if span.0.end <= index {
+                continue;
+            } else if span.0.start >= index {
+                removes.push((span.0.clone(), false));
+            } else {
+                removes.push((span.0.clone(), true));
+            }
+        }
+
+        for (key, resize) in removes {
+            let (range, attrs) = self
+                .0
+                .get_key_value(&key.start)
+                .map(|v| (v.0.clone(), v.1.clone()))
+                .expect("attrs span not found");
+            self.0.remove(key);
+
+            if resize {
+                new.0.insert(0..range.end - index, attrs.clone());
+                self.0.insert(range.start..index, attrs);
+            } else {
+                new.0.insert(range.start - index..range.end - index, attrs);
+            }
+        }
+        new
+    }
+}
+
 /// List of text attributes to apply to a line
 //TODO: have this clean up the spans when changes are made
 #[derive(Eq, PartialEq)]
 pub struct AttrsList {
     defaults: Attrs,
-    spans: RangeMap<usize, Attrs>,
+    spans: Spans<Attrs>,
 }
 
 impl AttrsList {
@@ -232,7 +292,7 @@ impl AttrsList {
     pub fn new(defaults: Attrs) -> Self {
         Self {
             defaults,
-            spans: RangeMap::new(),
+            spans: Spans::default(),
         }
     }
 
@@ -253,53 +313,21 @@ impl AttrsList {
 
     /// Add an attribute span, removes any previous matching parts of spans
     pub fn add_span(&mut self, range: Range<usize>, attrs: impl Into<Attrs>) {
-        //do not support 1..1 even if by accident.
-        if range.start == range.end {
-            return;
-        }
-
-        self.spans.insert(range, attrs.into());
+        self.spans.add(range, attrs.into());
     }
 
     /// Get the attribute span for an index
     ///
     /// This returns a span that contains the index
     pub fn get_span(&self, index: usize) -> &Attrs {
-        self.spans.get(&index).unwrap_or(&self.defaults)
+        self.spans.get(index).unwrap_or(&self.defaults)
     }
 
     /// Split attributes list at an offset
     pub fn split_off(&mut self, index: usize) -> Self {
-        let mut new = Self::new(self.defaults.clone());
-        let mut removes = Vec::new();
-
-        //get the keys we need to remove or fix.
-        for span in self.spans.iter() {
-            if span.0.end <= index {
-                continue;
-            } else if span.0.start >= index {
-                removes.push((span.0.clone(), false));
-            } else {
-                removes.push((span.0.clone(), true));
-            }
+        Self {
+            defaults: self.defaults.clone(),
+            spans: self.spans.split_off(index),
         }
-
-        for (key, resize) in removes {
-            let (range, attrs) = self
-                .spans
-                .get_key_value(&key.start)
-                .map(|v| (v.0.clone(), v.1.clone()))
-                .expect("attrs span not found");
-            self.spans.remove(key);
-
-            if resize {
-                new.spans.insert(0..range.end - index, attrs.clone());
-                self.spans.insert(range.start..index, attrs);
-            } else {
-                new.spans
-                    .insert(range.start - index..range.end - index, attrs);
-            }
-        }
-        new
     }
 }

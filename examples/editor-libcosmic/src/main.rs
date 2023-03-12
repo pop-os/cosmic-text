@@ -88,6 +88,7 @@ pub struct Window {
     theme: Theme,
     path_opt: Option<PathBuf>,
     attrs: Attrs,
+    color: Option<cosmic_text::Color>,
     font_size: FontSize,
     #[cfg(not(feature = "vi"))]
     editor: Mutex<SyntaxEditor<'static>>,
@@ -114,7 +115,7 @@ impl Window {
         let mut editor = self.editor.lock().unwrap();
         let mut font_system = FONT_SYSTEM.lock().unwrap();
         let mut editor = editor.borrow_with(&mut font_system);
-        match editor.load_text(&path, &self.attrs) {
+        match editor.load_text(&path, &self.attrs, self.color) {
             Ok(()) => {
                 log::info!("opened '{}'", path.display());
                 self.path_opt = Some(path);
@@ -160,6 +161,7 @@ impl Application for Window {
             font_size: FontSize::Body,
             path_opt: None,
             attrs,
+            color: None,
             editor: Mutex::new(editor),
         };
         if let Some(arg) = env::args().nth(1) {
@@ -269,15 +271,12 @@ impl Application for Window {
 
                 let Color { r, g, b, a } = self.theme.palette().text;
                 let as_u8 = |component: f32| (component * 255.0) as u8;
-                self.attrs.color_opt = Some(cosmic_text::Color::rgba(
+                self.color = Some(cosmic_text::Color::rgba(
                     as_u8(r),
                     as_u8(g),
                     as_u8(b),
                     as_u8(a),
                 ));
-
-                let mut editor = self.editor.lock().unwrap();
-                update_attrs(&mut *editor, &self.attrs);
             }
         }
 
@@ -360,7 +359,7 @@ impl Application for Window {
             ]
             .align_items(Alignment::Center)
             .spacing(8),
-            text_box(&self.editor)
+            text_box(&self.editor, self.color)
         ]
         .spacing(8)
         .padding(16)
