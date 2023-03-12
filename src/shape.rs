@@ -21,7 +21,7 @@ fn shape_fallback(
 ) -> (Vec<ShapeGlyph>, Vec<usize>) {
     let run = &line[start_run..end_run];
 
-    let font_scale = font.rustybuzz.units_per_em() as f32;
+    let font_scale = font.rustybuzz().units_per_em() as f32;
 
     let mut buffer = rustybuzz::UnicodeBuffer::new();
     buffer.set_direction(if span_rtl {
@@ -35,7 +35,7 @@ fn shape_fallback(
     let rtl = matches!(buffer.direction(), rustybuzz::Direction::RightToLeft);
     assert_eq!(rtl, span_rtl);
 
-    let glyph_buffer = rustybuzz::shape(&font.rustybuzz, &[], buffer);
+    let glyph_buffer = rustybuzz::shape(&font.rustybuzz(), &[], buffer);
     let glyph_infos = glyph_buffer.glyph_infos();
     let glyph_positions = glyph_buffer.glyph_positions();
 
@@ -62,7 +62,7 @@ fn shape_fallback(
             y_advance,
             x_offset,
             y_offset,
-            font_id: font.info.id,
+            font_id: font.info().id,
             glyph_id: info.glyph_id.try_into().expect("failed to cast glyph ID"),
             //TODO: color should not be related to shaping
             color_opt: attrs.color_opt,
@@ -123,24 +123,18 @@ fn shape_run(
 
     let attrs = attrs_list.get_span(start_run);
 
-    let font_matches = font_system.get_font_matches(attrs);
+    let fonts = font_system.get_font_matches(attrs);
 
-    let default_families = [font_matches.default_family.as_str()];
-    let mut font_iter = FontFallbackIter::new(
-        &font_matches.fonts,
-        &default_families,
-        scripts,
-        font_matches.locale,
-    );
+    let db = font_system.db();
 
-    let (mut glyphs, mut missing) = shape_fallback(
-        font_iter.next().expect("no default font found"),
-        line,
-        attrs_list,
-        start_run,
-        end_run,
-        span_rtl,
-    );
+    let default_families = [db.family_name(&attrs.family)];
+    let mut font_iter =
+        FontFallbackIter::new(&fonts, &default_families, scripts, font_system.locale());
+
+    let font = font_iter.next().expect("no default font found");
+
+    let (mut glyphs, mut missing) =
+        shape_fallback(font, line, attrs_list, start_run, end_run, span_rtl);
 
     //TODO: improve performance!
     while !missing.is_empty() {

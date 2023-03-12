@@ -26,7 +26,7 @@ mod platform;
 mod platform;
 
 pub struct FontFallbackIter<'a> {
-    fonts: &'a [Arc<Font<'a>>],
+    fonts: &'a [Arc<Font>],
     default_families: &'a [&'a str],
     default_i: usize,
     scripts: Vec<Script>,
@@ -39,7 +39,7 @@ pub struct FontFallbackIter<'a> {
 
 impl<'a> FontFallbackIter<'a> {
     pub fn new(
-        fonts: &'a [Arc<Font<'a>>],
+        fonts: &'a [Arc<Font>],
         default_families: &'a [&'a str],
         scripts: Vec<Script>,
         locale: &'a str,
@@ -88,7 +88,7 @@ impl<'a> FontFallbackIter<'a> {
 }
 
 impl<'a> Iterator for FontFallbackIter<'a> {
-    type Item = &'a Arc<Font<'a>>;
+    type Item = &'a Arc<Font>;
     fn next(&mut self) -> Option<Self::Item> {
         while self.default_i < self.default_families.len() {
             let default_family = self.default_families[self.default_i];

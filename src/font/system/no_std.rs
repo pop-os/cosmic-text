@@ -6,7 +6,7 @@ use alloc::{
     vec::Vec,
 };
 
-use crate::{Attrs, Font, FontMatches};
+use crate::{Attrs, Font};
 
 /// Access system fonts
 pub struct FontSystem {
@@ -43,9 +43,7 @@ impl FontSystem {
         &self.db
     }
 
-    // Clippy false positive
-    #[allow(clippy::needless_lifetimes)]
-    pub fn get_font<'a>(&'a self, id: fontdb::ID) -> Option<Arc<Font<'a>>> {
+    pub fn get_font(&self, id: fontdb::ID) -> Option<Arc<Font>> {
         let face = self.db.face(id)?;
         match Font::new(face) {
             Some(font) => Some(Arc::new(font)),
@@ -56,7 +54,7 @@ impl FontSystem {
         }
     }
 
-    pub fn get_font_matches<'a>(&'a self, attrs: Attrs) -> Arc<FontMatches<'a>> {
+    pub fn get_font_matches(&self, attrs: Attrs) -> Arc<Vec<Arc<Font>>> {
         let mut fonts = Vec::new();
         for face in self.db.faces() {
             if !attrs.matches(face) {
@@ -68,10 +66,6 @@ impl FontSystem {
             }
         }
 
-        Arc::new(FontMatches {
-            locale: &self.locale,
-            default_family: self.db.family_name(&attrs.family).to_string(),
-            fonts,
-        })
+        Arc::new(fonts)
     }
 }
