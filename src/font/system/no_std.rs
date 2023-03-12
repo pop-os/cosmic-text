@@ -43,6 +43,10 @@ impl FontSystem {
         &self.db
     }
 
+    pub fn db_mut(&mut self) -> &mut fontdb::Database {
+        &mut self.db
+    }
+
     pub fn get_font(&self, id: fontdb::ID) -> Option<Arc<Font>> {
         get_font(&self.db, id)
     }

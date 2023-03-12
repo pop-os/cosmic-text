@@ -98,6 +98,11 @@ impl FontSystem {
         &self.db
     }
 
+    pub fn db_mut(&mut self) -> &mut fontdb::Database {
+        self.font_matches_cache.clear();
+        &mut self.db
+    }
+
     pub fn into_locale_and_db(self) -> (String, fontdb::Database) {
         (self.locale, self.db)
     }
