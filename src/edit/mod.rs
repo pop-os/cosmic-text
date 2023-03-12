@@ -79,6 +79,7 @@ pub enum Action {
 
 /// A trait to allow easy replacements of [`Editor`], like `SyntaxEditor`
 pub trait Edit {
+    /// Mutably borrows `self` together with an [`FontSystem`] for more convenient methods
     fn borrow_with<'a>(
         &'a mut self,
         font_system: &'a mut FontSystem,

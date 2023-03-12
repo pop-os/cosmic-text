@@ -13,6 +13,7 @@ mod std;
 // re-export fontdb
 pub use fontdb;
 
+/// A value borrowed together with an [`FontSystem`]
 pub struct BorrowedWithFontSystem<'a, T> {
     pub(crate) inner: &'a mut T,
     pub(crate) font_system: &'a mut FontSystem,

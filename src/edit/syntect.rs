@@ -60,8 +60,13 @@ impl<'a> SyntaxEditor<'a> {
         })
     }
 
+    /// Load text from a file, and also set syntax to the best option
+    ///
+    /// ## Errors
+    ///
+    /// Returns an [`io::Error`] if reading the file fails
     #[cfg(feature = "std")]
-    pub(crate) fn load_text<P: AsRef<Path>>(
+    pub fn load_text<P: AsRef<Path>>(
         &mut self,
         font_system: &mut FontSystem,
         path: P,

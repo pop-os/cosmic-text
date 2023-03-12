@@ -35,7 +35,7 @@ impl Editor {
         }
     }
 
-    pub(crate) fn set_layout_cursor(&mut self, font_system: &mut FontSystem, cursor: LayoutCursor) {
+    fn set_layout_cursor(&mut self, font_system: &mut FontSystem, cursor: LayoutCursor) {
         let layout = self
             .buffer
             .line_layout(font_system, cursor.line)

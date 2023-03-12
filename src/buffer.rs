@@ -333,6 +333,7 @@ impl Buffer {
         buffer
     }
 
+    /// Mutably borrows the buffer together with an [`FontSystem`] for more convenient methods
     pub fn borrow_with<'a>(
         &'a mut self,
         font_system: &'a mut FontSystem,
@@ -343,7 +344,7 @@ impl Buffer {
         }
     }
 
-    pub(crate) fn relayout(&mut self, font_system: &mut FontSystem) {
+    fn relayout(&mut self, font_system: &mut FontSystem) {
         #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
         let instant = std::time::Instant::now();
 
@@ -360,7 +361,8 @@ impl Buffer {
         log::debug!("relayout: {:?}", instant.elapsed());
     }
 
-    pub(crate) fn shape_until(&mut self, font_system: &mut FontSystem, lines: i32) -> i32 {
+    /// Pre-shape lines in the buffer, up to `lines`, return actual number of layout lines
+    pub fn shape_until(&mut self, font_system: &mut FontSystem, lines: i32) -> i32 {
         #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
         let instant = std::time::Instant::now();
 
@@ -387,7 +389,8 @@ impl Buffer {
         total_layout
     }
 
-    pub(crate) fn shape_until_cursor(&mut self, font_system: &mut FontSystem, cursor: Cursor) {
+    /// Shape lines until cursor, also scrolling to include cursor in view
+    pub fn shape_until_cursor(&mut self, font_system: &mut FontSystem, cursor: Cursor) {
         #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
         let instant = std::time::Instant::now();
 
@@ -427,7 +430,8 @@ impl Buffer {
         self.shape_until_scroll(font_system);
     }
 
-    pub(crate) fn shape_until_scroll(&mut self, font_system: &mut FontSystem) {
+    /// Shape lines until scroll
+    pub fn shape_until_scroll(&mut self, font_system: &mut FontSystem) {
         let lines = self.visible_lines();
 
         let scroll_end = self.scroll + lines;
@@ -466,7 +470,8 @@ impl Buffer {
         LayoutCursor::new(cursor.line, 0, 0)
     }
 
-    pub(crate) fn line_shape(
+    /// Shape the provided line index and return the result
+    pub fn line_shape(
         &mut self,
         font_system: &mut FontSystem,
         line_i: usize,
@@ -475,7 +480,8 @@ impl Buffer {
         Some(line.shape(font_system))
     }
 
-    pub(crate) fn line_layout(
+    /// Lay out the provided line index and return the result
+    pub fn line_layout(
         &mut self,
         font_system: &mut FontSystem,
         line_i: usize,
@@ -489,7 +495,12 @@ impl Buffer {
         self.metrics
     }
 
-    fn set_metrics(&mut self, font_system: &mut FontSystem, metrics: Metrics) {
+    /// Set the current [`Metrics`]
+    ///
+    /// # Panics
+    ///
+    /// Will panic if `metrics.font_size` is zero.
+    pub fn set_metrics(&mut self, font_system: &mut FontSystem, metrics: Metrics) {
         if metrics != self.metrics {
             assert_ne!(metrics.font_size, 0.0, "font size cannot be 0");
             self.metrics = metrics;
@@ -503,7 +514,8 @@ impl Buffer {
         self.wrap
     }
 
-    pub(crate) fn set_wrap(&mut self, font_system: &mut FontSystem, wrap: Wrap) {
+    /// Set the current [`Wrap`]
+    pub fn set_wrap(&mut self, font_system: &mut FontSystem, wrap: Wrap) {
         if wrap != self.wrap {
             self.wrap = wrap;
             self.relayout(font_system);
@@ -516,7 +528,8 @@ impl Buffer {
         (self.width, self.height)
     }
 
-    pub(crate) fn set_size(&mut self, font_system: &mut FontSystem, width: f32, height: f32) {
+    /// Set the current buffer dimensions
+    pub fn set_size(&mut self, font_system: &mut FontSystem, width: f32, height: f32) {
         let clamped_width = width.max(0.0);
         let clamped_height = height.max(0.0);
 
@@ -546,7 +559,8 @@ impl Buffer {
         (self.height / self.metrics.line_height) as i32
     }
 
-    pub(crate) fn set_text(&mut self, font_system: &mut FontSystem, text: &str, attrs: Attrs) {
+    /// Set text of buffer, using provided attributes for each line by default
+    pub fn set_text(&mut self, font_system: &mut FontSystem, text: &str, attrs: Attrs) {
         self.lines.clear();
         for line in text.lines() {
             self.lines
@@ -679,8 +693,9 @@ impl Buffer {
         new_cursor_opt
     }
 
+    /// Draw the buffer
     #[cfg(feature = "swash")]
-    pub(crate) fn draw<F>(
+    pub fn draw<F>(
         &self,
         font_system: &mut FontSystem,
         cache: &mut crate::SwashCache,
