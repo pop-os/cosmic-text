@@ -81,7 +81,7 @@ pub enum Action {
 pub trait Edit {
     fn borrow_with<'a>(
         &'a mut self,
-        font_system: &'a FontSystem,
+        font_system: &'a mut FontSystem,
     ) -> BorrowedWithFontSystem<'a, Self>
     where
         Self: Sized,

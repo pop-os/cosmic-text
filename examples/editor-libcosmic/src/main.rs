@@ -23,7 +23,7 @@ use self::text_box::text_box;
 mod text_box;
 
 lazy_static::lazy_static! {
-    static ref FONT_SYSTEM: FontSystem = FontSystem::new();
+    static ref FONT_SYSTEM: Mutex<FontSystem> = Mutex::new(FontSystem::new());
     static ref SYNTAX_SYSTEM: SyntaxSystem = SyntaxSystem::new();
 }
 
@@ -112,7 +112,8 @@ pub enum Message {
 impl Window {
     pub fn open(&mut self, path: PathBuf) {
         let mut editor = self.editor.lock().unwrap();
-        let mut editor = editor.borrow_with(&FONT_SYSTEM);
+        let mut font_system = FONT_SYSTEM.lock().unwrap();
+        let mut editor = editor.borrow_with(&mut font_system);
         match editor.load_text(&path, self.attrs) {
             Ok(()) => {
                 log::info!("opened '{}'", path.display());
@@ -138,7 +139,7 @@ impl Application for Window {
             .family(cosmic_text::Family::Monospace);
 
         let mut editor = SyntaxEditor::new(
-            Buffer::new(&FONT_SYSTEM, FontSize::Body.to_metrics()),
+            Buffer::new(&FONT_SYSTEM.lock().unwrap(), FontSize::Body.to_metrics()),
             &SYNTAX_SYSTEM,
             "base16-eighties.dark",
         )
@@ -170,11 +171,11 @@ impl Application for Window {
         if let Some(path) = &self.path_opt {
             format!(
                 "COSMIC Text - {} - {}",
-                FONT_SYSTEM.locale(),
+                FONT_SYSTEM.lock().unwrap().locale(),
                 path.display()
             )
         } else {
-            format!("COSMIC Text - {}", FONT_SYSTEM.locale())
+            format!("COSMIC Text - {}", FONT_SYSTEM.lock().unwrap().locale())
         }
     }
 
@@ -240,13 +241,16 @@ impl Application for Window {
                 self.font_size = font_size;
                 let mut editor = self.editor.lock().unwrap();
                 editor
-                    .borrow_with(&FONT_SYSTEM)
+                    .borrow_with(&mut FONT_SYSTEM.lock().unwrap())
                     .buffer_mut()
                     .set_metrics(font_size.to_metrics());
             }
             Message::WrapChanged(wrap) => {
                 let mut editor = self.editor.lock().unwrap();
-                editor.borrow_with(&FONT_SYSTEM).buffer_mut().set_wrap(wrap);
+                editor
+                    .borrow_with(&mut FONT_SYSTEM.lock().unwrap())
+                    .buffer_mut()
+                    .set_wrap(wrap);
             }
             Message::AlignmentChanged(align) => {
                 let mut editor = self.editor.lock().unwrap();

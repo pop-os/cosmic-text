@@ -335,7 +335,7 @@ impl Buffer {
 
     pub fn borrow_with<'a>(
         &'a mut self,
-        font_system: &'a FontSystem,
+        font_system: &'a mut FontSystem,
     ) -> BorrowedWithFontSystem<'a, Buffer> {
         BorrowedWithFontSystem {
             inner: self,

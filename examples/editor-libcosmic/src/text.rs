@@ -53,7 +53,7 @@ impl Text {
         let mut line = BufferLine::new(string, AttrsList::new(Attrs::new()));
 
         //TODO: do we have to immediately shape?
-        line.shape(&crate::FONT_SYSTEM);
+        line.shape(&FONT_SYSTEM.lock().unwrap());
 
         let text = Self {
             line,
@@ -186,7 +186,7 @@ where
                 };
 
                 cache.with_pixels(
-                    &FONT_SYSTEM,
+                    &FONT_SYSTEM.lock().unwrap(),
                     cache_key,
                     glyph_color,
                     |pixel_x, pixel_y, color| {

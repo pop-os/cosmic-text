@@ -35,7 +35,7 @@ fn shape_fallback(
     let rtl = matches!(buffer.direction(), rustybuzz::Direction::RightToLeft);
     assert_eq!(rtl, span_rtl);
 
-    let glyph_buffer = rustybuzz::shape(&font.rustybuzz(), &[], buffer);
+    let glyph_buffer = rustybuzz::shape(font.rustybuzz(), &[], buffer);
     let glyph_infos = glyph_buffer.glyph_infos();
     let glyph_positions = glyph_buffer.glyph_positions();
 

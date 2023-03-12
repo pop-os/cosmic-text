@@ -40,7 +40,7 @@ fn main() {
     )
     .unwrap();
 
-    let font_system = FontSystem::new();
+    let mut font_system = FontSystem::new();
 
     let syntax_system = SyntaxSystem::new();
 
@@ -67,7 +67,7 @@ fn main() {
     #[cfg(feature = "vi")]
     let mut editor = cosmic_text::ViEditor::new(editor);
 
-    let mut editor = editor.borrow_with(&font_system);
+    let mut editor = editor.borrow_with(&mut font_system);
 
     editor
         .buffer_mut()

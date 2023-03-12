@@ -15,7 +15,7 @@ pub use fontdb;
 
 pub struct BorrowedWithFontSystem<'a, T> {
     pub(crate) inner: &'a mut T,
-    pub(crate) font_system: &'a FontSystem,
+    pub(crate) font_system: &'a mut FontSystem,
 }
 
 impl<'a, T> Deref for BorrowedWithFontSystem<'a, T> {
