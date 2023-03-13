@@ -62,26 +62,7 @@ impl FontSystem {
     }
 
     /// Create a new [`FontSystem`], manually specifying the current locale and font database.
-    pub fn new_with_locale_and_db(locale: String, mut db: fontdb::Database) -> Self {
-        {
-            #[cfg(not(target_arch = "wasm32"))]
-            let now = std::time::Instant::now();
-
-            //TODO only do this on demand!
-            for id in db.faces().map(|face| face.id).collect::<Vec<_>>() {
-                unsafe {
-                    db.make_shared_face_data(id);
-                }
-            }
-
-            #[cfg(not(target_arch = "wasm32"))]
-            log::info!(
-                "Mapped {} font faces in {}ms.",
-                db.len(),
-                now.elapsed().as_millis()
-            );
-        }
-
+    pub fn new_with_locale_and_db(locale: String, db: fontdb::Database) -> Self {
         Self {
             locale,
             db,
@@ -150,6 +131,9 @@ fn get_font(
     font_cache
         .entry(id)
         .or_insert_with(|| {
+            unsafe {
+                db.make_shared_face_data(id);
+            }
             let face = db.face(id)?;
             match Font::new(face) {
                 Some(font) => Some(Arc::new(font)),
