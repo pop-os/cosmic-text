@@ -721,15 +721,13 @@ impl ShapeLine {
                         } else {
                             // Wrap::Word
                             let mut trailing_space_width = None;
-                            if i > 0 {
-                                if let Some(previous_word) = span.words.get(i - 1) {
-                                    // Current word causing a wrap is not whitespace, so we ignore the
-                                    // previous word if it's a whitespace
-                                    if previous_word.blank {
-                                        trailing_space_width =
-                                            Some(previous_word.x_advance * font_size);
-                                        number_of_blanks = number_of_blanks.saturating_sub(1);
-                                    }
+                            if let Some(previous_word) = span.words.get(i + 1) {
+                                // Current word causing a wrap is not whitespace, so we ignore the
+                                // previous word if it's a whitespace
+                                if previous_word.blank {
+                                    trailing_space_width =
+                                        Some(previous_word.x_advance * font_size);
+                                    number_of_blanks = number_of_blanks.saturating_sub(1);
                                 }
                             }
                             if let Some(width) = trailing_space_width {
@@ -758,7 +756,7 @@ impl ShapeLine {
                             if word.blank {
                                 fit_x = line_width;
                                 word_range_width = 0.;
-                                fitting_start = (i + 1, 0);
+                                fitting_start = (i, 0);
                             } else {
                                 fit_x = line_width - word_width;
                                 word_range_width = word_width;
@@ -815,10 +813,7 @@ impl ShapeLine {
                         } else {
                             // Wrap::Word
                             let mut trailing_space_width = None;
-                            if word.blank {
-                                // current word causing a wrap is a space so we ignore it
-                                // number_of_blanks = number_of_blanks.saturating_sub(1);
-                            } else if i > 0 {
+                            if i > 0 {
                                 if let Some(previous_word) = span.words.get(i - 1) {
                                     // Current word causing a wrap is not whitespace, so we ignore the
                                     // previous word if it's a whitespace
@@ -834,7 +829,7 @@ impl ShapeLine {
                                     &mut current_visual_line,
                                     span_index,
                                     fitting_start,
-                                    (i, 0),
+                                    (i - 1, 0),
                                     word_range_width - width,
                                     number_of_blanks,
                                 );
