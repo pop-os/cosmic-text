@@ -9,7 +9,7 @@ pub struct FontSystem {
     locale: String,
     db: fontdb::Database,
     font_cache: HashMap<fontdb::ID, Option<Arc<Font>>>,
-    font_matches_cache: HashMap<AttrsOwned, Arc<Vec<Arc<Font>>>>,
+    font_matches_cache: HashMap<AttrsOwned, Arc<Vec<fontdb::ID>>>,
 }
 
 impl FontSystem {
@@ -92,7 +92,7 @@ impl FontSystem {
         get_font(&mut self.font_cache, &mut self.db, id)
     }
 
-    pub fn get_font_matches(&mut self, attrs: Attrs) -> Arc<Vec<Arc<Font>>> {
+    pub fn get_font_matches(&mut self, attrs: Attrs) -> Arc<Vec<fontdb::ID>> {
         self.font_matches_cache
             //TODO: do not create AttrsOwned unless entry does not already exist
             .entry(AttrsOwned::new(attrs))
@@ -106,10 +106,6 @@ impl FontSystem {
                     .filter(|face| attrs.matches(face))
                     .map(|face| face.id)
                     .collect::<Vec<_>>();
-                let fonts = ids
-                    .into_iter()
-                    .filter_map(|id| get_font(&mut self.font_cache, &mut self.db, id))
-                    .collect();
 
                 #[cfg(not(target_arch = "wasm32"))]
                 {
@@ -117,7 +113,7 @@ impl FontSystem {
                     log::debug!("font matches for {:?} in {:?}", attrs, elapsed);
                 }
 
-                Arc::new(fonts)
+                Arc::new(ids)
             })
             .clone()
     }

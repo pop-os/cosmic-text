@@ -62,7 +62,7 @@ fn shape_fallback(
             y_advance,
             x_offset,
             y_offset,
-            font_id: font.info().id,
+            font_id: font.id(),
             glyph_id: info.glyph_id.try_into().expect("failed to cast glyph ID"),
             //TODO: color should not be related to shaping
             color_opt: attrs.color_opt,
@@ -125,16 +125,13 @@ fn shape_run(
 
     let fonts = font_system.get_font_matches(attrs);
 
-    let db = font_system.db();
-
-    let default_families = [db.family_name(&attrs.family)];
-    let mut font_iter =
-        FontFallbackIter::new(&fonts, &default_families, scripts, font_system.locale());
+    let default_families = [&attrs.family];
+    let mut font_iter = FontFallbackIter::new(font_system, &fonts, &default_families, scripts);
 
     let font = font_iter.next().expect("no default font found");
 
     let (mut glyphs, mut missing) =
-        shape_fallback(font, line, attrs_list, start_run, end_run, span_rtl);
+        shape_fallback(&font, line, attrs_list, start_run, end_run, span_rtl);
 
     //TODO: improve performance!
     while !missing.is_empty() {
@@ -143,9 +140,12 @@ fn shape_run(
             None => break,
         };
 
-        log::trace!("Evaluating fallback with font '{}'", font.name());
+        log::trace!(
+            "Evaluating fallback with font '{}'",
+            font_iter.face_name(font.id())
+        );
         let (mut fb_glyphs, fb_missing) =
-            shape_fallback(font, line, attrs_list, start_run, end_run, span_rtl);
+            shape_fallback(&font, line, attrs_list, start_run, end_run, span_rtl);
 
         // Insert all matching glyphs
         let mut fb_i = 0;
