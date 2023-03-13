@@ -615,24 +615,6 @@ impl ShapeLine {
         runs
     }
 
-    fn add_to_visual_line(
-        &self,
-        vl: &mut VisualLine,
-        span_index: usize,
-        start: (usize, usize),
-        end: (usize, usize),
-        width: f32,
-        number_of_blanks: u32,
-    ) {
-        if end == start {
-            return;
-        }
-
-        vl.ranges.push((span_index, start, end));
-        vl.w += width;
-        vl.spaces += number_of_blanks;
-    }
-
     pub fn layout(
         &self,
         font_size: f32,
@@ -657,6 +639,23 @@ impl ShapeLine {
         // Note that a BiDi visual line could have multiple spans or parts of them
         // let mut vl_range_of_spans = Vec::with_capacity(1);
         let mut visual_lines: Vec<VisualLine> = Vec::with_capacity(1);
+
+        fn add_to_visual_line(
+            vl: &mut VisualLine,
+            span_index: usize,
+            start: (usize, usize),
+            end: (usize, usize),
+            width: f32,
+            number_of_blanks: u32,
+        ) {
+            if end == start {
+                return;
+            }
+
+            vl.ranges.push((span_index, start, end));
+            vl.w += width;
+            vl.spaces += number_of_blanks;
+        }
 
         let start_x = if self.rtl { line_width } else { 0.0 };
         let mut x;
@@ -702,7 +701,7 @@ impl ShapeLine {
                                     word_range_width += glyph_width;
                                     continue;
                                 } else {
-                                    self.add_to_visual_line(
+                                    add_to_visual_line(
                                         &mut current_visual_line,
                                         span_index,
                                         (i, glyph_i + 1),
@@ -721,20 +720,20 @@ impl ShapeLine {
                             }
                         } else {
                             // Wrap::Word
-                            let mut trialing_space_width = None;
+                            let mut trailing_space_width = None;
                             if i > 0 {
                                 if let Some(previous_word) = span.words.get(i - 1) {
                                     // Current word causing a wrap is not whitespace, so we ignore the
                                     // previous word if it's a whitespace
                                     if previous_word.blank {
-                                        trialing_space_width =
+                                        trailing_space_width =
                                             Some(previous_word.x_advance * font_size);
                                         number_of_blanks = number_of_blanks.saturating_sub(1);
                                     }
                                 }
                             }
-                            if let Some(width) = trialing_space_width {
-                                self.add_to_visual_line(
+                            if let Some(width) = trailing_space_width {
+                                add_to_visual_line(
                                     &mut current_visual_line,
                                     span_index,
                                     (i + 2, 0),
@@ -743,7 +742,7 @@ impl ShapeLine {
                                     number_of_blanks,
                                 );
                             } else {
-                                self.add_to_visual_line(
+                                add_to_visual_line(
                                     &mut current_visual_line,
                                     span_index,
                                     (i + 1, 0),
@@ -767,7 +766,7 @@ impl ShapeLine {
                             }
                         }
                     }
-                    self.add_to_visual_line(
+                    add_to_visual_line(
                         &mut current_visual_line,
                         span_index,
                         (0, 0),
@@ -796,7 +795,7 @@ impl ShapeLine {
                                     word_range_width += glyph_width;
                                     continue;
                                 } else {
-                                    self.add_to_visual_line(
+                                    add_to_visual_line(
                                         &mut current_visual_line,
                                         span_index,
                                         fitting_start,
@@ -815,7 +814,7 @@ impl ShapeLine {
                             }
                         } else {
                             // Wrap::Word
-                            let mut prev_word_width = None;
+                            let mut trailing_space_width = None;
                             if word.blank {
                                 // current word causing a wrap is a space so we ignore it
                                 // number_of_blanks = number_of_blanks.saturating_sub(1);
@@ -824,13 +823,14 @@ impl ShapeLine {
                                     // Current word causing a wrap is not whitespace, so we ignore the
                                     // previous word if it's a whitespace
                                     if previous_word.blank {
-                                        prev_word_width = Some(previous_word.x_advance * font_size);
+                                        trailing_space_width =
+                                            Some(previous_word.x_advance * font_size);
                                         number_of_blanks = number_of_blanks.saturating_sub(1);
                                     }
                                 }
                             }
-                            if let Some(width) = prev_word_width {
-                                self.add_to_visual_line(
+                            if let Some(width) = trailing_space_width {
+                                add_to_visual_line(
                                     &mut current_visual_line,
                                     span_index,
                                     fitting_start,
@@ -839,7 +839,7 @@ impl ShapeLine {
                                     number_of_blanks,
                                 );
                             } else {
-                                self.add_to_visual_line(
+                                add_to_visual_line(
                                     &mut current_visual_line,
                                     span_index,
                                     fitting_start,
@@ -863,7 +863,7 @@ impl ShapeLine {
                             }
                         }
                     }
-                    self.add_to_visual_line(
+                    add_to_visual_line(
                         &mut current_visual_line,
                         span_index,
                         fitting_start,
