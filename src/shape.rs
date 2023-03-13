@@ -5,11 +5,28 @@ use alloc::vec::Vec;
 use core::cmp::{max, min};
 use core::mem;
 use core::ops::Range;
+use log::info;
 use unicode_script::{Script, UnicodeScript};
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::fallback::FontFallbackIter;
-use crate::{Align, AttrsList, CacheKey, Color, Font, FontSystem, LayoutGlyph, LayoutLine, Wrap};
+use crate::{
+    Align, AttrsList, CacheKey, Color, Ellipsize, Font, FontSystem, HeightLimit, LayoutGlyph,
+    LayoutLine, Wrap,
+};
+
+#[derive(Default)]
+struct VisualParagraph {
+    visual_lines: Vec<VisualLineInfo>,
+    overflow: bool,
+}
+
+#[derive(Default)]
+struct VisualLineInfo {
+    ranges: Vec<VlRange>,
+    spaces: u32,
+    w: f32,
+}
 
 fn shape_fallback(
     font: &Font,
@@ -349,6 +366,7 @@ impl ShapeWord {
 pub struct ShapeSpan {
     pub level: unicode_bidi::Level,
     pub words: Vec<ShapeWord>,
+    pub x_advance: f32,
 }
 
 impl ShapeSpan {
@@ -369,6 +387,7 @@ impl ShapeSpan {
         );
 
         let mut words = Vec::new();
+        let mut x_advance = 0.;
 
         let mut start_word = 0;
         for (end_lb, _) in unicode_linebreak::linebreaks(span) {
@@ -382,19 +401,21 @@ impl ShapeSpan {
                 }
             }
             if start_word < start_lb {
-                words.push(ShapeWord::new(
+                let word = ShapeWord::new(
                     font_system,
                     line,
                     attrs_list,
                     (span_range.start + start_word)..(span_range.start + start_lb),
                     level,
                     false,
-                ));
+                );
+                x_advance += word.x_advance;
+                words.push(word);
             }
             if start_lb < end_lb {
                 for (i, c) in span[start_lb..end_lb].char_indices() {
                     // assert!(c.is_whitespace());
-                    words.push(ShapeWord::new(
+                    let word = ShapeWord::new(
                         font_system,
                         line,
                         attrs_list,
@@ -402,7 +423,9 @@ impl ShapeSpan {
                             ..(span_range.start + start_lb + i + c.len_utf8()),
                         level,
                         true,
-                    ));
+                    );
+                    x_advance += word.x_advance;
+                    words.push(word);
                 }
             }
             start_word = end_lb;
@@ -420,7 +443,11 @@ impl ShapeSpan {
             words.reverse();
         }
 
-        ShapeSpan { level, words }
+        ShapeSpan {
+            level,
+            words,
+            x_advance,
+        }
     }
 }
 
@@ -428,6 +455,7 @@ impl ShapeSpan {
 pub struct ShapeLine {
     pub rtl: bool,
     pub spans: Vec<ShapeSpan>,
+    ellipsis: ShapeSpan,
 }
 
 // Visual Line Ranges: (span_index, (first_word_index, first_glyph_index), (last_word_index, last_glyph_index))
@@ -489,7 +517,26 @@ impl ShapeLine {
             line_rtl
         };
 
-        Self { rtl, spans }
+        // TODO: add to the function signature to make it customizable
+        let ellipsis_str = "…";
+
+        // Mongolian ellipsis
+        // let ellipsis_str = "᠁";
+
+        let ellipsis = ShapeSpan::new(
+            font_system,
+            ellipsis_str,
+            attrs_list,
+            0..3,
+            false,
+            unicode_bidi::LTR_LEVEL,
+        );
+
+        Self {
+            rtl,
+            spans,
+            ellipsis,
+        }
     }
 
     // A modified version of first part of unicode_bidi::bidi_info::visual_run
@@ -609,12 +656,62 @@ impl ShapeLine {
         runs
     }
 
+    /// Finds as much of the text that fits inside a line with `line_width`
+    /// Returns the `VisualLineInfo` and a bool indicating if an overflow happened.
+    fn fit_in_line(
+        &self,
+        line_width: f32,
+        font_size: f32,
+        _span_start: (usize, usize),
+    ) -> (VisualLineInfo, bool) {
+        let mut vl = VisualLineInfo::default();
+        let mut fit_x = line_width;
+        let ellipsis_size = self.ellipsis.x_advance * font_size;
+        for (span_index, span) in self.spans.iter().enumerate() {
+            let span_width = font_size * span.x_advance;
+            if (fit_x - ellipsis_size - span_width >= 0.)
+                || (fit_x - span_width >= 0. && span_index == self.spans.len() - 1)
+            {
+                // fits
+                vl.ranges.push((span_index, (0, 0), (span.words.len(), 0)));
+                fit_x -= span_width;
+            } else {
+                // the span doesn't fit, fit as many words as you can
+                for (word_i, word) in span.words.iter().enumerate() {
+                    let word_width = font_size * word.x_advance;
+                    if fit_x - ellipsis_size - word_width >= 0. {
+                        fit_x -= word_width;
+                        continue;
+                    } else {
+                        // the word doesn't fit, fit as many glyphs as you can
+                        for (glyph_i, glyph) in word.glyphs.iter().enumerate() {
+                            let glyph_width = font_size * glyph.x_advance;
+                            if fit_x - ellipsis_size - glyph_width >= 0. {
+                                fit_x -= glyph_width;
+                                continue;
+                            } else {
+                                // the glyph doesn't fit, return the word and glyph
+                                // index
+                                vl.ranges.push((span_index, (0, 0), (word_i, glyph_i)));
+                                // overflow is true
+                                return (vl, true);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // return the visual line and overflow is false
+        (vl, false)
+    }
+
     pub fn layout(
         &self,
         font_size: f32,
         line_width: f32,
         wrap: Wrap,
         align: Option<Align>,
+        ellipsize: Ellipsize,
     ) -> Vec<LayoutLine> {
         let mut layout_lines = Vec::with_capacity(1);
 
@@ -629,16 +726,9 @@ impl ShapeLine {
         // This is used to create a visual line for empty lines (e.g. lines with only a <CR>)
         let mut push_line = true;
 
-        #[derive(Default)]
-        struct VisualLine {
-            ranges: Vec<VlRange>,
-            spaces: u32,
-            w: f32,
-        }
         // For each visual line a list of  (span index,  and range of words in that span)
         // Note that a BiDi visual line could have multiple spans or parts of them
-        // let mut vl_range_of_spans = Vec::with_capacity(1);
-        let mut vl_range_of_spans: Vec<VisualLine> = Vec::with_capacity(1);
+        let mut visual_paragraph: VisualParagraph = VisualParagraph::default();
 
         let start_x = if self.rtl { line_width } else { 0.0 };
         let end_x = if self.rtl { 0.0 } else { line_width };
@@ -648,21 +738,45 @@ impl ShapeLine {
         // This would keep the maximum number of spans that would fit on a visual line
         // If one span is too large, this variable will hold the range of words inside that span
         // that fits on a line.
-        // let mut current_visual_line: Vec<VlRange> = Vec::with_capacity(1);
-        let mut current_visual_line = VisualLine::default();
+        let mut current_visual_line = VisualLineInfo::default();
 
         if wrap == Wrap::None {
-            for (span_index, span) in self.spans.iter().enumerate() {
-                current_visual_line
-                    .ranges
-                    .push((span_index, (0, 0), (span.words.len(), 0)));
+            match ellipsize {
+                Ellipsize::None => {
+                    for (span_index, span) in self.spans.iter().enumerate() {
+                        current_visual_line.ranges.push((
+                            span_index,
+                            (0, 0),
+                            (span.words.len(), 0),
+                        ));
+                    }
+                }
+                Ellipsize::Start | Ellipsize::Middle => {
+                    unimplemented!("Ellipsizing Start or Middle are not implemented yet.")
+                }
+                Ellipsize::End(limit) => match limit {
+                    HeightLimit::Default | HeightLimit::Lines(0) | HeightLimit::Lines(1) => {
+                        let overflow;
+                        (current_visual_line, overflow) =
+                            self.fit_in_line(line_width as f32, font_size as f32, (0, 0));
+                        visual_paragraph.overflow = overflow;
+                    }
+                    HeightLimit::Lines(_max_lines) => {
+                        unimplemented!(
+                            "Ellipsizing by a specific number of lines is not implemented yet"
+                        )
+                    }
+                    HeightLimit::Height => {
+                        unimplemented!("Ellipsizing by a specific height is not implemented yet")
+                    }
+                },
             }
         } else {
             let mut fit_x = line_width;
             for (span_index, span) in self.spans.iter().enumerate() {
                 let mut word_ranges = Vec::new();
                 let mut word_range_width = 0.;
-                let mut number_of_blanks = 0;
+                let mut number_of_blanks: u32 = 0;
 
                 // Create the word ranges that fits in a visual line
                 if self.rtl != span.level.is_rtl() {
@@ -857,8 +971,8 @@ impl ShapeLine {
                         }
                     } else {
                         if !current_visual_line.ranges.is_empty() {
-                            vl_range_of_spans.push(current_visual_line);
-                            current_visual_line = VisualLine::default();
+                            visual_paragraph.visual_lines.push(current_visual_line);
+                            current_visual_line = VisualLineInfo::default();
                             x = start_x;
                         }
                         current_visual_line.ranges.push((
@@ -875,8 +989,8 @@ impl ShapeLine {
                         }
                         if word_range_width > line_width {
                             // single word is bigger than line_width
-                            vl_range_of_spans.push(current_visual_line);
-                            current_visual_line = VisualLine::default();
+                            visual_paragraph.visual_lines.push(current_visual_line);
+                            current_visual_line = VisualLineInfo::default();
                             x = start_x;
                         }
                     }
@@ -885,12 +999,12 @@ impl ShapeLine {
         }
 
         if !current_visual_line.ranges.is_empty() {
-            vl_range_of_spans.push(current_visual_line);
+            visual_paragraph.visual_lines.push(current_visual_line);
         }
 
         // Create the LayoutLines using the ranges inside visual lines
-        let number_of_visual_lines = vl_range_of_spans.len();
-        for (index, visual_line) in vl_range_of_spans.iter().enumerate() {
+        let number_of_visual_lines = visual_paragraph.visual_lines.len();
+        for (index, visual_line) in visual_paragraph.visual_lines.iter().enumerate() {
             let new_order = self.reorder(&visual_line.ranges);
             let mut glyphs = Vec::with_capacity(1);
             x = start_x;
@@ -1057,6 +1171,18 @@ impl ShapeLine {
                                 }
                             }
                         }
+                    }
+                }
+            }
+            if visual_paragraph.overflow {
+                info!("Overflowed, so adding the ellipsis glyph");
+                for word in &self.ellipsis.words {
+                    for glyph in &word.glyphs {
+                        let x_advance = glyph.x_advance * font_size as f32;
+                        let y_advance = font_size as f32 * glyph.y_advance;
+                        glyphs.push(glyph.layout(font_size, x, y, x_advance, self.ellipsis.level));
+                        x += x_advance;
+                        y += y_advance;
                     }
                 }
             }

@@ -10,7 +10,9 @@ use unicode_segmentation::UnicodeSegmentation;
 
 #[cfg(feature = "swash")]
 use crate::Color;
-use crate::{Attrs, AttrsList, BufferLine, FontSystem, LayoutGlyph, LayoutLine, ShapeLine, Wrap};
+use crate::{
+    Attrs, AttrsList, BufferLine, Ellipsize, FontSystem, LayoutGlyph, LayoutLine, ShapeLine, Wrap,
+};
 
 /// Current cursor location
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Ord, PartialOrd)]
@@ -307,6 +309,7 @@ pub struct Buffer<'a> {
     /// True if a redraw is requires. Set to false after processing
     redraw: bool,
     wrap: Wrap,
+    ellipsize: Ellipsize,
 }
 
 impl<'a> Buffer<'a> {
@@ -327,6 +330,7 @@ impl<'a> Buffer<'a> {
             scroll: 0,
             redraw: false,
             wrap: Wrap::Word,
+            ellipsize: Ellipsize::None,
         };
         buffer.set_text("", Attrs::new());
         buffer
@@ -344,6 +348,7 @@ impl<'a> Buffer<'a> {
                     self.metrics.font_size,
                     self.width,
                     self.wrap,
+                    self.ellipsize,
                 );
             }
         }
@@ -374,6 +379,7 @@ impl<'a> Buffer<'a> {
                 self.metrics.font_size,
                 self.width,
                 self.wrap,
+                self.ellipsize,
             );
             total_layout += layout.len() as i32;
         }
@@ -407,6 +413,7 @@ impl<'a> Buffer<'a> {
                 self.metrics.font_size,
                 self.width,
                 self.wrap,
+                self.ellipsize,
             );
             if line_i == cursor.line {
                 let layout_cursor = self.layout_cursor(&cursor);
@@ -492,6 +499,7 @@ impl<'a> Buffer<'a> {
             self.metrics.font_size,
             self.width,
             self.wrap,
+            self.ellipsize,
         ))
     }
 
