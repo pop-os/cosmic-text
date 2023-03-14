@@ -54,6 +54,11 @@
 //! });
 //! ```
 
+// If the docsrs feature is enabled, use nightly documentation features.
+//
+// This can be locally tested using RUSTDOCFLAGS="--cfg=docsrs" cargo +nightly doc --all-features
+#![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
+
 // Not interested in these lints
 #![allow(clippy::new_without_default)]
 // TODO: address occurrences and then deny

@@ -12,8 +12,16 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    # Right now the doc_cfg and auto_doc_cfg features require nightly
+    - name: Install latest nightly
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: nightly
+        override: true
     - name: Build documentation
-      run: cargo doc --verbose
+      run: cargo +nightly doc --verbose --all-features
+      env:
+        RUSTDOCFLAGS: --cfg docsrs
     - name: Deploy documentation
       uses: peaceiris/actions-gh-pages@v3
       with:
