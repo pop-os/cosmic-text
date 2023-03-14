@@ -61,6 +61,8 @@ impl FontSystem {
 
         Arc::new(ids)
     }
+
+    pub fn discard_unused_fonts(&mut self) {}
 }
 
 fn get_font(db: &fontdb::Database, id: fontdb::ID) -> Option<Arc<Font>> {

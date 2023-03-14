@@ -117,6 +117,21 @@ impl FontSystem {
             })
             .clone()
     }
+
+    pub fn discard_unused_fonts(&mut self) {
+        self.font_cache.retain(|_, font| {
+            if let Some(font) = font {
+                if Arc::strong_count(font) == 1 {
+                    self.db.make_face_data_unshared(font.id());
+                    false
+                } else {
+                    true
+                }
+            } else {
+                true
+            }
+        });
+    }
 }
 
 fn get_font(
