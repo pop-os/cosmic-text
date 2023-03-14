@@ -2,8 +2,9 @@
 
 use std::{
     collections::HashMap,
-    sync::{Arc, Mutex},
+    sync::Mutex,
 };
+use alloc::sync::Arc;
 
 use crate::{Attrs, AttrsOwned, Font, FontMatches};
 
@@ -31,7 +32,7 @@ impl FontSystem {
     /// while debug builds can take up to ten times longer. For this reason, it should only be
     /// called once, and the resulting [`FontSystem`] should be shared.
     pub fn new() -> Self {
-        Self::new_with_fonts(std::iter::empty())
+        Self::new_with_fonts(core::iter::empty())
     }
 
     pub fn new_with_fonts(fonts: impl Iterator<Item = fontdb::Source>) -> Self {
