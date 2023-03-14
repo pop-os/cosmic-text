@@ -85,6 +85,10 @@
 #![warn(clippy::semicolon_if_nothing_returned)]
 // Ensure numbers are readable
 #![warn(clippy::unreadable_literal)]
+// Warn if any std or alloc types are used when the types are available in alloc or core instead.
+#![warn(clippy::std_instead_of_core)]
+#![warn(clippy::std_instead_of_alloc)]
+#![warn(clippy::alloc_instead_of_core)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
 extern crate alloc;
