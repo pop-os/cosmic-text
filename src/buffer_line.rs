@@ -1,7 +1,8 @@
+use alloc::sync::Arc;
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, vec::Vec};
 
-use crate::{Align, AttrsList, FontSystem, LayoutLine, ShapeLine, Wrap};
+use crate::{Align, AttrsList, Font, FontSystem, LayoutLine, ShapeLine, Wrap};
 
 /// A line (or paragraph) of text that is shaped and laid out
 pub struct BufferLine {
@@ -12,6 +13,7 @@ pub struct BufferLine {
     align: Option<Align>,
     shape_opt: Option<ShapeLine>,
     layout_opt: Option<Vec<LayoutLine>>,
+    used_fonts: Vec<Arc<Font>>,
 }
 
 impl BufferLine {
@@ -26,6 +28,7 @@ impl BufferLine {
             align: None,
             shape_opt: None,
             layout_opt: None,
+            used_fonts: Vec::new(),
         }
     }
 
@@ -152,6 +155,7 @@ impl BufferLine {
     /// Reset shaping and layout information
     //TODO: make this private
     pub fn reset(&mut self) {
+        self.used_fonts.clear();
         self.shape_opt = None;
         self.layout_opt = None;
     }
@@ -169,7 +173,13 @@ impl BufferLine {
     /// Shape line, will cache results
     pub fn shape(&mut self, font_system: &mut FontSystem) -> &ShapeLine {
         if self.shape_opt.is_none() {
-            self.shape_opt = Some(ShapeLine::new(font_system, &self.text, &self.attrs_list));
+            self.used_fonts.clear();
+            self.shape_opt = Some(ShapeLine::new(
+                font_system,
+                &self.text,
+                &self.attrs_list,
+                &mut self.used_fonts,
+            ));
             self.layout_opt = None;
         }
         self.shape_opt.as_ref().expect("shape not found")

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+use alloc::sync::Arc;
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 use core::cmp::{max, min};
@@ -104,6 +105,7 @@ fn shape_run(
     start_run: usize,
     end_run: usize,
     span_rtl: bool,
+    used_fonts: &mut Vec<Arc<Font>>,
 ) -> Vec<ShapeGlyph> {
     //TODO: use smallvec?
     let mut scripts = Vec::new();
@@ -132,6 +134,14 @@ fn shape_run(
     let (mut glyphs, mut missing) =
         shape_fallback(&font, line, attrs_list, start_run, end_run, span_rtl);
 
+    if !glyphs.is_empty()
+        && used_fonts
+            .last()
+            .map_or(true, |last| Arc::ptr_eq(last, &font))
+    {
+        used_fonts.push(font);
+    }
+
     //TODO: improve performance!
     while !missing.is_empty() {
         let font = match font_iter.next() {
@@ -145,6 +155,14 @@ fn shape_run(
         );
         let (mut fb_glyphs, fb_missing) =
             shape_fallback(&font, line, attrs_list, start_run, end_run, span_rtl);
+
+        if !fb_glyphs.is_empty()
+            && used_fonts
+                .last()
+                .map_or(true, |last| Arc::ptr_eq(last, &font))
+        {
+            used_fonts.push(font);
+        }
 
         // Insert all matching glyphs
         let mut fb_i = 0;
@@ -278,6 +296,7 @@ impl ShapeWord {
         word_range: Range<usize>,
         level: unicode_bidi::Level,
         blank: bool,
+        used_fonts: &mut Vec<Arc<Font>>,
     ) -> Self {
         let word = &line[word_range.clone()];
 
@@ -304,6 +323,7 @@ impl ShapeWord {
                     start_run,
                     start_egc,
                     span_rtl,
+                    used_fonts,
                 ));
 
                 start_run = start_egc;
@@ -319,6 +339,7 @@ impl ShapeWord {
                 start_run,
                 word_range.end,
                 span_rtl,
+                used_fonts,
             ));
         }
 
@@ -352,6 +373,7 @@ impl ShapeSpan {
         span_range: Range<usize>,
         line_rtl: bool,
         level: unicode_bidi::Level,
+        used_fonts: &mut Vec<Arc<Font>>,
     ) -> Self {
         let span = &line[span_range.start..span_range.end];
 
@@ -382,6 +404,7 @@ impl ShapeSpan {
                     (span_range.start + start_word)..(span_range.start + start_lb),
                     level,
                     false,
+                    used_fonts,
                 ));
             }
             if start_lb < end_lb {
@@ -395,6 +418,7 @@ impl ShapeSpan {
                             ..(span_range.start + start_lb + i + c.len_utf8()),
                         level,
                         true,
+                        used_fonts,
                     ));
                 }
             }
@@ -437,7 +461,12 @@ impl ShapeLine {
     /// # Panics
     ///
     /// Will panic if `line` contains more than one paragraph.
-    pub fn new(font_system: &mut FontSystem, line: &str, attrs_list: &AttrsList) -> Self {
+    pub fn new(
+        font_system: &mut FontSystem,
+        line: &str,
+        attrs_list: &AttrsList,
+        used_fonts: &mut Vec<Arc<Font>>,
+    ) -> Self {
         let mut spans = Vec::new();
 
         let bidi = unicode_bidi::BidiInfo::new(line, None);
@@ -473,6 +502,7 @@ impl ShapeLine {
                         start..i,
                         line_rtl,
                         run_level,
+                        used_fonts,
                     ));
                     start = i;
                     run_level = new_level;
@@ -485,6 +515,7 @@ impl ShapeLine {
                 start..line_range.end,
                 line_rtl,
                 run_level,
+                used_fonts,
             ));
             line_rtl
         };
