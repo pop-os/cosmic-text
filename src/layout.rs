@@ -5,7 +5,7 @@ use core::fmt::Display;
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 
-use crate::{CacheKey, Color};
+use crate::CacheKey;
 
 /// A laid out glyph
 #[derive(Debug)]
@@ -46,8 +46,6 @@ pub struct LayoutGlyph {
     pub x_int: i32,
     /// Integer component of Y offset in line
     pub y_int: i32,
-    /// Optional color override
-    pub color_opt: Option<Color>,
     /// Metadata from `Attrs`
     pub metadata: usize,
 }

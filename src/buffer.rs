@@ -8,11 +8,9 @@ use alloc::{
 use core::{cmp, fmt};
 use unicode_segmentation::UnicodeSegmentation;
 
-#[cfg(feature = "swash")]
-use crate::Color;
 use crate::{
-    Attrs, AttrsList, BorrowedWithFontSystem, BufferLine, FontSystem, LayoutGlyph, LayoutLine,
-    ShapeLine, Wrap,
+    Attrs, AttrsList, BorrowedWithFontSystem, BufferLine, Color, FontSystem, LayoutGlyph,
+    LayoutLine, ShapeLine, Spans, Wrap,
 };
 
 /// Current cursor location
@@ -329,7 +327,7 @@ impl Buffer {
             redraw: false,
             wrap: Wrap::Word,
         };
-        buffer.set_text(font_system, "", Attrs::new());
+        buffer.set_text(font_system, "", Attrs::new(), None);
         buffer
     }
 
@@ -560,16 +558,43 @@ impl Buffer {
     }
 
     /// Set text of buffer, using provided attributes for each line by default
-    pub fn set_text(&mut self, font_system: &mut FontSystem, text: &str, attrs: Attrs) {
+    pub fn set_text(
+        &mut self,
+        font_system: &mut FontSystem,
+        text: &str,
+        attrs: impl AsRef<Attrs> + Into<Attrs>,
+        color: Option<Color>,
+    ) {
         self.lines.clear();
-        for line in text.lines() {
-            self.lines
-                .push(BufferLine::new(line.to_string(), AttrsList::new(attrs)));
-        }
-        // Make sure there is always one line
-        if self.lines.is_empty() {
-            self.lines
-                .push(BufferLine::new(String::new(), AttrsList::new(attrs)));
+        let mut lines = text.lines().peekable();
+        if lines.peek().is_some() {
+            while let Some(line) = lines.next() {
+                let mut color_spans = Spans::default();
+                if let Some(color) = color {
+                    color_spans.add(0..line.len(), color);
+                }
+                if lines.peek().is_some() {
+                    self.lines.push(BufferLine::new(
+                        line.to_string(),
+                        AttrsList::new(attrs.as_ref().clone()),
+                        color_spans,
+                    ));
+                } else {
+                    self.lines.push(BufferLine::new(
+                        line.to_string(),
+                        AttrsList::new(attrs.into()),
+                        color_spans,
+                    ));
+                    break;
+                }
+            }
+        } else {
+            // Make sure there is always one line
+            self.lines.push(BufferLine::new(
+                String::new(),
+                AttrsList::new(attrs.into()),
+                Spans::default(),
+            ));
         }
 
         self.scroll = 0;
@@ -708,8 +733,8 @@ impl Buffer {
             for glyph in run.glyphs.iter() {
                 let (cache_key, x_int, y_int) = (glyph.cache_key, glyph.x_int, glyph.y_int);
 
-                let glyph_color = match glyph.color_opt {
-                    Some(some) => some,
+                let glyph_color = match self.lines[run.line_i].color_spans().get(glyph.start) {
+                    Some(some) => *some,
                     None => color,
                 };
 
@@ -767,8 +792,13 @@ impl<'a> BorrowedWithFontSystem<'a, Buffer> {
     }
 
     /// Set text of buffer, using provided attributes for each line by default
-    pub fn set_text(&mut self, text: &str, attrs: Attrs) {
-        self.inner.set_text(self.font_system, text, attrs);
+    pub fn set_text(
+        &mut self,
+        text: &str,
+        attrs: impl AsRef<Attrs> + Into<Attrs>,
+        color: Option<Color>,
+    ) {
+        self.inner.set_text(self.font_system, text, attrs, color);
     }
 
     /// Draw the buffer

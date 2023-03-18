@@ -9,7 +9,7 @@ use unicode_script::{Script, UnicodeScript};
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::fallback::FontFallbackIter;
-use crate::{Align, AttrsList, CacheKey, Color, Font, FontSystem, LayoutGlyph, LayoutLine, Wrap};
+use crate::{Align, AttrsList, CacheKey, Font, FontSystem, LayoutGlyph, LayoutLine, Wrap};
 
 fn shape_fallback(
     font: &Font,
@@ -63,8 +63,6 @@ fn shape_fallback(
             y_offset,
             font_id: font.id(),
             glyph_id: info.glyph_id.try_into().expect("failed to cast glyph ID"),
-            //TODO: color should not be related to shaping
-            color_opt: attrs.color_opt,
             metadata: attrs.metadata,
         });
     }
@@ -124,7 +122,7 @@ fn shape_run(
 
     let fonts = font_system.get_font_matches(attrs);
 
-    let default_families = [&attrs.family];
+    let default_families = [&attrs.family_owned.as_family()];
     let mut font_iter = FontFallbackIter::new(font_system, &fonts, &default_families, scripts);
 
     let font = font_iter.next().expect("no default font found");
@@ -223,7 +221,6 @@ pub struct ShapeGlyph {
     pub y_offset: f32,
     pub font_id: fontdb::ID,
     pub glyph_id: u16,
-    pub color_opt: Option<Color>,
     pub metadata: usize,
 }
 
@@ -256,7 +253,6 @@ impl ShapeGlyph {
             y_offset,
             x_int,
             y_int,
-            color_opt: self.color_opt,
             metadata: self.metadata,
         }
     }
@@ -295,7 +291,7 @@ impl ShapeWord {
         for (egc_i, _egc) in word.grapheme_indices(true) {
             let start_egc = word_range.start + egc_i;
             let attrs_egc = attrs_list.get_span(start_egc);
-            if !attrs.compatible(&attrs_egc) {
+            if !attrs.compatible(attrs_egc) {
                 //TODO: more efficient
                 glyphs.append(&mut shape_run(
                     font_system,

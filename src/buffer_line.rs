@@ -1,13 +1,14 @@
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, vec::Vec};
 
-use crate::{Align, AttrsList, FontSystem, LayoutLine, ShapeLine, Wrap};
+use crate::{Align, AttrsList, Color, FontSystem, LayoutLine, ShapeLine, Spans, Wrap};
 
 /// A line (or paragraph) of text that is shaped and laid out
 pub struct BufferLine {
     //TODO: make this not pub(crate)
     text: String,
     attrs_list: AttrsList,
+    color_spans: Spans<Color>,
     wrap: Wrap,
     align: Option<Align>,
     shape_opt: Option<ShapeLine>,
@@ -15,13 +16,14 @@ pub struct BufferLine {
 }
 
 impl BufferLine {
-    /// Create a new line with the given text and attributes list
+    /// Create a new line with the given text, attributes list and color spans
     /// Cached shaping and layout can be done using the [`Self::shape`] and
     /// [`Self::layout`] functions
-    pub fn new<T: Into<String>>(text: T, attrs_list: AttrsList) -> Self {
+    pub fn new<T: Into<String>>(text: T, attrs_list: AttrsList, color_spans: Spans<Color>) -> Self {
         Self {
             text: text.into(),
             attrs_list,
+            color_spans,
             wrap: Wrap::Word,
             align: None,
             shape_opt: None,
@@ -34,7 +36,7 @@ impl BufferLine {
         &self.text
     }
 
-    /// Set text and attributes list
+    /// Set text, attributes list and color spans
     ///
     /// Will reset shape and layout if it differs from current text and attributes list.
     /// Returns true if the line was reset
@@ -42,7 +44,9 @@ impl BufferLine {
         &mut self,
         text: T,
         attrs_list: AttrsList,
+        color_spans: Spans<Color>,
     ) -> bool {
+        self.color_spans = color_spans;
         if text.as_ref() != self.text || attrs_list != self.attrs_list {
             self.text = text.into();
             self.attrs_list = attrs_list;
@@ -75,6 +79,14 @@ impl BufferLine {
         } else {
             false
         }
+    }
+
+    pub fn color_spans(&self) -> &Spans<Color> {
+        &self.color_spans
+    }
+
+    pub fn color_spans_mut(&mut self) -> &mut Spans<Color> {
+        &mut self.color_spans
     }
 
     /// Get wrapping setting (wrap by characters/words or no wrapping)
@@ -132,7 +144,7 @@ impl BufferLine {
         for (other_range, attrs) in other.attrs_list.spans() {
             // Add previous attrs spans
             let range = other_range.start + len..other_range.end + len;
-            self.attrs_list.add_span(range, attrs.as_attrs());
+            self.attrs_list.add_span(range, attrs);
         }
 
         self.reset();
@@ -142,9 +154,10 @@ impl BufferLine {
     pub fn split_off(&mut self, index: usize) -> Self {
         let text = self.text.split_off(index);
         let attrs_list = self.attrs_list.split_off(index);
+        let color_spans = self.color_spans.split_off(index);
         self.reset();
 
-        let mut new = Self::new(text, attrs_list);
+        let mut new = Self::new(text, attrs_list, color_spans);
         new.wrap = self.wrap;
         new
     }

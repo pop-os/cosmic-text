@@ -57,6 +57,7 @@ fn main() {
 
     let line_x = 8.0 * display_scale;
 
+    #[cfg_attr(feature = "vi", allow(unused_mut))]
     let mut editor = SyntaxEditor::new(
         Buffer::new(&mut font_system, font_sizes[font_size_i]),
         &syntax_system,
@@ -73,8 +74,11 @@ fn main() {
         .buffer_mut()
         .set_size(window.width() as f32 - line_x * 2.0, window.height() as f32);
 
-    let attrs = Attrs::new().monospaced(true).family(Family::Monospace);
-    match editor.load_text(&path, attrs) {
+    let attrs = Attrs::builder()
+        .monospaced(true)
+        .family(Family::Monospace)
+        .build();
+    match editor.load_text(&path, attrs, None) {
         Ok(()) => (),
         Err(err) => {
             log::error!("failed to load {:?}: {}", path, err);

@@ -11,7 +11,7 @@ use cosmic::{
     iced_winit::renderer::BorderRadius,
     theme::Theme,
 };
-use cosmic_text::{Attrs, AttrsList, BufferLine, Metrics, SwashCache};
+use cosmic_text::{Attrs, AttrsList, BufferLine, Metrics, Spans, SwashCache};
 use std::{cmp, sync::Mutex, time::Instant};
 
 use crate::FONT_SYSTEM;
@@ -50,7 +50,7 @@ impl Text {
         let instant = Instant::now();
 
         //TODO: make it possible to set attrs
-        let mut line = BufferLine::new(string, AttrsList::new(Attrs::new()));
+        let mut line = BufferLine::new(string, AttrsList::new(Attrs::new()), Spans::default());
 
         //TODO: do we have to immediately shape?
         line.shape(&mut FONT_SYSTEM.lock().unwrap());
@@ -180,8 +180,8 @@ where
             for glyph in layout_line.glyphs.iter() {
                 let (cache_key, x_int, y_int) = (glyph.cache_key, glyph.x_int, glyph.y_int);
 
-                let glyph_color = match glyph.color_opt {
-                    Some(some) => some,
+                let glyph_color = match self.line.color_spans().get(glyph.start) {
+                    Some(some) => *some,
                     None => text_color,
                 };
 

@@ -2,14 +2,14 @@
 
 use std::{collections::HashMap, sync::Arc};
 
-use crate::{Attrs, AttrsOwned, Font};
+use crate::{Attrs, Font};
 
 /// Access system fonts
 pub struct FontSystem {
     locale: String,
     db: fontdb::Database,
     font_cache: HashMap<fontdb::ID, Option<Arc<Font>>>,
-    font_matches_cache: HashMap<AttrsOwned, Arc<Vec<fontdb::ID>>>,
+    font_matches_cache: HashMap<Attrs, Arc<Vec<fontdb::ID>>>,
 }
 
 impl FontSystem {
@@ -92,30 +92,35 @@ impl FontSystem {
         get_font(&mut self.font_cache, &mut self.db, id)
     }
 
-    pub fn get_font_matches(&mut self, attrs: Attrs) -> Arc<Vec<fontdb::ID>> {
-        self.font_matches_cache
-            //TODO: do not create AttrsOwned unless entry does not already exist
-            .entry(AttrsOwned::new(attrs))
-            .or_insert_with(|| {
-                #[cfg(not(target_arch = "wasm32"))]
-                let now = std::time::Instant::now();
+    pub fn get_font_matches(
+        &mut self,
+        attrs: impl AsRef<Attrs> + Into<Attrs>,
+    ) -> Arc<Vec<fontdb::ID>> {
+        if let Some(matches) = self.font_matches_cache.get(attrs.as_ref()) {
+            matches.clone()
+        } else {
+            #[cfg(not(target_arch = "wasm32"))]
+            let now = std::time::Instant::now();
 
-                let ids = self
-                    .db
-                    .faces()
-                    .filter(|face| attrs.matches(face))
-                    .map(|face| face.id)
-                    .collect::<Vec<_>>();
+            let ids = self
+                .db
+                .faces()
+                .filter(|face| attrs.as_ref().matches(face))
+                .map(|face| face.id)
+                .collect::<Vec<_>>();
 
-                #[cfg(not(target_arch = "wasm32"))]
-                {
-                    let elapsed = now.elapsed();
-                    log::debug!("font matches for {:?} in {:?}", attrs, elapsed);
-                }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let elapsed = now.elapsed();
+                log::debug!("font matches for {:?} in {:?}", attrs.as_ref(), elapsed);
+            }
 
-                Arc::new(ids)
-            })
-            .clone()
+            let font_matches = Arc::new(ids);
+
+            self.font_matches_cache
+                .insert(attrs.into(), font_matches.clone());
+            font_matches
+        }
     }
 }
 
