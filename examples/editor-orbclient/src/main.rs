@@ -40,7 +40,7 @@ fn main() {
     )
     .unwrap();
 
-    let font_system = FontSystem::new();
+    let mut font_system = FontSystem::new();
 
     let syntax_system = SyntaxSystem::new();
 
@@ -58,7 +58,7 @@ fn main() {
     let line_x = 8.0 * display_scale;
 
     let mut editor = SyntaxEditor::new(
-        Buffer::new(&font_system, font_sizes[font_size_i]),
+        Buffer::new(&mut font_system, font_sizes[font_size_i]),
         &syntax_system,
         "base16-eighties.dark",
     )
@@ -66,6 +66,8 @@ fn main() {
 
     #[cfg(feature = "vi")]
     let mut editor = cosmic_text::ViEditor::new(editor);
+
+    let mut editor = editor.borrow_with(&mut font_system);
 
     editor
         .buffer_mut()

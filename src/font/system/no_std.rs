@@ -6,7 +6,7 @@ use alloc::{
     vec::Vec,
 };
 
-use crate::{Attrs, Font, FontMatches};
+use crate::{Attrs, Font};
 
 /// Access system fonts
 pub struct FontSystem {
@@ -43,35 +43,33 @@ impl FontSystem {
         &self.db
     }
 
-    // Clippy false positive
-    #[allow(clippy::needless_lifetimes)]
-    pub fn get_font<'a>(&'a self, id: fontdb::ID) -> Option<Arc<Font<'a>>> {
-        let face = self.db.face(id)?;
-        match Font::new(face) {
-            Some(font) => Some(Arc::new(font)),
-            None => {
-                log::warn!("failed to load font '{}'", face.post_script_name);
-                None
-            }
-        }
+    pub fn db_mut(&mut self) -> &mut fontdb::Database {
+        &mut self.db
     }
 
-    pub fn get_font_matches<'a>(&'a self, attrs: Attrs) -> Arc<FontMatches<'a>> {
-        let mut fonts = Vec::new();
-        for face in self.db.faces() {
-            if !attrs.matches(face) {
-                continue;
-            }
+    pub fn get_font(&self, id: fontdb::ID) -> Option<Arc<Font>> {
+        get_font(&self.db, id)
+    }
 
-            if let Some(font) = self.get_font(face.id) {
-                fonts.push(font);
-            }
+    pub fn get_font_matches(&mut self, attrs: Attrs) -> Arc<Vec<fontdb::ID>> {
+        let ids = self
+            .db
+            .faces()
+            .filter(|face| attrs.matches(face))
+            .map(|face| face.id)
+            .collect::<Vec<_>>();
+
+        Arc::new(ids)
+    }
+}
+
+fn get_font(db: &fontdb::Database, id: fontdb::ID) -> Option<Arc<Font>> {
+    let face = db.face(id)?;
+    match Font::new(face) {
+        Some(font) => Some(Arc::new(font)),
+        None => {
+            log::warn!("failed to load font '{}'", face.post_script_name);
+            None
         }
-
-        Arc::new(FontMatches {
-            locale: &self.locale,
-            default_family: self.db.family_name(&attrs.family).to_string(),
-            fonts,
-        })
     }
 }

@@ -3,7 +3,7 @@ use alloc::string::String;
 
 #[cfg(feature = "swash")]
 use crate::Color;
-use crate::{AttrsList, Buffer, Cursor};
+use crate::{AttrsList, BorrowedWithFontSystem, Buffer, Cursor, FontSystem};
 
 pub use self::editor::*;
 mod editor;
@@ -78,12 +78,26 @@ pub enum Action {
 }
 
 /// A trait to allow easy replacements of [`Editor`], like `SyntaxEditor`
-pub trait Edit<'a> {
+pub trait Edit {
+    /// Mutably borrows `self` together with an [`FontSystem`] for more convenient methods
+    fn borrow_with<'a>(
+        &'a mut self,
+        font_system: &'a mut FontSystem,
+    ) -> BorrowedWithFontSystem<'a, Self>
+    where
+        Self: Sized,
+    {
+        BorrowedWithFontSystem {
+            inner: self,
+            font_system,
+        }
+    }
+
     /// Get the internal [`Buffer`]
-    fn buffer(&self) -> &Buffer<'a>;
+    fn buffer(&self) -> &Buffer;
 
     /// Get the internal [`Buffer`], mutably
-    fn buffer_mut(&mut self) -> &mut Buffer<'a>;
+    fn buffer_mut(&mut self) -> &mut Buffer;
 
     /// Get the current cursor position
     fn cursor(&self) -> Cursor;
@@ -95,7 +109,7 @@ pub trait Edit<'a> {
     fn set_select_opt(&mut self, select_opt: Option<Cursor>);
 
     /// Shape lines until scroll, after adjusting scroll if the cursor moved
-    fn shape_as_needed(&mut self);
+    fn shape_as_needed(&mut self, font_system: &mut FontSystem);
 
     /// Copy selection
     fn copy_selection(&mut self) -> Option<String>;
@@ -109,11 +123,45 @@ pub trait Edit<'a> {
     fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>);
 
     /// Perform an [Action] on the editor
-    fn action(&mut self, action: Action);
+    fn action(&mut self, font_system: &mut FontSystem, action: Action);
 
     /// Draw the editor
     #[cfg(feature = "swash")]
-    fn draw<F>(&self, cache: &mut crate::SwashCache, color: Color, f: F)
-    where
+    fn draw<F>(
+        &self,
+        font_system: &mut FontSystem,
+        cache: &mut crate::SwashCache,
+        color: Color,
+        f: F,
+    ) where
         F: FnMut(i32, i32, u32, u32, Color);
+}
+
+impl<'a, T: Edit> BorrowedWithFontSystem<'a, T> {
+    /// Get the internal [`Buffer`], mutably
+    pub fn buffer_mut(&mut self) -> BorrowedWithFontSystem<Buffer> {
+        BorrowedWithFontSystem {
+            inner: self.inner.buffer_mut(),
+            font_system: self.font_system,
+        }
+    }
+
+    /// Shape lines until scroll, after adjusting scroll if the cursor moved
+    pub fn shape_as_needed(&mut self) {
+        self.inner.shape_as_needed(self.font_system);
+    }
+
+    /// Perform an [Action] on the editor
+    pub fn action(&mut self, action: Action) {
+        self.inner.action(self.font_system, action);
+    }
+
+    /// Draw the editor
+    #[cfg(feature = "swash")]
+    pub fn draw<F>(&mut self, cache: &mut crate::SwashCache, color: Color, f: F)
+    where
+        F: FnMut(i32, i32, u32, u32, Color),
+    {
+        self.inner.draw(self.font_system, cache, color, f);
+    }
 }

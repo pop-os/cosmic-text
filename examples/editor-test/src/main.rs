@@ -1,11 +1,17 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use cosmic_text::{Action, Buffer, Color, Edit, Editor, FontSystem, Metrics, SwashCache};
+use cosmic_text::{
+    Action, BorrowedWithFontSystem, Buffer, Color, Edit, Editor, FontSystem, Metrics, SwashCache,
+};
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{env, fs, process, time::Instant};
 use unicode_segmentation::UnicodeSegmentation;
 
-fn redraw(window: &mut Window, editor: &mut Editor<'_>, swash_cache: &mut SwashCache) {
+fn redraw(
+    window: &mut Window,
+    editor: &mut BorrowedWithFontSystem<Editor>,
+    swash_cache: &mut SwashCache,
+) {
     let bg_color = orbclient::Color::rgb(0x34, 0x34, 0x34);
     let font_color = Color::rgb(0xFF, 0xFF, 0xFF);
 
@@ -32,7 +38,7 @@ fn main() {
     env_logger::init();
 
     let display_scale = 1.0;
-    let font_system = FontSystem::new();
+    let mut font_system = FontSystem::new();
 
     let mut window = Window::new_flags(
         -1,
@@ -54,10 +60,14 @@ fn main() {
     ];
     let font_size_default = 1; // Body
 
-    let mut buffer = Buffer::new(&font_system, font_sizes[font_size_default]);
-    buffer.set_size(window.width() as f32, window.height() as f32);
+    let mut buffer = Buffer::new(&mut font_system, font_sizes[font_size_default]);
+    buffer
+        .borrow_with(&mut font_system)
+        .set_size(window.width() as f32, window.height() as f32);
 
     let mut editor = Editor::new(buffer);
+
+    let mut editor = editor.borrow_with(&mut font_system);
 
     let mut swash_cache = SwashCache::new();
 

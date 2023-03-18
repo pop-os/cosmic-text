@@ -7,7 +7,10 @@ use syntect::highlighting::{
 };
 use syntect::parsing::{ParseState, ScopeStack, SyntaxReference, SyntaxSet};
 
-use crate::{Action, AttrsList, Buffer, Color, Cursor, Edit, Editor, Style, Weight, Wrap};
+use crate::{
+    Action, AttrsList, BorrowedWithFontSystem, Buffer, Color, Cursor, Edit, Editor, FontSystem,
+    Style, Weight, Wrap,
+};
 
 pub struct SyntaxSystem {
     pub syntax_set: SyntaxSet,
@@ -27,7 +30,7 @@ impl SyntaxSystem {
 
 /// A wrapper of [`Editor`] with syntax highlighting provided by [`SyntaxSystem`]
 pub struct SyntaxEditor<'a> {
-    editor: Editor<'a>,
+    editor: Editor,
     syntax_system: &'a SyntaxSystem,
     syntax: &'a SyntaxReference,
     theme: &'a Theme,
@@ -41,11 +44,7 @@ impl<'a> SyntaxEditor<'a> {
     /// A good default theme name is "base16-eighties.dark".
     ///
     /// Returns None if theme not found
-    pub fn new(
-        buffer: Buffer<'a>,
-        syntax_system: &'a SyntaxSystem,
-        theme_name: &str,
-    ) -> Option<Self> {
+    pub fn new(buffer: Buffer, syntax_system: &'a SyntaxSystem, theme_name: &str) -> Option<Self> {
         let editor = Editor::new(buffer);
         let syntax = syntax_system.syntax_set.find_syntax_plain_text();
         let theme = syntax_system.theme_set.themes.get(theme_name)?;
@@ -69,13 +68,14 @@ impl<'a> SyntaxEditor<'a> {
     #[cfg(feature = "std")]
     pub fn load_text<P: AsRef<Path>>(
         &mut self,
+        font_system: &mut FontSystem,
         path: P,
-        attrs: crate::Attrs<'a>,
+        attrs: crate::Attrs,
     ) -> io::Result<()> {
         let path = path.as_ref();
 
         let text = fs::read_to_string(path)?;
-        self.editor.buffer_mut().set_text(&text, attrs);
+        self.editor.buffer_mut().set_text(font_system, &text, attrs);
 
         //TODO: re-use text
         self.syntax = match self.syntax_system.syntax_set.find_syntax_for_file(path) {
@@ -115,12 +115,12 @@ impl<'a> SyntaxEditor<'a> {
     }
 }
 
-impl<'a> Edit<'a> for SyntaxEditor<'a> {
-    fn buffer(&self) -> &Buffer<'a> {
+impl<'a> Edit for SyntaxEditor<'a> {
+    fn buffer(&self) -> &Buffer {
         self.editor.buffer()
     }
 
-    fn buffer_mut(&mut self) -> &mut Buffer<'a> {
+    fn buffer_mut(&mut self) -> &mut Buffer {
         self.editor.buffer_mut()
     }
 
@@ -136,7 +136,7 @@ impl<'a> Edit<'a> for SyntaxEditor<'a> {
         self.editor.set_select_opt(select_opt);
     }
 
-    fn shape_as_needed(&mut self) {
+    fn shape_as_needed(&mut self, font_system: &mut FontSystem) {
         #[cfg(feature = "std")]
         let now = std::time::Instant::now();
 
@@ -201,7 +201,7 @@ impl<'a> Edit<'a> for SyntaxEditor<'a> {
             line.set_wrap(Wrap::Word);
 
             //TODO: efficiently do syntax highlighting without having to shape whole buffer
-            buffer.line_shape(line_i);
+            buffer.line_shape(font_system, line_i);
 
             let cache_item = (parse_state.clone(), highlight_state.clone());
             if line_i < self.syntax_cache.len() {
@@ -226,7 +226,7 @@ impl<'a> Edit<'a> for SyntaxEditor<'a> {
             );
         }
 
-        self.editor.shape_as_needed();
+        self.editor.shape_as_needed(font_system);
     }
 
     fn copy_selection(&mut self) -> Option<String> {
@@ -241,18 +241,36 @@ impl<'a> Edit<'a> for SyntaxEditor<'a> {
         self.editor.insert_string(data, attrs_list);
     }
 
-    fn action(&mut self, action: Action) {
-        self.editor.action(action);
+    fn action(&mut self, font_system: &mut FontSystem, action: Action) {
+        self.editor.action(font_system, action);
     }
 
     /// Draw the editor
     #[cfg(feature = "swash")]
-    fn draw<F>(&self, cache: &mut crate::SwashCache, _color: Color, mut f: F)
-    where
+    fn draw<F>(
+        &self,
+        font_system: &mut FontSystem,
+        cache: &mut crate::SwashCache,
+        _color: Color,
+        mut f: F,
+    ) where
         F: FnMut(i32, i32, u32, u32, Color),
     {
         let size = self.buffer().size();
         f(0, 0, size.0 as u32, size.1 as u32, self.background_color());
-        self.editor.draw(cache, self.foreground_color(), f);
+        self.editor
+            .draw(font_system, cache, self.foreground_color(), f);
+    }
+}
+
+impl<'a, 'b> BorrowedWithFontSystem<'b, SyntaxEditor<'a>> {
+    /// Load text from a file, and also set syntax to the best option
+    ///
+    /// ## Errors
+    ///
+    /// Returns an [`io::Error`] if reading the file fails
+    #[cfg(feature = "std")]
+    pub fn load_text<P: AsRef<Path>>(&mut self, path: P, attrs: crate::Attrs) -> io::Result<()> {
+        self.inner.load_text(self.font_system, path, attrs)
     }
 }
