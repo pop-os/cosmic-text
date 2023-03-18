@@ -49,7 +49,6 @@ fn shape_fallback(
 
         let start_glyph = start_run + info.cluster as usize;
 
-        //println!("  {:?} {:?}", info, pos);
         if info.glyph_id == 0 {
             missing.push(start_glyph);
         }
@@ -433,6 +432,13 @@ pub struct ShapeLine {
 // Visual Line Ranges: (span_index, (first_word_index, first_glyph_index), (last_word_index, last_glyph_index))
 type VlRange = (usize, (usize, usize), (usize, usize));
 
+#[derive(Default)]
+struct VisualLine {
+    ranges: Vec<VlRange>,
+    spaces: u32,
+    w: f32,
+}
+
 impl ShapeLine {
     /// # Panics
     ///
@@ -629,20 +635,30 @@ impl ShapeLine {
         // This is used to create a visual line for empty lines (e.g. lines with only a <CR>)
         let mut push_line = true;
 
-        #[derive(Default)]
-        struct VisualLine {
-            ranges: Vec<VlRange>,
-            spaces: u32,
-            w: f32,
-        }
         // For each visual line a list of  (span index,  and range of words in that span)
         // Note that a BiDi visual line could have multiple spans or parts of them
         // let mut vl_range_of_spans = Vec::with_capacity(1);
-        let mut vl_range_of_spans: Vec<VisualLine> = Vec::with_capacity(1);
+        let mut visual_lines: Vec<VisualLine> = Vec::with_capacity(1);
+
+        fn add_to_visual_line(
+            vl: &mut VisualLine,
+            span_index: usize,
+            start: (usize, usize),
+            end: (usize, usize),
+            width: f32,
+            number_of_blanks: u32,
+        ) {
+            if end == start {
+                return;
+            }
+
+            vl.ranges.push((span_index, start, end));
+            vl.w += width;
+            vl.spaces += number_of_blanks;
+        }
 
         let start_x = if self.rtl { line_width } else { 0.0 };
-        let end_x = if self.rtl { 0.0 } else { line_width };
-        let mut x = start_x;
+        let mut x;
         let mut y;
 
         // This would keep the maximum number of spans that would fit on a visual line
@@ -660,148 +676,175 @@ impl ShapeLine {
         } else {
             let mut fit_x = line_width;
             for (span_index, span) in self.spans.iter().enumerate() {
-                let mut word_ranges = Vec::new();
                 let mut word_range_width = 0.;
-                let mut number_of_blanks = 0;
+                let mut number_of_blanks: u32 = 0;
 
                 // Create the word ranges that fits in a visual line
                 if self.rtl != span.level.is_rtl() {
                     // incongruent directions
                     let mut fitting_start = (span.words.len(), 0);
                     for (i, word) in span.words.iter().enumerate().rev() {
-                        let word_size = font_size * word.x_advance;
-                        if fit_x - word_size >= 0. {
+                        let word_width = font_size * word.x_advance;
+                        if fit_x - word_width >= 0. {
                             // fits
-                            fit_x -= word_size;
-                            word_range_width += word_size;
+                            fit_x -= word_width;
+                            word_range_width += word_width;
                             if word.blank {
                                 number_of_blanks += 1;
                             }
                             continue;
                         } else if wrap == Wrap::Glyph {
                             for (glyph_i, glyph) in word.glyphs.iter().enumerate().rev() {
-                                let glyph_size = font_size * glyph.x_advance;
-                                if fit_x - glyph_size >= 0. {
-                                    fit_x -= glyph_size;
-                                    word_range_width += glyph_size;
+                                let glyph_width = font_size * glyph.x_advance;
+                                if fit_x - glyph_width >= 0. {
+                                    fit_x -= glyph_width;
+                                    word_range_width += glyph_width;
                                     continue;
                                 } else {
-                                    word_ranges.push((
+                                    add_to_visual_line(
+                                        &mut current_visual_line,
+                                        span_index,
                                         (i, glyph_i + 1),
                                         fitting_start,
                                         word_range_width,
                                         number_of_blanks,
-                                    ));
+                                    );
+                                    visual_lines.push(current_visual_line);
+                                    current_visual_line = VisualLine::default();
+
                                     number_of_blanks = 0;
-                                    fit_x = line_width - glyph_size;
-                                    word_range_width = glyph_size;
+                                    fit_x = line_width - glyph_width;
+                                    word_range_width = glyph_width;
                                     fitting_start = (i, glyph_i + 1);
                                 }
                             }
                         } else {
                             // Wrap::Word
-                            let mut prev_word_width = None;
-                            if word.blank && number_of_blanks > 0 {
-                                // current word causing a wrap is a space so we ignore it
-                                number_of_blanks -= 1;
-                            } else if let Some(previous_word) = span.words.get(i - 1) {
+                            let mut trailing_space_width = None;
+                            if let Some(previous_word) = span.words.get(i + 1) {
                                 // Current word causing a wrap is not whitespace, so we ignore the
                                 // previous word if it's a whitespace
                                 if previous_word.blank {
-                                    number_of_blanks -= 1;
-                                    prev_word_width = Some(previous_word.x_advance * font_size);
+                                    trailing_space_width =
+                                        Some(previous_word.x_advance * font_size);
+                                    number_of_blanks = number_of_blanks.saturating_sub(1);
                                 }
                             }
-                            if let Some(width) = prev_word_width {
-                                word_ranges.push((
-                                    (i, 0),
+                            if let Some(width) = trailing_space_width {
+                                add_to_visual_line(
+                                    &mut current_visual_line,
+                                    span_index,
+                                    (i + 2, 0),
                                     fitting_start,
                                     word_range_width - width,
                                     number_of_blanks,
-                                ));
+                                );
                             } else {
-                                word_ranges.push((
+                                add_to_visual_line(
+                                    &mut current_visual_line,
+                                    span_index,
                                     (i + 1, 0),
                                     fitting_start,
                                     word_range_width,
                                     number_of_blanks,
-                                ));
+                                );
                             }
+                            visual_lines.push(current_visual_line);
+                            current_visual_line = VisualLine::default();
+
                             number_of_blanks = 0;
                             if word.blank {
                                 fit_x = line_width;
                                 word_range_width = 0.;
-                                fitting_start = (i + 1, 0);
+                                fitting_start = (i, 0);
                             } else {
-                                fit_x = line_width - word_size;
-                                word_range_width = word_size;
+                                fit_x = line_width - word_width;
+                                word_range_width = word_width;
                                 fitting_start = (i + 1, 0);
                             }
                         }
                     }
-                    word_ranges.push(((0, 0), fitting_start, word_range_width, number_of_blanks));
+                    add_to_visual_line(
+                        &mut current_visual_line,
+                        span_index,
+                        (0, 0),
+                        fitting_start,
+                        word_range_width,
+                        number_of_blanks,
+                    );
                 } else {
                     // congruent direction
                     let mut fitting_start = (0, 0);
                     for (i, word) in span.words.iter().enumerate() {
-                        let word_size = font_size * word.x_advance;
-                        if fit_x - word_size >= 0. {
+                        let word_width = font_size * word.x_advance;
+                        if fit_x - word_width >= 0. {
                             // fits
-                            fit_x -= word_size;
-                            word_range_width += word_size;
+                            fit_x -= word_width;
+                            word_range_width += word_width;
                             if word.blank {
                                 number_of_blanks += 1;
                             }
                             continue;
                         } else if wrap == Wrap::Glyph {
                             for (glyph_i, glyph) in word.glyphs.iter().enumerate() {
-                                let glyph_size = font_size * glyph.x_advance;
-                                if fit_x - glyph_size >= 0. {
-                                    fit_x -= glyph_size;
-                                    word_range_width += glyph_size;
+                                let glyph_width = font_size * glyph.x_advance;
+                                if fit_x - glyph_width >= 0. {
+                                    fit_x -= glyph_width;
+                                    word_range_width += glyph_width;
                                     continue;
                                 } else {
-                                    word_ranges.push((
+                                    add_to_visual_line(
+                                        &mut current_visual_line,
+                                        span_index,
                                         fitting_start,
                                         (i, glyph_i),
                                         word_range_width,
                                         number_of_blanks,
-                                    ));
+                                    );
+                                    visual_lines.push(current_visual_line);
+                                    current_visual_line = VisualLine::default();
+
                                     number_of_blanks = 0;
-                                    fit_x = line_width - glyph_size;
-                                    word_range_width = glyph_size;
+                                    fit_x = line_width - glyph_width;
+                                    word_range_width = glyph_width;
                                     fitting_start = (i, glyph_i);
                                 }
                             }
                         } else {
                             // Wrap::Word
-                            let mut prev_word_width = None;
-                            if word.blank && number_of_blanks > 0 {
-                                // current word causing a wrap is a space so we ignore it
-                                number_of_blanks -= 1;
-                            } else if let Some(previous_word) = span.words.get(i - 1) {
-                                // Current word causing a wrap is not whitespace, so we ignore the
-                                // previous word if it's a whitespace
-                                if previous_word.blank {
-                                    number_of_blanks -= 1;
-                                    prev_word_width = Some(previous_word.x_advance * font_size);
+                            let mut trailing_space_width = None;
+                            if i > 0 {
+                                if let Some(previous_word) = span.words.get(i - 1) {
+                                    // Current word causing a wrap is not whitespace, so we ignore the
+                                    // previous word if it's a whitespace
+                                    if previous_word.blank {
+                                        trailing_space_width =
+                                            Some(previous_word.x_advance * font_size);
+                                        number_of_blanks = number_of_blanks.saturating_sub(1);
+                                    }
                                 }
                             }
-                            if let Some(width) = prev_word_width {
-                                word_ranges.push((
+                            if let Some(width) = trailing_space_width {
+                                add_to_visual_line(
+                                    &mut current_visual_line,
+                                    span_index,
                                     fitting_start,
                                     (i - 1, 0),
                                     word_range_width - width,
                                     number_of_blanks,
-                                ));
+                                );
                             } else {
-                                word_ranges.push((
+                                add_to_visual_line(
+                                    &mut current_visual_line,
+                                    span_index,
                                     fitting_start,
                                     (i, 0),
                                     word_range_width,
                                     number_of_blanks,
-                                ));
+                                );
                             }
+                            visual_lines.push(current_visual_line);
+                            current_visual_line = VisualLine::default();
                             number_of_blanks = 0;
 
                             if word.blank {
@@ -809,88 +852,34 @@ impl ShapeLine {
                                 word_range_width = 0.;
                                 fitting_start = (i + 1, 0);
                             } else {
-                                fit_x = line_width - word_size;
-                                word_range_width = word_size;
+                                fit_x = line_width - word_width;
+                                word_range_width = word_width;
                                 fitting_start = (i, 0);
                             }
                         }
                     }
-                    word_ranges.push((
+                    add_to_visual_line(
+                        &mut current_visual_line,
+                        span_index,
                         fitting_start,
                         (span.words.len(), 0),
                         word_range_width,
                         number_of_blanks,
-                    ));
-                }
-
-                // Create a visual line
-                for (
-                    (starting_word, starting_glyph),
-                    (ending_word, ending_glyph),
-                    word_range_width,
-                    number_of_blanks,
-                ) in word_ranges
-                {
-                    // To simplify the algorithm above, we might push empty ranges but we ignore them here
-                    if ending_word == starting_word && starting_glyph == ending_glyph {
-                        continue;
-                    }
-
-                    let fits = !if self.rtl {
-                        x - word_range_width < end_x
-                    } else {
-                        x + word_range_width > end_x
-                    };
-
-                    if fits {
-                        current_visual_line.ranges.push((
-                            span_index,
-                            (starting_word, starting_glyph),
-                            (ending_word, ending_glyph),
-                        ));
-                        current_visual_line.w += word_range_width;
-                        current_visual_line.spaces += number_of_blanks;
-                        if self.rtl {
-                            x -= word_range_width;
-                        } else {
-                            x += word_range_width;
-                        }
-                    } else {
-                        if !current_visual_line.ranges.is_empty() {
-                            vl_range_of_spans.push(current_visual_line);
-                            current_visual_line = VisualLine::default();
-                            x = start_x;
-                        }
-                        current_visual_line.ranges.push((
-                            span_index,
-                            (starting_word, starting_glyph),
-                            (ending_word, ending_glyph),
-                        ));
-                        current_visual_line.w += word_range_width;
-                        current_visual_line.spaces += number_of_blanks;
-                        if self.rtl {
-                            x -= word_range_width;
-                        } else {
-                            x += word_range_width;
-                        }
-                        if word_range_width > line_width {
-                            // single word is bigger than line_width
-                            vl_range_of_spans.push(current_visual_line);
-                            current_visual_line = VisualLine::default();
-                            x = start_x;
-                        }
-                    }
+                    );
                 }
             }
         }
 
         if !current_visual_line.ranges.is_empty() {
-            vl_range_of_spans.push(current_visual_line);
+            visual_lines.push(current_visual_line);
         }
 
         // Create the LayoutLines using the ranges inside visual lines
-        let number_of_visual_lines = vl_range_of_spans.len();
-        for (index, visual_line) in vl_range_of_spans.iter().enumerate() {
+        let number_of_visual_lines = visual_lines.len();
+        for (index, visual_line) in visual_lines.iter().enumerate() {
+            if visual_line.ranges.is_empty() {
+                continue;
+            }
             let new_order = self.reorder(&visual_line.ranges);
             let mut glyphs = Vec::with_capacity(1);
             x = start_x;
