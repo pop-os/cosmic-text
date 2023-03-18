@@ -15,7 +15,7 @@
 //! use cosmic_text::{Attrs, Color, FontSystem, SwashCache, Buffer, Metrics};
 //!
 //! // A FontSystem provides access to detected system fonts, create one per application
-//! let font_system = FontSystem::new();
+//! let mut font_system = FontSystem::new();
 //!
 //! // A SwashCache stores rasterized glyphs, create one per application
 //! let mut swash_cache = SwashCache::new();
@@ -24,7 +24,10 @@
 //! let metrics = Metrics::new(14.0, 20.0);
 //!
 //! // A Buffer provides shaping and layout for a UTF-8 string, create one per text widget
-//! let mut buffer = Buffer::new(&font_system, metrics);
+//! let mut buffer = Buffer::new(&mut font_system, metrics);
+//!
+//! // Borrow buffer together with the font system for more convenient method calls
+//! let mut buffer = buffer.borrow_with(&mut font_system);
 //!
 //! // Set a size for the text buffer, in pixels
 //! buffer.set_size(80.0, 25.0);

@@ -2,7 +2,10 @@ use alloc::string::String;
 use core::cmp;
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::{Action, AttrsList, Buffer, Color, Cursor, Edit, SyntaxEditor};
+use crate::{
+    Action, AttrsList, BorrowedWithFontSystem, Buffer, Color, Cursor, Edit, FontSystem,
+    SyntaxEditor,
+};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Mode {
@@ -30,10 +33,11 @@ impl<'a> ViEditor<'a> {
     #[cfg(feature = "std")]
     pub fn load_text<P: AsRef<std::path::Path>>(
         &mut self,
+        font_system: &mut FontSystem,
         path: P,
-        attrs: crate::Attrs<'a>,
+        attrs: crate::Attrs,
     ) -> std::io::Result<()> {
-        self.editor.load_text(path, attrs)
+        self.editor.load_text(font_system, path, attrs)
     }
 
     /// Get the default background color
@@ -47,12 +51,12 @@ impl<'a> ViEditor<'a> {
     }
 }
 
-impl<'a> Edit<'a> for ViEditor<'a> {
-    fn buffer(&self) -> &Buffer<'a> {
+impl<'a> Edit for ViEditor<'a> {
+    fn buffer(&self) -> &Buffer {
         self.editor.buffer()
     }
 
-    fn buffer_mut(&mut self) -> &mut Buffer<'a> {
+    fn buffer_mut(&mut self) -> &mut Buffer {
         self.editor.buffer_mut()
     }
 
@@ -68,8 +72,8 @@ impl<'a> Edit<'a> for ViEditor<'a> {
         self.editor.set_select_opt(select_opt);
     }
 
-    fn shape_as_needed(&mut self) {
-        self.editor.shape_as_needed()
+    fn shape_as_needed(&mut self, font_system: &mut FontSystem) {
+        self.editor.shape_as_needed(font_system);
     }
 
     fn copy_selection(&mut self) -> Option<String> {
@@ -84,7 +88,7 @@ impl<'a> Edit<'a> for ViEditor<'a> {
         self.editor.insert_string(data, attrs_list);
     }
 
-    fn action(&mut self, action: Action) {
+    fn action(&mut self, font_system: &mut FontSystem, action: Action) {
         let old_mode = self.mode;
 
         match self.mode {
@@ -92,18 +96,18 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                 Action::Insert(c) => match c {
                     // Enter insert mode after cursor
                     'a' => {
-                        self.editor.action(Action::Right);
+                        self.editor.action(font_system, Action::Right);
                         self.mode = Mode::Insert;
                     }
                     // Enter insert mode at end of line
                     'A' => {
-                        self.editor.action(Action::End);
+                        self.editor.action(font_system, Action::End);
                         self.mode = Mode::Insert;
                     }
                     // Change mode
                     'c' => {
                         if self.editor.select_opt().is_some() {
-                            self.editor.action(Action::Delete);
+                            self.editor.action(font_system, Action::Delete);
                             self.mode = Mode::Insert;
                         } else {
                             //TODO: change to next cursor movement
@@ -112,7 +116,7 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                     // Delete mode
                     'd' => {
                         if self.editor.select_opt().is_some() {
-                            self.editor.action(Action::Delete);
+                            self.editor.action(font_system, Action::Delete);
                         } else {
                             //TODO: delete to next cursor movement
                         }
@@ -124,33 +128,33 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                     // Enter insert mode at start of line
                     'I' => {
                         //TODO: soft home, skip whitespace
-                        self.editor.action(Action::Home);
+                        self.editor.action(font_system, Action::Home);
                         self.mode = Mode::Insert;
                     }
                     // Create line after and enter insert mode
                     'o' => {
-                        self.editor.action(Action::End);
-                        self.editor.action(Action::Enter);
+                        self.editor.action(font_system, Action::End);
+                        self.editor.action(font_system, Action::Enter);
                         self.mode = Mode::Insert;
                     }
                     // Create line before and enter insert mode
                     'O' => {
-                        self.editor.action(Action::Home);
-                        self.editor.action(Action::Enter);
-                        self.editor.shape_as_needed(); // TODO: do not require this?
-                        self.editor.action(Action::Up);
+                        self.editor.action(font_system, Action::Home);
+                        self.editor.action(font_system, Action::Enter);
+                        self.editor.shape_as_needed(font_system); // TODO: do not require this?
+                        self.editor.action(font_system, Action::Up);
                         self.mode = Mode::Insert;
                     }
                     // Left
-                    'h' => self.editor.action(Action::Left),
+                    'h' => self.editor.action(font_system, Action::Left),
                     // Top of screen
                     //TODO: 'H' => self.editor.action(Action::ScreenHigh),
                     // Down
-                    'j' => self.editor.action(Action::Down),
+                    'j' => self.editor.action(font_system, Action::Down),
                     // Up
-                    'k' => self.editor.action(Action::Up),
+                    'k' => self.editor.action(font_system, Action::Up),
                     // Right
-                    'l' => self.editor.action(Action::Right),
+                    'l' => self.editor.action(font_system, Action::Right),
                     // Bottom of screen
                     //TODO: 'L' => self.editor.action(Action::ScreenLow),
                     // Middle of screen
@@ -168,23 +172,23 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                         if self.editor.select_opt().is_some() {
                             self.editor.set_select_opt(None);
                         } else {
-                            self.editor.action(Action::Home);
+                            self.editor.action(font_system, Action::Home);
                             self.editor.set_select_opt(Some(self.editor.cursor()));
                             //TODO: set cursor_x_opt to max
-                            self.editor.action(Action::End);
+                            self.editor.action(font_system, Action::End);
                         }
                     }
                     // Remove character at cursor
-                    'x' => self.editor.action(Action::Delete),
+                    'x' => self.editor.action(font_system, Action::Delete),
                     // Remove character before cursor
-                    'X' => self.editor.action(Action::Backspace),
+                    'X' => self.editor.action(font_system, Action::Backspace),
                     // Go to start of line
-                    '0' => self.editor.action(Action::Home),
+                    '0' => self.editor.action(font_system, Action::Home),
                     // Go to end of line
-                    '$' => self.editor.action(Action::End),
+                    '$' => self.editor.action(font_system, Action::End),
                     // Go to start of line after whitespace
                     //TODO: implement this
-                    '^' => self.editor.action(Action::Home),
+                    '^' => self.editor.action(font_system, Action::Home),
                     // Enter command mode
                     ':' => {
                         self.mode = Mode::Command;
@@ -199,18 +203,18 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                     }
                     _ => (),
                 },
-                _ => self.editor.action(action),
+                _ => self.editor.action(font_system, action),
             },
             Mode::Insert => match action {
                 Action::Escape => {
                     let cursor = self.cursor();
                     let layout_cursor = self.buffer().layout_cursor(&cursor);
                     if layout_cursor.glyph > 0 {
-                        self.editor.action(Action::Left);
+                        self.editor.action(font_system, Action::Left);
                     }
                     self.mode = Mode::Normal;
                 }
-                _ => self.editor.action(action),
+                _ => self.editor.action(font_system, action),
             },
             _ => {
                 //TODO: other modes
@@ -224,8 +228,13 @@ impl<'a> Edit<'a> for ViEditor<'a> {
     }
 
     #[cfg(feature = "swash")]
-    fn draw<F>(&self, cache: &mut crate::SwashCache, color: Color, mut f: F)
-    where
+    fn draw<F>(
+        &self,
+        font_system: &mut FontSystem,
+        cache: &mut crate::SwashCache,
+        color: Color,
+        mut f: F,
+    ) where
         F: FnMut(i32, i32, u32, u32, Color),
     {
         let font_size = self.buffer().metrics().font_size;
@@ -421,15 +430,22 @@ impl<'a> Edit<'a> for ViEditor<'a> {
                     None => color,
                 };
 
-                cache.with_pixels(
-                    self.buffer().font_system(),
-                    cache_key,
-                    glyph_color,
-                    |x, y, color| {
-                        f(x_int + x, line_y as i32 + y_int + y, 1, 1, color);
-                    },
-                );
+                cache.with_pixels(font_system, cache_key, glyph_color, |x, y, color| {
+                    f(x_int + x, line_y as i32 + y_int + y, 1, 1, color);
+                });
             }
         }
+    }
+}
+
+impl<'a, 'b> BorrowedWithFontSystem<'b, ViEditor<'a>> {
+    /// Load text from a file, and also set syntax to the best option
+    #[cfg(feature = "std")]
+    pub fn load_text<P: AsRef<std::path::Path>>(
+        &mut self,
+        path: P,
+        attrs: crate::Attrs,
+    ) -> std::io::Result<()> {
+        self.inner.load_text(self.font_system, path, attrs)
     }
 }

@@ -3,9 +3,10 @@
 use alloc::sync::Arc;
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
+use fontdb::Family;
 use unicode_script::Script;
 
-use crate::Font;
+use crate::{Font, FontSystem};
 
 use self::platform::*;
 
@@ -26,11 +27,11 @@ mod platform;
 mod platform;
 
 pub struct FontFallbackIter<'a> {
-    fonts: &'a [Arc<Font<'a>>],
-    default_families: &'a [&'a str],
+    font_system: &'a mut FontSystem,
+    font_ids: &'a [fontdb::ID],
+    default_families: &'a [&'a Family<'a>],
     default_i: usize,
     scripts: Vec<Script>,
-    locale: &'a str,
     script_i: (usize, usize),
     common_i: usize,
     other_i: usize,
@@ -39,17 +40,17 @@ pub struct FontFallbackIter<'a> {
 
 impl<'a> FontFallbackIter<'a> {
     pub fn new(
-        fonts: &'a [Arc<Font<'a>>],
-        default_families: &'a [&'a str],
+        font_system: &'a mut FontSystem,
+        font_ids: &'a [fontdb::ID],
+        default_families: &'a [&'a Family<'a>],
         scripts: Vec<Script>,
-        locale: &'a str,
     ) -> Self {
         Self {
-            fonts,
+            font_system,
+            font_ids,
             default_families,
             default_i: 0,
             scripts,
-            locale,
             script_i: (0, 0),
             common_i: 0,
             other_i: 0,
@@ -57,21 +58,20 @@ impl<'a> FontFallbackIter<'a> {
         }
     }
 
-    pub fn check_missing(&self, word: &str) {
+    pub fn check_missing(&mut self, word: &str) {
         if self.end {
             log::debug!(
                 "Failed to find any fallback for {:?} locale '{}': '{}'",
                 self.scripts,
-                self.locale,
+                self.font_system.locale(),
                 word
             );
         } else if self.other_i > 0 {
-            let font = &self.fonts[self.other_i - 1];
             log::debug!(
                 "Failed to find preset fallback for {:?} locale '{}', used '{}': '{}'",
                 self.scripts,
-                self.locale,
-                font.name(),
+                self.font_system.locale(),
+                self.face_name(self.font_ids[self.other_i - 1]),
                 word
             );
         } else if !self.scripts.is_empty() && self.common_i > 0 {
@@ -79,24 +79,48 @@ impl<'a> FontFallbackIter<'a> {
             log::debug!(
                 "Failed to find script fallback for {:?} locale '{}', used '{}': '{}'",
                 self.scripts,
-                self.locale,
+                self.font_system.locale(),
                 family,
                 word
             );
         }
     }
+
+    pub fn face_name(&self, id: fontdb::ID) -> &str {
+        if let Some(face) = self.font_system.db().face(id) {
+            if let Some((name, _)) = face.families.first() {
+                name
+            } else {
+                &face.post_script_name
+            }
+        } else {
+            "invalid font id"
+        }
+    }
+
+    fn face_contains_family(&self, id: fontdb::ID, family_name: &str) -> bool {
+        if let Some(face) = self.font_system.db().face(id) {
+            face.families.iter().any(|(name, _)| name == family_name)
+        } else {
+            false
+        }
+    }
 }
 
 impl<'a> Iterator for FontFallbackIter<'a> {
-    type Item = &'a Arc<Font<'a>>;
+    type Item = Arc<Font>;
     fn next(&mut self) -> Option<Self::Item> {
         while self.default_i < self.default_families.len() {
-            let default_family = self.default_families[self.default_i];
             self.default_i += 1;
-
-            for font in self.fonts.iter() {
-                if font.contains_family(default_family) {
-                    return Some(font);
+            for id in self.font_ids.iter() {
+                let default_family = self
+                    .font_system
+                    .db()
+                    .family_name(self.default_families[self.default_i - 1]);
+                if self.face_contains_family(*id, default_family) {
+                    if let Some(font) = self.font_system.get_font(*id) {
+                        return Some(font);
+                    }
                 }
             }
         }
@@ -104,20 +128,22 @@ impl<'a> Iterator for FontFallbackIter<'a> {
         while self.script_i.0 < self.scripts.len() {
             let script = self.scripts[self.script_i.0];
 
-            let script_families = script_fallback(script, self.locale);
+            let script_families = script_fallback(script, self.font_system.locale());
             while self.script_i.1 < script_families.len() {
                 let script_family = script_families[self.script_i.1];
                 self.script_i.1 += 1;
-                for font in self.fonts.iter() {
-                    if font.contains_family(script_family) {
-                        return Some(font);
+                for id in self.font_ids.iter() {
+                    if self.face_contains_family(*id, script_family) {
+                        if let Some(font) = self.font_system.get_font(*id) {
+                            return Some(font);
+                        }
                     }
                 }
                 log::debug!(
                     "failed to find family '{}' for script {:?} and locale '{}'",
                     script_family,
                     script,
-                    self.locale
+                    self.font_system.locale(),
                 );
             }
 
@@ -129,9 +155,11 @@ impl<'a> Iterator for FontFallbackIter<'a> {
         while self.common_i < common_families.len() {
             let common_family = common_families[self.common_i];
             self.common_i += 1;
-            for font in self.fonts.iter() {
-                if font.contains_family(common_family) {
-                    return Some(font);
+            for id in self.font_ids.iter() {
+                if self.face_contains_family(*id, common_family) {
+                    if let Some(font) = self.font_system.get_font(*id) {
+                        return Some(font);
+                    }
                 }
             }
             log::debug!("failed to find family '{}'", common_family);
@@ -140,14 +168,16 @@ impl<'a> Iterator for FontFallbackIter<'a> {
         //TODO: do we need to do this?
         //TODO: do not evaluate fonts more than once!
         let forbidden_families = forbidden_fallback();
-        while self.other_i < self.fonts.len() {
-            let font = &self.fonts[self.other_i];
+        while self.other_i < self.font_ids.len() {
+            let id = self.font_ids[self.other_i];
             self.other_i += 1;
             if forbidden_families
                 .iter()
-                .all(|family| !font.contains_family(family))
+                .all(|family_name| !self.face_contains_family(id, family_name))
             {
-                return Some(font);
+                if let Some(font) = self.font_system.get_font(id) {
+                    return Some(font);
+                }
             }
         }
 

@@ -16,7 +16,7 @@ pub use swash::scale::image::{Content as SwashContent, Image as SwashImage};
 pub use swash::zeno::{Command, Placement};
 
 fn swash_image(
-    font_system: &FontSystem,
+    font_system: &mut FontSystem,
     context: &mut ScaleContext,
     cache_key: CacheKey,
 ) -> Option<SwashImage> {
@@ -57,7 +57,7 @@ fn swash_image(
 }
 
 fn swash_outline_commands(
-    font_system: &FontSystem,
+    font_system: &mut FontSystem,
     context: &mut ScaleContext,
     cache_key: CacheKey,
 ) -> Option<Vec<swash::zeno::Command>> {
@@ -109,7 +109,7 @@ impl SwashCache {
     /// Create a swash Image from a cache key, without caching results
     pub fn get_image_uncached(
         &mut self,
-        font_system: &FontSystem,
+        font_system: &mut FontSystem,
         cache_key: CacheKey,
     ) -> Option<SwashImage> {
         swash_image(font_system, &mut self.context, cache_key)
@@ -118,7 +118,7 @@ impl SwashCache {
     /// Create a swash Image from a cache key, caching results
     pub fn get_image(
         &mut self,
-        font_system: &FontSystem,
+        font_system: &mut FontSystem,
         cache_key: CacheKey,
     ) -> &Option<SwashImage> {
         self.image_cache
@@ -128,7 +128,7 @@ impl SwashCache {
 
     pub fn get_outline_commands(
         &mut self,
-        font_system: &FontSystem,
+        font_system: &mut FontSystem,
         cache_key: CacheKey,
     ) -> Option<&[swash::zeno::Command]> {
         self.outline_command_cache
@@ -140,7 +140,7 @@ impl SwashCache {
     /// Enumerate pixels in an Image, use `with_image` for better performance
     pub fn with_pixels<F: FnMut(i32, i32, Color)>(
         &mut self,
-        font_system: &FontSystem,
+        font_system: &mut FontSystem,
         cache_key: CacheKey,
         base: Color,
         mut f: F,
