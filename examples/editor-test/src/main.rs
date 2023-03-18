@@ -5,7 +5,7 @@ use cosmic_text::{
 };
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{env, fs, process, time::Instant};
-use unicode_bidi::BidiInfo;
+use unicode_bidi::{bidi_class, BidiClass, BidiInfo};
 use unicode_segmentation::UnicodeSegmentation;
 
 fn redraw(
@@ -86,10 +86,20 @@ fn main() {
 
     let bidi_info = BidiInfo::new(&text, None);
     for paragraph in bidi_info.paragraphs {
-        let line = &text[paragraph.range];
-        log::debug!("Line {:?}", line);
+        let paragraph = &text[paragraph.range];
+        let mut chars = paragraph.chars();
+        let paragraph = if let Some(char) = chars.next_back() {
+            if let BidiClass::B = bidi_class(char) {
+                chars.as_str()
+            } else {
+                paragraph
+            }
+        } else {
+            paragraph
+        };
+        log::debug!("Paragraph {:?}", paragraph);
 
-        for grapheme in line.graphemes(true) {
+        for grapheme in paragraph.graphemes(true) {
             for c in grapheme.chars() {
                 log::trace!("Insert {:?}", c);
 
@@ -153,10 +163,27 @@ fn main() {
     log::info!("Test completed in {:?}", test_elapsed);
 
     let mut wrong = 0;
-    for (line_i, line) in text.lines().enumerate() {
-        let buffer_line = &editor.buffer().lines[line_i];
-        if buffer_line.text() != line {
-            log::error!("line {}: {:?} != {:?}", line_i, buffer_line.text(), line);
+    let bidi_info = BidiInfo::new(&text, None);
+    for (paragraph_i, paragraph) in bidi_info.paragraphs.into_iter().enumerate() {
+        let buffer_line = &editor.buffer().lines[paragraph_i];
+        let paragraph = &text[paragraph.range];
+        let mut chars = paragraph.chars();
+        let paragraph = if let Some(char) = chars.next_back() {
+            if let BidiClass::B = bidi_class(char) {
+                chars.as_str()
+            } else {
+                paragraph
+            }
+        } else {
+            paragraph
+        };
+        if buffer_line.text() != paragraph {
+            log::error!(
+                "paragraph {}: {:?} != {:?}",
+                paragraph_i,
+                buffer_line.text(),
+                paragraph,
+            );
             wrong += 1;
         }
     }
