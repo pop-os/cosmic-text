@@ -9,7 +9,7 @@ use cosmic::{
         {Color, Element, Length, Point, Rectangle, Size},
     },
     iced_winit::renderer::BorderRadius,
-    theme::Theme,
+    theme::{Theme, ThemeType},
 };
 use cosmic_text::{Attrs, AttrsList, BufferLine, Metrics, SwashCache};
 use std::{cmp, sync::Mutex, time::Instant};
@@ -27,12 +27,12 @@ pub trait StyleSheet {
 
 impl StyleSheet for Theme {
     fn appearance(&self) -> Appearance {
-        match self {
-            Theme::Dark => Appearance {
+        match self.theme_type {
+            ThemeType::Dark | ThemeType::HighContrastDark => Appearance {
                 background_color: None,
                 text_color: Color::from_rgb8(0xFF, 0xFF, 0xFF),
             },
-            Theme::Light => Appearance {
+            ThemeType::Light | ThemeType::HighContrastLight => Appearance {
                 background_color: None,
                 text_color: Color::from_rgb8(0x00, 0x00, 0x00),
             },

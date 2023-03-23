@@ -7,7 +7,7 @@ use cosmic::{
         Alignment, Application, Color, Command, Length,
     },
     settings,
-    theme::{self, Theme},
+    theme::{self, Theme, ThemeType},
     widget::{button, toggler},
     Element,
 };
@@ -154,7 +154,7 @@ impl Application for Window {
         update_attrs(&mut editor, attrs);
 
         let mut window = Window {
-            theme: Theme::Dark,
+            theme: Theme::dark(),
             font_size: FontSize::Body,
             path_opt: None,
             attrs,
@@ -261,12 +261,12 @@ impl Application for Window {
             }
             Message::ThemeChanged(theme) => {
                 self.theme = match theme {
-                    "Dark" => Theme::Dark,
-                    "Light" => Theme::Light,
+                    "Dark" => Theme::dark(),
+                    "Light" => Theme::light(),
                     _ => return Command::none(),
                 };
 
-                let Color { r, g, b, a } = self.theme.palette().text;
+                let Color { r, g, b, a } = self.theme.cosmic().on_bg_color().into();
                 let as_u8 = |component: f32| (component * 255.0) as u8;
                 self.attrs = self.attrs.color(cosmic_text::Color::rgba(
                     as_u8(r),
@@ -287,9 +287,10 @@ impl Application for Window {
         static THEMES: &[&str] = &["Dark", "Light"];
         let theme_picker = pick_list(
             THEMES,
-            Some(match self.theme {
-                Theme::Dark => THEMES[0],
-                Theme::Light => THEMES[1],
+            Some(match self.theme.theme_type {
+                ThemeType::Dark => THEMES[0],
+                ThemeType::Light => THEMES[1],
+                _ => unreachable!(),
             }),
             Message::ThemeChanged,
         );
