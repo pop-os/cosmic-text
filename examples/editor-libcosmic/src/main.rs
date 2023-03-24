@@ -8,16 +8,13 @@ use cosmic::{
     },
     settings,
     theme::{self, Theme, ThemeType},
-    widget::{button, toggler},
+    widget::{button, text, toggler},
     Element,
 };
 use cosmic_text::{
     Align, Attrs, AttrsList, Buffer, Edit, FontSystem, Metrics, SyntaxEditor, SyntaxSystem, Wrap,
 };
 use std::{env, fmt, fs, path::PathBuf, sync::Mutex};
-
-use self::text::text;
-mod text;
 
 use self::text_box::text_box;
 mod text_box;

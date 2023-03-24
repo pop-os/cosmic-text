@@ -1,8 +1,5 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use crate::FONT_SYSTEM;
-
-use super::text;
 use cosmic::{
     iced_native::{
         clipboard::Clipboard,
@@ -15,11 +12,12 @@ use cosmic::{
         widget::{self, tree, Widget},
         Padding, {Color, Element, Length, Point, Rectangle, Shell, Size},
     },
-    iced_winit::renderer::BorderRadius,
     theme::{Theme, ThemeType},
 };
 use cosmic_text::{Action, Edit, SwashCache};
 use std::{cmp, sync::Mutex, time::Instant};
+
+use crate::FONT_SYSTEM;
 
 pub struct Appearance {
     background_color: Option<Color>,
@@ -64,11 +62,60 @@ impl<'a, Editor> TextBox<'a, Editor> {
     }
 }
 
-pub fn text_box<Editor>(editor: &Mutex<Editor>) -> TextBox<Editor> {
+pub fn text_box<'a, Editor>(editor: &'a Mutex<Editor>) -> TextBox<'a, Editor> {
     TextBox::new(editor)
 }
 
-impl<'a, Editor, Message, Renderer> Widget<Message, Renderer> for TextBox<'a, Editor>
+fn draw_pixel(
+    buffer: &mut [u8],
+    width: i32,
+    height: i32,
+    x: i32,
+    y: i32,
+    color: cosmic_text::Color,
+) {
+    let alpha = (color.0 >> 24) & 0xFF;
+    if alpha == 0 {
+        // Do not draw if alpha is zero
+        return;
+    }
+
+    if y < 0 || y >= height {
+        // Skip if y out of bounds
+        return;
+    }
+
+    if x < 0 || x >= width {
+        // Skip if x out of bounds
+        return;
+    }
+
+    let offset = (y as usize * width as usize + x as usize) * 4;
+
+    let mut current = buffer[offset + 2] as u32
+        | (buffer[offset + 1] as u32) << 8
+        | (buffer[offset + 0] as u32) << 16
+        | (buffer[offset + 3] as u32) << 24;
+
+    if alpha >= 255 || current == 0 {
+        // Alpha is 100% or current is null, replace with no blending
+        current = color.0;
+    } else {
+        // Alpha blend with current value
+        let n_alpha = 255 - alpha;
+        let rb = ((n_alpha * (current & 0x00FF00FF)) + (alpha * (color.0 & 0x00FF00FF))) >> 8;
+        let ag = (n_alpha * ((current & 0xFF00FF00) >> 8))
+            + (alpha * (0x01000000 | ((color.0 & 0x0000FF00) >> 8)));
+        current = (rb & 0x00FF00FF) | (ag & 0xFF00FF00);
+    }
+
+    buffer[offset + 2] = current as u8;
+    buffer[offset + 1] = (current >> 8) as u8;
+    buffer[offset + 0] = (current >> 16) as u8;
+    buffer[offset + 3] = (current >> 24) as u8;
+}
+
+impl<'a, 'editor, Editor, Message, Renderer> Widget<Message, Renderer> for TextBox<'a, Editor>
 where
     Renderer: renderer::Renderer + image::Renderer<Handle = image::Handle>,
     Renderer::Theme: StyleSheet,
@@ -135,11 +182,13 @@ where
         tree: &widget::Tree,
         renderer: &mut Renderer,
         theme: &Renderer::Theme,
-        _style: &renderer::Style,
+        style: &renderer::Style,
         layout: Layout<'_>,
         _cursor_position: Point,
         viewport: &Rectangle,
     ) {
+        let instant = Instant::now();
+
         let state = tree.state.downcast_ref::<State>();
 
         let appearance = theme.appearance();
@@ -148,7 +197,7 @@ where
             renderer.fill_quad(
                 renderer::Quad {
                     bounds: layout.bounds(),
-                    border_radius: BorderRadius::default(),
+                    border_radius: 0.0.into(),
                     border_width: 0.0,
                     border_color: Color::TRANSPARENT,
                 },
@@ -165,63 +214,52 @@ where
 
         let mut editor = self.editor.lock().unwrap();
 
-        let view_w = viewport.width.min(layout.bounds().width) - self.padding.horizontal() as f32;
-        let view_h = viewport.height.min(layout.bounds().height) - self.padding.vertical() as f32;
+        let view_w = cmp::min(viewport.width as i32, layout.bounds().width as i32)
+            - self.padding.horizontal() as i32;
+        let view_h = cmp::min(viewport.height as i32, layout.bounds().height as i32)
+            - self.padding.vertical() as i32;
+
+        let image_w = (view_w as f64 * style.scale_factor) as i32;
+        let image_h = (view_h as f64 * style.scale_factor) as i32;
 
         let mut font_system = FONT_SYSTEM.lock().unwrap();
         let mut editor = editor.borrow_with(&mut font_system);
 
-        editor.buffer_mut().set_size(view_w, view_h);
+        // Scale metrics
+        let metrics = editor.buffer().metrics();
+        editor.buffer_mut().set_metrics(metrics.scale(style.scale_factor as f32));
 
+        // Set size
+        editor.buffer_mut().set_size(image_w as f32, image_h as f32);
+
+        // Shape and layout
         editor.shape_as_needed();
 
-        let instant = Instant::now();
-
-        let mut pixels = vec![0; view_w as usize * view_h as usize * 4];
-
+        // Draw to pixel buffer
+        let mut pixels = vec![0; image_w as usize * image_h as usize * 4];
         editor.draw(
             &mut state.cache.lock().unwrap(),
             text_color,
             |x, y, w, h, color| {
-                if w == 0 || h == 0 {
-                    // Do not draw invalid sized rectangles
-                    return;
-                }
-
-                if w > 1 || h > 1 {
-                    // Draw rectangles with optimized quad renderer
-                    renderer.fill_quad(
-                        renderer::Quad {
-                            bounds: Rectangle::new(
-                                layout.position()
-                                    + [x as f32, y as f32].into()
-                                    + [self.padding.left as f32, self.padding.top as f32].into(),
-                                Size::new(w as f32, h as f32),
-                            ),
-                            border_radius: BorderRadius::default(),
-                            border_width: 0.0,
-                            border_color: Color::TRANSPARENT,
-                        },
-                        Color::from_rgba8(
-                            color.r(),
-                            color.g(),
-                            color.b(),
-                            (color.a() as f32) / 255.0,
-                        ),
-                    );
-                } else {
-                    text::draw_pixel(&mut pixels, view_w as i32, view_h as i32, x, y, color);
+                //TODO: improve performance
+                for row in 0..h as i32 {
+                    for col in 0..w as i32 {
+                        draw_pixel(&mut pixels, image_w, image_h, x + col, y + row, color);
+                    }
                 }
             },
         );
 
-        let handle = image::Handle::from_pixels(view_w as u32, view_h as u32, pixels);
+        // Restore original metrics
+        editor.buffer_mut().set_metrics(metrics);
+
+        let handle = image::Handle::from_pixels(image_w as u32, image_h as u32, pixels);
         image::Renderer::draw(
             renderer,
             handle,
             Rectangle::new(
                 layout.position() + [self.padding.left as f32, self.padding.top as f32].into(),
-                Size::new(view_w, view_h),
+                Size::new(view_w as f32, view_h as f32),
             ),
         );
 
@@ -246,7 +284,10 @@ where
 
         let mut status = Status::Ignored;
         match event {
-            Event::Keyboard(KeyEvent::KeyPressed { key_code, .. }) => match key_code {
+            Event::Keyboard(KeyEvent::KeyPressed {
+                key_code,
+                modifiers,
+            }) => match key_code {
                 KeyCode::Left => {
                     editor.action(Action::Left);
                     status = Status::Captured;
@@ -326,14 +367,15 @@ where
                     status = Status::Captured;
                 }
             }
-            Event::Mouse(MouseEvent::WheelScrolled {
-                delta: ScrollDelta::Lines { y, .. },
-            }) => {
-                editor.action(Action::Scroll {
-                    lines: (-y * 6.0) as i32,
-                });
-                status = Status::Captured;
-            }
+            Event::Mouse(MouseEvent::WheelScrolled { delta }) => match delta {
+                ScrollDelta::Lines { x, y } => {
+                    editor.action(Action::Scroll {
+                        lines: (-y * 6.0) as i32,
+                    });
+                    status = Status::Captured;
+                }
+                _ => (),
+            },
             _ => (),
         }
 
@@ -341,7 +383,8 @@ where
     }
 }
 
-impl<'a, Editor, Message, Renderer> From<TextBox<'a, Editor>> for Element<'a, Message, Renderer>
+impl<'a, 'editor, Editor, Message, Renderer> From<TextBox<'a, Editor>>
+    for Element<'a, Message, Renderer>
 where
     Renderer: renderer::Renderer + image::Renderer<Handle = image::Handle>,
     Renderer::Theme: StyleSheet,
