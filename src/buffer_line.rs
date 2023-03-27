@@ -38,13 +38,11 @@ impl BufferLine {
     ///
     /// Will reset shape and layout if it differs from current text and attributes list.
     /// Returns true if the line was reset
-    pub fn set_text<T: AsRef<str> + Into<String>>(
-        &mut self,
-        text: T,
-        attrs_list: AttrsList,
-    ) -> bool {
-        if text.as_ref() != self.text || attrs_list != self.attrs_list {
-            self.text = text.into();
+    pub fn set_text<T: AsRef<str>>(&mut self, text: T, attrs_list: AttrsList) -> bool {
+        let text = text.as_ref();
+        if text != self.text || attrs_list != self.attrs_list {
+            self.text.clear();
+            self.text.push_str(text);
             self.attrs_list = attrs_list;
             self.reset();
             true
