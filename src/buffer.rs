@@ -243,14 +243,16 @@ impl<'b> Iterator for LayoutRunIter<'b> {
                     return None;
                 }
 
-                self.remaining_len -= 1;
-                return Some(LayoutRun {
-                    line_i: self.line_i,
-                    text: line.text(),
-                    rtl: shape.rtl,
-                    glyphs: &layout_line.glyphs,
-                    line_y: self.line_y,
-                    line_w: layout_line.w,
+                return self.remaining_len.checked_sub(1).map(|num| {
+                    self.remaining_len = num;
+                    LayoutRun {
+                        line_i: self.line_i,
+                        text: line.text(),
+                        rtl: shape.rtl,
+                        glyphs: &layout_line.glyphs,
+                        line_y: self.line_y,
+                        line_w: layout_line.w,
+                    }
                 });
             }
             self.line_i += 1;
