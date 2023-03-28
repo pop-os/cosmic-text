@@ -10,8 +10,9 @@ pub use self::std::*;
 #[cfg(feature = "std")]
 mod std;
 
-// re-export fontdb
+// re-export fontdb and rustybuzz
 pub use fontdb;
+pub use rustybuzz;
 
 /// A value borrowed together with an [`FontSystem`]
 pub struct BorrowedWithFontSystem<'a, T> {
