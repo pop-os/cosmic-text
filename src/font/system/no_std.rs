@@ -28,11 +28,8 @@ impl FontSystem {
         Self { locale, db }
     }
 
-    pub fn new_with_locale_and_db(locale: &str, db: fontdb::Database) -> Self {
-        Self {
-            locale: locale.to_string(),
-            db,
-        }
+    pub fn new_with_locale_and_db(locale: String, db: fontdb::Database) -> Self {
+        Self { locale, db }
     }
 
     pub fn locale(&self) -> &str {

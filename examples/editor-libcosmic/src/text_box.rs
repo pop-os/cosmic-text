@@ -10,7 +10,7 @@ use cosmic::{
         mouse::{self, Button, Event as MouseEvent, ScrollDelta},
         renderer,
         widget::{self, tree, Widget},
-        Padding, {Color, Element, Length, Point, Rectangle, Shell, Size},
+        Color, Element, Length, Padding, Point, Rectangle, Shell, Size,
     },
     theme::{Theme, ThemeType},
 };
@@ -227,7 +227,9 @@ where
 
         // Scale metrics
         let metrics = editor.buffer().metrics();
-        editor.buffer_mut().set_metrics(metrics.scale(style.scale_factor as f32));
+        editor
+            .buffer_mut()
+            .set_metrics(metrics.scale(style.scale_factor as f32));
 
         // Set size
         editor.buffer_mut().set_size(image_w as f32, image_h as f32);
