@@ -93,7 +93,6 @@ pub struct Attrs<'a> {
     //TODO: should this be an option?
     pub color_opt: Option<Color>,
     pub family: Family<'a>,
-    pub monospaced: bool,
     pub stretch: Stretch,
     pub style: Style,
     pub weight: Weight,
@@ -108,7 +107,6 @@ impl<'a> Attrs<'a> {
         Self {
             color_opt: None,
             family: Family::SansSerif,
-            monospaced: false,
             stretch: Stretch::Normal,
             style: Style::Normal,
             weight: Weight::NORMAL,
@@ -125,12 +123,6 @@ impl<'a> Attrs<'a> {
     /// Set [Family]
     pub fn family(mut self, family: Family<'a>) -> Self {
         self.family = family;
-        self
-    }
-
-    /// Set monospaced
-    pub fn monospaced(mut self, monospaced: bool) -> Self {
-        self.monospaced = monospaced;
         self
     }
 
@@ -164,14 +156,12 @@ impl<'a> Attrs<'a> {
         face.post_script_name.contains("Emoji")
             || (face.style == self.style
                 && face.weight == self.weight
-                && face.stretch == self.stretch
-                && face.monospaced == self.monospaced)
+                && face.stretch == self.stretch)
     }
 
     /// Check if this set of attributes can be shaped with another
     pub fn compatible(&self, other: &Self) -> bool {
         self.family == other.family
-            && self.monospaced == other.monospaced
             && self.stretch == other.stretch
             && self.style == other.style
             && self.weight == other.weight
@@ -184,7 +174,6 @@ pub struct AttrsOwned {
     //TODO: should this be an option?
     pub color_opt: Option<Color>,
     pub family_owned: FamilyOwned,
-    pub monospaced: bool,
     pub stretch: Stretch,
     pub style: Style,
     pub weight: Weight,
@@ -196,7 +185,6 @@ impl AttrsOwned {
         Self {
             color_opt: attrs.color_opt,
             family_owned: FamilyOwned::new(attrs.family),
-            monospaced: attrs.monospaced,
             stretch: attrs.stretch,
             style: attrs.style,
             weight: attrs.weight,
@@ -208,7 +196,6 @@ impl AttrsOwned {
         Attrs {
             color_opt: self.color_opt,
             family: self.family_owned.as_family(),
-            monospaced: self.monospaced,
             stretch: self.stretch,
             style: self.style,
             weight: self.weight,

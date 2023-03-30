@@ -227,7 +227,9 @@ where
 
         // Scale metrics
         let metrics = editor.buffer().metrics();
-        editor.buffer_mut().set_metrics(metrics.scale(style.scale_factor as f32));
+        editor
+            .buffer_mut()
+            .set_metrics(metrics.scale(style.scale_factor as f32));
 
         // Set size
         editor.buffer_mut().set_size(image_w as f32, image_h as f32);

@@ -131,9 +131,7 @@ impl Application for Window {
     type Theme = Theme;
 
     fn new(_flags: ()) -> (Self, Command<Self::Message>) {
-        let attrs = cosmic_text::Attrs::new()
-            .monospaced(true)
-            .family(cosmic_text::Family::Monospace);
+        let attrs = cosmic_text::Attrs::new().family(cosmic_text::Family::Monospace);
 
         let mut editor = SyntaxEditor::new(
             Buffer::new(
@@ -225,14 +223,11 @@ impl Application for Window {
                 update_attrs(&mut *editor, self.attrs);
             }
             Message::Monospaced(monospaced) => {
-                self.attrs = self
-                    .attrs
-                    .family(if monospaced {
-                        cosmic_text::Family::Monospace
-                    } else {
-                        cosmic_text::Family::SansSerif
-                    })
-                    .monospaced(monospaced);
+                self.attrs = self.attrs.family(if monospaced {
+                    cosmic_text::Family::Monospace
+                } else {
+                    cosmic_text::Family::SansSerif
+                });
 
                 let mut editor = self.editor.lock().unwrap();
                 update_attrs(&mut *editor, self.attrs);
@@ -331,7 +326,11 @@ impl Application for Window {
                     Message::Italic
                 ),
                 text("Monospaced:"),
-                toggler(None, self.attrs.monospaced, Message::Monospaced),
+                toggler(
+                    None,
+                    self.attrs.family == cosmic_text::Family::Monospace,
+                    Message::Monospaced
+                ),
                 text("Theme:"),
                 theme_picker,
                 text("Font Size:"),

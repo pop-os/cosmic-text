@@ -49,7 +49,7 @@ fn main() {
 
     let attrs = Attrs::new();
     let serif_attrs = attrs.family(Family::Serif);
-    let mono_attrs = attrs.monospaced(true).family(Family::Monospace);
+    let mono_attrs = attrs.family(Family::Monospace);
     let comic_attrs = attrs.family(Family::Name("Comic Neue"));
 
     editor.buffer_mut().lines.clear();
