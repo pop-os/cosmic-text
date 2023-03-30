@@ -243,6 +243,9 @@ deny = [
 
 # Certain crates/versions that will be skipped when doing duplicate detection.
 skip = [
+    # TODO: We allow syn 1.0 during the transition to syn 2.0. Remove this when
+    # syn is not in the dependency tree anymore.
+    { name = "syn", version = "1" }
     #{ name = "ansi_term", version = "=0.11.0" },
 ]
 # Similarly to `skip` allows you to skip certain crates during duplicate
