@@ -10,7 +10,7 @@ use cosmic::{
         mouse::{self, Button, Event as MouseEvent, ScrollDelta},
         renderer,
         widget::{self, tree, Widget},
-        Padding, {Color, Element, Length, Point, Rectangle, Shell, Size},
+        Color, Element, Length, Padding, Point, Rectangle, Shell, Size,
     },
     theme::{Theme, ThemeType},
 };
