@@ -245,6 +245,7 @@ impl Edit for Editor {
                     .strip_suffix(char::is_control)
                     .unwrap_or(data_line),
                 these_attrs,
+                false,
             ));
         } else {
             panic!("str::lines() did not yield any elements");
@@ -256,6 +257,7 @@ impl Edit for Editor {
                     .strip_suffix(char::is_control)
                     .unwrap_or(data_line),
                 final_attrs.split_off(remaining_split_len),
+                false,
             );
             tmp.append(after);
             self.buffer.lines.insert(insert_line, tmp);
@@ -270,6 +272,7 @@ impl Edit for Editor {
                     .strip_suffix(char::is_control)
                     .unwrap_or(data_line),
                 final_attrs.split_off(remaining_split_len),
+                false,
             );
             self.buffer.lines.insert(insert_line, tmp);
             self.cursor.line += 1;

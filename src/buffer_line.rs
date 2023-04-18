@@ -12,13 +12,14 @@ pub struct BufferLine {
     align: Option<Align>,
     shape_opt: Option<ShapeLine>,
     layout_opt: Option<Vec<LayoutLine>>,
+    skip_shaping: bool,
 }
 
 impl BufferLine {
     /// Create a new line with the given text and attributes list
     /// Cached shaping and layout can be done using the [`Self::shape`] and
     /// [`Self::layout`] functions
-    pub fn new<T: Into<String>>(text: T, attrs_list: AttrsList) -> Self {
+    pub fn new<T: Into<String>>(text: T, attrs_list: AttrsList, skip_shaping: bool) -> Self {
         Self {
             text: text.into(),
             attrs_list,
@@ -26,6 +27,7 @@ impl BufferLine {
             align: None,
             shape_opt: None,
             layout_opt: None,
+            skip_shaping,
         }
     }
 
@@ -142,7 +144,7 @@ impl BufferLine {
         let attrs_list = self.attrs_list.split_off(index);
         self.reset();
 
-        let mut new = Self::new(text, attrs_list);
+        let mut new = Self::new(text, attrs_list, self.skip_shaping);
         new.wrap = self.wrap;
         new
     }
@@ -167,7 +169,12 @@ impl BufferLine {
     /// Shape line, will cache results
     pub fn shape(&mut self, font_system: &mut FontSystem) -> &ShapeLine {
         if self.shape_opt.is_none() {
-            self.shape_opt = Some(ShapeLine::new(font_system, &self.text, &self.attrs_list));
+            self.shape_opt = Some(ShapeLine::new(
+                font_system,
+                &self.text,
+                &self.attrs_list,
+                self.skip_shaping,
+            ));
             self.layout_opt = None;
         }
         self.shape_opt.as_ref().expect("shape not found")

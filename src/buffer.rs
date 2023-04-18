@@ -331,7 +331,7 @@ impl Buffer {
             redraw: false,
             wrap: Wrap::Word,
         };
-        buffer.set_text(font_system, "", Attrs::new());
+        buffer.set_text(font_system, "", Attrs::new(), true);
         buffer
     }
 
@@ -562,16 +562,28 @@ impl Buffer {
     }
 
     /// Set text of buffer, using provided attributes for each line by default
-    pub fn set_text(&mut self, font_system: &mut FontSystem, text: &str, attrs: Attrs) {
+    pub fn set_text(
+        &mut self,
+        font_system: &mut FontSystem,
+        text: &str,
+        attrs: Attrs,
+        skip_shaping: bool,
+    ) {
         self.lines.clear();
         for line in text.lines() {
-            self.lines
-                .push(BufferLine::new(line.to_string(), AttrsList::new(attrs)));
+            self.lines.push(BufferLine::new(
+                line.to_string(),
+                AttrsList::new(attrs),
+                skip_shaping,
+            ));
         }
         // Make sure there is always one line
         if self.lines.is_empty() {
-            self.lines
-                .push(BufferLine::new(String::new(), AttrsList::new(attrs)));
+            self.lines.push(BufferLine::new(
+                String::new(),
+                AttrsList::new(attrs),
+                skip_shaping,
+            ));
         }
 
         self.scroll = 0;
@@ -769,8 +781,9 @@ impl<'a> BorrowedWithFontSystem<'a, Buffer> {
     }
 
     /// Set text of buffer, using provided attributes for each line by default
-    pub fn set_text(&mut self, text: &str, attrs: Attrs) {
-        self.inner.set_text(self.font_system, text, attrs);
+    pub fn set_text(&mut self, text: &str, attrs: Attrs, skip_shaping: bool) {
+        self.inner
+            .set_text(self.font_system, text, attrs, skip_shaping);
     }
 
     /// Draw the buffer

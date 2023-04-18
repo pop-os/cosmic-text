@@ -213,6 +213,49 @@ fn shape_run(
     glyphs
 }
 
+fn shape_skip(
+    font_system: &mut FontSystem,
+    line: &str,
+    attrs_list: &AttrsList,
+    start_run: usize,
+    end_run: usize,
+) -> Vec<ShapeGlyph> {
+    let attrs = attrs_list.get_span(start_run);
+    let fonts = font_system.get_font_matches(attrs);
+
+    let default_families = [&attrs.family];
+    let mut font_iter = FontFallbackIter::new(font_system, &fonts, &default_families, vec![]);
+
+    let font = font_iter.next().expect("no default font found");
+    let font_id = font.id();
+    let font = font.as_swash();
+
+    let charmap = font.charmap();
+    let glyph_metrics = font.glyph_metrics(&[]).scale(1.0);
+
+    line[start_run..end_run]
+        .chars()
+        .enumerate()
+        .map(|(i, codepoint)| {
+            let glyph_id = charmap.map(codepoint);
+            let x_advance = glyph_metrics.advance_width(glyph_id);
+
+            ShapeGlyph {
+                start: i,
+                end: i + 1,
+                x_advance,
+                y_advance: 0.0,
+                x_offset: 0.0,
+                y_offset: 0.0,
+                font_id,
+                glyph_id,
+                color_opt: attrs.color_opt,
+                metadata: attrs.metadata,
+            }
+        })
+        .collect()
+}
+
 /// A shaped glyph
 pub struct ShapeGlyph {
     pub start: usize,
@@ -278,6 +321,7 @@ impl ShapeWord {
         word_range: Range<usize>,
         level: unicode_bidi::Level,
         blank: bool,
+        skip_shaping: bool,
     ) -> Self {
         let word = &line[word_range.clone()];
 
@@ -297,14 +341,24 @@ impl ShapeWord {
             let attrs_egc = attrs_list.get_span(start_egc);
             if !attrs.compatible(&attrs_egc) {
                 //TODO: more efficient
-                glyphs.append(&mut shape_run(
-                    font_system,
-                    line,
-                    attrs_list,
-                    start_run,
-                    start_egc,
-                    span_rtl,
-                ));
+                if skip_shaping {
+                    glyphs.append(&mut shape_skip(
+                        font_system,
+                        line,
+                        attrs_list,
+                        start_run,
+                        start_egc,
+                    ));
+                } else {
+                    glyphs.append(&mut shape_run(
+                        font_system,
+                        line,
+                        attrs_list,
+                        start_run,
+                        start_egc,
+                        span_rtl,
+                    ));
+                };
 
                 start_run = start_egc;
                 attrs = attrs_egc;
@@ -312,14 +366,24 @@ impl ShapeWord {
         }
         if start_run < word_range.end {
             //TODO: more efficient
-            glyphs.append(&mut shape_run(
-                font_system,
-                line,
-                attrs_list,
-                start_run,
-                word_range.end,
-                span_rtl,
-            ));
+            if skip_shaping {
+                glyphs.append(&mut shape_skip(
+                    font_system,
+                    line,
+                    attrs_list,
+                    start_run,
+                    word_range.end,
+                ));
+            } else {
+                glyphs.append(&mut shape_run(
+                    font_system,
+                    line,
+                    attrs_list,
+                    start_run,
+                    word_range.end,
+                    span_rtl,
+                ));
+            }
         }
 
         let mut x_advance = 0.0;
@@ -352,6 +416,7 @@ impl ShapeSpan {
         span_range: Range<usize>,
         line_rtl: bool,
         level: unicode_bidi::Level,
+        skip_shaping: bool,
     ) -> Self {
         let span = &line[span_range.start..span_range.end];
 
@@ -382,6 +447,7 @@ impl ShapeSpan {
                     (span_range.start + start_word)..(span_range.start + start_lb),
                     level,
                     false,
+                    skip_shaping,
                 ));
             }
             if start_lb < end_lb {
@@ -395,6 +461,7 @@ impl ShapeSpan {
                             ..(span_range.start + start_lb + i + c.len_utf8()),
                         level,
                         true,
+                        skip_shaping,
                     ));
                 }
             }
@@ -437,7 +504,12 @@ impl ShapeLine {
     /// # Panics
     ///
     /// Will panic if `line` contains more than one paragraph.
-    pub fn new(font_system: &mut FontSystem, line: &str, attrs_list: &AttrsList) -> Self {
+    pub fn new(
+        font_system: &mut FontSystem,
+        line: &str,
+        attrs_list: &AttrsList,
+        skip_shaping: bool,
+    ) -> Self {
         let mut spans = Vec::new();
 
         let bidi = unicode_bidi::BidiInfo::new(line, None);
@@ -473,6 +545,7 @@ impl ShapeLine {
                         start..i,
                         line_rtl,
                         run_level,
+                        skip_shaping,
                     ));
                     start = i;
                     run_level = new_level;
@@ -485,6 +558,7 @@ impl ShapeLine {
                 start..line_range.end,
                 line_rtl,
                 run_level,
+                skip_shaping,
             ));
             line_rtl
         };
