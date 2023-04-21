@@ -1,7 +1,7 @@
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, vec::Vec};
 
-use crate::{Align, AttrsList, FontSystem, LayoutLine, ShapeLine, Wrap};
+use crate::{Align, AttrsList, FontSystem, LayoutLine, ShapeLine, Shaping, Wrap};
 
 /// A line (or paragraph) of text that is shaped and laid out
 pub struct BufferLine {
@@ -12,14 +12,14 @@ pub struct BufferLine {
     align: Option<Align>,
     shape_opt: Option<ShapeLine>,
     layout_opt: Option<Vec<LayoutLine>>,
-    skip_shaping: bool,
+    shaping: Shaping,
 }
 
 impl BufferLine {
     /// Create a new line with the given text and attributes list
     /// Cached shaping and layout can be done using the [`Self::shape`] and
     /// [`Self::layout`] functions
-    pub fn new<T: Into<String>>(text: T, attrs_list: AttrsList, skip_shaping: bool) -> Self {
+    pub fn new<T: Into<String>>(text: T, attrs_list: AttrsList, shaping: Shaping) -> Self {
         Self {
             text: text.into(),
             attrs_list,
@@ -27,7 +27,7 @@ impl BufferLine {
             align: None,
             shape_opt: None,
             layout_opt: None,
-            skip_shaping,
+            shaping,
         }
     }
 
@@ -144,7 +144,7 @@ impl BufferLine {
         let attrs_list = self.attrs_list.split_off(index);
         self.reset();
 
-        let mut new = Self::new(text, attrs_list, self.skip_shaping);
+        let mut new = Self::new(text, attrs_list, self.shaping);
         new.wrap = self.wrap;
         new
     }
@@ -173,7 +173,7 @@ impl BufferLine {
                 font_system,
                 &self.text,
                 &self.attrs_list,
-                self.skip_shaping,
+                self.shaping,
             ));
             self.layout_opt = None;
         }

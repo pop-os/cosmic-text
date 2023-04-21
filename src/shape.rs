@@ -11,6 +11,31 @@ use unicode_segmentation::UnicodeSegmentation;
 use crate::fallback::FontFallbackIter;
 use crate::{Align, AttrsList, CacheKey, Color, Font, FontSystem, LayoutGlyph, LayoutLine, Wrap};
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Shaping {
+    Basic,
+    Advanced,
+}
+
+impl Shaping {
+    fn run(
+        self,
+        font_system: &mut FontSystem,
+        line: &str,
+        attrs_list: &AttrsList,
+        start_run: usize,
+        end_run: usize,
+        span_rtl: bool,
+    ) -> Vec<ShapeGlyph> {
+        match self {
+            Self::Basic => shape_skip(font_system, line, attrs_list, start_run, end_run),
+            Self::Advanced => {
+                shape_run(font_system, line, attrs_list, start_run, end_run, span_rtl)
+            }
+        }
+    }
+}
+
 fn shape_fallback(
     font: &Font,
     line: &str,
@@ -321,7 +346,7 @@ impl ShapeWord {
         word_range: Range<usize>,
         level: unicode_bidi::Level,
         blank: bool,
-        skip_shaping: bool,
+        shaping: Shaping,
     ) -> Self {
         let word = &line[word_range.clone()];
 
@@ -341,24 +366,14 @@ impl ShapeWord {
             let attrs_egc = attrs_list.get_span(start_egc);
             if !attrs.compatible(&attrs_egc) {
                 //TODO: more efficient
-                if skip_shaping {
-                    glyphs.append(&mut shape_skip(
-                        font_system,
-                        line,
-                        attrs_list,
-                        start_run,
-                        start_egc,
-                    ));
-                } else {
-                    glyphs.append(&mut shape_run(
-                        font_system,
-                        line,
-                        attrs_list,
-                        start_run,
-                        start_egc,
-                        span_rtl,
-                    ));
-                };
+                glyphs.append(&mut shaping.run(
+                    font_system,
+                    line,
+                    attrs_list,
+                    start_run,
+                    start_egc,
+                    span_rtl,
+                ));
 
                 start_run = start_egc;
                 attrs = attrs_egc;
@@ -366,24 +381,14 @@ impl ShapeWord {
         }
         if start_run < word_range.end {
             //TODO: more efficient
-            if skip_shaping {
-                glyphs.append(&mut shape_skip(
-                    font_system,
-                    line,
-                    attrs_list,
-                    start_run,
-                    word_range.end,
-                ));
-            } else {
-                glyphs.append(&mut shape_run(
-                    font_system,
-                    line,
-                    attrs_list,
-                    start_run,
-                    word_range.end,
-                    span_rtl,
-                ));
-            }
+            glyphs.append(&mut shaping.run(
+                font_system,
+                line,
+                attrs_list,
+                start_run,
+                word_range.end,
+                span_rtl,
+            ));
         }
 
         let mut x_advance = 0.0;
@@ -416,7 +421,7 @@ impl ShapeSpan {
         span_range: Range<usize>,
         line_rtl: bool,
         level: unicode_bidi::Level,
-        skip_shaping: bool,
+        shaping: Shaping,
     ) -> Self {
         let span = &line[span_range.start..span_range.end];
 
@@ -447,7 +452,7 @@ impl ShapeSpan {
                     (span_range.start + start_word)..(span_range.start + start_lb),
                     level,
                     false,
-                    skip_shaping,
+                    shaping,
                 ));
             }
             if start_lb < end_lb {
@@ -461,7 +466,7 @@ impl ShapeSpan {
                             ..(span_range.start + start_lb + i + c.len_utf8()),
                         level,
                         true,
-                        skip_shaping,
+                        shaping,
                     ));
                 }
             }
@@ -508,7 +513,7 @@ impl ShapeLine {
         font_system: &mut FontSystem,
         line: &str,
         attrs_list: &AttrsList,
-        skip_shaping: bool,
+        shaping: Shaping,
     ) -> Self {
         let mut spans = Vec::new();
 
@@ -545,7 +550,7 @@ impl ShapeLine {
                         start..i,
                         line_rtl,
                         run_level,
-                        skip_shaping,
+                        shaping,
                     ));
                     start = i;
                     run_level = new_level;
@@ -558,7 +563,7 @@ impl ShapeLine {
                 start..line_range.end,
                 line_rtl,
                 run_level,
-                skip_shaping,
+                shaping,
             ));
             line_rtl
         };

@@ -12,6 +12,7 @@ use unicode_segmentation::UnicodeSegmentation;
 use crate::Color;
 use crate::{
     Action, Affinity, AttrsList, Buffer, BufferLine, Cursor, Edit, FontSystem, LayoutCursor,
+    Shaping,
 };
 
 /// A wrapper of [`Buffer`] for easy editing
@@ -245,7 +246,7 @@ impl Edit for Editor {
                     .strip_suffix(char::is_control)
                     .unwrap_or(data_line),
                 these_attrs,
-                false,
+                Shaping::Advanced,
             ));
         } else {
             panic!("str::lines() did not yield any elements");
@@ -257,7 +258,7 @@ impl Edit for Editor {
                     .strip_suffix(char::is_control)
                     .unwrap_or(data_line),
                 final_attrs.split_off(remaining_split_len),
-                false,
+                Shaping::Advanced,
             );
             tmp.append(after);
             self.buffer.lines.insert(insert_line, tmp);
@@ -272,7 +273,7 @@ impl Edit for Editor {
                     .strip_suffix(char::is_control)
                     .unwrap_or(data_line),
                 final_attrs.split_off(remaining_split_len),
-                false,
+                Shaping::Advanced,
             );
             self.buffer.lines.insert(insert_line, tmp);
             self.cursor.line += 1;
