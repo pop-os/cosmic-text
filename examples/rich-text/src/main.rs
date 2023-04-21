@@ -2,7 +2,7 @@
 
 use cosmic_text::{
     Action, Attrs, AttrsList, Buffer, BufferLine, Color, Edit, Editor, Family, FontSystem, Metrics,
-    Style, SwashCache, Weight,
+    Shaping, Style, SwashCache, Weight,
 };
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{
@@ -143,7 +143,7 @@ fn main() {
         editor
             .buffer_mut()
             .lines
-            .push(BufferLine::new(line_text, attrs_list));
+            .push(BufferLine::new(line_text, attrs_list, Shaping::Advanced));
     }
 
     let mut swash_cache = SwashCache::new();
