@@ -331,7 +331,7 @@ impl Buffer {
             redraw: false,
             wrap: Wrap::Word,
         };
-        buffer.set_text(font_system, "", Attrs::new(), Shaping::Basic);
+        buffer.set_text(font_system, "", Attrs::new(), Shaping::Advanced);
         buffer
     }
 

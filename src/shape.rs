@@ -21,6 +21,7 @@ pub enum Shaping {
     ///
     /// You should use this strategy when you have complete control of the text
     /// and the font you are displaying in your application.
+    #[cfg(feature = "swash")]
     Basic,
     /// Advanced text shaping and font fallback.
     ///
@@ -41,6 +42,7 @@ impl Shaping {
         span_rtl: bool,
     ) -> Vec<ShapeGlyph> {
         match self {
+            #[cfg(feature = "swash")]
             Self::Basic => shape_skip(font_system, line, attrs_list, start_run, end_run),
             Self::Advanced => {
                 shape_run(font_system, line, attrs_list, start_run, end_run, span_rtl)
@@ -251,6 +253,7 @@ fn shape_run(
     glyphs
 }
 
+#[cfg(feature = "swash")]
 fn shape_skip(
     font_system: &mut FontSystem,
     line: &str,
