@@ -265,7 +265,7 @@ fn shape_skip(
     let fonts = font_system.get_font_matches(attrs);
 
     let default_families = [&attrs.family];
-    let mut font_iter = FontFallbackIter::new(font_system, &fonts, &default_families, vec![]);
+    let mut font_iter = FontFallbackIter::new(font_system, &fonts, &default_families, Vec::new());
 
     let font = font_iter.next().expect("no default font found");
     let font_id = font.id();
