@@ -95,6 +95,9 @@ extern crate alloc;
 pub use self::attrs::*;
 mod attrs;
 
+pub use self::bidi_para::*;
+mod bidi_para;
+
 pub use self::buffer::*;
 mod buffer;
 
