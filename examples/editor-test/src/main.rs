@@ -84,7 +84,6 @@ fn main() {
 
     let test_start = Instant::now();
 
-    //TODO: support bidi
     for line in BidiParagraphs::new(&text) {
         log::debug!("Line {:?}", line);
 
