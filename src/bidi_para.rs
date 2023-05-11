@@ -6,7 +6,7 @@ use unicode_bidi::{bidi_class, BidiClass, BidiInfo, ParagraphInfo};
 /// It is equivalent to [`core::str::Lines`] but follows `unicode-bidi` behaviour.
 pub struct BidiParagraphs<'text> {
     text: &'text str,
-    info: std::vec::IntoIter<ParagraphInfo>,
+    info: alloc::vec::IntoIter<ParagraphInfo>,
 }
 
 impl<'text> BidiParagraphs<'text> {
