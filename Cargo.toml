@@ -9,7 +9,7 @@ documentation = "https://docs.rs/cosmic-text/latest/cosmic_text/"
 repository = "https://github.com/pop-os/cosmic-text"
 
 [dependencies]
-fontdb = { version = "0.13.0", default-features = false }
+fontdb = { version = "0.14.1", default-features = false }
 libm = "0.2.6"
 log = "0.4.17"
 ouroboros = { version = "0.15.5", default-features = false }
