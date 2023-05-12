@@ -354,17 +354,7 @@ impl Buffer {
     ///
     /// Will panic if `metrics.line_height` is zero.
     pub fn new(font_system: &mut FontSystem, metrics: Metrics) -> Self {
-        assert_ne!(metrics.line_height, 0.0, "line height cannot be 0");
-
-        let mut buffer = Self {
-            lines: Vec::new(),
-            metrics,
-            width: 0.0,
-            height: 0.0,
-            scroll: 0,
-            redraw: false,
-            wrap: Wrap::Word,
-        };
+        let mut buffer = Self::new_empty(metrics);
         buffer.set_text(font_system, "", Attrs::new(), Shaping::Advanced);
         buffer
     }
