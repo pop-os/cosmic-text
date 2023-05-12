@@ -324,6 +324,30 @@ pub struct Buffer {
 }
 
 impl Buffer {
+    /// Create an empty [`Buffer`] with the provided [`Metrics`].
+    /// This is useful for initializing a [`Buffer`] without a [`FontSystem`].
+    ///
+    /// You must populate the [`Buffer`] with at least one [`BufferLine`] before shaping and layout,
+    /// for example by calling [`Buffer::set_text`].
+    ///
+    /// If you have a [`FontSystem`] in scope, you should use [`Buffer::new`] instead.
+    ///
+    /// # Panics
+    ///
+    /// Will panic if `metrics.line_height` is zero.
+    pub fn new_empty(metrics: Metrics) -> Self {
+        assert_ne!(metrics.line_height, 0.0, "line height cannot be 0");
+        Self {
+            lines: Vec::new(),
+            metrics,
+            width: 0.0,
+            height: 0.0,
+            scroll: 0,
+            redraw: false,
+            wrap: Wrap::Word,
+        }
+    }
+
     /// Create a new [`Buffer`] with the provided [`FontSystem`] and [`Metrics`]
     ///
     /// # Panics
