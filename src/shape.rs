@@ -663,9 +663,23 @@ impl ShapeLine {
 
         if wrap == Wrap::None {
             for (span_index, span) in self.spans.iter().enumerate() {
-                current_visual_line
-                    .ranges
-                    .push((span_index, (0, 0), (span.words.len(), 0)));
+                let mut word_range_width = 0.;
+                let mut number_of_blanks: u32 = 0;
+                for word in span.words.iter() {
+                    let word_width = font_size * word.x_advance;
+                    word_range_width += word_width;
+                    if word.blank {
+                        number_of_blanks += 1;
+                    }
+                }
+                add_to_visual_line(
+                    &mut current_visual_line,
+                    span_index,
+                    (0, 0),
+                    (span.words.len(), 0),
+                    word_range_width,
+                    number_of_blanks,
+                );
             }
         } else {
             let mut fit_x = line_width;
