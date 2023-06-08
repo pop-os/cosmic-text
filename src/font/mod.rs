@@ -1,31 +1,103 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pub(crate) mod fallback;
 
+use alloc::boxed::Box;
 use alloc::sync::Arc;
 
 pub use self::system::*;
 mod system;
 
-/// A font
-pub struct Font(FontInner);
+pub use font_inner::Font;
 
-#[ouroboros::self_referencing]
-#[allow(dead_code)]
-struct FontInner {
-    id: fontdb::ID,
-    data: Arc<dyn AsRef<[u8]> + Send + Sync>,
-    #[borrows(data)]
-    #[covariant]
-    rustybuzz: rustybuzz::Face<'this>,
-    // workaround, since ouroboros does not work with #[cfg(feature = "swash")]
-    swash: SwashKey,
+/// Encapsulates the self-referencing `Font` struct to ensure all field accesses have to go through
+/// safe methods.
+mod font_inner {
+    use super::*;
+    use aliasable::boxed::AliasableBox;
+
+    /// A font
+    //
+    // # Safety invariant
+    //
+    // `data` must never have a mutable reference taken, nor be modified during the lifetime of
+    // this `Font`.
+    pub struct Font {
+        #[cfg(feature = "swash")]
+        swash: (u32, swash::CacheKey),
+        rustybuzz: rustybuzz::Face<'static>,
+        // Note: This field must be after rustybuzz to ensure that it is dropped later. Otherwise
+        // there would be a dangling reference when dropping rustybuzz.
+        data: aliasable::boxed::AliasableBox<Arc<dyn AsRef<[u8]> + Send + Sync>>,
+        id: fontdb::ID,
+    }
+
+    pub(super) struct FontTryBuilder<
+        RustybuzzBuilder: for<'this> FnOnce(
+            &'this Arc<dyn AsRef<[u8]> + Send + Sync>,
+        ) -> Option<rustybuzz::Face<'this>>,
+    > {
+        pub(super) id: fontdb::ID,
+        pub(super) data: Arc<dyn AsRef<[u8]> + Send + Sync>,
+        pub(super) rustybuzz_builder: RustybuzzBuilder,
+        #[cfg(feature = "swash")]
+        pub(super) swash: (u32, swash::CacheKey),
+    }
+    impl<
+            RustybuzzBuilder: for<'this> FnOnce(
+                &'this Arc<dyn AsRef<[u8]> + Send + Sync>,
+            ) -> Option<rustybuzz::Face<'this>>,
+        > FontTryBuilder<RustybuzzBuilder>
+    {
+        pub(super) fn try_build(self) -> Option<Font> {
+            unsafe fn change_lifetime<'old, 'new: 'old, T: 'new>(data: &'old T) -> &'new T {
+                &*(data as *const _)
+            }
+
+            let data: AliasableBox<Arc<dyn AsRef<[u8]> + Send + Sync>> =
+                AliasableBox::from_unique(Box::new(self.data));
+
+            // Safety: We use AliasableBox to allow the references in rustybuzz::Face to alias with
+            // the data stored behind the AliasableBox. In addition the entire public interface of
+            // Font ensures that no mutable reference is given to data. And finally we use
+            // for<'this> for the rustybuzz_builder to ensure it can't leak a reference. Combined
+            // this ensures that it is sound to produce a self-referential type.
+            let rustybuzz = (self.rustybuzz_builder)(unsafe { change_lifetime(&*data) })?;
+
+            Some(Font {
+                id: self.id,
+                data,
+                rustybuzz,
+                #[cfg(feature = "swash")]
+                swash: self.swash,
+            })
+        }
+    }
+
+    impl Font {
+        pub fn id(&self) -> fontdb::ID {
+            self.id
+        }
+
+        pub fn data(&self) -> &[u8] {
+            // Safety: This only gives an immutable access to `data`.
+            (**self.data).as_ref()
+        }
+
+        pub fn rustybuzz(&self) -> &rustybuzz::Face<'_> {
+            &self.rustybuzz
+        }
+
+        #[cfg(feature = "swash")]
+        pub fn as_swash(&self) -> swash::FontRef<'_> {
+            let swash = &self.swash;
+            swash::FontRef {
+                data: self.data(),
+                offset: swash.0,
+                key: swash.1,
+            }
+        }
+    }
 }
-
-#[cfg(feature = "swash")]
-pub type SwashKey = (u32, swash::CacheKey);
-
-#[cfg(not(feature = "swash"))]
-pub type SwashKey = ();
 
 impl Font {
     pub fn new(info: &fontdb::FaceInfo) -> Option<Self> {
@@ -40,56 +112,16 @@ impl Font {
             #[cfg(feature = "std")]
             fontdb::Source::SharedFile(_path, data) => Arc::clone(data),
         };
-        Some(Self(
-            FontInnerTryBuilder {
-                id: info.id,
-                swash: {
-                    #[cfg(feature = "swash")]
-                    let swash = {
-                        let swash =
-                            swash::FontRef::from_index((*data).as_ref(), info.index as usize)?;
-                        (swash.offset, swash.key)
-                    };
-                    #[cfg(not(feature = "swash"))]
-                    let swash = ();
-                    swash
-                },
-                data,
-                rustybuzz_builder: |data| {
-                    rustybuzz::Face::from_slice((**data).as_ref(), info.index).ok_or(())
-                },
-            }
-            .try_build()
-            .ok()?,
-        ))
-    }
-
-    pub fn id(&self) -> fontdb::ID {
-        *self.0.borrow_id()
-    }
-
-    pub fn data(&self) -> &[u8] {
-        (**self.0.borrow_data()).as_ref()
-    }
-
-    pub fn rustybuzz(&self) -> &rustybuzz::Face {
-        self.0.borrow_rustybuzz()
-    }
-
-    #[cfg(feature = "swash")]
-    pub fn as_swash(&self) -> swash::FontRef {
-        let swash = self.0.borrow_swash();
-        swash::FontRef {
-            data: self.data(),
-            offset: swash.0,
-            key: swash.1,
+        font_inner::FontTryBuilder {
+            id: info.id,
+            #[cfg(feature = "swash")]
+            swash: {
+                let swash = swash::FontRef::from_index((*data).as_ref(), info.index as usize)?;
+                (swash.offset, swash.key)
+            },
+            data,
+            rustybuzz_builder: |data| rustybuzz::Face::from_slice((**data).as_ref(), info.index),
         }
-    }
-
-    // This is used to prevent warnings due to the swash field being unused.
-    #[cfg(not(feature = "swash"))]
-    #[allow(dead_code)]
-    fn as_swash(&self) {
-        self.0.borrow_swash();
+        .try_build()
     }
 }
