@@ -9,7 +9,7 @@ use syntect::parsing::{ParseState, ScopeStack, SyntaxReference, SyntaxSet};
 
 use crate::{
     Action, AttrsList, BorrowedWithFontSystem, Buffer, Color, Cursor, Edit, Editor, FontSystem,
-    Style, Weight, Wrap,
+    Shaping, Style, Weight, Wrap,
 };
 
 pub struct SyntaxSystem {
@@ -75,7 +75,9 @@ impl<'a> SyntaxEditor<'a> {
         let path = path.as_ref();
 
         let text = fs::read_to_string(path)?;
-        self.editor.buffer_mut().set_text(font_system, &text, attrs);
+        self.editor
+            .buffer_mut()
+            .set_text(font_system, &text, attrs, Shaping::Advanced);
 
         //TODO: re-use text
         self.syntax = match self.syntax_system.syntax_set.find_syntax_for_file(path) {

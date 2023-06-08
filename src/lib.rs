@@ -12,7 +12,7 @@
 //! point, you can use the `SwashCache` to rasterize glyphs into either images or pixels.
 //!
 //! ```
-//! use cosmic_text::{Attrs, Color, FontSystem, SwashCache, Buffer, Metrics};
+//! use cosmic_text::{Attrs, Color, FontSystem, SwashCache, Buffer, Metrics, Shaping};
 //!
 //! // A FontSystem provides access to detected system fonts, create one per application
 //! let mut font_system = FontSystem::new();
@@ -36,7 +36,7 @@
 //! let attrs = Attrs::new();
 //!
 //! // Add some text!
-//! buffer.set_text("Hello, Rust! 🦀\n", attrs);
+//! buffer.set_text("Hello, Rust! 🦀\n", attrs, Shaping::Advanced);
 //!
 //! // Perform shaping as desired
 //! buffer.shape_until_scroll();

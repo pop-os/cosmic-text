@@ -12,7 +12,7 @@ use unicode_segmentation::UnicodeSegmentation;
 use crate::Color;
 use crate::{
     Attrs, AttrsList, BorrowedWithFontSystem, BufferLine, FontSystem, LayoutGlyph, LayoutLine,
-    ShapeLine, Wrap,
+    ShapeLine, Shaping, Wrap,
 };
 
 /// Current cursor location
@@ -331,7 +331,7 @@ impl Buffer {
             redraw: false,
             wrap: Wrap::Word,
         };
-        buffer.set_text(font_system, "", Attrs::new());
+        buffer.set_text(font_system, "", Attrs::new(), Shaping::Advanced);
         buffer
     }
 
@@ -562,16 +562,28 @@ impl Buffer {
     }
 
     /// Set text of buffer, using provided attributes for each line by default
-    pub fn set_text(&mut self, font_system: &mut FontSystem, text: &str, attrs: Attrs) {
+    pub fn set_text(
+        &mut self,
+        font_system: &mut FontSystem,
+        text: &str,
+        attrs: Attrs,
+        shaping: Shaping,
+    ) {
         self.lines.clear();
         for line in text.lines() {
-            self.lines
-                .push(BufferLine::new(line.to_string(), AttrsList::new(attrs)));
+            self.lines.push(BufferLine::new(
+                line.to_string(),
+                AttrsList::new(attrs),
+                shaping,
+            ));
         }
         // Make sure there is always one line
         if self.lines.is_empty() {
-            self.lines
-                .push(BufferLine::new(String::new(), AttrsList::new(attrs)));
+            self.lines.push(BufferLine::new(
+                String::new(),
+                AttrsList::new(attrs),
+                shaping,
+            ));
         }
 
         self.scroll = 0;
@@ -769,8 +781,8 @@ impl<'a> BorrowedWithFontSystem<'a, Buffer> {
     }
 
     /// Set text of buffer, using provided attributes for each line by default
-    pub fn set_text(&mut self, text: &str, attrs: Attrs) {
-        self.inner.set_text(self.font_system, text, attrs);
+    pub fn set_text(&mut self, text: &str, attrs: Attrs, shaping: Shaping) {
+        self.inner.set_text(self.font_system, text, attrs, shaping);
     }
 
     /// Draw the buffer

@@ -11,6 +11,46 @@ use unicode_segmentation::UnicodeSegmentation;
 use crate::fallback::FontFallbackIter;
 use crate::{Align, AttrsList, CacheKey, Color, Font, FontSystem, LayoutGlyph, LayoutLine, Wrap};
 
+/// The shaping strategy of some text.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Shaping {
+    /// Basic shaping with no font fallback.
+    ///
+    /// This shaping strategy is very cheap, but it will not display complex
+    /// scripts properly nor try to find missing glyphs in your system fonts.
+    ///
+    /// You should use this strategy when you have complete control of the text
+    /// and the font you are displaying in your application.
+    #[cfg(feature = "swash")]
+    Basic,
+    /// Advanced text shaping and font fallback.
+    ///
+    /// You will need to enable this strategy if the text contains a complex
+    /// script, the font used needs it, and/or multiple fonts in your system
+    /// may be needed to display all of the glyphs.
+    Advanced,
+}
+
+impl Shaping {
+    fn run(
+        self,
+        font_system: &mut FontSystem,
+        line: &str,
+        attrs_list: &AttrsList,
+        start_run: usize,
+        end_run: usize,
+        span_rtl: bool,
+    ) -> Vec<ShapeGlyph> {
+        match self {
+            #[cfg(feature = "swash")]
+            Self::Basic => shape_skip(font_system, line, attrs_list, start_run, end_run),
+            Self::Advanced => {
+                shape_run(font_system, line, attrs_list, start_run, end_run, span_rtl)
+            }
+        }
+    }
+}
+
 fn shape_fallback(
     font: &Font,
     line: &str,
@@ -213,6 +253,50 @@ fn shape_run(
     glyphs
 }
 
+#[cfg(feature = "swash")]
+fn shape_skip(
+    font_system: &mut FontSystem,
+    line: &str,
+    attrs_list: &AttrsList,
+    start_run: usize,
+    end_run: usize,
+) -> Vec<ShapeGlyph> {
+    let attrs = attrs_list.get_span(start_run);
+    let fonts = font_system.get_font_matches(attrs);
+
+    let default_families = [&attrs.family];
+    let mut font_iter = FontFallbackIter::new(font_system, &fonts, &default_families, Vec::new());
+
+    let font = font_iter.next().expect("no default font found");
+    let font_id = font.id();
+    let font = font.as_swash();
+
+    let charmap = font.charmap();
+    let glyph_metrics = font.glyph_metrics(&[]).scale(1.0);
+
+    line[start_run..end_run]
+        .chars()
+        .enumerate()
+        .map(|(i, codepoint)| {
+            let glyph_id = charmap.map(codepoint);
+            let x_advance = glyph_metrics.advance_width(glyph_id);
+
+            ShapeGlyph {
+                start: i,
+                end: i + 1,
+                x_advance,
+                y_advance: 0.0,
+                x_offset: 0.0,
+                y_offset: 0.0,
+                font_id,
+                glyph_id,
+                color_opt: attrs.color_opt,
+                metadata: attrs.metadata,
+            }
+        })
+        .collect()
+}
+
 /// A shaped glyph
 pub struct ShapeGlyph {
     pub start: usize,
@@ -278,6 +362,7 @@ impl ShapeWord {
         word_range: Range<usize>,
         level: unicode_bidi::Level,
         blank: bool,
+        shaping: Shaping,
     ) -> Self {
         let word = &line[word_range.clone()];
 
@@ -297,7 +382,7 @@ impl ShapeWord {
             let attrs_egc = attrs_list.get_span(start_egc);
             if !attrs.compatible(&attrs_egc) {
                 //TODO: more efficient
-                glyphs.append(&mut shape_run(
+                glyphs.append(&mut shaping.run(
                     font_system,
                     line,
                     attrs_list,
@@ -312,7 +397,7 @@ impl ShapeWord {
         }
         if start_run < word_range.end {
             //TODO: more efficient
-            glyphs.append(&mut shape_run(
+            glyphs.append(&mut shaping.run(
                 font_system,
                 line,
                 attrs_list,
@@ -352,6 +437,7 @@ impl ShapeSpan {
         span_range: Range<usize>,
         line_rtl: bool,
         level: unicode_bidi::Level,
+        shaping: Shaping,
     ) -> Self {
         let span = &line[span_range.start..span_range.end];
 
@@ -382,6 +468,7 @@ impl ShapeSpan {
                     (span_range.start + start_word)..(span_range.start + start_lb),
                     level,
                     false,
+                    shaping,
                 ));
             }
             if start_lb < end_lb {
@@ -395,6 +482,7 @@ impl ShapeSpan {
                             ..(span_range.start + start_lb + i + c.len_utf8()),
                         level,
                         true,
+                        shaping,
                     ));
                 }
             }
@@ -437,7 +525,12 @@ impl ShapeLine {
     /// # Panics
     ///
     /// Will panic if `line` contains more than one paragraph.
-    pub fn new(font_system: &mut FontSystem, line: &str, attrs_list: &AttrsList) -> Self {
+    pub fn new(
+        font_system: &mut FontSystem,
+        line: &str,
+        attrs_list: &AttrsList,
+        shaping: Shaping,
+    ) -> Self {
         let mut spans = Vec::new();
 
         let bidi = unicode_bidi::BidiInfo::new(line, None);
@@ -473,6 +566,7 @@ impl ShapeLine {
                         start..i,
                         line_rtl,
                         run_level,
+                        shaping,
                     ));
                     start = i;
                     run_level = new_level;
@@ -485,6 +579,7 @@ impl ShapeLine {
                 start..line_range.end,
                 line_rtl,
                 run_level,
+                shaping,
             ));
             line_rtl
         };
