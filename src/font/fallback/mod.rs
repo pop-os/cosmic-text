@@ -131,7 +131,7 @@ impl<'a> Iterator for FontFallbackIter<'a> {
                     monospace_fallback = Some(id);
                 }
             }
-            // If default family is Monospace allback to first monospaced font
+            // If default family is Monospace fallback to first monospaced font
             if let Some(id) = monospace_fallback {
                 if let Some(font) = self.font_system.get_font(*id) {
                     return Some(font);
