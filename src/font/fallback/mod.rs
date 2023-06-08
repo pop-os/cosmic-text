@@ -112,6 +112,7 @@ impl<'a> Iterator for FontFallbackIter<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         while self.default_i < self.default_families.len() {
             self.default_i += 1;
+            let mut monospace_fallback = None;
             for id in self.font_ids.iter() {
                 let default_family = self
                     .font_system
@@ -121,6 +122,19 @@ impl<'a> Iterator for FontFallbackIter<'a> {
                     if let Some(font) = self.font_system.get_font(*id) {
                         return Some(font);
                     }
+                }
+                // Set a monospace fallback if Monospace family is not found
+                if self.default_families[self.default_i - 1] == &Family::Monospace
+                    && self.font_system.db().face(*id).map(|f| f.monospaced) == Some(true)
+                    && monospace_fallback.is_none()
+                {
+                    monospace_fallback = Some(id);
+                }
+            }
+            // If default family is Monospace fallback to first monospaced font
+            if let Some(id) = monospace_fallback {
+                if let Some(font) = self.font_system.get_font(*id) {
+                    return Some(font);
                 }
             }
         }
