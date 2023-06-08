@@ -8,11 +8,9 @@ use alloc::{
 use core::{cmp, fmt};
 use unicode_segmentation::UnicodeSegmentation;
 
-#[cfg(feature = "swash")]
-use crate::Color;
 use crate::{
-    Attrs, AttrsList, BorrowedWithFontSystem, BufferLine, FontSystem, LayoutGlyph, LayoutLine,
-    ShapeLine, Shaping, Wrap,
+    Attrs, AttrsList, BorrowedWithFontSystem, BufferLine, Color, FontSystem, LayoutGlyph,
+    LayoutLine, ShapeLine, Shaping, Wrap,
 };
 
 /// Current cursor location
@@ -25,6 +23,8 @@ pub struct Cursor {
     /// Whether to associate the cursor with the run before it or the run after it if placed at the
     /// boundary between two runs
     pub affinity: Affinity,
+    /// Cursor color
+    pub color: Option<Color>,
 }
 
 impl Cursor {
@@ -39,6 +39,16 @@ impl Cursor {
             line,
             index,
             affinity,
+            color: None,
+        }
+    }
+    /// Create a new cursor, specifying the color
+    pub const fn new_with_color(line: usize, index: usize, color: Color) -> Self {
+        Self {
+            line,
+            index,
+            affinity: Affinity::Before,
+            color: Some(color),
         }
     }
 }

@@ -36,6 +36,17 @@ impl Editor {
         }
     }
 
+    /// Create a new [`Editor`] with the provided [`Buffer`] and [`Cursor`]
+    pub fn new_with_cursor(buffer: Buffer, cursor: Cursor) -> Self {
+        Self {
+            buffer,
+            cursor,
+            cursor_x_opt: None,
+            select_opt: None,
+            cursor_moved: false,
+        }
+    }
+
     fn set_layout_cursor(&mut self, font_system: &mut FontSystem, cursor: LayoutCursor) {
         let layout = self
             .buffer
@@ -556,7 +567,9 @@ impl Edit for Editor {
 
                 if let Some(new_cursor) = self.buffer.hit(x as f32, y as f32) {
                     if new_cursor != self.cursor {
+                        let color = self.cursor.color;
                         self.cursor = new_cursor;
+                        self.cursor.color = color;
                         self.buffer.set_redraw(true);
                     }
                 }
@@ -569,7 +582,9 @@ impl Edit for Editor {
 
                 if let Some(new_cursor) = self.buffer.hit(x as f32, y as f32) {
                     if new_cursor != self.cursor {
+                        let color = self.cursor.color;
                         self.cursor = new_cursor;
+                        self.cursor.color = color;
                         self.buffer.set_redraw(true);
                     }
                 }
@@ -833,7 +848,13 @@ impl Edit for Editor {
                     },
                 };
 
-                f(x, (line_y - font_size) as i32, 1, line_height as u32, color);
+                f(
+                    x,
+                    (line_y - font_size) as i32,
+                    1,
+                    line_height as u32,
+                    self.cursor.color.unwrap_or(color),
+                );
             }
 
             for glyph in run.glyphs.iter() {
