@@ -73,15 +73,7 @@ yanked = "warn"
 notice = "warn"
 # A list of advisory IDs to ignore. Note that ignored advisories will still
 # output a note when they are encountered.
-ignore = [
-    # = Advisory: https://rustsec.org/advisories/RUSTSEC-2022-0048
-    # = xml-rs is a XML parser has open issues around parsing including integer
-    #     overflows / panics that may or may not be an issue with untrusted data.
-
-    #     Together with these open issues with Unmaintained status xml-rs
-    #     may or may not be suited to parse untrusted data.
-    "RUSTSEC-2022-0048",
-]
+ignore = []
 # Threshold for security vulnerabilities, any vulnerability with a CVSS score
 # lower than the range specified will be ignored. Note that ignored advisories
 # will still output a note when they are encountered.
@@ -111,7 +103,7 @@ allow = [
     "MIT",
     "Apache-2.0",
     "Unicode-DFS-2016",
-    "BSD-2-Clause",
+    #"BSD-2-Clause",
     "Zlib",
     #"Apache-2.0 WITH LLVM-exception",
 ]
