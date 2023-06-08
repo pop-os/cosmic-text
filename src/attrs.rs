@@ -11,7 +11,7 @@ pub use fontdb::{Family, Stretch, Style, Weight};
 use rangemap::RangeMap;
 
 /// Text color
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialOrd, Ord, Eq, Hash, PartialEq)]
 pub struct Color(pub u32);
 
 impl Color {
