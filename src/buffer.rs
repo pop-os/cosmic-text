@@ -9,8 +9,8 @@ use core::{cmp, fmt};
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
-    Attrs, AttrsList, BorrowedWithFontSystem, BufferLine, Color, FontSystem, LayoutGlyph,
-    LayoutLine, ShapeLine, Shaping, Wrap,
+    Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem, BufferLine, Color, FontSystem,
+    LayoutGlyph, LayoutLine, ShapeLine, Shaping, Wrap,
 };
 
 /// Current cursor location
@@ -594,7 +594,7 @@ impl Buffer {
         shaping: Shaping,
     ) {
         self.lines.clear();
-        for line in text.lines() {
+        for line in BidiParagraphs::new(text) {
             self.lines.push(BufferLine::new(
                 line.to_string(),
                 AttrsList::new(attrs),

@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic_text::{
-    Action, BorrowedWithFontSystem, Buffer, Color, Edit, Editor, FontSystem, Metrics, SwashCache,
+    Action, BidiParagraphs, BorrowedWithFontSystem, Buffer, Color, Edit, Editor, FontSystem,
+    Metrics, SwashCache,
 };
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{env, fs, process, time::Instant};
@@ -83,8 +84,7 @@ fn main() {
 
     let test_start = Instant::now();
 
-    //TODO: support bidi
-    for line in text.lines() {
+    for line in BidiParagraphs::new(&text) {
         log::debug!("Line {:?}", line);
 
         for grapheme in line.graphemes(true) {
