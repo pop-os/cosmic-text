@@ -324,15 +324,20 @@ pub struct Buffer {
 }
 
 impl Buffer {
-    /// Create a new [`Buffer`] with the provided [`FontSystem`] and [`Metrics`]
+    /// Create an empty [`Buffer`] with the provided [`Metrics`].
+    /// This is useful for initializing a [`Buffer`] without a [`FontSystem`].
+    ///
+    /// You must populate the [`Buffer`] with at least one [`BufferLine`] before shaping and layout,
+    /// for example by calling [`Buffer::set_text`].
+    ///
+    /// If you have a [`FontSystem`] in scope, you should use [`Buffer::new`] instead.
     ///
     /// # Panics
     ///
     /// Will panic if `metrics.line_height` is zero.
-    pub fn new(font_system: &mut FontSystem, metrics: Metrics) -> Self {
+    pub fn new_empty(metrics: Metrics) -> Self {
         assert_ne!(metrics.line_height, 0.0, "line height cannot be 0");
-
-        let mut buffer = Self {
+        Self {
             lines: Vec::new(),
             metrics,
             width: 0.0,
@@ -340,7 +345,16 @@ impl Buffer {
             scroll: 0,
             redraw: false,
             wrap: Wrap::Word,
-        };
+        }
+    }
+
+    /// Create a new [`Buffer`] with the provided [`FontSystem`] and [`Metrics`]
+    ///
+    /// # Panics
+    ///
+    /// Will panic if `metrics.line_height` is zero.
+    pub fn new(font_system: &mut FontSystem, metrics: Metrics) -> Self {
+        let mut buffer = Self::new_empty(metrics);
         buffer.set_text(font_system, "", Attrs::new(), Shaping::Advanced);
         buffer
     }
