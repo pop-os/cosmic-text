@@ -130,6 +130,10 @@ impl<'a> Edit for SyntaxEditor<'a> {
         self.editor.cursor()
     }
 
+    fn set_cursor(&mut self, cursor: Cursor) {
+        self.editor.set_cursor(cursor);
+    }
+
     fn select_opt(&self) -> Option<Cursor> {
         self.editor.select_opt()
     }

@@ -36,17 +36,6 @@ impl Editor {
         }
     }
 
-    /// Create a new [`Editor`] with the provided [`Buffer`] and [`Cursor`]
-    pub fn new_with_cursor(buffer: Buffer, cursor: Cursor) -> Self {
-        Self {
-            buffer,
-            cursor,
-            cursor_x_opt: None,
-            select_opt: None,
-            cursor_moved: false,
-        }
-    }
-
     fn set_layout_cursor(&mut self, font_system: &mut FontSystem, cursor: LayoutCursor) {
         let layout = self
             .buffer
@@ -93,6 +82,10 @@ impl Edit for Editor {
 
     fn cursor(&self) -> Cursor {
         self.cursor
+    }
+
+    fn set_cursor(&mut self, cursor: Cursor) {
+        self.cursor = cursor;
     }
 
     fn select_opt(&self) -> Option<Cursor> {

@@ -99,8 +99,11 @@ pub trait Edit {
     /// Get the internal [`Buffer`], mutably
     fn buffer_mut(&mut self) -> &mut Buffer;
 
-    /// Get the current cursor position
+    /// Get the current cursor
     fn cursor(&self) -> Cursor;
+
+    /// Set the current cursor
+    fn set_cursor(&mut self, cursor: Cursor);
 
     /// Get the current selection position
     fn select_opt(&self) -> Option<Cursor>;
