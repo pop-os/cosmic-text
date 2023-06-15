@@ -62,6 +62,7 @@ fn shape_fallback(
     let run = &line[start_run..end_run];
 
     let font_scale = font.rustybuzz().units_per_em() as f32;
+    let metrics = font.as_swash().metrics(&[]);
 
     let mut buffer = rustybuzz::UnicodeBuffer::new();
     buffer.set_direction(if span_rtl {
@@ -101,6 +102,8 @@ fn shape_fallback(
             y_advance,
             x_offset,
             y_offset,
+            ascent: metrics.ascent / f32::from(metrics.units_per_em),
+            descent: metrics.descent / f32::from(metrics.units_per_em),
             font_id: font.id(),
             glyph_id: info.glyph_id.try_into().expect("failed to cast glyph ID"),
             //TODO: color should not be related to shaping
@@ -272,6 +275,7 @@ fn shape_skip(
     let font = font.as_swash();
 
     let charmap = font.charmap();
+    let metrics = font.metrics(&[]);
     let glyph_metrics = font.glyph_metrics(&[]).scale(1.0);
 
     line[start_run..end_run]
@@ -288,6 +292,8 @@ fn shape_skip(
                 y_advance: 0.0,
                 x_offset: 0.0,
                 y_offset: 0.0,
+                ascent: metrics.ascent / f32::from(metrics.units_per_em),
+                descent: metrics.descent / f32::from(metrics.units_per_em),
                 font_id,
                 glyph_id,
                 color_opt: attrs.color_opt,
@@ -305,6 +311,8 @@ pub struct ShapeGlyph {
     pub y_advance: f32,
     pub x_offset: f32,
     pub y_offset: f32,
+    pub ascent: f32,
+    pub descent: f32,
     pub font_id: fontdb::ID,
     pub glyph_id: u16,
     pub color_opt: Option<Color>,
@@ -749,6 +757,8 @@ impl ShapeLine {
         let start_x = if self.rtl { line_width } else { 0.0 };
         let mut x;
         let mut y;
+        let mut max_ascent: f32 = 0.;
+        let mut max_descent: f32 = 0.;
 
         // This would keep the maximum number of spans that would fit on a visual line
         // If one span is too large, this variable will hold the range of words inside that span
@@ -987,6 +997,8 @@ impl ShapeLine {
             let mut glyphs = Vec::with_capacity(1);
             x = start_x;
             y = 0.;
+            max_ascent = 0.;
+            max_descent = 0.;
             let alignment_correction = match (align, self.rtl) {
                 (Align::Left, true) => line_width - visual_line.w,
                 (Align::Left, false) => 0.,
@@ -1037,6 +1049,8 @@ impl ShapeLine {
                                         .push(glyph.layout(font_size, x, y, x_advance, span.level));
                                 }
                                 y += y_advance;
+                                max_ascent = max_ascent.max(glyph.ascent);
+                                max_descent = max_descent.max(glyph.descent);
                             }
                         } else {
                             for i in *starting_word..*ending_word + 1 {
@@ -1070,6 +1084,8 @@ impl ShapeLine {
                                                 ));
                                         }
                                         y += y_advance;
+                                        max_ascent = max_ascent.max(glyph.ascent);
+                                        max_descent = max_descent.max(glyph.descent);
                                     }
                                 }
                             }
@@ -1112,6 +1128,8 @@ impl ShapeLine {
                                 }
                                 x += x_advance;
                                 y += y_advance;
+                                max_ascent = max_ascent.max(glyph.ascent);
+                                max_descent = max_descent.max(glyph.descent);
                             }
                         } else {
                             for i in *starting_word..*ending_word + 1 {
@@ -1145,6 +1163,8 @@ impl ShapeLine {
                                         }
                                         x += x_advance;
                                         y += y_advance;
+                                        max_ascent = max_ascent.max(glyph.ascent);
+                                        max_descent = max_descent.max(glyph.descent);
                                     }
                                 }
                             }
@@ -1156,6 +1176,8 @@ impl ShapeLine {
             mem::swap(&mut glyphs, &mut glyphs_swap);
             layout_lines.push(LayoutLine {
                 w: if self.rtl { start_x - x } else { x },
+                max_ascent: max_ascent * font_size,
+                max_descent: max_descent * font_size,
                 glyphs: glyphs_swap,
             });
             push_line = false;
@@ -1164,6 +1186,8 @@ impl ShapeLine {
         if push_line {
             layout_lines.push(LayoutLine {
                 w: 0.0,
+                max_ascent: max_ascent * font_size,
+                max_descent: max_descent * font_size,
                 glyphs: Default::default(),
             });
         }

@@ -56,6 +56,10 @@ pub struct LayoutGlyph {
 pub struct LayoutLine {
     /// Width of the line
     pub w: f32,
+    /// Maximum ascent of the glyphs in line
+    pub max_ascent: f32,
+    /// Maximum descent of the glyphs in line
+    pub max_descent: f32,
     /// Glyphs in line
     pub glyphs: Vec<LayoutGlyph>,
 }

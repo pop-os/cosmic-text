@@ -119,9 +119,9 @@ pub struct LayoutRun<'a> {
     pub rtl: bool,
     /// The array of layout glyphs to draw
     pub glyphs: &'a [LayoutGlyph],
-    /// Y offset of line
+    /// Y offset to baseline of line
     pub line_y: f32,
-    /// width of line
+    /// Width of line
     pub line_w: f32,
 }
 
@@ -187,7 +187,6 @@ pub struct LayoutRunIter<'b> {
     line_i: usize,
     layout_i: usize,
     remaining_len: usize,
-    line_y: f32,
     total_layout: i32,
 }
 
@@ -222,7 +221,6 @@ impl<'b> LayoutRunIter<'b> {
             line_i: 0,
             layout_i: 0,
             remaining_len: bottom_cropped_layout_lines,
-            line_y: buffer.metrics.y_offset(),
             total_layout: 0,
         }
     }
@@ -248,10 +246,14 @@ impl<'b> Iterator for LayoutRunIter<'b> {
                     continue;
                 }
 
-                self.line_y += self.buffer.metrics.line_height;
-                if self.line_y - self.buffer.metrics.y_offset() > self.buffer.height {
+                let line_y = self.line_i as f32 * self.buffer.metrics.line_height;
+
+                if line_y > self.buffer.height {
                     return None;
                 }
+
+                let glyph_height = layout_line.max_ascent + layout_line.max_descent;
+                let centering_offset = (self.buffer.metrics.line_height - glyph_height) / 2.0;
 
                 return self.remaining_len.checked_sub(1).map(|num| {
                     self.remaining_len = num;
@@ -260,7 +262,7 @@ impl<'b> Iterator for LayoutRunIter<'b> {
                         text: line.text(),
                         rtl: shape.rtl,
                         glyphs: &layout_line.glyphs,
-                        line_y: self.line_y,
+                        line_y: line_y + centering_offset + layout_line.max_ascent,
                         line_w: layout_line.w,
                     }
                 });
@@ -297,10 +299,6 @@ impl Metrics {
             font_size: self.font_size * scale,
             line_height: self.line_height * scale,
         }
-    }
-
-    fn y_offset(&self) -> f32 {
-        self.font_size - self.line_height
     }
 }
 
