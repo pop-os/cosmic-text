@@ -279,6 +279,9 @@ fn shape_skip(
     let metrics = font.metrics(&[]);
     let glyph_metrics = font.glyph_metrics(&[]).scale(1.0);
 
+    let ascent = metrics.ascent / f32::from(metrics.units_per_em);
+    let descent = metrics.descent / f32::from(metrics.units_per_em);
+
     line[start_run..end_run]
         .chars()
         .enumerate()
@@ -293,8 +296,8 @@ fn shape_skip(
                 y_advance: 0.0,
                 x_offset: 0.0,
                 y_offset: 0.0,
-                ascent: metrics.ascent / f32::from(metrics.units_per_em),
-                descent: metrics.descent / f32::from(metrics.units_per_em),
+                ascent,
+                descent,
                 font_id,
                 glyph_id,
                 color_opt: attrs.color_opt,
