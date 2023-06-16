@@ -247,13 +247,12 @@ impl<'b> Iterator for LayoutRunIter<'b> {
                 }
 
                 let line_y = self.line_i as f32 * self.buffer.metrics.line_height;
-
-                if line_y > self.buffer.height {
-                    return None;
-                }
-
                 let glyph_height = layout_line.max_ascent + layout_line.max_descent;
                 let centering_offset = (self.buffer.metrics.line_height - glyph_height) / 2.0;
+
+                if line_y + centering_offset > self.buffer.height {
+                    return None;
+                }
 
                 return self.remaining_len.checked_sub(1).map(|num| {
                     self.remaining_len = num;
