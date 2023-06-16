@@ -246,7 +246,11 @@ impl<'b> Iterator for LayoutRunIter<'b> {
                     continue;
                 }
 
-                let line_y = self.line_i as f32 * self.buffer.metrics.line_height;
+                let line_y = self
+                    .total_layout
+                    .saturating_sub(self.buffer.scroll)
+                    .saturating_sub(1) as f32
+                    * self.buffer.metrics.line_height;
                 let glyph_height = layout_line.max_ascent + layout_line.max_descent;
                 let centering_offset = (self.buffer.metrics.line_height - glyph_height) / 2.0;
 
