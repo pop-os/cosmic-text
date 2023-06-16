@@ -62,7 +62,8 @@ fn shape_fallback(
     let run = &line[start_run..end_run];
 
     let font_scale = font.rustybuzz().units_per_em() as f32;
-    let metrics = font.as_swash().metrics(&[]);
+    let ascent = font.rustybuzz().ascender() as f32 / font_scale;
+    let descent = -font.rustybuzz().descender() as f32 / font_scale;
 
     let mut buffer = rustybuzz::UnicodeBuffer::new();
     buffer.set_direction(if span_rtl {
@@ -102,8 +103,8 @@ fn shape_fallback(
             y_advance,
             x_offset,
             y_offset,
-            ascent: metrics.ascent / f32::from(metrics.units_per_em),
-            descent: metrics.descent / f32::from(metrics.units_per_em),
+            ascent,
+            descent,
             font_id: font.id(),
             glyph_id: info.glyph_id.try_into().expect("failed to cast glyph ID"),
             //TODO: color should not be related to shaping
