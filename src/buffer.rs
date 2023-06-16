@@ -121,6 +121,8 @@ pub struct LayoutRun<'a> {
     pub glyphs: &'a [LayoutGlyph],
     /// Y offset to baseline of line
     pub line_y: f32,
+    /// Y offset to top of line
+    pub line_top: f32,
     /// Width of line
     pub line_w: f32,
 }
@@ -246,15 +248,16 @@ impl<'b> Iterator for LayoutRunIter<'b> {
                     continue;
                 }
 
-                let line_y = self
+                let line_top = self
                     .total_layout
                     .saturating_sub(self.buffer.scroll)
                     .saturating_sub(1) as f32
                     * self.buffer.metrics.line_height;
                 let glyph_height = layout_line.max_ascent + layout_line.max_descent;
                 let centering_offset = (self.buffer.metrics.line_height - glyph_height) / 2.0;
+                let line_y = line_top + centering_offset + layout_line.max_ascent;
 
-                if line_y + centering_offset > self.buffer.height {
+                if line_top + centering_offset > self.buffer.height {
                     return None;
                 }
 
@@ -265,7 +268,8 @@ impl<'b> Iterator for LayoutRunIter<'b> {
                         text: line.text(),
                         rtl: shape.rtl,
                         glyphs: &layout_line.glyphs,
-                        line_y: line_y + centering_offset + layout_line.max_ascent,
+                        line_y,
+                        line_top,
                         line_w: layout_line.w,
                     }
                 });

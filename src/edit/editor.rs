@@ -702,6 +702,7 @@ impl Edit for Editor {
         for run in self.buffer.layout_runs() {
             let line_i = run.line_i;
             let line_y = run.line_y;
+            let line_top = run.line_top;
 
             let cursor_glyph_opt = |cursor: &Cursor| -> Option<(usize, f32)> {
                 if cursor.line == line_i {
@@ -779,7 +780,7 @@ impl Edit for Editor {
                             } else if let Some((min, max)) = range_opt.take() {
                                 f(
                                     min,
-                                    (line_y - font_size) as i32,
+                                    line_top as i32,
                                     cmp::max(0, max - min) as u32,
                                     line_height as u32,
                                     Color::rgba(color.r(), color.g(), color.b(), 0x33),
@@ -805,7 +806,7 @@ impl Edit for Editor {
                         }
                         f(
                             min,
-                            (line_y - font_size) as i32,
+                            line_top as i32,
                             cmp::max(0, max - min) as u32,
                             line_height as u32,
                             Color::rgba(color.r(), color.g(), color.b(), 0x33),
@@ -843,7 +844,7 @@ impl Edit for Editor {
 
                 f(
                     x,
-                    (line_y - font_size) as i32,
+                    line_top as i32,
                     1,
                     line_height as u32,
                     self.cursor.color.unwrap_or(color),
