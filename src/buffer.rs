@@ -749,16 +749,27 @@ impl Buffer {
     {
         for run in self.layout_runs() {
             for glyph in run.glyphs.iter() {
-                let (cache_key, x_int, y_int) = (glyph.cache_key, glyph.x_int, glyph.y_int);
+                let physical_glyph = glyph.physical((0., 0.), 1.0);
 
                 let glyph_color = match glyph.color_opt {
                     Some(some) => some,
                     None => color,
                 };
 
-                cache.with_pixels(font_system, cache_key, glyph_color, |x, y, color| {
-                    f(x_int + x, run.line_y as i32 + y_int + y, 1, 1, color);
-                });
+                cache.with_pixels(
+                    font_system,
+                    physical_glyph.cache_key,
+                    glyph_color,
+                    |x, y, color| {
+                        f(
+                            physical_glyph.x + x,
+                            run.line_y as i32 + physical_glyph.y + y,
+                            1,
+                            1,
+                            color,
+                        );
+                    },
+                );
             }
         }
     }

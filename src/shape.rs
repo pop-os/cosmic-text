@@ -9,7 +9,7 @@ use unicode_script::{Script, UnicodeScript};
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::fallback::FontFallbackIter;
-use crate::{Align, AttrsList, CacheKey, Color, Font, FontSystem, LayoutGlyph, LayoutLine, Wrap};
+use crate::{Align, AttrsList, Color, Font, FontSystem, LayoutGlyph, LayoutLine, Wrap};
 
 /// The shaping strategy of some text.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -332,26 +332,18 @@ impl ShapeGlyph {
         w: f32,
         level: unicode_bidi::Level,
     ) -> LayoutGlyph {
-        let x_offset = font_size * self.x_offset;
-        let y_offset = font_size * self.y_offset;
-
-        let (cache_key, x_int, y_int) = CacheKey::new(
-            self.font_id,
-            self.glyph_id,
-            font_size,
-            (x + x_offset, y - y_offset),
-        );
         LayoutGlyph {
             start: self.start,
             end: self.end,
+            font_size,
+            font_id: self.font_id,
+            glyph_id: self.glyph_id,
             x,
+            y,
             w,
             level,
-            cache_key,
-            x_offset,
-            y_offset,
-            x_int,
-            y_int,
+            x_offset: self.x_offset,
+            y_offset: self.y_offset,
             color_opt: self.color_opt,
             metadata: self.metadata,
         }
