@@ -23,7 +23,7 @@ impl CacheKey {
         pos: (f32, f32),
     ) -> (Self, i32, i32) {
         let (x, x_bin) = SubpixelBin::new(pos.0);
-        let (y, y_bin) = SubpixelBin::new(pos.1.trunc());
+        let (y, y_bin) = SubpixelBin::new(pos.1);
         (
             Self {
                 font_id,
