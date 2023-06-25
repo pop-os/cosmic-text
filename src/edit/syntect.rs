@@ -60,6 +60,19 @@ impl<'a> SyntaxEditor<'a> {
         })
     }
 
+    /// Modifies the theme of the [`SyntaxEditor`], returning false if the theme is missing
+    pub fn update_theme(&mut self, theme_name: &str) -> bool {
+        if let Some(theme) = self.syntax_system.theme_set.themes.get(theme_name) {
+            self.theme = theme;
+            self.highlighter = Highlighter::new(theme);
+            self.syntax_cache.clear();
+
+            true
+        } else {
+            false
+        }
+    }
+
     /// Load text from a file, and also set syntax to the best option
     ///
     /// ## Errors

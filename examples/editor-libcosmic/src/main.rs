@@ -268,6 +268,13 @@ impl Application for Window {
                 ));
 
                 let mut editor = self.editor.lock().unwrap();
+
+                // Update the syntax color theme
+                match theme {
+                    "Light" => editor.update_theme("base16-ocean.light"),
+                    "Dark" | _ => editor.update_theme("base16-eighties.dark"),
+                };
+
                 update_attrs(&mut *editor, self.attrs);
             }
         }
