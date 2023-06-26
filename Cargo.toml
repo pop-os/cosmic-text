@@ -27,6 +27,27 @@ version = "0.3.8"
 default-features = false
 features = ["hardcoded-data"]
 
+[dev-dependencies]
+env_logger = "0.10"
+lazy_static = "1.4"
+log = "0.4"
+orbclient = "0.3.35"
+unicode-segmentation = "1.7"
+termion = "2.0"
+
+[dev-dependencies.rfd]
+version = "0.11"
+#TODO: iced portal
+#default-features = false
+#features = ["xdg-portal"]
+
+[dev-dependencies.libcosmic]
+git = "https://github.com/pop-os/libcosmic"
+rev = "035ec88"
+default-features = false
+features = ["winit_softbuffer"]
+#path = "../libcosmic"
+
 [features]
 default = ["std", "swash"]
 no_std = [
@@ -42,7 +63,6 @@ std = [
 vi = ["syntect"]
 wasm-web = ["sys-locale?/js"]
 
-[workspace]
-members = [
-  "examples/*",
-]
+[[example]]
+name = "editor-libcosmic"
+required-features = ["syntect"]
