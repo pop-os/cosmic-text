@@ -162,7 +162,7 @@ impl Application for Window {
     }
 
     fn theme(&self) -> Theme {
-        self.theme
+        self.theme.clone()
     }
 
     fn title(&self) -> String {

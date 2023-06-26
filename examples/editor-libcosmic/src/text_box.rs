@@ -1,17 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic::{
-    iced_native::{
-        clipboard::Clipboard,
-        event::{Event, Status},
-        image,
-        keyboard::{Event as KeyEvent, KeyCode},
-        layout::{self, Layout},
-        mouse::{self, Button, Event as MouseEvent, ScrollDelta},
-        renderer,
-        widget::{self, tree, Widget},
-        Color, Element, Length, Padding, Point, Rectangle, Shell, Size,
-    },
+    iced_core::{event::Status, widget::tree, *},
+    iced_runtime::keyboard::KeyCode,
     theme::{Theme, ThemeType},
 };
 use cosmic_text::{Action, Edit, SwashCache};
@@ -31,7 +22,7 @@ pub trait StyleSheet {
 impl StyleSheet for Theme {
     fn appearance(&self) -> Appearance {
         match self.theme_type {
-            ThemeType::Dark | ThemeType::HighContrastDark => Appearance {
+            ThemeType::Dark | ThemeType::HighContrastDark | ThemeType::Custom(_) => Appearance {
                 background_color: Some(Color::from_rgb8(0x34, 0x34, 0x34)),
                 text_color: Color::from_rgb8(0xFF, 0xFF, 0xFF),
             },
@@ -52,7 +43,7 @@ impl<'a, Editor> TextBox<'a, Editor> {
     pub fn new(editor: &'a Mutex<Editor>) -> Self {
         Self {
             editor,
-            padding: Padding::new(0),
+            padding: Padding::new(0.),
         }
     }
 
@@ -117,7 +108,7 @@ fn draw_pixel(
 
 impl<'a, 'editor, Editor, Message, Renderer> Widget<Message, Renderer> for TextBox<'a, Editor>
 where
-    Renderer: renderer::Renderer + image::Renderer<Handle = image::Handle>,
+    Renderer: cosmic::iced_core::Renderer + image::Renderer<Handle = image::Handle>,
     Renderer::Theme: StyleSheet,
     Editor: Edit,
 {
@@ -166,11 +157,11 @@ where
         &self,
         _tree: &widget::Tree,
         layout: Layout<'_>,
-        cursor_position: Point,
+        cursor_position: mouse::Cursor,
         _viewport: &Rectangle,
         _renderer: &Renderer,
     ) -> mouse::Interaction {
-        if layout.bounds().contains(cursor_position) {
+        if cursor_position.is_over(layout.bounds()) {
             mouse::Interaction::Text
         } else {
             mouse::Interaction::Idle
@@ -182,9 +173,9 @@ where
         tree: &widget::Tree,
         renderer: &mut Renderer,
         theme: &Renderer::Theme,
-        style: &renderer::Style,
+        _style: &renderer::Style,
         layout: Layout<'_>,
-        _cursor_position: Point,
+        _cursor_position: mouse::Cursor,
         viewport: &Rectangle,
     ) {
         let instant = Instant::now();
@@ -219,8 +210,10 @@ where
         let view_h = cmp::min(viewport.height as i32, layout.bounds().height as i32)
             - self.padding.vertical() as i32;
 
-        let image_w = (view_w as f64 * style.scale_factor) as i32;
-        let image_h = (view_h as f64 * style.scale_factor) as i32;
+        const SCALE_FACTOR: f64 = 1.;
+
+        let image_w = (view_w as f64 * SCALE_FACTOR) as i32;
+        let image_h = (view_h as f64 * SCALE_FACTOR) as i32;
 
         let mut font_system = FONT_SYSTEM.lock().unwrap();
         let mut editor = editor.borrow_with(&mut font_system);
@@ -229,7 +222,7 @@ where
         let metrics = editor.buffer().metrics();
         editor
             .buffer_mut()
-            .set_metrics(metrics.scale(style.scale_factor as f32));
+            .set_metrics(metrics.scale(SCALE_FACTOR as f32));
 
         // Set size
         editor.buffer_mut().set_size(image_w as f32, image_h as f32);
@@ -274,7 +267,7 @@ where
         tree: &mut widget::Tree,
         event: Event,
         layout: Layout<'_>,
-        cursor_position: Point,
+        cursor_position: mouse::Cursor,
         _renderer: &Renderer,
         _clipboard: &mut dyn Clipboard,
         _shell: &mut Shell<'_, Message>,
@@ -286,10 +279,7 @@ where
 
         let mut status = Status::Ignored;
         match event {
-            Event::Keyboard(KeyEvent::KeyPressed {
-                key_code,
-                modifiers,
-            }) => match key_code {
+            Event::Keyboard(keyboard::Event::KeyPressed { key_code, .. }) => match key_code {
                 KeyCode::Left => {
                     editor.action(Action::Left);
                     status = Status::Captured;
@@ -340,37 +330,35 @@ where
                 }
                 _ => (),
             },
-            Event::Keyboard(KeyEvent::CharacterReceived(character)) => {
+            Event::Keyboard(keyboard::Event::CharacterReceived(character)) => {
                 editor.action(Action::Insert(character));
                 status = Status::Captured;
             }
-            Event::Mouse(MouseEvent::ButtonPressed(Button::Left)) => {
-                if layout.bounds().contains(cursor_position) {
+            Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left)) => {
+                if let Some(position_in) = cursor_position.position_in(layout.bounds()) {
                     editor.action(Action::Click {
-                        x: (cursor_position.x - layout.bounds().x) as i32
-                            - self.padding.left as i32,
-                        y: (cursor_position.y - layout.bounds().y) as i32 - self.padding.top as i32,
+                        x: position_in.x as i32 - self.padding.left as i32,
+                        y: position_in.y as i32 - self.padding.top as i32,
                     });
                     state.is_dragging = true;
                     status = Status::Captured;
                 }
             }
-            Event::Mouse(MouseEvent::ButtonReleased(Button::Left)) => {
+            Event::Mouse(mouse::Event::ButtonReleased(mouse::Button::Left)) => {
                 state.is_dragging = false;
                 status = Status::Captured;
             }
-            Event::Mouse(MouseEvent::CursorMoved { .. }) => {
+            Event::Mouse(mouse::Event::CursorMoved { position }) => {
                 if state.is_dragging {
                     editor.action(Action::Drag {
-                        x: (cursor_position.x - layout.bounds().x) as i32
-                            - self.padding.left as i32,
-                        y: (cursor_position.y - layout.bounds().y) as i32 - self.padding.top as i32,
+                        x: (position.x - layout.bounds().x) as i32 - self.padding.left as i32,
+                        y: (position.y - layout.bounds().y) as i32 - self.padding.top as i32,
                     });
                     status = Status::Captured;
                 }
             }
-            Event::Mouse(MouseEvent::WheelScrolled { delta }) => match delta {
-                ScrollDelta::Lines { x, y } => {
+            Event::Mouse(mouse::Event::WheelScrolled { delta }) => match delta {
+                mouse::ScrollDelta::Lines { y, .. } => {
                     editor.action(Action::Scroll {
                         lines: (-y * 6.0) as i32,
                     });
