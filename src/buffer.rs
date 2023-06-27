@@ -598,21 +598,105 @@ impl Buffer {
         attrs: Attrs,
         shaping: Shaping,
     ) {
+        self.set_rich_text(font_system, [(text, attrs)], shaping);
+    }
+
+    /// Set text of buffer, using an iterator of styled spans (pairs of text and attributes)
+    ///
+    /// ```
+    /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, Metrics, Shaping};
+    /// # let mut font_system = FontSystem::new();
+    /// let mut buffer = Buffer::new_empty(Metrics::new(32.0, 44.0));
+    /// let attrs = Attrs::new().family(Family::Serif);
+    /// buffer.set_rich_text(
+    ///     &mut font_system,
+    ///     [
+    ///         ("hello, ", attrs),
+    ///         ("cosmic\ntext", attrs.family(Family::Monospace)),
+    ///     ]
+    ///     .into_iter(),
+    ///     Shaping::Advanced,
+    /// );
+    /// ```
+    pub fn set_rich_text<'r, 's, I>(
+        &mut self,
+        font_system: &mut FontSystem,
+        spans: I,
+        shaping: Shaping,
+    ) where
+        I: IntoIterator<Item = (&'s str, Attrs<'r>)>,
+    {
         self.lines.clear();
-        for line in BidiParagraphs::new(text) {
-            self.lines.push(BufferLine::new(
-                line.to_string(),
-                AttrsList::new(attrs),
-                shaping,
-            ));
-        }
-        // Make sure there is always one line
-        if self.lines.is_empty() {
-            self.lines.push(BufferLine::new(
-                String::new(),
-                AttrsList::new(attrs),
-                shaping,
-            ));
+
+        let mut attrs_list = AttrsList::new(Attrs::new());
+        let mut line_string = String::new();
+        let mut end = 0;
+        let (string, spans_data): (String, Vec<_>) = spans
+            .into_iter()
+            .map(|(s, attrs)| {
+                let start = end;
+                end += s.len();
+                (s, (attrs, start..end))
+            })
+            .unzip();
+
+        let mut spans_iter = spans_data.into_iter();
+        let mut maybe_span = spans_iter.next();
+
+        // split the string into lines, as ranges
+        let string_start = string.as_ptr() as usize;
+        let mut lines_iter = BidiParagraphs::new(&string).map(|line: &str| {
+            let start = line.as_ptr() as usize - string_start;
+            let end = start + line.len();
+            start..end
+        });
+        let mut maybe_line = lines_iter.next();
+
+        loop {
+            let (Some(line_range), Some((attrs, span_range))) = (&maybe_line, &maybe_span) else {
+                // this is reached only if this text is empty
+                self.lines.push(BufferLine::new(
+                    String::new(),
+                    AttrsList::new(Attrs::new()),
+                    shaping,
+                ));
+                break;
+            };
+
+            // start..end is the intersection of this line and this section
+            let start = line_range.start.max(span_range.start);
+            let end = line_range.end.min(span_range.end);
+            if start < end {
+                let text = &string[start..end];
+                let text_start = line_string.len();
+                line_string.push_str(text);
+                let text_end = line_string.len();
+                attrs_list.add_span(text_start..text_end, *attrs);
+            }
+
+            // we know that at the end of a line,
+            // section text's end index is always >= line text's end index
+            // so if this section ends before this line ends,
+            // there is another section in this line.
+            // otherwise, we move on to the next line.
+            if span_range.end < line_range.end {
+                maybe_span = spans_iter.next();
+            } else {
+                maybe_line = lines_iter.next();
+                if maybe_line.is_some() {
+                    // finalize this line and start a new line
+                    let prev_attrs_list =
+                        std::mem::replace(&mut attrs_list, AttrsList::new(Attrs::new()));
+                    let prev_line_string = std::mem::take(&mut line_string);
+                    let buffer_line = BufferLine::new(prev_line_string, prev_attrs_list, shaping);
+                    self.lines.push(buffer_line);
+                } else {
+                    // finalize the final line
+                    let buffer_line = BufferLine::new(line_string, attrs_list, shaping);
+                    self.lines.push(buffer_line);
+                    break;
+                }
+            }
         }
 
         self.scroll = 0;
