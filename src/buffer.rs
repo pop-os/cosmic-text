@@ -613,8 +613,7 @@ impl Buffer {
     ///     [
     ///         ("hello, ", attrs),
     ///         ("cosmic\ntext", attrs.family(Family::Monospace)),
-    ///     ]
-    ///     .into_iter(),
+    ///     ],
     ///     Shaping::Advanced,
     /// );
     /// ```
@@ -910,8 +909,7 @@ impl<'a> BorrowedWithFontSystem<'a, Buffer> {
     ///     [
     ///         ("hello, ", attrs),
     ///         ("cosmic\ntext", attrs.family(Family::Monospace)),
-    ///     ]
-    ///     .into_iter(),
+    ///     ],
     ///     Shaping::Advanced,
     /// );
     /// ```
