@@ -898,6 +898,30 @@ impl<'a> BorrowedWithFontSystem<'a, Buffer> {
         self.inner.set_text(self.font_system, text, attrs, shaping);
     }
 
+    /// Set text of buffer, using an iterator of styled spans (pairs of text and attributes)
+    ///
+    /// ```
+    /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, Metrics, Shaping};
+    /// # let mut font_system = FontSystem::new();
+    /// let mut buffer = Buffer::new_empty(Metrics::new(32.0, 44.0));
+    /// let mut buffer = buffer.borrow_with(&mut font_system);
+    /// let attrs = Attrs::new().family(Family::Serif);
+    /// buffer.set_rich_text(
+    ///     [
+    ///         ("hello, ", attrs),
+    ///         ("cosmic\ntext", attrs.family(Family::Monospace)),
+    ///     ]
+    ///     .into_iter(),
+    ///     Shaping::Advanced,
+    /// );
+    /// ```
+    pub fn set_rich_text<'r, 's, I>(&mut self, spans: I, shaping: Shaping)
+    where
+        I: IntoIterator<Item = (&'s str, Attrs<'r>)>,
+    {
+        self.inner.set_rich_text(self.font_system, spans, shaping);
+    }
+
     /// Draw the buffer
     #[cfg(feature = "swash")]
     pub fn draw<F>(&mut self, cache: &mut crate::SwashCache, color: Color, f: F)
