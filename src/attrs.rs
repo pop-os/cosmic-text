@@ -100,15 +100,19 @@ impl FamilyOwned {
 }
 
 /// Text attributes
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Attrs<'a> {
     //TODO: should this be an option?
+    // TODO: extract
     pub color_opt: Option<Color>,
     pub family: Family<'a>,
     pub stretch: Stretch,
     pub style: Style,
     pub weight: Weight,
+    // TODO: extract
     pub metadata: usize,
+    // TODO: extract
+    pub font_size: f32,
 }
 
 impl<'a> Attrs<'a> {
@@ -122,6 +126,7 @@ impl<'a> Attrs<'a> {
             stretch: Stretch::Normal,
             style: Style::Normal,
             weight: Weight::NORMAL,
+            font_size: 16.0,
             metadata: 0,
         }
     }
@@ -129,6 +134,12 @@ impl<'a> Attrs<'a> {
     /// Set [Color]
     pub fn color(mut self, color: Color) -> Self {
         self.color_opt = Some(color);
+        self
+    }
+
+    /// Set font size
+    pub fn size(mut self, size: f32) -> Self {
+        self.font_size = size;
         self
     }
 
@@ -180,16 +191,34 @@ impl<'a> Attrs<'a> {
     }
 }
 
+impl<'a> Eq for Attrs<'a> {}
+
+impl<'a> core::hash::Hash for Attrs<'a> {
+    fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
+        self.color_opt.hash(state);
+        self.family.hash(state);
+        self.stretch.hash(state);
+        self.style.hash(state);
+        self.weight.hash(state);
+        self.metadata.hash(state);
+        self.font_size.to_bits().hash(state);
+    }
+}
+
 /// An owned version of [`Attrs`]
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct AttrsOwned {
     //TODO: should this be an option?
+    // TODO: extract
     pub color_opt: Option<Color>,
     pub family_owned: FamilyOwned,
     pub stretch: Stretch,
     pub style: Style,
     pub weight: Weight,
+    // TODO: extract
     pub metadata: usize,
+    // TODO: extract
+    pub font_size: f32,
 }
 
 impl AttrsOwned {
@@ -201,6 +230,7 @@ impl AttrsOwned {
             style: attrs.style,
             weight: attrs.weight,
             metadata: attrs.metadata,
+            font_size: attrs.font_size,
         }
     }
 
@@ -212,7 +242,22 @@ impl AttrsOwned {
             style: self.style,
             weight: self.weight,
             metadata: self.metadata,
+            font_size: self.font_size,
         }
+    }
+}
+
+impl Eq for AttrsOwned {}
+
+impl core::hash::Hash for AttrsOwned {
+    fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
+        self.color_opt.hash(state);
+        self.family_owned.hash(state);
+        self.stretch.hash(state);
+        self.style.hash(state);
+        self.weight.hash(state);
+        self.metadata.hash(state);
+        self.font_size.to_bits().hash(state);
     }
 }
 

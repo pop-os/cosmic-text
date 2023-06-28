@@ -200,7 +200,6 @@ impl BufferLine {
     pub fn layout(
         &mut self,
         font_system: &mut FontSystem,
-        font_size: f32,
         width: f32,
         wrap: Wrap,
     ) -> &[LayoutLine] {
@@ -208,7 +207,7 @@ impl BufferLine {
             self.wrap = wrap;
             let align = self.align;
             let shape = self.shape(font_system);
-            let layout = shape.layout(font_size, width, wrap, align);
+            let layout = shape.layout(width, wrap, align);
             self.layout_opt = Some(layout);
         }
         self.layout_opt.as_ref().expect("layout not found")
@@ -219,7 +218,6 @@ impl BufferLine {
         &mut self,
         scratch: &mut ShapeBuffer,
         font_system: &mut FontSystem,
-        font_size: f32,
         width: f32,
         wrap: Wrap,
     ) -> &[LayoutLine] {
@@ -228,7 +226,7 @@ impl BufferLine {
             let align = self.align;
             let shape = self.shape_in_buffer(scratch, font_system);
             let mut layout = Vec::with_capacity(1);
-            shape.layout_to_buffer(scratch, font_size, width, wrap, align, &mut layout);
+            shape.layout_to_buffer(scratch, width, wrap, align, &mut layout);
             self.layout_opt = Some(layout);
         }
         self.layout_opt.as_ref().expect("layout not found")
