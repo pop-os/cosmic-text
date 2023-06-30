@@ -662,7 +662,7 @@ impl Buffer {
                 break;
             };
 
-            // start..end is the intersection of this line and this section
+            // start..end is the intersection of this line and this span
             let start = line_range.start.max(span_range.start);
             let end = line_range.end.min(span_range.end);
             if start < end {
@@ -674,9 +674,9 @@ impl Buffer {
             }
 
             // we know that at the end of a line,
-            // section text's end index is always >= line text's end index
-            // so if this section ends before this line ends,
-            // there is another section in this line.
+            // span text's end index is always >= line text's end index
+            // so if this span ends before this line ends,
+            // there is another span in this line.
             // otherwise, we move on to the next line.
             if span_range.end < line_range.end {
                 maybe_span = spans_iter.next();
