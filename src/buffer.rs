@@ -685,8 +685,8 @@ impl Buffer {
                 if maybe_line.is_some() {
                     // finalize this line and start a new line
                     let prev_attrs_list =
-                        std::mem::replace(&mut attrs_list, AttrsList::new(Attrs::new()));
-                    let prev_line_string = std::mem::take(&mut line_string);
+                        core::mem::replace(&mut attrs_list, AttrsList::new(Attrs::new()));
+                    let prev_line_string = core::mem::take(&mut line_string);
                     let buffer_line = BufferLine::new(prev_line_string, prev_attrs_list, shaping);
                     self.lines.push(buffer_line);
                 } else {
