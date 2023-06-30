@@ -193,27 +193,30 @@ pub struct LayoutRunIter<'b> {
     layout_i: usize,
     remaining_len: usize,
     total_layout: i32,
+    line_heights: Vec<f32>,
 }
 
 impl<'b> LayoutRunIter<'b> {
     pub fn new(buffer: &'b Buffer) -> Self {
-        let total_layout_lines: usize = buffer
+        let line_heights = buffer
             .lines
             .iter()
-            .map(|line| {
-                line.layout_opt()
-                    .as_ref()
-                    .map(|layout| layout.len())
-                    .unwrap_or_default()
-            })
-            .sum();
+            .flat_map(|line| line.layout_opt())
+            .flat_map(|lines| lines.iter().map(|line| line.line_height()))
+            .collect::<Vec<_>>();
+        let total_layout_lines = line_heights.len();
         let top_cropped_layout_lines =
             total_layout_lines.saturating_sub(buffer.scroll.try_into().unwrap_or_default());
-        let maximum_lines = if buffer.metrics.line_height == 0.0 {
-            0
-        } else {
-            (buffer.height / buffer.metrics.line_height) as i32
-        };
+        let mut maximum_lines = line_heights.len() as i32;
+        let mut remaining_height = buffer.height;
+        for (line_number, line_height) in line_heights.iter().enumerate() {
+            remaining_height -= line_height;
+            if remaining_height < 0.0 {
+                maximum_lines = line_number as i32;
+                break;
+            }
+        }
+        let maximum_lines = maximum_lines;
         let bottom_cropped_layout_lines =
             if top_cropped_layout_lines > maximum_lines.try_into().unwrap_or_default() {
                 maximum_lines.try_into().unwrap_or_default()
@@ -227,6 +230,7 @@ impl<'b> LayoutRunIter<'b> {
             layout_i: 0,
             remaining_len: bottom_cropped_layout_lines,
             total_layout: 0,
+            line_heights,
         }
     }
 }
@@ -250,14 +254,13 @@ impl<'b> Iterator for LayoutRunIter<'b> {
                 if scrolled {
                     continue;
                 }
-
-                let line_top = self
-                    .total_layout
-                    .saturating_sub(self.buffer.scroll)
-                    .saturating_sub(1) as f32
-                    * self.buffer.metrics.line_height;
+                // TODO: can scroll be negative?
+                let this_line = self.total_layout as usize + self.buffer.scroll as usize - 1;
+                let line_top = self.line_heights[self.buffer.scroll as usize..this_line]
+                    .iter()
+                    .sum();
                 let glyph_height = layout_line.max_ascent + layout_line.max_descent;
-                let centering_offset = (self.buffer.metrics.line_height - glyph_height) / 2.0;
+                let centering_offset = (self.line_heights[this_line] - glyph_height) / 2.0;
                 let line_y = line_top + centering_offset + layout_line.max_ascent;
 
                 if line_top + centering_offset > self.buffer.height {
@@ -297,10 +300,11 @@ pub struct Metrics {
 }
 
 impl Metrics {
-    pub const fn new(font_size: f32, line_height: f32) -> Self {
+    pub fn new(font_size: f32, line_height: f32) -> Self {
         Self {
             font_size,
-            line_height,
+            // TODO: remove this (not hardcoded)
+            line_height: font_size * 1.2,
         }
     }
 
