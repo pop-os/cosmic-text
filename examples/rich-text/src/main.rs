@@ -46,8 +46,9 @@ fn main() {
         .buffer_mut()
         .set_size(window.width() as f32, window.height() as f32);
 
-    let attrs = Attrs::new();
-    let serif_attrs = attrs.family(Family::Serif);
+    let font_size = editor.buffer().metrics().font_size;
+    let attrs = Attrs::new().size(font_size);
+    let serif_attrs = attrs.family(Family::Serif).size(attrs.font_size * 1.5);
     let mono_attrs = attrs.family(Family::Monospace);
     let comic_attrs = attrs.family(Family::Name("Comic Neue"));
 
@@ -97,13 +98,48 @@ fn main() {
         ("B", attrs.color(Color::rgb(0x00, 0x00, 0xFF))),
         ("O", attrs.color(Color::rgb(0x4B, 0x00, 0x82))),
         ("W ", attrs.color(Color::rgb(0x94, 0x00, 0xD3))),
-        ("Red ", attrs.color(Color::rgb(0xFF, 0x00, 0x00))),
-        ("Orange ", attrs.color(Color::rgb(0xFF, 0x7F, 0x00))),
-        ("Yellow ", attrs.color(Color::rgb(0xFF, 0xFF, 0x00))),
-        ("Green ", attrs.color(Color::rgb(0x00, 0xFF, 0x00))),
-        ("Blue ", attrs.color(Color::rgb(0x00, 0x00, 0xFF))),
-        ("Indigo ", attrs.color(Color::rgb(0x4B, 0x00, 0x82))),
-        ("Violet ", attrs.color(Color::rgb(0x94, 0x00, 0xD3))),
+        (
+            "Red ",
+            attrs
+                .color(Color::rgb(0xFF, 0x00, 0x00))
+                .size(attrs.font_size * 1.9),
+        ),
+        (
+            "Orange ",
+            attrs
+                .color(Color::rgb(0xFF, 0x7F, 0x00))
+                .size(attrs.font_size * 1.6),
+        ),
+        (
+            "Yellow ",
+            attrs
+                .color(Color::rgb(0xFF, 0xFF, 0x00))
+                .size(attrs.font_size * 1.3),
+        ),
+        (
+            "Green ",
+            attrs
+                .color(Color::rgb(0x00, 0xFF, 0x00))
+                .size(attrs.font_size * 1.0),
+        ),
+        (
+            "Blue ",
+            attrs
+                .color(Color::rgb(0x00, 0x00, 0xFF))
+                .size(attrs.font_size * 0.8),
+        ),
+        (
+            "Indigo ",
+            attrs
+                .color(Color::rgb(0x4B, 0x00, 0x82))
+                .size(attrs.font_size * 0.6),
+        ),
+        (
+            "Violet ",
+            attrs
+                .color(Color::rgb(0x94, 0x00, 0xD3))
+                .size(attrs.font_size * 0.4),
+        ),
         ("U", attrs.color(Color::rgb(0x94, 0x00, 0xD3))),
         ("N", attrs.color(Color::rgb(0x4B, 0x00, 0x82))),
         ("I", attrs.color(Color::rgb(0x00, 0x00, 0xFF))),
