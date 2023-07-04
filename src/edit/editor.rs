@@ -448,22 +448,56 @@ impl Edit for Editor {
             Action::PageDown => {
                 self.action(font_system, Action::Vertical(self.buffer.size().1 as i32));
             }
-            Action::Vertical(px) => {
+            Action::Vertical(mut px) => {
                 // TODO more efficient
-                let lines = px / self.buffer.metrics().line_height as i32;
-                match lines.cmp(&0) {
-                    Ordering::Less => {
-                        for _ in 0..-lines {
+                let line_heights = self.buffer.line_heights();
+                dbg!(line_heights.len());
+                let cursor = self.buffer.layout_cursor(&self.cursor);
+                let mut current_line = cursor.line as i32;
+                let direction = px.signum();
+                loop {
+                    current_line += direction;
+                    if current_line < 0 || current_line >= line_heights.len() as i32 {
+                        break;
+                    }
+
+                    let current_line_height = line_heights[current_line as usize];
+
+                    match direction {
+                        -1 => {
                             self.action(font_system, Action::Up);
+                            px -= current_line_height as i32;
+                            if px >= self.buffer.size().1 as i32 {
+                                break;
+                            }
                         }
-                    }
-                    Ordering::Greater => {
-                        for _ in 0..lines {
+                        1 => {
                             self.action(font_system, Action::Down);
+                            px += current_line_height as i32;
+
+                            if px <= 0 as i32 {
+                                break;
+                            }
                         }
+                        _ => break,
                     }
-                    Ordering::Equal => {}
                 }
+                dbg!(current_line, self.buffer.scroll());
+                // let lines = px / self.buffer.metrics().line_height as i32;
+                // match lines.cmp(&0) {
+                //     Ordering::Less => {
+                //         for _ in 0..-lines {
+                //             self.action(font_system, Action::Up);
+                //         }
+                //     }
+                //     Ordering::Greater => {
+                //         for _ in 0..lines {
+                //             self.action(font_system, Action::Down);
+                //         }
+                //     }
+                //     Ordering::Equal => {}
+                // }
+                self.buffer.set_redraw(true);
             }
             Action::Escape => {
                 if self.select_opt.take().is_some() {
@@ -700,12 +734,11 @@ impl Edit for Editor {
     ) where
         F: FnMut(i32, i32, u32, u32, Color),
     {
-        let line_height = self.buffer.metrics().line_height;
-
         for run in self.buffer.layout_runs() {
             let line_i = run.line_i;
             let line_y = run.line_y;
             let line_top = run.line_top;
+            let line_height = run.line_height();
 
             let cursor_glyph_opt = |cursor: &Cursor| -> Option<(usize, f32)> {
                 if cursor.line == line_i {
