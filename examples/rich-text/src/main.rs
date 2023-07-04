@@ -46,7 +46,7 @@ fn main() {
         .buffer_mut()
         .set_size(window.width() as f32, window.height() as f32);
 
-    let font_size = editor.buffer().metrics().font_size;
+    let font_size = editor.buffer().metrics().font_size_;
     let attrs = Attrs::new().size(font_size);
     let serif_attrs = attrs.family(Family::Serif).size(attrs.font_size * 1.5);
     let mono_attrs = attrs.family(Family::Monospace);

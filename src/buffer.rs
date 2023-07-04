@@ -183,6 +183,15 @@ impl<'a> LayoutRun<'a> {
             Cursor::new_with_affinity(self.line_i, glyph.end, Affinity::Before)
         }
     }
+
+    pub fn line_height(&self) -> f32 {
+        self.glyphs
+            .iter()
+            .map(|g| g.line_height())
+            .reduce(f32::max)
+            // TODO: not 0
+            .unwrap_or(0.0)
+    }
 }
 
 /// An iterator of visible text lines, see [`LayoutRun`]
@@ -193,17 +202,13 @@ pub struct LayoutRunIter<'b> {
     layout_i: usize,
     remaining_len: usize,
     total_layout: i32,
+    // TODO: lift this to BufferLine::layout_opt, and take a &'b [f32] slice instead
     line_heights: Vec<f32>,
 }
 
 impl<'b> LayoutRunIter<'b> {
     pub fn new(buffer: &'b Buffer) -> Self {
-        let line_heights = buffer
-            .lines
-            .iter()
-            .flat_map(|line| line.layout_opt())
-            .flat_map(|lines| lines.iter().map(|line| line.line_height()))
-            .collect::<Vec<_>>();
+        let line_heights = buffer.line_heights();
         let total_layout_lines = line_heights.len();
         let top_cropped_layout_lines =
             total_layout_lines.saturating_sub(buffer.scroll.try_into().unwrap_or_default());
@@ -216,7 +221,6 @@ impl<'b> LayoutRunIter<'b> {
                 break;
             }
         }
-        let maximum_lines = maximum_lines;
         let bottom_cropped_layout_lines =
             if top_cropped_layout_lines > maximum_lines.try_into().unwrap_or_default() {
                 maximum_lines.try_into().unwrap_or_default()
@@ -294,31 +298,31 @@ impl<'b> ExactSizeIterator for LayoutRunIter<'b> {}
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Metrics {
     /// Font size in pixels
-    pub font_size: f32,
+    pub font_size_: f32,
     /// Line height in pixels
-    pub line_height: f32,
+    pub line_height_: f32,
 }
 
 impl Metrics {
     pub fn new(font_size: f32, line_height: f32) -> Self {
         Self {
-            font_size,
+            font_size_: font_size,
             // TODO: remove this (not hardcoded)
-            line_height: font_size * 1.2,
+            line_height_: font_size * 1.2,
         }
     }
 
     pub fn scale(self, scale: f32) -> Self {
         Self {
-            font_size: self.font_size * scale,
-            line_height: self.line_height * scale,
+            font_size_: self.font_size_ * scale,
+            line_height_: self.line_height_ * scale,
         }
     }
 }
 
 impl fmt::Display for Metrics {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}px / {}px", self.font_size, self.line_height)
+        write!(f, "{}px / {}px", self.font_size_, self.line_height_)
     }
 }
 
@@ -352,7 +356,7 @@ impl Buffer {
     ///
     /// Will panic if `metrics.line_height` is zero.
     pub fn new_empty(metrics: Metrics) -> Self {
-        assert_ne!(metrics.line_height, 0.0, "line height cannot be 0");
+        assert_ne!(metrics.line_height_, 0.0, "line height cannot be 0");
         Self {
             lines: Vec::new(),
             metrics,
@@ -402,6 +406,14 @@ impl Buffer {
 
         #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
         log::debug!("relayout: {:?}", instant.elapsed());
+    }
+
+    pub fn line_heights(&self) -> Vec<f32> {
+        self.lines
+            .iter()
+            .flat_map(|line| line.layout_opt())
+            .flat_map(|lines| lines.iter().map(|line| line.line_height()))
+            .collect::<Vec<_>>()
     }
 
     /// Pre-shape lines in the buffer, up to `lines`, return actual number of layout lines
@@ -547,7 +559,7 @@ impl Buffer {
     /// Will panic if `metrics.font_size` is zero.
     pub fn set_metrics(&mut self, font_system: &mut FontSystem, metrics: Metrics) {
         if metrics != self.metrics {
-            assert_ne!(metrics.font_size, 0.0, "font size cannot be 0");
+            assert_ne!(metrics.font_size_, 0.0, "font size cannot be 0");
             self.metrics = metrics;
             self.relayout(font_system);
             self.shape_until_scroll(font_system);
@@ -601,7 +613,8 @@ impl Buffer {
 
     /// Get the number of lines that can be viewed in the buffer
     pub fn visible_lines(&self) -> i32 {
-        (self.height / self.metrics.line_height) as i32
+        // TODO
+        1000_000
     }
 
     /// Set text of buffer, using provided attributes for each line by default
@@ -733,104 +746,188 @@ impl Buffer {
     }
 
     /// Convert x, y position to Cursor (hit detection)
-    pub fn hit(&self, x: f32, y: f32) -> Option<Cursor> {
+    pub fn hit(&self, strike_x: f32, strike_y: f32) -> Option<Cursor> {
         #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
         let instant = std::time::Instant::now();
 
-        let font_size = self.metrics.font_size;
-        let line_height = self.metrics.line_height;
+        println!("strike_y: {strike_y}");
 
-        let mut new_cursor_opt = None;
+        // below,
+        // - `first`, `last` refers to iterator indices (usize)
+        // - `start`, `end` refers to byte indices (usize)
+        // - `left`, `top`, `right`, `bot`, `mid` refers to spatial coordinates (f32)
 
-        let mut runs = self.layout_runs().peekable();
-        let mut first_run = true;
-        while let Some(run) = runs.next() {
-            let line_y = run.line_y;
+        let last_run_index = self.layout_runs().count() - 1;
 
-            if first_run && y < line_y - font_size {
-                first_run = false;
-                let new_cursor = Cursor::new(run.line_i, 0);
-                new_cursor_opt = Some(new_cursor);
-            } else if y >= line_y - font_size && y < line_y - font_size + line_height {
-                let mut new_cursor_glyph = run.glyphs.len();
-                let mut new_cursor_char = 0;
-                let mut new_cursor_affinity = Affinity::After;
+        let mut runs = self.layout_runs().enumerate();
 
-                let mut first_glyph = true;
+        // TODO: cache line_top, run.line_height(), and line_bot on LayoutRun
 
-                'hit: for (glyph_i, glyph) in run.glyphs.iter().enumerate() {
-                    if first_glyph {
-                        first_glyph = false;
-                        if (run.rtl && x > glyph.x) || (!run.rtl && x < 0.0) {
-                            new_cursor_glyph = 0;
-                            new_cursor_char = 0;
-                        }
-                    }
-                    if x >= glyph.x && x <= glyph.x + glyph.w {
-                        new_cursor_glyph = glyph_i;
+        // 1. within the buffer, find the layout run (line) that contains the strike point
+        // 2. within the layout run (line), find the glyph that contains the strike point
+        // 3. within the glyph, find the approximate extended grapheme cluster (egc) that contains the strike point
+        // the boundary (top/bot, left/right) cases in each step are special
+        let mut line_top = 0.0;
+        let cursor = 'hit: loop {
+            let Some((run_index, run)) = runs.next() else {
+                // no hit found
+                break 'hit None;
+            };
 
-                        let cluster = &run.text[glyph.start..glyph.end];
-                        let total = cluster.grapheme_indices(true).count();
-                        let mut egc_x = glyph.x;
-                        let egc_w = glyph.w / (total as f32);
-                        for (egc_i, egc) in cluster.grapheme_indices(true) {
-                            if x >= egc_x && x <= egc_x + egc_w {
-                                new_cursor_char = egc_i;
-
-                                let right_half = x >= egc_x + egc_w / 2.0;
-                                if right_half != glyph.level.is_rtl() {
-                                    // If clicking on last half of glyph, move cursor past glyph
-                                    new_cursor_char += egc.len();
-                                    new_cursor_affinity = Affinity::Before;
-                                }
-                                break 'hit;
-                            }
-                            egc_x += egc_w;
-                        }
-
-                        let right_half = x >= glyph.x + glyph.w / 2.0;
-                        if right_half != glyph.level.is_rtl() {
-                            // If clicking on last half of glyph, move cursor past glyph
-                            new_cursor_char = cluster.len();
-                            new_cursor_affinity = Affinity::Before;
-                        }
-                        break 'hit;
-                    }
-                }
-
-                let mut new_cursor = Cursor::new(run.line_i, 0);
-
-                match run.glyphs.get(new_cursor_glyph) {
-                    Some(glyph) => {
-                        // Position at glyph
-                        new_cursor.index = glyph.start + new_cursor_char;
-                        new_cursor.affinity = new_cursor_affinity;
-                    }
-                    None => {
-                        if let Some(glyph) = run.glyphs.last() {
-                            // Position at end of line
-                            new_cursor.index = glyph.end;
-                            new_cursor.affinity = Affinity::Before;
-                        }
-                    }
-                }
-
-                new_cursor_opt = Some(new_cursor);
-
-                break;
-            } else if runs.peek().is_none() && y > run.line_y {
-                let mut new_cursor = Cursor::new(run.line_i, 0);
-                if let Some(glyph) = run.glyphs.last() {
-                    new_cursor = run.cursor_from_glyph_right(glyph);
-                }
-                new_cursor_opt = Some(new_cursor);
+            if run_index == 0 && strike_y < line_top {
+                // hit above top line
+                break 'hit Some(Cursor::new(run.line_i, 0));
             }
-        }
+
+            let line_bot = line_top + run.line_height();
+
+            if run_index == last_run_index && strike_y >= line_bot {
+                // hit below bottom line
+                match run.glyphs.last() {
+                    Some(glyph) => break 'hit Some(run.cursor_from_glyph_right(glyph)),
+                    None => break 'hit Some(Cursor::new(run.line_i, 0)),
+                }
+            }
+
+            println!("{run_index}: [{line_top} .. {line_bot}]");
+
+            if (line_top..line_bot).contains(&strike_y) {
+                println!(
+                    "-> hit on line {run_index} \"{run_text}\"",
+                    run_text = run.text
+                );
+
+                let last_glyph_index = run.glyphs.len() - 1;
+
+                // TODO: is this assumption correct with rtl?
+                let (left_glyph_index, right_glyph_index) = if run.rtl {
+                    (last_glyph_index, 0)
+                } else {
+                    (0, last_glyph_index)
+                };
+
+                // TODO: check Arabic
+                for (glyph_index, glyph) in run.glyphs.iter().enumerate() {
+                    let glyph_left = glyph.x;
+
+                    if glyph_index == left_glyph_index && strike_x < glyph_left {
+                        // hit left of left-most glyph in line
+                        break 'hit Some(Cursor::new(run.line_i, 0));
+                    }
+
+                    let glyph_right = glyph_left + glyph.w;
+
+                    if glyph_index == right_glyph_index && strike_x >= glyph_right {
+                        // hit right of right-most glyph in line
+                        break 'hit Some(run.cursor_from_glyph_right(glyph));
+                    }
+
+                    // let glyph_mid = glyph_left + glyph.w / 2.0;
+
+                    // println!("{glyph_index}: [{glyph_left} .. {glyph_mid} .. {glyph_right}]");
+
+                    // let hit_glyph = if (glyph_left..glyph_mid).contains(&strike_x) {
+                    //     // hit left half of glyph
+                    //     println!("-> hit on glyph {glyph_index} (left half)");
+                    //     Some(true)
+                    // } else if (glyph_mid..glyph_right).contains(&strike_x) {
+                    //     // hit right half of glyph
+                    //     println!("-> hit on glyph {glyph_index} (right half)");
+                    //     Some(false)
+                    // } else {
+                    //     None
+                    // };
+
+                    // if let Some(glyph_left_half) = hit_glyph {
+                    if (glyph_left..glyph_right).contains(&strike_x) {
+                        let cluster = &run.text[glyph.start..glyph.end];
+                        println!(
+                            "--> hit on glyph with value \"{cluster}\" [{len}]",
+                            len = cluster.len()
+                        );
+
+                        let total = cluster.graphemes(true).count();
+                        let last_egc_index = total - 1;
+                        let egc_w = glyph.w / (total as f32);
+                        dbg!(egc_w, total);
+                        let mut egc_left = glyph_left;
+
+                        // TODO: is this assumption correct with rtl?
+                        let (left_egc_index, right_egc_index) = if glyph.level.is_rtl() {
+                            (last_egc_index, 0)
+                        } else {
+                            (0, last_egc_index)
+                        };
+
+                        for (egc_index, (egc_start, egc)) in
+                            cluster.grapheme_indices(true).enumerate()
+                        {
+                            let egc_end = egc_start + egc.len();
+                            if egc_start != 0 {
+                                dbg!(egc_start);
+                            }
+
+                            let (left_egc_byte, right_egc_byte) = if glyph.level.is_rtl() {
+                                (glyph.start + egc_end, glyph.start + egc_start)
+                            } else {
+                                (glyph.start + egc_start, glyph.start + egc_end)
+                            };
+
+                            if egc_index == left_egc_index && strike_x < egc_left {
+                                // hit left of left-most egc in cluster
+                                println!("-> hit left of left-most egc in cluster");
+                                break 'hit Some(Cursor::new(run.line_i, left_egc_byte));
+                            }
+
+                            let egc_right = egc_left + egc_w;
+
+                            if egc_index == right_egc_index && strike_x >= egc_right {
+                                // hit right of right-most egc in cluster
+                                println!("-> hit right of right-most egc in cluster");
+                                break 'hit Some(Cursor::new(run.line_i, right_egc_byte));
+                            }
+
+                            let egc_mid = egc_left + egc_w / 2.0;
+
+                            println!("{egc_index}: [{egc_left} .. {egc_mid} .. {egc_right}]");
+
+                            let hit_egc = if (egc_left..egc_mid).contains(&strike_x) {
+                                // hit left half of egc
+                                println!("-> hit on egc {egc_index} (left half)");
+                                Some(true)
+                            } else if (egc_mid..egc_right).contains(&strike_x) {
+                                // hit right half of egc
+                                println!("-> hit on egc {egc_index} (right half)");
+                                Some(false)
+                            } else {
+                                None
+                            };
+
+                            if let Some(egc_left_half) = hit_egc {
+                                println!("--> hit on egc with value \"{egc}\"");
+                                break 'hit Some(Cursor::new(
+                                    run.line_i,
+                                    if egc_left_half {
+                                        left_egc_byte
+                                    } else {
+                                        right_egc_byte
+                                    },
+                                ));
+                            }
+
+                            egc_left = egc_right;
+                        }
+                    }
+                }
+            }
+
+            line_top = line_bot;
+        };
 
         #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
-        log::trace!("click({}, {}): {:?}", x, y, instant.elapsed());
+        log::trace!("click({}, {}): {:?}", strike_x, strike_y, instant.elapsed());
 
-        new_cursor_opt
+        cursor
     }
 
     /// Draw the buffer
