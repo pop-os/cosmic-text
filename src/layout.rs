@@ -72,7 +72,7 @@ impl LayoutGlyph {
             self.font_size * scale,
             (
                 (self.x + x_offset) * scale + offset.0,
-                ((self.y - y_offset) * scale + offset.1).trunc(), // Hinting in Y axis
+                libm::truncf((self.y - y_offset) * scale + offset.1), // Hinting in Y axis
             ),
         );
 
