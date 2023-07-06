@@ -1,7 +1,7 @@
 [package]
 name = "cosmic-text"
 description = "Pure Rust multi-line text handling"
-version = "0.8.0"
+version = "0.9.0"
 authors = ["Jeremy Soller <jeremy@system76.com>"]
 edition = "2021"
 license = "MIT OR Apache-2.0"
