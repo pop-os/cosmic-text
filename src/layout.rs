@@ -14,19 +14,24 @@ pub struct LayoutGlyph {
     pub start: usize,
     /// End index of cluster in original line
     pub end: usize,
+    /// Font size of the glyph
+    pub font_size: f32,
+    /// Font id of the glyph
+    pub font_id: fontdb::ID,
+    /// Font id of the glyph
+    pub glyph_id: u16,
     /// X offset of hitbox
     pub x: f32,
-    /// width of hitbox
+    /// Y offset of hitbox
+    pub y: f32,
+    /// Width of hitbox
     pub w: f32,
     /// Unicode BiDi embedding level, character is left-to-right if `level` is divisible by 2
     pub level: unicode_bidi::Level,
-    /// Cache key, see [CacheKey]
-    pub cache_key: CacheKey,
     /// X offset in line
     ///
-    /// If you are dealing with physical coordinates, you will want to use [`Self::x_int`]
-    /// together with [`CacheKey::x_bin`] instead. This will ensure the best alignment of the
-    /// rasterized glyphs with the pixel grid.
+    /// If you are dealing with physical coordinates, use [`Self::physical`] to obtain a
+    /// [`PhysicalGlyph`] for rendering.
     ///
     /// This offset is useful when you are dealing with logical units and you do not care or
     /// cannot guarantee pixel grid alignment. For instance, when you want to use the glyphs
@@ -34,22 +39,45 @@ pub struct LayoutGlyph {
     pub x_offset: f32,
     /// Y offset in line
     ///
-    /// If you are dealing with physical coordinates, you will want to use [`Self::y_int`]
-    /// together with [`CacheKey::y_bin`] instead. This will ensure the best alignment of the
-    /// rasterized glyphs with the pixel grid.
+    /// If you are dealing with physical coordinates, use [`Self::physical`] to obtain a
+    /// [`PhysicalGlyph`] for rendering.
     ///
     /// This offset is useful when you are dealing with logical units and you do not care or
     /// cannot guarantee pixel grid alignment. For instance, when you want to use the glyphs
     /// for vectorial text, apply linear transformations to the layout, etc.
     pub y_offset: f32,
-    /// Integer component of X offset in line
-    pub x_int: i32,
-    /// Integer component of Y offset in line
-    pub y_int: i32,
     /// Optional color override
     pub color_opt: Option<Color>,
     /// Metadata from `Attrs`
     pub metadata: usize,
+}
+
+pub struct PhysicalGlyph {
+    /// Cache key, see [CacheKey]
+    pub cache_key: CacheKey,
+    /// Integer component of X offset in line
+    pub x: i32,
+    /// Integer component of Y offset in line
+    pub y: i32,
+}
+
+impl LayoutGlyph {
+    pub fn physical(&self, offset: (f32, f32), scale: f32) -> PhysicalGlyph {
+        let x_offset = self.font_size * self.x_offset;
+        let y_offset = self.font_size * self.y_offset;
+
+        let (cache_key, x, y) = CacheKey::new(
+            self.font_id,
+            self.glyph_id,
+            self.font_size * scale,
+            (
+                (self.x + x_offset) * scale + offset.0,
+                libm::truncf((self.y - y_offset) * scale + offset.1), // Hinting in Y axis
+            ),
+        );
+
+        PhysicalGlyph { cache_key, x, y }
+    }
 }
 
 /// A line of laid out glyphs
