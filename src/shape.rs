@@ -1001,6 +1001,7 @@ impl ShapeLine {
                 (Align::Right, true) => 0.,
                 (Align::Right, false) => line_width - visual_line.w,
                 (Align::Center, _) => (line_width - visual_line.w) / 2.0,
+                (Align::End, _) => line_width - visual_line.w,
                 (Align::Justified, _) => {
                     // Don't justify the last line in a paragraph.
                     if visual_line.spaces > 0 && index != number_of_visual_lines - 1 {
