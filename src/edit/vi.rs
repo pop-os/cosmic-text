@@ -16,6 +16,7 @@ enum Mode {
     SearchBackwards,
 }
 
+#[derive(Debug)]
 pub struct ViEditor<'a> {
     editor: SyntaxEditor<'a>,
     mode: Mode,

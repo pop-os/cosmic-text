@@ -4,6 +4,7 @@ use unicode_bidi::{bidi_class, BidiClass, BidiInfo, ParagraphInfo};
 
 /// An iterator over the paragraphs in the input text.
 /// It is equivalent to [`core::str::Lines`] but follows `unicode-bidi` behaviour.
+#[derive(Debug)]
 pub struct BidiParagraphs<'text> {
     text: &'text str,
     info: alloc::vec::IntoIter<ParagraphInfo>,

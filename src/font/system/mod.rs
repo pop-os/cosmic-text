@@ -15,6 +15,7 @@ pub use fontdb;
 pub use rustybuzz;
 
 /// A value borrowed together with an [`FontSystem`]
+#[derive(Debug)]
 pub struct BorrowedWithFontSystem<'a, T> {
     pub(crate) inner: &'a mut T,
     pub(crate) font_system: &'a mut FontSystem,

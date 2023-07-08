@@ -12,6 +12,7 @@ use crate::{
     Shaping, Style, Weight, Wrap,
 };
 
+#[derive(Debug)]
 pub struct SyntaxSystem {
     pub syntax_set: SyntaxSet,
     pub theme_set: ThemeSet,
@@ -29,6 +30,7 @@ impl SyntaxSystem {
 }
 
 /// A wrapper of [`Editor`] with syntax highlighting provided by [`SyntaxSystem`]
+#[derive(Debug)]
 pub struct SyntaxEditor<'a> {
     editor: Editor,
     syntax_system: &'a SyntaxSystem,

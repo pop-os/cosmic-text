@@ -14,6 +14,7 @@ pub use font_inner::Font;
 mod font_inner {
     use super::*;
     use aliasable::boxed::AliasableBox;
+    use core::fmt;
 
     /// A font
     //
@@ -29,6 +30,14 @@ mod font_inner {
         // there would be a dangling reference when dropping rustybuzz.
         data: aliasable::boxed::AliasableBox<Arc<dyn AsRef<[u8]> + Send + Sync>>,
         id: fontdb::ID,
+    }
+
+    impl fmt::Debug for Font {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            f.debug_struct("Font")
+                .field("id", &self.id)
+                .finish_non_exhaustive()
+        }
     }
 
     pub(super) struct FontTryBuilder<

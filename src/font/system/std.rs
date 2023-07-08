@@ -5,6 +5,7 @@ use std::{collections::HashMap, sync::Arc};
 use crate::{Attrs, AttrsOwned, Font};
 
 /// Access system fonts
+#[derive(Debug)]
 pub struct FontSystem {
     locale: String,
     db: fontdb::Database,

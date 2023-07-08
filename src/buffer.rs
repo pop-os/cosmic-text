@@ -93,6 +93,7 @@ impl Default for Affinity {
 }
 
 /// The position of a cursor within a [`Buffer`].
+#[derive(Debug)]
 pub struct LayoutCursor {
     pub line: usize,
     pub layout: usize,
@@ -110,6 +111,7 @@ impl LayoutCursor {
 }
 
 /// A line of visible text for rendering
+#[derive(Debug)]
 pub struct LayoutRun<'a> {
     /// The index of the original text line
     pub line_i: usize,
@@ -184,6 +186,7 @@ impl<'a> LayoutRun<'a> {
 }
 
 /// An iterator of visible text lines, see [`LayoutRun`]
+#[derive(Debug)]
 pub struct LayoutRunIter<'b> {
     buffer: &'b Buffer,
     line_i: usize,
@@ -316,6 +319,7 @@ impl fmt::Display for Metrics {
 }
 
 /// A buffer of text that is shaped and laid out
+#[derive(Debug)]
 pub struct Buffer {
     /// [BufferLine]s (or paragraphs) of text in the buffer
     pub lines: Vec<BufferLine>,

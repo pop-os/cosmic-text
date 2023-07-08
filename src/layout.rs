@@ -52,6 +52,7 @@ pub struct LayoutGlyph {
     pub metadata: usize,
 }
 
+#[derive(Debug)]
 pub struct PhysicalGlyph {
     /// Cache key, see [CacheKey]
     pub cache_key: CacheKey,
@@ -81,6 +82,7 @@ impl LayoutGlyph {
 }
 
 /// A line of laid out glyphs
+#[derive(Debug)]
 pub struct LayoutLine {
     /// Width of the line
     pub w: f32,
