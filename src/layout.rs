@@ -120,6 +120,7 @@ pub enum Align {
     Right,
     Center,
     Justified,
+    End,
 }
 
 impl Display for Align {
@@ -129,6 +130,7 @@ impl Display for Align {
             Self::Right => write!(f, "Right"),
             Self::Center => write!(f, "Center"),
             Self::Justified => write!(f, "Justified"),
+            Self::End => write!(f, "End"),
         }
     }
 }
