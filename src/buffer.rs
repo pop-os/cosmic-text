@@ -10,7 +10,7 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
     Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem, BufferLine, Color, FontSystem,
-    LayoutGlyph, LayoutLine, ShapeLine, Shaping, Wrap,
+    LayoutGlyph, LayoutLine, ShapeBuffer, ShapeLine, Shaping, Wrap,
 };
 
 /// Current cursor location
@@ -330,6 +330,9 @@ pub struct Buffer {
     /// True if a redraw is requires. Set to false after processing
     redraw: bool,
     wrap: Wrap,
+
+    /// Scratch buffer for shaping and laying out.
+    scratch: ShapeBuffer,
 }
 
 impl Buffer {
@@ -354,6 +357,7 @@ impl Buffer {
             scroll: 0,
             redraw: false,
             wrap: Wrap::Word,
+            scratch: ShapeBuffer::default(),
         }
     }
 
@@ -411,7 +415,13 @@ impl Buffer {
             if line.shape_opt().is_none() {
                 reshaped += 1;
             }
-            let layout = line.layout(font_system, self.metrics.font_size, self.width, self.wrap);
+            let layout = line.layout_in_buffer(
+                &mut self.scratch,
+                font_system,
+                self.metrics.font_size,
+                self.width,
+                self.wrap,
+            );
             total_layout += layout.len() as i32;
         }
 
@@ -439,7 +449,13 @@ impl Buffer {
             if line.shape_opt().is_none() {
                 reshaped += 1;
             }
-            let layout = line.layout(font_system, self.metrics.font_size, self.width, self.wrap);
+            let layout = line.layout_in_buffer(
+                &mut self.scratch,
+                font_system,
+                self.metrics.font_size,
+                self.width,
+                self.wrap,
+            );
             if line_i == cursor.line {
                 let layout_cursor = self.layout_cursor(&cursor);
                 layout_i += layout_cursor.layout as i32;

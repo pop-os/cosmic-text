@@ -1,7 +1,7 @@
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, vec::Vec};
 
-use crate::{Align, AttrsList, FontSystem, LayoutLine, ShapeLine, Shaping, Wrap};
+use crate::{Align, AttrsList, FontSystem, LayoutLine, ShapeBuffer, ShapeLine, Shaping, Wrap};
 
 /// A line (or paragraph) of text that is shaped and laid out
 #[derive(Debug)]
@@ -169,8 +169,18 @@ impl BufferLine {
 
     /// Shape line, will cache results
     pub fn shape(&mut self, font_system: &mut FontSystem) -> &ShapeLine {
+        self.shape_in_buffer(&mut ShapeBuffer::default(), font_system)
+    }
+
+    /// Shape a line using a pre-existing shape buffer.
+    pub fn shape_in_buffer(
+        &mut self,
+        scratch: &mut ShapeBuffer,
+        font_system: &mut FontSystem,
+    ) -> &ShapeLine {
         if self.shape_opt.is_none() {
-            self.shape_opt = Some(ShapeLine::new(
+            self.shape_opt = Some(ShapeLine::new_in_buffer(
+                scratch,
                 font_system,
                 &self.text,
                 &self.attrs_list,
@@ -199,6 +209,26 @@ impl BufferLine {
             let align = self.align;
             let shape = self.shape(font_system);
             let layout = shape.layout(font_size, width, wrap, align);
+            self.layout_opt = Some(layout);
+        }
+        self.layout_opt.as_ref().expect("layout not found")
+    }
+
+    /// Layout a line using a pre-existing shape buffer.
+    pub fn layout_in_buffer(
+        &mut self,
+        scratch: &mut ShapeBuffer,
+        font_system: &mut FontSystem,
+        font_size: f32,
+        width: f32,
+        wrap: Wrap,
+    ) -> &[LayoutLine] {
+        if self.layout_opt.is_none() {
+            self.wrap = wrap;
+            let align = self.align;
+            let shape = self.shape_in_buffer(scratch, font_system);
+            let mut layout = Vec::with_capacity(1);
+            shape.layout_to_buffer(scratch, font_size, width, wrap, align, &mut layout);
             self.layout_opt = Some(layout);
         }
         self.layout_opt.as_ref().expect("layout not found")

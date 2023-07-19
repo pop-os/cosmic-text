@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+#![allow(clippy::too_many_arguments)]
+
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 use core::cmp::{max, min};
@@ -34,38 +36,62 @@ pub enum Shaping {
 impl Shaping {
     fn run(
         self,
+        scratch: &mut ShapeBuffer,
+        glyphs: &mut Vec<ShapeGlyph>,
         font_system: &mut FontSystem,
         line: &str,
         attrs_list: &AttrsList,
         start_run: usize,
         end_run: usize,
         span_rtl: bool,
-    ) -> Vec<ShapeGlyph> {
+    ) {
         match self {
             #[cfg(feature = "swash")]
-            Self::Basic => shape_skip(font_system, line, attrs_list, start_run, end_run),
-            Self::Advanced => {
-                shape_run(font_system, line, attrs_list, start_run, end_run, span_rtl)
-            }
+            Self::Basic => shape_skip(font_system, glyphs, line, attrs_list, start_run, end_run),
+            Self::Advanced => shape_run(
+                scratch,
+                glyphs,
+                font_system,
+                line,
+                attrs_list,
+                start_run,
+                end_run,
+                span_rtl,
+            ),
         }
     }
 }
 
+/// A set of buffers containing allocations for shaped text.
+#[derive(Default)]
+pub struct ShapeBuffer {
+    /// Buffer for holding unicode text.
+    rustybuzz_buffer: Option<rustybuzz::UnicodeBuffer>,
+
+    /// Temporary buffers for scripts.
+    scripts: Vec<Script>,
+
+    /// Buffer for visual lines.
+    visual_lines: Vec<VisualLine>,
+}
+
 fn shape_fallback(
+    scratch: &mut ShapeBuffer,
+    glyphs: &mut Vec<ShapeGlyph>,
     font: &Font,
     line: &str,
     attrs_list: &AttrsList,
     start_run: usize,
     end_run: usize,
     span_rtl: bool,
-) -> (Vec<ShapeGlyph>, Vec<usize>) {
+) -> Vec<usize> {
     let run = &line[start_run..end_run];
 
     let font_scale = font.rustybuzz().units_per_em() as f32;
     let ascent = font.rustybuzz().ascender() as f32 / font_scale;
     let descent = -font.rustybuzz().descender() as f32 / font_scale;
 
-    let mut buffer = rustybuzz::UnicodeBuffer::new();
+    let mut buffer = scratch.rustybuzz_buffer.take().unwrap_or_default();
     buffer.set_direction(if span_rtl {
         rustybuzz::Direction::RightToLeft
     } else {
@@ -82,7 +108,8 @@ fn shape_fallback(
     let glyph_positions = glyph_buffer.glyph_positions();
 
     let mut missing = Vec::new();
-    let mut glyphs = Vec::with_capacity(glyph_infos.len());
+    glyphs.reserve(glyph_infos.len());
+    let glyph_start = glyphs.len();
     for (info, pos) in glyph_infos.iter().zip(glyph_positions.iter()) {
         let x_advance = pos.x_advance as f32 / font_scale;
         let y_advance = pos.y_advance as f32 / font_scale;
@@ -115,7 +142,7 @@ fn shape_fallback(
 
     // Adjust end of glyphs
     if rtl {
-        for i in 1..glyphs.len() {
+        for i in glyph_start + 1..glyphs.len() {
             let next_start = glyphs[i - 1].start;
             let next_end = glyphs[i - 1].end;
             let prev = &mut glyphs[i];
@@ -126,7 +153,7 @@ fn shape_fallback(
             }
         }
     } else {
-        for i in (1..glyphs.len()).rev() {
+        for i in (glyph_start + 1..glyphs.len()).rev() {
             let next_start = glyphs[i].start;
             let next_end = glyphs[i].end;
             let prev = &mut glyphs[i - 1];
@@ -138,19 +165,28 @@ fn shape_fallback(
         }
     }
 
-    (glyphs, missing)
+    // Restore the buffer to save an allocation.
+    scratch.rustybuzz_buffer = Some(glyph_buffer.clear());
+
+    missing
 }
 
 fn shape_run(
+    scratch: &mut ShapeBuffer,
+    glyphs: &mut Vec<ShapeGlyph>,
     font_system: &mut FontSystem,
     line: &str,
     attrs_list: &AttrsList,
     start_run: usize,
     end_run: usize,
     span_rtl: bool,
-) -> Vec<ShapeGlyph> {
-    //TODO: use smallvec?
-    let mut scripts = Vec::new();
+) {
+    // Re-use the previous script buffer if possible.
+    let mut scripts = {
+        let mut scripts = mem::take(&mut scratch.scripts);
+        scripts.clear();
+        scripts
+    };
     for c in line[start_run..end_run].chars() {
         match c.script() {
             Script::Common | Script::Inherited | Script::Latin | Script::Unknown => (),
@@ -162,19 +198,25 @@ fn shape_run(
         }
     }
 
-    log::trace!("      Run {:?}: '{}'", scripts, &line[start_run..end_run],);
+    log::trace!(
+        "      Run {:?}: '{}'",
+        &scratch.scripts,
+        &line[start_run..end_run],
+    );
 
     let attrs = attrs_list.get_span(start_run);
 
     let fonts = font_system.get_font_matches(attrs);
 
     let default_families = [&attrs.family];
-    let mut font_iter = FontFallbackIter::new(font_system, &fonts, &default_families, scripts);
+    let mut font_iter = FontFallbackIter::new(font_system, &fonts, &default_families, &scripts);
 
     let font = font_iter.next().expect("no default font found");
 
-    let (mut glyphs, mut missing) =
-        shape_fallback(&font, line, attrs_list, start_run, end_run, span_rtl);
+    let glyph_start = glyphs.len();
+    let mut missing = shape_fallback(
+        scratch, glyphs, &font, line, attrs_list, start_run, end_run, span_rtl,
+    );
 
     //TODO: improve performance!
     while !missing.is_empty() {
@@ -187,8 +229,17 @@ fn shape_run(
             "Evaluating fallback with font '{}'",
             font_iter.face_name(font.id())
         );
-        let (mut fb_glyphs, fb_missing) =
-            shape_fallback(&font, line, attrs_list, start_run, end_run, span_rtl);
+        let mut fb_glyphs = Vec::new();
+        let fb_missing = shape_fallback(
+            scratch,
+            &mut fb_glyphs,
+            &font,
+            line,
+            attrs_list,
+            start_run,
+            end_run,
+            span_rtl,
+        );
 
         // Insert all matching glyphs
         let mut fb_i = 0;
@@ -213,7 +264,7 @@ fn shape_run(
             }
 
             // Find prior glyphs
-            let mut i = 0;
+            let mut i = glyph_start;
             while i < glyphs.len() {
                 if glyphs[i].start >= start && glyphs[i].end <= end {
                     break;
@@ -254,22 +305,24 @@ fn shape_run(
     }
     */
 
-    glyphs
+    // Restore the scripts buffer.
+    scratch.scripts = scripts;
 }
 
 #[cfg(feature = "swash")]
 fn shape_skip(
     font_system: &mut FontSystem,
+    glyphs: &mut Vec<ShapeGlyph>,
     line: &str,
     attrs_list: &AttrsList,
     start_run: usize,
     end_run: usize,
-) -> Vec<ShapeGlyph> {
+) {
     let attrs = attrs_list.get_span(start_run);
     let fonts = font_system.get_font_matches(attrs);
 
     let default_families = [&attrs.family];
-    let mut font_iter = FontFallbackIter::new(font_system, &fonts, &default_families, Vec::new());
+    let mut font_iter = FontFallbackIter::new(font_system, &fonts, &default_families, &[]);
 
     let font = font_iter.next().expect("no default font found");
     let font_id = font.id();
@@ -282,29 +335,30 @@ fn shape_skip(
     let ascent = metrics.ascent / f32::from(metrics.units_per_em);
     let descent = metrics.descent / f32::from(metrics.units_per_em);
 
-    line[start_run..end_run]
-        .chars()
-        .enumerate()
-        .map(|(i, codepoint)| {
-            let glyph_id = charmap.map(codepoint);
-            let x_advance = glyph_metrics.advance_width(glyph_id);
+    glyphs.extend(
+        line[start_run..end_run]
+            .chars()
+            .enumerate()
+            .map(|(i, codepoint)| {
+                let glyph_id = charmap.map(codepoint);
+                let x_advance = glyph_metrics.advance_width(glyph_id);
 
-            ShapeGlyph {
-                start: i,
-                end: i + 1,
-                x_advance,
-                y_advance: 0.0,
-                x_offset: 0.0,
-                y_offset: 0.0,
-                ascent,
-                descent,
-                font_id,
-                glyph_id,
-                color_opt: attrs.color_opt,
-                metadata: attrs.metadata,
-            }
-        })
-        .collect()
+                ShapeGlyph {
+                    start: i,
+                    end: i + 1,
+                    x_advance,
+                    y_advance: 0.0,
+                    x_offset: 0.0,
+                    y_offset: 0.0,
+                    ascent,
+                    descent,
+                    font_id,
+                    glyph_id,
+                    color_opt: attrs.color_opt,
+                    metadata: attrs.metadata,
+                }
+            }),
+    );
 }
 
 /// A shaped glyph
@@ -370,6 +424,30 @@ impl ShapeWord {
         blank: bool,
         shaping: Shaping,
     ) -> Self {
+        Self::new_in_buffer(
+            &mut ShapeBuffer::default(),
+            font_system,
+            line,
+            attrs_list,
+            word_range,
+            level,
+            blank,
+            shaping,
+        )
+    }
+
+    /// Shape a word into a set of glyphs, using a scratch buffer.
+    #[allow(clippy::too_many_arguments)]
+    pub fn new_in_buffer(
+        scratch: &mut ShapeBuffer,
+        font_system: &mut FontSystem,
+        line: &str,
+        attrs_list: &AttrsList,
+        word_range: Range<usize>,
+        level: unicode_bidi::Level,
+        blank: bool,
+        shaping: Shaping,
+    ) -> Self {
         let word = &line[word_range.clone()];
 
         log::trace!(
@@ -387,30 +465,32 @@ impl ShapeWord {
             let start_egc = word_range.start + egc_i;
             let attrs_egc = attrs_list.get_span(start_egc);
             if !attrs.compatible(&attrs_egc) {
-                //TODO: more efficient
-                glyphs.append(&mut shaping.run(
+                shaping.run(
+                    scratch,
+                    &mut glyphs,
                     font_system,
                     line,
                     attrs_list,
                     start_run,
                     start_egc,
                     span_rtl,
-                ));
+                );
 
                 start_run = start_egc;
                 attrs = attrs_egc;
             }
         }
         if start_run < word_range.end {
-            //TODO: more efficient
-            glyphs.append(&mut shaping.run(
+            shaping.run(
+                scratch,
+                &mut glyphs,
                 font_system,
                 line,
                 attrs_list,
                 start_run,
                 word_range.end,
                 span_rtl,
-            ));
+            );
         }
 
         let mut x_advance = 0.0;
@@ -446,6 +526,29 @@ impl ShapeSpan {
         level: unicode_bidi::Level,
         shaping: Shaping,
     ) -> Self {
+        Self::new_in_buffer(
+            &mut ShapeBuffer::default(),
+            font_system,
+            line,
+            attrs_list,
+            span_range,
+            line_rtl,
+            level,
+            shaping,
+        )
+    }
+
+    /// Shape a span into a set of words, using a scratch buffer.
+    pub fn new_in_buffer(
+        scratch: &mut ShapeBuffer,
+        font_system: &mut FontSystem,
+        line: &str,
+        attrs_list: &AttrsList,
+        span_range: Range<usize>,
+        line_rtl: bool,
+        level: unicode_bidi::Level,
+        shaping: Shaping,
+    ) -> Self {
         let span = &line[span_range.start..span_range.end];
 
         log::trace!(
@@ -468,7 +571,8 @@ impl ShapeSpan {
                 }
             }
             if start_word < start_lb {
-                words.push(ShapeWord::new(
+                words.push(ShapeWord::new_in_buffer(
+                    scratch,
                     font_system,
                     line,
                     attrs_list,
@@ -481,7 +585,8 @@ impl ShapeSpan {
             if start_lb < end_lb {
                 for (i, c) in span[start_lb..end_lb].char_indices() {
                     // assert!(c.is_whitespace());
-                    words.push(ShapeWord::new(
+                    words.push(ShapeWord::new_in_buffer(
+                        scratch,
                         font_system,
                         line,
                         attrs_list,
@@ -539,6 +644,27 @@ impl ShapeLine {
         attrs_list: &AttrsList,
         shaping: Shaping,
     ) -> Self {
+        Self::new_in_buffer(
+            &mut ShapeBuffer::default(),
+            font_system,
+            line,
+            attrs_list,
+            shaping,
+        )
+    }
+
+    /// Shape a line into a set of spans, using a scratch buffer.
+    ///
+    /// # Panics
+    ///
+    /// Will panic if `line` contains more than one paragraph.
+    pub fn new_in_buffer(
+        scratch: &mut ShapeBuffer,
+        font_system: &mut FontSystem,
+        line: &str,
+        attrs_list: &AttrsList,
+        shaping: Shaping,
+    ) -> Self {
         let mut spans = Vec::new();
 
         let bidi = unicode_bidi::BidiInfo::new(line, None);
@@ -558,6 +684,7 @@ impl ShapeLine {
             // Each span is a set of characters with equal levels.
             let mut start = line_range.start;
             let mut run_level = levels[start];
+            spans.reserve(line_range.end - start + 1);
 
             for (i, &new_level) in levels
                 .iter()
@@ -567,7 +694,8 @@ impl ShapeLine {
             {
                 if new_level != run_level {
                     // End of the previous run, start of a new one.
-                    spans.push(ShapeSpan::new(
+                    spans.push(ShapeSpan::new_in_buffer(
+                        scratch,
                         font_system,
                         line,
                         attrs_list,
@@ -580,7 +708,8 @@ impl ShapeLine {
                     run_level = new_level;
                 }
             }
-            spans.push(ShapeSpan::new(
+            spans.push(ShapeSpan::new_in_buffer(
+                scratch,
                 font_system,
                 line,
                 attrs_list,
@@ -719,8 +848,27 @@ impl ShapeLine {
         wrap: Wrap,
         align: Option<Align>,
     ) -> Vec<LayoutLine> {
-        let mut layout_lines = Vec::with_capacity(1);
+        let mut lines = Vec::with_capacity(1);
+        self.layout_to_buffer(
+            &mut ShapeBuffer::default(),
+            font_size,
+            line_width,
+            wrap,
+            align,
+            &mut lines,
+        );
+        lines
+    }
 
+    pub fn layout_to_buffer(
+        &self,
+        scratch: &mut ShapeBuffer,
+        font_size: f32,
+        line_width: f32,
+        wrap: Wrap,
+        align: Option<Align>,
+        layout_lines: &mut Vec<LayoutLine>,
+    ) {
         let align = align.unwrap_or({
             if self.rtl {
                 Align::Right
@@ -735,7 +883,11 @@ impl ShapeLine {
         // For each visual line a list of  (span index,  and range of words in that span)
         // Note that a BiDi visual line could have multiple spans or parts of them
         // let mut vl_range_of_spans = Vec::with_capacity(1);
-        let mut visual_lines: Vec<VisualLine> = Vec::with_capacity(1);
+        let mut visual_lines: Vec<VisualLine> = {
+            let mut visual_lines = mem::take(&mut scratch.visual_lines);
+            visual_lines.clear();
+            visual_lines
+        };
 
         fn add_to_visual_line(
             vl: &mut VisualLine,
@@ -1193,6 +1345,7 @@ impl ShapeLine {
             });
         }
 
-        layout_lines
+        // Restore the buffer to the scratch set to prevent reallocations.
+        scratch.visual_lines = visual_lines;
     }
 }
