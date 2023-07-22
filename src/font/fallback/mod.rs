@@ -26,6 +26,11 @@ mod platform;
 #[path = "windows.rs"]
 mod platform;
 
+#[cfg(not(feature = "warn_on_missing_glyphs"))]
+use log::debug as missing_warn;
+#[cfg(feature = "warn_on_missing_glyphs")]
+use log::warn as missing_warn;
+
 pub struct FontFallbackIter<'a> {
     font_system: &'a mut FontSystem,
     font_ids: &'a [fontdb::ID],
@@ -60,14 +65,14 @@ impl<'a> FontFallbackIter<'a> {
 
     pub fn check_missing(&mut self, word: &str) {
         if self.end {
-            log::warn!(
+            missing_warn!(
                 "Failed to find any fallback for {:?} locale '{}': '{}'",
                 self.scripts,
                 self.font_system.locale(),
                 word
             );
         } else if self.other_i > 0 {
-            log::warn!(
+            missing_warn!(
                 "Failed to find preset fallback for {:?} locale '{}', used '{}': '{}'",
                 self.scripts,
                 self.font_system.locale(),
@@ -76,7 +81,7 @@ impl<'a> FontFallbackIter<'a> {
             );
         } else if !self.scripts.is_empty() && self.common_i > 0 {
             let family = common_fallback()[self.common_i - 1];
-            log::warn!(
+            missing_warn!(
                 "Failed to find script fallback for {:?} locale '{}', used '{}': '{}'",
                 self.scripts,
                 self.font_system.locale(),
