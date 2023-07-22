@@ -60,14 +60,14 @@ impl<'a> FontFallbackIter<'a> {
 
     pub fn check_missing(&mut self, word: &str) {
         if self.end {
-            log::debug!(
+            log::warn!(
                 "Failed to find any fallback for {:?} locale '{}': '{}'",
                 self.scripts,
                 self.font_system.locale(),
                 word
             );
         } else if self.other_i > 0 {
-            log::debug!(
+            log::warn!(
                 "Failed to find preset fallback for {:?} locale '{}', used '{}': '{}'",
                 self.scripts,
                 self.font_system.locale(),
@@ -76,7 +76,7 @@ impl<'a> FontFallbackIter<'a> {
             );
         } else if !self.scripts.is_empty() && self.common_i > 0 {
             let family = common_fallback()[self.common_i - 1];
-            log::debug!(
+            log::warn!(
                 "Failed to find script fallback for {:?} locale '{}', used '{}': '{}'",
                 self.scripts,
                 self.font_system.locale(),
