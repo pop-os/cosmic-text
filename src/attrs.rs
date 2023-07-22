@@ -27,6 +27,18 @@ impl Color {
         Self(((a as u32) << 24) | ((r as u32) << 16) | ((g as u32) << 8) | (b as u32))
     }
 
+    /// Get a tuple over all of the attributes, in `(r, g, b, a)` order.
+    #[inline]
+    pub fn as_rgba_tuple(self) -> (u8, u8, u8, u8) {
+        (self.r(), self.g(), self.b(), self.a())
+    }
+
+    /// Get an array over all of the components, in `[r, g, b, a]` order.
+    #[inline]
+    pub fn as_rgba(self) -> [u8; 4] {
+        [self.r(), self.g(), self.b(), self.a()]
+    }
+
     /// Get the red component
     #[inline]
     pub fn r(&self) -> u8 {
