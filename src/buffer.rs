@@ -201,6 +201,7 @@ pub struct LayoutRunIter<'b> {
     line_i: usize,
     layout_i: usize,
     remaining_len: usize,
+    total_layout_height: f32,
     total_layout: i32,
     // TODO: lift this to BufferLine::layout_opt, and take a &'b [f32] slice instead
     line_heights: Vec<f32>,
@@ -208,6 +209,7 @@ pub struct LayoutRunIter<'b> {
 
 impl<'b> LayoutRunIter<'b> {
     pub fn new(buffer: &'b Buffer) -> Self {
+        dbg!(buffer.scroll);
         let line_heights = buffer.line_heights();
         let total_layout_lines = line_heights.len();
         let top_cropped_layout_lines =
@@ -227,12 +229,12 @@ impl<'b> LayoutRunIter<'b> {
             } else {
                 top_cropped_layout_lines
             };
-
         Self {
             buffer,
             line_i: 0,
             layout_i: 0,
             remaining_len: bottom_cropped_layout_lines,
+            total_layout_height: 0.0,
             total_layout: 0,
             line_heights,
         }
@@ -259,10 +261,12 @@ impl<'b> Iterator for LayoutRunIter<'b> {
                     continue;
                 }
                 // TODO: can scroll be negative?
-                let this_line = self.total_layout as usize + self.buffer.scroll as usize - 1;
+                // let this_line = self.total_layout as usize + self.buffer.scroll as usize - 1;
+                let this_line = self.total_layout.saturating_sub(1) as usize;
                 let line_top = self.line_heights[self.buffer.scroll as usize..this_line]
                     .iter()
                     .sum();
+                // dbg!(line_top);
                 let glyph_height = layout_line.max_ascent + layout_line.max_descent;
                 let centering_offset = (self.line_heights[this_line] - glyph_height) / 2.0;
                 let line_y = line_top + centering_offset + layout_line.max_ascent;
@@ -489,12 +493,18 @@ impl Buffer {
 
     /// Shape lines until scroll
     pub fn shape_until_scroll(&mut self, font_system: &mut FontSystem) {
+        println!(
+            "{:?} ======================",
+            std::time::SystemTime::now().duration_since(std::time::SystemTime::UNIX_EPOCH)
+        );
+        println!("visible_lines() called from shape_until_scroll");
         let lines = self.visible_lines();
 
         let scroll_end = self.scroll + lines;
+        dbg!(self.scroll, lines, scroll_end);
         let total_layout = self.shape_until(font_system, scroll_end);
-
-        self.scroll = cmp::max(0, cmp::min(total_layout - (lines - 1), self.scroll));
+        dbg!(total_layout);
+        self.scroll = (total_layout - (lines - 1)).clamp(0, self.scroll);
     }
 
     pub fn layout_cursor(&self, cursor: &Cursor) -> LayoutCursor {
@@ -613,8 +623,23 @@ impl Buffer {
 
     /// Get the number of lines that can be viewed in the buffer
     pub fn visible_lines(&self) -> i32 {
-        // TODO
-        1000_000
+        let mut height = self.height;
+        let line_heights = self.line_heights();
+        if line_heights.is_empty() {
+            // this has never been laid out, so we can't know the height
+            return i32::MAX;
+        }
+        let mut total_height = 0.0;
+        for (i, line_height) in line_heights.iter().skip(self.scroll as usize).enumerate() {
+            println!("{i}: line_height({line_height})");
+            total_height += line_height;
+            height -= line_height;
+            if height <= 0.0 {
+                dbg!(self.scroll, i, total_height);
+                return i as i32;
+            }
+        }
+        1
     }
 
     /// Set text of buffer, using provided attributes for each line by default
