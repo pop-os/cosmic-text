@@ -71,6 +71,8 @@
 #![deny(clippy::cast_ptr_alignment)]
 // Avoid panicking in without information about the panic. Use expect
 #![deny(clippy::unwrap_used)]
+// Ensure all types have a debug impl
+#![deny(missing_debug_implementations)]
 // This is usually a serious issue - a missing import of a define where it is interpreted
 // as a catch-all variable in a match, for example
 #![deny(unreachable_patterns)]

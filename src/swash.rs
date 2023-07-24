@@ -4,6 +4,7 @@
 use alloc::collections::BTreeMap as Map;
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
+use core::fmt;
 #[cfg(feature = "std")]
 use std::collections::HashMap as Map;
 use swash::scale::{image::Content, ScaleContext};
@@ -94,6 +95,12 @@ pub struct SwashCache {
     context: ScaleContext,
     pub image_cache: Map<CacheKey, Option<SwashImage>>,
     pub outline_command_cache: Map<CacheKey, Option<Vec<swash::zeno::Command>>>,
+}
+
+impl fmt::Debug for SwashCache {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.pad("SwashCache { .. }")
+    }
 }
 
 impl SwashCache {

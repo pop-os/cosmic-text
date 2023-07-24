@@ -9,6 +9,7 @@ use alloc::{
 use crate::{Attrs, Font};
 
 /// Access system fonts
+#[derive(Debug)]
 pub struct FontSystem {
     locale: String,
     db: fontdb::Database,
