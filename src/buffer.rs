@@ -626,20 +626,19 @@ impl Buffer {
         let mut height = self.height;
         let line_heights = self.line_heights();
         if line_heights.is_empty() {
-            // this has never been laid out, so we can't know the height
+            // this has never been laid out, so we can't know the height yet
             return i32::MAX;
         }
-        let mut total_height = 0.0;
-        for (i, line_height) in line_heights.iter().skip(self.scroll as usize).enumerate() {
-            println!("{i}: line_height({line_height})");
-            total_height += line_height;
+        let mut i = 0;
+        let mut iter = line_heights.iter().skip(self.scroll as usize);
+        while let Some(line_height) = iter.next() {
             height -= line_height;
             if height <= 0.0 {
-                dbg!(self.scroll, i, total_height);
-                return i as i32;
+                break;
             }
+            i += 1;
         }
-        1
+        i
     }
 
     /// Set text of buffer, using provided attributes for each line by default
