@@ -8,6 +8,7 @@ use unicode_script::Script;
 
 use crate::{Font, FontSystem};
 
+pub(crate) use self::platform::common_fallback;
 use self::platform::*;
 
 #[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "windows",)))]
@@ -80,7 +81,7 @@ impl<'a> FontFallbackIter<'a> {
                 word
             );
         } else if !self.scripts.is_empty() && self.common_i > 0 {
-            let family = common_fallback()[self.common_i - 1];
+            let family = &self.font_system.common_fallbacks()[self.common_i - 1];
             missing_warn!(
                 "Failed to find script fallback for {:?} locale '{}', used '{}': '{}'",
                 self.scripts,
@@ -170,18 +171,21 @@ impl<'a> Iterator for FontFallbackIter<'a> {
             self.script_i.1 = 0;
         }
 
-        let common_families = common_fallback();
-        while self.common_i < common_families.len() {
-            let common_family = common_families[self.common_i];
+        while self.common_i < self.font_system.common_fallbacks().len() {
             self.common_i += 1;
             for id in self.font_ids.iter() {
-                if self.face_contains_family(*id, common_family) {
+                if self
+                    .face_contains_family(*id, &self.font_system.common_fallbacks()[self.common_i])
+                {
                     if let Some(font) = self.font_system.get_font(*id) {
                         return Some(font);
                     }
                 }
             }
-            log::debug!("failed to find family '{}'", common_family);
+            log::debug!(
+                "failed to find family '{}'",
+                self.font_system.common_fallbacks()[self.common_i]
+            );
         }
 
         //TODO: do we need to do this?

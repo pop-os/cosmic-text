@@ -1,4 +1,5 @@
 use crate::{Attrs, AttrsOwned, Font};
+use alloc::borrow::Cow;
 use alloc::string::String;
 use alloc::sync::Arc;
 use alloc::vec::Vec;
@@ -25,6 +26,9 @@ pub struct FontSystem {
 
     /// Cache for font matches.
     font_matches_cache: HashMap<AttrsOwned, Arc<Vec<fontdb::ID>>>,
+
+    /// Common fallback fonts for this system.
+    common_fallbacks: Vec<Cow<'static, str>>,
 }
 
 impl fmt::Debug for FontSystem {
@@ -71,6 +75,11 @@ impl FontSystem {
             db,
             font_cache: HashMap::default(),
             font_matches_cache: HashMap::default(),
+            common_fallbacks: super::fallback::common_fallback()
+                .iter()
+                .copied()
+                .map(Cow::Borrowed)
+                .collect(),
         }
     }
 
@@ -82,6 +91,17 @@ impl FontSystem {
     /// Get the database.
     pub fn db(&self) -> &fontdb::Database {
         &self.db
+    }
+
+    /// Add fallback fonts to this [`FontSystem`].
+    pub fn push_fallbacks(&mut self, fallbacks: impl IntoIterator<Item = String>) {
+        self.common_fallbacks
+            .extend(fallbacks.into_iter().map(Cow::Owned));
+    }
+
+    /// Get the list of fallback fonts for this [`FontSystem`].
+    pub(crate) fn common_fallbacks(&self) -> &[Cow<'static, str>] {
+        &self.common_fallbacks
     }
 
     /// Get a mutable reference to the database.
