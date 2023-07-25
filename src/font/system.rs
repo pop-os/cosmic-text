@@ -1,6 +1,7 @@
 use crate::{Attrs, AttrsOwned, Font};
 use alloc::string::String;
 use alloc::sync::Arc;
+use alloc::vec::Vec;
 use core::fmt;
 use core::hash::BuildHasherDefault;
 use core::ops::{Deref, DerefMut};
@@ -44,7 +45,7 @@ impl FontSystem {
     /// while debug builds can take up to ten times longer. For this reason, it should only be
     /// called once, and the resulting [`FontSystem`] should be shared.
     pub fn new() -> Self {
-        Self::new_with_fonts(std::iter::empty())
+        Self::new_with_fonts(core::iter::empty())
     }
 
     /// Create a new [`FontSystem`] with a pre-specified set of fonts.
@@ -100,6 +101,7 @@ impl FontSystem {
             .entry(id)
             .or_insert_with(|| {
                 unsafe {
+                    #[cfg(feature = "std")]
                     self.db.make_shared_face_data(id);
                 }
                 let face = self.db.face(id)?;
@@ -119,7 +121,7 @@ impl FontSystem {
             //TODO: do not create AttrsOwned unless entry does not already exist
             .entry(AttrsOwned::new(attrs))
             .or_insert_with(|| {
-                #[cfg(not(target_arch = "wasm32"))]
+                #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
                 let now = std::time::Instant::now();
 
                 let ids = self
@@ -129,7 +131,7 @@ impl FontSystem {
                     .map(|face| face.id)
                     .collect::<Vec<_>>();
 
-                #[cfg(not(target_arch = "wasm32"))]
+                #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
                 {
                     let elapsed = now.elapsed();
                     log::debug!("font matches for {:?} in {:?}", attrs, elapsed);
