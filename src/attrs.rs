@@ -206,7 +206,7 @@ impl AttrsOwned {
 
 /// List of text attributes to apply to a line
 //TODO: have this clean up the spans when changes are made
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AttrsList {
     defaults: AttrsOwned,
     spans: RangeMap<usize, AttrsOwned>,
