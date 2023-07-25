@@ -100,8 +100,8 @@ impl FontSystem {
         self.font_cache
             .entry(id)
             .or_insert_with(|| {
+                #[cfg(feature = "std")]
                 unsafe {
-                    #[cfg(feature = "std")]
                     self.db.make_shared_face_data(id);
                 }
                 let face = self.db.face(id)?;
