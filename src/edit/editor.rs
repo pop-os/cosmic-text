@@ -450,18 +450,16 @@ impl Edit for Editor {
             }
             Action::Vertical(mut px) => {
                 // TODO more efficient
-                let line_heights = self.buffer.line_heights();
-                dbg!(line_heights.len());
                 let cursor = self.buffer.layout_cursor(&self.cursor);
                 let mut current_line = cursor.line as i32;
                 let direction = px.signum();
                 loop {
                     current_line += direction;
-                    if current_line < 0 || current_line >= line_heights.len() as i32 {
+                    if current_line < 0 || current_line >= self.buffer.line_heights().len() as i32 {
                         break;
                     }
 
-                    let current_line_height = line_heights[current_line as usize];
+                    let current_line_height = self.buffer.line_heights()[current_line as usize];
 
                     match direction {
                         -1 => {
@@ -738,7 +736,7 @@ impl Edit for Editor {
             let line_i = run.line_i;
             let line_y = run.line_y;
             let line_top = run.line_top;
-            let line_height = run.line_height();
+            let line_height = run.line_height;
 
             let cursor_glyph_opt = |cursor: &Cursor| -> Option<(usize, f32)> {
                 if cursor.line == line_i {

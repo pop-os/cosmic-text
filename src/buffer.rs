@@ -127,6 +127,8 @@ pub struct LayoutRun<'a> {
     pub line_top: f32,
     /// Width of line
     pub line_w: f32,
+    /// The height of the line
+    pub line_height: f32,
 }
 
 impl<'a> LayoutRun<'a> {
@@ -184,14 +186,14 @@ impl<'a> LayoutRun<'a> {
         }
     }
 
-    pub fn line_height(&self) -> f32 {
-        self.glyphs
-            .iter()
-            .map(|g| g.line_height())
-            .reduce(f32::max)
-            // TODO: not 0
-            .unwrap_or(0.0)
-    }
+    // pub fn line_height(&self) -> f32 {
+    //     self.glyphs
+    //         .iter()
+    //         .map(|g| g.line_height())
+    //         .reduce(f32::max)
+    //         // TODO: not 0
+    //         .unwrap_or(0.0)
+    // }
 }
 
 /// An iterator of visible text lines, see [`LayoutRun`]
@@ -204,7 +206,7 @@ pub struct LayoutRunIter<'b> {
     total_layout_height: f32,
     total_layout: i32,
     // TODO: lift this to BufferLine::layout_opt, and take a &'b [f32] slice instead
-    line_heights: Vec<f32>,
+    // line_heights: &'b [f32],
 }
 
 impl<'b> LayoutRunIter<'b> {
@@ -226,7 +228,7 @@ impl<'b> LayoutRunIter<'b> {
             remaining_len: bottom_cropped_layout_lines,
             total_layout_height: 0.0,
             total_layout: 0,
-            line_heights,
+            // line_heights,
         }
     }
 }
@@ -253,12 +255,12 @@ impl<'b> Iterator for LayoutRunIter<'b> {
                 // TODO: can scroll be negative?
                 // let this_line = self.total_layout as usize + self.buffer.scroll as usize - 1;
                 let this_line = self.total_layout.saturating_sub(1) as usize;
-                let line_top = self.line_heights[self.buffer.scroll as usize..this_line]
+                let line_top = self.buffer.line_heights[self.buffer.scroll as usize..this_line]
                     .iter()
                     .sum();
                 // dbg!(line_top);
                 let glyph_height = layout_line.max_ascent + layout_line.max_descent;
-                let centering_offset = (self.line_heights[this_line] - glyph_height) / 2.0;
+                let centering_offset = (self.buffer.line_heights[this_line] - glyph_height) / 2.0;
                 let line_y = line_top + centering_offset + layout_line.max_ascent;
 
                 if line_top + centering_offset > self.buffer.height {
@@ -275,6 +277,7 @@ impl<'b> Iterator for LayoutRunIter<'b> {
                         line_y,
                         line_top,
                         line_w: layout_line.w,
+                        line_height: self.buffer.line_heights[this_line],
                     }
                 });
             }
@@ -333,6 +336,7 @@ macro_rules! dbgg {
 pub struct Buffer {
     /// [BufferLine]s (or paragraphs) of text in the buffer
     pub lines: Vec<BufferLine>,
+    line_heights: Vec<f32>,
     metrics: Metrics,
     width: f32,
     height: f32,
@@ -361,6 +365,7 @@ impl Buffer {
         assert_ne!(metrics.line_height_, 0.0, "line height cannot be 0");
         Self {
             lines: Vec::new(),
+            line_heights: Vec::new(),
             metrics,
             width: 0.0,
             height: 0.0,
@@ -404,18 +409,46 @@ impl Buffer {
             }
         }
 
+        self.update_line_heights();
         self.redraw = true;
 
         #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
         log::debug!("relayout: {:?}", instant.elapsed());
     }
 
-    pub fn line_heights(&self) -> Vec<f32> {
-        self.lines
+    pub fn line_heights(&self) -> &[f32] {
+        // self.lines
+        //     .iter()
+        //     .flat_map(|line| line.layout_opt())
+        //     .flat_map(|lines| lines.iter().map(|line| line.line_height()))
+        //     .collect()
+        // self.lines
+        //     .iter()
+        //     .flat_map(|line| line.line_heights())
+        //     .flat_map(|lines| lines.iter().copied())
+        //     .collect()
+        self.line_heights.as_slice()
+    }
+
+    pub fn update_line_heights(&mut self) {
+        #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
+        let instant = std::time::Instant::now();
+
+        self.line_heights.clear();
+        let iter = self
+            .lines
             .iter()
-            .flat_map(|line| line.layout_opt())
-            .flat_map(|lines| lines.iter().map(|line| line.line_height()))
-            .collect::<Vec<_>>()
+            .flat_map(|line| line.line_heights())
+            .flat_map(|lines| lines.iter().copied());
+        self.line_heights.extend(iter);
+        dbg!(&self.line_heights);
+
+        #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
+        log::debug!(
+            "update_line_heights {}: {:?}",
+            self.line_heights.len(),
+            instant.elapsed()
+        );
     }
 
     /// Pre-shape lines in the buffer, up to `lines`, return actual number of layout lines
@@ -425,6 +458,7 @@ impl Buffer {
 
         let mut reshaped = 0;
         let mut total_layout = 0;
+        let mut should_update_line_heights = false;
         dbgg!(lines);
         for (index, line) in &mut self.lines.iter_mut().enumerate() {
             if total_layout >= lines {
@@ -434,9 +468,24 @@ impl Buffer {
             if line.shape_opt().is_none() {
                 reshaped += 1;
             }
+
+            if line.layout_opt().is_none() {
+                should_update_line_heights = true;
+            }
+
             let layout =
                 line.layout_in_buffer(&mut self.scratch, font_system, self.width, self.wrap);
+            // dbg!(
+            //     index,
+            //     total_layout,
+            //     layout.len(),
+            //     total_layout + layout.len() as i32
+            // );
             total_layout += layout.len() as i32;
+        }
+
+        if should_update_line_heights {
+            self.update_line_heights();
         }
 
         if reshaped > 0 {
@@ -456,6 +505,7 @@ impl Buffer {
 
         let mut reshaped = 0;
         let mut layout_i = 0;
+        let mut should_update_line_heights = false;
         for (line_i, line) in self.lines.iter_mut().enumerate() {
             if line_i > cursor.line {
                 break;
@@ -464,6 +514,11 @@ impl Buffer {
             if line.shape_opt().is_none() {
                 reshaped += 1;
             }
+
+            if line.layout_opt().is_none() {
+                should_update_line_heights = true;
+            }
+
             let layout =
                 line.layout_in_buffer(&mut self.scratch, font_system, self.width, self.wrap);
             if line_i == cursor.line {
@@ -473,6 +528,10 @@ impl Buffer {
             } else {
                 layout_i += layout.len() as i32;
             }
+        }
+
+        if should_update_line_heights {
+            self.update_line_heights();
         }
 
         if reshaped > 0 {
@@ -514,6 +573,9 @@ impl Buffer {
             std::time::SystemTime::now().duration_since(std::time::SystemTime::UNIX_EPOCH)
         );
         println!("visible_lines() called from shape_until_scroll");
+
+        self.layout_lines(font_system);
+
         let lines = self.visible_lines();
 
         let scroll_end = self.scroll + lines;
@@ -569,8 +631,41 @@ impl Buffer {
         font_system: &mut FontSystem,
         line_i: usize,
     ) -> Option<&[LayoutLine]> {
+        let should_update_line_heights = {
+            let line = self.lines.get_mut(line_i)?;
+            // check if the line needs to be laid out
+            if line.layout_opt().is_none() {
+                // update the layout (result will be cached)
+                let _ = line.layout(font_system, self.width, self.wrap);
+                true
+            } else {
+                false
+            }
+        };
+
+        if should_update_line_heights {
+            self.update_line_heights();
+        }
+
         let line = self.lines.get_mut(line_i)?;
+
+        // return cached layout
         Some(line.layout(font_system, self.width, self.wrap))
+    }
+
+    /// Lay out all lines without shaping
+    pub fn layout_lines(&mut self, font_system: &mut FontSystem) {
+        let mut should_update_line_heights = false;
+        for line in self.lines.iter_mut() {
+            if line.layout_opt().is_none() {
+                should_update_line_heights = true;
+                let _ = line.layout(font_system, self.width, self.wrap);
+            }
+        }
+
+        if should_update_line_heights {
+            self.update_line_heights();
+        }
     }
 
     /// Get the current [`Metrics`]
@@ -861,7 +956,7 @@ impl Buffer {
                 break 'hit Some(Cursor::new(run.line_i, 0));
             }
 
-            let line_bot = line_top + run.line_height();
+            let line_bot = line_top + run.line_height;
 
             if run_index == last_run_index && strike_y >= line_bot {
                 // hit below bottom line

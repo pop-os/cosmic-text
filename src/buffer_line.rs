@@ -13,6 +13,7 @@ pub struct BufferLine {
     align: Option<Align>,
     shape_opt: Option<ShapeLine>,
     layout_opt: Option<Vec<LayoutLine>>,
+    line_heights: Option<Vec<f32>>,
     shaping: Shaping,
 }
 
@@ -28,6 +29,7 @@ impl BufferLine {
             align: None,
             shape_opt: None,
             layout_opt: None,
+            line_heights: None,
             shaping,
         }
     }
@@ -155,11 +157,13 @@ impl BufferLine {
     pub fn reset(&mut self) {
         self.shape_opt = None;
         self.layout_opt = None;
+        self.line_heights = None;
     }
 
     /// Reset only layout information
     pub fn reset_layout(&mut self) {
         self.layout_opt = None;
+        self.line_heights = None;
     }
 
     /// Check if shaping and layout information is cleared
@@ -187,6 +191,7 @@ impl BufferLine {
                 self.shaping,
             ));
             self.layout_opt = None;
+            self.line_heights = None;
         }
         self.shape_opt.as_ref().expect("shape not found")
     }
@@ -197,6 +202,8 @@ impl BufferLine {
     }
 
     /// Layout line, will cache results
+    ///
+    /// Ensure that if this buffer line was laid out, you call [`Buffer::update_line_heights`] afterwards
     pub fn layout(
         &mut self,
         font_system: &mut FontSystem,
@@ -208,7 +215,9 @@ impl BufferLine {
             let align = self.align;
             let shape = self.shape(font_system);
             let layout = shape.layout(width, wrap, align);
+            let line_heights = layout.iter().map(|line| line.line_height()).collect();
             self.layout_opt = Some(layout);
+            self.line_heights = Some(line_heights);
         }
         self.layout_opt.as_ref().expect("layout not found")
     }
@@ -235,5 +244,10 @@ impl BufferLine {
     /// Get line layout cache
     pub fn layout_opt(&self) -> &Option<Vec<LayoutLine>> {
         &self.layout_opt
+    }
+
+    /// Get line height cache, maps from [`Self::layout_opt`]
+    pub fn line_heights(&self) -> &Option<Vec<f32>> {
+        &self.line_heights
     }
 }
