@@ -168,7 +168,7 @@ fn shape_run(
 
     let fonts = font_system.get_font_matches(attrs);
 
-    let default_families = [&attrs.family];
+    let default_families = [&attrs.family_owned.as_family()];
     let mut font_iter = FontFallbackIter::new(font_system, &fonts, &default_families, scripts);
 
     let font = font_iter.next().expect("no default font found");
@@ -268,7 +268,7 @@ fn shape_skip(
     let attrs = attrs_list.get_span(start_run);
     let fonts = font_system.get_font_matches(attrs);
 
-    let default_families = [&attrs.family];
+    let default_families = [&attrs.family_owned.as_family()];
     let mut font_iter = FontFallbackIter::new(font_system, &fonts, &default_families, Vec::new());
 
     let font = font_iter.next().expect("no default font found");
@@ -386,7 +386,7 @@ impl ShapeWord {
         for (egc_i, _egc) in word.grapheme_indices(true) {
             let start_egc = word_range.start + egc_i;
             let attrs_egc = attrs_list.get_span(start_egc);
-            if !attrs.compatible(&attrs_egc) {
+            if !attrs.compatible(attrs_egc) {
                 //TODO: more efficient
                 glyphs.append(&mut shaping.run(
                     font_system,

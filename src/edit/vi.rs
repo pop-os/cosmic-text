@@ -32,11 +32,11 @@ impl<'a> ViEditor<'a> {
 
     /// Load text from a file, and also set syntax to the best option
     #[cfg(feature = "std")]
-    pub fn load_text<P: AsRef<std::path::Path>>(
+    pub fn load_text(
         &mut self,
         font_system: &mut FontSystem,
-        path: P,
-        attrs: crate::Attrs,
+        path: impl AsRef<std::path::Path>,
+        attrs: impl AsRef<crate::Attrs> + Into<crate::Attrs>,
     ) -> std::io::Result<()> {
         self.editor.load_text(font_system, path, attrs)
     }
@@ -457,10 +457,10 @@ impl<'a> Edit for ViEditor<'a> {
 impl<'a, 'b> BorrowedWithFontSystem<'b, ViEditor<'a>> {
     /// Load text from a file, and also set syntax to the best option
     #[cfg(feature = "std")]
-    pub fn load_text<P: AsRef<std::path::Path>>(
+    pub fn load_text(
         &mut self,
-        path: P,
-        attrs: crate::Attrs,
+        path: impl AsRef<std::path::Path>,
+        attrs: impl AsRef<crate::Attrs> + Into<crate::Attrs>,
     ) -> std::io::Result<()> {
         self.inner.load_text(self.font_system, path, attrs)
     }

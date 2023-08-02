@@ -49,11 +49,14 @@ impl FontSystem {
         get_font(&self.db, id)
     }
 
-    pub fn get_font_matches(&mut self, attrs: Attrs) -> Arc<Vec<fontdb::ID>> {
+    pub fn get_font_matches(
+        &mut self,
+        attrs: impl AsRef<Attrs> + Into<Attrs>,
+    ) -> Arc<Vec<fontdb::ID>> {
         let ids = self
             .db
             .faces()
-            .filter(|face| attrs.matches(face))
+            .filter(|face| attrs.as_ref().matches(face))
             .map(|face| face.id)
             .collect::<Vec<_>>();
 
