@@ -7,10 +7,10 @@ use core::ops::{Deref, DerefMut};
 
 type BuildHasher = core::hash::BuildHasherDefault<rustc_hash::FxHasher>;
 
-#[cfg(feature = "no_std")]
-type HashMap<K, V> = hashbrown::HashMap<K, V, BuildHasher>;
-#[cfg(not(feature = "no_std"))]
+#[cfg(feature = "std")]
 type HashMap<K, V> = std::collections::HashMap<K, V, BuildHasher>;
+#[cfg(not(feature = "std"))]
+type HashMap<K, V> = hashbrown::HashMap<K, V, BuildHasher>;
 
 // re-export fontdb and rustybuzz
 pub use fontdb;
