@@ -875,17 +875,6 @@ impl ShapeLine {
         align: Option<Align>,
         layout_lines: &mut Vec<LayoutLine>,
     ) {
-        let align = align.unwrap_or({
-            if self.rtl {
-                Align::Right
-            } else {
-                Align::Left
-            }
-        });
-
-        // This is used to create a visual line for empty lines (e.g. lines with only a <CR>)
-        let mut push_line = true;
-
         // For each visual line a list of  (span index,  and range of words in that span)
         // Note that a BiDi visual line could have multiple spans or parts of them
         // let mut vl_range_of_spans = Vec::with_capacity(1);
@@ -1149,6 +1138,14 @@ impl ShapeLine {
         }
 
         // Create the LayoutLines using the ranges inside visual lines
+        let align = align.unwrap_or({
+            if self.rtl {
+                Align::Right
+            } else {
+                Align::Left
+            }
+        });
+
         let start_x = if self.rtl { line_width } else { 0.0 };
 
         let number_of_visual_lines = visual_lines.len();
@@ -1264,10 +1261,10 @@ impl ShapeLine {
                 max_descent: max_descent * font_size,
                 glyphs,
             });
-            push_line = false;
         }
 
-        if push_line {
+        // This is used to create a visual line for empty lines (e.g. lines with only a <CR>)
+        if layout_lines.is_empty() {
             layout_lines.push(LayoutLine {
                 w: 0.0,
                 max_ascent: 0.0,
