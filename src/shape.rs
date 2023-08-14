@@ -205,11 +205,7 @@ fn shape_run(
         }
     }
 
-    log::trace!(
-        "      Run {:?}: '{}'",
-        &scratch.scripts,
-        &line[start_run..end_run],
-    );
+    log::trace!("      Run {:?}: '{}'", &scripts, &line[start_run..end_run],);
 
     let attrs = attrs_list.get_span(start_run);
 
@@ -1154,8 +1150,6 @@ impl ShapeLine {
 
         // Create the LayoutLines using the ranges inside visual lines
         let start_x = if self.rtl { line_width } else { 0.0 };
-        let mut max_ascent: f32 = 0.;
-        let mut max_descent: f32 = 0.;
 
         let number_of_visual_lines = visual_lines.len();
         for (index, visual_line) in visual_lines.iter().enumerate() {
@@ -1166,8 +1160,8 @@ impl ShapeLine {
             let mut glyphs = Vec::with_capacity(1);
             let mut x = start_x;
             let mut y = 0.;
-            max_ascent = 0.;
-            max_descent = 0.;
+            let mut max_ascent: f32 = 0.;
+            let mut max_descent: f32 = 0.;
             let alignment_correction = match (align, self.rtl) {
                 (Align::Left, true) => line_width - visual_line.w,
                 (Align::Left, false) => 0.,
@@ -1175,184 +1169,84 @@ impl ShapeLine {
                 (Align::Right, false) => line_width - visual_line.w,
                 (Align::Center, _) => (line_width - visual_line.w) / 2.0,
                 (Align::End, _) => line_width - visual_line.w,
-                (Align::Justified, _) => {
-                    // TODO: Only certain `is_whitespace` chars are typically expanded.
-                    //
-                    // https://www.unicode.org/reports/tr14/#Introduction
-                    // > When expanding or compressing interword space according to common
-                    // > typographical practice, only the spaces marked by U+0020 SPACE and U+00A0
-                    // > NO-BREAK SPACE are subject to compression, and only spaces marked by U+0020
-                    // > SPACE, U+00A0 NO-BREAK SPACE, and occasionally spaces marked by U+2009 THIN
-                    // > SPACE are subject to expansion. All other space characters normally have
-                    // > fixed width.
-                    //
-                    // (also some spaces aren't followed by potential linebreaks but they could
-                    //  still be expanded)
+                (Align::Justified, _) => 0.,
+            };
 
-                    // Don't justify the last line in a paragraph.
-                    if visual_line.spaces > 0 && index != number_of_visual_lines - 1 {
-                        (line_width - visual_line.w) / visual_line.spaces as f32
-                    } else {
-                        0.
+            if self.rtl {
+                x -= alignment_correction;
+            } else {
+                x += alignment_correction;
+            }
+
+            // TODO: Only certain `is_whitespace` chars are typically expanded but this is what is
+            // currently used to compute `visual_line.spaces`.
+            //
+            // https://www.unicode.org/reports/tr14/#Introduction
+            // > When expanding or compressing interword space according to common
+            // > typographical practice, only the spaces marked by U+0020 SPACE and U+00A0
+            // > NO-BREAK SPACE are subject to compression, and only spaces marked by U+0020
+            // > SPACE, U+00A0 NO-BREAK SPACE, and occasionally spaces marked by U+2009 THIN
+            // > SPACE are subject to expansion. All other space characters normally have
+            // > fixed width.
+            //
+            // (also some spaces aren't followed by potential linebreaks but they could
+            //  still be expanded)
+
+            // Amount of extra width added to each blank space within a line.
+            let justification_expansion = if matches!(align, Align::Justified)
+                && visual_line.spaces > 0
+                // Don't justify the last line in a paragraph.
+                && index != number_of_visual_lines - 1
+            {
+                (line_width - visual_line.w) / visual_line.spaces as f32
+            } else {
+                0.
+            };
+
+            let mut process_range = |range: Range<usize>| {
+                for &(span_index, (starting_word, starting_glyph), (ending_word, ending_glyph)) in
+                    visual_line.ranges[range.clone()].iter()
+                {
+                    let span = &self.spans[span_index];
+                    // If ending_glyph is not 0 we need to include glyphs from the ending_word
+                    for i in starting_word..ending_word + usize::from(ending_glyph != 0) {
+                        let word = &span.words[i];
+                        let included_glyphs = match (i == starting_word, i == ending_word) {
+                            (false, false) => &word.glyphs[..],
+                            (true, false) => &word.glyphs[starting_glyph..],
+                            (false, true) => &word.glyphs[..ending_glyph],
+                            (true, true) => &word.glyphs[starting_glyph..ending_glyph],
+                        };
+                        for glyph in included_glyphs {
+                            let x_advance = font_size * glyph.x_advance
+                                + if word.blank {
+                                    justification_expansion
+                                } else {
+                                    0.0
+                                };
+                            let y_advance = font_size * glyph.y_advance;
+                            glyphs.push(glyph.layout(font_size, x, y, x_advance, span.level));
+                            if self.rtl {
+                                x -= x_advance;
+                            } else {
+                                x += x_advance;
+                            }
+                            y += y_advance;
+                            max_ascent = max_ascent.max(glyph.ascent);
+                            max_descent = max_descent.max(glyph.descent);
+                        }
                     }
                 }
             };
-            if self.rtl {
-                if align != Align::Justified {
-                    x -= alignment_correction;
-                }
-                for range in new_order.iter().rev() {
-                    for (
-                        span_index,
-                        (starting_word, starting_glyph),
-                        (ending_word, ending_glyph),
-                    ) in visual_line.ranges[range.clone()].iter()
-                    {
-                        let span = &self.spans[*span_index];
-                        if starting_word == ending_word {
-                            let word_blank = span.words[*starting_word].blank;
-                            for glyph in span.words[*starting_word].glyphs
-                                [*starting_glyph..*ending_glyph]
-                                .iter()
-                            {
-                                let x_advance = font_size * glyph.x_advance;
-                                let y_advance = font_size * glyph.y_advance;
-                                x -= x_advance;
-                                if word_blank && align == Align::Justified {
-                                    x -= alignment_correction;
-                                    glyphs.push(glyph.layout(
-                                        font_size,
-                                        x,
-                                        y,
-                                        x_advance + alignment_correction,
-                                        span.level,
-                                    ));
-                                } else {
-                                    glyphs
-                                        .push(glyph.layout(font_size, x, y, x_advance, span.level));
-                                }
-                                y += y_advance;
-                                max_ascent = max_ascent.max(glyph.ascent);
-                                max_descent = max_descent.max(glyph.descent);
-                            }
-                        } else {
-                            for i in *starting_word..*ending_word + 1 {
-                                if let Some(word) = span.words.get(i) {
-                                    let (g1, g2) = if i == *starting_word {
-                                        (*starting_glyph, word.glyphs.len())
-                                    } else if i == *ending_word {
-                                        (0, *ending_glyph)
-                                    } else {
-                                        (0, word.glyphs.len())
-                                    };
 
-                                    let word_blank = word.blank;
-                                    for glyph in &word.glyphs[g1..g2] {
-                                        let x_advance = font_size * glyph.x_advance;
-                                        let y_advance = font_size * glyph.y_advance;
-                                        x -= x_advance;
-                                        if word_blank && align == Align::Justified {
-                                            x -= alignment_correction;
-                                            glyphs.push(glyph.layout(
-                                                font_size,
-                                                x,
-                                                y,
-                                                x_advance + alignment_correction,
-                                                span.level,
-                                            ));
-                                        } else {
-                                            glyphs
-                                                .push(glyph.layout(
-                                                    font_size, x, y, x_advance, span.level,
-                                                ));
-                                        }
-                                        y += y_advance;
-                                        max_ascent = max_ascent.max(glyph.ascent);
-                                        max_descent = max_descent.max(glyph.descent);
-                                    }
-                                }
-                            }
-                        }
-                    }
+            if self.rtl {
+                for range in new_order.into_iter().rev() {
+                    process_range(range);
                 }
             } else {
                 /* LTR */
-                if align != Align::Justified {
-                    x += alignment_correction;
-                }
                 for range in new_order {
-                    for (
-                        span_index,
-                        (starting_word, starting_glyph),
-                        (ending_word, ending_glyph),
-                    ) in visual_line.ranges[range.clone()].iter()
-                    {
-                        let span = &self.spans[*span_index];
-                        if starting_word == ending_word {
-                            let word_blank = span.words[*starting_word].blank;
-                            for glyph in span.words[*starting_word].glyphs
-                                [*starting_glyph..*ending_glyph]
-                                .iter()
-                            {
-                                let x_advance = font_size * glyph.x_advance;
-                                let y_advance = font_size * glyph.y_advance;
-                                if word_blank && align == Align::Justified {
-                                    glyphs.push(glyph.layout(
-                                        font_size,
-                                        x,
-                                        y,
-                                        x_advance + alignment_correction,
-                                        span.level,
-                                    ));
-                                    x += alignment_correction;
-                                } else {
-                                    glyphs
-                                        .push(glyph.layout(font_size, x, y, x_advance, span.level));
-                                }
-                                x += x_advance;
-                                y += y_advance;
-                                max_ascent = max_ascent.max(glyph.ascent);
-                                max_descent = max_descent.max(glyph.descent);
-                            }
-                        } else {
-                            for i in *starting_word..*ending_word + 1 {
-                                if let Some(word) = span.words.get(i) {
-                                    let (g1, g2) = if i == *starting_word {
-                                        (*starting_glyph, word.glyphs.len())
-                                    } else if i == *ending_word {
-                                        (0, *ending_glyph)
-                                    } else {
-                                        (0, word.glyphs.len())
-                                    };
-
-                                    let word_blank = word.blank;
-                                    for glyph in &word.glyphs[g1..g2] {
-                                        let x_advance = font_size * glyph.x_advance;
-                                        let y_advance = font_size * glyph.y_advance;
-                                        if word_blank && align == Align::Justified {
-                                            glyphs.push(glyph.layout(
-                                                font_size,
-                                                x,
-                                                y,
-                                                x_advance + alignment_correction,
-                                                span.level,
-                                            ));
-                                            x += alignment_correction;
-                                        } else {
-                                            glyphs
-                                                .push(glyph.layout(
-                                                    font_size, x, y, x_advance, span.level,
-                                                ));
-                                        }
-                                        x += x_advance;
-                                        y += y_advance;
-                                        max_ascent = max_ascent.max(glyph.ascent);
-                                        max_descent = max_descent.max(glyph.descent);
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    process_range(range);
                 }
             }
 
@@ -1368,7 +1262,7 @@ impl ShapeLine {
                 },
                 max_ascent: max_ascent * font_size,
                 max_descent: max_descent * font_size,
-                glyphs: mem::take(&mut glyphs),
+                glyphs,
             });
             push_line = false;
         }
@@ -1376,8 +1270,8 @@ impl ShapeLine {
         if push_line {
             layout_lines.push(LayoutLine {
                 w: 0.0,
-                max_ascent: max_ascent * font_size,
-                max_descent: max_descent * font_size,
+                max_ascent: 0.0,
+                max_descent: 0.0,
                 glyphs: Default::default(),
             });
         }
