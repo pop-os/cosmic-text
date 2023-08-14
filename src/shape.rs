@@ -916,12 +916,6 @@ impl ShapeLine {
             vl.spaces += number_of_blanks;
         }
 
-        let start_x = if self.rtl { line_width } else { 0.0 };
-        let mut x;
-        let mut y;
-        let mut max_ascent: f32 = 0.;
-        let mut max_descent: f32 = 0.;
-
         // This would keep the maximum number of spans that would fit on a visual line
         // If one span is too large, this variable will hold the range of words inside that span
         // that fits on a line.
@@ -1159,6 +1153,10 @@ impl ShapeLine {
         }
 
         // Create the LayoutLines using the ranges inside visual lines
+        let start_x = if self.rtl { line_width } else { 0.0 };
+        let mut max_ascent: f32 = 0.;
+        let mut max_descent: f32 = 0.;
+
         let number_of_visual_lines = visual_lines.len();
         for (index, visual_line) in visual_lines.iter().enumerate() {
             if visual_line.ranges.is_empty() {
@@ -1166,8 +1164,8 @@ impl ShapeLine {
             }
             let new_order = self.reorder(&visual_line.ranges);
             let mut glyphs = Vec::with_capacity(1);
-            x = start_x;
-            y = 0.;
+            let mut x = start_x;
+            let mut y = 0.;
             max_ascent = 0.;
             max_descent = 0.;
             let alignment_correction = match (align, self.rtl) {
@@ -1357,8 +1355,7 @@ impl ShapeLine {
                     }
                 }
             }
-            let mut glyphs_swap = Vec::new();
-            mem::swap(&mut glyphs, &mut glyphs_swap);
+
             layout_lines.push(LayoutLine {
                 w: if align != Align::Justified {
                     visual_line.w
@@ -1371,7 +1368,7 @@ impl ShapeLine {
                 },
                 max_ascent: max_ascent * font_size,
                 max_descent: max_descent * font_size,
-                glyphs: glyphs_swap,
+                glyphs: mem::take(&mut glyphs),
             });
             push_line = false;
         }
