@@ -3,10 +3,14 @@ use alloc::string::String;
 use alloc::sync::Arc;
 use alloc::vec::Vec;
 use core::fmt;
-use core::hash::BuildHasherDefault;
 use core::ops::{Deref, DerefMut};
 
-type HashMap<K, V> = hashbrown::HashMap<K, V, BuildHasherDefault<rustc_hash::FxHasher>>;
+type BuildHasher = core::hash::BuildHasherDefault<rustc_hash::FxHasher>;
+
+#[cfg(feature = "std")]
+type HashMap<K, V> = std::collections::HashMap<K, V, BuildHasher>;
+#[cfg(not(feature = "std"))]
+type HashMap<K, V> = hashbrown::HashMap<K, V, BuildHasher>;
 
 // re-export fontdb and rustybuzz
 pub use fontdb;

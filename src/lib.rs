@@ -91,8 +91,10 @@
 // Ensure numbers are readable
 #![warn(clippy::unreadable_literal)]
 #![cfg_attr(not(feature = "std"), no_std)]
-
 extern crate alloc;
+
+#[cfg(not(any(feature = "std", feature = "no_std")))]
+compile_error!("Either the `std` or `no_std` feature must be enabled");
 
 pub use self::attrs::*;
 mod attrs;
