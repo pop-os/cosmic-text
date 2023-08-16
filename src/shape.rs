@@ -5,6 +5,7 @@
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 use core::cmp::{max, min};
+use core::fmt;
 use core::mem;
 use core::ops::Range;
 use unicode_script::{Script, UnicodeScript};
@@ -73,6 +74,12 @@ pub struct ShapeBuffer {
 
     /// Buffer for visual lines.
     visual_lines: Vec<VisualLine>,
+}
+
+impl fmt::Debug for ShapeBuffer {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.pad("ShapeBuffer { .. }")
+    }
 }
 
 fn shape_fallback(
