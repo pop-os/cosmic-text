@@ -36,7 +36,7 @@ pub struct FontFallbackIter<'a> {
     font_ids: &'a [fontdb::ID],
     default_families: &'a [&'a Family<'a>],
     default_i: usize,
-    scripts: Vec<Script>,
+    scripts: &'a [Script],
     script_i: (usize, usize),
     common_i: usize,
     other_i: usize,
@@ -48,7 +48,7 @@ impl<'a> FontFallbackIter<'a> {
         font_system: &'a mut FontSystem,
         font_ids: &'a [fontdb::ID],
         default_families: &'a [&'a Family<'a>],
-        scripts: Vec<Script>,
+        scripts: &'a [Script],
     ) -> Self {
         Self {
             font_system,

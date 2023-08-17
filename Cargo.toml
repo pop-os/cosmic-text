@@ -47,7 +47,14 @@ wasm-web = ["sys-locale?/js"]
 warn_on_missing_glyphs = []
 fontconfig = ["fontdb/fontconfig"]
 
+[[bench]]
+name = "layout"
+harness = false
+
 [workspace]
 members = [
   "examples/*",
 ]
+
+[dev-dependencies]
+criterion = { version = "0.5.1", default-features = false, features = ["cargo_bench_support"] }
