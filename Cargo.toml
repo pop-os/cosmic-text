@@ -30,7 +30,7 @@ default-features = false
 features = ["hardcoded-data"]
 
 [features]
-default = ["std", "swash"]
+default = ["std", "swash", "fontconfig"]
 no_std = [
   "rustybuzz/libm",
   "hashbrown",
