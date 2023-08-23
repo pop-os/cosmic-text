@@ -45,7 +45,7 @@ std = [
 vi = ["syntect"]
 wasm-web = ["sys-locale?/js"]
 warn_on_missing_glyphs = []
-fontconfig = ["fontdb/fontconfig"]
+fontconfig = ["fontdb/fontconfig", "std"]
 
 [[bench]]
 name = "layout"
