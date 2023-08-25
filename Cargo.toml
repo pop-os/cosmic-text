@@ -58,3 +58,6 @@ members = [
 
 [dev-dependencies]
 criterion = { version = "0.5.1", default-features = false, features = ["cargo_bench_support"] }
+
+[profile.test]
+opt-level = 1
