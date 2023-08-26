@@ -966,8 +966,8 @@ impl ShapeLine {
                         // wrapping results.
                         if current_visual_line.w + (word_range_width + word_width)
                             <= line_width
-                            // Include on blank word over the width limit since it won't be counted
-                            // in the final width
+                            // Include one blank word over the width limit since it won't be
+                            // counted in the final width
                             || (word.blank
                                 && (current_visual_line.w + word_range_width) <= line_width)
                         {
@@ -1066,8 +1066,8 @@ impl ShapeLine {
                         let word_width = font_size * word.x_advance;
                         if current_visual_line.w + (word_range_width + word_width)
                             <= line_width
-                            // Include on blank word over the width limit since it won't be counted
-                            // in the final width.
+                            // Include one blank word over the width limit since it won't be
+                            // counted in the final width.
                             || (word.blank
                                 && (current_visual_line.w + word_range_width) <= line_width)
                         {
