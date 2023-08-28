@@ -569,11 +569,14 @@ impl ShapeSpan {
         let mut start_word = 0;
         for (end_lb, _) in unicode_linebreak::linebreaks(span) {
             let mut start_lb = end_lb;
-            for (i, c) in span[start_word..end_lb].char_indices() {
-                if start_word + i == end_lb {
-                    break;
-                } else if c.is_whitespace() {
+            for (i, c) in span[start_word..end_lb].char_indices().rev() {
+                // TODO: Not all whitespace characters are linebreakable, e.g. 00A0 (No-break
+                // space)
+                // https://www.unicode.org/reports/tr14/#GL
+                // https://www.unicode.org/Public/UCD/latest/ucd/PropList.txt
+                if c.is_whitespace() {
                     start_lb = start_word + i;
+                } else {
                     break;
                 }
             }
@@ -946,9 +949,9 @@ impl ShapeLine {
                 );
             }
         } else {
-            let mut fit_x = line_width;
             for (span_index, span) in self.spans.iter().enumerate() {
                 let mut word_range_width = 0.;
+                let mut width_before_last_blank = 0.;
                 let mut number_of_blanks: u32 = 0;
 
                 // Create the word ranges that fits in a visual line
@@ -957,19 +960,30 @@ impl ShapeLine {
                     let mut fitting_start = (span.words.len(), 0);
                     for (i, word) in span.words.iter().enumerate().rev() {
                         let word_width = font_size * word.x_advance;
-                        if fit_x - word_width >= 0. {
+
+                        // Addition in the same order used to compute the final width, so that
+                        // relayouts with that width as the `line_width` will produce the same
+                        // wrapping results.
+                        if current_visual_line.w + (word_range_width + word_width)
+                            <= line_width
+                            // Include one blank word over the width limit since it won't be
+                            // counted in the final width
+                            || (word.blank
+                                && (current_visual_line.w + word_range_width) <= line_width)
+                        {
                             // fits
-                            fit_x -= word_width;
-                            word_range_width += word_width;
                             if word.blank {
                                 number_of_blanks += 1;
+                                width_before_last_blank = word_range_width;
                             }
+                            word_range_width += word_width;
                             continue;
                         } else if wrap == Wrap::Glyph {
                             for (glyph_i, glyph) in word.glyphs.iter().enumerate().rev() {
                                 let glyph_width = font_size * glyph.x_advance;
-                                if fit_x - glyph_width >= 0. {
-                                    fit_x -= glyph_width;
+                                if current_visual_line.w + (word_range_width + glyph_width)
+                                    <= line_width
+                                {
                                     word_range_width += glyph_width;
                                     continue;
                                 } else {
@@ -985,30 +999,33 @@ impl ShapeLine {
                                     current_visual_line = VisualLine::default();
 
                                     number_of_blanks = 0;
-                                    fit_x = line_width - glyph_width;
                                     word_range_width = glyph_width;
                                     fitting_start = (i, glyph_i + 1);
                                 }
                             }
                         } else {
                             // Wrap::Word
-                            let mut trailing_space_width = None;
-                            if let Some(previous_word) = span.words.get(i + 1) {
-                                // Current word causing a wrap is not whitespace, so we ignore the
-                                // previous word if it's a whitespace
-                                if previous_word.blank {
-                                    trailing_space_width =
-                                        Some(previous_word.x_advance * font_size);
-                                    number_of_blanks = number_of_blanks.saturating_sub(1);
-                                }
-                            }
-                            if let Some(width) = trailing_space_width {
+
+                            // TODO: What if the previous span ended with whitespace and the next
+                            // span wraps a new line? Is that possible?
+                            //
+                            // TODO: This comment it outdated, the current word can be a
+                            // whitespace.
+                            //
+                            // Current word causing a wrap is not whitespace, so we ignore the
+                            // previous word if it's a whitespace
+                            let trailing_blank = span
+                                .words
+                                .get(i + 1)
+                                .map_or(false, |previous_word| previous_word.blank);
+                            if trailing_blank {
+                                number_of_blanks = number_of_blanks.saturating_sub(1);
                                 add_to_visual_line(
                                     &mut current_visual_line,
                                     span_index,
                                     (i + 2, 0),
                                     fitting_start,
-                                    word_range_width - width,
+                                    width_before_last_blank,
                                     number_of_blanks,
                                 );
                             } else {
@@ -1026,11 +1043,9 @@ impl ShapeLine {
 
                             number_of_blanks = 0;
                             if word.blank {
-                                fit_x = line_width;
                                 word_range_width = 0.;
                                 fitting_start = (i, 0);
                             } else {
-                                fit_x = line_width - word_width;
                                 word_range_width = word_width;
                                 fitting_start = (i + 1, 0);
                             }
@@ -1049,19 +1064,26 @@ impl ShapeLine {
                     let mut fitting_start = (0, 0);
                     for (i, word) in span.words.iter().enumerate() {
                         let word_width = font_size * word.x_advance;
-                        if fit_x - word_width >= 0. {
+                        if current_visual_line.w + (word_range_width + word_width)
+                            <= line_width
+                            // Include one blank word over the width limit since it won't be
+                            // counted in the final width.
+                            || (word.blank
+                                && (current_visual_line.w + word_range_width) <= line_width)
+                        {
                             // fits
-                            fit_x -= word_width;
-                            word_range_width += word_width;
                             if word.blank {
                                 number_of_blanks += 1;
+                                width_before_last_blank = word_range_width;
                             }
+                            word_range_width += word_width;
                             continue;
                         } else if wrap == Wrap::Glyph {
                             for (glyph_i, glyph) in word.glyphs.iter().enumerate() {
                                 let glyph_width = font_size * glyph.x_advance;
-                                if fit_x - glyph_width >= 0. {
-                                    fit_x -= glyph_width;
+                                if current_visual_line.w + (word_range_width + glyph_width)
+                                    <= line_width
+                                {
                                     word_range_width += glyph_width;
                                     continue;
                                 } else {
@@ -1077,32 +1099,24 @@ impl ShapeLine {
                                     current_visual_line = VisualLine::default();
 
                                     number_of_blanks = 0;
-                                    fit_x = line_width - glyph_width;
                                     word_range_width = glyph_width;
                                     fitting_start = (i, glyph_i);
                                 }
                             }
                         } else {
                             // Wrap::Word
-                            let mut trailing_space_width = None;
-                            if i > 0 {
-                                if let Some(previous_word) = span.words.get(i - 1) {
-                                    // Current word causing a wrap is not whitespace, so we ignore the
-                                    // previous word if it's a whitespace
-                                    if previous_word.blank {
-                                        trailing_space_width =
-                                            Some(previous_word.x_advance * font_size);
-                                        number_of_blanks = number_of_blanks.saturating_sub(1);
-                                    }
-                                }
-                            }
-                            if let Some(width) = trailing_space_width {
+
+                            // Current word causing a wrap is not whitespace, so we ignore the
+                            // previous word if it's a whitespace
+                            let trailing_blank = i > 0 && span.words[i - 1].blank;
+                            if trailing_blank {
+                                number_of_blanks = number_of_blanks.saturating_sub(1);
                                 add_to_visual_line(
                                     &mut current_visual_line,
                                     span_index,
                                     fitting_start,
                                     (i - 1, 0),
-                                    word_range_width - width,
+                                    width_before_last_blank,
                                     number_of_blanks,
                                 );
                             } else {
@@ -1120,11 +1134,9 @@ impl ShapeLine {
                             number_of_blanks = 0;
 
                             if word.blank {
-                                fit_x = line_width;
                                 word_range_width = 0.;
                                 fitting_start = (i + 1, 0);
                             } else {
-                                fit_x = line_width - word_width;
                                 word_range_width = word_width;
                                 fitting_start = (i, 0);
                             }
@@ -1166,6 +1178,19 @@ impl ShapeLine {
                 (Align::Center, _) => (line_width - visual_line.w) / 2.0,
                 (Align::End, _) => line_width - visual_line.w,
                 (Align::Justified, _) => {
+                    // TODO: Only certain `is_whitespace` chars are typically expanded.
+                    //
+                    // https://www.unicode.org/reports/tr14/#Introduction
+                    // > When expanding or compressing interword space according to common
+                    // > typographical practice, only the spaces marked by U+0020 SPACE and U+00A0
+                    // > NO-BREAK SPACE are subject to compression, and only spaces marked by U+0020
+                    // > SPACE, U+00A0 NO-BREAK SPACE, and occasionally spaces marked by U+2009 THIN
+                    // > SPACE are subject to expansion. All other space characters normally have
+                    // > fixed width.
+                    //
+                    // (also some spaces aren't followed by potential linebreaks but they could
+                    //  still be expanded)
+
                     // Don't justify the last line in a paragraph.
                     if visual_line.spaces > 0 && index != number_of_visual_lines - 1 {
                         (line_width - visual_line.w) / visual_line.spaces as f32
@@ -1335,7 +1360,15 @@ impl ShapeLine {
             let mut glyphs_swap = Vec::new();
             mem::swap(&mut glyphs, &mut glyphs_swap);
             layout_lines.push(LayoutLine {
-                w: if self.rtl { start_x - x } else { x },
+                w: if align != Align::Justified {
+                    visual_line.w
+                } else {
+                    if self.rtl {
+                        start_x - x
+                    } else {
+                        x
+                    }
+                },
                 max_ascent: max_ascent * font_size,
                 max_descent: max_descent * font_size,
                 glyphs: glyphs_swap,
