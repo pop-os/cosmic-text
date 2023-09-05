@@ -452,6 +452,18 @@ impl<'a> Edit for ViEditor<'a> {
             }
         }
     }
+
+    fn preedit_range(&self) -> Option<core::ops::Range<usize>> {
+        self.editor.preedit_range()
+    }
+
+    fn preedit_text(&self) -> Option<&str> {
+        self.editor.preedit_text()
+    }
+
+    fn cursor_position(&self) -> Option<(i32, i32)> {
+        self.editor.cursor_position()
+    }
 }
 
 impl<'a, 'b> BorrowedWithFontSystem<'b, ViEditor<'a>> {

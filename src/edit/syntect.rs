@@ -262,6 +262,14 @@ impl<'a> Edit for SyntaxEditor<'a> {
         self.editor.insert_string(data, attrs_list);
     }
 
+    fn preedit_range(&self) -> Option<core::ops::Range<usize>> {
+        self.editor.preedit_range()
+    }
+
+    fn preedit_text(&self) -> Option<&str> {
+        self.editor.preedit_text()
+    }
+
     fn action(&mut self, font_system: &mut FontSystem, action: Action) {
         self.editor.action(font_system, action);
     }
@@ -281,6 +289,10 @@ impl<'a> Edit for SyntaxEditor<'a> {
         f(0, 0, size.0 as u32, size.1 as u32, self.background_color());
         self.editor
             .draw(font_system, cache, self.foreground_color(), f);
+    }
+
+    fn cursor_position(&self) -> Option<(i32, i32)> {
+        self.editor.cursor_position()
     }
 }
 
