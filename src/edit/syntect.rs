@@ -149,6 +149,10 @@ impl<'a> Edit for SyntaxEditor<'a> {
         self.editor.set_cursor(cursor);
     }
 
+    fn set_cursor_hidden(&mut self, hidden: bool) {
+        self.editor.set_cursor_hidden(hidden);
+    }
+
     fn select_opt(&self) -> Option<Cursor> {
         self.editor.select_opt()
     }
