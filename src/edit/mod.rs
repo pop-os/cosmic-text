@@ -3,9 +3,7 @@ use core::ops::Range;
 #[cfg(not(feature = "std"))]
 use alloc::string::String;
 
-#[cfg(feature = "swash")]
-use crate::Color;
-use crate::{AttrsList, AttrsOwned, BorrowedWithFontSystem, Buffer, Cursor, FontSystem};
+use crate::{AttrsList, AttrsOwned, BorrowedWithFontSystem, Buffer, Color, Cursor, FontSystem};
 
 pub use self::editor::*;
 mod editor;
@@ -183,6 +181,9 @@ pub trait Edit {
 
     /// Get X and Y position of the top left corner of the cursor
     fn cursor_position(&self) -> Option<(i32, i32)>;
+
+    /// Set background color of the selected region
+    fn set_selection_color(&mut self, color: Option<Color>);
 }
 
 impl<'a, T: Edit> BorrowedWithFontSystem<'a, T> {

@@ -27,6 +27,7 @@ pub struct Editor {
     has_preedit_without_cursor: bool,
     // Set with `set_cursor_hidden`
     cursor_hidden_by_setting: bool,
+    selection_color: Option<Color>,
 }
 
 impl Editor {
@@ -40,6 +41,7 @@ impl Editor {
             cursor_moved: false,
             has_preedit_without_cursor: false,
             cursor_hidden_by_setting: false,
+            selection_color: None,
         }
     }
 
@@ -829,7 +831,7 @@ impl Edit for Editor {
             let line_y = run.line_y;
             let line_top = run.line_top;
 
-            // Highlight selection (TODO: HIGHLIGHT COLOR!)
+            // Highlight selection
             if let Some(select) = self.select_opt {
                 let (start, end) = match select.line.cmp(&self.cursor.line) {
                     cmp::Ordering::Greater => (self.cursor, select),
@@ -844,6 +846,10 @@ impl Edit for Editor {
                         }
                     }
                 };
+
+                let color = self
+                    .selection_color
+                    .unwrap_or_else(|| Color::rgba(color.r(), color.g(), color.b(), 0x33));
 
                 if line_i >= start.line && line_i <= end.line {
                     let mut range_opt = None;
@@ -872,7 +878,7 @@ impl Edit for Editor {
                                     line_top as i32,
                                     cmp::max(0, max - min) as u32,
                                     line_height as u32,
-                                    Color::rgba(color.r(), color.g(), color.b(), 0x33),
+                                    color,
                                 );
                             }
                             c_x += c_w;
@@ -893,12 +899,13 @@ impl Edit for Editor {
                                 max = self.buffer.size().0 as i32;
                             }
                         }
+
                         f(
                             min,
                             line_top as i32,
                             cmp::max(0, max - min) as u32,
                             line_height as u32,
-                            Color::rgba(color.r(), color.g(), color.b(), 0x33),
+                            color,
                         );
                     }
                 }
@@ -950,5 +957,10 @@ impl Edit for Editor {
         self.buffer
             .layout_runs()
             .find_map(|run| cursor_position(&self.cursor, &run))
+    }
+
+    fn set_selection_color(&mut self, color: Option<Color>) {
+        self.selection_color = color;
+        self.buffer.set_redraw(true);
     }
 }

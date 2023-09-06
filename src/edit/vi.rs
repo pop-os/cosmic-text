@@ -468,6 +468,10 @@ impl<'a> Edit for ViEditor<'a> {
     fn set_cursor_hidden(&mut self, hidden: bool) {
         self.editor.set_cursor_hidden(hidden);
     }
+
+    fn set_selection_color(&mut self, color: Option<Color>) {
+        self.editor.set_selection_color(color);
+    }
 }
 
 impl<'a, 'b> BorrowedWithFontSystem<'b, ViEditor<'a>> {

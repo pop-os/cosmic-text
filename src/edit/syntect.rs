@@ -298,6 +298,10 @@ impl<'a> Edit for SyntaxEditor<'a> {
     fn cursor_position(&self) -> Option<(i32, i32)> {
         self.editor.cursor_position()
     }
+
+    fn set_selection_color(&mut self, color: Option<Color>) {
+        self.editor.set_selection_color(color);
+    }
 }
 
 impl<'a, 'b> BorrowedWithFontSystem<'b, SyntaxEditor<'a>> {
