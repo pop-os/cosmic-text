@@ -302,6 +302,9 @@ impl<'a> Edit for SyntaxEditor<'a> {
     fn set_selection_color(&mut self, color: Option<Color>) {
         self.editor.set_selection_color(color);
     }
+    fn set_selected_text_color(&mut self, color: Option<Color>) {
+        self.editor.set_selected_text_color(color);
+    }
 }
 
 impl<'a, 'b> BorrowedWithFontSystem<'b, SyntaxEditor<'a>> {

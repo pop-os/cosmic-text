@@ -184,6 +184,9 @@ pub trait Edit {
 
     /// Set background color of the selected region
     fn set_selection_color(&mut self, color: Option<Color>);
+
+    /// Set foreground color of the selected text
+    fn set_selected_text_color(&mut self, color: Option<Color>);
 }
 
 impl<'a, T: Edit> BorrowedWithFontSystem<'a, T> {
