@@ -1,4 +1,4 @@
-use core::ops::Range;
+use core::{cmp, ops::Range};
 
 #[cfg(not(feature = "std"))]
 use alloc::string::String;
@@ -41,12 +41,18 @@ pub enum Action {
     ParagraphStart,
     /// Move cursor to end of paragraph
     ParagraphEnd,
+    /// Move cursor to start of document
+    DocumentStart,
+    /// Move cursor to end of document
+    DocumentEnd,
     /// Move cursor up one page
     PageUp,
     /// Move cursor down one page
     PageDown,
     /// Move cursor up or down by a number of pixels
     Vertical(i32),
+    /// Select text from start to end
+    SelectAll,
     /// Escape, clears selection
     Escape,
     /// Insert character at cursor
@@ -55,12 +61,20 @@ pub enum Action {
     Enter,
     /// Delete text behind cursor
     Backspace,
+    /// Delete text behind cursor to next word boundary
+    DeleteStartOfWord,
     /// Delete text in front of cursor
     Delete,
+    /// Delete text in front of cursor to next word boundary
+    DeleteEndOfWord,
     /// Mouse click at specified position
     Click { x: i32, y: i32 },
     /// Mouse drag to specified position
     Drag { x: i32, y: i32 },
+    /// Select word under cursor
+    SelectWord { x: i32, y: i32 },
+    /// Select paragraph under cursor
+    SelectParagraph { x: i32, y: i32 },
     /// Scroll specified number of lines
     Scroll { lines: i32 },
     /// Move cursor to previous word boundary
@@ -138,6 +152,28 @@ pub trait Edit {
         })
     }
 
+    /// If there is a non-empty selection, returns cursors to the start and end
+    /// of the selection
+    fn selection(&self) -> Option<(Cursor, Cursor)> {
+        let cursor = self.cursor();
+        if let Some(select) = self.select_opt() {
+            match select.line.cmp(&cursor.line) {
+                cmp::Ordering::Greater => Some((cursor, select)),
+                cmp::Ordering::Less => Some((select, cursor)),
+                cmp::Ordering::Equal => {
+                    /* select.line == cursor.line */
+                    match select.index.cmp(&cursor.index) {
+                        cmp::Ordering::Greater => Some((cursor, select)),
+                        cmp::Ordering::Less => Some((select, cursor)),
+                        cmp::Ordering::Equal => None,
+                    }
+                }
+            }
+        } else {
+            None
+        }
+    }
+
     /// Get the current selection position
     fn select_opt(&self) -> Option<Cursor>;
 
@@ -166,7 +202,10 @@ pub trait Edit {
     fn preedit_text(&self) -> Option<&str>;
 
     /// Perform an [Action] on the editor
-    fn action(&mut self, font_system: &mut FontSystem, action: Action);
+    ///
+    /// If `select` is true, some actions will create or extend a selection
+    /// (this is mostly applicable to actions that move the cursor).
+    fn action(&mut self, font_system: &mut FontSystem, action: Action, select: bool);
 
     /// Draw the editor
     #[cfg(feature = "swash")]
@@ -204,8 +243,8 @@ impl<'a, T: Edit> BorrowedWithFontSystem<'a, T> {
     }
 
     /// Perform an [Action] on the editor
-    pub fn action(&mut self, action: Action) {
-        self.inner.action(self.font_system, action);
+    pub fn action(&mut self, action: Action, select: bool) {
+        self.inner.action(self.font_system, action, select);
     }
 
     /// Draw the editor

@@ -177,37 +177,45 @@ fn main() {
         for event in window.events() {
             match event.to_option() {
                 EventOption::Key(event) => match event.scancode {
-                    orbclient::K_LEFT if event.pressed => editor.action(Action::Left),
-                    orbclient::K_RIGHT if event.pressed => editor.action(Action::Right),
-                    orbclient::K_UP if event.pressed => editor.action(Action::Up),
-                    orbclient::K_DOWN if event.pressed => editor.action(Action::Down),
-                    orbclient::K_HOME if event.pressed => editor.action(Action::Home),
-                    orbclient::K_END if event.pressed => editor.action(Action::End),
-                    orbclient::K_PGUP if event.pressed => editor.action(Action::PageUp),
-                    orbclient::K_PGDN if event.pressed => editor.action(Action::PageDown),
-                    orbclient::K_ENTER if event.pressed => editor.action(Action::Enter),
-                    orbclient::K_BKSP if event.pressed => editor.action(Action::Backspace),
-                    orbclient::K_DEL if event.pressed => editor.action(Action::Delete),
+                    orbclient::K_LEFT if event.pressed => editor.action(Action::Left, false),
+                    orbclient::K_RIGHT if event.pressed => editor.action(Action::Right, false),
+                    orbclient::K_UP if event.pressed => editor.action(Action::Up, false),
+                    orbclient::K_DOWN if event.pressed => editor.action(Action::Down, false),
+                    orbclient::K_HOME if event.pressed => editor.action(Action::Home, false),
+                    orbclient::K_END if event.pressed => editor.action(Action::End, false),
+                    orbclient::K_PGUP if event.pressed => editor.action(Action::PageUp, false),
+                    orbclient::K_PGDN if event.pressed => editor.action(Action::PageDown, false),
+                    orbclient::K_ENTER if event.pressed => editor.action(Action::Enter, false),
+                    orbclient::K_BKSP if event.pressed => editor.action(Action::Backspace, false),
+                    orbclient::K_DEL if event.pressed => editor.action(Action::Delete, false),
                     _ => (),
                 },
-                EventOption::TextInput(event) => editor.action(Action::Insert(event.character)),
+                EventOption::TextInput(event) => {
+                    editor.action(Action::Insert(event.character), false)
+                }
                 EventOption::Mouse(mouse) => {
                     mouse_x = mouse.x;
                     mouse_y = mouse.y;
                     if mouse_left {
-                        editor.action(Action::Drag {
-                            x: mouse_x,
-                            y: mouse_y,
-                        });
+                        editor.action(
+                            Action::Drag {
+                                x: mouse_x,
+                                y: mouse_y,
+                            },
+                            false,
+                        );
                     }
                 }
                 EventOption::Button(button) => {
                     mouse_left = button.left;
                     if mouse_left {
-                        editor.action(Action::Click {
-                            x: mouse_x,
-                            y: mouse_y,
-                        });
+                        editor.action(
+                            Action::Click {
+                                x: mouse_x,
+                                y: mouse_y,
+                            },
+                            false,
+                        );
                     }
                 }
                 EventOption::Resize(resize) => {

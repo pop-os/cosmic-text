@@ -380,11 +380,34 @@ impl Edit for Editor {
         self.buffer().lines[self.cursor.line].preedit_text()
     }
 
-    fn action(&mut self, font_system: &mut FontSystem, action: Action) {
+    fn action(&mut self, font_system: &mut FontSystem, action: Action, select: bool) {
         let old_cursor = self.cursor;
+
+        if has_select_option(&action) {
+            if select {
+                if self.select_opt.is_none() {
+                    self.select_opt = Some(self.cursor);
+                }
+            } else {
+                match action {
+                    // These actions have special behavior when there is an active selection.
+                    Action::Next | Action::Previous | Action::Left | Action::Right => {}
+                    _ => self.select_opt = None,
+                }
+            }
+        }
 
         match action {
             Action::Previous => {
+                if !select {
+                    if let Some((start, _)) = self.selection() {
+                        self.cursor = start;
+                        self.select_opt = None;
+                        self.buffer.set_redraw(true);
+                        self.cursor_moved = true;
+                        return;
+                    }
+                }
                 let line = &mut self.buffer.lines[self.cursor.line];
                 if self.cursor.index > 0 {
                     // Find previous character index
@@ -409,6 +432,15 @@ impl Edit for Editor {
                 self.cursor_x_opt = None;
             }
             Action::Next => {
+                if !select {
+                    if let Some((_, end)) = self.selection() {
+                        self.cursor = end;
+                        self.select_opt = None;
+                        self.buffer.set_redraw(true);
+                        self.cursor_moved = true;
+                        return;
+                    }
+                }
                 let line = &mut self.buffer.lines[self.cursor.line];
                 if self.cursor.index < line.text().len() {
                     for (i, c) in line.text().grapheme_indices(true) {
@@ -434,9 +466,9 @@ impl Edit for Editor {
                     .map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
-                        self.action(font_system, Action::Next);
+                        self.action(font_system, Action::Next, select);
                     } else {
-                        self.action(font_system, Action::Previous);
+                        self.action(font_system, Action::Previous, select);
                     }
                 }
             }
@@ -447,9 +479,9 @@ impl Edit for Editor {
                     .map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
-                        self.action(font_system, Action::Previous);
+                        self.action(font_system, Action::Previous, select);
                     } else {
-                        self.action(font_system, Action::Next);
+                        self.action(font_system, Action::Next, select);
                     }
                 }
             }
@@ -527,11 +559,31 @@ impl Edit for Editor {
                 self.cursor_x_opt = None;
                 self.buffer.set_redraw(true);
             }
+            Action::DocumentStart => {
+                self.cursor.line = 0;
+                self.cursor.index = 0;
+                self.cursor_x_opt = None;
+                self.buffer.set_redraw(true);
+            }
+            Action::DocumentEnd => {
+                self.cursor.line = self.buffer.lines.len() - 1;
+                self.cursor.index = self.buffer.lines[self.cursor.line].text().len();
+                self.cursor_x_opt = None;
+                self.buffer.set_redraw(true);
+            }
             Action::PageUp => {
-                self.action(font_system, Action::Vertical(-self.buffer.size().1 as i32));
+                self.action(
+                    font_system,
+                    Action::Vertical(-self.buffer.size().1 as i32),
+                    select,
+                );
             }
             Action::PageDown => {
-                self.action(font_system, Action::Vertical(self.buffer.size().1 as i32));
+                self.action(
+                    font_system,
+                    Action::Vertical(self.buffer.size().1 as i32),
+                    select,
+                );
             }
             Action::Vertical(px) => {
                 // TODO more efficient
@@ -539,16 +591,20 @@ impl Edit for Editor {
                 match lines.cmp(&0) {
                     Ordering::Less => {
                         for _ in 0..-lines {
-                            self.action(font_system, Action::Up);
+                            self.action(font_system, Action::Up, select);
                         }
                     }
                     Ordering::Greater => {
                         for _ in 0..lines {
-                            self.action(font_system, Action::Down);
+                            self.action(font_system, Action::Down, select);
                         }
                     }
                     Ordering::Equal => {}
                 }
+            }
+            Action::SelectAll => {
+                self.action(font_system, Action::DocumentStart, false);
+                self.action(font_system, Action::DocumentEnd, true);
             }
             Action::Escape => {
                 if self.select_opt.take().is_some() {
@@ -560,7 +616,7 @@ impl Edit for Editor {
                     // Filter out special chars (except for tab), use Action instead
                     log::debug!("Refusing to insert control character {:?}", character);
                 } else if character == '\n' {
-                    self.action(font_system, Action::Enter);
+                    self.action(font_system, Action::Enter, false);
                 } else {
                     let mut str_buf = [0u8; 8];
                     let str_ref = character.encode_utf8(&mut str_buf);
@@ -655,6 +711,14 @@ impl Edit for Editor {
                     line.append(old_line);
                 }
             }
+            Action::DeleteStartOfWord => {
+                if self.delete_selection() {
+                    // Deleted selection
+                } else {
+                    self.action(font_system, Action::PreviousWord, true);
+                    self.delete_selection();
+                }
+            }
             Action::Delete => {
                 if self.delete_selection() {
                     // Deleted selection
@@ -685,9 +749,15 @@ impl Edit for Editor {
                     self.buffer.lines[self.cursor.line].append(old_line);
                 }
             }
+            Action::DeleteEndOfWord => {
+                if self.delete_selection() {
+                    // Deleted selection
+                } else {
+                    self.action(font_system, Action::NextWord, true);
+                    self.delete_selection();
+                }
+            }
             Action::Click { x, y } => {
-                self.select_opt = None;
-
                 if let Some(new_cursor) = self.buffer.hit(x as f32, y as f32) {
                     if new_cursor != self.cursor {
                         let color = self.cursor.color;
@@ -711,6 +781,29 @@ impl Edit for Editor {
                         self.buffer.set_redraw(true);
                     }
                 }
+            }
+            Action::SelectWord { x, y } => {
+                self.action(font_system, Action::Click { x, y }, false);
+
+                let line: &mut BufferLine = &mut self.buffer.lines[self.cursor.line];
+                if self.cursor.index > 0 {
+                    let mut prev_index = 0;
+                    for (i, _) in line.text().unicode_word_indices() {
+                        if i <= self.cursor.index {
+                            prev_index = i;
+                        } else {
+                            break;
+                        }
+                    }
+                    self.cursor.index = prev_index;
+                    self.buffer.set_redraw(true);
+                }
+                self.action(font_system, Action::NextWord, true);
+            }
+            Action::SelectParagraph { x, y } => {
+                self.action(font_system, Action::Click { x, y }, false);
+                self.action(font_system, Action::ParagraphStart, false);
+                self.action(font_system, Action::ParagraphEnd, true);
             }
             Action::Scroll { lines } => {
                 let mut scroll = self.buffer.scroll();
@@ -763,9 +856,9 @@ impl Edit for Editor {
                     .map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
-                        self.action(font_system, Action::NextWord);
+                        self.action(font_system, Action::NextWord, select);
                     } else {
-                        self.action(font_system, Action::PreviousWord);
+                        self.action(font_system, Action::PreviousWord, select);
                     }
                 }
             }
@@ -776,9 +869,9 @@ impl Edit for Editor {
                     .map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
-                        self.action(font_system, Action::PreviousWord);
+                        self.action(font_system, Action::PreviousWord, select);
                     } else {
-                        self.action(font_system, Action::NextWord);
+                        self.action(font_system, Action::NextWord, select);
                     }
                 }
             }
@@ -983,5 +1076,46 @@ impl Edit for Editor {
     fn set_selected_text_color(&mut self, color: Option<Color>) {
         self.selected_text_color = color;
         self.buffer.set_redraw(true);
+    }
+}
+
+fn has_select_option(action: &Action) -> bool {
+    match action {
+        Action::Previous
+        | Action::Next
+        | Action::Left
+        | Action::Right
+        | Action::Up
+        | Action::Down
+        | Action::Home
+        | Action::End
+        | Action::ParagraphStart
+        | Action::ParagraphEnd
+        | Action::DocumentStart
+        | Action::DocumentEnd
+        | Action::PageUp
+        | Action::PageDown
+        | Action::Vertical(_)
+        | Action::Click { .. }
+        | Action::PreviousWord
+        | Action::NextWord
+        | Action::LeftWord
+        | Action::RightWord
+        | Action::BufferStart
+        | Action::BufferEnd => true,
+
+        Action::SelectAll
+        | Action::Escape
+        | Action::Insert(_)
+        | Action::Enter
+        | Action::Backspace
+        | Action::DeleteStartOfWord
+        | Action::Delete
+        | Action::DeleteEndOfWord
+        | Action::Drag { .. }
+        | Action::SelectWord { .. }
+        | Action::SelectParagraph { .. }
+        | Action::Scroll { .. }
+        | Action::SetPreedit { .. } => false,
     }
 }

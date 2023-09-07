@@ -281,65 +281,68 @@ where
         match event {
             Event::Keyboard(keyboard::Event::KeyPressed { key_code, .. }) => match key_code {
                 KeyCode::Left => {
-                    editor.action(Action::Left);
+                    editor.action(Action::Left, false);
                     status = Status::Captured;
                 }
                 KeyCode::Right => {
-                    editor.action(Action::Right);
+                    editor.action(Action::Right, false);
                     status = Status::Captured;
                 }
                 KeyCode::Up => {
-                    editor.action(Action::Up);
+                    editor.action(Action::Up, false);
                     status = Status::Captured;
                 }
                 KeyCode::Down => {
-                    editor.action(Action::Down);
+                    editor.action(Action::Down, false);
                     status = Status::Captured;
                 }
                 KeyCode::Home => {
-                    editor.action(Action::Home);
+                    editor.action(Action::Home, false);
                     status = Status::Captured;
                 }
                 KeyCode::End => {
-                    editor.action(Action::End);
+                    editor.action(Action::End, false);
                     status = Status::Captured;
                 }
                 KeyCode::PageUp => {
-                    editor.action(Action::PageUp);
+                    editor.action(Action::PageUp, false);
                     status = Status::Captured;
                 }
                 KeyCode::PageDown => {
-                    editor.action(Action::PageDown);
+                    editor.action(Action::PageDown, false);
                     status = Status::Captured;
                 }
                 KeyCode::Escape => {
-                    editor.action(Action::Escape);
+                    editor.action(Action::Escape, false);
                     status = Status::Captured;
                 }
                 KeyCode::Enter => {
-                    editor.action(Action::Enter);
+                    editor.action(Action::Enter, false);
                     status = Status::Captured;
                 }
                 KeyCode::Backspace => {
-                    editor.action(Action::Backspace);
+                    editor.action(Action::Backspace, false);
                     status = Status::Captured;
                 }
                 KeyCode::Delete => {
-                    editor.action(Action::Delete);
+                    editor.action(Action::Delete, false);
                     status = Status::Captured;
                 }
                 _ => (),
             },
             Event::Keyboard(keyboard::Event::CharacterReceived(character)) => {
-                editor.action(Action::Insert(character));
+                editor.action(Action::Insert(character), false);
                 status = Status::Captured;
             }
             Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left)) => {
                 if let Some(position_in) = cursor_position.position_in(layout.bounds()) {
-                    editor.action(Action::Click {
-                        x: position_in.x as i32 - self.padding.left as i32,
-                        y: position_in.y as i32 - self.padding.top as i32,
-                    });
+                    editor.action(
+                        Action::Click {
+                            x: position_in.x as i32 - self.padding.left as i32,
+                            y: position_in.y as i32 - self.padding.top as i32,
+                        },
+                        false,
+                    );
                     state.is_dragging = true;
                     status = Status::Captured;
                 }
@@ -350,18 +353,24 @@ where
             }
             Event::Mouse(mouse::Event::CursorMoved { position }) => {
                 if state.is_dragging {
-                    editor.action(Action::Drag {
-                        x: (position.x - layout.bounds().x) as i32 - self.padding.left as i32,
-                        y: (position.y - layout.bounds().y) as i32 - self.padding.top as i32,
-                    });
+                    editor.action(
+                        Action::Drag {
+                            x: (position.x - layout.bounds().x) as i32 - self.padding.left as i32,
+                            y: (position.y - layout.bounds().y) as i32 - self.padding.top as i32,
+                        },
+                        false,
+                    );
                     status = Status::Captured;
                 }
             }
             Event::Mouse(mouse::Event::WheelScrolled { delta }) => match delta {
                 mouse::ScrollDelta::Lines { y, .. } => {
-                    editor.action(Action::Scroll {
-                        lines: (-y * 6.0) as i32,
-                    });
+                    editor.action(
+                        Action::Scroll {
+                            lines: (-y * 6.0) as i32,
+                        },
+                        false,
+                    );
                     status = Status::Captured;
                 }
                 _ => (),
