@@ -166,23 +166,25 @@ impl<'a> Attrs<'a> {
     }
 
     /// Set font size
-    /// 
+    ///
     /// # Panics
-    /// 
+    ///
     /// Will panic if font size is zero.
     pub fn size(mut self, size: f32) -> Self {
-        assert_ne!(inner, 0.0, "font size cannot be 0");
+        assert_ne!(size, 0.0, "font size cannot be 0");
         self.font_size = size;
         self
     }
 
     /// Set line height
-    /// 
+    ///
     /// # Panics
-    /// 
+    ///
     /// Will panic if line height is zero.
     pub fn line_height(mut self, line_height: LineHeight) -> Self {
-        let LineHeight::Absolute(inner) | LineHeight::Proportional(inner) = line_height;
+        let inner = match line_height {
+            LineHeight::Absolute(inner) | LineHeight::Proportional(inner) => inner,
+        };
         assert_ne!(inner, 0.0, "line height cannot be 0");
         self.line_height = line_height;
         self
@@ -236,9 +238,9 @@ impl<'a> Attrs<'a> {
     }
 
     /// Scale the font size and line height
-    /// 
+    ///
     /// # Panics
-    /// 
+    ///
     /// Will panic if scale is zero.
     pub fn scale(mut self, scale: f32) -> Self {
         assert_ne!(scale, 0.0, "scale cannot be 0");
