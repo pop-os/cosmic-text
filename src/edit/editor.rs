@@ -2,10 +2,7 @@
 
 #[cfg(not(feature = "std"))]
 use alloc::string::String;
-use core::{
-    cmp::{self, Ordering},
-    iter::once,
-};
+use core::{cmp, iter::once};
 use unicode_segmentation::UnicodeSegmentation;
 
 #[cfg(feature = "swash")]
@@ -480,7 +477,6 @@ impl Edit for Editor {
                         _ => break,
                     }
                 }
-                dbg!(current_line, self.buffer.scroll());
                 // let lines = px / self.buffer.metrics().line_height as i32;
                 // match lines.cmp(&0) {
                 //     Ordering::Less => {

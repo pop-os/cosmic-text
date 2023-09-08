@@ -5,7 +5,7 @@ use alloc::{
     string::{String, ToString},
     vec::Vec,
 };
-use core::{cmp, fmt};
+use core::fmt;
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
@@ -185,15 +185,6 @@ impl<'a> LayoutRun<'a> {
             Cursor::new_with_affinity(self.line_i, glyph.end, Affinity::Before)
         }
     }
-
-    // pub fn line_height(&self) -> f32 {
-    //     self.glyphs
-    //         .iter()
-    //         .map(|g| g.line_height())
-    //         .reduce(f32::max)
-    //         // TODO: not 0
-    //         .unwrap_or(0.0)
-    // }
 }
 
 /// An iterator of visible text lines, see [`LayoutRun`]
@@ -203,10 +194,7 @@ pub struct LayoutRunIter<'b> {
     line_i: usize,
     layout_i: usize,
     remaining_len: usize,
-    total_layout_height: f32,
     total_layout: i32,
-    // TODO: lift this to BufferLine::layout_opt, and take a &'b [f32] slice instead
-    // line_heights: &'b [f32],
 }
 
 impl<'b> LayoutRunIter<'b> {
@@ -226,9 +214,7 @@ impl<'b> LayoutRunIter<'b> {
             line_i: 0,
             layout_i: 0,
             remaining_len: bottom_cropped_layout_lines,
-            total_layout_height: 0.0,
             total_layout: 0,
-            // line_heights,
         }
     }
 }
@@ -253,12 +239,10 @@ impl<'b> Iterator for LayoutRunIter<'b> {
                     continue;
                 }
                 // TODO: can scroll be negative?
-                // let this_line = self.total_layout as usize + self.buffer.scroll as usize - 1;
                 let this_line = self.total_layout.saturating_sub(1) as usize;
                 let line_top = self.buffer.line_heights[self.buffer.scroll as usize..this_line]
                     .iter()
                     .sum();
-                // dbg!(line_top);
                 let glyph_height = layout_line.max_ascent + layout_line.max_descent;
                 let centering_offset = (self.buffer.line_heights[this_line] - glyph_height) / 2.0;
                 let line_y = line_top + centering_offset + layout_line.max_ascent;
@@ -321,14 +305,6 @@ impl fmt::Display for Metrics {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}px / {}px", self.font_size_, self.line_height_)
     }
-}
-
-macro_rules! dbgg {
-    ($ex:expr) => {
-        if cfg!(debug_assertions) {
-            println!("{}: {}", stringify!($ex), $ex);
-        }
-    };
 }
 
 /// A buffer of text that is shaped and laid out
@@ -417,16 +393,6 @@ impl Buffer {
     }
 
     pub fn line_heights(&self) -> &[f32] {
-        // self.lines
-        //     .iter()
-        //     .flat_map(|line| line.layout_opt())
-        //     .flat_map(|lines| lines.iter().map(|line| line.line_height()))
-        //     .collect()
-        // self.lines
-        //     .iter()
-        //     .flat_map(|line| line.line_heights())
-        //     .flat_map(|lines| lines.iter().copied())
-        //     .collect()
         self.line_heights.as_slice()
     }
 
@@ -441,7 +407,6 @@ impl Buffer {
             .flat_map(|line| line.line_heights())
             .flat_map(|lines| lines.iter().copied());
         self.line_heights.extend(iter);
-        dbg!(&self.line_heights);
 
         #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
         log::debug!(
@@ -459,8 +424,7 @@ impl Buffer {
         let mut reshaped = 0;
         let mut total_layout = 0;
         let mut should_update_line_heights = false;
-        dbgg!(lines);
-        for (index, line) in &mut self.lines.iter_mut().enumerate() {
+        for line in &mut self.lines {
             if total_layout >= lines {
                 break;
             }
@@ -475,12 +439,6 @@ impl Buffer {
 
             let layout =
                 line.layout_in_buffer(&mut self.scratch, font_system, self.width, self.wrap);
-            // dbg!(
-            //     index,
-            //     total_layout,
-            //     layout.len(),
-            //     total_layout + layout.len() as i32
-            // );
             total_layout += layout.len() as i32;
         }
 
@@ -499,7 +457,6 @@ impl Buffer {
 
     /// Shape lines until cursor, also scrolling to include cursor in view
     pub fn shape_until_cursor(&mut self, font_system: &mut FontSystem, cursor: Cursor) {
-        println!("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
         #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
         let instant = std::time::Instant::now();
 
@@ -542,19 +499,7 @@ impl Buffer {
 
         // the first visible line is index = self.scroll
         // the last visible line is index = self.scroll + lines
-        for (last_line, _) in self
-            .lines
-            .iter()
-            .filter_map(|line| line.layout_opt().as_ref())
-            .flat_map(|para| para.iter())
-            .enumerate()
-            .skip(self.scroll as usize)
-            .take(self.visible_lines() as usize)
-        {
-            dbg!(last_line);
-        }
         let lines = self.visible_lines();
-        dbg!(layout_i, self.scroll, lines);
         if layout_i < self.scroll {
             self.scroll = layout_i;
         } else if layout_i >= self.scroll + lines {
@@ -568,20 +513,12 @@ impl Buffer {
 
     /// Shape lines until scroll
     pub fn shape_until_scroll(&mut self, font_system: &mut FontSystem) {
-        println!(
-            "{:?} ======================",
-            std::time::SystemTime::now().duration_since(std::time::SystemTime::UNIX_EPOCH)
-        );
-        println!("visible_lines() called from shape_until_scroll");
-
         self.layout_lines(font_system);
 
         let lines = self.visible_lines();
 
         let scroll_end = self.scroll + lines;
-        dbg!(self.scroll, lines, scroll_end);
         let total_layout = self.shape_until(font_system, scroll_end);
-        dbg!(total_layout);
         self.scroll = (total_layout - (lines - 1)).clamp(0, self.scroll);
     }
 
@@ -754,7 +691,6 @@ impl Buffer {
 
     /// Get the number of lines that can be viewed in the buffer, to an ending point
     pub fn visible_lines_to(&self, to: usize) -> i32 {
-        println!("called visible lines to");
         let mut height = self.height;
         let line_heights = self.line_heights();
         if line_heights.is_empty() {
@@ -776,22 +712,6 @@ impl Buffer {
     /// Get the number of lines that can be viewed in the buffer
     pub fn visible_lines(&self) -> i32 {
         self.visible_lines_from(self.scroll as usize)
-        // let mut height = self.height;
-        // let line_heights = self.line_heights();
-        // if line_heights.is_empty() {
-        //     // this has never been laid out, so we can't know the height yet
-        //     return i32::MAX;
-        // }
-        // let mut i = 0;
-        // let mut iter = line_heights.iter().skip(self.scroll as usize);
-        // while let Some(line_height) = iter.next() {
-        //     height -= line_height;
-        //     if height <= 0.0 {
-        //         break;
-        //     }
-        //     i += 1;
-        // }
-        // i
     }
 
     /// Set text of buffer, using provided attributes for each line by default
@@ -927,8 +847,6 @@ impl Buffer {
         #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
         let instant = std::time::Instant::now();
 
-        // println!("strike_y: {strike_y}");
-
         // below,
         // - `first`, `last` refers to iterator indices (usize)
         // - `start`, `end` refers to byte indices (usize)
@@ -966,14 +884,7 @@ impl Buffer {
                 }
             }
 
-            // println!("{run_index}: [{line_top} .. {line_bot}]");
-
             if (line_top..line_bot).contains(&strike_y) {
-                // println!(
-                //     "-> hit on line {run_index} \"{run_text}\"",
-                //     run_text = run.text
-                // );
-
                 let last_glyph_index = run.glyphs.len() - 1;
 
                 // TODO: is this assumption correct with rtl?
@@ -983,7 +894,6 @@ impl Buffer {
                     (0, last_glyph_index)
                 };
 
-                // TODO: check Arabic
                 for (glyph_index, glyph) in run.glyphs.iter().enumerate() {
                     let glyph_left = glyph.x;
 
@@ -999,34 +909,12 @@ impl Buffer {
                         break 'hit Some(run.cursor_from_glyph_right(glyph));
                     }
 
-                    // let glyph_mid = glyph_left + glyph.w / 2.0;
-
-                    // println!("{glyph_index}: [{glyph_left} .. {glyph_mid} .. {glyph_right}]");
-
-                    // let hit_glyph = if (glyph_left..glyph_mid).contains(&strike_x) {
-                    //     // hit left half of glyph
-                    //     println!("-> hit on glyph {glyph_index} (left half)");
-                    //     Some(true)
-                    // } else if (glyph_mid..glyph_right).contains(&strike_x) {
-                    //     // hit right half of glyph
-                    //     println!("-> hit on glyph {glyph_index} (right half)");
-                    //     Some(false)
-                    // } else {
-                    //     None
-                    // };
-
-                    // if let Some(glyph_left_half) = hit_glyph {
                     if (glyph_left..glyph_right).contains(&strike_x) {
                         let cluster = &run.text[glyph.start..glyph.end];
-                        // println!(
-                        //     "--> hit on glyph with value \"{cluster}\" [{len}]",
-                        //     len = cluster.len()
-                        // );
 
                         let total = cluster.graphemes(true).count();
                         let last_egc_index = total - 1;
                         let egc_w = glyph.w / (total as f32);
-                        // dbg!(egc_w, total);
                         let mut egc_left = glyph_left;
 
                         // TODO: is this assumption correct with rtl?
@@ -1040,9 +928,6 @@ impl Buffer {
                             cluster.grapheme_indices(true).enumerate()
                         {
                             let egc_end = egc_start + egc.len();
-                            // if egc_start != 0 {
-                            //     dbg!(egc_start);
-                            // }
 
                             let (left_egc_byte, right_egc_byte) = if glyph.level.is_rtl() {
                                 (glyph.start + egc_end, glyph.start + egc_start)
@@ -1052,7 +937,6 @@ impl Buffer {
 
                             if egc_index == left_egc_index && strike_x < egc_left {
                                 // hit left of left-most egc in cluster
-                                // println!("-> hit left of left-most egc in cluster");
                                 break 'hit Some(Cursor::new(run.line_i, left_egc_byte));
                             }
 
@@ -1060,28 +944,22 @@ impl Buffer {
 
                             if egc_index == right_egc_index && strike_x >= egc_right {
                                 // hit right of right-most egc in cluster
-                                // println!("-> hit right of right-most egc in cluster");
                                 break 'hit Some(Cursor::new(run.line_i, right_egc_byte));
                             }
 
                             let egc_mid = egc_left + egc_w / 2.0;
 
-                            // println!("{egc_index}: [{egc_left} .. {egc_mid} .. {egc_right}]");
-
                             let hit_egc = if (egc_left..egc_mid).contains(&strike_x) {
                                 // hit left half of egc
-                                // println!("-> hit on egc {egc_index} (left half)");
                                 Some(true)
                             } else if (egc_mid..egc_right).contains(&strike_x) {
                                 // hit right half of egc
-                                // println!("-> hit on egc {egc_index} (right half)");
                                 Some(false)
                             } else {
                                 None
                             };
 
                             if let Some(egc_left_half) = hit_egc {
-                                // println!("--> hit on egc with value \"{egc}\"");
                                 break 'hit Some(Cursor::new(
                                     run.line_i,
                                     if egc_left_half {
