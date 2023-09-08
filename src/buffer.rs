@@ -5,7 +5,6 @@ use alloc::{
     string::{String, ToString},
     vec::Vec,
 };
-use core::fmt;
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
@@ -275,45 +274,12 @@ impl<'b> Iterator for LayoutRunIter<'b> {
 
 impl<'b> ExactSizeIterator for LayoutRunIter<'b> {}
 
-/// Metrics of text
-#[derive(Clone, Copy, Debug, Default, PartialEq)]
-pub struct Metrics {
-    /// Font size in pixels
-    pub font_size_: f32,
-    /// Line height in pixels
-    pub line_height_: f32,
-}
-
-impl Metrics {
-    pub fn new(font_size: f32, line_height: f32) -> Self {
-        Self {
-            font_size_: font_size,
-            // TODO: remove this (not hardcoded)
-            line_height_: font_size * 1.2,
-        }
-    }
-
-    pub fn scale(self, scale: f32) -> Self {
-        Self {
-            font_size_: self.font_size_ * scale,
-            line_height_: self.line_height_ * scale,
-        }
-    }
-}
-
-impl fmt::Display for Metrics {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}px / {}px", self.font_size_, self.line_height_)
-    }
-}
-
 /// A buffer of text that is shaped and laid out
 #[derive(Debug)]
 pub struct Buffer {
     /// [BufferLine]s (or paragraphs) of text in the buffer
     pub lines: Vec<BufferLine>,
     line_heights: Vec<f32>,
-    metrics: Metrics,
     width: f32,
     height: f32,
     scroll: i32,
@@ -333,16 +299,10 @@ impl Buffer {
     /// for example by calling [`Buffer::set_text`].
     ///
     /// If you have a [`FontSystem`] in scope, you should use [`Buffer::new`] instead.
-    ///
-    /// # Panics
-    ///
-    /// Will panic if `metrics.line_height` is zero.
-    pub fn new_empty(metrics: Metrics) -> Self {
-        assert_ne!(metrics.line_height_, 0.0, "line height cannot be 0");
+    pub fn new_empty() -> Self {
         Self {
             lines: Vec::new(),
             line_heights: Vec::new(),
-            metrics,
             width: 0.0,
             height: 0.0,
             scroll: 0,
@@ -353,12 +313,8 @@ impl Buffer {
     }
 
     /// Create a new [`Buffer`] with the provided [`FontSystem`] and [`Metrics`]
-    ///
-    /// # Panics
-    ///
-    /// Will panic if `metrics.line_height` is zero.
-    pub fn new(font_system: &mut FontSystem, metrics: Metrics) -> Self {
-        let mut buffer = Self::new_empty(metrics);
+    pub fn new(font_system: &mut FontSystem) -> Self {
+        let mut buffer = Self::new_empty();
         buffer.set_text(font_system, "", Attrs::new(), Shaping::Advanced);
         buffer
     }
@@ -602,25 +558,6 @@ impl Buffer {
 
         if should_update_line_heights {
             self.update_line_heights();
-        }
-    }
-
-    /// Get the current [`Metrics`]
-    pub fn metrics(&self) -> Metrics {
-        self.metrics
-    }
-
-    /// Set the current [`Metrics`]
-    ///
-    /// # Panics
-    ///
-    /// Will panic if `metrics.font_size` is zero.
-    pub fn set_metrics(&mut self, font_system: &mut FontSystem, metrics: Metrics) {
-        if metrics != self.metrics {
-            assert_ne!(metrics.font_size_, 0.0, "font size cannot be 0");
-            self.metrics = metrics;
-            self.relayout(font_system);
-            self.shape_until_scroll(font_system);
         }
     }
 
@@ -1050,15 +987,6 @@ impl<'a> BorrowedWithFontSystem<'a, Buffer> {
     /// Lay out the provided line index and return the result
     pub fn line_layout(&mut self, line_i: usize) -> Option<&[LayoutLine]> {
         self.inner.line_layout(self.font_system, line_i)
-    }
-
-    /// Set the current [`Metrics`]
-    ///
-    /// # Panics
-    ///
-    /// Will panic if `metrics.font_size` is zero.
-    pub fn set_metrics(&mut self, metrics: Metrics) {
-        self.inner.set_metrics(self.font_system, metrics);
     }
 
     /// Set the current [`Wrap`]

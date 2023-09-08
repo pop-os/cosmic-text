@@ -2,7 +2,7 @@
 
 use cosmic_text::{
     Action, Attrs, AttrsList, Buffer, BufferLine, Color, Edit, Editor, Family, FontSystem,
-    LineHeight, Metrics, Shaping, Style, SwashCache, Weight,
+    LineHeight, Shaping, Style, SwashCache, Weight,
 };
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{
@@ -36,9 +36,7 @@ fn main() {
     )
     .unwrap();
 
-    let mut editor = Editor::new(Buffer::new_empty(
-        Metrics::new(32.0, 44.0).scale(display_scale),
-    ));
+    let mut editor = Editor::new(Buffer::new_empty());
 
     let mut editor = editor.borrow_with(&mut font_system);
 
