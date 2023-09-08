@@ -852,11 +852,13 @@ impl Buffer {
         // - `start`, `end` refers to byte indices (usize)
         // - `left`, `top`, `right`, `bot`, `mid` refers to spatial coordinates (f32)
 
-        let last_run_index = self.layout_runs().count() - 1;
+        let Some(last_run_index) = self.layout_runs().count().checked_sub(1) else {
+            return None;
+        };
 
         let mut runs = self.layout_runs().enumerate();
 
-        // TODO: cache line_top, run.line_height(), and line_bot on LayoutRun
+        // TODO: consider caching line_top and line_bot on LayoutRun
 
         // 1. within the buffer, find the layout run (line) that contains the strike point
         // 2. within the layout run (line), find the glyph that contains the strike point
