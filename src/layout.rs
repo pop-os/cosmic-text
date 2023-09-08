@@ -16,6 +16,8 @@ pub struct LayoutGlyph {
     pub end: usize,
     /// Font size of the glyph
     pub font_size: f32,
+    /// Line height
+    pub line_height: f32,
     /// Font id of the glyph
     pub font_id: fontdb::ID,
     /// Font id of the glyph
@@ -63,11 +65,6 @@ pub struct PhysicalGlyph {
 }
 
 impl LayoutGlyph {
-    pub fn line_height(&self) -> f32 {
-        // TODO: should not be hardcoded / should come from Attrs
-        self.font_size * 1.2
-    }
-
     pub fn physical(&self, offset: (f32, f32), scale: f32) -> PhysicalGlyph {
         let x_offset = self.font_size * self.x_offset;
         let y_offset = self.font_size * self.y_offset;
@@ -103,7 +100,7 @@ impl LayoutLine {
     pub fn line_height(&self) -> f32 {
         self.glyphs
             .iter()
-            .map(|g| g.line_height())
+            .map(|g| g.line_height)
             .reduce(f32::max)
             .unwrap_or_default()
     }

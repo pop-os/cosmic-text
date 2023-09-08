@@ -99,6 +99,31 @@ impl FamilyOwned {
     }
 }
 
+/// Determines the line height and strategy.
+/// The actual height of a line will be determined by the largest logical line height in a line.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum LineHeight {
+    /// Represents a line height that is proportional to the font size.
+    Proportional(f32),
+    /// Represents an absolute line height, independent of the font size.
+    Absolute(f32),
+}
+
+impl LineHeight {
+    pub fn height(&self, font_size: f32) -> f32 {
+        match self {
+            LineHeight::Proportional(height) => *height * font_size,
+            LineHeight::Absolute(height) => *height,
+        }
+    }
+}
+
+impl Default for LineHeight {
+    fn default() -> Self {
+        Self::Proportional(1.2)
+    }
+}
+
 /// Text attributes
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Attrs<'a> {
@@ -113,6 +138,8 @@ pub struct Attrs<'a> {
     pub metadata: usize,
     // TODO: extract
     pub font_size: f32,
+    // TODO: extract
+    pub line_height: LineHeight,
 }
 
 impl<'a> Attrs<'a> {
@@ -127,6 +154,7 @@ impl<'a> Attrs<'a> {
             style: Style::Normal,
             weight: Weight::NORMAL,
             font_size: 16.0,
+            line_height: LineHeight::Proportional(1.2),
             metadata: 0,
         }
     }
@@ -140,6 +168,12 @@ impl<'a> Attrs<'a> {
     /// Set font size
     pub fn size(mut self, size: f32) -> Self {
         self.font_size = size;
+        self
+    }
+
+    /// Set line_height
+    pub fn line_height(mut self, line_height: LineHeight) -> Self {
+        self.line_height = line_height;
         self
     }
 
@@ -219,6 +253,8 @@ pub struct AttrsOwned {
     pub metadata: usize,
     // TODO: extract
     pub font_size: f32,
+    // TODO: extract
+    pub line_height: LineHeight,
 }
 
 impl AttrsOwned {
@@ -231,6 +267,7 @@ impl AttrsOwned {
             weight: attrs.weight,
             metadata: attrs.metadata,
             font_size: attrs.font_size,
+            line_height: attrs.line_height,
         }
     }
 
@@ -243,6 +280,7 @@ impl AttrsOwned {
             weight: self.weight,
             metadata: self.metadata,
             font_size: self.font_size,
+            line_height: self.line_height,
         }
     }
 }

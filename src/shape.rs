@@ -147,6 +147,8 @@ fn shape_fallback(
             metadata: attrs.metadata,
             //TODO: font_size should not be related to shaping
             font_size: attrs.font_size,
+            //TODO: line_height should not be related to shaping
+            line_height: attrs.line_height.height(attrs.font_size),
         });
     }
 
@@ -360,9 +362,14 @@ fn shape_skip(
                     descent,
                     font_id,
                     glyph_id,
+                    //TODO: color should not be related to shaping
                     color_opt: attrs.color_opt,
+                    //TODO: metadata should not be related to shaping
                     metadata: attrs.metadata,
+                    //TODO: font_size should not be related to shaping
                     font_size: attrs.font_size,
+                    //TODO: line_height should not be related to shaping
+                    line_height: attrs.line_height.height(attrs.font_size),
                 }
             }),
     );
@@ -387,6 +394,8 @@ pub struct ShapeGlyph {
     pub metadata: usize,
     // TODO: extract
     pub font_size: f32,
+    // TODO: extract
+    pub line_height: f32,
 }
 
 impl ShapeGlyph {
@@ -403,6 +412,7 @@ impl ShapeGlyph {
             level,
             x_offset: self.x_offset,
             y_offset: self.y_offset,
+            line_height: self.line_height,
             color_opt: self.color_opt,
             metadata: self.metadata,
         }

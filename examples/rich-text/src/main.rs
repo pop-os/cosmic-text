@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic_text::{
-    Action, Attrs, Buffer, Color, Edit, Editor, Family, FontSystem, Metrics, Shaping, Style,
-    SwashCache, Weight,
+    Action, Attrs, AttrsList, Buffer, BufferLine, Color, Edit, Editor, Family, FontSystem,
+    LineHeight, Metrics, Shaping, Style, SwashCache, Weight,
 };
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{
@@ -46,9 +46,10 @@ fn main() {
         .buffer_mut()
         .set_size(window.width() as f32, window.height() as f32);
 
-    let font_size = editor.buffer().metrics().font_size_;
-    let attrs = Attrs::new().size(font_size);
-    let serif_attrs = attrs.family(Family::Serif).size(attrs.font_size * 1.5);
+    let attrs = Attrs::new()
+        .size(editor.buffer().metrics().font_size_)
+        .line_height(LineHeight::Absolute(editor.buffer().metrics().line_height_));
+    let serif_attrs = attrs.family(Family::Serif);
     let mono_attrs = attrs.family(Family::Monospace);
     let comic_attrs = attrs.family(Family::Name("Comic Neue"));
 
@@ -102,43 +103,50 @@ fn main() {
             "Red ",
             attrs
                 .color(Color::rgb(0xFF, 0x00, 0x00))
-                .size(attrs.font_size * 1.9),
+                .size(attrs.font_size * 1.9)
+                .line_height(LineHeight::Proportional(0.9)),
         ),
         (
             "Orange ",
             attrs
                 .color(Color::rgb(0xFF, 0x7F, 0x00))
-                .size(attrs.font_size * 1.6),
+                .size(attrs.font_size * 1.6)
+                .line_height(LineHeight::Proportional(1.0)),
         ),
         (
             "Yellow ",
             attrs
                 .color(Color::rgb(0xFF, 0xFF, 0x00))
-                .size(attrs.font_size * 1.3),
+                .size(attrs.font_size * 1.3)
+                .line_height(LineHeight::Proportional(1.1)),
         ),
         (
             "Green ",
             attrs
                 .color(Color::rgb(0x00, 0xFF, 0x00))
-                .size(attrs.font_size * 1.0),
+                .size(attrs.font_size * 1.0)
+                .line_height(LineHeight::Proportional(1.2)),
         ),
         (
             "Blue ",
             attrs
                 .color(Color::rgb(0x00, 0x00, 0xFF))
-                .size(attrs.font_size * 0.8),
+                .size(attrs.font_size * 0.8)
+                .line_height(LineHeight::Proportional(1.3)),
         ),
         (
             "Indigo ",
             attrs
                 .color(Color::rgb(0x4B, 0x00, 0x82))
-                .size(attrs.font_size * 0.6),
+                .size(attrs.font_size * 0.6)
+                .line_height(LineHeight::Proportional(1.4)),
         ),
         (
             "Violet ",
             attrs
                 .color(Color::rgb(0x94, 0x00, 0xD3))
-                .size(attrs.font_size * 0.4),
+                .size(attrs.font_size * 0.4)
+                .line_height(LineHeight::Proportional(1.5)),
         ),
         ("U", attrs.color(Color::rgb(0x94, 0x00, 0xD3))),
         ("N", attrs.color(Color::rgb(0x4B, 0x00, 0x82))),
