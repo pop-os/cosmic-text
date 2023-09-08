@@ -588,6 +588,8 @@ impl Edit for Editor {
                     let old_line = self.buffer.lines.remove(self.cursor.line + 1);
                     self.buffer.lines[self.cursor.line].append(old_line);
                 }
+                // TODO: Delete doesn't redraw without this now
+                self.buffer.set_redraw(true);
             }
             Action::Click { x, y } => {
                 self.select_opt = None;
