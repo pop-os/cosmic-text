@@ -223,6 +223,14 @@ impl<'a> Attrs<'a> {
             && self.style == other.style
             && self.weight == other.weight
     }
+
+    pub fn scale(mut self, scale: f32) -> Self {
+        self.font_size = self.font_size * scale;
+        if let LineHeight::Absolute(height) = self.line_height {
+            self.line_height = LineHeight::Absolute(height * scale);
+        }
+        self
+    }
 }
 
 impl<'a> Eq for Attrs<'a> {}

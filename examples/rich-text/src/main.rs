@@ -47,8 +47,9 @@ fn main() {
         .set_size(window.width() as f32, window.height() as f32);
 
     let attrs = Attrs::new()
-        .size(editor.buffer().metrics().font_size_)
-        .line_height(LineHeight::Absolute(editor.buffer().metrics().line_height_));
+        .size(32.0)
+        .line_height(LineHeight::Absolute(44.0))
+        .scale(display_scale);
     let serif_attrs = attrs.family(Family::Serif);
     let mono_attrs = attrs.family(Family::Monospace);
     let comic_attrs = attrs.family(Family::Name("Comic Neue"));
