@@ -94,22 +94,22 @@ fn main() {
                 // Test backspace of character
                 {
                     let cursor = editor.cursor();
-                    editor.action(Action::Insert(c));
-                    editor.action(Action::Backspace);
+                    editor.action(Action::Insert(c), false);
+                    editor.action(Action::Backspace, false);
                     assert_eq!(cursor, editor.cursor());
                 }
 
                 // Finally, normal insert of character
-                editor.action(Action::Insert(c));
+                editor.action(Action::Insert(c), false);
             }
 
             // Test delete of EGC
             {
                 let cursor = editor.cursor();
-                editor.action(Action::Previous);
-                editor.action(Action::Delete);
+                editor.action(Action::Previous, false);
+                editor.action(Action::Delete, false);
                 for c in grapheme.chars() {
-                    editor.action(Action::Insert(c));
+                    editor.action(Action::Insert(c), false);
                 }
                 assert_eq!(
                     (cursor.line, cursor.index),
@@ -121,22 +121,22 @@ fn main() {
         // Test backspace of newline
         {
             let cursor = editor.cursor();
-            editor.action(Action::Enter);
-            editor.action(Action::Backspace);
+            editor.action(Action::Enter, false);
+            editor.action(Action::Backspace, false);
             assert_eq!(cursor, editor.cursor());
         }
 
         // Test delete of newline
         {
             let cursor = editor.cursor();
-            editor.action(Action::Enter);
-            editor.action(Action::Previous);
-            editor.action(Action::Delete);
+            editor.action(Action::Enter, false);
+            editor.action(Action::Previous, false);
+            editor.action(Action::Delete, false);
             assert_eq!(cursor, editor.cursor());
         }
 
         // Finally, normal enter
-        editor.action(Action::Enter);
+        editor.action(Action::Enter, false);
 
         redraw(&mut window, &mut editor, &mut swash_cache);
 

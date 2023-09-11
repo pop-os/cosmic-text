@@ -5,14 +5,13 @@ use alloc::string::String;
 use core::{
     cmp::{self, Ordering},
     iter::once,
+    ops::Range,
 };
 use unicode_segmentation::UnicodeSegmentation;
 
-#[cfg(feature = "swash")]
-use crate::Color;
 use crate::{
-    Action, Affinity, AttrsList, Buffer, BufferLine, Cursor, Edit, FontSystem, LayoutCursor,
-    Shaping,
+    Action, Affinity, AttrsList, Buffer, BufferLine, Color, Cursor, Edit, FontSystem, LayoutCursor,
+    LayoutRun, Shaping,
 };
 
 /// A wrapper of [`Buffer`] for easy editing
@@ -23,6 +22,13 @@ pub struct Editor {
     cursor_x_opt: Option<i32>,
     select_opt: Option<Cursor>,
     cursor_moved: bool,
+    // A preedit was specified with non-empty text but with empty cursor,
+    // indicating that the cursor should be hidden
+    has_preedit_without_cursor: bool,
+    // Set with `set_cursor_hidden`
+    cursor_hidden_by_setting: bool,
+    selection_color: Option<Color>,
+    selected_text_color: Option<Color>,
 }
 
 impl Editor {
@@ -34,6 +40,10 @@ impl Editor {
             cursor_x_opt: None,
             select_opt: None,
             cursor_moved: false,
+            has_preedit_without_cursor: false,
+            cursor_hidden_by_setting: false,
+            selection_color: None,
+            selected_text_color: None,
         }
     }
 
@@ -72,6 +82,72 @@ impl Editor {
     }
 }
 
+fn cursor_glyph_opt(cursor: &Cursor, run: &LayoutRun) -> Option<(usize, f32)> {
+    if cursor.line == run.line_i {
+        for (glyph_i, glyph) in run.glyphs.iter().enumerate() {
+            if cursor.index == glyph.start {
+                return Some((glyph_i, 0.0));
+            } else if cursor.index > glyph.start && cursor.index < glyph.end {
+                // Guess x offset based on characters
+                let mut before = 0;
+                let mut total = 0;
+
+                let cluster = &run.text[glyph.start..glyph.end];
+                for (i, _) in cluster.grapheme_indices(true) {
+                    if glyph.start + i < cursor.index {
+                        before += 1;
+                    }
+                    total += 1;
+                }
+
+                let offset = glyph.w * (before as f32) / (total as f32);
+                return Some((glyph_i, offset));
+            }
+        }
+        match run.glyphs.last() {
+            Some(glyph) => {
+                if cursor.index == glyph.end {
+                    return Some((run.glyphs.len(), 0.0));
+                }
+            }
+            None => {
+                return Some((0, 0.0));
+            }
+        }
+    }
+    None
+}
+
+fn cursor_position(cursor: &Cursor, run: &LayoutRun) -> Option<(i32, i32)> {
+    let (cursor_glyph, cursor_glyph_offset) = cursor_glyph_opt(cursor, run)?;
+    let x = match run.glyphs.get(cursor_glyph) {
+        Some(glyph) => {
+            // Start of detected glyph
+            if glyph.level.is_rtl() {
+                (glyph.x + glyph.w - cursor_glyph_offset) as i32
+            } else {
+                (glyph.x + cursor_glyph_offset) as i32
+            }
+        }
+        None => match run.glyphs.last() {
+            Some(glyph) => {
+                // End of last glyph
+                if glyph.level.is_rtl() {
+                    glyph.x as i32
+                } else {
+                    (glyph.x + glyph.w) as i32
+                }
+            }
+            None => {
+                // Start of empty line
+                0
+            }
+        },
+    };
+
+    Some((x, run.line_top as i32))
+}
+
 impl Edit for Editor {
     fn buffer(&self) -> &Buffer {
         &self.buffer
@@ -87,6 +163,12 @@ impl Edit for Editor {
 
     fn set_cursor(&mut self, cursor: Cursor) {
         self.cursor = cursor;
+        self.buffer.set_redraw(true);
+    }
+
+    fn set_cursor_hidden(&mut self, hidden: bool) {
+        self.cursor_hidden_by_setting = hidden;
+        self.buffer.set_redraw(true);
     }
 
     fn select_opt(&self) -> Option<Cursor> {
@@ -290,11 +372,42 @@ impl Edit for Editor {
         self.cursor.index = self.buffer.lines[self.cursor.line].text().len() - after_len;
     }
 
-    fn action(&mut self, font_system: &mut FontSystem, action: Action) {
+    fn preedit_range(&self) -> Option<Range<usize>> {
+        self.buffer().lines[self.cursor.line].preedit_range()
+    }
+
+    fn preedit_text(&self) -> Option<&str> {
+        self.buffer().lines[self.cursor.line].preedit_text()
+    }
+
+    fn action(&mut self, font_system: &mut FontSystem, action: Action, select: bool) {
         let old_cursor = self.cursor;
+
+        if has_select_option(&action) {
+            if select {
+                if self.select_opt.is_none() {
+                    self.select_opt = Some(self.cursor);
+                }
+            } else {
+                match action {
+                    // These actions have special behavior when there is an active selection.
+                    Action::Next | Action::Previous | Action::Left | Action::Right => {}
+                    _ => self.select_opt = None,
+                }
+            }
+        }
 
         match action {
             Action::Previous => {
+                if !select {
+                    if let Some((start, _)) = self.selection() {
+                        self.cursor = start;
+                        self.select_opt = None;
+                        self.buffer.set_redraw(true);
+                        self.cursor_moved = true;
+                        return;
+                    }
+                }
                 let line = &mut self.buffer.lines[self.cursor.line];
                 if self.cursor.index > 0 {
                     // Find previous character index
@@ -319,6 +432,15 @@ impl Edit for Editor {
                 self.cursor_x_opt = None;
             }
             Action::Next => {
+                if !select {
+                    if let Some((_, end)) = self.selection() {
+                        self.cursor = end;
+                        self.select_opt = None;
+                        self.buffer.set_redraw(true);
+                        self.cursor_moved = true;
+                        return;
+                    }
+                }
                 let line = &mut self.buffer.lines[self.cursor.line];
                 if self.cursor.index < line.text().len() {
                     for (i, c) in line.text().grapheme_indices(true) {
@@ -344,9 +466,9 @@ impl Edit for Editor {
                     .map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
-                        self.action(font_system, Action::Next);
+                        self.action(font_system, Action::Next, select);
                     } else {
-                        self.action(font_system, Action::Previous);
+                        self.action(font_system, Action::Previous, select);
                     }
                 }
             }
@@ -357,9 +479,9 @@ impl Edit for Editor {
                     .map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
-                        self.action(font_system, Action::Previous);
+                        self.action(font_system, Action::Previous, select);
                     } else {
-                        self.action(font_system, Action::Next);
+                        self.action(font_system, Action::Next, select);
                     }
                 }
             }
@@ -437,11 +559,31 @@ impl Edit for Editor {
                 self.cursor_x_opt = None;
                 self.buffer.set_redraw(true);
             }
+            Action::DocumentStart => {
+                self.cursor.line = 0;
+                self.cursor.index = 0;
+                self.cursor_x_opt = None;
+                self.buffer.set_redraw(true);
+            }
+            Action::DocumentEnd => {
+                self.cursor.line = self.buffer.lines.len() - 1;
+                self.cursor.index = self.buffer.lines[self.cursor.line].text().len();
+                self.cursor_x_opt = None;
+                self.buffer.set_redraw(true);
+            }
             Action::PageUp => {
-                self.action(font_system, Action::Vertical(-self.buffer.size().1 as i32));
+                self.action(
+                    font_system,
+                    Action::Vertical(-self.buffer.size().1 as i32),
+                    select,
+                );
             }
             Action::PageDown => {
-                self.action(font_system, Action::Vertical(self.buffer.size().1 as i32));
+                self.action(
+                    font_system,
+                    Action::Vertical(self.buffer.size().1 as i32),
+                    select,
+                );
             }
             Action::Vertical(px) => {
                 // TODO more efficient
@@ -449,16 +591,20 @@ impl Edit for Editor {
                 match lines.cmp(&0) {
                     Ordering::Less => {
                         for _ in 0..-lines {
-                            self.action(font_system, Action::Up);
+                            self.action(font_system, Action::Up, select);
                         }
                     }
                     Ordering::Greater => {
                         for _ in 0..lines {
-                            self.action(font_system, Action::Down);
+                            self.action(font_system, Action::Down, select);
                         }
                     }
                     Ordering::Equal => {}
                 }
+            }
+            Action::SelectAll => {
+                self.action(font_system, Action::DocumentStart, false);
+                self.action(font_system, Action::DocumentEnd, true);
             }
             Action::Escape => {
                 if self.select_opt.take().is_some() {
@@ -470,12 +616,51 @@ impl Edit for Editor {
                     // Filter out special chars (except for tab), use Action instead
                     log::debug!("Refusing to insert control character {:?}", character);
                 } else if character == '\n' {
-                    self.action(font_system, Action::Enter);
+                    self.action(font_system, Action::Enter, false);
                 } else {
                     let mut str_buf = [0u8; 8];
                     let str_ref = character.encode_utf8(&mut str_buf);
                     self.insert_string(str_ref, None);
                 }
+            }
+            Action::SetPreedit {
+                preedit,
+                cursor,
+                attrs,
+            } => {
+                self.select_opt = None;
+                let line: &mut BufferLine = &mut self.buffer.lines[self.cursor.line];
+                if let Some(range) = line.preedit_range() {
+                    let end = line.split_off(range.end);
+                    line.split_off(range.start);
+                    line.append(end);
+                    self.cursor.index = range.start;
+                }
+                if !preedit.is_empty() {
+                    let new_attrs = if let Some(attrs) = attrs {
+                        AttrsList::new(attrs.as_attrs().preedit(true))
+                    } else {
+                        let attrs_at_cursor = line.attrs_list().get_span(self.cursor.index);
+                        AttrsList::new(
+                            attrs_at_cursor
+                                .preedit(true)
+                                .color(Color::rgb(128, 128, 128)),
+                        )
+                    };
+                    self.insert_string(&preedit, Some(new_attrs));
+                    if let Some((start, end)) = cursor {
+                        let end_delta = preedit.len().saturating_sub(end);
+                        self.cursor.index = self.cursor.index.saturating_sub(end_delta);
+                        if start != end {
+                            let start_delta = preedit.len().saturating_sub(start);
+                            let mut select = self.cursor;
+                            select.index = select.index.saturating_sub(start_delta);
+                            self.select_opt = Some(select);
+                        }
+                    }
+                }
+                self.has_preedit_without_cursor = !preedit.is_empty() && cursor.is_none();
+                self.buffer.set_redraw(true);
             }
             Action::Enter => {
                 self.delete_selection();
@@ -526,6 +711,14 @@ impl Edit for Editor {
                     line.append(old_line);
                 }
             }
+            Action::DeleteStartOfWord => {
+                if self.delete_selection() {
+                    // Deleted selection
+                } else {
+                    self.action(font_system, Action::PreviousWord, true);
+                    self.delete_selection();
+                }
+            }
             Action::Delete => {
                 if self.delete_selection() {
                     // Deleted selection
@@ -556,9 +749,15 @@ impl Edit for Editor {
                     self.buffer.lines[self.cursor.line].append(old_line);
                 }
             }
+            Action::DeleteEndOfWord => {
+                if self.delete_selection() {
+                    // Deleted selection
+                } else {
+                    self.action(font_system, Action::NextWord, true);
+                    self.delete_selection();
+                }
+            }
             Action::Click { x, y } => {
-                self.select_opt = None;
-
                 if let Some(new_cursor) = self.buffer.hit(x as f32, y as f32) {
                     if new_cursor != self.cursor {
                         let color = self.cursor.color;
@@ -582,6 +781,29 @@ impl Edit for Editor {
                         self.buffer.set_redraw(true);
                     }
                 }
+            }
+            Action::SelectWord { x, y } => {
+                self.action(font_system, Action::Click { x, y }, false);
+
+                let line: &mut BufferLine = &mut self.buffer.lines[self.cursor.line];
+                if self.cursor.index > 0 {
+                    let mut prev_index = 0;
+                    for (i, _) in line.text().unicode_word_indices() {
+                        if i <= self.cursor.index {
+                            prev_index = i;
+                        } else {
+                            break;
+                        }
+                    }
+                    self.cursor.index = prev_index;
+                    self.buffer.set_redraw(true);
+                }
+                self.action(font_system, Action::NextWord, true);
+            }
+            Action::SelectParagraph { x, y } => {
+                self.action(font_system, Action::Click { x, y }, false);
+                self.action(font_system, Action::ParagraphStart, false);
+                self.action(font_system, Action::ParagraphEnd, true);
             }
             Action::Scroll { lines } => {
                 let mut scroll = self.buffer.scroll();
@@ -612,14 +834,14 @@ impl Edit for Editor {
             Action::NextWord => {
                 let line: &mut BufferLine = &mut self.buffer.lines[self.cursor.line];
                 if self.cursor.index < line.text().len() {
-                    for (i, word) in line.text().unicode_word_indices() {
-                        let i = i + word.len();
-                        if i > self.cursor.index {
-                            self.cursor.index = i;
-                            self.buffer.set_redraw(true);
-                            break;
-                        }
-                    }
+                    let closest_word_end = line
+                        .text()
+                        .unicode_word_indices()
+                        .map(|(i, word)| i + word.len())
+                        .find(|i| *i > self.cursor.index)
+                        .unwrap_or_else(|| line.text().len());
+                    self.cursor.index = closest_word_end;
+                    self.buffer.set_redraw(true);
                 } else if self.cursor.line + 1 < self.buffer.lines.len() {
                     self.cursor.line += 1;
                     self.cursor.index = 0;
@@ -634,9 +856,9 @@ impl Edit for Editor {
                     .map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
-                        self.action(font_system, Action::NextWord);
+                        self.action(font_system, Action::NextWord, select);
                     } else {
-                        self.action(font_system, Action::PreviousWord);
+                        self.action(font_system, Action::PreviousWord, select);
                     }
                 }
             }
@@ -647,9 +869,9 @@ impl Edit for Editor {
                     .map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
-                        self.action(font_system, Action::PreviousWord);
+                        self.action(font_system, Action::PreviousWord, select);
                     } else {
-                        self.action(font_system, Action::NextWord);
+                        self.action(font_system, Action::NextWord, select);
                     }
                 }
             }
@@ -704,45 +926,8 @@ impl Edit for Editor {
             let line_y = run.line_y;
             let line_top = run.line_top;
 
-            let cursor_glyph_opt = |cursor: &Cursor| -> Option<(usize, f32)> {
-                if cursor.line == line_i {
-                    for (glyph_i, glyph) in run.glyphs.iter().enumerate() {
-                        if cursor.index == glyph.start {
-                            return Some((glyph_i, 0.0));
-                        } else if cursor.index > glyph.start && cursor.index < glyph.end {
-                            // Guess x offset based on characters
-                            let mut before = 0;
-                            let mut total = 0;
-
-                            let cluster = &run.text[glyph.start..glyph.end];
-                            for (i, _) in cluster.grapheme_indices(true) {
-                                if glyph.start + i < cursor.index {
-                                    before += 1;
-                                }
-                                total += 1;
-                            }
-
-                            let offset = glyph.w * (before as f32) / (total as f32);
-                            return Some((glyph_i, offset));
-                        }
-                    }
-                    match run.glyphs.last() {
-                        Some(glyph) => {
-                            if cursor.index == glyph.end {
-                                return Some((run.glyphs.len(), 0.0));
-                            }
-                        }
-                        None => {
-                            return Some((0, 0.0));
-                        }
-                    }
-                }
-                None
-            };
-
-            // Highlight selection (TODO: HIGHLIGHT COLOR!)
-            if let Some(select) = self.select_opt {
-                let (start, end) = match select.line.cmp(&self.cursor.line) {
+            let (selection_start, selection_end) = if let Some(select) = self.select_opt {
+                match select.line.cmp(&self.cursor.line) {
                     cmp::Ordering::Greater => (self.cursor, select),
                     cmp::Ordering::Less => (select, self.cursor),
                     cmp::Ordering::Equal => {
@@ -754,9 +939,18 @@ impl Edit for Editor {
                             (self.cursor, select)
                         }
                     }
-                };
+                }
+            } else {
+                (self.cursor, self.cursor)
+            };
 
-                if line_i >= start.line && line_i <= end.line {
+            // Highlight selection
+            if selection_start != selection_end {
+                let color = self
+                    .selection_color
+                    .unwrap_or_else(|| Color::rgba(color.r(), color.g(), color.b(), 0x33));
+
+                if line_i >= selection_start.line && line_i <= selection_end.line {
                     let mut range_opt = None;
                     for glyph in run.glyphs.iter() {
                         // Guess x offset based on characters
@@ -767,8 +961,8 @@ impl Edit for Editor {
                         for (i, c) in cluster.grapheme_indices(true) {
                             let c_start = glyph.start + i;
                             let c_end = glyph.start + i + c.len();
-                            if (start.line != line_i || c_end > start.index)
-                                && (end.line != line_i || c_start < end.index)
+                            if (selection_start.line != line_i || c_end > selection_start.index)
+                                && (selection_end.line != line_i || c_start < selection_end.index)
                             {
                                 range_opt = match range_opt.take() {
                                     Some((min, max)) => Some((
@@ -783,20 +977,20 @@ impl Edit for Editor {
                                     line_top as i32,
                                     cmp::max(0, max - min) as u32,
                                     line_height as u32,
-                                    Color::rgba(color.r(), color.g(), color.b(), 0x33),
+                                    color,
                                 );
                             }
                             c_x += c_w;
                         }
                     }
 
-                    if run.glyphs.is_empty() && end.line > line_i {
+                    if run.glyphs.is_empty() && selection_end.line > line_i {
                         // Highlight all of internal empty lines
                         range_opt = Some((0, self.buffer.size().0 as i32));
                     }
 
                     if let Some((mut min, mut max)) = range_opt.take() {
-                        if end.line > line_i {
+                        if selection_end.line > line_i {
                             // Draw to end of line
                             if run.rtl {
                                 min = 0;
@@ -804,60 +998,51 @@ impl Edit for Editor {
                                 max = self.buffer.size().0 as i32;
                             }
                         }
+
                         f(
                             min,
                             line_top as i32,
                             cmp::max(0, max - min) as u32,
                             line_height as u32,
-                            Color::rgba(color.r(), color.g(), color.b(), 0x33),
+                            color,
                         );
                     }
                 }
             }
 
             // Draw cursor
-            if let Some((cursor_glyph, cursor_glyph_offset)) = cursor_glyph_opt(&self.cursor) {
-                let x = match run.glyphs.get(cursor_glyph) {
-                    Some(glyph) => {
-                        // Start of detected glyph
-                        if glyph.level.is_rtl() {
-                            (glyph.x + glyph.w - cursor_glyph_offset) as i32
-                        } else {
-                            (glyph.x + cursor_glyph_offset) as i32
-                        }
-                    }
-                    None => match run.glyphs.last() {
-                        Some(glyph) => {
-                            // End of last glyph
-                            if glyph.level.is_rtl() {
-                                glyph.x as i32
-                            } else {
-                                (glyph.x + glyph.w) as i32
-                            }
-                        }
-                        None => {
-                            // Start of empty line
-                            0
-                        }
-                    },
-                };
-
-                f(
-                    x,
-                    line_top as i32,
-                    1,
-                    line_height as u32,
-                    self.cursor.color.unwrap_or(color),
-                );
+            let cursor_hidden = self.cursor_hidden_by_setting
+                || self.has_preedit_without_cursor
+                || self.has_selection();
+            if !cursor_hidden {
+                if let Some((x, y)) = cursor_position(&self.cursor, &run) {
+                    f(
+                        x,
+                        y,
+                        1,
+                        line_height as u32,
+                        self.cursor.color.unwrap_or(color),
+                    );
+                }
             }
 
             for glyph in run.glyphs.iter() {
                 let physical_glyph = glyph.physical((0., 0.), 1.0);
 
-                let glyph_color = match glyph.color_opt {
+                let mut glyph_color = match glyph.color_opt {
                     Some(some) => some,
                     None => color,
                 };
+                if let Some(color) = self.selected_text_color {
+                    let is_selected = line_i >= selection_start.line
+                        && line_i <= selection_end.line
+                        && (selection_start.line != line_i || glyph.end > selection_start.index)
+                        && (selection_end.line != line_i || glyph.start < selection_end.index);
+
+                    if is_selected {
+                        glyph_color = color;
+                    }
+                }
 
                 cache.with_pixels(
                     font_system,
@@ -875,5 +1060,62 @@ impl Edit for Editor {
                 );
             }
         }
+    }
+
+    fn cursor_position(&self) -> Option<(i32, i32)> {
+        self.buffer
+            .layout_runs()
+            .find_map(|run| cursor_position(&self.cursor, &run))
+    }
+
+    fn set_selection_color(&mut self, color: Option<Color>) {
+        self.selection_color = color;
+        self.buffer.set_redraw(true);
+    }
+
+    fn set_selected_text_color(&mut self, color: Option<Color>) {
+        self.selected_text_color = color;
+        self.buffer.set_redraw(true);
+    }
+}
+
+fn has_select_option(action: &Action) -> bool {
+    match action {
+        Action::Previous
+        | Action::Next
+        | Action::Left
+        | Action::Right
+        | Action::Up
+        | Action::Down
+        | Action::Home
+        | Action::End
+        | Action::ParagraphStart
+        | Action::ParagraphEnd
+        | Action::DocumentStart
+        | Action::DocumentEnd
+        | Action::PageUp
+        | Action::PageDown
+        | Action::Vertical(_)
+        | Action::Click { .. }
+        | Action::PreviousWord
+        | Action::NextWord
+        | Action::LeftWord
+        | Action::RightWord
+        | Action::BufferStart
+        | Action::BufferEnd => true,
+
+        Action::SelectAll
+        | Action::Escape
+        | Action::Insert(_)
+        | Action::Enter
+        | Action::Backspace
+        | Action::DeleteStartOfWord
+        | Action::Delete
+        | Action::DeleteEndOfWord
+        | Action::Drag { .. }
+        | Action::SelectWord { .. }
+        | Action::SelectParagraph { .. }
+        | Action::Scroll { .. }
+        | Action::SetPreedit { .. } => false,
     }
 }

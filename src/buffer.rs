@@ -6,6 +6,7 @@ use alloc::{
     vec::Vec,
 };
 use core::{cmp, fmt};
+use itertools::Itertools;
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
@@ -721,6 +722,14 @@ impl Buffer {
         self.scroll = 0;
 
         self.shape_until_scroll(font_system);
+    }
+
+    /// Returns text of the buffer, excluding preedit (if any)
+    pub fn text_without_preedit(&self) -> String {
+        self.lines
+            .iter()
+            .map(|line| line.text_without_preedit())
+            .join("\n")
     }
 
     /// True if a redraw is needed

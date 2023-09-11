@@ -1,9 +1,9 @@
+use core::{cmp, ops::Range};
+
 #[cfg(not(feature = "std"))]
 use alloc::string::String;
 
-#[cfg(feature = "swash")]
-use crate::Color;
-use crate::{AttrsList, BorrowedWithFontSystem, Buffer, Cursor, FontSystem};
+use crate::{AttrsList, AttrsOwned, BorrowedWithFontSystem, Buffer, Color, Cursor, FontSystem};
 
 pub use self::editor::*;
 mod editor;
@@ -19,7 +19,7 @@ pub use self::vi::*;
 mod vi;
 
 /// An action to perform on an [`Editor`]
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Action {
     /// Move cursor to previous character ([Self::Left] in LTR, [Self::Right] in RTL)
     Previous,
@@ -41,12 +41,18 @@ pub enum Action {
     ParagraphStart,
     /// Move cursor to end of paragraph
     ParagraphEnd,
+    /// Move cursor to start of document
+    DocumentStart,
+    /// Move cursor to end of document
+    DocumentEnd,
     /// Move cursor up one page
     PageUp,
     /// Move cursor down one page
     PageDown,
     /// Move cursor up or down by a number of pixels
     Vertical(i32),
+    /// Select text from start to end
+    SelectAll,
     /// Escape, clears selection
     Escape,
     /// Insert character at cursor
@@ -55,12 +61,20 @@ pub enum Action {
     Enter,
     /// Delete text behind cursor
     Backspace,
+    /// Delete text behind cursor to next word boundary
+    DeleteStartOfWord,
     /// Delete text in front of cursor
     Delete,
+    /// Delete text in front of cursor to next word boundary
+    DeleteEndOfWord,
     /// Mouse click at specified position
     Click { x: i32, y: i32 },
     /// Mouse drag to specified position
     Drag { x: i32, y: i32 },
+    /// Select word under cursor
+    SelectWord { x: i32, y: i32 },
+    /// Select paragraph under cursor
+    SelectParagraph { x: i32, y: i32 },
     /// Scroll specified number of lines
     Scroll { lines: i32 },
     /// Move cursor to previous word boundary
@@ -75,6 +89,20 @@ pub enum Action {
     BufferStart,
     /// Move cursor to the end of the document
     BufferEnd,
+    /// Set preedit text, replacing any previous preedit text
+    ///
+    /// If `cursor` is specified, it contains a start and end cursor byte positions
+    /// within the preedit. If no cursor is specified for a non-empty preedit,
+    /// the cursor should be hidden.
+    ///
+    /// If `attrs` is specified, these attributes will be assigned to the preedit's span.
+    /// However, regardless of `attrs` setting, the preedit's span will always have
+    /// `is_preedit` set to `true`.
+    SetPreedit {
+        preedit: String,
+        cursor: Option<(usize, usize)>,
+        attrs: Option<AttrsOwned>,
+    },
 }
 
 /// A trait to allow easy replacements of [`Editor`], like `SyntaxEditor`
@@ -102,8 +130,49 @@ pub trait Edit {
     /// Get the current cursor
     fn cursor(&self) -> Cursor;
 
+    /// Hide or show the cursor
+    ///
+    /// This should be used to hide the cursor, for example,
+    /// when the editor is unfocused, when the text is not editable,
+    /// or to implement cursor blinking.
+    ///
+    /// Note that even after `set_cursor_hidden(false)`, the editor may
+    /// choose to hide the cursor based on internal state, for example,
+    /// when there is a selection or when there is a preedit without a cursor.
+    fn set_cursor_hidden(&mut self, hidden: bool);
+
     /// Set the current cursor
     fn set_cursor(&mut self, cursor: Cursor);
+
+    /// Returns true if some text is selected
+    fn has_selection(&self) -> bool {
+        let cursor = self.cursor();
+        self.select_opt().map_or(false, |select| {
+            select.line != cursor.line || select.index != cursor.index
+        })
+    }
+
+    /// If there is a non-empty selection, returns cursors to the start and end
+    /// of the selection
+    fn selection(&self) -> Option<(Cursor, Cursor)> {
+        let cursor = self.cursor();
+        if let Some(select) = self.select_opt() {
+            match select.line.cmp(&cursor.line) {
+                cmp::Ordering::Greater => Some((cursor, select)),
+                cmp::Ordering::Less => Some((select, cursor)),
+                cmp::Ordering::Equal => {
+                    /* select.line == cursor.line */
+                    match select.index.cmp(&cursor.index) {
+                        cmp::Ordering::Greater => Some((cursor, select)),
+                        cmp::Ordering::Less => Some((select, cursor)),
+                        cmp::Ordering::Equal => None,
+                    }
+                }
+            }
+        } else {
+            None
+        }
+    }
 
     /// Get the current selection position
     fn select_opt(&self) -> Option<Cursor>;
@@ -125,8 +194,18 @@ pub trait Edit {
     /// attributes, or with the previous character's attributes if None is given.
     fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>);
 
+    /// Returns the range of byte indices of the text corresponding
+    /// to the preedit
+    fn preedit_range(&self) -> Option<Range<usize>>;
+
+    /// Get current preedit text
+    fn preedit_text(&self) -> Option<&str>;
+
     /// Perform an [Action] on the editor
-    fn action(&mut self, font_system: &mut FontSystem, action: Action);
+    ///
+    /// If `select` is true, some actions will create or extend a selection
+    /// (this is mostly applicable to actions that move the cursor).
+    fn action(&mut self, font_system: &mut FontSystem, action: Action, select: bool);
 
     /// Draw the editor
     #[cfg(feature = "swash")]
@@ -138,6 +217,15 @@ pub trait Edit {
         f: F,
     ) where
         F: FnMut(i32, i32, u32, u32, Color);
+
+    /// Get X and Y position of the top left corner of the cursor
+    fn cursor_position(&self) -> Option<(i32, i32)>;
+
+    /// Set background color of the selected region
+    fn set_selection_color(&mut self, color: Option<Color>);
+
+    /// Set foreground color of the selected text
+    fn set_selected_text_color(&mut self, color: Option<Color>);
 }
 
 impl<'a, T: Edit> BorrowedWithFontSystem<'a, T> {
@@ -155,8 +243,8 @@ impl<'a, T: Edit> BorrowedWithFontSystem<'a, T> {
     }
 
     /// Perform an [Action] on the editor
-    pub fn action(&mut self, action: Action) {
-        self.inner.action(self.font_system, action);
+    pub fn action(&mut self, action: Action, select: bool) {
+        self.inner.action(self.font_system, action, select);
     }
 
     /// Draw the editor

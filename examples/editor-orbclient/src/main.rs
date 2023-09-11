@@ -84,9 +84,13 @@ fn main() {
     let mut swash_cache = SwashCache::new();
 
     let mut ctrl_pressed = false;
+    let mut shift_pressed = false;
     let mut mouse_x = -1;
     let mut mouse_y = -1;
     let mut mouse_left = false;
+    let mut num_clicks = 0;
+    let mut last_click_instant = Instant::now();
+    const DOUBLE_CLICK_TIMEOUT: Duration = Duration::from_millis(300);
     loop {
         editor.shape_as_needed();
         if editor.buffer().redraw() {
@@ -147,18 +151,66 @@ fn main() {
             match event.to_option() {
                 EventOption::Key(event) => match event.scancode {
                     orbclient::K_CTRL => ctrl_pressed = event.pressed,
-                    orbclient::K_LEFT if event.pressed => editor.action(Action::Left),
-                    orbclient::K_RIGHT if event.pressed => editor.action(Action::Right),
-                    orbclient::K_UP if event.pressed => editor.action(Action::Up),
-                    orbclient::K_DOWN if event.pressed => editor.action(Action::Down),
-                    orbclient::K_HOME if event.pressed => editor.action(Action::Home),
-                    orbclient::K_END if event.pressed => editor.action(Action::End),
-                    orbclient::K_PGUP if event.pressed => editor.action(Action::PageUp),
-                    orbclient::K_PGDN if event.pressed => editor.action(Action::PageDown),
-                    orbclient::K_ESC if event.pressed => editor.action(Action::Escape),
-                    orbclient::K_ENTER if event.pressed => editor.action(Action::Enter),
-                    orbclient::K_BKSP if event.pressed => editor.action(Action::Backspace),
-                    orbclient::K_DEL if event.pressed => editor.action(Action::Delete),
+                    orbclient::K_LEFT_SHIFT | orbclient::K_RIGHT_SHIFT => {
+                        shift_pressed = event.pressed;
+                    }
+                    orbclient::K_LEFT if event.pressed => {
+                        if ctrl_pressed {
+                            editor.action(Action::PreviousWord, shift_pressed)
+                        } else {
+                            editor.action(Action::Left, shift_pressed)
+                        }
+                    }
+                    orbclient::K_RIGHT if event.pressed => {
+                        if ctrl_pressed {
+                            editor.action(Action::NextWord, shift_pressed)
+                        } else {
+                            editor.action(Action::Right, shift_pressed)
+                        }
+                    }
+                    orbclient::K_UP if event.pressed => editor.action(Action::Up, shift_pressed),
+                    orbclient::K_DOWN if event.pressed => {
+                        editor.action(Action::Down, shift_pressed)
+                    }
+                    orbclient::K_HOME if event.pressed => {
+                        if ctrl_pressed {
+                            editor.action(Action::DocumentStart, shift_pressed)
+                        } else {
+                            editor.action(Action::Home, shift_pressed)
+                        }
+                    }
+                    orbclient::K_END if event.pressed => {
+                        if ctrl_pressed {
+                            editor.action(Action::DocumentEnd, shift_pressed)
+                        } else {
+                            editor.action(Action::End, shift_pressed)
+                        }
+                    }
+                    orbclient::K_PGUP if event.pressed => {
+                        editor.action(Action::PageUp, shift_pressed)
+                    }
+                    orbclient::K_PGDN if event.pressed => {
+                        editor.action(Action::PageDown, shift_pressed)
+                    }
+                    orbclient::K_ESC if event.pressed => editor.action(Action::Escape, false),
+                    orbclient::K_ENTER if event.pressed => editor.action(Action::Enter, false),
+                    orbclient::K_BKSP if event.pressed => {
+                        if ctrl_pressed {
+                            editor.action(Action::DeleteStartOfWord, false);
+                        } else {
+                            editor.action(Action::Backspace, false);
+                        }
+                    }
+                    orbclient::K_DEL if event.pressed => {
+                        if ctrl_pressed {
+                            editor.action(Action::DeleteEndOfWord, false);
+                        } else {
+                            editor.action(Action::Delete, false);
+                        }
+                    }
+                    orbclient::K_A if event.pressed && ctrl_pressed => {
+                        editor.action(Action::SelectAll, false);
+                    }
                     orbclient::K_0 if event.pressed && ctrl_pressed => {
                         font_size_i = font_size_default;
                         editor.buffer_mut().set_metrics(font_sizes[font_size_i]);
@@ -178,22 +230,25 @@ fn main() {
                     _ => (),
                 },
                 EventOption::TextInput(event) if !ctrl_pressed => {
-                    editor.action(Action::Insert(event.character));
+                    editor.action(Action::Insert(event.character), false);
                 }
                 EventOption::Mouse(event) => {
                     mouse_x = event.x;
                     mouse_y = event.y;
                     if mouse_left {
-                        editor.action(Action::Drag {
-                            x: mouse_x - line_x as i32,
-                            y: mouse_y,
-                        });
+                        editor.action(
+                            Action::Drag {
+                                x: mouse_x - line_x as i32,
+                                y: mouse_y,
+                            },
+                            true,
+                        );
 
                         if mouse_y <= 5 {
-                            editor.action(Action::Scroll { lines: -3 });
+                            editor.action(Action::Scroll { lines: -3 }, false);
                             window_async = true;
                         } else if mouse_y + 5 >= window.height() as i32 {
-                            editor.action(Action::Scroll { lines: 3 });
+                            editor.action(Action::Scroll { lines: 3 }, false);
                             window_async = true;
                         }
 
@@ -204,10 +259,23 @@ fn main() {
                     if event.left != mouse_left {
                         mouse_left = event.left;
                         if mouse_left {
-                            editor.action(Action::Click {
-                                x: mouse_x - line_x as i32,
-                                y: mouse_y,
-                            });
+                            if last_click_instant.elapsed() > DOUBLE_CLICK_TIMEOUT {
+                                num_clicks = 1;
+                            } else {
+                                num_clicks += 1;
+                            }
+                            last_click_instant = Instant::now();
+                            let x = mouse_x - line_x as i32;
+                            let y = mouse_y;
+                            match num_clicks {
+                                1 => editor.action(Action::Click { x, y }, shift_pressed),
+                                2 => editor.action(Action::SelectWord { x, y }, false),
+                                3 => editor.action(Action::SelectParagraph { x, y }, false),
+                                _ => {}
+                            };
+                            if num_clicks >= 3 {
+                                num_clicks = 0;
+                            }
                         }
                         force_drag = false;
                     }
@@ -218,9 +286,12 @@ fn main() {
                         .set_size(event.width as f32 - line_x * 2.0, event.height as f32);
                 }
                 EventOption::Scroll(event) => {
-                    editor.action(Action::Scroll {
-                        lines: -event.y * 3,
-                    });
+                    editor.action(
+                        Action::Scroll {
+                            lines: -event.y * 3,
+                        },
+                        false,
+                    );
                 }
                 EventOption::Quit(_) => return,
                 _ => (),
@@ -228,16 +299,19 @@ fn main() {
         }
 
         if mouse_left && force_drag {
-            editor.action(Action::Drag {
-                x: mouse_x - line_x as i32,
-                y: mouse_y,
-            });
+            editor.action(
+                Action::Drag {
+                    x: mouse_x - line_x as i32,
+                    y: mouse_y,
+                },
+                true,
+            );
 
             if mouse_y <= 5 {
-                editor.action(Action::Scroll { lines: -3 });
+                editor.action(Action::Scroll { lines: -3 }, false);
                 window_async = true;
             } else if mouse_y + 5 >= window.height() as i32 {
-                editor.action(Action::Scroll { lines: 3 });
+                editor.action(Action::Scroll { lines: 3 }, false);
                 window_async = true;
             }
         }

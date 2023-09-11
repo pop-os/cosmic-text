@@ -93,7 +93,7 @@ impl<'a> Edit for ViEditor<'a> {
         self.editor.insert_string(data, attrs_list);
     }
 
-    fn action(&mut self, font_system: &mut FontSystem, action: Action) {
+    fn action(&mut self, font_system: &mut FontSystem, action: Action, select: bool) {
         let old_mode = self.mode;
 
         match self.mode {
@@ -101,18 +101,18 @@ impl<'a> Edit for ViEditor<'a> {
                 Action::Insert(c) => match c {
                     // Enter insert mode after cursor
                     'a' => {
-                        self.editor.action(font_system, Action::Right);
+                        self.editor.action(font_system, Action::Right, select);
                         self.mode = Mode::Insert;
                     }
                     // Enter insert mode at end of line
                     'A' => {
-                        self.editor.action(font_system, Action::End);
+                        self.editor.action(font_system, Action::End, select);
                         self.mode = Mode::Insert;
                     }
                     // Change mode
                     'c' => {
                         if self.editor.select_opt().is_some() {
-                            self.editor.action(font_system, Action::Delete);
+                            self.editor.action(font_system, Action::Delete, select);
                             self.mode = Mode::Insert;
                         } else {
                             //TODO: change to next cursor movement
@@ -121,7 +121,7 @@ impl<'a> Edit for ViEditor<'a> {
                     // Delete mode
                     'd' => {
                         if self.editor.select_opt().is_some() {
-                            self.editor.action(font_system, Action::Delete);
+                            self.editor.action(font_system, Action::Delete, select);
                         } else {
                             //TODO: delete to next cursor movement
                         }
@@ -133,33 +133,33 @@ impl<'a> Edit for ViEditor<'a> {
                     // Enter insert mode at start of line
                     'I' => {
                         //TODO: soft home, skip whitespace
-                        self.editor.action(font_system, Action::Home);
+                        self.editor.action(font_system, Action::Home, select);
                         self.mode = Mode::Insert;
                     }
                     // Create line after and enter insert mode
                     'o' => {
-                        self.editor.action(font_system, Action::End);
-                        self.editor.action(font_system, Action::Enter);
+                        self.editor.action(font_system, Action::End, select);
+                        self.editor.action(font_system, Action::Enter, select);
                         self.mode = Mode::Insert;
                     }
                     // Create line before and enter insert mode
                     'O' => {
-                        self.editor.action(font_system, Action::Home);
-                        self.editor.action(font_system, Action::Enter);
+                        self.editor.action(font_system, Action::Home, select);
+                        self.editor.action(font_system, Action::Enter, select);
                         self.editor.shape_as_needed(font_system); // TODO: do not require this?
-                        self.editor.action(font_system, Action::Up);
+                        self.editor.action(font_system, Action::Up, select);
                         self.mode = Mode::Insert;
                     }
                     // Left
-                    'h' => self.editor.action(font_system, Action::Left),
+                    'h' => self.editor.action(font_system, Action::Left, select),
                     // Top of screen
                     //TODO: 'H' => self.editor.action(Action::ScreenHigh),
                     // Down
-                    'j' => self.editor.action(font_system, Action::Down),
+                    'j' => self.editor.action(font_system, Action::Down, select),
                     // Up
-                    'k' => self.editor.action(font_system, Action::Up),
+                    'k' => self.editor.action(font_system, Action::Up, select),
                     // Right
-                    'l' => self.editor.action(font_system, Action::Right),
+                    'l' => self.editor.action(font_system, Action::Right, select),
                     // Bottom of screen
                     //TODO: 'L' => self.editor.action(Action::ScreenLow),
                     // Middle of screen
@@ -177,23 +177,23 @@ impl<'a> Edit for ViEditor<'a> {
                         if self.editor.select_opt().is_some() {
                             self.editor.set_select_opt(None);
                         } else {
-                            self.editor.action(font_system, Action::Home);
+                            self.editor.action(font_system, Action::Home, select);
                             self.editor.set_select_opt(Some(self.editor.cursor()));
                             //TODO: set cursor_x_opt to max
-                            self.editor.action(font_system, Action::End);
+                            self.editor.action(font_system, Action::End, select);
                         }
                     }
                     // Remove character at cursor
-                    'x' => self.editor.action(font_system, Action::Delete),
+                    'x' => self.editor.action(font_system, Action::Delete, select),
                     // Remove character before cursor
-                    'X' => self.editor.action(font_system, Action::Backspace),
+                    'X' => self.editor.action(font_system, Action::Backspace, select),
                     // Go to start of line
-                    '0' => self.editor.action(font_system, Action::Home),
+                    '0' => self.editor.action(font_system, Action::Home, select),
                     // Go to end of line
-                    '$' => self.editor.action(font_system, Action::End),
+                    '$' => self.editor.action(font_system, Action::End, select),
                     // Go to start of line after whitespace
                     //TODO: implement this
-                    '^' => self.editor.action(font_system, Action::Home),
+                    '^' => self.editor.action(font_system, Action::Home, select),
                     // Enter command mode
                     ':' => {
                         self.mode = Mode::Command;
@@ -208,18 +208,18 @@ impl<'a> Edit for ViEditor<'a> {
                     }
                     _ => (),
                 },
-                _ => self.editor.action(font_system, action),
+                _ => self.editor.action(font_system, action, select),
             },
             Mode::Insert => match action {
                 Action::Escape => {
                     let cursor = self.cursor();
                     let layout_cursor = self.buffer().layout_cursor(&cursor);
                     if layout_cursor.glyph > 0 {
-                        self.editor.action(font_system, Action::Left);
+                        self.editor.action(font_system, Action::Left, select);
                     }
                     self.mode = Mode::Normal;
                 }
-                _ => self.editor.action(font_system, action),
+                _ => self.editor.action(font_system, action, select),
             },
             _ => {
                 //TODO: other modes
@@ -451,6 +451,30 @@ impl<'a> Edit for ViEditor<'a> {
                 );
             }
         }
+    }
+
+    fn preedit_range(&self) -> Option<core::ops::Range<usize>> {
+        self.editor.preedit_range()
+    }
+
+    fn preedit_text(&self) -> Option<&str> {
+        self.editor.preedit_text()
+    }
+
+    fn cursor_position(&self) -> Option<(i32, i32)> {
+        self.editor.cursor_position()
+    }
+
+    fn set_cursor_hidden(&mut self, hidden: bool) {
+        self.editor.set_cursor_hidden(hidden);
+    }
+
+    fn set_selection_color(&mut self, color: Option<Color>) {
+        self.editor.set_selection_color(color);
+    }
+
+    fn set_selected_text_color(&mut self, color: Option<Color>) {
+        self.editor.set_selected_text_color(color);
     }
 }
 

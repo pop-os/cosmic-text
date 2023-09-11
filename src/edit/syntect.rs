@@ -149,6 +149,10 @@ impl<'a> Edit for SyntaxEditor<'a> {
         self.editor.set_cursor(cursor);
     }
 
+    fn set_cursor_hidden(&mut self, hidden: bool) {
+        self.editor.set_cursor_hidden(hidden);
+    }
+
     fn select_opt(&self) -> Option<Cursor> {
         self.editor.select_opt()
     }
@@ -262,8 +266,16 @@ impl<'a> Edit for SyntaxEditor<'a> {
         self.editor.insert_string(data, attrs_list);
     }
 
-    fn action(&mut self, font_system: &mut FontSystem, action: Action) {
-        self.editor.action(font_system, action);
+    fn preedit_range(&self) -> Option<core::ops::Range<usize>> {
+        self.editor.preedit_range()
+    }
+
+    fn preedit_text(&self) -> Option<&str> {
+        self.editor.preedit_text()
+    }
+
+    fn action(&mut self, font_system: &mut FontSystem, action: Action, select: bool) {
+        self.editor.action(font_system, action, select);
     }
 
     /// Draw the editor
@@ -281,6 +293,17 @@ impl<'a> Edit for SyntaxEditor<'a> {
         f(0, 0, size.0 as u32, size.1 as u32, self.background_color());
         self.editor
             .draw(font_system, cache, self.foreground_color(), f);
+    }
+
+    fn cursor_position(&self) -> Option<(i32, i32)> {
+        self.editor.cursor_position()
+    }
+
+    fn set_selection_color(&mut self, color: Option<Color>) {
+        self.editor.set_selection_color(color);
+    }
+    fn set_selected_text_color(&mut self, color: Option<Color>) {
+        self.editor.set_selected_text_color(color);
     }
 }
 
