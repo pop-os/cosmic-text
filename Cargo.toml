@@ -7,6 +7,7 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 documentation = "https://docs.rs/cosmic-text/latest/cosmic_text/"
 repository = "https://github.com/pop-os/cosmic-text"
+rust-version = "1.65"
 
 [dependencies]
 fontdb = { version = "0.14.1", default-features = false }
@@ -31,16 +32,13 @@ features = ["hardcoded-data"]
 
 [features]
 default = ["std", "swash", "fontconfig"]
-no_std = [
-  "rustybuzz/libm",
-  "hashbrown",
-]
+no_std = ["rustybuzz/libm", "hashbrown"]
 std = [
-  "fontdb/memmap",
-  "fontdb/std",
-  "rustybuzz/std",
-  "sys-locale",
-  "unicode-bidi/std",
+    "fontdb/memmap",
+    "fontdb/std",
+    "rustybuzz/std",
+    "sys-locale",
+    "unicode-bidi/std",
 ]
 vi = ["syntect"]
 wasm-web = ["sys-locale?/js"]
@@ -52,12 +50,12 @@ name = "layout"
 harness = false
 
 [workspace]
-members = [
-  "examples/*",
-]
+members = ["examples/*"]
 
 [dev-dependencies]
-criterion = { version = "0.5.1", default-features = false, features = ["cargo_bench_support"] }
+criterion = { version = "0.5.1", default-features = false, features = [
+    "cargo_bench_support",
+] }
 
 [profile.test]
 opt-level = 1
