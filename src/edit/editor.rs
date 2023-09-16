@@ -592,16 +592,14 @@ impl Edit for Editor {
             Action::PreviousWord => {
                 let line: &mut BufferLine = &mut self.buffer.lines[self.cursor.line];
                 if self.cursor.index > 0 {
-                    let mut prev_index = 0;
-                    for (i, _) in line.text().unicode_word_indices() {
-                        if i < self.cursor.index {
-                            prev_index = i;
-                        } else {
-                            break;
-                        }
-                    }
+                    self.cursor.index = line
+                        .text()
+                        .unicode_word_indices()
+                        .rev()
+                        .map(|(i, _)| i)
+                        .find(|&i| i < self.cursor.index)
+                        .unwrap_or(0);
 
-                    self.cursor.index = prev_index;
                     self.buffer.set_redraw(true);
                 } else if self.cursor.line > 0 {
                     self.cursor.line -= 1;
