@@ -81,7 +81,7 @@ impl<'a> Edit for ViEditor<'a> {
         self.editor.shape_as_needed(font_system);
     }
 
-    fn copy_selection(&mut self) -> Option<String> {
+    fn copy_selection(&self) -> Option<String> {
         self.editor.copy_selection()
     }
 

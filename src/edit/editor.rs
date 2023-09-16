@@ -109,7 +109,7 @@ impl Edit for Editor {
         }
     }
 
-    fn copy_selection(&mut self) -> Option<String> {
+    fn copy_selection(&self) -> Option<String> {
         let select = self.select_opt?;
 
         let (start, end) = match select.line.cmp(&self.cursor.line) {
