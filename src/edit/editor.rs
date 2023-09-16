@@ -613,14 +613,14 @@ impl Edit for Editor {
             Action::NextWord => {
                 let line: &mut BufferLine = &mut self.buffer.lines[self.cursor.line];
                 if self.cursor.index < line.text().len() {
-                    for (i, word) in line.text().unicode_word_indices() {
-                        let i = i + word.len();
-                        if i > self.cursor.index {
-                            self.cursor.index = i;
-                            self.buffer.set_redraw(true);
-                            break;
-                        }
-                    }
+                    self.cursor.index = line
+                        .text()
+                        .unicode_word_indices()
+                        .map(|(i, word)| i + word.len())
+                        .find(|&i| i > self.cursor.index)
+                        .unwrap_or(line.text().len());
+
+                    self.buffer.set_redraw(true);
                 } else if self.cursor.line + 1 < self.buffer.lines.len() {
                     self.cursor.line += 1;
                     self.cursor.index = 0;
