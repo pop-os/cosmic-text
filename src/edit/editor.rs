@@ -288,6 +288,7 @@ impl Edit for Editor {
 
         // Append the text after insertion
         self.cursor.index = self.buffer.lines[self.cursor.line].text().len() - after_len;
+        self.cursor_moved = true;
     }
 
     fn action(&mut self, font_system: &mut FontSystem, action: Action) {
