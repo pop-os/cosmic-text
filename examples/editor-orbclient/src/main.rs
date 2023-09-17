@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic_text::{
-    Action, Attrs, Buffer, Edit, Family, FontSystem, Metrics, SwashCache, SyntaxEditor,
-    SyntaxSystem,
+    Action, Attrs, Buffer, Edit, Family, FontSystem, Metrics, SyntaxEditor, SyntaxSystem,
 };
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{
@@ -81,7 +80,10 @@ fn main() {
         }
     }
 
-    let mut swash_cache = SwashCache::new();
+    #[cfg(feature = "ab_glyph")]
+    let mut renderer = cosmic_text::AbGlyphDraw::new();
+    #[cfg(not(feature = "ab_glyph"))]
+    let mut renderer = cosmic_text::SwashCache::new();
 
     let mut ctrl_pressed = false;
     let mut mouse_x = -1;
@@ -96,7 +98,7 @@ fn main() {
             window.set(orbclient::Color::rgb(bg.r(), bg.g(), bg.b()));
 
             let fg = editor.foreground_color();
-            editor.draw(&mut swash_cache, fg, |x, y, w, h, color| {
+            editor.draw_with(&mut renderer, fg, |x, y, w, h, color| {
                 window.rect(
                     line_x as i32 + x,
                     y,

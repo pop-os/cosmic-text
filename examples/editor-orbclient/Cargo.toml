@@ -17,3 +17,4 @@ unicode-segmentation = "1.7"
 [features]
 default = []
 vi = ["cosmic-text/vi"]
+ab_glyph = ["cosmic-text/ab_glyph_image"]

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use cosmic_text::{Attrs, Buffer, Color, FontSystem, Metrics, Shaping, SwashCache};
+use cosmic_text::{Attrs, Buffer, Color, FontSystem, Metrics, Shaping};
 use std::cmp::{self, Ordering};
 use termion::{color, cursor};
 
@@ -8,8 +8,11 @@ fn main() {
     // A FontSystem provides access to detected system fonts, create one per application
     let mut font_system = FontSystem::new();
 
+    #[cfg(feature = "ab_glyph")]
+    let mut renderer = cosmic_text::AbGlyphDraw::new();
+    #[cfg(not(feature = "ab_glyph"))]
     // A SwashCache stores rasterized glyphs, create one per application
-    let mut swash_cache = SwashCache::new();
+    let mut renderer = cosmic_text::SwashCache::new();
 
     // Text metrics indicate the font size and line height of a buffer
     let metrics = Metrics::new(14.0, 20.0);
@@ -57,7 +60,7 @@ fn main() {
     // Print the buffer
     let mut last_x = 0;
     let mut last_y = 0;
-    buffer.draw(&mut swash_cache, text_color, |x, y, w, h, color| {
+    buffer.draw_with(&mut renderer, text_color, |x, y, w, h, color| {
         let a = color.a();
         if a == 0 || x < 0 || y < 0 || w != 1 || h != 1 {
             // Ignore alphas of 0, or invalid x, y coordinates, or unimplemented sizes

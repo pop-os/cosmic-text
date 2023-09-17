@@ -5,7 +5,11 @@ use cosmic::{
     iced_runtime::keyboard::KeyCode,
     theme::{Theme, ThemeType},
 };
-use cosmic_text::{Action, Edit, SwashCache};
+#[cfg(feature = "ab_glyph")]
+use cosmic_text::AbGlyphDraw;
+#[cfg(not(feature = "ab_glyph"))]
+use cosmic_text::SwashCache;
+use cosmic_text::{Action, Edit};
 use std::{cmp, sync::Mutex, time::Instant};
 
 use crate::FONT_SYSTEM;
@@ -232,8 +236,8 @@ where
 
         // Draw to pixel buffer
         let mut pixels = vec![0; image_w as usize * image_h as usize * 4];
-        editor.draw(
-            &mut state.cache.lock().unwrap(),
+        editor.draw_with(
+            &mut (*state.cache.lock().unwrap()),
             text_color,
             |x, y, w, h, color| {
                 //TODO: improve performance
@@ -387,6 +391,9 @@ where
 
 pub struct State {
     is_dragging: bool,
+    #[cfg(feature = "ab_glyph")]
+    cache: Mutex<AbGlyphDraw>,
+    #[cfg(not(feature = "ab_glyph"))]
     cache: Mutex<SwashCache>,
 }
 
@@ -395,6 +402,9 @@ impl State {
     pub fn new() -> State {
         State {
             is_dragging: false,
+            #[cfg(feature = "ab_glyph")]
+            cache: Mutex::new(AbGlyphDraw::new()),
+            #[cfg(not(feature = "ab_glyph"))]
             cache: Mutex::new(SwashCache::new()),
         }
     }

@@ -12,3 +12,6 @@ env_logger = "0.10"
 fontdb = "0.13"
 log = "0.4"
 orbclient = "0.3.35"
+
+[features]
+ab_glyph = ["cosmic-text/ab_glyph_image"]

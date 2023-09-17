@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic_text::{
-    Action, BidiParagraphs, BorrowedWithFontSystem, Buffer, Color, Edit, Editor, FontSystem,
-    Metrics, SwashCache,
+    Action, BidiParagraphs, BorrowedWithFontSystem, Buffer, Color, Draw, Edit, Editor, FontSystem,
+    Metrics,
 };
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{env, fs, process, time::Instant};
 use unicode_segmentation::UnicodeSegmentation;
 
-fn redraw(
+fn redraw<D: Draw>(
     window: &mut Window,
     editor: &mut BorrowedWithFontSystem<Editor>,
-    swash_cache: &mut SwashCache,
+    renderer: &mut D,
 ) {
     let bg_color = orbclient::Color::rgb(0x34, 0x34, 0x34);
     let font_color = Color::rgb(0xFF, 0xFF, 0xFF);
@@ -22,7 +22,7 @@ fn redraw(
 
         window.set(bg_color);
 
-        editor.draw(swash_cache, font_color, |x, y, w, h, color| {
+        editor.draw_with(renderer, font_color, |x, y, w, h, color| {
             window.rect(x, y, w, h, orbclient::Color { data: color.0 });
         });
 
@@ -70,7 +70,10 @@ fn main() {
 
     let mut editor = editor.borrow_with(&mut font_system);
 
-    let mut swash_cache = SwashCache::new();
+    #[cfg(feature = "ab_glyph")]
+    let mut renderer = cosmic_text::AbGlyphDraw::new();
+    #[cfg(not(feature = "ab_glyph"))]
+    let mut renderer = cosmic_text::SwashCache::new();
 
     let text = if let Some(arg) = env::args().nth(1) {
         fs::read_to_string(&arg).expect("failed to open file")
@@ -138,7 +141,7 @@ fn main() {
         // Finally, normal enter
         editor.action(Action::Enter);
 
-        redraw(&mut window, &mut editor, &mut swash_cache);
+        redraw(&mut window, &mut editor, &mut renderer);
 
         for event in window.events() {
             if let EventOption::Quit(_) = event.to_option() {

@@ -13,3 +13,6 @@ fontdb = "0.13"
 log = "0.4"
 orbclient = "0.3.35"
 unicode-segmentation = "1.7"
+
+[features]
+ab_glyph = ["cosmic-text/ab_glyph_image"]

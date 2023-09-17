@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic_text::{
-    Action, Attrs, Buffer, Color, Edit, Editor, Family, FontSystem, Metrics, Shaping, Style,
-    SwashCache, Weight,
+    Action, Attrs, Buffer, Color, Edit, Editor, Family, FontSystem, Metrics, Shaping, Style, Weight,
 };
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{
@@ -121,7 +120,11 @@ fn main() {
         .buffer_mut()
         .set_rich_text(spans.iter().copied(), Shaping::Advanced);
 
-    let mut swash_cache = SwashCache::new();
+    #[cfg(feature = "ab_glyph")]
+    let mut renderer = cosmic_text::AbGlyphDraw::new();
+    #[cfg(not(feature = "ab_glyph"))]
+    // A SwashCache stores rasterized glyphs, create one per application
+    let mut renderer = cosmic_text::SwashCache::new();
 
     //TODO: make window not async?
     let mut mouse_x = -1;
@@ -137,7 +140,7 @@ fn main() {
 
             window.set(bg_color);
 
-            editor.draw(&mut swash_cache, font_color, |x, y, w, h, color| {
+            editor.draw_with(&mut renderer, font_color, |x, y, w, h, color| {
                 window.rect(x, y, w, h, orbclient::Color { data: color.0 });
             });
 

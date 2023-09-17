@@ -27,3 +27,4 @@ version = "0.11"
 [features]
 default = []
 vi = ["cosmic-text/vi"]
+ab_glyph = ["cosmic-text/ab_glyph_image"]
