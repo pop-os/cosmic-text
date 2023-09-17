@@ -269,6 +269,7 @@ impl Application for Window {
 
                 let mut editor = self.editor.lock().unwrap();
 
+                #[cfg(not(feature = "vi"))]
                 // Update the syntax color theme
                 match theme {
                     "Light" => editor.update_theme("base16-ocean.light"),
