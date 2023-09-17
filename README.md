@@ -66,7 +66,7 @@ The following features must be supported before this is "ready":
     - [ ] no_std font loading
     - [x] no_std shaping
     - [x] no_std layout
-    - [ ] no_std rendering
+    - [x] no_std rendering (using ab_glyph, incomplete color emoji support)
 
 The UDHR (Universal Declaration of Human Rights) test involves taking the entire
 set of UDHR translations (almost 500 languages), concatenating them as one file

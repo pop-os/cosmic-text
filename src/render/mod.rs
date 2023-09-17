@@ -15,6 +15,11 @@ pub trait Draw {
         F: FnMut(i32, i32, u32, u32, Color);
 }
 
+#[cfg(feature = "ab_glyph")]
+mod ab_glyph;
+#[cfg(feature = "ab_glyph")]
+pub use self::ab_glyph::*;
+
 #[cfg(feature = "swash")]
 mod swash;
 #[cfg(feature = "swash")]

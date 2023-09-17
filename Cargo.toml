@@ -13,7 +13,9 @@ rust-version = "1.65"
 fontdb = { version = "0.14.1", default-features = false }
 libm = "0.2.7"
 log = "0.4.20"
-rustybuzz = { version = "0.10.0", default-features = false, features = ["libm"] }
+rustybuzz = { version = "0.10.0", default-features = false, features = [
+    "libm",
+] }
 swash = { version = "0.1.8", optional = true }
 syntect = { version = "5.1.0", optional = true }
 sys-locale = { version = "0.3.1", optional = true }
@@ -24,6 +26,12 @@ rangemap = "1.3.0"
 hashbrown = { version = "0.14.0", optional = true, default-features = false }
 rustc-hash = { version = "1.1.0", default-features = false }
 self_cell = "1.0.1"
+ab_glyph = { version = "0.2.22", default-features = false, optional = true, features = [
+    "variable-fonts",
+] }
+rgb = { version = "0.8.36", default-features = false, optional = true }
+zune-png = { version = "0.2.1", default-features = false, optional = true }
+resize = { version = "0.8.1", default-features = false, optional = true }
 
 [dependencies.unicode-bidi]
 version = "0.3.13"
@@ -32,18 +40,23 @@ features = ["hardcoded-data"]
 
 [features]
 default = ["std", "swash", "fontconfig"]
-no_std = ["rustybuzz/libm", "hashbrown"]
+no_std = ["rustybuzz/libm", "hashbrown", "ab_glyph?/libm", "resize?/no_std"]
 std = [
     "fontdb/memmap",
     "fontdb/std",
     "rustybuzz/std",
     "sys-locale",
     "unicode-bidi/std",
+    "ab_glyph?/std",
+    "zune-png?/std",
+    "resize?/std",
 ]
 vi = ["syntect"]
 wasm-web = ["sys-locale?/js"]
 warn_on_missing_glyphs = []
 fontconfig = ["fontdb/fontconfig", "std"]
+# glyph image support for ab_glyph rendering backend, no_std
+ab_glyph_image = ["ab_glyph", "dep:zune-png", "dep:rgb", "dep:resize"]
 
 [[bench]]
 name = "layout"

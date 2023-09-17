@@ -16,11 +16,17 @@ build
 echo Build with only no_std feature
 build --no-default-features --features no_std
 
+echo Build with only no_std and ab_glyph feature
+build --no-default-features --features no_std,ab_glyph
+
 echo Build with only std feature
 build --no-default-features --features std
 
 echo Build with only std and swash features
 build --no-default-features --features std,swash
+
+echo Build with only std and ab_glyph features
+build --no-default-features --features std,ab_glyph
 
 echo Build with only std and syntect features
 build --no-default-features --features std,syntect
