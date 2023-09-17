@@ -1,9 +1,7 @@
 #[cfg(not(feature = "std"))]
 use alloc::string::String;
 
-#[cfg(feature = "swash")]
-use crate::Color;
-use crate::{AttrsList, BorrowedWithFontSystem, Buffer, Cursor, FontSystem};
+use crate::{AttrsList, BorrowedWithFontSystem, Buffer, Color, Cursor, Draw, FontSystem};
 
 pub use self::editor::*;
 mod editor;
@@ -128,7 +126,13 @@ pub trait Edit {
     /// Perform an [Action] on the editor
     fn action(&mut self, font_system: &mut FontSystem, action: Action);
 
-    /// Draw the editor
+    /// Draw the editor using a renderer implemented [`Draw`]
+    fn draw_with<D, F>(&self, font_system: &mut FontSystem, renderer: &mut D, color: Color, f: F)
+    where
+        D: Draw,
+        F: FnMut(i32, i32, u32, u32, Color);
+
+    /// Draw the editor using [`SwashCache`](crate::SwashCache)
     #[cfg(feature = "swash")]
     fn draw<F>(
         &self,
@@ -137,7 +141,10 @@ pub trait Edit {
         color: Color,
         f: F,
     ) where
-        F: FnMut(i32, i32, u32, u32, Color);
+        F: FnMut(i32, i32, u32, u32, Color),
+    {
+        self.draw_with(font_system, cache, color, f);
+    }
 }
 
 impl<'a, T: Edit> BorrowedWithFontSystem<'a, T> {
@@ -159,7 +166,16 @@ impl<'a, T: Edit> BorrowedWithFontSystem<'a, T> {
         self.inner.action(self.font_system, action);
     }
 
-    /// Draw the editor
+    /// Draw the editor using a renderer implemented [`Draw`]
+    pub fn draw_with<D, F>(&mut self, renderer: &mut D, color: Color, f: F)
+    where
+        D: Draw,
+        F: FnMut(i32, i32, u32, u32, Color),
+    {
+        self.inner.draw_with(self.font_system, renderer, color, f);
+    }
+
+    /// Draw the editor using [`SwashCache`](crate::SwashCache)
     #[cfg(feature = "swash")]
     pub fn draw<F>(&mut self, cache: &mut crate::SwashCache, color: Color, f: F)
     where

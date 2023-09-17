@@ -8,11 +8,9 @@ use core::{
 };
 use unicode_segmentation::UnicodeSegmentation;
 
-#[cfg(feature = "swash")]
-use crate::Color;
 use crate::{
-    Action, Affinity, AttrsList, Buffer, BufferLine, Cursor, Edit, FontSystem, LayoutCursor,
-    Shaping,
+    Action, Affinity, AttrsList, Buffer, BufferLine, Color, Cursor, Draw, Edit, FontSystem,
+    LayoutCursor, Shaping,
 };
 
 /// A wrapper of [`Buffer`] for easy editing
@@ -689,22 +687,21 @@ impl Edit for Editor {
         }
     }
 
-    /// Draw the editor
-    #[cfg(feature = "swash")]
-    fn draw<F>(
+    fn draw_with<D, F>(
         &self,
         font_system: &mut FontSystem,
-        cache: &mut crate::SwashCache,
+        renderer: &mut D,
         color: Color,
         mut f: F,
     ) where
+        D: Draw,
         F: FnMut(i32, i32, u32, u32, Color),
     {
         let line_height = self.buffer.metrics().line_height;
 
         for run in self.buffer.layout_runs() {
             let line_i = run.line_i;
-            let line_y = run.line_y;
+            let _line_y = run.line_y;
             let line_top = run.line_top;
 
             let cursor_glyph_opt = |cursor: &Cursor| -> Option<(usize, f32)> {
@@ -854,29 +851,7 @@ impl Edit for Editor {
                 );
             }
 
-            for glyph in run.glyphs.iter() {
-                let physical_glyph = glyph.physical((0., 0.), 1.0);
-
-                let glyph_color = match glyph.color_opt {
-                    Some(some) => some,
-                    None => color,
-                };
-
-                cache.with_pixels(
-                    font_system,
-                    physical_glyph.cache_key,
-                    glyph_color,
-                    |x, y, color| {
-                        f(
-                            physical_glyph.x + x,
-                            line_y as i32 + physical_glyph.y + y,
-                            1,
-                            1,
-                            color,
-                        );
-                    },
-                );
-            }
+            renderer.draw_line(font_system, &run, color, &mut f);
         }
     }
 }

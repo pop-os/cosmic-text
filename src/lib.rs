@@ -120,6 +120,9 @@ mod font;
 pub use self::layout::*;
 mod layout;
 
+pub use self::render::*;
+mod render;
+
 pub use self::shape::*;
 mod shape;
 
