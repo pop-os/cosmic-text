@@ -9,7 +9,7 @@ use core::{cmp, fmt};
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
-    Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem, BufferLine, Color, FontSystem,
+    Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem, BufferLine, Color, Draw, FontSystem,
     LayoutGlyph, LayoutLine, ShapeBuffer, ShapeLine, Shaping, Wrap,
 };
 
@@ -839,42 +839,35 @@ impl Buffer {
         new_cursor_opt
     }
 
-    /// Draw the buffer
+    /// Draw the buffer using a renderer implemented [`Draw`]
+    #[inline]
+    pub fn draw_with<D, F>(
+        &self,
+        font_system: &mut FontSystem,
+        renderer: &mut D,
+        color: Color,
+        mut f: F,
+    ) where
+        D: Draw,
+        F: FnMut(i32, i32, u32, u32, Color),
+    {
+        for run in self.layout_runs() {
+            renderer.draw_line(font_system, &run, color, &mut f);
+        }
+    }
+
+    /// Draw the buffer using [`SwashCache`](crate::SwashCache)
     #[cfg(feature = "swash")]
     pub fn draw<F>(
         &self,
         font_system: &mut FontSystem,
         cache: &mut crate::SwashCache,
         color: Color,
-        mut f: F,
+        f: F,
     ) where
         F: FnMut(i32, i32, u32, u32, Color),
     {
-        for run in self.layout_runs() {
-            for glyph in run.glyphs.iter() {
-                let physical_glyph = glyph.physical((0., 0.), 1.0);
-
-                let glyph_color = match glyph.color_opt {
-                    Some(some) => some,
-                    None => color,
-                };
-
-                cache.with_pixels(
-                    font_system,
-                    physical_glyph.cache_key,
-                    glyph_color,
-                    |x, y, color| {
-                        f(
-                            physical_glyph.x + x,
-                            run.line_y as i32 + physical_glyph.y + y,
-                            1,
-                            1,
-                            color,
-                        );
-                    },
-                );
-            }
-        }
+        self.draw_with(font_system, cache, color, f);
     }
 }
 
@@ -951,7 +944,17 @@ impl<'a> BorrowedWithFontSystem<'a, Buffer> {
         self.inner.set_rich_text(self.font_system, spans, shaping);
     }
 
-    /// Draw the buffer
+    /// Draw the buffer using a renderer implemented [`Draw`]
+    #[inline]
+    pub fn draw_with<D, F>(&mut self, renderer: &mut D, color: Color, f: F)
+    where
+        D: Draw,
+        F: FnMut(i32, i32, u32, u32, Color),
+    {
+        self.inner.draw_with(self.font_system, renderer, color, f);
+    }
+
+    /// Draw the buffer using [`SwashCache`](crate::SwashCache)
     #[cfg(feature = "swash")]
     pub fn draw<F>(&mut self, cache: &mut crate::SwashCache, color: Color, f: F)
     where

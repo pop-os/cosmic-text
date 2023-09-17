@@ -266,21 +266,29 @@ impl<'a> Edit for SyntaxEditor<'a> {
         self.editor.action(font_system, action);
     }
 
+    fn draw_with<D, F>(&self, font_system: &mut FontSystem, render: &mut D, _color: Color, mut f: F)
+    where
+        D: crate::Draw,
+        F: FnMut(i32, i32, u32, u32, Color),
+    {
+        let size = self.buffer().size();
+        f(0, 0, size.0 as u32, size.1 as u32, self.background_color());
+        self.editor
+            .draw_with(font_system, render, self.foreground_color(), f);
+    }
+
     /// Draw the editor
     #[cfg(feature = "swash")]
     fn draw<F>(
         &self,
         font_system: &mut FontSystem,
         cache: &mut crate::SwashCache,
-        _color: Color,
-        mut f: F,
+        color: Color,
+        f: F,
     ) where
         F: FnMut(i32, i32, u32, u32, Color),
     {
-        let size = self.buffer().size();
-        f(0, 0, size.0 as u32, size.1 as u32, self.background_color());
-        self.editor
-            .draw(font_system, cache, self.foreground_color(), f);
+        self.draw_with(font_system, cache, color, f);
     }
 }
 

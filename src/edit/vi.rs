@@ -3,7 +3,7 @@ use core::cmp;
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
-    Action, AttrsList, BorrowedWithFontSystem, Buffer, Color, Cursor, Edit, FontSystem,
+    Action, AttrsList, BorrowedWithFontSystem, Buffer, Color, Cursor, Draw, Edit, FontSystem,
     SyntaxEditor,
 };
 
@@ -232,14 +232,14 @@ impl<'a> Edit for ViEditor<'a> {
         }
     }
 
-    #[cfg(feature = "swash")]
-    fn draw<F>(
+    fn draw_with<D, F>(
         &self,
         font_system: &mut FontSystem,
-        cache: &mut crate::SwashCache,
+        renderer: &mut D,
         color: Color,
         mut f: F,
     ) where
+        D: Draw,
         F: FnMut(i32, i32, u32, u32, Color),
     {
         let font_size = self.buffer().metrics().font_size;
@@ -427,29 +427,7 @@ impl<'a> Edit for ViEditor<'a> {
                 }
             }
 
-            for glyph in run.glyphs.iter() {
-                let physical_glyph = glyph.physical((0., 0.), 1.0);
-
-                let glyph_color = match glyph.color_opt {
-                    Some(some) => some,
-                    None => color,
-                };
-
-                cache.with_pixels(
-                    font_system,
-                    physical_glyph.cache_key,
-                    glyph_color,
-                    |x, y, color| {
-                        f(
-                            physical_glyph.x + x,
-                            line_y as i32 + physical_glyph.y + y,
-                            1,
-                            1,
-                            color,
-                        );
-                    },
-                );
-            }
+            renderer.draw_line(font_system, &run, color, &mut f);
         }
     }
 }
