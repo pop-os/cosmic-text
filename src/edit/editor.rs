@@ -235,8 +235,12 @@ impl Edit for Editor {
         let after_len = after.text().len();
 
         // Collect attributes
-        let mut final_attrs = attrs_list
-            .unwrap_or_else(|| AttrsList::new(line.attrs_list().get_span(line.text().len())));
+        let mut final_attrs = attrs_list.unwrap_or_else(|| {
+            AttrsList::new(
+                line.attrs_list()
+                    .get_span(self.cursor.index.saturating_sub(1)),
+            )
+        });
 
         // Append the inserted text, line by line
         // we want to see a blank entry if the string ends with a newline
