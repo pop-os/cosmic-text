@@ -109,7 +109,7 @@ impl Edit for Editor {
         }
     }
 
-    fn copy_selection(&mut self) -> Option<String> {
+    fn copy_selection(&self) -> Option<String> {
         let select = self.select_opt?;
 
         let (start, end) = match select.line.cmp(&self.cursor.line) {
@@ -235,8 +235,12 @@ impl Edit for Editor {
         let after_len = after.text().len();
 
         // Collect attributes
-        let mut final_attrs = attrs_list
-            .unwrap_or_else(|| AttrsList::new(line.attrs_list().get_span(line.text().len())));
+        let mut final_attrs = attrs_list.unwrap_or_else(|| {
+            AttrsList::new(
+                line.attrs_list()
+                    .get_span(self.cursor.index.saturating_sub(1)),
+            )
+        });
 
         // Append the inserted text, line by line
         // we want to see a blank entry if the string ends with a newline
@@ -288,6 +292,7 @@ impl Edit for Editor {
 
         // Append the text after insertion
         self.cursor.index = self.buffer.lines[self.cursor.line].text().len() - after_len;
+        self.cursor_moved = true;
     }
 
     fn action(&mut self, font_system: &mut FontSystem, action: Action) {
@@ -591,16 +596,14 @@ impl Edit for Editor {
             Action::PreviousWord => {
                 let line: &mut BufferLine = &mut self.buffer.lines[self.cursor.line];
                 if self.cursor.index > 0 {
-                    let mut prev_index = 0;
-                    for (i, _) in line.text().unicode_word_indices() {
-                        if i < self.cursor.index {
-                            prev_index = i;
-                        } else {
-                            break;
-                        }
-                    }
+                    self.cursor.index = line
+                        .text()
+                        .unicode_word_indices()
+                        .rev()
+                        .map(|(i, _)| i)
+                        .find(|&i| i < self.cursor.index)
+                        .unwrap_or(0);
 
-                    self.cursor.index = prev_index;
                     self.buffer.set_redraw(true);
                 } else if self.cursor.line > 0 {
                     self.cursor.line -= 1;
@@ -612,14 +615,14 @@ impl Edit for Editor {
             Action::NextWord => {
                 let line: &mut BufferLine = &mut self.buffer.lines[self.cursor.line];
                 if self.cursor.index < line.text().len() {
-                    for (i, word) in line.text().unicode_word_indices() {
-                        let i = i + word.len();
-                        if i > self.cursor.index {
-                            self.cursor.index = i;
-                            self.buffer.set_redraw(true);
-                            break;
-                        }
-                    }
+                    self.cursor.index = line
+                        .text()
+                        .unicode_word_indices()
+                        .map(|(i, word)| i + word.len())
+                        .find(|&i| i > self.cursor.index)
+                        .unwrap_or(line.text().len());
+
+                    self.buffer.set_redraw(true);
                 } else if self.cursor.line + 1 < self.buffer.lines.len() {
                     self.cursor.line += 1;
                     self.cursor.index = 0;

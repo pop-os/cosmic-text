@@ -115,7 +115,7 @@ pub trait Edit {
     fn shape_as_needed(&mut self, font_system: &mut FontSystem);
 
     /// Copy selection
-    fn copy_selection(&mut self) -> Option<String>;
+    fn copy_selection(&self) -> Option<String>;
 
     /// Delete selection, adjusting cursor and returning true if there was a selection
     // Also used by backspace, delete, insert, and enter when there is a selection
