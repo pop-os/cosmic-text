@@ -53,6 +53,7 @@ harness = false
 members = ["examples/*"]
 
 [dev-dependencies]
+tiny-skia = "0.11"
 criterion = { version = "0.5.1", default-features = false, features = [
     "cargo_bench_support",
 ] }
