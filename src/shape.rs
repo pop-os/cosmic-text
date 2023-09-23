@@ -1221,11 +1221,12 @@ impl ShapeLine {
                                 } else {
                                     0.0
                                 };
-                            let y_advance = font_size * glyph.y_advance;
-                            glyphs.push(glyph.layout(font_size, x, y, x_advance, span.level));
                             if self.rtl {
                                 x -= x_advance;
-                            } else {
+                            }
+                            let y_advance = font_size * glyph.y_advance;
+                            glyphs.push(glyph.layout(font_size, x, y, x_advance, span.level));
+                            if !self.rtl {
                                 x += x_advance;
                             }
                             y += y_advance;
