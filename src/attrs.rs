@@ -109,6 +109,21 @@ pub enum LineHeight {
     Absolute(f32),
 }
 
+impl core::hash::Hash for LineHeight {
+    fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
+        match self {
+            LineHeight::Proportional(height) => {
+                state.write_u8(1);
+                height.to_bits().hash(state);
+            }
+            LineHeight::Absolute(height) => {
+                state.write_u8(2);
+                height.to_bits().hash(state);
+            }
+        }
+    }
+}
+
 impl LineHeight {
     pub fn height(&self, font_size: f32) -> f32 {
         match self {
@@ -323,6 +338,7 @@ impl core::hash::Hash for AttrsOwned {
         self.weight.hash(state);
         self.metadata.hash(state);
         self.font_size.to_bits().hash(state);
+        self.line_height.hash(state);
     }
 }
 
