@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic_text::{
-    Action, Attrs, AttrsList, Buffer, BufferLine, Color, Edit, Editor, Family, FontSystem,
-    LineHeight, Shaping, Style, SwashCache, Weight,
+    Action, Attrs, Buffer, Color, Edit, Editor, Family, FontSystem, LineHeight, Shaping, Style,
+    SwashCache, Weight,
 };
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{
