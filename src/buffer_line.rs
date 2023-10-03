@@ -214,8 +214,11 @@ impl BufferLine {
             self.wrap = wrap;
             let align = self.align;
             let shape = self.shape(font_system);
+
             let layout = shape.layout(width, wrap, align);
+
             let line_heights = layout.iter().map(|line| line.line_height()).collect();
+
             self.layout_opt = Some(layout);
             self.line_heights = Some(line_heights);
         }
@@ -223,6 +226,8 @@ impl BufferLine {
     }
 
     /// Layout a line using a pre-existing shape buffer.
+    ///
+    /// Ensure that if this buffer line was laid out, you call [`Buffer::update_line_heights`] afterwards
     pub fn layout_in_buffer(
         &mut self,
         scratch: &mut ShapeBuffer,
@@ -234,9 +239,14 @@ impl BufferLine {
             self.wrap = wrap;
             let align = self.align;
             let shape = self.shape_in_buffer(scratch, font_system);
+
             let mut layout = Vec::with_capacity(1);
             shape.layout_to_buffer(scratch, width, wrap, align, &mut layout);
+
+            let line_heights = layout.iter().map(|line| line.line_height()).collect();
+
             self.layout_opt = Some(layout);
+            self.line_heights = Some(line_heights);
         }
         self.layout_opt.as_ref().expect("layout not found")
     }
