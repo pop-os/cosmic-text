@@ -210,19 +210,7 @@ impl BufferLine {
         width: f32,
         wrap: Wrap,
     ) -> &[LayoutLine] {
-        if self.layout_opt.is_none() {
-            self.wrap = wrap;
-            let align = self.align;
-            let shape = self.shape(font_system);
-
-            let layout = shape.layout(width, wrap, align);
-
-            let line_heights = layout.iter().map(|line| line.line_height()).collect();
-
-            self.layout_opt = Some(layout);
-            self.line_heights = Some(line_heights);
-        }
-        self.layout_opt.as_ref().expect("layout not found")
+        self.layout_in_buffer(&mut ShapeBuffer::default(), font_system, width, wrap)
     }
 
     /// Layout a line using a pre-existing shape buffer.
