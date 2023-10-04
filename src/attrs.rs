@@ -278,6 +278,7 @@ impl<'a> core::hash::Hash for Attrs<'a> {
         self.weight.hash(state);
         self.metadata.hash(state);
         self.font_size.to_bits().hash(state);
+        self.line_height.hash(state);
     }
 }
 
