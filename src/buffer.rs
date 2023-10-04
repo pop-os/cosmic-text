@@ -228,7 +228,7 @@ impl<'b> Iterator for LayoutRunIter<'b> {
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(line) = self.buffer.lines.get(self.line_i) {
             let shape = line.shape_opt().as_ref()?;
-            let layout = line.layout_opt().as_ref()?;
+            let layout = line.layout_opt()?;
             while let Some(layout_line) = layout.get(self.layout_i) {
                 self.layout_i += 1;
 
@@ -482,7 +482,7 @@ impl Buffer {
         let line = &self.lines[cursor.line];
 
         //TODO: ensure layout is done?
-        let layout = line.layout_opt().as_ref().expect("layout not found");
+        let layout = line.layout_opt().expect("layout not found");
         for (layout_i, layout_line) in layout.iter().enumerate() {
             for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
                 let cursor_end =

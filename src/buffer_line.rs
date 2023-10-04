@@ -12,8 +12,7 @@ pub struct BufferLine {
     wrap: Wrap,
     align: Option<Align>,
     shape_opt: Option<ShapeLine>,
-    layout_opt: Option<Vec<LayoutLine>>,
-    line_heights: Option<Vec<f32>>,
+    layout_opt: Option<LayoutLines>,
     shaping: Shaping,
 }
 
@@ -29,7 +28,6 @@ impl BufferLine {
             align: None,
             shape_opt: None,
             layout_opt: None,
-            line_heights: None,
             shaping,
         }
     }
@@ -157,13 +155,11 @@ impl BufferLine {
     pub fn reset(&mut self) {
         self.shape_opt = None;
         self.layout_opt = None;
-        self.line_heights = None;
     }
 
     /// Reset only layout information
     pub fn reset_layout(&mut self) {
         self.layout_opt = None;
-        self.line_heights = None;
     }
 
     /// Check if shaping and layout information is cleared
@@ -191,7 +187,6 @@ impl BufferLine {
                 self.shaping,
             ));
             self.layout_opt = None;
-            self.line_heights = None;
         }
         self.shape_opt.as_ref().expect("shape not found")
     }
@@ -233,19 +228,31 @@ impl BufferLine {
 
             let line_heights = layout.iter().map(|line| line.line_height()).collect();
 
-            self.layout_opt = Some(layout);
-            self.line_heights = Some(line_heights);
+            self.layout_opt = Some(LayoutLines {
+                layout,
+                line_heights,
+            });
         }
-        self.layout_opt.as_ref().expect("layout not found")
+        self.layout_opt
+            .as_ref()
+            .map(|l| l.layout.as_ref())
+            .expect("layout not found")
     }
 
     /// Get line layout cache
-    pub fn layout_opt(&self) -> &Option<Vec<LayoutLine>> {
-        &self.layout_opt
+    pub fn layout_opt(&self) -> Option<&[LayoutLine]> {
+        self.layout_opt.as_ref().map(|l| l.layout.as_ref())
     }
 
-    /// Get line height cache, maps from [`Self::layout_opt`]
-    pub fn line_heights(&self) -> &Option<Vec<f32>> {
-        &self.line_heights
+    /// Get line height cache
+    pub fn line_heights(&self) -> Option<&[f32]> {
+        self.layout_opt.as_ref().map(|l| l.line_heights.as_ref())
     }
+}
+
+/// A list of [`LayoutLine`] in a [`BufferLine`] alongside their line heights
+#[derive(Debug)]
+struct LayoutLines {
+    layout: Vec<LayoutLine>,
+    line_heights: Vec<f32>,
 }
