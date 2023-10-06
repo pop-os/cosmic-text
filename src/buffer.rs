@@ -279,14 +279,18 @@ impl<'b> ExactSizeIterator for LayoutRunIter<'b> {}
 pub struct Buffer {
     /// [BufferLine]s (or paragraphs) of text in the buffer
     pub lines: Vec<BufferLine>,
+    /// The cached heights of visual lines
     line_heights: Vec<f32>,
+    /// The text bounding box width
     width: f32,
+    /// The text bounding box height
     height: f32,
+    /// The current scroll position in terms of visual lines
     scroll: i32,
-    /// True if a redraw is requires. Set to false after processing
+    /// True if a redraw is required. Set to false after processing
     redraw: bool,
+    /// The wrapping mode
     wrap: Wrap,
-
     /// Scratch buffer for shaping and laying out.
     scratch: ShapeBuffer,
 }
@@ -348,10 +352,12 @@ impl Buffer {
         log::debug!("relayout: {:?}", instant.elapsed());
     }
 
+    /// Get the cached heights of visual lines
     pub fn line_heights(&self) -> &[f32] {
         self.line_heights.as_slice()
     }
 
+    /// Update the cached heights of visual lines
     pub fn update_line_heights(&mut self) {
         #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
         let instant = std::time::Instant::now();
