@@ -1,5 +1,16 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+//! This module contains the [`Buffer`] type which is the entry point for shaping and layout of text.
+//!
+//! A [`Buffer`] contains a list of [`BufferLine`]s and is used to compute the [`LayoutRun`]s.
+//!
+//! [`BufferLine`]s correspond to the paragraphs of text in the [`Buffer`].
+//! Each [`BufferLine`] contains a list of [`LayoutLine`]s, which represent the visual lines.
+//! `Buffer::line_heights` is a computed list of visual line heights.
+//!
+//! [`LayoutRun`]s represent the actually-visible visual lines,
+//! based on the [`Buffer`]'s scroll position, width, height and wrapping mode.
+
 #[cfg(not(feature = "std"))]
 use alloc::{
     string::{String, ToString},
@@ -112,9 +123,9 @@ impl LayoutCursor {
 /// A line of visible text for rendering
 #[derive(Debug)]
 pub struct LayoutRun<'a> {
-    /// The index of the original text line
+    /// The index of the original [`BufferLine`] (or paragraph) in the [`Buffer`]
     pub line_i: usize,
-    /// The original text line
+    /// The text of the original [`BufferLine`] (or paragraph)
     pub text: &'a str,
     /// True if the original paragraph direction is RTL
     pub rtl: bool,
@@ -277,17 +288,17 @@ impl<'b> ExactSizeIterator for LayoutRunIter<'b> {}
 /// A buffer of text that is shaped and laid out
 #[derive(Debug)]
 pub struct Buffer {
-    /// [BufferLine]s (or paragraphs) of text in the buffer
+    /// [BufferLine]s (or paragraphs) of text in the buffer.
     pub lines: Vec<BufferLine>,
-    /// The cached heights of visual lines
+    /// The cached heights of visual lines. Compute using [`Buffer::update_line_heights`].
     line_heights: Vec<f32>,
-    /// The text bounding box width
+    /// The text bounding box width.
     width: f32,
-    /// The text bounding box height
+    /// The text bounding box height.
     height: f32,
-    /// The current scroll position in terms of visual lines
+    /// The current scroll position in terms of visual lines.
     scroll: i32,
-    /// True if a redraw is required. Set to false after processing
+    /// True if a redraw is required. Set to false after processing.
     redraw: bool,
     /// The wrapping mode
     wrap: Wrap,
@@ -652,7 +663,7 @@ impl Buffer {
         i
     }
 
-    /// Get the number of lines that can be viewed in the buffer
+    /// Get the number of visual lines that can be viewed in the buffer
     pub fn visible_lines(&self) -> i32 {
         self.visible_lines_from(self.scroll as usize)
     }
