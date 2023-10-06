@@ -610,13 +610,17 @@ impl Buffer {
         }
     }
 
-    /// Get the current scroll location
+    /// Get the current scroll location in terms of visual lines
     pub fn scroll(&self) -> i32 {
         self.scroll
     }
 
-    /// Set the current scroll location
+    /// Set the current scroll location in terms of visual lines.
+    ///
+    /// This is clamped to the visual lines of the buffer.
     pub fn set_scroll(&mut self, scroll: i32) {
+        let visual_lines = self.line_heights().len() as i32;
+        let scroll = scroll.clamp(0, visual_lines - 1);
         if scroll != self.scroll {
             self.scroll = scroll;
             self.redraw = true;
