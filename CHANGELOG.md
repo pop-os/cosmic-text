@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2023-10-19
+
+### Added
+
+- Added `Buffer::set_rich_text` method
+- Add `Align::End` for end-based alignment
+- Add more `Debug` implementations
+- Add feature to warn on missing glyphs
+- Add easy conversions for tuples/arrays for `Color`
+- Derive `Clone` for `AttrsList`
+- Add feature to allow `fontdb` to get `fontconfig` information
+- Add benchmarks to accurately gauge improvements
+- Add image render tests
+- Allow BSD-2-Clause and BSD-3-Clause licneses in cargo-deny
+
+### Fixed
+
+- Fix `no_std` build
+- Fix `BufferLine::set_align` docs to not mention shape reset is performed
+- Fix width computed during unconstrained layout and add test for it
+- Set `cursor_moved` to true in `Editor::insert_string`
+- Fix `NextWord` action in `Editor` when line ends with word boundaries
+- Fix building `editor-libcosmic` with `vi` feature
+- Respect `fontconfig` font aliases when enabled
+- Fix rendering of RTL words
+
+### Changed
+
+- Unify `no_std` and `std` impls of `FontSystem`
+- Move `hashbrown` behind `no_std` feature
+- Require either `std` or `no_std` feature to be specified
+- Use a scratch buffer to reduce allocations
+- Enable `std` feature with `fontconfig` feature
+- Enable `fontconfig` feature by default
+- Refactor code in `ShapeLine::layout`
+- Set MSRV to `1.65`
+- Make `Edit::copy_selection` immutable
+- Rewrite `PreviousWord` logic in `Editor` with iterators
+- Use attributes at cursor position for insertions in `Editor`
+- Update all dependencies
+- Use `self_cell` for creating self-referential struct
+
 ## [0.9.0] - 2023-07-06
 
 ### Added
