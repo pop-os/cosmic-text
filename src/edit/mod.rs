@@ -35,6 +35,8 @@ pub enum Action {
     Down,
     /// Move cursor to start of line
     Home,
+    /// Move cursor to start of line, skipping whitespace
+    SoftHome,
     /// Move cursor to end of line
     End,
     /// Move cursor to start of paragraph

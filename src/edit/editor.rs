@@ -426,6 +426,17 @@ impl Edit for Editor {
                 self.set_layout_cursor(font_system, cursor);
                 self.cursor_x_opt = None;
             }
+            Action::SoftHome => {
+                let line: &mut BufferLine = &mut self.buffer.lines[self.cursor.line];
+                self.cursor.index = line
+                    .text()
+                    .unicode_word_indices()
+                    .map(|(i, _)| i)
+                    .next()
+                    .unwrap_or(0);
+                self.buffer.set_redraw(true);
+                self.cursor_x_opt = None;
+            }
             Action::End => {
                 let mut cursor = self.buffer.layout_cursor(&self.cursor);
                 cursor.glyph = usize::max_value();
