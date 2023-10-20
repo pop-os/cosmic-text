@@ -7,7 +7,7 @@ use crate::{
     SyntaxEditor,
 };
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ViMode {
     /// Passthrough mode, disables vi features
     Passthrough,
@@ -16,15 +16,16 @@ pub enum ViMode {
     /// Insert mode
     Insert,
     /// Command mode
-    Command,
+    Command { value: String },
     /// Search mode
-    Search { forwards: bool },
+    Search { value: String, forwards: bool },
 }
 
 #[derive(Debug)]
 pub struct ViEditor<'a> {
     editor: SyntaxEditor<'a>,
     mode: ViMode,
+    search_opt: Option<(String, bool)>,
 }
 
 impl<'a> ViEditor<'a> {
@@ -32,6 +33,7 @@ impl<'a> ViEditor<'a> {
         Self {
             editor,
             mode: ViMode::Normal,
+            search_opt: None,
         }
     }
 
@@ -66,8 +68,66 @@ impl<'a> ViEditor<'a> {
     }
 
     /// Get current vi editing mode
-    pub fn mode(&self) -> ViMode {
-        self.mode
+    pub fn mode(&self) -> &ViMode {
+        &self.mode
+    }
+
+    fn search(&mut self, inverted: bool) {
+        let (search, mut forwards) = match &self.search_opt {
+            Some(some) => some,
+            None => return,
+        };
+
+        if inverted {
+            forwards = !forwards;
+        }
+
+        let mut cursor = self.cursor();
+        let start_line = cursor.line;
+        if forwards {
+            while cursor.line < self.buffer().lines.len() {
+                if let Some(index) = self.buffer().lines[cursor.line]
+                    .text()
+                    .match_indices(search.as_str())
+                    .filter_map(|(i, _)| {
+                        if cursor.line != start_line || i > cursor.index {
+                            Some(i)
+                        } else {
+                            None
+                        }
+                    })
+                    .next()
+                {
+                    cursor.index = index;
+                    self.set_cursor(cursor);
+                    return;
+                }
+
+                cursor.line += 1;
+            }
+        } else {
+            cursor.line += 1;
+            while cursor.line > 0 {
+                cursor.line -= 1;
+
+                if let Some(index) = self.buffer().lines[cursor.line]
+                    .text()
+                    .rmatch_indices(search.as_str())
+                    .filter_map(|(i, _)| {
+                        if cursor.line != start_line || i < cursor.index {
+                            Some(i)
+                        } else {
+                            None
+                        }
+                    })
+                    .next()
+                {
+                    cursor.index = index;
+                    self.set_cursor(cursor);
+                    return;
+                }
+            }
+        }
     }
 }
 
@@ -113,7 +173,7 @@ impl<'a> Edit for ViEditor<'a> {
     }
 
     fn action(&mut self, font_system: &mut FontSystem, action: Action) {
-        let old_mode = self.mode;
+        let old_mode = self.mode.clone();
 
         match self.mode {
             ViMode::Passthrough => self.editor.action(font_system, action),
@@ -203,6 +263,10 @@ impl<'a> Edit for ViEditor<'a> {
                     //TODO: 'L' => self.editor.action(Action::ScreenLow),
                     // Middle of screen
                     //TODO: 'M' => self.editor.action(Action::ScreenMiddle),
+                    // Next search item
+                    'n' => self.search(false),
+                    // Previous search item
+                    'N' => self.search(true),
                     // Enter visual mode
                     'v' => {
                         if self.editor.select_opt().is_some() {
@@ -244,15 +308,23 @@ impl<'a> Edit for ViEditor<'a> {
                     '^' => self.editor.action(font_system, Action::SoftHome),
                     // Enter command mode
                     ':' => {
-                        self.mode = ViMode::Command;
+                        self.mode = ViMode::Command {
+                            value: String::new(),
+                        };
                     }
                     // Enter search mode
                     '/' => {
-                        self.mode = ViMode::Search { forwards: true };
+                        self.mode = ViMode::Search {
+                            value: String::new(),
+                            forwards: true,
+                        };
                     }
                     // Enter search backwards mode
                     '?' => {
-                        self.mode = ViMode::Search { forwards: false };
+                        self.mode = ViMode::Search {
+                            value: String::new(),
+                            forwards: false,
+                        };
                     }
                     _ => (),
                 },
@@ -278,24 +350,47 @@ impl<'a> Edit for ViEditor<'a> {
                 }
                 _ => self.editor.action(font_system, action),
             },
-            ViMode::Command => match action {
+            ViMode::Command { ref mut value } => match action {
                 Action::Escape => {
                     self.mode = ViMode::Normal;
                 }
-                Action::Enter => {}
                 Action::Insert(c) => match c {
-                    _ => {}
+                    _ => {
+                        value.push(c);
+                    }
                 },
+                Action::Enter => {
+                    //TODO: run command
+                    self.mode = ViMode::Normal;
+                }
+                Action::Backspace => {
+                    if value.pop().is_none() {
+                        self.mode = ViMode::Normal;
+                    }
+                }
                 _ => self.editor.action(font_system, action),
             },
-            ViMode::Search { forwards } => match action {
+            ViMode::Search {
+                ref mut value,
+                forwards,
+            } => match action {
                 Action::Escape => {
                     self.mode = ViMode::Normal;
                 }
-                Action::Enter => {}
-                Action::Insert(c) => match c {
-                    _ => {}
-                },
+                Action::Insert(c) => {
+                    value.push(c);
+                }
+                Action::Enter => {
+                    //TODO: do not require clone?
+                    self.search_opt = Some((value.clone(), forwards));
+                    self.mode = ViMode::Normal;
+                    self.search(false);
+                }
+                Action::Backspace => {
+                    if value.pop().is_none() {
+                        self.mode = ViMode::Normal;
+                    }
+                }
                 _ => self.editor.action(font_system, action),
             },
         }
