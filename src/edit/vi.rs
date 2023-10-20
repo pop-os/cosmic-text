@@ -8,26 +8,30 @@ use crate::{
 };
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-enum Mode {
+pub enum ViMode {
+    /// Passthrough mode, disables vi features
     Passthrough,
+    /// Normal mode
     Normal,
+    /// Insert mode
     Insert,
+    /// Command mode
     Command,
-    Search,
-    SearchBackwards,
+    /// Search mode
+    Search { forwards: bool },
 }
 
 #[derive(Debug)]
 pub struct ViEditor<'a> {
     editor: SyntaxEditor<'a>,
-    mode: Mode,
+    mode: ViMode,
 }
 
 impl<'a> ViEditor<'a> {
     pub fn new(editor: SyntaxEditor<'a>) -> Self {
         Self {
             editor,
-            mode: Mode::Normal,
+            mode: ViMode::Normal,
         }
     }
 
@@ -55,10 +59,15 @@ impl<'a> ViEditor<'a> {
     /// Set passthrough mode (true will turn off vi features)
     pub fn set_passthrough(&mut self, passthrough: bool) {
         if passthrough {
-            self.mode = Mode::Passthrough;
+            self.mode = ViMode::Passthrough;
         } else {
-            self.mode = Mode::Normal;
+            self.mode = ViMode::Normal;
         }
+    }
+
+    /// Get current vi editing mode
+    pub fn mode(&self) -> ViMode {
+        self.mode
     }
 }
 
@@ -107,24 +116,34 @@ impl<'a> Edit for ViEditor<'a> {
         let old_mode = self.mode;
 
         match self.mode {
-            Mode::Passthrough => self.editor.action(font_system, action),
-            Mode::Normal => match action {
+            ViMode::Passthrough => self.editor.action(font_system, action),
+            ViMode::Normal => match action {
                 Action::Insert(c) => match c {
                     // Enter insert mode after cursor
                     'a' => {
                         self.editor.action(font_system, Action::Right);
-                        self.mode = Mode::Insert;
+                        self.mode = ViMode::Insert;
                     }
                     // Enter insert mode at end of line
                     'A' => {
                         self.editor.action(font_system, Action::End);
-                        self.mode = Mode::Insert;
+                        self.mode = ViMode::Insert;
+                    }
+                    // Previous word
+                    'b' => {
+                        //TODO: WORD vs word, iterate by vi word rules
+                        self.editor.action(font_system, Action::PreviousWord);
+                    }
+                    // Previous WORD
+                    'B' => {
+                        //TODO: WORD vs word, iterate by vi word rules
+                        self.editor.action(font_system, Action::PreviousWord);
                     }
                     // Change mode
                     'c' => {
                         if self.editor.select_opt().is_some() {
                             self.editor.action(font_system, Action::Delete);
-                            self.mode = Mode::Insert;
+                            self.mode = ViMode::Insert;
                         } else {
                             //TODO: change to next cursor movement
                         }
@@ -137,20 +156,30 @@ impl<'a> Edit for ViEditor<'a> {
                             //TODO: delete to next cursor movement
                         }
                     }
+                    // End of word
+                    'e' => {
+                        //TODO: WORD vs word, iterate by vi word rules
+                        self.editor.action(font_system, Action::NextWord);
+                    }
+                    // End of WORD
+                    'E' => {
+                        //TODO: WORD vs word, iterate by vi word rules
+                        self.editor.action(font_system, Action::NextWord);
+                    }
                     // Enter insert mode at cursor
                     'i' => {
-                        self.mode = Mode::Insert;
+                        self.mode = ViMode::Insert;
                     }
                     // Enter insert mode at start of line
                     'I' => {
                         self.editor.action(font_system, Action::SoftHome);
-                        self.mode = Mode::Insert;
+                        self.mode = ViMode::Insert;
                     }
                     // Create line after and enter insert mode
                     'o' => {
                         self.editor.action(font_system, Action::End);
                         self.editor.action(font_system, Action::Enter);
-                        self.mode = Mode::Insert;
+                        self.mode = ViMode::Insert;
                     }
                     // Create line before and enter insert mode
                     'O' => {
@@ -158,7 +187,7 @@ impl<'a> Edit for ViEditor<'a> {
                         self.editor.action(font_system, Action::Enter);
                         self.editor.shape_as_needed(font_system); // TODO: do not require this?
                         self.editor.action(font_system, Action::Up);
-                        self.mode = Mode::Insert;
+                        self.mode = ViMode::Insert;
                     }
                     // Left
                     'h' => self.editor.action(font_system, Action::Left),
@@ -169,7 +198,7 @@ impl<'a> Edit for ViEditor<'a> {
                     // Up
                     'k' => self.editor.action(font_system, Action::Up),
                     // Right
-                    'l' => self.editor.action(font_system, Action::Right),
+                    'l' | ' ' => self.editor.action(font_system, Action::Right),
                     // Bottom of screen
                     //TODO: 'L' => self.editor.action(Action::ScreenLow),
                     // Middle of screen
@@ -193,6 +222,16 @@ impl<'a> Edit for ViEditor<'a> {
                             self.editor.action(font_system, Action::End);
                         }
                     }
+                    // Next word
+                    'w' => {
+                        //TODO: WORD vs word, iterate by vi word rules
+                        self.editor.action(font_system, Action::NextWord);
+                    }
+                    // Next WORD
+                    'W' => {
+                        //TODO: WORD vs word, iterate by vi word rules
+                        self.editor.action(font_system, Action::NextWord);
+                    }
                     // Remove character at cursor
                     'x' => self.editor.action(font_system, Action::Delete),
                     // Remove character before cursor
@@ -205,35 +244,60 @@ impl<'a> Edit for ViEditor<'a> {
                     '^' => self.editor.action(font_system, Action::SoftHome),
                     // Enter command mode
                     ':' => {
-                        self.mode = Mode::Command;
+                        self.mode = ViMode::Command;
                     }
                     // Enter search mode
                     '/' => {
-                        self.mode = Mode::Search;
+                        self.mode = ViMode::Search { forwards: true };
                     }
                     // Enter search backwards mode
                     '?' => {
-                        self.mode = Mode::SearchBackwards;
+                        self.mode = ViMode::Search { forwards: false };
                     }
                     _ => (),
                 },
+                // Go to start of next line
+                Action::Enter => {
+                    self.editor.action(font_system, Action::Down);
+                    self.editor.action(font_system, Action::SoftHome);
+                }
+                // Left
+                Action::Backspace => {
+                    self.editor.action(font_system, Action::Left);
+                }
                 _ => self.editor.action(font_system, action),
             },
-            Mode::Insert => match action {
+            ViMode::Insert => match action {
                 Action::Escape => {
                     let cursor = self.cursor();
                     let layout_cursor = self.buffer().layout_cursor(&cursor);
                     if layout_cursor.glyph > 0 {
                         self.editor.action(font_system, Action::Left);
                     }
-                    self.mode = Mode::Normal;
+                    self.mode = ViMode::Normal;
                 }
                 _ => self.editor.action(font_system, action),
             },
-            _ => {
-                //TODO: other modes
-                self.mode = Mode::Normal;
-            }
+            ViMode::Command => match action {
+                Action::Escape => {
+                    self.mode = ViMode::Normal;
+                }
+                Action::Enter => {}
+                Action::Insert(c) => match c {
+                    _ => {}
+                },
+                _ => self.editor.action(font_system, action),
+            },
+            ViMode::Search { forwards } => match action {
+                Action::Escape => {
+                    self.mode = ViMode::Normal;
+                }
+                Action::Enter => {}
+                Action::Insert(c) => match c {
+                    _ => {}
+                },
+                _ => self.editor.action(font_system, action),
+            },
         }
 
         if self.mode != old_mode {
@@ -378,9 +442,9 @@ impl<'a> Edit for ViEditor<'a> {
                 cursor_glyph_opt(&self.cursor())
             {
                 let block_cursor = match self.mode {
-                    Mode::Passthrough => false,
-                    Mode::Normal => true,
-                    Mode::Insert => false,
+                    ViMode::Passthrough => false,
+                    ViMode::Normal => true,
+                    ViMode::Insert => false,
                     _ => true, /*TODO: determine block cursor in other modes*/
                 };
 
