@@ -9,6 +9,7 @@ use crate::{
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Mode {
+    Passthrough,
     Normal,
     Insert,
     Command,
@@ -49,6 +50,15 @@ impl<'a> ViEditor<'a> {
     /// Get the default foreground (text) color
     pub fn foreground_color(&self) -> Color {
         self.editor.foreground_color()
+    }
+
+    /// Set passthrough mode (true will turn off vi features)
+    pub fn set_passthrough(&mut self, passthrough: bool) {
+        if passthrough {
+            self.mode = Mode::Passthrough;
+        } else {
+            self.mode = Mode::Normal;
+        }
     }
 }
 
@@ -97,6 +107,7 @@ impl<'a> Edit for ViEditor<'a> {
         let old_mode = self.mode;
 
         match self.mode {
+            Mode::Passthrough => self.editor.action(font_system, action),
             Mode::Normal => match action {
                 Action::Insert(c) => match c {
                     // Enter insert mode after cursor
@@ -369,6 +380,7 @@ impl<'a> Edit for ViEditor<'a> {
                 cursor_glyph_opt(&self.cursor())
             {
                 let block_cursor = match self.mode {
+                    Mode::Passthrough => false,
                     Mode::Normal => true,
                     Mode::Insert => false,
                     _ => true, /*TODO: determine block cursor in other modes*/
