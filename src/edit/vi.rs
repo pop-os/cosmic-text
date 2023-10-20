@@ -143,8 +143,7 @@ impl<'a> Edit for ViEditor<'a> {
                     }
                     // Enter insert mode at start of line
                     'I' => {
-                        //TODO: soft home, skip whitespace
-                        self.editor.action(font_system, Action::Home);
+                        self.editor.action(font_system, Action::SoftHome);
                         self.mode = Mode::Insert;
                     }
                     // Create line after and enter insert mode
@@ -203,8 +202,7 @@ impl<'a> Edit for ViEditor<'a> {
                     // Go to end of line
                     '$' => self.editor.action(font_system, Action::End),
                     // Go to start of line after whitespace
-                    //TODO: implement this
-                    '^' => self.editor.action(font_system, Action::Home),
+                    '^' => self.editor.action(font_system, Action::SoftHome),
                     // Enter command mode
                     ':' => {
                         self.mode = Mode::Command;
