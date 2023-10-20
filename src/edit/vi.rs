@@ -242,6 +242,9 @@ impl<'a> Edit for ViEditor<'a> {
     ) where
         F: FnMut(i32, i32, u32, u32, Color),
     {
+        let size = self.buffer().size();
+        f(0, 0, size.0 as u32, size.1 as u32, self.background_color());
+
         let font_size = self.buffer().metrics().font_size;
         let line_height = self.buffer().metrics().line_height;
 
