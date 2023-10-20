@@ -86,7 +86,11 @@ impl Edit for Editor {
     }
 
     fn set_cursor(&mut self, cursor: Cursor) {
-        self.cursor = cursor;
+        if self.cursor != cursor {
+            self.cursor = cursor;
+            self.cursor_moved = true;
+            self.buffer.set_redraw(true);
+        }
     }
 
     fn select_opt(&self) -> Option<Cursor> {
