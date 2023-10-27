@@ -419,6 +419,7 @@ impl<'a> Edit for ViEditor<'a> {
         for run in self.buffer().layout_runs() {
             let line_i = run.line_i;
             let line_y = run.line_y;
+            let line_top = run.line_top;
 
             let cursor_glyph_opt = |cursor: &Cursor| -> Option<(usize, f32, f32)> {
                 //TODO: better calculation of width
@@ -497,7 +498,7 @@ impl<'a> Edit for ViEditor<'a> {
                             } else if let Some((min, max)) = range_opt.take() {
                                 f(
                                     min,
-                                    (line_y - font_size) as i32,
+                                    line_top as i32,
                                     cmp::max(0, max - min) as u32,
                                     line_height as u32,
                                     Color::rgba(color.r(), color.g(), color.b(), 0x33),
@@ -523,7 +524,7 @@ impl<'a> Edit for ViEditor<'a> {
                         }
                         f(
                             min,
-                            (line_y - font_size) as i32,
+                            line_top as i32,
                             cmp::max(0, max - min) as u32,
                             line_height as u32,
                             Color::rgba(color.r(), color.g(), color.b(), 0x33),
@@ -583,7 +584,7 @@ impl<'a> Edit for ViEditor<'a> {
                     let right_x = cmp::max(start_x, end_x);
                     f(
                         left_x,
-                        (line_y - font_size) as i32,
+                        line_top as i32,
                         (right_x - left_x) as u32,
                         line_height as u32,
                         Color::rgba(color.r(), color.g(), color.b(), 0x33),
@@ -591,7 +592,7 @@ impl<'a> Edit for ViEditor<'a> {
                 } else {
                     f(
                         start_x,
-                        (line_y - font_size) as i32,
+                        line_top as i32,
                         1,
                         line_height as u32,
                         color,
