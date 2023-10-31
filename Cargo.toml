@@ -10,7 +10,7 @@ repository = "https://github.com/pop-os/cosmic-text"
 rust-version = "1.65"
 
 [dependencies]
-fontdb = { version = "0.15.0", default-features = false }
+fontdb = { version = "0.16.0", default-features = false }
 libm = "0.2.8"
 log = "0.4.20"
 rustybuzz = { version = "0.11.0", default-features = false, features = ["libm"] }
