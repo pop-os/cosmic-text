@@ -60,10 +60,13 @@ impl<'a> ViEditor<'a> {
 
     /// Set passthrough mode (true will turn off vi features)
     pub fn set_passthrough(&mut self, passthrough: bool) {
-        if passthrough {
-            self.mode = ViMode::Passthrough;
-        } else {
-            self.mode = ViMode::Normal;
+        if passthrough != (self.mode == ViMode::Passthrough) {
+            if passthrough {
+                self.mode = ViMode::Passthrough;
+            } else {
+                self.mode = ViMode::Normal;
+            }
+            self.buffer_mut().set_redraw(true);
         }
     }
 
