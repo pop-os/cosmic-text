@@ -157,6 +157,14 @@ impl<'a> Edit for SyntaxEditor<'a> {
         self.editor.set_select_opt(select_opt);
     }
 
+    fn tab_width(&self) -> usize {
+        self.editor.tab_width()
+    }
+
+    fn set_tab_width(&mut self, tab_width: usize) {
+        self.editor.set_tab_width(tab_width);
+    }
+
     fn shape_as_needed(&mut self, font_system: &mut FontSystem) {
         #[cfg(feature = "std")]
         let now = std::time::Instant::now();

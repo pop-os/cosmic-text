@@ -23,6 +23,7 @@ pub struct Editor {
     cursor_x_opt: Option<i32>,
     select_opt: Option<Cursor>,
     cursor_moved: bool,
+    tab_width: usize,
 }
 
 impl Editor {
@@ -34,6 +35,7 @@ impl Editor {
             cursor_x_opt: None,
             select_opt: None,
             cursor_moved: false,
+            tab_width: 4,
         }
     }
 
@@ -100,6 +102,21 @@ impl Edit for Editor {
     fn set_select_opt(&mut self, select_opt: Option<Cursor>) {
         if self.select_opt != select_opt {
             self.select_opt = select_opt;
+            self.buffer.set_redraw(true);
+        }
+    }
+
+    fn tab_width(&self) -> usize {
+        self.tab_width
+    }
+
+    fn set_tab_width(&mut self, tab_width: usize) {
+        // A tab width of 0 is not allowed
+        if tab_width == 0 {
+            return;
+        }
+        if self.tab_width != tab_width {
+            self.tab_width = tab_width;
             self.buffer.set_redraw(true);
         }
     }
@@ -574,6 +591,162 @@ impl Edit for Editor {
                 } else if self.cursor.line + 1 < self.buffer.lines.len() {
                     let old_line = self.buffer.lines.remove(self.cursor.line + 1);
                     self.buffer.lines[self.cursor.line].append(old_line);
+                }
+            }
+            Action::Indent => {
+                // Get start and end of selection
+                let (start, end) = match self.select_opt {
+                    Some(select) => match select.line.cmp(&self.cursor.line) {
+                        cmp::Ordering::Greater => (self.cursor, select),
+                        cmp::Ordering::Less => (select, self.cursor),
+                        cmp::Ordering::Equal => {
+                            /* select.line == self.cursor.line */
+                            if select.index < self.cursor.index {
+                                (select, self.cursor)
+                            } else {
+                                /* select.index >= self.cursor.index */
+                                (self.cursor, select)
+                            }
+                        }
+                    },
+                    None => (self.cursor, self.cursor),
+                };
+
+                // For every line in selection
+                for line_i in start.line..=end.line {
+                    let line = &mut self.buffer.lines[line_i];
+
+                    // Determine indexes of last indent and first character after whitespace
+                    let mut after_whitespace = 0;
+                    let mut required_indent = 0;
+                    {
+                        let text = line.text();
+                        for (count, (index, c)) in text.char_indices().enumerate() {
+                            if !c.is_whitespace() {
+                                after_whitespace = index;
+                                required_indent = self.tab_width - (count % self.tab_width);
+                                break;
+                            }
+                        }
+                    }
+
+                    // No indent required (not possible?)
+                    if required_indent == 0 {
+                        continue;
+                    }
+
+                    // Save line after last whitespace
+                    let after = line.split_off(after_whitespace);
+
+                    // Add required indent
+                    line.append(BufferLine::new(
+                        " ".repeat(required_indent),
+                        AttrsList::new(line.attrs_list().defaults()),
+                        Shaping::Advanced,
+                    ));
+
+                    // Re-add line after last whitespace
+                    line.append(after);
+
+                    // Adjust cursor
+                    if self.cursor.line == line_i {
+                        if self.cursor.index >= after_whitespace {
+                            self.cursor.index += required_indent;
+                            self.cursor_moved = true;
+                        }
+                    }
+
+                    // Adjust selection
+                    match self.select_opt {
+                        Some(ref mut select) => {
+                            if select.line == line_i {
+                                if select.index >= after_whitespace {
+                                    select.index += required_indent;
+                                }
+                            }
+                        }
+                        None => {}
+                    }
+
+                    // Request redraw
+                    self.buffer.set_redraw(true);
+                }
+            }
+            Action::Unindent => {
+                // Get start and end of selection
+                let (start, end) = match self.select_opt {
+                    Some(select) => match select.line.cmp(&self.cursor.line) {
+                        cmp::Ordering::Greater => (self.cursor, select),
+                        cmp::Ordering::Less => (select, self.cursor),
+                        cmp::Ordering::Equal => {
+                            /* select.line == self.cursor.line */
+                            if select.index < self.cursor.index {
+                                (select, self.cursor)
+                            } else {
+                                /* select.index >= self.cursor.index */
+                                (self.cursor, select)
+                            }
+                        }
+                    },
+                    None => (self.cursor, self.cursor),
+                };
+
+                // For every line in selection
+                for line_i in start.line..=end.line {
+                    let line = &mut self.buffer.lines[line_i];
+
+                    // Determine indexes of last indent and first character after whitespace
+                    let mut last_indent = 0;
+                    let mut after_whitespace = 0;
+                    {
+                        let text = line.text();
+                        for (count, (index, c)) in text.char_indices().enumerate() {
+                            if !c.is_whitespace() {
+                                after_whitespace = index;
+                                break;
+                            }
+                            if count % self.tab_width == 0 {
+                                last_indent = index;
+                            }
+                        }
+                    }
+
+                    // No de-indent required
+                    if last_indent == after_whitespace {
+                        continue;
+                    }
+
+                    // Save line after last whitespace
+                    let after = line.split_off(after_whitespace);
+
+                    // Drop part of line after last indent
+                    line.split_off(last_indent);
+
+                    // Re-add line after last whitespace
+                    line.append(after);
+
+                    // Adjust cursor
+                    if self.cursor.line == line_i {
+                        if self.cursor.index > last_indent {
+                            self.cursor.index -= after_whitespace - last_indent;
+                            self.cursor_moved = true;
+                        }
+                    }
+
+                    // Adjust selection
+                    match self.select_opt {
+                        Some(ref mut select) => {
+                            if select.line == line_i {
+                                if select.index > last_indent {
+                                    select.index -= after_whitespace - last_indent;
+                                }
+                            }
+                        }
+                        None => {}
+                    }
+
+                    // Request redraw
+                    self.buffer.set_redraw(true);
                 }
             }
             Action::Click { x, y } => {

@@ -59,12 +59,24 @@ pub enum Action {
     Backspace,
     /// Delete text in front of cursor
     Delete,
+    // Indent text (typically Tab)
+    Indent,
+    // Unindent text (typically Shift+Tab)
+    Unindent,
     /// Mouse click at specified position
-    Click { x: i32, y: i32 },
+    Click {
+        x: i32,
+        y: i32,
+    },
     /// Mouse drag to specified position
-    Drag { x: i32, y: i32 },
+    Drag {
+        x: i32,
+        y: i32,
+    },
     /// Scroll specified number of lines
-    Scroll { lines: i32 },
+    Scroll {
+        lines: i32,
+    },
     /// Move cursor to previous word boundary
     PreviousWord,
     /// Move cursor to next word boundary
@@ -112,6 +124,12 @@ pub trait Edit {
 
     /// Set the current selection position
     fn set_select_opt(&mut self, select_opt: Option<Cursor>);
+
+    /// Get the current tab width
+    fn tab_width(&self) -> usize;
+
+    /// Set the current tab width. A tab_width of 0 is not allowed, and will be ignored
+    fn set_tab_width(&mut self, tab_width: usize);
 
     /// Shape lines until scroll, after adjusting scroll if the cursor moved
     fn shape_as_needed(&mut self, font_system: &mut FontSystem);
