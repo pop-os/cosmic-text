@@ -552,12 +552,7 @@ impl Buffer {
     ///
     /// Will panic if `metrics.font_size` is zero.
     pub fn set_metrics(&mut self, font_system: &mut FontSystem, metrics: Metrics) {
-        if metrics != self.metrics {
-            assert_ne!(metrics.font_size, 0.0, "font size cannot be 0");
-            self.metrics = metrics;
-            self.relayout(font_system);
-            self.shape_until_scroll(font_system);
-        }
+        self.set_metrics_and_size(font_system, metrics, self.width, self.height);
     }
 
     /// Get the current [`Wrap`]
@@ -581,10 +576,27 @@ impl Buffer {
 
     /// Set the current buffer dimensions
     pub fn set_size(&mut self, font_system: &mut FontSystem, width: f32, height: f32) {
+        self.set_metrics_and_size(font_system, self.metrics, width, height);
+    }
+
+    /// Set the current [`Metrics`] and buffer dimensions at the same time
+    ///
+    /// # Panics
+    ///
+    /// Will panic if `metrics.font_size` is zero.
+    pub fn set_metrics_and_size(
+        &mut self,
+        font_system: &mut FontSystem,
+        metrics: Metrics,
+        width: f32,
+        height: f32,
+    ) {
         let clamped_width = width.max(0.0);
         let clamped_height = height.max(0.0);
 
-        if clamped_width != self.width || clamped_height != self.height {
+        if metrics != self.metrics || clamped_width != self.width || clamped_height != self.height {
+            assert_ne!(metrics.font_size, 0.0, "font size cannot be 0");
+            self.metrics = metrics;
             self.width = clamped_width;
             self.height = clamped_height;
             self.relayout(font_system);
@@ -923,6 +935,16 @@ impl<'a> BorrowedWithFontSystem<'a, Buffer> {
     /// Set the current buffer dimensions
     pub fn set_size(&mut self, width: f32, height: f32) {
         self.inner.set_size(self.font_system, width, height);
+    }
+
+    /// Set the current [`Metrics`] and buffer dimensions at the same time
+    ///
+    /// # Panics
+    ///
+    /// Will panic if `metrics.font_size` is zero.
+    pub fn set_metrics_and_size(&mut self, metrics: Metrics, width: f32, height: f32) {
+        self.inner
+            .set_metrics_and_size(self.font_system, metrics, width, height);
     }
 
     /// Set text of buffer, using provided attributes for each line by default

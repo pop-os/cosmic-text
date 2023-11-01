@@ -590,13 +590,7 @@ impl<'a> Edit for ViEditor<'a> {
                         Color::rgba(color.r(), color.g(), color.b(), 0x33),
                     );
                 } else {
-                    f(
-                        start_x,
-                        line_top as i32,
-                        1,
-                        line_height as u32,
-                        color,
-                    );
+                    f(start_x, line_top as i32, 1, line_height as u32, color);
                 }
             }
 
