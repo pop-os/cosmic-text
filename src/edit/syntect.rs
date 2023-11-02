@@ -188,7 +188,7 @@ impl<'a> Edit for SyntaxEditor<'a> {
                 match buffer.line_layout(font_system, line_i) {
                     Some(layout_lines) => {
                         total_layout += layout_lines.len() as i32;
-                    },
+                    }
                     None => {
                         //TODO: should this be possible?
                     }
@@ -251,7 +251,7 @@ impl<'a> Edit for SyntaxEditor<'a> {
             match buffer.line_layout(font_system, line_i) {
                 Some(layout_lines) => {
                     total_layout += layout_lines.len() as i32;
-                },
+                }
                 None => {
                     //TODO: should this be possible?
                 }
