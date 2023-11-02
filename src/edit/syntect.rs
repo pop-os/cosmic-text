@@ -169,12 +169,30 @@ impl<'a> Edit for SyntaxEditor<'a> {
         #[cfg(feature = "std")]
         let now = std::time::Instant::now();
 
+        let cursor = self.cursor();
         let buffer = self.editor.buffer_mut();
-
+        let lines = buffer.visible_lines();
+        let scroll_end = buffer.scroll() + lines;
+        let mut total_layout = 0;
         let mut highlighted = 0;
         for line_i in 0..buffer.lines.len() {
+            // Break out if we have reached the end of scroll and are past the cursor
+            if total_layout >= scroll_end && line_i > cursor.line {
+                break;
+            }
+
             let line = &mut buffer.lines[line_i];
             if !line.is_reset() && line_i < self.syntax_cache.len() {
+                //TODO: duplicated code!
+                // Perform shaping and layout of this line in order to count if we have reached scroll
+                match buffer.line_layout(font_system, line_i) {
+                    Some(layout_lines) => {
+                        total_layout += layout_lines.len() as i32;
+                    },
+                    None => {
+                        //TODO: should this be possible?
+                    }
+                }
                 continue;
             }
             highlighted += 1;
@@ -229,8 +247,15 @@ impl<'a> Edit for SyntaxEditor<'a> {
             line.set_attrs_list(attrs_list);
             line.set_wrap(Wrap::Word);
 
-            //TODO: efficiently do syntax highlighting without having to shape whole buffer
-            buffer.line_shape(font_system, line_i);
+            // Perform shaping and layout of this line in order to count if we have reached scroll
+            match buffer.line_layout(font_system, line_i) {
+                Some(layout_lines) => {
+                    total_layout += layout_lines.len() as i32;
+                },
+                None => {
+                    //TODO: should this be possible?
+                }
+            }
 
             let cache_item = (parse_state.clone(), highlight_state.clone());
             if line_i < self.syntax_cache.len() {
