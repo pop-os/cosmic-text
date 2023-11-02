@@ -3,7 +3,7 @@ use alloc::{string::String, vec::Vec};
 #[cfg(feature = "std")]
 use std::{fs, io, path::Path};
 use syntect::highlighting::{
-    FontStyle, HighlightState, Highlighter, RangedHighlightIterator, Theme, ThemeSet,
+    FontStyle, HighlightState, Highlighter, RangedHighlightIterator, ThemeSet,
 };
 use syntect::parsing::{ParseState, ScopeStack, SyntaxReference, SyntaxSet};
 
@@ -11,6 +11,8 @@ use crate::{
     Action, AttrsList, BorrowedWithFontSystem, Buffer, Color, Cursor, Edit, Editor, FontSystem,
     Shaping, Style, Weight, Wrap,
 };
+
+pub use syntect::highlighting::Theme as SyntaxTheme;
 
 #[derive(Debug)]
 pub struct SyntaxSystem {
@@ -35,7 +37,7 @@ pub struct SyntaxEditor<'a> {
     editor: Editor,
     syntax_system: &'a SyntaxSystem,
     syntax: &'a SyntaxReference,
-    theme: &'a Theme,
+    theme: &'a SyntaxTheme,
     highlighter: Highlighter<'a>,
     syntax_cache: Vec<(ParseState, HighlightState)>,
 }
@@ -65,9 +67,11 @@ impl<'a> SyntaxEditor<'a> {
     /// Modifies the theme of the [`SyntaxEditor`], returning false if the theme is missing
     pub fn update_theme(&mut self, theme_name: &str) -> bool {
         if let Some(theme) = self.syntax_system.theme_set.themes.get(theme_name) {
-            self.theme = theme;
-            self.highlighter = Highlighter::new(theme);
-            self.syntax_cache.clear();
+            if self.theme != theme {
+                self.theme = theme;
+                self.highlighter = Highlighter::new(theme);
+                self.syntax_cache.clear();
+            }
 
             true
         } else {
@@ -129,6 +133,11 @@ impl<'a> SyntaxEditor<'a> {
         } else {
             Color::rgb(0xFF, 0xFF, 0xFF)
         }
+    }
+
+    /// Get the current syntect theme
+    pub fn theme(&self) -> &SyntaxTheme {
+        self.theme
     }
 }
 

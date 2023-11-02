@@ -4,7 +4,7 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
     Action, AttrsList, BorrowedWithFontSystem, Buffer, Color, Cursor, Edit, FontSystem,
-    SyntaxEditor,
+    SyntaxEditor, SyntaxTheme,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -37,6 +37,11 @@ impl<'a> ViEditor<'a> {
         }
     }
 
+    /// Modifies the theme of the [`SyntaxEditor`], returning false if the theme is missing
+    pub fn update_theme(&mut self, theme_name: &str) -> bool {
+        self.editor.update_theme(theme_name)
+    }
+
     /// Load text from a file, and also set syntax to the best option
     #[cfg(feature = "std")]
     pub fn load_text<P: AsRef<std::path::Path>>(
@@ -56,6 +61,11 @@ impl<'a> ViEditor<'a> {
     /// Get the default foreground (text) color
     pub fn foreground_color(&self) -> Color {
         self.editor.foreground_color()
+    }
+
+    /// Get the current syntect theme
+    pub fn theme(&self) -> &SyntaxTheme {
+        self.editor.theme()
     }
 
     /// Set passthrough mode (true will turn off vi features)
