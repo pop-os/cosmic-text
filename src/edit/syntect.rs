@@ -22,10 +22,22 @@ pub struct SyntaxSystem {
 
 impl SyntaxSystem {
     /// Create a new [`SyntaxSystem`]
+    #[cfg(not(feature = "two-face"))]
     pub fn new() -> Self {
         Self {
             //TODO: store newlines in buffer
             syntax_set: SyntaxSet::load_defaults_nonewlines(),
+            theme_set: ThemeSet::load_defaults(),
+        }
+    }
+
+    /// Create a new [`SyntaxSystem`] using `[two-face]` definitions
+    #[cfg(feature = "two-face")]
+    pub fn new() -> Self {
+        Self {
+            //TODO: store newlines in buffer
+            syntax_set: two_face::syntax::extra_no_newlines(),
+            //TODO: use two-face themes
             theme_set: ThemeSet::load_defaults(),
         }
     }
