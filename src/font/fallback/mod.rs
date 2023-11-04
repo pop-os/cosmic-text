@@ -130,10 +130,14 @@ impl<'a> Iterator for FontFallbackIter<'a> {
                 }
                 // Set a monospace fallback if Monospace family is not found
                 if self.default_families[self.default_i - 1] == &Family::Monospace
-                    && self.font_system.db().face(*id).map(|f| f.monospaced) == Some(true)
                     && monospace_fallback.is_none()
                 {
-                    monospace_fallback = Some(id);
+                    if let Some(face_info) = self.font_system.db().face(*id) {
+                        // Don't use emoji fonts as Monospace
+                        if face_info.monospaced && !face_info.post_script_name.contains("Emoji") {
+                            monospace_fallback = Some(id);
+                        }
+                    }
                 }
             }
             // If default family is Monospace fallback to first monospaced font
