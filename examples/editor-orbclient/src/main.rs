@@ -22,7 +22,7 @@ fn main() {
     let display_scale = match orbclient::get_display_size() {
         Ok((w, h)) => {
             log::info!("Display size: {}, {}", w, h);
-            (h as f32 / 1600.0) + 1.0
+            (h / 1600) as f32 + 1.0
         }
         Err(err) => {
             log::warn!("Failed to get display size: {}", err);
