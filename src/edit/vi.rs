@@ -1,5 +1,6 @@
 use alloc::string::String;
 use core::cmp;
+use modit::{Event, Motion, Operator, Parser, WordIter};
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
@@ -7,24 +8,13 @@ use crate::{
     SyntaxEditor, SyntaxTheme,
 };
 
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub enum ViMode {
-    /// Passthrough mode, disables vi features
-    Passthrough,
-    /// Normal mode
-    Normal,
-    /// Insert mode
-    Insert,
-    /// Command mode
-    Command { value: String },
-    /// Search mode
-    Search { value: String, forwards: bool },
-}
+pub use modit::{ViMode, ViParser};
 
 #[derive(Debug)]
 pub struct ViEditor<'a> {
     editor: SyntaxEditor<'a>,
-    mode: ViMode,
+    parser: ViParser,
+    passthrough: bool,
     search_opt: Option<(String, bool)>,
 }
 
@@ -32,7 +22,8 @@ impl<'a> ViEditor<'a> {
     pub fn new(editor: SyntaxEditor<'a>) -> Self {
         Self {
             editor,
-            mode: ViMode::Normal,
+            parser: ViParser::new(),
+            passthrough: false,
             search_opt: None,
         }
     }
@@ -70,19 +61,15 @@ impl<'a> ViEditor<'a> {
 
     /// Set passthrough mode (true will turn off vi features)
     pub fn set_passthrough(&mut self, passthrough: bool) {
-        if passthrough != (self.mode == ViMode::Passthrough) {
-            if passthrough {
-                self.mode = ViMode::Passthrough;
-            } else {
-                self.mode = ViMode::Normal;
-            }
+        if passthrough != self.passthrough {
+            self.passthrough = passthrough;
             self.buffer_mut().set_redraw(true);
         }
     }
 
-    /// Get current vi editing mode
-    pub fn mode(&self) -> &ViMode {
-        &self.mode
+    /// Get current vi parser
+    pub fn parser(&self) -> &ViParser {
+        &self.parser
     }
 
     fn search(&mut self, inverted: bool) {
@@ -194,231 +181,189 @@ impl<'a> Edit for ViEditor<'a> {
     }
 
     fn action(&mut self, font_system: &mut FontSystem, action: Action) {
-        let old_mode = self.mode.clone();
+        let editor = &mut self.editor;
+        let c = match action {
+            Action::Escape => modit::ESCAPE,
+            Action::Insert(c) => c,
+            Action::Enter => modit::ENTER,
+            Action::Backspace => modit::BACKSPACE,
+            Action::Delete => modit::DELETE,
+            _ => return editor.action(font_system, action),
+        };
+        //TODO: redraw on parser mode change
+        self.parser.parse(c, false, |event| {
+            log::info!("{:?}", event);
+            let action = match event {
+                Event::Backspace => Action::Backspace,
+                Event::Delete => Action::Delete,
+                Event::Down => Action::Down,
+                Event::End => Action::End,
+                Event::Escape => Action::Escape,
+                Event::Home => Action::Home,
+                Event::Insert(c) => Action::Insert(c),
+                Event::Left => Action::Left,
+                Event::NewLine => Action::Enter,
+                Event::Operator(count, operator, motion, text_object_opt) => {
+                    let start = editor.cursor();
 
-        match self.mode {
-            ViMode::Passthrough => self.editor.action(font_system, action),
-            ViMode::Normal => match action {
-                Action::Insert(c) => match c {
-                    // Enter insert mode after cursor
-                    'a' => {
-                        self.editor.action(font_system, Action::Right);
-                        self.mode = ViMode::Insert;
-                    }
-                    // Enter insert mode at end of line
-                    'A' => {
-                        self.editor.action(font_system, Action::End);
-                        self.mode = ViMode::Insert;
-                    }
-                    // Previous word
-                    'b' => {
-                        //TODO: WORD vs word, iterate by vi word rules
-                        self.editor.action(font_system, Action::PreviousWord);
-                    }
-                    // Previous WORD
-                    'B' => {
-                        //TODO: WORD vs word, iterate by vi word rules
-                        self.editor.action(font_system, Action::PreviousWord);
-                    }
-                    // Change mode
-                    'c' => {
-                        if self.editor.select_opt().is_some() {
-                            self.editor.action(font_system, Action::Delete);
-                            self.mode = ViMode::Insert;
-                        } else {
-                            //TODO: change to next cursor movement
-                        }
-                    }
-                    // Delete mode
-                    'd' => {
-                        if self.editor.select_opt().is_some() {
-                            self.editor.action(font_system, Action::Delete);
-                        } else {
-                            //TODO: delete to next cursor movement
-                        }
-                    }
-                    // End of word
-                    'e' => {
-                        //TODO: WORD vs word, iterate by vi word rules
-                        self.editor.action(font_system, Action::NextWord);
-                    }
-                    // End of WORD
-                    'E' => {
-                        //TODO: WORD vs word, iterate by vi word rules
-                        self.editor.action(font_system, Action::NextWord);
-                    }
-                    // Enter insert mode at cursor
-                    'i' => {
-                        self.mode = ViMode::Insert;
-                    }
-                    // Enter insert mode at start of line
-                    'I' => {
-                        self.editor.action(font_system, Action::SoftHome);
-                        self.mode = ViMode::Insert;
-                    }
-                    // Create line after and enter insert mode
-                    'o' => {
-                        self.editor.action(font_system, Action::End);
-                        self.editor.action(font_system, Action::Enter);
-                        self.mode = ViMode::Insert;
-                    }
-                    // Create line before and enter insert mode
-                    'O' => {
-                        self.editor.action(font_system, Action::Home);
-                        self.editor.action(font_system, Action::Enter);
-                        self.editor.shape_as_needed(font_system); // TODO: do not require this?
-                        self.editor.action(font_system, Action::Up);
-                        self.mode = ViMode::Insert;
-                    }
-                    // Left
-                    'h' => self.editor.action(font_system, Action::Left),
-                    // Top of screen
-                    //TODO: 'H' => self.editor.action(Action::ScreenHigh),
-                    // Down
-                    'j' => self.editor.action(font_system, Action::Down),
-                    // Up
-                    'k' => self.editor.action(font_system, Action::Up),
-                    // Right
-                    'l' | ' ' => self.editor.action(font_system, Action::Right),
-                    // Bottom of screen
-                    //TODO: 'L' => self.editor.action(Action::ScreenLow),
-                    // Middle of screen
-                    //TODO: 'M' => self.editor.action(Action::ScreenMiddle),
-                    // Next search item
-                    'n' => self.search(false),
-                    // Previous search item
-                    'N' => self.search(true),
-                    // Enter visual mode
-                    'v' => {
-                        if self.editor.select_opt().is_some() {
-                            self.editor.set_select_opt(None);
-                        } else {
-                            self.editor.set_select_opt(Some(self.editor.cursor()));
-                        }
-                    }
-                    // Enter line visual mode
-                    'V' => {
-                        if self.editor.select_opt().is_some() {
-                            self.editor.set_select_opt(None);
-                        } else {
-                            self.editor.action(font_system, Action::Home);
-                            self.editor.set_select_opt(Some(self.editor.cursor()));
-                            //TODO: set cursor_x_opt to max
-                            self.editor.action(font_system, Action::End);
-                        }
-                    }
-                    // Next word
-                    'w' => {
-                        //TODO: WORD vs word, iterate by vi word rules
-                        self.editor.action(font_system, Action::NextWord);
-                    }
-                    // Next WORD
-                    'W' => {
-                        //TODO: WORD vs word, iterate by vi word rules
-                        self.editor.action(font_system, Action::NextWord);
-                    }
-                    // Remove character at cursor
-                    'x' => self.editor.action(font_system, Action::Delete),
-                    // Remove character before cursor
-                    'X' => self.editor.action(font_system, Action::Backspace),
-                    // Go to start of line
-                    '0' => self.editor.action(font_system, Action::Home),
-                    // Go to end of line
-                    '$' => self.editor.action(font_system, Action::End),
-                    // Go to start of line after whitespace
-                    '^' => self.editor.action(font_system, Action::SoftHome),
-                    // Enter command mode
-                    ':' => {
-                        self.mode = ViMode::Command {
-                            value: String::new(),
+                    for _ in 0..count {
+                        let action = match motion {
+                            Motion::Down => Action::Down,
+                            Motion::End => Action::End,
+                            Motion::GotoLine(line) => Action::GotoLine(line.saturating_sub(1)),
+                            Motion::GotoEof => {
+                                Action::GotoLine(editor.buffer().lines.len().saturating_sub(1))
+                            }
+                            Motion::Home => Action::Home,
+                            Motion::Left => Action::Left,
+                            Motion::NextWordEnd(word) => {
+                                let mut cursor = editor.cursor();
+                                let buffer = editor.buffer_mut();
+                                loop {
+                                    let text = buffer.lines[cursor.line].text();
+                                    if cursor.index < text.len() {
+                                        cursor.index = WordIter::new(text, word)
+                                            .map(|(i, w)| {
+                                                i + w
+                                                    .char_indices()
+                                                    .last()
+                                                    .map(|(i, _)| i)
+                                                    .unwrap_or(0)
+                                            })
+                                            .find(|&i| i > cursor.index)
+                                            .unwrap_or(text.len());
+                                        if cursor.index == text.len() {
+                                            // Try again, searching next line
+                                            continue;
+                                        }
+                                    } else if cursor.line + 1 < buffer.lines.len() {
+                                        // Go to next line and rerun loop
+                                        cursor.line += 1;
+                                        cursor.index = 0;
+                                        continue;
+                                    }
+                                    break;
+                                }
+                                editor.set_cursor(cursor);
+                                continue;
+                            }
+                            Motion::NextWordStart(word) => {
+                                let mut cursor = editor.cursor();
+                                let buffer = editor.buffer_mut();
+                                loop {
+                                    let text = buffer.lines[cursor.line].text();
+                                    if cursor.index < text.len() {
+                                        cursor.index = WordIter::new(text, word)
+                                            .map(|(i, _)| i)
+                                            .find(|&i| i > cursor.index)
+                                            .unwrap_or(text.len());
+                                        if cursor.index == text.len() {
+                                            // Try again, searching next line
+                                            continue;
+                                        }
+                                    } else if cursor.line + 1 < buffer.lines.len() {
+                                        // Go to next line and rerun loop
+                                        cursor.line += 1;
+                                        cursor.index = 0;
+                                        continue;
+                                    }
+                                    break;
+                                }
+                                editor.set_cursor(cursor);
+                                continue;
+                            }
+                            Motion::PreviousWordEnd(word) => {
+                                let mut cursor = editor.cursor();
+                                let buffer = editor.buffer_mut();
+                                loop {
+                                    let text = buffer.lines[cursor.line].text();
+                                    if cursor.index > 0 {
+                                        cursor.index = WordIter::new(text, word)
+                                            .map(|(i, w)| {
+                                                i + w
+                                                    .char_indices()
+                                                    .last()
+                                                    .map(|(i, _)| i)
+                                                    .unwrap_or(0)
+                                            })
+                                            .filter(|&i| i < cursor.index)
+                                            .last()
+                                            .unwrap_or(0);
+                                        if cursor.index == 0 {
+                                            // Try again, searching previous line
+                                            continue;
+                                        }
+                                    } else if cursor.line > 0 {
+                                        // Go to previous line and rerun loop
+                                        cursor.line -= 1;
+                                        cursor.index = buffer.lines[cursor.line].text().len();
+                                        continue;
+                                    }
+                                    break;
+                                }
+                                editor.set_cursor(cursor);
+                                continue;
+                            }
+                            Motion::PreviousWordStart(word) => {
+                                let mut cursor = editor.cursor();
+                                let buffer = editor.buffer_mut();
+                                loop {
+                                    let text = buffer.lines[cursor.line].text();
+                                    if cursor.index > 0 {
+                                        cursor.index = WordIter::new(text, word)
+                                            .map(|(i, _)| i)
+                                            .filter(|&i| i < cursor.index)
+                                            .last()
+                                            .unwrap_or(0);
+                                        if cursor.index == 0 {
+                                            // Try again, searching previous line
+                                            continue;
+                                        }
+                                    } else if cursor.line > 0 {
+                                        // Go to previous line and rerun loop
+                                        cursor.line -= 1;
+                                        cursor.index = buffer.lines[cursor.line].text().len();
+                                        continue;
+                                    }
+                                    break;
+                                }
+                                editor.set_cursor(cursor);
+                                continue;
+                            }
+                            Motion::Right => Action::Right,
+                            Motion::SoftHome => Action::SoftHome,
+                            Motion::Up => Action::Up,
+                            _ => {
+                                log::info!("TODO");
+                                break;
+                            }
                         };
+                        editor.action(font_system, action);
                     }
-                    // Enter search mode
-                    '/' => {
-                        self.mode = ViMode::Search {
-                            value: String::new(),
-                            forwards: true,
-                        };
-                    }
-                    // Enter search backwards mode
-                    '?' => {
-                        self.mode = ViMode::Search {
-                            value: String::new(),
-                            forwards: false,
-                        };
-                    }
-                    _ => (),
-                },
-                // Go to start of next line
-                Action::Enter => {
-                    self.editor.action(font_system, Action::Down);
-                    self.editor.action(font_system, Action::SoftHome);
-                }
-                // Left
-                Action::Backspace => {
-                    self.editor.action(font_system, Action::Left);
-                }
-                _ => self.editor.action(font_system, action),
-            },
-            ViMode::Insert => match action {
-                Action::Escape => {
-                    let cursor = self.cursor();
-                    let layout_cursor = self.buffer().layout_cursor(&cursor);
-                    if layout_cursor.glyph > 0 {
-                        self.editor.action(font_system, Action::Left);
-                    }
-                    self.mode = ViMode::Normal;
-                }
-                _ => self.editor.action(font_system, action),
-            },
-            ViMode::Command { ref mut value } => match action {
-                Action::Escape => {
-                    self.mode = ViMode::Normal;
-                }
-                Action::Insert(c) => match c {
-                    _ => {
-                        value.push(c);
-                    }
-                },
-                Action::Enter => {
-                    //TODO: run command
-                    self.mode = ViMode::Normal;
-                }
-                Action::Backspace => {
-                    if value.pop().is_none() {
-                        self.mode = ViMode::Normal;
-                    }
-                }
-                _ => self.editor.action(font_system, action),
-            },
-            ViMode::Search {
-                ref mut value,
-                forwards,
-            } => match action {
-                Action::Escape => {
-                    self.mode = ViMode::Normal;
-                }
-                Action::Insert(c) => {
-                    value.push(c);
-                }
-                Action::Enter => {
-                    //TODO: do not require clone?
-                    self.search_opt = Some((value.clone(), forwards));
-                    self.mode = ViMode::Normal;
-                    self.search(false);
-                }
-                Action::Backspace => {
-                    if value.pop().is_none() {
-                        self.mode = ViMode::Normal;
-                    }
-                }
-                _ => self.editor.action(font_system, action),
-            },
-        }
 
-        if self.mode != old_mode {
-            self.buffer_mut().set_redraw(true);
-        }
+                    let end = editor.cursor();
+
+                    println!("start {:?}, end {:?}", start, end);
+                    return;
+                }
+                Event::Paste => {
+                    log::info!("TODO");
+                    return;
+                }
+                Event::Replace(char) => {
+                    log::info!("TODO");
+                    return;
+                }
+                Event::Right => Action::Right,
+                Event::SoftHome => Action::SoftHome,
+                Event::Undo => {
+                    log::info!("TODO");
+                    return;
+                }
+                Event::Up => Action::Up,
+            };
+            editor.action(font_system, action);
+        });
     }
 
     #[cfg(feature = "swash")]
@@ -558,11 +503,14 @@ impl<'a> Edit for ViEditor<'a> {
             if let Some((cursor_glyph, cursor_glyph_offset, cursor_glyph_width)) =
                 cursor_glyph_opt(&self.cursor())
             {
-                let block_cursor = match self.mode {
-                    ViMode::Passthrough => false,
-                    ViMode::Normal => true,
-                    ViMode::Insert => false,
-                    _ => true, /*TODO: determine block cursor in other modes*/
+                let block_cursor = if self.passthrough {
+                    false
+                } else {
+                    match self.parser.mode {
+                        ViMode::Normal(_) => true,
+                        ViMode::Insert => false,
+                        _ => true, /*TODO: determine block cursor in other modes*/
+                    }
                 };
 
                 let (start_x, end_x) = match run.glyphs.get(cursor_glyph) {
