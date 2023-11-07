@@ -91,6 +91,7 @@ impl Edit for Editor {
         if self.cursor != cursor {
             self.cursor = cursor;
             self.cursor_moved = true;
+            self.cursor_x_opt = None;
             self.buffer.set_redraw(true);
         }
     }
@@ -853,6 +854,11 @@ impl Edit for Editor {
                 self.cursor.line = self.buffer.lines.len() - 1;
                 self.cursor.index = self.buffer.lines[self.cursor.line].text().len();
                 self.cursor_x_opt = None;
+            }
+            Action::GotoLine(line) => {
+                let mut cursor = self.buffer.layout_cursor(&self.cursor);
+                cursor.line = line;
+                self.set_layout_cursor(font_system, cursor);
             }
         }
 

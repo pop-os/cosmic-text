@@ -89,6 +89,8 @@ pub enum Action {
     BufferStart,
     /// Move cursor to the end of the document
     BufferEnd,
+    /// Move cursor to specific line
+    GotoLine(usize),
 }
 
 /// A trait to allow easy replacements of [`Editor`], like `SyntaxEditor`
