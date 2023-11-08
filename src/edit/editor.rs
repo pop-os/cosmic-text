@@ -524,6 +524,9 @@ impl Edit for Editor {
                 self.cursor.index = 0;
 
                 self.buffer.lines.insert(self.cursor.line, new_line);
+
+                // Ensure line is properly shaped and laid out (for potential immediate commands)
+                self.buffer.line_layout(font_system, self.cursor.line);
             }
             Action::Backspace => {
                 if self.delete_selection() {
