@@ -216,6 +216,43 @@ impl<'a> Edit for ViEditor<'a> {
                             }
                             Motion::Home => Action::Home,
                             Motion::Left => Action::Left,
+                            Motion::NextChar(find_c) => {
+                                let mut cursor = editor.cursor();
+                                let buffer = editor.buffer_mut();
+                                let text = buffer.lines[cursor.line].text();
+                                if cursor.index < text.len() {
+                                    match text[cursor.index..]
+                                        .char_indices()
+                                        .filter(|&(i, c)| i > 0 && c == find_c)
+                                        .next()
+                                    {
+                                        Some((i, _)) => {
+                                            cursor.index += i;
+                                            editor.set_cursor(cursor);
+                                        }
+                                        None => {}
+                                    }
+                                }
+                                continue;
+                            }
+                            Motion::NextCharTill(find_c) => {
+                                let mut cursor = editor.cursor();
+                                let buffer = editor.buffer_mut();
+                                let text = buffer.lines[cursor.line].text();
+                                if cursor.index < text.len() {
+                                    let mut last_i = 0;
+                                    for (i, c) in text[cursor.index..].char_indices() {
+                                        if last_i > 0 && c == find_c {
+                                            cursor.index += last_i;
+                                            editor.set_cursor(cursor);
+                                            break;
+                                        } else {
+                                            last_i = i;
+                                        }
+                                    }
+                                }
+                                continue;
+                            }
                             Motion::NextWordEnd(word) => {
                                 let mut cursor = editor.cursor();
                                 let buffer = editor.buffer_mut();
@@ -270,6 +307,52 @@ impl<'a> Edit for ViEditor<'a> {
                                     break;
                                 }
                                 editor.set_cursor(cursor);
+                                continue;
+                            }
+                            Motion::PreviousChar(find_c) => {
+                                let mut cursor = editor.cursor();
+                                let buffer = editor.buffer_mut();
+                                let text = buffer.lines[cursor.line].text();
+                                if cursor.index > 0 {
+                                    match text[..cursor.index]
+                                        .char_indices()
+                                        .filter(|&(_, c)| c == find_c)
+                                        .last()
+                                    {
+                                        Some((i, _)) => {
+                                            cursor.index = i;
+                                            editor.set_cursor(cursor);
+                                        }
+                                        None => {}
+                                    }
+                                }
+                                continue;
+                            }
+                            Motion::PreviousCharTill(find_c) => {
+                                let mut cursor = editor.cursor();
+                                let buffer = editor.buffer_mut();
+                                let text = buffer.lines[cursor.line].text();
+                                if cursor.index > 0 {
+                                    match text[..cursor.index]
+                                        .char_indices()
+                                        .filter_map(|(i, c)| {
+                                            if c == find_c {
+                                                let end = i + c.len_utf8();
+                                                if end < cursor.index {
+                                                    return Some(end);
+                                                }
+                                            }
+                                            None
+                                        })
+                                        .last()
+                                    {
+                                        Some(i) => {
+                                            cursor.index = i;
+                                            editor.set_cursor(cursor);
+                                        }
+                                        None => {}
+                                    }
+                                }
                                 continue;
                             }
                             Motion::PreviousWordEnd(word) => {
