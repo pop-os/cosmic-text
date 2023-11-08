@@ -182,6 +182,7 @@ impl<'a> Edit for ViEditor<'a> {
 
     fn action(&mut self, font_system: &mut FontSystem, action: Action) {
         let editor = &mut self.editor;
+        log::info!("Action {:?}", action);
         let c = match action {
             Action::Escape => modit::ESCAPE,
             Action::Insert(c) => c,
@@ -192,18 +193,26 @@ impl<'a> Edit for ViEditor<'a> {
         };
         //TODO: redraw on parser mode change
         self.parser.parse(c, false, |event| {
-            log::info!("{:?}", event);
+            log::info!("  Event {:?}", event);
             let action = match event {
+                Event::Redraw => {
+                    editor.buffer_mut().set_redraw(true);
+                    return;
+                }
                 Event::Backspace => Action::Backspace,
                 Event::Delete => Action::Delete,
-                Event::Down => Action::Down,
-                Event::End => Action::End,
                 Event::Escape => Action::Escape,
-                Event::Home => Action::Home,
                 Event::Insert(c) => Action::Insert(c),
-                Event::Left => Action::Left,
                 Event::NewLine => Action::Enter,
-                Event::Operator(count, operator, motion, text_object_opt) => {
+                Event::Paste => {
+                    log::info!("TODO");
+                    return;
+                }
+                Event::Undo => {
+                    log::info!("TODO");
+                    return;
+                }
+                Event::Cmd(count, operator, motion, text_object_opt) => {
                     let start = editor.cursor();
 
                     for _ in 0..count {
@@ -429,21 +438,6 @@ impl<'a> Edit for ViEditor<'a> {
                     println!("start {:?}, end {:?}", start, end);
                     return;
                 }
-                Event::Paste => {
-                    log::info!("TODO");
-                    return;
-                }
-                Event::Replace(char) => {
-                    log::info!("TODO");
-                    return;
-                }
-                Event::Right => Action::Right,
-                Event::SoftHome => Action::SoftHome,
-                Event::Undo => {
-                    log::info!("TODO");
-                    return;
-                }
-                Event::Up => Action::Up,
             };
             editor.action(font_system, action);
         });
@@ -590,8 +584,7 @@ impl<'a> Edit for ViEditor<'a> {
                     false
                 } else {
                     match self.parser.mode {
-                        ViMode::Normal(_) => true,
-                        ViMode::Insert => false,
+                        ViMode::Insert | ViMode::Replace => false,
                         _ => true, /*TODO: determine block cursor in other modes*/
                     }
                 };
