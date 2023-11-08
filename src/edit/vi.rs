@@ -1,6 +1,6 @@
 use alloc::string::String;
 use core::cmp;
-use modit::{Event, Motion, Operator, Parser, WordIter};
+use modit::{Event, Motion, Operator, Parser, TextObject, WordIter};
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
@@ -195,11 +195,15 @@ impl<'a> Edit for ViEditor<'a> {
         self.parser.parse(c, false, |event| {
             log::info!("  Event {:?}", event);
             let action = match event {
-                Event::Redraw => {
-                    editor.buffer_mut().set_redraw(true);
+                Event::AutoIndent => {
+                    log::info!("TODO");
                     return;
                 }
                 Event::Backspace => Action::Backspace,
+                Event::Copy => {
+                    log::info!("TODO");
+                    return;
+                }
                 Event::Delete => Action::Delete,
                 Event::Escape => Action::Escape,
                 Event::Insert(c) => Action::Insert(c),
@@ -208,13 +212,129 @@ impl<'a> Edit for ViEditor<'a> {
                     log::info!("TODO");
                     return;
                 }
+                Event::Redraw => {
+                    editor.buffer_mut().set_redraw(true);
+                    return;
+                }
+                Event::SelectClear => {
+                    editor.set_select_opt(None);
+                    return;
+                }
+                Event::SelectStart => {
+                    let cursor = editor.cursor();
+                    editor.set_select_opt(Some(cursor));
+                    return;
+                }
+                Event::SelectTextObject(text_object, include) => {
+                    fn select_in(
+                        editor: &mut SyntaxEditor,
+                        start_c: char,
+                        end_c: char,
+                        include: bool,
+                    ) {
+                        // Find the largest encompasing object, or if there is none, find the next one.
+                        let cursor = editor.cursor();
+                        let buffer = editor.buffer();
+
+                        // Search forwards for isolated end character, counting start and end characters found
+                        let mut end = cursor;
+                        let mut starts = 0;
+                        let mut ends = 0;
+                        'find_end: loop {
+                            let line = &buffer.lines[end.line];
+                            let text = line.text();
+                            for (i, c) in text[end.index..].char_indices() {
+                                if c == end_c {
+                                    ends += 1;
+                                } else if c == start_c {
+                                    starts += 1;
+                                }
+                                if ends > starts {
+                                    end.index += if include { i + c.len_utf8() } else { i };
+                                    break 'find_end;
+                                }
+                            }
+                            if end.line + 1 < buffer.lines.len() {
+                                end.line += 1;
+                                end.index = 0;
+                            } else {
+                                break 'find_end;
+                            }
+                        }
+
+                        // Search backwards to resolve starts and ends
+                        let mut start = cursor;
+                        'find_start: loop {
+                            let line = &buffer.lines[start.line];
+                            let text = line.text();
+                            for (i, c) in text[..start.index].char_indices().rev() {
+                                if c == start_c {
+                                    starts += 1;
+                                } else if c == end_c {
+                                    ends += 1;
+                                }
+                                if starts >= ends {
+                                    start.index = if include { i } else { i + c.len_utf8() };
+                                    break 'find_start;
+                                }
+                            }
+                            if start.line > 0 {
+                                start.line -= 1;
+                                start.index = buffer.lines[start.line].text().len();
+                            } else {
+                                break 'find_start;
+                            }
+                        }
+
+                        editor.set_select_opt(Some(start));
+                        editor.set_cursor(end);
+                    }
+
+                    match text_object {
+                        TextObject::AngleBrackets => select_in(editor, '<', '>', include),
+                        TextObject::CurlyBrackets => select_in(editor, '{', '}', include),
+                        TextObject::DoubleQuotes => select_in(editor, '"', '"', include),
+                        TextObject::Parentheses => select_in(editor, '(', ')', include),
+                        TextObject::SingleQuotes => select_in(editor, '\'', '\'', include),
+                        TextObject::SquareBrackets => select_in(editor, '[', ']', include),
+                        TextObject::Ticks => select_in(editor, '`', '`', include),
+                        TextObject::Word(word) => {
+                            let mut cursor = editor.cursor();
+                            let mut select_opt = editor.select_opt();
+                            let buffer = editor.buffer();
+                            let text = buffer.lines[cursor.line].text();
+                            match WordIter::new(text, word)
+                                .find(|&(i, w)| i <= cursor.index && i + w.len() > cursor.index)
+                            {
+                                Some((i, w)) => {
+                                    cursor.index = i;
+                                    select_opt = Some(cursor);
+                                    cursor.index += w.len();
+                                }
+                                None => {
+                                    //TODO
+                                }
+                            }
+                            editor.set_select_opt(select_opt);
+                            editor.set_cursor(cursor);
+                        }
+                        _ => {
+                            log::info!("TODO: {:?}", text_object);
+                        }
+                    }
+                    return;
+                }
+                Event::ShiftLeft => Action::Unindent,
+                Event::ShiftRight => Action::Indent,
+                Event::SwapCase => {
+                    log::info!("TODO");
+                    return;
+                }
                 Event::Undo => {
                     log::info!("TODO");
                     return;
                 }
-                Event::Cmd(count, operator, motion, text_object_opt) => {
-                    let start = editor.cursor();
-
+                Event::Motion(motion, count) => {
                     for _ in 0..count {
                         let action = match motion {
                             Motion::Down => Action::Down,
@@ -227,7 +347,7 @@ impl<'a> Edit for ViEditor<'a> {
                             Motion::Left => Action::Left,
                             Motion::NextChar(find_c) => {
                                 let mut cursor = editor.cursor();
-                                let buffer = editor.buffer_mut();
+                                let buffer = editor.buffer();
                                 let text = buffer.lines[cursor.line].text();
                                 if cursor.index < text.len() {
                                     match text[cursor.index..]
@@ -246,7 +366,7 @@ impl<'a> Edit for ViEditor<'a> {
                             }
                             Motion::NextCharTill(find_c) => {
                                 let mut cursor = editor.cursor();
-                                let buffer = editor.buffer_mut();
+                                let buffer = editor.buffer();
                                 let text = buffer.lines[cursor.line].text();
                                 if cursor.index < text.len() {
                                     let mut last_i = 0;
@@ -264,7 +384,7 @@ impl<'a> Edit for ViEditor<'a> {
                             }
                             Motion::NextWordEnd(word) => {
                                 let mut cursor = editor.cursor();
-                                let buffer = editor.buffer_mut();
+                                let buffer = editor.buffer();
                                 loop {
                                     let text = buffer.lines[cursor.line].text();
                                     if cursor.index < text.len() {
@@ -295,7 +415,7 @@ impl<'a> Edit for ViEditor<'a> {
                             }
                             Motion::NextWordStart(word) => {
                                 let mut cursor = editor.cursor();
-                                let buffer = editor.buffer_mut();
+                                let buffer = editor.buffer();
                                 loop {
                                     let text = buffer.lines[cursor.line].text();
                                     if cursor.index < text.len() {
@@ -320,7 +440,7 @@ impl<'a> Edit for ViEditor<'a> {
                             }
                             Motion::PreviousChar(find_c) => {
                                 let mut cursor = editor.cursor();
-                                let buffer = editor.buffer_mut();
+                                let buffer = editor.buffer();
                                 let text = buffer.lines[cursor.line].text();
                                 if cursor.index > 0 {
                                     match text[..cursor.index]
@@ -339,7 +459,7 @@ impl<'a> Edit for ViEditor<'a> {
                             }
                             Motion::PreviousCharTill(find_c) => {
                                 let mut cursor = editor.cursor();
-                                let buffer = editor.buffer_mut();
+                                let buffer = editor.buffer();
                                 let text = buffer.lines[cursor.line].text();
                                 if cursor.index > 0 {
                                     match text[..cursor.index]
@@ -366,7 +486,7 @@ impl<'a> Edit for ViEditor<'a> {
                             }
                             Motion::PreviousWordEnd(word) => {
                                 let mut cursor = editor.cursor();
-                                let buffer = editor.buffer_mut();
+                                let buffer = editor.buffer();
                                 loop {
                                     let text = buffer.lines[cursor.line].text();
                                     if cursor.index > 0 {
@@ -398,7 +518,7 @@ impl<'a> Edit for ViEditor<'a> {
                             }
                             Motion::PreviousWordStart(word) => {
                                 let mut cursor = editor.cursor();
-                                let buffer = editor.buffer_mut();
+                                let buffer = editor.buffer();
                                 loop {
                                     let text = buffer.lines[cursor.line].text();
                                     if cursor.index > 0 {
@@ -426,16 +546,12 @@ impl<'a> Edit for ViEditor<'a> {
                             Motion::SoftHome => Action::SoftHome,
                             Motion::Up => Action::Up,
                             _ => {
-                                log::info!("TODO");
+                                log::info!("TODO: {:?}", motion);
                                 break;
                             }
                         };
                         editor.action(font_system, action);
                     }
-
-                    let end = editor.cursor();
-
-                    println!("start {:?}, end {:?}", start, end);
                     return;
                 }
             };
