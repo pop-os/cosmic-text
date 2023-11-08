@@ -452,8 +452,8 @@ impl Edit for Editor {
                 let line: &mut BufferLine = &mut self.buffer.lines[self.cursor.line];
                 self.cursor.index = line
                     .text()
-                    .unicode_word_indices()
-                    .map(|(i, _)| i)
+                    .char_indices()
+                    .filter_map(|(i, c)| if c.is_whitespace() { None } else { Some(i) })
                     .next()
                     .unwrap_or(0);
                 self.buffer.set_redraw(true);
