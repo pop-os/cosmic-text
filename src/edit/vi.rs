@@ -1,6 +1,6 @@
 use alloc::string::String;
 use core::cmp;
-use modit::{Event, Motion, Operator, Parser, TextObject, WordIter};
+use modit::{Event, Motion, Parser, TextObject, WordIter};
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
@@ -191,7 +191,6 @@ impl<'a> Edit for ViEditor<'a> {
             Action::Delete => modit::DELETE,
             _ => return editor.action(font_system, action),
         };
-        //TODO: redraw on parser mode change
         self.parser.parse(c, false, |event| {
             log::info!("  Event {:?}", event);
             let action = match event {
