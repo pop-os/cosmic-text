@@ -10,6 +10,114 @@ use crate::{
 
 pub use modit::{ViMode, ViParser};
 
+fn search<E: Edit>(editor: &mut E, search: &str, forwards: bool) {
+    let mut cursor = editor.cursor();
+    let start_line = cursor.line;
+    if forwards {
+        while cursor.line < editor.buffer().lines.len() {
+            if let Some(index) = editor.buffer().lines[cursor.line]
+                .text()
+                .match_indices(search)
+                .filter_map(|(i, _)| {
+                    if cursor.line != start_line || i > cursor.index {
+                        Some(i)
+                    } else {
+                        None
+                    }
+                })
+                .next()
+            {
+                cursor.index = index;
+                editor.set_cursor(cursor);
+                return;
+            }
+
+            cursor.line += 1;
+        }
+    } else {
+        cursor.line += 1;
+        while cursor.line > 0 {
+            cursor.line -= 1;
+
+            if let Some(index) = editor.buffer().lines[cursor.line]
+                .text()
+                .rmatch_indices(search)
+                .filter_map(|(i, _)| {
+                    if cursor.line != start_line || i < cursor.index {
+                        Some(i)
+                    } else {
+                        None
+                    }
+                })
+                .next()
+            {
+                cursor.index = index;
+                editor.set_cursor(cursor);
+                return;
+            }
+        }
+    }
+}
+
+fn select_in<E: Edit>(editor: &mut E, start_c: char, end_c: char, include: bool) {
+    // Find the largest encompasing object, or if there is none, find the next one.
+    let cursor = editor.cursor();
+    let buffer = editor.buffer();
+
+    // Search forwards for isolated end character, counting start and end characters found
+    let mut end = cursor;
+    let mut starts = 0;
+    let mut ends = 0;
+    'find_end: loop {
+        let line = &buffer.lines[end.line];
+        let text = line.text();
+        for (i, c) in text[end.index..].char_indices() {
+            if c == end_c {
+                ends += 1;
+            } else if c == start_c {
+                starts += 1;
+            }
+            if ends > starts {
+                end.index += if include { i + c.len_utf8() } else { i };
+                break 'find_end;
+            }
+        }
+        if end.line + 1 < buffer.lines.len() {
+            end.line += 1;
+            end.index = 0;
+        } else {
+            break 'find_end;
+        }
+    }
+
+    // Search backwards to resolve starts and ends
+    let mut start = cursor;
+    'find_start: loop {
+        let line = &buffer.lines[start.line];
+        let text = line.text();
+        for (i, c) in text[..start.index].char_indices().rev() {
+            if c == start_c {
+                starts += 1;
+            } else if c == end_c {
+                ends += 1;
+            }
+            if starts >= ends {
+                start.index = if include { i } else { i + c.len_utf8() };
+                break 'find_start;
+            }
+        }
+        if start.line > 0 {
+            start.line -= 1;
+            start.index = buffer.lines[start.line].text().len();
+        } else {
+            break 'find_start;
+        }
+    }
+
+    editor.set_select_opt(Some(start));
+    editor.set_cursor(end);
+}
+
 #[derive(Debug)]
 pub struct ViEditor<'a> {
     editor: SyntaxEditor<'a>,
@@ -70,64 +178,6 @@ impl<'a> ViEditor<'a> {
     /// Get current vi parser
     pub fn parser(&self) -> &ViParser {
         &self.parser
-    }
-
-    fn search(&mut self, inverted: bool) {
-        let (search, mut forwards) = match &self.search_opt {
-            Some(some) => some,
-            None => return,
-        };
-
-        if inverted {
-            forwards = !forwards;
-        }
-
-        let mut cursor = self.cursor();
-        let start_line = cursor.line;
-        if forwards {
-            while cursor.line < self.buffer().lines.len() {
-                if let Some(index) = self.buffer().lines[cursor.line]
-                    .text()
-                    .match_indices(search.as_str())
-                    .filter_map(|(i, _)| {
-                        if cursor.line != start_line || i > cursor.index {
-                            Some(i)
-                        } else {
-                            None
-                        }
-                    })
-                    .next()
-                {
-                    cursor.index = index;
-                    self.set_cursor(cursor);
-                    return;
-                }
-
-                cursor.line += 1;
-            }
-        } else {
-            cursor.line += 1;
-            while cursor.line > 0 {
-                cursor.line -= 1;
-
-                if let Some(index) = self.buffer().lines[cursor.line]
-                    .text()
-                    .rmatch_indices(search.as_str())
-                    .filter_map(|(i, _)| {
-                        if cursor.line != start_line || i < cursor.index {
-                            Some(i)
-                        } else {
-                            None
-                        }
-                    })
-                    .next()
-                {
-                    cursor.index = index;
-                    self.set_cursor(cursor);
-                    return;
-                }
-            }
-        }
     }
 }
 
@@ -225,70 +275,6 @@ impl<'a> Edit for ViEditor<'a> {
                     return;
                 }
                 Event::SelectTextObject(text_object, include) => {
-                    fn select_in(
-                        editor: &mut SyntaxEditor,
-                        start_c: char,
-                        end_c: char,
-                        include: bool,
-                    ) {
-                        // Find the largest encompasing object, or if there is none, find the next one.
-                        let cursor = editor.cursor();
-                        let buffer = editor.buffer();
-
-                        // Search forwards for isolated end character, counting start and end characters found
-                        let mut end = cursor;
-                        let mut starts = 0;
-                        let mut ends = 0;
-                        'find_end: loop {
-                            let line = &buffer.lines[end.line];
-                            let text = line.text();
-                            for (i, c) in text[end.index..].char_indices() {
-                                if c == end_c {
-                                    ends += 1;
-                                } else if c == start_c {
-                                    starts += 1;
-                                }
-                                if ends > starts {
-                                    end.index += if include { i + c.len_utf8() } else { i };
-                                    break 'find_end;
-                                }
-                            }
-                            if end.line + 1 < buffer.lines.len() {
-                                end.line += 1;
-                                end.index = 0;
-                            } else {
-                                break 'find_end;
-                            }
-                        }
-
-                        // Search backwards to resolve starts and ends
-                        let mut start = cursor;
-                        'find_start: loop {
-                            let line = &buffer.lines[start.line];
-                            let text = line.text();
-                            for (i, c) in text[..start.index].char_indices().rev() {
-                                if c == start_c {
-                                    starts += 1;
-                                } else if c == end_c {
-                                    ends += 1;
-                                }
-                                if starts >= ends {
-                                    start.index = if include { i } else { i + c.len_utf8() };
-                                    break 'find_start;
-                                }
-                            }
-                            if start.line > 0 {
-                                start.line -= 1;
-                                start.index = buffer.lines[start.line].text().len();
-                            } else {
-                                break 'find_start;
-                            }
-                        }
-
-                        editor.set_select_opt(Some(start));
-                        editor.set_cursor(end);
-                    }
-
                     match text_object {
                         TextObject::AngleBrackets => select_in(editor, '<', '>', include),
                         TextObject::CurlyBrackets => select_in(editor, '{', '}', include),
@@ -321,6 +307,10 @@ impl<'a> Edit for ViEditor<'a> {
                             log::info!("TODO: {:?}", text_object);
                         }
                     }
+                    return;
+                }
+                Event::SetSearch(value, forwards) => {
+                    self.search_opt = Some((value, forwards));
                     return;
                 }
                 Event::ShiftLeft => Action::Unindent,
@@ -380,6 +370,13 @@ impl<'a> Edit for ViEditor<'a> {
                             }
                             return;
                         }
+                        Motion::NextSearch => match &self.search_opt {
+                            Some((value, forwards)) => {
+                                search(editor, value, *forwards);
+                                return;
+                            }
+                            None => return,
+                        },
                         Motion::NextWordEnd(word) => {
                             let mut cursor = editor.cursor();
                             let buffer = editor.buffer();
@@ -478,6 +475,13 @@ impl<'a> Edit for ViEditor<'a> {
                             }
                             return;
                         }
+                        Motion::PreviousSearch => match &self.search_opt {
+                            Some((value, forwards)) => {
+                                search(editor, value, !*forwards);
+                                return;
+                            }
+                            None => return,
+                        },
                         Motion::PreviousWordEnd(word) => {
                             let mut cursor = editor.cursor();
                             let buffer = editor.buffer();
