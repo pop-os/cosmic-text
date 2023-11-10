@@ -1,6 +1,6 @@
 use alloc::string::String;
 use core::cmp;
-use modit::{Event, Motion, Parser, TextObject, WordIter};
+use modit::{Event, Key, Motion, Parser, TextObject, WordIter};
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
@@ -183,15 +183,15 @@ impl<'a> Edit for ViEditor<'a> {
     fn action(&mut self, font_system: &mut FontSystem, action: Action) {
         let editor = &mut self.editor;
         log::info!("Action {:?}", action);
-        let c = match action {
-            Action::Escape => modit::ESCAPE,
-            Action::Insert(c) => c,
-            Action::Enter => modit::ENTER,
-            Action::Backspace => modit::BACKSPACE,
-            Action::Delete => modit::DELETE,
+        let key = match action {
+            Action::Backspace => Key::Backspace,
+            Action::Delete => Key::Delete,
+            Action::Enter => Key::Enter,
+            Action::Escape => Key::Escape,
+            Action::Insert(c) => Key::Char(c),
             _ => return editor.action(font_system, action),
         };
-        self.parser.parse(c, false, |event| {
+        self.parser.parse(key, false, |event| {
             log::info!("  Event {:?}", event);
             let action = match event {
                 Event::AutoIndent => {
@@ -333,225 +333,213 @@ impl<'a> Edit for ViEditor<'a> {
                     log::info!("TODO");
                     return;
                 }
-                Event::Motion(motion, count) => {
-                    for _ in 0..count {
-                        let action = match motion {
-                            Motion::Down => Action::Down,
-                            Motion::End => Action::End,
-                            Motion::GotoLine(line) => Action::GotoLine(line.saturating_sub(1)),
-                            Motion::GotoEof => {
-                                Action::GotoLine(editor.buffer().lines.len().saturating_sub(1))
+                Event::Motion(motion) => {
+                    match motion {
+                        Motion::Down => Action::Down,
+                        Motion::End => Action::End,
+                        Motion::GotoLine(line) => Action::GotoLine(line.saturating_sub(1)),
+                        Motion::GotoEof => {
+                            Action::GotoLine(editor.buffer().lines.len().saturating_sub(1))
+                        }
+                        Motion::Home => Action::Home,
+                        Motion::Left => Action::Left,
+                        Motion::NextChar(find_c) => {
+                            let mut cursor = editor.cursor();
+                            let buffer = editor.buffer();
+                            let text = buffer.lines[cursor.line].text();
+                            if cursor.index < text.len() {
+                                match text[cursor.index..]
+                                    .char_indices()
+                                    .filter(|&(i, c)| i > 0 && c == find_c)
+                                    .next()
+                                {
+                                    Some((i, _)) => {
+                                        cursor.index += i;
+                                        editor.set_cursor(cursor);
+                                    }
+                                    None => {}
+                                }
                             }
-                            Motion::Home => Action::Home,
-                            Motion::Left => Action::Left,
-                            Motion::NextChar(find_c) => {
-                                let mut cursor = editor.cursor();
-                                let buffer = editor.buffer();
+                            return;
+                        }
+                        Motion::NextCharTill(find_c) => {
+                            let mut cursor = editor.cursor();
+                            let buffer = editor.buffer();
+                            let text = buffer.lines[cursor.line].text();
+                            if cursor.index < text.len() {
+                                let mut last_i = 0;
+                                for (i, c) in text[cursor.index..].char_indices() {
+                                    if last_i > 0 && c == find_c {
+                                        cursor.index += last_i;
+                                        editor.set_cursor(cursor);
+                                        break;
+                                    } else {
+                                        last_i = i;
+                                    }
+                                }
+                            }
+                            return;
+                        }
+                        Motion::NextWordEnd(word) => {
+                            let mut cursor = editor.cursor();
+                            let buffer = editor.buffer();
+                            loop {
                                 let text = buffer.lines[cursor.line].text();
                                 if cursor.index < text.len() {
-                                    match text[cursor.index..]
-                                        .char_indices()
-                                        .filter(|&(i, c)| i > 0 && c == find_c)
-                                        .next()
-                                    {
-                                        Some((i, _)) => {
-                                            cursor.index += i;
-                                            editor.set_cursor(cursor);
-                                        }
-                                        None => {}
-                                    }
-                                }
-                                continue;
-                            }
-                            Motion::NextCharTill(find_c) => {
-                                let mut cursor = editor.cursor();
-                                let buffer = editor.buffer();
-                                let text = buffer.lines[cursor.line].text();
-                                if cursor.index < text.len() {
-                                    let mut last_i = 0;
-                                    for (i, c) in text[cursor.index..].char_indices() {
-                                        if last_i > 0 && c == find_c {
-                                            cursor.index += last_i;
-                                            editor.set_cursor(cursor);
-                                            break;
-                                        } else {
-                                            last_i = i;
-                                        }
-                                    }
-                                }
-                                continue;
-                            }
-                            Motion::NextWordEnd(word) => {
-                                let mut cursor = editor.cursor();
-                                let buffer = editor.buffer();
-                                loop {
-                                    let text = buffer.lines[cursor.line].text();
-                                    if cursor.index < text.len() {
-                                        cursor.index = WordIter::new(text, word)
-                                            .map(|(i, w)| {
-                                                i + w
-                                                    .char_indices()
-                                                    .last()
-                                                    .map(|(i, _)| i)
-                                                    .unwrap_or(0)
-                                            })
-                                            .find(|&i| i > cursor.index)
-                                            .unwrap_or(text.len());
-                                        if cursor.index == text.len() {
-                                            // Try again, searching next line
-                                            continue;
-                                        }
-                                    } else if cursor.line + 1 < buffer.lines.len() {
-                                        // Go to next line and rerun loop
-                                        cursor.line += 1;
-                                        cursor.index = 0;
-                                        continue;
-                                    }
-                                    break;
-                                }
-                                editor.set_cursor(cursor);
-                                continue;
-                            }
-                            Motion::NextWordStart(word) => {
-                                let mut cursor = editor.cursor();
-                                let buffer = editor.buffer();
-                                loop {
-                                    let text = buffer.lines[cursor.line].text();
-                                    if cursor.index < text.len() {
-                                        cursor.index = WordIter::new(text, word)
-                                            .map(|(i, _)| i)
-                                            .find(|&i| i > cursor.index)
-                                            .unwrap_or(text.len());
-                                        if cursor.index == text.len() {
-                                            // Try again, searching next line
-                                            continue;
-                                        }
-                                    } else if cursor.line + 1 < buffer.lines.len() {
-                                        // Go to next line and rerun loop
-                                        cursor.line += 1;
-                                        cursor.index = 0;
-                                        continue;
-                                    }
-                                    break;
-                                }
-                                editor.set_cursor(cursor);
-                                continue;
-                            }
-                            Motion::PreviousChar(find_c) => {
-                                let mut cursor = editor.cursor();
-                                let buffer = editor.buffer();
-                                let text = buffer.lines[cursor.line].text();
-                                if cursor.index > 0 {
-                                    match text[..cursor.index]
-                                        .char_indices()
-                                        .filter(|&(_, c)| c == find_c)
-                                        .last()
-                                    {
-                                        Some((i, _)) => {
-                                            cursor.index = i;
-                                            editor.set_cursor(cursor);
-                                        }
-                                        None => {}
-                                    }
-                                }
-                                continue;
-                            }
-                            Motion::PreviousCharTill(find_c) => {
-                                let mut cursor = editor.cursor();
-                                let buffer = editor.buffer();
-                                let text = buffer.lines[cursor.line].text();
-                                if cursor.index > 0 {
-                                    match text[..cursor.index]
-                                        .char_indices()
-                                        .filter_map(|(i, c)| {
-                                            if c == find_c {
-                                                let end = i + c.len_utf8();
-                                                if end < cursor.index {
-                                                    return Some(end);
-                                                }
-                                            }
-                                            None
+                                    cursor.index = WordIter::new(text, word)
+                                        .map(|(i, w)| {
+                                            i + w.char_indices().last().map(|(i, _)| i).unwrap_or(0)
                                         })
-                                        .last()
-                                    {
-                                        Some(i) => {
-                                            cursor.index = i;
-                                            editor.set_cursor(cursor);
-                                        }
-                                        None => {}
-                                    }
-                                }
-                                continue;
-                            }
-                            Motion::PreviousWordEnd(word) => {
-                                let mut cursor = editor.cursor();
-                                let buffer = editor.buffer();
-                                loop {
-                                    let text = buffer.lines[cursor.line].text();
-                                    if cursor.index > 0 {
-                                        cursor.index = WordIter::new(text, word)
-                                            .map(|(i, w)| {
-                                                i + w
-                                                    .char_indices()
-                                                    .last()
-                                                    .map(|(i, _)| i)
-                                                    .unwrap_or(0)
-                                            })
-                                            .filter(|&i| i < cursor.index)
-                                            .last()
-                                            .unwrap_or(0);
-                                        if cursor.index == 0 {
-                                            // Try again, searching previous line
-                                            continue;
-                                        }
-                                    } else if cursor.line > 0 {
-                                        // Go to previous line and rerun loop
-                                        cursor.line -= 1;
-                                        cursor.index = buffer.lines[cursor.line].text().len();
+                                        .find(|&i| i > cursor.index)
+                                        .unwrap_or(text.len());
+                                    if cursor.index == text.len() {
+                                        // Try again, searching next line
                                         continue;
                                     }
-                                    break;
+                                } else if cursor.line + 1 < buffer.lines.len() {
+                                    // Go to next line and rerun loop
+                                    cursor.line += 1;
+                                    cursor.index = 0;
+                                    continue;
                                 }
-                                editor.set_cursor(cursor);
-                                continue;
-                            }
-                            Motion::PreviousWordStart(word) => {
-                                let mut cursor = editor.cursor();
-                                let buffer = editor.buffer();
-                                loop {
-                                    let text = buffer.lines[cursor.line].text();
-                                    if cursor.index > 0 {
-                                        cursor.index = WordIter::new(text, word)
-                                            .map(|(i, _)| i)
-                                            .filter(|&i| i < cursor.index)
-                                            .last()
-                                            .unwrap_or(0);
-                                        if cursor.index == 0 {
-                                            // Try again, searching previous line
-                                            continue;
-                                        }
-                                    } else if cursor.line > 0 {
-                                        // Go to previous line and rerun loop
-                                        cursor.line -= 1;
-                                        cursor.index = buffer.lines[cursor.line].text().len();
-                                        continue;
-                                    }
-                                    break;
-                                }
-                                editor.set_cursor(cursor);
-                                continue;
-                            }
-                            Motion::Right => Action::Right,
-                            Motion::SoftHome => Action::SoftHome,
-                            Motion::Up => Action::Up,
-                            _ => {
-                                log::info!("TODO: {:?}", motion);
                                 break;
                             }
-                        };
-                        editor.action(font_system, action);
+                            editor.set_cursor(cursor);
+                            return;
+                        }
+                        Motion::NextWordStart(word) => {
+                            let mut cursor = editor.cursor();
+                            let buffer = editor.buffer();
+                            loop {
+                                let text = buffer.lines[cursor.line].text();
+                                if cursor.index < text.len() {
+                                    cursor.index = WordIter::new(text, word)
+                                        .map(|(i, _)| i)
+                                        .find(|&i| i > cursor.index)
+                                        .unwrap_or(text.len());
+                                    if cursor.index == text.len() {
+                                        // Try again, searching next line
+                                        continue;
+                                    }
+                                } else if cursor.line + 1 < buffer.lines.len() {
+                                    // Go to next line and rerun loop
+                                    cursor.line += 1;
+                                    cursor.index = 0;
+                                    continue;
+                                }
+                                break;
+                            }
+                            editor.set_cursor(cursor);
+                            return;
+                        }
+                        Motion::PreviousChar(find_c) => {
+                            let mut cursor = editor.cursor();
+                            let buffer = editor.buffer();
+                            let text = buffer.lines[cursor.line].text();
+                            if cursor.index > 0 {
+                                match text[..cursor.index]
+                                    .char_indices()
+                                    .filter(|&(_, c)| c == find_c)
+                                    .last()
+                                {
+                                    Some((i, _)) => {
+                                        cursor.index = i;
+                                        editor.set_cursor(cursor);
+                                    }
+                                    None => {}
+                                }
+                            }
+                            return;
+                        }
+                        Motion::PreviousCharTill(find_c) => {
+                            let mut cursor = editor.cursor();
+                            let buffer = editor.buffer();
+                            let text = buffer.lines[cursor.line].text();
+                            if cursor.index > 0 {
+                                match text[..cursor.index]
+                                    .char_indices()
+                                    .filter_map(|(i, c)| {
+                                        if c == find_c {
+                                            let end = i + c.len_utf8();
+                                            if end < cursor.index {
+                                                return Some(end);
+                                            }
+                                        }
+                                        None
+                                    })
+                                    .last()
+                                {
+                                    Some(i) => {
+                                        cursor.index = i;
+                                        editor.set_cursor(cursor);
+                                    }
+                                    None => {}
+                                }
+                            }
+                            return;
+                        }
+                        Motion::PreviousWordEnd(word) => {
+                            let mut cursor = editor.cursor();
+                            let buffer = editor.buffer();
+                            loop {
+                                let text = buffer.lines[cursor.line].text();
+                                if cursor.index > 0 {
+                                    cursor.index = WordIter::new(text, word)
+                                        .map(|(i, w)| {
+                                            i + w.char_indices().last().map(|(i, _)| i).unwrap_or(0)
+                                        })
+                                        .filter(|&i| i < cursor.index)
+                                        .last()
+                                        .unwrap_or(0);
+                                    if cursor.index == 0 {
+                                        // Try again, searching previous line
+                                        continue;
+                                    }
+                                } else if cursor.line > 0 {
+                                    // Go to previous line and rerun loop
+                                    cursor.line -= 1;
+                                    cursor.index = buffer.lines[cursor.line].text().len();
+                                    continue;
+                                }
+                                break;
+                            }
+                            editor.set_cursor(cursor);
+                            return;
+                        }
+                        Motion::PreviousWordStart(word) => {
+                            let mut cursor = editor.cursor();
+                            let buffer = editor.buffer();
+                            loop {
+                                let text = buffer.lines[cursor.line].text();
+                                if cursor.index > 0 {
+                                    cursor.index = WordIter::new(text, word)
+                                        .map(|(i, _)| i)
+                                        .filter(|&i| i < cursor.index)
+                                        .last()
+                                        .unwrap_or(0);
+                                    if cursor.index == 0 {
+                                        // Try again, searching previous line
+                                        continue;
+                                    }
+                                } else if cursor.line > 0 {
+                                    // Go to previous line and rerun loop
+                                    cursor.line -= 1;
+                                    cursor.index = buffer.lines[cursor.line].text().len();
+                                    continue;
+                                }
+                                break;
+                            }
+                            editor.set_cursor(cursor);
+                            return;
+                        }
+                        Motion::Right => Action::Right,
+                        Motion::SoftHome => Action::SoftHome,
+                        Motion::Up => Action::Up,
+                        _ => {
+                            log::info!("TODO: {:?}", motion);
+                            return;
+                        }
                     }
-                    return;
                 }
             };
             editor.action(font_system, action);
