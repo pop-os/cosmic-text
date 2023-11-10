@@ -233,13 +233,32 @@ impl<'a> Edit for ViEditor<'a> {
     fn action(&mut self, font_system: &mut FontSystem, action: Action) {
         let editor = &mut self.editor;
         log::info!("Action {:?}", action);
+
+        if self.passthrough {
+            return editor.action(font_system, action);
+        }
+
         let key = match action {
+            //TODO: this leaves lots of room for issues in translation, should we directly accept Key?
             Action::Backspace => Key::Backspace,
             Action::Delete => Key::Delete,
+            Action::Down => Key::Down,
+            Action::End => Key::End,
             Action::Enter => Key::Enter,
             Action::Escape => Key::Escape,
+            Action::Home => Key::Home,
+            Action::Indent => Key::Tab,
             Action::Insert(c) => Key::Char(c),
-            _ => return editor.action(font_system, action),
+            Action::Left => Key::Left,
+            Action::PageDown => Key::PageDown,
+            Action::PageUp => Key::PageUp,
+            Action::Right => Key::Right,
+            Action::Unindent => Key::Backtab,
+            Action::Up => Key::Up,
+            _ => {
+                log::info!("pass through action {:?}", action);
+                return editor.action(font_system, action);
+            }
         };
         self.parser.parse(key, false, |event| {
             log::info!("  Event {:?}", event);
