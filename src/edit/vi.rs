@@ -360,6 +360,14 @@ impl<'a> Edit for ViEditor<'a> {
                             return;
                         }
                         Motion::Left => Action::Left,
+                        Motion::LeftInLine => {
+                            let cursor = editor.cursor();
+                            if cursor.index > 0 {
+                                Action::Left
+                            } else {
+                                return;
+                            }
+                        }
                         Motion::Line => {
                             //TODO: what to do for this psuedo-motion?
                             return;
@@ -570,6 +578,15 @@ impl<'a> Edit for ViEditor<'a> {
                             return;
                         }
                         Motion::Right => Action::Right,
+                        Motion::RightInLine => {
+                            let cursor = editor.cursor();
+                            let buffer = editor.buffer();
+                            if cursor.index < buffer.lines[cursor.line].text().len() {
+                                Action::Right
+                            } else {
+                                return;
+                            }
+                        }
                         Motion::ScreenHigh => {
                             //TODO: is this efficient?
                             if let Some(first) = editor.buffer().layout_runs().next() {
