@@ -140,6 +140,7 @@ pub struct ViEditor<'a> {
     passthrough: bool,
     search_opt: Option<(String, bool)>,
     commands: Commands<Change>,
+    changed: bool,
 }
 
 impl<'a> ViEditor<'a> {
@@ -150,6 +151,7 @@ impl<'a> ViEditor<'a> {
             passthrough: false,
             search_opt: None,
             commands: Commands::new(),
+            changed: false,
         }
     }
 
@@ -184,6 +186,16 @@ impl<'a> ViEditor<'a> {
         self.editor.theme()
     }
 
+    /// Get changed flag
+    pub fn changed(&self) -> bool {
+        self.changed
+    }
+
+    /// Set changed flag
+    pub fn set_changed(&mut self, changed: bool) {
+        self.changed = changed;
+    }
+
     /// Set passthrough mode (true will turn off vi features)
     pub fn set_passthrough(&mut self, passthrough: bool) {
         if passthrough != self.passthrough {
@@ -202,6 +214,8 @@ impl<'a> ViEditor<'a> {
         log::info!("Redo");
         for action in self.commands.redo() {
             undo_2_action(&mut self.editor, action);
+            //TODO: clear changed flag when back to last saved state?
+            self.changed = true;
         }
     }
 
@@ -210,6 +224,8 @@ impl<'a> ViEditor<'a> {
         log::info!("Undo");
         for action in self.commands.undo() {
             undo_2_action(&mut self.editor, action);
+            //TODO: clear changed flag when back to last saved state?
+            self.changed = true;
         }
     }
 
@@ -682,11 +698,12 @@ impl<'a> Edit for ViEditor<'a> {
 
         self.action_inner(font_system, action);
 
+        //TODO: join changes together
         match self.finish_change() {
             Some(change) => {
                 if !change.items.is_empty() {
-                    log::info!("{:?}", change);
                     self.commands.push(change);
+                    self.changed = true;
                 }
             }
             None => {}
