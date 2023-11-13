@@ -344,6 +344,10 @@ impl<'a> Edit for ViEditor<'a> {
                 }
                 Event::Motion(motion) => {
                     match motion {
+                        Motion::Around => {
+                            //TODO: what to do for this psuedo-motion?
+                            return;
+                        }
                         Motion::Down => Action::Down,
                         Motion::End => Action::End,
                         Motion::GotoLine(line) => Action::GotoLine(line.saturating_sub(1)),
@@ -351,7 +355,15 @@ impl<'a> Edit for ViEditor<'a> {
                             Action::GotoLine(editor.buffer().lines.len().saturating_sub(1))
                         }
                         Motion::Home => Action::Home,
+                        Motion::Inside => {
+                            //TODO: what to do for this psuedo-motion?
+                            return;
+                        }
                         Motion::Left => Action::Left,
+                        Motion::Line => {
+                            //TODO: what to do for this psuedo-motion?
+                            return;
+                        }
                         Motion::NextChar(find_c) => {
                             let mut cursor = editor.cursor();
                             let buffer = editor.buffer();
@@ -448,6 +460,8 @@ impl<'a> Edit for ViEditor<'a> {
                             editor.set_cursor(cursor);
                             return;
                         }
+                        Motion::PageDown => Action::PageDown,
+                        Motion::PageUp => Action::PageUp,
                         Motion::PreviousChar(find_c) => {
                             let mut cursor = editor.cursor();
                             let buffer = editor.buffer();
@@ -556,12 +570,41 @@ impl<'a> Edit for ViEditor<'a> {
                             return;
                         }
                         Motion::Right => Action::Right,
-                        Motion::SoftHome => Action::SoftHome,
-                        Motion::Up => Action::Up,
-                        _ => {
-                            log::info!("TODO: {:?}", motion);
+                        Motion::ScreenHigh => {
+                            //TODO: is this efficient?
+                            if let Some(first) = editor.buffer().layout_runs().next() {
+                                Action::GotoLine(first.line_i)
+                            } else {
+                                return;
+                            }
+                        }
+                        Motion::ScreenLow => {
+                            //TODO: is this efficient?
+                            if let Some(last) = editor.buffer().layout_runs().last() {
+                                Action::GotoLine(last.line_i)
+                            } else {
+                                return;
+                            }
+                        }
+                        Motion::ScreenMiddle => {
+                            //TODO: is this efficient?
+                            let mut layout_runs = editor.buffer().layout_runs();
+                            if let Some(first) = layout_runs.next() {
+                                if let Some(last) = layout_runs.last() {
+                                    Action::GotoLine((last.line_i + first.line_i) / 2)
+                                } else {
+                                    return;
+                                }
+                            } else {
+                                return;
+                            }
+                        }
+                        Motion::Selection => {
+                            //TODO: what to do for this psuedo-motion?
                             return;
                         }
+                        Motion::SoftHome => Action::SoftHome,
+                        Motion::Up => Action::Up,
                     }
                 }
             };
