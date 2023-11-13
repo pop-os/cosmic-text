@@ -1,6 +1,7 @@
 use alloc::string::String;
 use core::cmp;
 use modit::{Event, Key, Motion, Parser, TextObject, WordIter};
+use undo_2::Commands;
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
@@ -9,6 +10,20 @@ use crate::{
 };
 
 pub use modit::{ViMode, ViParser};
+
+fn undo_2_action<E: Edit>(editor: &mut E, action: undo_2::Action<&Change>) {
+    match action {
+        undo_2::Action::Do(change) => {
+            editor.apply_change(change);
+        }
+        undo_2::Action::Undo(change) => {
+            //TODO: make this more efficient
+            let mut reversed = change.clone();
+            reversed.reverse();
+            editor.apply_change(&reversed);
+        }
+    }
+}
 
 fn search<E: Edit>(editor: &mut E, search: &str, forwards: bool) {
     let mut cursor = editor.cursor();
@@ -124,6 +139,7 @@ pub struct ViEditor<'a> {
     parser: ViParser,
     passthrough: bool,
     search_opt: Option<(String, bool)>,
+    commands: Commands<Change>,
 }
 
 impl<'a> ViEditor<'a> {
@@ -133,6 +149,7 @@ impl<'a> ViEditor<'a> {
             parser: ViParser::new(),
             passthrough: false,
             search_opt: None,
+            commands: Commands::new(),
         }
     }
 
@@ -179,66 +196,24 @@ impl<'a> ViEditor<'a> {
     pub fn parser(&self) -> &ViParser {
         &self.parser
     }
-}
 
-impl<'a> Edit for ViEditor<'a> {
-    fn buffer(&self) -> &Buffer {
-        self.editor.buffer()
+    /// Redo a change
+    pub fn redo(&mut self) {
+        log::info!("Redo");
+        for action in self.commands.redo() {
+            undo_2_action(&mut self.editor, action);
+        }
     }
 
-    fn buffer_mut(&mut self) -> &mut Buffer {
-        self.editor.buffer_mut()
+    /// Undo a change
+    pub fn undo(&mut self) {
+        log::info!("Undo");
+        for action in self.commands.undo() {
+            undo_2_action(&mut self.editor, action);
+        }
     }
 
-    fn cursor(&self) -> Cursor {
-        self.editor.cursor()
-    }
-
-    fn set_cursor(&mut self, cursor: Cursor) {
-        self.editor.set_cursor(cursor);
-    }
-
-    fn select_opt(&self) -> Option<Cursor> {
-        self.editor.select_opt()
-    }
-
-    fn set_select_opt(&mut self, select_opt: Option<Cursor>) {
-        self.editor.set_select_opt(select_opt);
-    }
-
-    fn tab_width(&self) -> usize {
-        self.editor.tab_width()
-    }
-
-    fn set_tab_width(&mut self, tab_width: usize) {
-        self.editor.set_tab_width(tab_width);
-    }
-
-    fn shape_as_needed(&mut self, font_system: &mut FontSystem) {
-        self.editor.shape_as_needed(font_system);
-    }
-
-    fn copy_selection(&self) -> Option<String> {
-        self.editor.copy_selection()
-    }
-
-    fn delete_selection(&mut self) -> bool {
-        self.editor.delete_selection()
-    }
-
-    fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>) {
-        self.editor.insert_string(data, attrs_list);
-    }
-
-    fn start_change(&mut self) {
-        self.editor.start_change();
-    }
-
-    fn finish_change(&mut self) -> Option<Change> {
-        self.editor.finish_change()
-    }
-
-    fn action(&mut self, font_system: &mut FontSystem, action: Action) {
+    fn action_inner(&mut self, font_system: &mut FontSystem, action: Action) {
         let editor = &mut self.editor;
         log::info!("Action {:?}", action);
 
@@ -268,6 +243,7 @@ impl<'a> Edit for ViEditor<'a> {
                 return editor.action(font_system, action);
             }
         };
+
         self.parser.parse(key, false, |event| {
             log::info!("  Event {:?}", event);
             let action = match event {
@@ -347,7 +323,9 @@ impl<'a> Edit for ViEditor<'a> {
                     return;
                 }
                 Event::Undo => {
-                    log::info!("TODO");
+                    for action in self.commands.undo() {
+                        undo_2_action(editor, action);
+                    }
                     return;
                 }
                 Event::Motion(motion) => {
@@ -635,6 +613,84 @@ impl<'a> Edit for ViEditor<'a> {
             };
             editor.action(font_system, action);
         });
+    }
+}
+
+impl<'a> Edit for ViEditor<'a> {
+    fn buffer(&self) -> &Buffer {
+        self.editor.buffer()
+    }
+
+    fn buffer_mut(&mut self) -> &mut Buffer {
+        self.editor.buffer_mut()
+    }
+
+    fn cursor(&self) -> Cursor {
+        self.editor.cursor()
+    }
+
+    fn set_cursor(&mut self, cursor: Cursor) {
+        self.editor.set_cursor(cursor);
+    }
+
+    fn select_opt(&self) -> Option<Cursor> {
+        self.editor.select_opt()
+    }
+
+    fn set_select_opt(&mut self, select_opt: Option<Cursor>) {
+        self.editor.set_select_opt(select_opt);
+    }
+
+    fn tab_width(&self) -> usize {
+        self.editor.tab_width()
+    }
+
+    fn set_tab_width(&mut self, tab_width: usize) {
+        self.editor.set_tab_width(tab_width);
+    }
+
+    fn shape_as_needed(&mut self, font_system: &mut FontSystem) {
+        self.editor.shape_as_needed(font_system);
+    }
+
+    fn copy_selection(&self) -> Option<String> {
+        self.editor.copy_selection()
+    }
+
+    fn delete_selection(&mut self) -> bool {
+        self.editor.delete_selection()
+    }
+
+    fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>) {
+        self.editor.insert_string(data, attrs_list);
+    }
+
+    fn apply_change(&mut self, change: &Change) -> bool {
+        self.editor.apply_change(change)
+    }
+
+    fn start_change(&mut self) {
+        self.editor.start_change();
+    }
+
+    fn finish_change(&mut self) -> Option<Change> {
+        self.editor.finish_change()
+    }
+
+    fn action(&mut self, font_system: &mut FontSystem, action: Action) {
+        self.start_change();
+
+        self.action_inner(font_system, action);
+
+        match self.finish_change() {
+            Some(change) => {
+                if !change.items.is_empty() {
+                    log::info!("{:?}", change);
+                    self.commands.push(change);
+                }
+            }
+            None => {}
+        }
     }
 
     #[cfg(feature = "swash")]

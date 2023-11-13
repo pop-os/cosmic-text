@@ -304,6 +304,10 @@ impl<'a> Edit for SyntaxEditor<'a> {
         self.editor.insert_string(data, attrs_list);
     }
 
+    fn apply_change(&mut self, change: &Change) -> bool {
+        self.editor.apply_change(change)
+    }
+
     fn start_change(&mut self) {
         self.editor.start_change();
     }

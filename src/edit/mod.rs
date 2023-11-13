@@ -93,15 +93,41 @@ pub enum Action {
     GotoLine(usize),
 }
 
+/// A unique change to an editor
 #[derive(Clone, Debug)]
-pub enum ChangeItem {
-    Delete(Cursor, String),
-    Insert(Cursor, String),
+pub struct ChangeItem {
+    /// Cursor indicating start of change
+    pub start: Cursor,
+    /// Cursor indicating end of change
+    pub end: Cursor,
+    /// Text to be inserted or deleted
+    pub text: String,
+    /// Insert if true, delete if false
+    pub insert: bool,
 }
 
+impl ChangeItem {
+    // Reverse change item (in place)
+    pub fn reverse(&mut self) {
+        self.insert = !self.insert;
+    }
+}
+
+/// A set of change items grouped into one logical change
 #[derive(Clone, Debug, Default)]
 pub struct Change {
-    items: Vec<ChangeItem>,
+    /// Change items grouped into one change
+    pub items: Vec<ChangeItem>,
+}
+
+impl Change {
+    // Reverse change (in place)
+    pub fn reverse(&mut self) {
+        self.items.reverse();
+        for item in self.items.iter_mut() {
+            item.reverse();
+        }
+    }
 }
 
 /// A trait to allow easy replacements of [`Editor`], like `SyntaxEditor`
@@ -157,6 +183,9 @@ pub trait Edit {
     /// Insert a string at the current cursor or replacing the current selection with the given
     /// attributes, or with the previous character's attributes if None is given.
     fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>);
+
+    /// Apply a change
+    fn apply_change(&mut self, change: &Change) -> bool;
 
     /// Start collecting change
     fn start_change(&mut self);

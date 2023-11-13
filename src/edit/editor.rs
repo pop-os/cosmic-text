@@ -124,7 +124,12 @@ impl Editor {
         }
 
         if let Some(ref mut change) = self.change {
-            let item = ChangeItem::Delete(start, change_text);
+            let item = ChangeItem {
+                start,
+                end,
+                text: change_text,
+                insert: false,
+            };
             change.items.push(item);
         }
     }
@@ -140,10 +145,8 @@ impl Editor {
             return cursor;
         }
 
-        if let Some(ref mut change) = self.change {
-            let item = ChangeItem::Insert(cursor, data.to_string());
-            change.items.push(item);
-        }
+        // Save cursor for change tracking
+        let start = cursor;
 
         let line: &mut BufferLine = &mut self.buffer.lines[cursor.line];
         let insert_line = cursor.line + 1;
@@ -207,6 +210,16 @@ impl Editor {
 
         // Append the text after insertion
         cursor.index = self.buffer.lines[cursor.line].text().len() - after_len;
+
+        if let Some(ref mut change) = self.change {
+            let item = ChangeItem {
+                start,
+                end: cursor,
+                text: data.to_string(),
+                insert: true,
+            };
+            change.items.push(item);
+        }
 
         cursor
     }
@@ -348,9 +361,36 @@ impl Edit for Editor {
         self.set_cursor(new_cursor);
     }
 
+    fn apply_change(&mut self, change: &Change) -> bool {
+        // Cannot apply changes if there is a pending change
+        match self.change.take() {
+            Some(pending) => {
+                if !pending.items.is_empty() {
+                    //TODO: is this a good idea?
+                    log::warn!("pending change caused apply_change to be ignored!");
+                    self.change = Some(pending);
+                    return false;
+                }
+            }
+            None => {}
+        }
+
+        for item in change.items.iter() {
+            //TODO: edit cursor if needed?
+            if item.insert {
+                self.cursor = self.insert_at(item.start, &item.text, None);
+            } else {
+                self.cursor = item.start;
+                self.delete_range(item.start, item.end);
+            }
+        }
+        true
+    }
+
     fn start_change(&mut self) {
-        //TODO: what to do if overwriting change?
-        self.change = Some(Change::default());
+        if self.change.is_none() {
+            self.change = Some(Change::default());
+        }
     }
 
     fn finish_change(&mut self) -> Option<Change> {
