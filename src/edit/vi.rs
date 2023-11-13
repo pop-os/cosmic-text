@@ -4,7 +4,7 @@ use modit::{Event, Key, Motion, Parser, TextObject, WordIter};
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
-    Action, AttrsList, BorrowedWithFontSystem, Buffer, Color, Cursor, Edit, FontSystem,
+    Action, AttrsList, BorrowedWithFontSystem, Buffer, Change, Color, Cursor, Edit, FontSystem,
     SyntaxEditor, SyntaxTheme,
 };
 
@@ -228,6 +228,14 @@ impl<'a> Edit for ViEditor<'a> {
 
     fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>) {
         self.editor.insert_string(data, attrs_list);
+    }
+
+    fn start_change(&mut self) {
+        self.editor.start_change();
+    }
+
+    fn finish_change(&mut self) -> Option<Change> {
+        self.editor.finish_change()
     }
 
     fn action(&mut self, font_system: &mut FontSystem, action: Action) {

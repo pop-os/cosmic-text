@@ -8,8 +8,8 @@ use syntect::highlighting::{
 use syntect::parsing::{ParseState, ScopeStack, SyntaxReference, SyntaxSet};
 
 use crate::{
-    Action, AttrsList, BorrowedWithFontSystem, Buffer, Color, Cursor, Edit, Editor, FontSystem,
-    Shaping, Style, Weight, Wrap,
+    Action, AttrsList, BorrowedWithFontSystem, Buffer, Change, Color, Cursor, Edit, Editor,
+    FontSystem, Shaping, Style, Weight, Wrap,
 };
 
 pub use syntect::highlighting::Theme as SyntaxTheme;
@@ -302,6 +302,14 @@ impl<'a> Edit for SyntaxEditor<'a> {
 
     fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>) {
         self.editor.insert_string(data, attrs_list);
+    }
+
+    fn start_change(&mut self) {
+        self.editor.start_change();
+    }
+
+    fn finish_change(&mut self) -> Option<Change> {
+        self.editor.finish_change()
     }
 
     fn action(&mut self, font_system: &mut FontSystem, action: Action) {

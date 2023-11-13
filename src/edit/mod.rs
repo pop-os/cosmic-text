@@ -1,5 +1,5 @@
 #[cfg(not(feature = "std"))]
-use alloc::string::String;
+use alloc::{string::String, vec::Vec};
 
 #[cfg(feature = "swash")]
 use crate::Color;
@@ -93,6 +93,17 @@ pub enum Action {
     GotoLine(usize),
 }
 
+#[derive(Clone, Debug)]
+pub enum ChangeItem {
+    Delete(Cursor, String),
+    Insert(Cursor, String),
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct Change {
+    items: Vec<ChangeItem>,
+}
+
 /// A trait to allow easy replacements of [`Editor`], like `SyntaxEditor`
 pub trait Edit {
     /// Mutably borrows `self` together with an [`FontSystem`] for more convenient methods
@@ -146,6 +157,12 @@ pub trait Edit {
     /// Insert a string at the current cursor or replacing the current selection with the given
     /// attributes, or with the previous character's attributes if None is given.
     fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>);
+
+    /// Start collecting change
+    fn start_change(&mut self);
+
+    /// Get completed change
+    fn finish_change(&mut self) -> Option<Change>;
 
     /// Perform an [Action] on the editor
     fn action(&mut self, font_system: &mut FontSystem, action: Action);

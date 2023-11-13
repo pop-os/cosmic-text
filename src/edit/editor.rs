@@ -11,8 +11,8 @@ use unicode_segmentation::UnicodeSegmentation;
 #[cfg(feature = "swash")]
 use crate::Color;
 use crate::{
-    Action, Affinity, AttrsList, Buffer, BufferLine, Cursor, Edit, FontSystem, LayoutCursor,
-    Shaping,
+    Action, Affinity, AttrsList, Buffer, BufferLine, Change, ChangeItem, Cursor, Edit, FontSystem,
+    LayoutCursor, Shaping,
 };
 
 /// A wrapper of [`Buffer`] for easy editing
@@ -24,6 +24,7 @@ pub struct Editor {
     select_opt: Option<Cursor>,
     cursor_moved: bool,
     tab_width: usize,
+    change: Option<Change>,
 }
 
 impl Editor {
@@ -36,6 +37,7 @@ impl Editor {
             select_opt: None,
             cursor_moved: false,
             tab_width: 4,
+            change: None,
         }
     }
 
@@ -71,6 +73,142 @@ impl Editor {
             self.cursor.affinity = new_affinity;
             self.buffer.set_redraw(true);
         }
+    }
+
+    fn delete_range(&mut self, start: Cursor, end: Cursor) {
+        // Collect removed data for change tracking
+        let mut change_text = String::new();
+
+        // Delete the selection from the last line
+        let end_line_opt = if end.line > start.line {
+            // Get part of line after selection
+            let after = self.buffer.lines[end.line].split_off(end.index);
+
+            // Remove end line
+            let removed = self.buffer.lines.remove(end.line);
+            change_text.insert_str(0, removed.text());
+
+            Some(after)
+        } else {
+            None
+        };
+
+        // Delete interior lines (in reverse for safety)
+        for line_i in (start.line + 1..end.line).rev() {
+            let removed = self.buffer.lines.remove(line_i);
+            change_text.insert_str(0, removed.text());
+        }
+
+        // Delete the selection from the first line
+        {
+            // Get part after selection if start line is also end line
+            let after_opt = if start.line == end.line {
+                Some(self.buffer.lines[start.line].split_off(end.index))
+            } else {
+                None
+            };
+
+            // Delete selected part of line
+            let removed = self.buffer.lines[start.line].split_off(start.index);
+            change_text.insert_str(0, removed.text());
+
+            // Re-add part of line after selection
+            if let Some(after) = after_opt {
+                self.buffer.lines[start.line].append(after);
+            }
+
+            // Re-add valid parts of end line
+            if let Some(end_line) = end_line_opt {
+                self.buffer.lines[start.line].append(end_line);
+            }
+        }
+
+        if let Some(ref mut change) = self.change {
+            let item = ChangeItem::Delete(start, change_text);
+            change.items.push(item);
+        }
+    }
+
+    fn insert_at(
+        &mut self,
+        mut cursor: Cursor,
+        data: &str,
+        attrs_list: Option<AttrsList>,
+    ) -> Cursor {
+        let mut remaining_split_len = data.len();
+        if remaining_split_len == 0 {
+            return cursor;
+        }
+
+        if let Some(ref mut change) = self.change {
+            let item = ChangeItem::Insert(cursor, data.to_string());
+            change.items.push(item);
+        }
+
+        let line: &mut BufferLine = &mut self.buffer.lines[cursor.line];
+        let insert_line = cursor.line + 1;
+
+        // Collect text after insertion as a line
+        let after: BufferLine = line.split_off(cursor.index);
+        let after_len = after.text().len();
+
+        // Collect attributes
+        let mut final_attrs = attrs_list.unwrap_or_else(|| {
+            AttrsList::new(line.attrs_list().get_span(cursor.index.saturating_sub(1)))
+        });
+
+        // Append the inserted text, line by line
+        // we want to see a blank entry if the string ends with a newline
+        let addendum = once("").filter(|_| data.ends_with('\n'));
+        let mut lines_iter = data.split_inclusive('\n').chain(addendum);
+        if let Some(data_line) = lines_iter.next() {
+            let mut these_attrs = final_attrs.split_off(data_line.len());
+            remaining_split_len -= data_line.len();
+            core::mem::swap(&mut these_attrs, &mut final_attrs);
+            line.append(BufferLine::new(
+                data_line
+                    .strip_suffix(char::is_control)
+                    .unwrap_or(data_line),
+                these_attrs,
+                Shaping::Advanced,
+            ));
+        } else {
+            panic!("str::lines() did not yield any elements");
+        }
+        if let Some(data_line) = lines_iter.next_back() {
+            remaining_split_len -= data_line.len();
+            let mut tmp = BufferLine::new(
+                data_line
+                    .strip_suffix(char::is_control)
+                    .unwrap_or(data_line),
+                final_attrs.split_off(remaining_split_len),
+                Shaping::Advanced,
+            );
+            tmp.append(after);
+            self.buffer.lines.insert(insert_line, tmp);
+            cursor.line += 1;
+        } else {
+            line.append(after);
+        }
+        for data_line in lines_iter.rev() {
+            remaining_split_len -= data_line.len();
+            let tmp = BufferLine::new(
+                data_line
+                    .strip_suffix(char::is_control)
+                    .unwrap_or(data_line),
+                final_attrs.split_off(remaining_split_len),
+                Shaping::Advanced,
+            );
+            self.buffer.lines.insert(insert_line, tmp);
+            cursor.line += 1;
+        }
+
+        assert_eq!(remaining_split_len, 0);
+
+        // Append the text after insertion
+        cursor.index = self.buffer.lines[cursor.line].text().len() - after_len;
+
+        cursor
     }
 }
 
@@ -198,123 +336,25 @@ impl Edit for Editor {
         // Reset cursor to start of selection
         self.cursor = start;
 
-        // Delete the selection from the last line
-        let end_line_opt = if end.line > start.line {
-            // Get part of line after selection
-            let after = self.buffer.lines[end.line].split_off(end.index);
-
-            // Remove end line
-            self.buffer.lines.remove(end.line);
-
-            Some(after)
-        } else {
-            None
-        };
-
-        // Delete interior lines (in reverse for safety)
-        for line_i in (start.line + 1..end.line).rev() {
-            self.buffer.lines.remove(line_i);
-        }
-
-        // Delete the selection from the first line
-        {
-            // Get part after selection if start line is also end line
-            let after_opt = if start.line == end.line {
-                Some(self.buffer.lines[start.line].split_off(end.index))
-            } else {
-                None
-            };
-
-            // Delete selected part of line
-            self.buffer.lines[start.line].split_off(start.index);
-
-            // Re-add part of line after selection
-            if let Some(after) = after_opt {
-                self.buffer.lines[start.line].append(after);
-            }
-
-            // Re-add valid parts of end line
-            if let Some(end_line) = end_line_opt {
-                self.buffer.lines[start.line].append(end_line);
-            }
-        }
+        // Delete from start to end of selection
+        self.delete_range(start, end);
 
         true
     }
 
     fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>) {
         self.delete_selection();
-        let mut remaining_split_len = data.len();
-        if remaining_split_len == 0 {
-            return;
-        }
+        let new_cursor = self.insert_at(self.cursor, data, attrs_list);
+        self.set_cursor(new_cursor);
+    }
 
-        let line: &mut BufferLine = &mut self.buffer.lines[self.cursor.line];
-        let insert_line = self.cursor.line + 1;
+    fn start_change(&mut self) {
+        //TODO: what to do if overwriting change?
+        self.change = Some(Change::default());
+    }
 
-        // Collect text after insertion as a line
-        let after: BufferLine = line.split_off(self.cursor.index);
-        let after_len = after.text().len();
-
-        // Collect attributes
-        let mut final_attrs = attrs_list.unwrap_or_else(|| {
-            AttrsList::new(
-                line.attrs_list()
-                    .get_span(self.cursor.index.saturating_sub(1)),
-            )
-        });
-
-        // Append the inserted text, line by line
-        // we want to see a blank entry if the string ends with a newline
-        let addendum = once("").filter(|_| data.ends_with('\n'));
-        let mut lines_iter = data.split_inclusive('\n').chain(addendum);
-        if let Some(data_line) = lines_iter.next() {
-            let mut these_attrs = final_attrs.split_off(data_line.len());
-            remaining_split_len -= data_line.len();
-            core::mem::swap(&mut these_attrs, &mut final_attrs);
-            line.append(BufferLine::new(
-                data_line
-                    .strip_suffix(char::is_control)
-                    .unwrap_or(data_line),
-                these_attrs,
-                Shaping::Advanced,
-            ));
-        } else {
-            panic!("str::lines() did not yield any elements");
-        }
-        if let Some(data_line) = lines_iter.next_back() {
-            remaining_split_len -= data_line.len();
-            let mut tmp = BufferLine::new(
-                data_line
-                    .strip_suffix(char::is_control)
-                    .unwrap_or(data_line),
-                final_attrs.split_off(remaining_split_len),
-                Shaping::Advanced,
-            );
-            tmp.append(after);
-            self.buffer.lines.insert(insert_line, tmp);
-            self.cursor.line += 1;
-        } else {
-            line.append(after);
-        }
-        for data_line in lines_iter.rev() {
-            remaining_split_len -= data_line.len();
-            let tmp = BufferLine::new(
-                data_line
-                    .strip_suffix(char::is_control)
-                    .unwrap_or(data_line),
-                final_attrs.split_off(remaining_split_len),
-                Shaping::Advanced,
-            );
-            self.buffer.lines.insert(insert_line, tmp);
-            self.cursor.line += 1;
-        }
-
-        assert_eq!(remaining_split_len, 0);
-
-        // Append the text after insertion
-        self.cursor.index = self.buffer.lines[self.cursor.line].text().len() - after_len;
-        self.cursor_moved = true;
+    fn finish_change(&mut self) -> Option<Change> {
+        self.change.take()
     }
 
     fn action(&mut self, font_system: &mut FontSystem, action: Action) {
@@ -322,7 +362,7 @@ impl Edit for Editor {
 
         match action {
             Action::Previous => {
-                let line = &mut self.buffer.lines[self.cursor.line];
+                let line = &self.buffer.lines[self.cursor.line];
                 if self.cursor.index > 0 {
                     // Find previous character index
                     let mut prev_index = 0;
@@ -346,7 +386,7 @@ impl Edit for Editor {
                 self.cursor_x_opt = None;
             }
             Action::Next => {
-                let line = &mut self.buffer.lines[self.cursor.line];
+                let line = &self.buffer.lines[self.cursor.line];
                 if self.cursor.index < line.text().len() {
                     for (i, c) in line.text().grapheme_indices(true) {
                         if i == self.cursor.index {
@@ -449,7 +489,7 @@ impl Edit for Editor {
                 self.cursor_x_opt = None;
             }
             Action::SoftHome => {
-                let line: &mut BufferLine = &mut self.buffer.lines[self.cursor.line];
+                let line = &self.buffer.lines[self.cursor.line];
                 self.cursor.index = line
                     .text()
                     .char_indices()
@@ -516,14 +556,7 @@ impl Edit for Editor {
                 }
             }
             Action::Enter => {
-                self.delete_selection();
-
-                let new_line = self.buffer.lines[self.cursor.line].split_off(self.cursor.index);
-
-                self.cursor.line += 1;
-                self.cursor.index = 0;
-
-                self.buffer.lines.insert(self.cursor.line, new_line);
+                self.insert_string("\n", None);
 
                 // Ensure line is properly shaped and laid out (for potential immediate commands)
                 self.buffer.line_layout(font_system, self.cursor.line);
@@ -531,70 +564,60 @@ impl Edit for Editor {
             Action::Backspace => {
                 if self.delete_selection() {
                     // Deleted selection
-                } else if self.cursor.index > 0 {
-                    let line = &mut self.buffer.lines[self.cursor.line];
+                } else {
+                    // Save current cursor as end
+                    let end = self.cursor;
 
-                    // Get text line after cursor
-                    let after = line.split_off(self.cursor.index);
-
-                    // Find previous character index
-                    let mut prev_index = 0;
-                    for (i, _) in line.text().char_indices() {
-                        if i < self.cursor.index {
-                            prev_index = i;
-                        } else {
-                            break;
-                        }
+                    if self.cursor.index > 0 {
+                        // Move cursor to previous character index
+                        let line = &self.buffer.lines[self.cursor.line];
+                        self.cursor.index = line.text()[..self.cursor.index]
+                            .char_indices()
+                            .rev()
+                            .next()
+                            .map_or(0, |(i, _)| i);
+                    } else if self.cursor.line > 0 {
+                        // Move cursor to previous line
+                        self.cursor.line -= 1;
+                        let line = &self.buffer.lines[self.cursor.line];
+                        self.cursor.index = line.text().len();
                     }
 
-                    self.cursor.index = prev_index;
-
-                    // Remove character
-                    line.split_off(self.cursor.index);
-
-                    // Add text after cursor
-                    line.append(after);
-                } else if self.cursor.line > 0 {
-                    let mut line_index = self.cursor.line;
-                    let old_line = self.buffer.lines.remove(line_index);
-                    line_index -= 1;
-
-                    let line = &mut self.buffer.lines[line_index];
-
-                    self.cursor.line = line_index;
-                    self.cursor.index = line.text().len();
-
-                    line.append(old_line);
+                    if self.cursor != end {
+                        // Delete range
+                        self.delete_range(self.cursor, end);
+                    }
                 }
             }
             Action::Delete => {
                 if self.delete_selection() {
                     // Deleted selection
-                } else if self.cursor.index < self.buffer.lines[self.cursor.line].text().len() {
-                    let line = &mut self.buffer.lines[self.cursor.line];
+                } else {
+                    // Save current cursor as end
+                    let mut end = self.cursor;
 
-                    let range_opt = line
-                        .text()
-                        .grapheme_indices(true)
-                        .take_while(|(i, _)| *i <= self.cursor.index)
-                        .last()
-                        .map(|(i, c)| i..(i + c.len()));
+                    if self.cursor.index < self.buffer.lines[self.cursor.line].text().len() {
+                        let line = &self.buffer.lines[self.cursor.line];
 
-                    if let Some(range) = range_opt {
-                        self.cursor.index = range.start;
+                        let range_opt = line
+                            .text()
+                            .grapheme_indices(true)
+                            .take_while(|(i, _)| *i <= self.cursor.index)
+                            .last()
+                            .map(|(i, c)| i..(i + c.len()));
 
-                        // Get text after deleted EGC
-                        let after = line.split_off(range.end);
-
-                        // Delete EGC
-                        line.split_off(range.start);
-
-                        // Add text after deleted EGC
-                        line.append(after);
+                        if let Some(range) = range_opt {
+                            self.cursor.index = range.start;
+                            end.index = range.end;
+                        }
+                    } else if self.cursor.line + 1 < self.buffer.lines.len() {
+                        end.line += 1;
+                        end.index = 0;
                     }
-                } else if self.cursor.line + 1 < self.buffer.lines.len() {
-                    let old_line = self.buffer.lines.remove(self.cursor.line + 1);
-                    self.buffer.lines[self.cursor.line].append(old_line);
+
+                    if self.cursor != end {
+                        self.delete_range(self.cursor, end);
+                    }
                 }
             }
             Action::Indent => {
@@ -618,12 +641,11 @@ impl Edit for Editor {
 
                 // For every line in selection
                 for line_i in start.line..=end.line {
-                    let line = &mut self.buffer.lines[line_i];
-
                     // Determine indexes of last indent and first character after whitespace
                     let mut after_whitespace = 0;
                     let mut required_indent = 0;
                     {
+                        let line = &self.buffer.lines[line_i];
                         let text = line.text();
                         for (count, (index, c)) in text.char_indices().enumerate() {
                             if !c.is_whitespace() {
@@ -636,28 +658,22 @@ impl Edit for Editor {
 
                     // No indent required (not possible?)
                     if required_indent == 0 {
-                        continue;
+                        required_indent = self.tab_width;
                     }
 
-                    // Save line after last whitespace
-                    let after = line.split_off(after_whitespace);
-
-                    // Add required indent
-                    line.append(BufferLine::new(
-                        " ".repeat(required_indent),
-                        AttrsList::new(line.attrs_list().defaults()),
-                        Shaping::Advanced,
-                    ));
-
-                    // Re-add line after last whitespace
-                    line.append(after);
+                    self.insert_at(
+                        Cursor::new(line_i, after_whitespace),
+                        &" ".repeat(required_indent),
+                        None,
+                    );
 
                     // Adjust cursor
                     if self.cursor.line == line_i {
-                        if self.cursor.index >= after_whitespace {
-                            self.cursor.index += required_indent;
-                            self.cursor_moved = true;
+                        //TODO: should we be forcing cursor index to current indent location?
+                        if self.cursor.index < after_whitespace {
+                            self.cursor.index = after_whitespace;
                         }
+                        self.cursor.index += required_indent;
                     }
 
                     // Adjust selection
@@ -697,12 +713,11 @@ impl Edit for Editor {
 
                 // For every line in selection
                 for line_i in start.line..=end.line {
-                    let line = &mut self.buffer.lines[line_i];
-
                     // Determine indexes of last indent and first character after whitespace
                     let mut last_indent = 0;
                     let mut after_whitespace = 0;
                     {
+                        let line = &self.buffer.lines[line_i];
                         let text = line.text();
                         for (count, (index, c)) in text.char_indices().enumerate() {
                             if !c.is_whitespace() {
@@ -720,20 +735,16 @@ impl Edit for Editor {
                         continue;
                     }
 
-                    // Save line after last whitespace
-                    let after = line.split_off(after_whitespace);
-
-                    // Drop part of line after last indent
-                    line.split_off(last_indent);
-
-                    // Re-add line after last whitespace
-                    line.append(after);
+                    // Delete one indent
+                    self.delete_range(
+                        Cursor::new(line_i, last_indent),
+                        Cursor::new(line_i, after_whitespace),
+                    );
 
                     // Adjust cursor
                     if self.cursor.line == line_i {
                         if self.cursor.index > last_indent {
                             self.cursor.index -= after_whitespace - last_indent;
-                            self.cursor_moved = true;
                         }
                     }
 
@@ -786,7 +797,7 @@ impl Edit for Editor {
                 self.buffer.set_scroll(scroll);
             }
             Action::PreviousWord => {
-                let line: &mut BufferLine = &mut self.buffer.lines[self.cursor.line];
+                let line = &self.buffer.lines[self.cursor.line];
                 if self.cursor.index > 0 {
                     self.cursor.index = line
                         .text()
@@ -805,7 +816,7 @@ impl Edit for Editor {
                 self.cursor_x_opt = None;
             }
             Action::NextWord => {
-                let line: &mut BufferLine = &mut self.buffer.lines[self.cursor.line];
+                let line = &self.buffer.lines[self.cursor.line];
                 if self.cursor.index < line.text().len() {
                     self.cursor.index = line
                         .text()
