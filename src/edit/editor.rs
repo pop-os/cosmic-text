@@ -682,11 +682,13 @@ impl Edit for Editor {
                 // For every line in selection
                 for line_i in start.line..=end.line {
                     // Determine indexes of last indent and first character after whitespace
-                    let mut after_whitespace = 0;
+                    let mut after_whitespace;
                     let mut required_indent = 0;
                     {
                         let line = &self.buffer.lines[line_i];
                         let text = line.text();
+                        // Default to end of line if no non-whitespace found
+                        after_whitespace = text.len();
                         for (count, (index, c)) in text.char_indices().enumerate() {
                             if !c.is_whitespace() {
                                 after_whitespace = index;
@@ -755,10 +757,12 @@ impl Edit for Editor {
                 for line_i in start.line..=end.line {
                     // Determine indexes of last indent and first character after whitespace
                     let mut last_indent = 0;
-                    let mut after_whitespace = 0;
+                    let mut after_whitespace;
                     {
                         let line = &self.buffer.lines[line_i];
                         let text = line.text();
+                        // Default to end of line if no non-whitespace found
+                        after_whitespace = text.len();
                         for (count, (index, c)) in text.char_indices().enumerate() {
                             if !c.is_whitespace() {
                                 after_whitespace = index;
