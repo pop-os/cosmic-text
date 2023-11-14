@@ -25,6 +25,23 @@ fn undo_2_action<E: Edit>(editor: &mut E, action: undo_2::Action<&Change>) {
     }
 }
 
+fn finish_change<E: Edit>(
+    editor: &mut E,
+    commands: &mut undo_2::Commands<Change>,
+    changed: &mut bool,
+) {
+    //TODO: join changes together
+    match editor.finish_change() {
+        Some(change) => {
+            if !change.items.is_empty() {
+                commands.push(change);
+                *changed = true;
+            }
+        }
+        None => {}
+    }
+}
+
 fn search<E: Edit>(editor: &mut E, search: &str, forwards: bool) {
     let mut cursor = editor.cursor();
     let start_line = cursor.line;
@@ -228,13 +245,79 @@ impl<'a> ViEditor<'a> {
             self.changed = true;
         }
     }
+}
 
-    fn action_inner(&mut self, font_system: &mut FontSystem, action: Action) {
-        let editor = &mut self.editor;
+impl<'a> Edit for ViEditor<'a> {
+    fn buffer(&self) -> &Buffer {
+        self.editor.buffer()
+    }
+
+    fn buffer_mut(&mut self) -> &mut Buffer {
+        self.editor.buffer_mut()
+    }
+
+    fn cursor(&self) -> Cursor {
+        self.editor.cursor()
+    }
+
+    fn set_cursor(&mut self, cursor: Cursor) {
+        self.editor.set_cursor(cursor);
+    }
+
+    fn select_opt(&self) -> Option<Cursor> {
+        self.editor.select_opt()
+    }
+
+    fn set_select_opt(&mut self, select_opt: Option<Cursor>) {
+        self.editor.set_select_opt(select_opt);
+    }
+
+    fn tab_width(&self) -> usize {
+        self.editor.tab_width()
+    }
+
+    fn set_tab_width(&mut self, tab_width: usize) {
+        self.editor.set_tab_width(tab_width);
+    }
+
+    fn shape_as_needed(&mut self, font_system: &mut FontSystem) {
+        self.editor.shape_as_needed(font_system);
+    }
+
+    fn copy_selection(&self) -> Option<String> {
+        self.editor.copy_selection()
+    }
+
+    fn delete_selection(&mut self) -> bool {
+        self.editor.delete_selection()
+    }
+
+    fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>) {
+        self.editor.insert_string(data, attrs_list);
+    }
+
+    fn apply_change(&mut self, change: &Change) -> bool {
+        self.editor.apply_change(change)
+    }
+
+    fn start_change(&mut self) {
+        self.editor.start_change();
+    }
+
+    fn finish_change(&mut self) -> Option<Change> {
+        self.editor.finish_change()
+    }
+
+    fn action(&mut self, font_system: &mut FontSystem, action: Action) {
         log::info!("Action {:?}", action);
 
+        let editor = &mut self.editor;
+
         if self.passthrough {
-            return editor.action(font_system, action);
+            editor.start_change();
+            editor.action(font_system, action);
+            finish_change(editor, &mut self.commands, &mut self.changed);
+            return;
         }
 
         let key = match action {
@@ -256,7 +339,10 @@ impl<'a> ViEditor<'a> {
             Action::Up => Key::Up,
             _ => {
                 log::info!("pass through action {:?}", action);
-                return editor.action(font_system, action);
+                editor.start_change();
+                editor.action(font_system, action);
+                finish_change(editor, &mut self.commands, &mut self.changed);
+                return;
             }
         };
 
@@ -268,6 +354,14 @@ impl<'a> ViEditor<'a> {
                     return;
                 }
                 Event::Backspace => Action::Backspace,
+                Event::ChangeStart => {
+                    editor.start_change();
+                    return;
+                }
+                Event::ChangeFinish => {
+                    finish_change(editor, &mut self.commands, &mut self.changed);
+                    return;
+                }
                 Event::Copy => {
                     log::info!("TODO");
                     return;
@@ -629,85 +723,6 @@ impl<'a> ViEditor<'a> {
             };
             editor.action(font_system, action);
         });
-    }
-}
-
-impl<'a> Edit for ViEditor<'a> {
-    fn buffer(&self) -> &Buffer {
-        self.editor.buffer()
-    }
-
-    fn buffer_mut(&mut self) -> &mut Buffer {
-        self.editor.buffer_mut()
-    }
-
-    fn cursor(&self) -> Cursor {
-        self.editor.cursor()
-    }
-
-    fn set_cursor(&mut self, cursor: Cursor) {
-        self.editor.set_cursor(cursor);
-    }
-
-    fn select_opt(&self) -> Option<Cursor> {
-        self.editor.select_opt()
-    }
-
-    fn set_select_opt(&mut self, select_opt: Option<Cursor>) {
-        self.editor.set_select_opt(select_opt);
-    }
-
-    fn tab_width(&self) -> usize {
-        self.editor.tab_width()
-    }
-
-    fn set_tab_width(&mut self, tab_width: usize) {
-        self.editor.set_tab_width(tab_width);
-    }
-
-    fn shape_as_needed(&mut self, font_system: &mut FontSystem) {
-        self.editor.shape_as_needed(font_system);
-    }
-
-    fn copy_selection(&self) -> Option<String> {
-        self.editor.copy_selection()
-    }
-
-    fn delete_selection(&mut self) -> bool {
-        self.editor.delete_selection()
-    }
-
-    fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>) {
-        self.editor.insert_string(data, attrs_list);
-    }
-
-    fn apply_change(&mut self, change: &Change) -> bool {
-        self.editor.apply_change(change)
-    }
-
-    fn start_change(&mut self) {
-        self.editor.start_change();
-    }
-
-    fn finish_change(&mut self) -> Option<Change> {
-        self.editor.finish_change()
-    }
-
-    fn action(&mut self, font_system: &mut FontSystem, action: Action) {
-        self.start_change();
-
-        self.action_inner(font_system, action);
-
-        //TODO: join changes together
-        match self.finish_change() {
-            Some(change) => {
-                if !change.items.is_empty() {
-                    self.commands.push(change);
-                    self.changed = true;
-                }
-            }
-            None => {}
-        }
     }
 
     #[cfg(feature = "swash")]
