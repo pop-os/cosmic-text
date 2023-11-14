@@ -445,9 +445,9 @@ impl Edit for Editor {
                 self.cursor_x_opt = None;
             }
             Action::Left => {
-                let rtl_opt = self.buffer.lines[self.cursor.line]
-                    .shape_opt()
-                    .as_ref()
+                let rtl_opt = self
+                    .buffer
+                    .line_shape(font_system, self.cursor.line)
                     .map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
@@ -458,9 +458,9 @@ impl Edit for Editor {
                 }
             }
             Action::Right => {
-                let rtl_opt = self.buffer.lines[self.cursor.line]
-                    .shape_opt()
-                    .as_ref()
+                let rtl_opt = self
+                    .buffer
+                    .line_shape(font_system, self.cursor.line)
                     .map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
@@ -878,9 +878,9 @@ impl Edit for Editor {
                 self.cursor_x_opt = None;
             }
             Action::LeftWord => {
-                let rtl_opt = self.buffer.lines[self.cursor.line]
-                    .shape_opt()
-                    .as_ref()
+                let rtl_opt = self
+                    .buffer
+                    .line_shape(font_system, self.cursor.line)
                     .map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
@@ -891,9 +891,9 @@ impl Edit for Editor {
                 }
             }
             Action::RightWord => {
-                let rtl_opt = self.buffer.lines[self.cursor.line]
-                    .shape_opt()
-                    .as_ref()
+                let rtl_opt = self
+                    .buffer
+                    .line_shape(font_system, self.cursor.line)
                     .map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
