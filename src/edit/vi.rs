@@ -42,14 +42,14 @@ fn finish_change<E: Edit>(
     }
 }
 
-fn search<E: Edit>(editor: &mut E, search: &str, forwards: bool) {
+fn search<E: Edit>(editor: &mut E, value: &str, forwards: bool) -> bool {
     let mut cursor = editor.cursor();
     let start_line = cursor.line;
     if forwards {
         while cursor.line < editor.buffer().lines.len() {
             if let Some(index) = editor.buffer().lines[cursor.line]
                 .text()
-                .match_indices(search)
+                .match_indices(value)
                 .filter_map(|(i, _)| {
                     if cursor.line != start_line || i > cursor.index {
                         Some(i)
@@ -61,7 +61,7 @@ fn search<E: Edit>(editor: &mut E, search: &str, forwards: bool) {
             {
                 cursor.index = index;
                 editor.set_cursor(cursor);
-                return;
+                return true;
             }
 
             cursor.line += 1;
@@ -73,7 +73,7 @@ fn search<E: Edit>(editor: &mut E, search: &str, forwards: bool) {
 
             if let Some(index) = editor.buffer().lines[cursor.line]
                 .text()
-                .rmatch_indices(search)
+                .rmatch_indices(value)
                 .filter_map(|(i, _)| {
                     if cursor.line != start_line || i < cursor.index {
                         Some(i)
@@ -85,10 +85,11 @@ fn search<E: Edit>(editor: &mut E, search: &str, forwards: bool) {
             {
                 cursor.index = index;
                 editor.set_cursor(cursor);
-                return;
+                return true;
             }
         }
     }
+    false
 }
 
 fn select_in<E: Edit>(editor: &mut E, start_c: char, end_c: char, include: bool) {
@@ -313,9 +314,12 @@ impl<'a> Edit for ViEditor<'a> {
 
         let editor = &mut self.editor;
 
+        // Ensure a change is always started
+        editor.start_change();
+
         if self.passthrough {
-            editor.start_change();
             editor.action(font_system, action);
+            // Always finish change when passing through (TODO: group changes)
             finish_change(editor, &mut self.commands, &mut self.changed);
             return;
         }
@@ -339,8 +343,8 @@ impl<'a> Edit for ViEditor<'a> {
             Action::Up => Key::Up,
             _ => {
                 log::info!("pass through action {:?}", action);
-                editor.start_change();
                 editor.action(font_system, action);
+                // Always finish change when passing through (TODO: group changes)
                 finish_change(editor, &mut self.commands, &mut self.changed);
                 return;
             }
@@ -393,6 +397,20 @@ impl<'a> Edit for ViEditor<'a> {
                         TextObject::CurlyBrackets => select_in(editor, '{', '}', include),
                         TextObject::DoubleQuotes => select_in(editor, '"', '"', include),
                         TextObject::Parentheses => select_in(editor, '(', ')', include),
+                        TextObject::Search { forwards } => {
+                            match &self.search_opt {
+                                Some((value, _)) => {
+                                    if search(editor, value, forwards) {
+                                        let mut cursor = editor.cursor();
+                                        editor.set_select_opt(Some(cursor));
+                                        //TODO: traverse lines if necessary
+                                        cursor.index += value.len();
+                                        editor.set_cursor(cursor);
+                                    }
+                                }
+                                None => {}
+                            }
+                        }
                         TextObject::SingleQuotes => select_in(editor, '\'', '\'', include),
                         TextObject::SquareBrackets => select_in(editor, '[', ']', include),
                         TextObject::Ticks => select_in(editor, '`', '`', include),
