@@ -138,21 +138,7 @@ where
             .buffer_mut()
             .shape_until(i32::max_value());
 
-        let mut height = 0.0;
-        for line in editor.buffer().lines.iter() {
-            let line_height = line
-                .attrs_list()
-                .spans()
-                .iter()
-                .map(|(_, attrs)| attrs.line_height.height(attrs.font_size))
-                .max_by(f32::total_cmp)
-                .unwrap_or(0.0);
-            match line.layout_opt() {
-                Some(layout) => height += layout.len() as f32 * line_height,
-                None => (),
-            }
-        }
-
+        let height = editor.buffer().line_heights().iter().sum();
         let size = Size::new(limits.max().width, height);
         log::info!("size {:?}", size);
 
