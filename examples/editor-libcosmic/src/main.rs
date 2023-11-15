@@ -12,7 +12,7 @@ use cosmic::{
     Element,
 };
 use cosmic_text::{
-    Align, Attrs, AttrsList, Buffer, Edit, FontSystem, Metrics, SyntaxEditor, SyntaxSystem, Wrap,
+    Align, Attrs, AttrsList, Buffer, Edit, FontSystem, LineHeight, SyntaxEditor, SyntaxSystem, Wrap,
 };
 use std::{env, fmt, fs, path::PathBuf, sync::Mutex};
 
@@ -46,15 +46,32 @@ impl FontSize {
         ]
     }
 
-    pub fn to_metrics(self) -> Metrics {
+    pub fn to_font_size(self) -> f32 {
         match self {
-            Self::Caption => Metrics::new(10.0, 14.0), // Caption
-            Self::Body => Metrics::new(14.0, 20.0),    // Body
-            Self::Title4 => Metrics::new(20.0, 28.0),  // Title 4
-            Self::Title3 => Metrics::new(24.0, 32.0),  // Title 3
-            Self::Title2 => Metrics::new(28.0, 36.0),  // Title 2
-            Self::Title1 => Metrics::new(32.0, 44.0),  // Title 1
+            Self::Caption => 10.0, // Caption
+            Self::Body => 14.0,    // Body
+            Self::Title4 => 20.0,  // Title 4
+            Self::Title3 => 24.0,  // Title 3
+            Self::Title2 => 28.0,  // Title 2
+            Self::Title1 => 32.0,  // Title 1
         }
+    }
+
+    pub fn to_line_height(self) -> LineHeight {
+        match self {
+            Self::Caption => LineHeight::Absolute(14.0), // Caption
+            Self::Body => LineHeight::Absolute(20.0),    // Body
+            Self::Title4 => LineHeight::Absolute(28.0),  // Title 4
+            Self::Title3 => LineHeight::Absolute(32.0),  // Title 3
+            Self::Title2 => LineHeight::Absolute(36.0),  // Title 2
+            Self::Title1 => LineHeight::Absolute(44.0),  // Title 1
+        }
+    }
+
+    pub fn to_attrs(self) -> Attrs<'static> {
+        Attrs::new()
+            .size(self.to_font_size())
+            .line_height(self.to_line_height())
     }
 }
 
@@ -131,13 +148,12 @@ impl Application for Window {
     type Theme = Theme;
 
     fn new(_flags: ()) -> (Self, Command<Self::Message>) {
-        let attrs = cosmic_text::Attrs::new().family(cosmic_text::Family::Monospace);
+        let attrs = FontSize::Body
+            .to_attrs()
+            .family(cosmic_text::Family::Monospace);
 
         let mut editor = SyntaxEditor::new(
-            Buffer::new(
-                &mut FONT_SYSTEM.lock().unwrap(),
-                FontSize::Body.to_metrics(),
-            ),
+            Buffer::new(&mut FONT_SYSTEM.lock().unwrap()),
             &SYNTAX_SYSTEM,
             "base16-eighties.dark",
         )
@@ -234,11 +250,13 @@ impl Application for Window {
             }
             Message::FontSizeChanged(font_size) => {
                 self.font_size = font_size;
+                self.attrs = self
+                    .attrs
+                    .size(font_size.to_font_size())
+                    .line_height(font_size.to_line_height());
+
                 let mut editor = self.editor.lock().unwrap();
-                editor
-                    .borrow_with(&mut FONT_SYSTEM.lock().unwrap())
-                    .buffer_mut()
-                    .set_metrics(font_size.to_metrics());
+                update_attrs(&mut *editor, self.attrs);
             }
             Message::WrapChanged(wrap) => {
                 let mut editor = self.editor.lock().unwrap();
