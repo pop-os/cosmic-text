@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 #[cfg(not(feature = "std"))]
-use alloc::{
-    string::{String, ToString},
-    vec::Vec,
-};
+use alloc::{string::String, vec::Vec};
 use core::{cmp, fmt};
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -54,8 +51,9 @@ impl Cursor {
 }
 
 /// Whether to associate cursors placed at a boundary between runs with the run before or after it.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd)]
 pub enum Affinity {
+    #[default]
     Before,
     After,
 }
@@ -83,12 +81,6 @@ impl Affinity {
         } else {
             Self::Before
         }
-    }
-}
-
-impl Default for Affinity {
-    fn default() -> Self {
-        Affinity::Before
     }
 }
 

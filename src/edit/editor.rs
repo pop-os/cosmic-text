@@ -613,8 +613,7 @@ impl Edit for Editor {
                         let line = &self.buffer.lines[self.cursor.line];
                         self.cursor.index = line.text()[..self.cursor.index]
                             .char_indices()
-                            .rev()
-                            .next()
+                            .next_back()
                             .map_or(0, |(i, _)| i);
                     } else if self.cursor.line > 0 {
                         // Move cursor to previous line
@@ -719,15 +718,10 @@ impl Edit for Editor {
                     }
 
                     // Adjust selection
-                    match self.select_opt {
-                        Some(ref mut select) => {
-                            if select.line == line_i {
-                                if select.index >= after_whitespace {
-                                    select.index += required_indent;
-                                }
-                            }
+                    if let Some(ref mut select) = self.select_opt {
+                        if select.line == line_i && select.index >= after_whitespace {
+                            select.index += required_indent;
                         }
-                        None => {}
                     }
 
                     // Request redraw
@@ -786,22 +780,15 @@ impl Edit for Editor {
                     );
 
                     // Adjust cursor
-                    if self.cursor.line == line_i {
-                        if self.cursor.index > last_indent {
-                            self.cursor.index -= after_whitespace - last_indent;
-                        }
+                    if self.cursor.line == line_i && self.cursor.index > last_indent {
+                        self.cursor.index -= after_whitespace - last_indent;
                     }
 
                     // Adjust selection
-                    match self.select_opt {
-                        Some(ref mut select) => {
-                            if select.line == line_i {
-                                if select.index > last_indent {
-                                    select.index -= after_whitespace - last_indent;
-                                }
-                            }
+                    if let Some(ref mut select) = self.select_opt {
+                        if select.line == line_i && select.index > last_indent {
+                            select.index -= after_whitespace - last_indent;
                         }
-                        None => {}
                     }
 
                     // Request redraw

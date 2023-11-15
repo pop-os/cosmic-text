@@ -167,7 +167,7 @@ pub trait Edit {
     /// Get the current tab width
     fn tab_width(&self) -> usize;
 
-    /// Set the current tab width. A tab_width of 0 is not allowed, and will be ignored
+    /// Set the current tab width. A `tab_width` of 0 is not allowed, and will be ignored
     fn set_tab_width(&mut self, tab_width: usize);
 
     /// Shape lines until scroll, after adjusting scroll if the cursor moved

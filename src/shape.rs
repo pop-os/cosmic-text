@@ -1251,12 +1251,10 @@ impl ShapeLine {
             layout_lines.push(LayoutLine {
                 w: if align != Align::Justified {
                     visual_line.w
+                } else if self.rtl {
+                    start_x - x
                 } else {
-                    if self.rtl {
-                        start_x - x
-                    } else {
-                        x
-                    }
+                    x
                 },
                 max_ascent: max_ascent * font_size,
                 max_descent: max_descent * font_size,
