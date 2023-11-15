@@ -1,7 +1,6 @@
 use alloc::string::String;
 use core::cmp;
 use modit::{Event, Key, Motion, Parser, TextObject, WordIter};
-use undo_2::Commands;
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
@@ -11,12 +10,12 @@ use crate::{
 
 pub use modit::{ViMode, ViParser};
 
-fn undo_2_action<E: Edit>(editor: &mut E, action: undo_2::Action<&Change>) {
+fn undo_2_action<E: Edit>(editor: &mut E, action: cosmic_undo_2::Action<&Change>) {
     match action {
-        undo_2::Action::Do(change) => {
+        cosmic_undo_2::Action::Do(change) => {
             editor.apply_change(change);
         }
-        undo_2::Action::Undo(change) => {
+        cosmic_undo_2::Action::Undo(change) => {
             //TODO: make this more efficient
             let mut reversed = change.clone();
             reversed.reverse();
@@ -27,7 +26,7 @@ fn undo_2_action<E: Edit>(editor: &mut E, action: undo_2::Action<&Change>) {
 
 fn finish_change<E: Edit>(
     editor: &mut E,
-    commands: &mut undo_2::Commands<Change>,
+    commands: &mut cosmic_undo_2::Commands<Change>,
     changed: &mut bool,
 ) {
     //TODO: join changes together
@@ -157,7 +156,7 @@ pub struct ViEditor<'a> {
     parser: ViParser,
     passthrough: bool,
     search_opt: Option<(String, bool)>,
-    commands: Commands<Change>,
+    commands: cosmic_undo_2::Commands<Change>,
     changed: bool,
 }
 
@@ -168,7 +167,7 @@ impl<'a> ViEditor<'a> {
             parser: ViParser::new(),
             passthrough: false,
             search_opt: None,
-            commands: Commands::new(),
+            commands: cosmic_undo_2::Commands::new(),
             changed: false,
         }
     }
