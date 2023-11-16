@@ -272,6 +272,14 @@ impl<'a> Edit for ViEditor<'a> {
         self.editor.set_select_opt(select_opt);
     }
 
+    fn auto_indent(&self) -> bool {
+        self.editor.auto_indent()
+    }
+
+    fn set_auto_indent(&mut self, auto_indent: bool) {
+        self.editor.set_auto_indent(auto_indent);
+    }
+
     fn tab_width(&self) -> u16 {
         self.editor.tab_width()
     }

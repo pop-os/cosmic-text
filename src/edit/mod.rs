@@ -164,6 +164,12 @@ pub trait Edit {
     /// Set the current selection position
     fn set_select_opt(&mut self, select_opt: Option<Cursor>);
 
+    /// Get the current automatic indentation setting
+    fn auto_indent(&self) -> bool;
+
+    /// Enable or disable automatic indentation
+    fn set_auto_indent(&mut self, auto_indent: bool);
+
     /// Get the current tab width
     fn tab_width(&self) -> u16;
 

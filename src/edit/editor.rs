@@ -23,6 +23,7 @@ pub struct Editor {
     cursor_x_opt: Option<i32>,
     select_opt: Option<Cursor>,
     cursor_moved: bool,
+    auto_indent: bool,
     tab_width: u16,
     change: Option<Change>,
 }
@@ -36,6 +37,7 @@ impl Editor {
             cursor_x_opt: None,
             select_opt: None,
             cursor_moved: false,
+            auto_indent: false,
             tab_width: 4,
             change: None,
         }
@@ -256,6 +258,14 @@ impl Edit for Editor {
             self.select_opt = select_opt;
             self.buffer.set_redraw(true);
         }
+    }
+
+    fn auto_indent(&self) -> bool {
+        self.auto_indent
+    }
+
+    fn set_auto_indent(&mut self, auto_indent: bool) {
+        self.auto_indent = auto_indent;
     }
 
     fn tab_width(&self) -> u16 {
@@ -596,7 +606,24 @@ impl Edit for Editor {
                 }
             }
             Action::Enter => {
-                self.insert_string("\n", None);
+                //TODO: what about indenting more after opening brackets or parentheses?
+                if self.auto_indent {
+                    let mut string = String::from("\n");
+                    {
+                        let line = &self.buffer.lines[self.cursor.line];
+                        let text = line.text();
+                        for c in text.chars() {
+                            if c.is_whitespace() {
+                                string.push(c);
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    self.insert_string(&string, None);
+                } else {
+                    self.insert_string("\n", None);
+                }
 
                 // Ensure line is properly shaped and laid out (for potential immediate commands)
                 self.buffer.line_layout(font_system, self.cursor.line);
