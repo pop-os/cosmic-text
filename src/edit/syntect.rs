@@ -166,11 +166,11 @@ impl<'a> Edit for SyntaxEditor<'a> {
         self.editor.set_select_opt(select_opt);
     }
 
-    fn tab_width(&self) -> usize {
+    fn tab_width(&self) -> u16 {
         self.editor.tab_width()
     }
 
-    fn set_tab_width(&mut self, tab_width: usize) {
+    fn set_tab_width(&mut self, tab_width: u16) {
         self.editor.set_tab_width(tab_width);
     }
 

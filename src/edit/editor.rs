@@ -23,7 +23,7 @@ pub struct Editor {
     cursor_x_opt: Option<i32>,
     select_opt: Option<Cursor>,
     cursor_moved: bool,
-    tab_width: usize,
+    tab_width: u16,
     change: Option<Change>,
 }
 
@@ -258,11 +258,11 @@ impl Edit for Editor {
         }
     }
 
-    fn tab_width(&self) -> usize {
+    fn tab_width(&self) -> u16 {
         self.tab_width
     }
 
-    fn set_tab_width(&mut self, tab_width: usize) {
+    fn set_tab_width(&mut self, tab_width: u16) {
         // A tab width of 0 is not allowed
         if tab_width == 0 {
             return;
@@ -679,6 +679,7 @@ impl Edit for Editor {
                 };
 
                 // For every line in selection
+                let tab_width: usize = self.tab_width.into();
                 for line_i in start.line..=end.line {
                     // Determine indexes of last indent and first character after whitespace
                     let mut after_whitespace;
@@ -691,7 +692,7 @@ impl Edit for Editor {
                         for (count, (index, c)) in text.char_indices().enumerate() {
                             if !c.is_whitespace() {
                                 after_whitespace = index;
-                                required_indent = self.tab_width - (count % self.tab_width);
+                                required_indent = tab_width - (count % tab_width);
                                 break;
                             }
                         }
@@ -699,7 +700,7 @@ impl Edit for Editor {
 
                     // No indent required (not possible?)
                     if required_indent == 0 {
-                        required_indent = self.tab_width;
+                        required_indent = tab_width;
                     }
 
                     self.insert_at(
@@ -748,6 +749,7 @@ impl Edit for Editor {
                 };
 
                 // For every line in selection
+                let tab_width: usize = self.tab_width.into();
                 for line_i in start.line..=end.line {
                     // Determine indexes of last indent and first character after whitespace
                     let mut last_indent = 0;
@@ -762,7 +764,7 @@ impl Edit for Editor {
                                 after_whitespace = index;
                                 break;
                             }
-                            if count % self.tab_width == 0 {
+                            if count % tab_width == 0 {
                                 last_indent = index;
                             }
                         }

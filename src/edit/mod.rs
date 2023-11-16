@@ -165,10 +165,10 @@ pub trait Edit {
     fn set_select_opt(&mut self, select_opt: Option<Cursor>);
 
     /// Get the current tab width
-    fn tab_width(&self) -> usize;
+    fn tab_width(&self) -> u16;
 
     /// Set the current tab width. A `tab_width` of 0 is not allowed, and will be ignored
-    fn set_tab_width(&mut self, tab_width: usize);
+    fn set_tab_width(&mut self, tab_width: u16);
 
     /// Shape lines until scroll, after adjusting scroll if the cursor moved
     fn shape_as_needed(&mut self, font_system: &mut FontSystem);
