@@ -1,33 +1,180 @@
 use alloc::string::String;
 use core::cmp;
+use modit::{Event, Key, Motion, Parser, TextObject, WordIter};
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
-    Action, AttrsList, BorrowedWithFontSystem, Buffer, Color, Cursor, Edit, FontSystem,
-    SyntaxEditor,
+    Action, AttrsList, BorrowedWithFontSystem, Buffer, Change, Color, Cursor, Edit, FontSystem,
+    SyntaxEditor, SyntaxTheme,
 };
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-enum Mode {
-    Normal,
-    Insert,
-    Command,
-    Search,
-    SearchBackwards,
+pub use modit::{ViMode, ViParser};
+
+fn undo_2_action<E: Edit>(editor: &mut E, action: cosmic_undo_2::Action<&Change>) {
+    match action {
+        cosmic_undo_2::Action::Do(change) => {
+            editor.apply_change(change);
+        }
+        cosmic_undo_2::Action::Undo(change) => {
+            //TODO: make this more efficient
+            let mut reversed = change.clone();
+            reversed.reverse();
+            editor.apply_change(&reversed);
+        }
+    }
+}
+
+fn finish_change<E: Edit>(
+    editor: &mut E,
+    commands: &mut cosmic_undo_2::Commands<Change>,
+    changed: &mut bool,
+) {
+    //TODO: join changes together
+    match editor.finish_change() {
+        Some(change) => {
+            if !change.items.is_empty() {
+                commands.push(change);
+                *changed = true;
+            }
+        }
+        None => {}
+    }
+}
+
+fn search<E: Edit>(editor: &mut E, value: &str, forwards: bool) -> bool {
+    let mut cursor = editor.cursor();
+    let start_line = cursor.line;
+    if forwards {
+        while cursor.line < editor.buffer().lines.len() {
+            if let Some(index) = editor.buffer().lines[cursor.line]
+                .text()
+                .match_indices(value)
+                .filter_map(|(i, _)| {
+                    if cursor.line != start_line || i > cursor.index {
+                        Some(i)
+                    } else {
+                        None
+                    }
+                })
+                .next()
+            {
+                cursor.index = index;
+                editor.set_cursor(cursor);
+                return true;
+            }
+
+            cursor.line += 1;
+        }
+    } else {
+        cursor.line += 1;
+        while cursor.line > 0 {
+            cursor.line -= 1;
+
+            if let Some(index) = editor.buffer().lines[cursor.line]
+                .text()
+                .rmatch_indices(value)
+                .filter_map(|(i, _)| {
+                    if cursor.line != start_line || i < cursor.index {
+                        Some(i)
+                    } else {
+                        None
+                    }
+                })
+                .next()
+            {
+                cursor.index = index;
+                editor.set_cursor(cursor);
+                return true;
+            }
+        }
+    }
+    false
+}
+
+fn select_in<E: Edit>(editor: &mut E, start_c: char, end_c: char, include: bool) {
+    // Find the largest encompasing object, or if there is none, find the next one.
+    let cursor = editor.cursor();
+    let buffer = editor.buffer();
+
+    // Search forwards for isolated end character, counting start and end characters found
+    let mut end = cursor;
+    let mut starts = 0;
+    let mut ends = 0;
+    'find_end: loop {
+        let line = &buffer.lines[end.line];
+        let text = line.text();
+        for (i, c) in text[end.index..].char_indices() {
+            if c == end_c {
+                ends += 1;
+            } else if c == start_c {
+                starts += 1;
+            }
+            if ends > starts {
+                end.index += if include { i + c.len_utf8() } else { i };
+                break 'find_end;
+            }
+        }
+        if end.line + 1 < buffer.lines.len() {
+            end.line += 1;
+            end.index = 0;
+        } else {
+            break 'find_end;
+        }
+    }
+
+    // Search backwards to resolve starts and ends
+    let mut start = cursor;
+    'find_start: loop {
+        let line = &buffer.lines[start.line];
+        let text = line.text();
+        for (i, c) in text[..start.index].char_indices().rev() {
+            if c == start_c {
+                starts += 1;
+            } else if c == end_c {
+                ends += 1;
+            }
+            if starts >= ends {
+                start.index = if include { i } else { i + c.len_utf8() };
+                break 'find_start;
+            }
+        }
+        if start.line > 0 {
+            start.line -= 1;
+            start.index = buffer.lines[start.line].text().len();
+        } else {
+            break 'find_start;
+        }
+    }
+
+    editor.set_select_opt(Some(start));
+    editor.set_cursor(end);
 }
 
 #[derive(Debug)]
 pub struct ViEditor<'a> {
     editor: SyntaxEditor<'a>,
-    mode: Mode,
+    parser: ViParser,
+    passthrough: bool,
+    search_opt: Option<(String, bool)>,
+    commands: cosmic_undo_2::Commands<Change>,
+    changed: bool,
 }
 
 impl<'a> ViEditor<'a> {
     pub fn new(editor: SyntaxEditor<'a>) -> Self {
         Self {
             editor,
-            mode: Mode::Normal,
+            parser: ViParser::new(),
+            passthrough: false,
+            search_opt: None,
+            commands: cosmic_undo_2::Commands::new(),
+            changed: false,
         }
+    }
+
+    /// Modifies the theme of the [`SyntaxEditor`], returning false if the theme is missing
+    pub fn update_theme(&mut self, theme_name: &str) -> bool {
+        self.editor.update_theme(theme_name)
     }
 
     /// Load text from a file, and also set syntax to the best option
@@ -49,6 +196,54 @@ impl<'a> ViEditor<'a> {
     /// Get the default foreground (text) color
     pub fn foreground_color(&self) -> Color {
         self.editor.foreground_color()
+    }
+
+    /// Get the current syntect theme
+    pub fn theme(&self) -> &SyntaxTheme {
+        self.editor.theme()
+    }
+
+    /// Get changed flag
+    pub fn changed(&self) -> bool {
+        self.changed
+    }
+
+    /// Set changed flag
+    pub fn set_changed(&mut self, changed: bool) {
+        self.changed = changed;
+    }
+
+    /// Set passthrough mode (true will turn off vi features)
+    pub fn set_passthrough(&mut self, passthrough: bool) {
+        if passthrough != self.passthrough {
+            self.passthrough = passthrough;
+            self.buffer_mut().set_redraw(true);
+        }
+    }
+
+    /// Get current vi parser
+    pub fn parser(&self) -> &ViParser {
+        &self.parser
+    }
+
+    /// Redo a change
+    pub fn redo(&mut self) {
+        log::info!("Redo");
+        for action in self.commands.redo() {
+            undo_2_action(&mut self.editor, action);
+            //TODO: clear changed flag when back to last saved state?
+            self.changed = true;
+        }
+    }
+
+    /// Undo a change
+    pub fn undo(&mut self) {
+        log::info!("Undo");
+        for action in self.commands.undo() {
+            undo_2_action(&mut self.editor, action);
+            //TODO: clear changed flag when back to last saved state?
+            self.changed = true;
+        }
     }
 }
 
@@ -77,6 +272,22 @@ impl<'a> Edit for ViEditor<'a> {
         self.editor.set_select_opt(select_opt);
     }
 
+    fn auto_indent(&self) -> bool {
+        self.editor.auto_indent()
+    }
+
+    fn set_auto_indent(&mut self, auto_indent: bool) {
+        self.editor.set_auto_indent(auto_indent);
+    }
+
+    fn tab_width(&self) -> u16 {
+        self.editor.tab_width()
+    }
+
+    fn set_tab_width(&mut self, tab_width: u16) {
+        self.editor.set_tab_width(tab_width);
+    }
+
     fn shape_as_needed(&mut self, font_system: &mut FontSystem) {
         self.editor.shape_as_needed(font_system);
     }
@@ -93,143 +304,450 @@ impl<'a> Edit for ViEditor<'a> {
         self.editor.insert_string(data, attrs_list);
     }
 
+    fn apply_change(&mut self, change: &Change) -> bool {
+        self.editor.apply_change(change)
+    }
+
+    fn start_change(&mut self) {
+        self.editor.start_change();
+    }
+
+    fn finish_change(&mut self) -> Option<Change> {
+        self.editor.finish_change()
+    }
+
     fn action(&mut self, font_system: &mut FontSystem, action: Action) {
-        let old_mode = self.mode;
+        log::info!("Action {:?}", action);
 
-        match self.mode {
-            Mode::Normal => match action {
-                Action::Insert(c) => match c {
-                    // Enter insert mode after cursor
-                    'a' => {
-                        self.editor.action(font_system, Action::Right);
-                        self.mode = Mode::Insert;
-                    }
-                    // Enter insert mode at end of line
-                    'A' => {
-                        self.editor.action(font_system, Action::End);
-                        self.mode = Mode::Insert;
-                    }
-                    // Change mode
-                    'c' => {
-                        if self.editor.select_opt().is_some() {
-                            self.editor.action(font_system, Action::Delete);
-                            self.mode = Mode::Insert;
-                        } else {
-                            //TODO: change to next cursor movement
-                        }
-                    }
-                    // Delete mode
-                    'd' => {
-                        if self.editor.select_opt().is_some() {
-                            self.editor.action(font_system, Action::Delete);
-                        } else {
-                            //TODO: delete to next cursor movement
-                        }
-                    }
-                    // Enter insert mode at cursor
-                    'i' => {
-                        self.mode = Mode::Insert;
-                    }
-                    // Enter insert mode at start of line
-                    'I' => {
-                        //TODO: soft home, skip whitespace
-                        self.editor.action(font_system, Action::Home);
-                        self.mode = Mode::Insert;
-                    }
-                    // Create line after and enter insert mode
-                    'o' => {
-                        self.editor.action(font_system, Action::End);
-                        self.editor.action(font_system, Action::Enter);
-                        self.mode = Mode::Insert;
-                    }
-                    // Create line before and enter insert mode
-                    'O' => {
-                        self.editor.action(font_system, Action::Home);
-                        self.editor.action(font_system, Action::Enter);
-                        self.editor.shape_as_needed(font_system); // TODO: do not require this?
-                        self.editor.action(font_system, Action::Up);
-                        self.mode = Mode::Insert;
-                    }
-                    // Left
-                    'h' => self.editor.action(font_system, Action::Left),
-                    // Top of screen
-                    //TODO: 'H' => self.editor.action(Action::ScreenHigh),
-                    // Down
-                    'j' => self.editor.action(font_system, Action::Down),
-                    // Up
-                    'k' => self.editor.action(font_system, Action::Up),
-                    // Right
-                    'l' => self.editor.action(font_system, Action::Right),
-                    // Bottom of screen
-                    //TODO: 'L' => self.editor.action(Action::ScreenLow),
-                    // Middle of screen
-                    //TODO: 'M' => self.editor.action(Action::ScreenMiddle),
-                    // Enter visual mode
-                    'v' => {
-                        if self.editor.select_opt().is_some() {
-                            self.editor.set_select_opt(None);
-                        } else {
-                            self.editor.set_select_opt(Some(self.editor.cursor()));
-                        }
-                    }
-                    // Enter line visual mode
-                    'V' => {
-                        if self.editor.select_opt().is_some() {
-                            self.editor.set_select_opt(None);
-                        } else {
-                            self.editor.action(font_system, Action::Home);
-                            self.editor.set_select_opt(Some(self.editor.cursor()));
-                            //TODO: set cursor_x_opt to max
-                            self.editor.action(font_system, Action::End);
-                        }
-                    }
-                    // Remove character at cursor
-                    'x' => self.editor.action(font_system, Action::Delete),
-                    // Remove character before cursor
-                    'X' => self.editor.action(font_system, Action::Backspace),
-                    // Go to start of line
-                    '0' => self.editor.action(font_system, Action::Home),
-                    // Go to end of line
-                    '$' => self.editor.action(font_system, Action::End),
-                    // Go to start of line after whitespace
-                    //TODO: implement this
-                    '^' => self.editor.action(font_system, Action::Home),
-                    // Enter command mode
-                    ':' => {
-                        self.mode = Mode::Command;
-                    }
-                    // Enter search mode
-                    '/' => {
-                        self.mode = Mode::Search;
-                    }
-                    // Enter search backwards mode
-                    '?' => {
-                        self.mode = Mode::SearchBackwards;
-                    }
-                    _ => (),
-                },
-                _ => self.editor.action(font_system, action),
-            },
-            Mode::Insert => match action {
-                Action::Escape => {
-                    let cursor = self.cursor();
-                    let layout_cursor = self.buffer().layout_cursor(&cursor);
-                    if layout_cursor.glyph > 0 {
-                        self.editor.action(font_system, Action::Left);
-                    }
-                    self.mode = Mode::Normal;
-                }
-                _ => self.editor.action(font_system, action),
-            },
+        let editor = &mut self.editor;
+
+        // Ensure a change is always started
+        editor.start_change();
+
+        if self.passthrough {
+            editor.action(font_system, action);
+            // Always finish change when passing through (TODO: group changes)
+            finish_change(editor, &mut self.commands, &mut self.changed);
+            return;
+        }
+
+        let key = match action {
+            //TODO: this leaves lots of room for issues in translation, should we directly accept Key?
+            Action::Backspace => Key::Backspace,
+            Action::Delete => Key::Delete,
+            Action::Down => Key::Down,
+            Action::End => Key::End,
+            Action::Enter => Key::Enter,
+            Action::Escape => Key::Escape,
+            Action::Home => Key::Home,
+            Action::Indent => Key::Tab,
+            Action::Insert(c) => Key::Char(c),
+            Action::Left => Key::Left,
+            Action::PageDown => Key::PageDown,
+            Action::PageUp => Key::PageUp,
+            Action::Right => Key::Right,
+            Action::Unindent => Key::Backtab,
+            Action::Up => Key::Up,
             _ => {
-                //TODO: other modes
-                self.mode = Mode::Normal;
+                log::info!("pass through action {:?}", action);
+                editor.action(font_system, action);
+                // Always finish change when passing through (TODO: group changes)
+                finish_change(editor, &mut self.commands, &mut self.changed);
+                return;
             }
-        }
+        };
 
-        if self.mode != old_mode {
-            self.buffer_mut().set_redraw(true);
-        }
+        self.parser.parse(key, false, |event| {
+            log::info!("  Event {:?}", event);
+            let action = match event {
+                Event::AutoIndent => {
+                    log::info!("TODO");
+                    return;
+                }
+                Event::Backspace => Action::Backspace,
+                Event::ChangeStart => {
+                    editor.start_change();
+                    return;
+                }
+                Event::ChangeFinish => {
+                    finish_change(editor, &mut self.commands, &mut self.changed);
+                    return;
+                }
+                Event::Copy => {
+                    log::info!("TODO");
+                    return;
+                }
+                Event::Delete => Action::Delete,
+                Event::Escape => Action::Escape,
+                Event::Insert(c) => Action::Insert(c),
+                Event::NewLine => Action::Enter,
+                Event::Paste => {
+                    log::info!("TODO");
+                    return;
+                }
+                Event::Redraw => {
+                    editor.buffer_mut().set_redraw(true);
+                    return;
+                }
+                Event::SelectClear => {
+                    editor.set_select_opt(None);
+                    return;
+                }
+                Event::SelectStart => {
+                    let cursor = editor.cursor();
+                    editor.set_select_opt(Some(cursor));
+                    return;
+                }
+                Event::SelectTextObject(text_object, include) => {
+                    match text_object {
+                        TextObject::AngleBrackets => select_in(editor, '<', '>', include),
+                        TextObject::CurlyBrackets => select_in(editor, '{', '}', include),
+                        TextObject::DoubleQuotes => select_in(editor, '"', '"', include),
+                        TextObject::Parentheses => select_in(editor, '(', ')', include),
+                        TextObject::Search { forwards } => {
+                            match &self.search_opt {
+                                Some((value, _)) => {
+                                    if search(editor, value, forwards) {
+                                        let mut cursor = editor.cursor();
+                                        editor.set_select_opt(Some(cursor));
+                                        //TODO: traverse lines if necessary
+                                        cursor.index += value.len();
+                                        editor.set_cursor(cursor);
+                                    }
+                                }
+                                None => {}
+                            }
+                        }
+                        TextObject::SingleQuotes => select_in(editor, '\'', '\'', include),
+                        TextObject::SquareBrackets => select_in(editor, '[', ']', include),
+                        TextObject::Ticks => select_in(editor, '`', '`', include),
+                        TextObject::Word(word) => {
+                            let mut cursor = editor.cursor();
+                            let mut select_opt = editor.select_opt();
+                            let buffer = editor.buffer();
+                            let text = buffer.lines[cursor.line].text();
+                            match WordIter::new(text, word)
+                                .find(|&(i, w)| i <= cursor.index && i + w.len() > cursor.index)
+                            {
+                                Some((i, w)) => {
+                                    cursor.index = i;
+                                    select_opt = Some(cursor);
+                                    cursor.index += w.len();
+                                }
+                                None => {
+                                    //TODO
+                                }
+                            }
+                            editor.set_select_opt(select_opt);
+                            editor.set_cursor(cursor);
+                        }
+                        _ => {
+                            log::info!("TODO: {:?}", text_object);
+                        }
+                    }
+                    return;
+                }
+                Event::SetSearch(value, forwards) => {
+                    self.search_opt = Some((value, forwards));
+                    return;
+                }
+                Event::ShiftLeft => Action::Unindent,
+                Event::ShiftRight => Action::Indent,
+                Event::SwapCase => {
+                    log::info!("TODO");
+                    return;
+                }
+                Event::Undo => {
+                    for action in self.commands.undo() {
+                        undo_2_action(editor, action);
+                    }
+                    return;
+                }
+                Event::Motion(motion) => {
+                    match motion {
+                        Motion::Around => {
+                            //TODO: what to do for this psuedo-motion?
+                            return;
+                        }
+                        Motion::Down => Action::Down,
+                        Motion::End => Action::End,
+                        Motion::GotoLine(line) => Action::GotoLine(line.saturating_sub(1)),
+                        Motion::GotoEof => {
+                            Action::GotoLine(editor.buffer().lines.len().saturating_sub(1))
+                        }
+                        Motion::Home => Action::Home,
+                        Motion::Inside => {
+                            //TODO: what to do for this psuedo-motion?
+                            return;
+                        }
+                        Motion::Left => Action::Left,
+                        Motion::LeftInLine => {
+                            let cursor = editor.cursor();
+                            if cursor.index > 0 {
+                                Action::Left
+                            } else {
+                                return;
+                            }
+                        }
+                        Motion::Line => {
+                            //TODO: what to do for this psuedo-motion?
+                            return;
+                        }
+                        Motion::NextChar(find_c) => {
+                            let mut cursor = editor.cursor();
+                            let buffer = editor.buffer();
+                            let text = buffer.lines[cursor.line].text();
+                            if cursor.index < text.len() {
+                                match text[cursor.index..]
+                                    .char_indices()
+                                    .filter(|&(i, c)| i > 0 && c == find_c)
+                                    .next()
+                                {
+                                    Some((i, _)) => {
+                                        cursor.index += i;
+                                        editor.set_cursor(cursor);
+                                    }
+                                    None => {}
+                                }
+                            }
+                            return;
+                        }
+                        Motion::NextCharTill(find_c) => {
+                            let mut cursor = editor.cursor();
+                            let buffer = editor.buffer();
+                            let text = buffer.lines[cursor.line].text();
+                            if cursor.index < text.len() {
+                                let mut last_i = 0;
+                                for (i, c) in text[cursor.index..].char_indices() {
+                                    if last_i > 0 && c == find_c {
+                                        cursor.index += last_i;
+                                        editor.set_cursor(cursor);
+                                        break;
+                                    } else {
+                                        last_i = i;
+                                    }
+                                }
+                            }
+                            return;
+                        }
+                        Motion::NextSearch => match &self.search_opt {
+                            Some((value, forwards)) => {
+                                search(editor, value, *forwards);
+                                return;
+                            }
+                            None => return,
+                        },
+                        Motion::NextWordEnd(word) => {
+                            let mut cursor = editor.cursor();
+                            let buffer = editor.buffer();
+                            loop {
+                                let text = buffer.lines[cursor.line].text();
+                                if cursor.index < text.len() {
+                                    cursor.index = WordIter::new(text, word)
+                                        .map(|(i, w)| {
+                                            i + w.char_indices().last().map(|(i, _)| i).unwrap_or(0)
+                                        })
+                                        .find(|&i| i > cursor.index)
+                                        .unwrap_or(text.len());
+                                    if cursor.index == text.len() {
+                                        // Try again, searching next line
+                                        continue;
+                                    }
+                                } else if cursor.line + 1 < buffer.lines.len() {
+                                    // Go to next line and rerun loop
+                                    cursor.line += 1;
+                                    cursor.index = 0;
+                                    continue;
+                                }
+                                break;
+                            }
+                            editor.set_cursor(cursor);
+                            return;
+                        }
+                        Motion::NextWordStart(word) => {
+                            let mut cursor = editor.cursor();
+                            let buffer = editor.buffer();
+                            loop {
+                                let text = buffer.lines[cursor.line].text();
+                                if cursor.index < text.len() {
+                                    cursor.index = WordIter::new(text, word)
+                                        .map(|(i, _)| i)
+                                        .find(|&i| i > cursor.index)
+                                        .unwrap_or(text.len());
+                                    if cursor.index == text.len() {
+                                        // Try again, searching next line
+                                        continue;
+                                    }
+                                } else if cursor.line + 1 < buffer.lines.len() {
+                                    // Go to next line and rerun loop
+                                    cursor.line += 1;
+                                    cursor.index = 0;
+                                    continue;
+                                }
+                                break;
+                            }
+                            editor.set_cursor(cursor);
+                            return;
+                        }
+                        Motion::PageDown => Action::PageDown,
+                        Motion::PageUp => Action::PageUp,
+                        Motion::PreviousChar(find_c) => {
+                            let mut cursor = editor.cursor();
+                            let buffer = editor.buffer();
+                            let text = buffer.lines[cursor.line].text();
+                            if cursor.index > 0 {
+                                match text[..cursor.index]
+                                    .char_indices()
+                                    .filter(|&(_, c)| c == find_c)
+                                    .last()
+                                {
+                                    Some((i, _)) => {
+                                        cursor.index = i;
+                                        editor.set_cursor(cursor);
+                                    }
+                                    None => {}
+                                }
+                            }
+                            return;
+                        }
+                        Motion::PreviousCharTill(find_c) => {
+                            let mut cursor = editor.cursor();
+                            let buffer = editor.buffer();
+                            let text = buffer.lines[cursor.line].text();
+                            if cursor.index > 0 {
+                                match text[..cursor.index]
+                                    .char_indices()
+                                    .filter_map(|(i, c)| {
+                                        if c == find_c {
+                                            let end = i + c.len_utf8();
+                                            if end < cursor.index {
+                                                return Some(end);
+                                            }
+                                        }
+                                        None
+                                    })
+                                    .last()
+                                {
+                                    Some(i) => {
+                                        cursor.index = i;
+                                        editor.set_cursor(cursor);
+                                    }
+                                    None => {}
+                                }
+                            }
+                            return;
+                        }
+                        Motion::PreviousSearch => match &self.search_opt {
+                            Some((value, forwards)) => {
+                                search(editor, value, !*forwards);
+                                return;
+                            }
+                            None => return,
+                        },
+                        Motion::PreviousWordEnd(word) => {
+                            let mut cursor = editor.cursor();
+                            let buffer = editor.buffer();
+                            loop {
+                                let text = buffer.lines[cursor.line].text();
+                                if cursor.index > 0 {
+                                    cursor.index = WordIter::new(text, word)
+                                        .map(|(i, w)| {
+                                            i + w.char_indices().last().map(|(i, _)| i).unwrap_or(0)
+                                        })
+                                        .filter(|&i| i < cursor.index)
+                                        .last()
+                                        .unwrap_or(0);
+                                    if cursor.index == 0 {
+                                        // Try again, searching previous line
+                                        continue;
+                                    }
+                                } else if cursor.line > 0 {
+                                    // Go to previous line and rerun loop
+                                    cursor.line -= 1;
+                                    cursor.index = buffer.lines[cursor.line].text().len();
+                                    continue;
+                                }
+                                break;
+                            }
+                            editor.set_cursor(cursor);
+                            return;
+                        }
+                        Motion::PreviousWordStart(word) => {
+                            let mut cursor = editor.cursor();
+                            let buffer = editor.buffer();
+                            loop {
+                                let text = buffer.lines[cursor.line].text();
+                                if cursor.index > 0 {
+                                    cursor.index = WordIter::new(text, word)
+                                        .map(|(i, _)| i)
+                                        .filter(|&i| i < cursor.index)
+                                        .last()
+                                        .unwrap_or(0);
+                                    if cursor.index == 0 {
+                                        // Try again, searching previous line
+                                        continue;
+                                    }
+                                } else if cursor.line > 0 {
+                                    // Go to previous line and rerun loop
+                                    cursor.line -= 1;
+                                    cursor.index = buffer.lines[cursor.line].text().len();
+                                    continue;
+                                }
+                                break;
+                            }
+                            editor.set_cursor(cursor);
+                            return;
+                        }
+                        Motion::Right => Action::Right,
+                        Motion::RightInLine => {
+                            let cursor = editor.cursor();
+                            let buffer = editor.buffer();
+                            if cursor.index < buffer.lines[cursor.line].text().len() {
+                                Action::Right
+                            } else {
+                                return;
+                            }
+                        }
+                        Motion::ScreenHigh => {
+                            //TODO: is this efficient?
+                            if let Some(first) = editor.buffer().layout_runs().next() {
+                                Action::GotoLine(first.line_i)
+                            } else {
+                                return;
+                            }
+                        }
+                        Motion::ScreenLow => {
+                            //TODO: is this efficient?
+                            if let Some(last) = editor.buffer().layout_runs().last() {
+                                Action::GotoLine(last.line_i)
+                            } else {
+                                return;
+                            }
+                        }
+                        Motion::ScreenMiddle => {
+                            //TODO: is this efficient?
+                            let mut layout_runs = editor.buffer().layout_runs();
+                            if let Some(first) = layout_runs.next() {
+                                if let Some(last) = layout_runs.last() {
+                                    Action::GotoLine((last.line_i + first.line_i) / 2)
+                                } else {
+                                    return;
+                                }
+                            } else {
+                                return;
+                            }
+                        }
+                        Motion::Selection => {
+                            //TODO: what to do for this psuedo-motion?
+                            return;
+                        }
+                        Motion::SoftHome => Action::SoftHome,
+                        Motion::Up => Action::Up,
+                    }
+                }
+            };
+            editor.action(font_system, action);
+        });
     }
 
     #[cfg(feature = "swash")]
@@ -242,12 +760,16 @@ impl<'a> Edit for ViEditor<'a> {
     ) where
         F: FnMut(i32, i32, u32, u32, Color),
     {
+        let size = self.buffer().size();
+        f(0, 0, size.0 as u32, size.1 as u32, self.background_color());
+
         let font_size = self.buffer().metrics().font_size;
         let line_height = self.buffer().metrics().line_height;
 
         for run in self.buffer().layout_runs() {
             let line_i = run.line_i;
             let line_y = run.line_y;
+            let line_top = run.line_top;
 
             let cursor_glyph_opt = |cursor: &Cursor| -> Option<(usize, f32, f32)> {
                 //TODO: better calculation of width
@@ -326,7 +848,7 @@ impl<'a> Edit for ViEditor<'a> {
                             } else if let Some((min, max)) = range_opt.take() {
                                 f(
                                     min,
-                                    (line_y - font_size) as i32,
+                                    line_top as i32,
                                     cmp::max(0, max - min) as u32,
                                     line_height as u32,
                                     Color::rgba(color.r(), color.g(), color.b(), 0x33),
@@ -352,7 +874,7 @@ impl<'a> Edit for ViEditor<'a> {
                         }
                         f(
                             min,
-                            (line_y - font_size) as i32,
+                            line_top as i32,
                             cmp::max(0, max - min) as u32,
                             line_height as u32,
                             Color::rgba(color.r(), color.g(), color.b(), 0x33),
@@ -365,10 +887,13 @@ impl<'a> Edit for ViEditor<'a> {
             if let Some((cursor_glyph, cursor_glyph_offset, cursor_glyph_width)) =
                 cursor_glyph_opt(&self.cursor())
             {
-                let block_cursor = match self.mode {
-                    Mode::Normal => true,
-                    Mode::Insert => false,
-                    _ => true, /*TODO: determine block cursor in other modes*/
+                let block_cursor = if self.passthrough {
+                    false
+                } else {
+                    match self.parser.mode {
+                        ViMode::Insert | ViMode::Replace => false,
+                        _ => true, /*TODO: determine block cursor in other modes*/
+                    }
                 };
 
                 let (start_x, end_x) = match run.glyphs.get(cursor_glyph) {
@@ -411,19 +936,13 @@ impl<'a> Edit for ViEditor<'a> {
                     let right_x = cmp::max(start_x, end_x);
                     f(
                         left_x,
-                        (line_y - font_size) as i32,
+                        line_top as i32,
                         (right_x - left_x) as u32,
                         line_height as u32,
                         Color::rgba(color.r(), color.g(), color.b(), 0x33),
                     );
                 } else {
-                    f(
-                        start_x,
-                        (line_y - font_size) as i32,
-                        1,
-                        line_height as u32,
-                        color,
-                    );
+                    f(start_x, line_top as i32, 1, line_height as u32, color);
                 }
             }
 

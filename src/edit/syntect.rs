@@ -3,14 +3,16 @@ use alloc::{string::String, vec::Vec};
 #[cfg(feature = "std")]
 use std::{fs, io, path::Path};
 use syntect::highlighting::{
-    FontStyle, HighlightState, Highlighter, RangedHighlightIterator, Theme, ThemeSet,
+    FontStyle, HighlightState, Highlighter, RangedHighlightIterator, ThemeSet,
 };
 use syntect::parsing::{ParseState, ScopeStack, SyntaxReference, SyntaxSet};
 
 use crate::{
-    Action, AttrsList, BorrowedWithFontSystem, Buffer, Color, Cursor, Edit, Editor, FontSystem,
-    Shaping, Style, Weight, Wrap,
+    Action, AttrsList, BorrowedWithFontSystem, Buffer, Change, Color, Cursor, Edit, Editor,
+    FontSystem, Shaping, Style, Weight, Wrap,
 };
+
+pub use syntect::highlighting::Theme as SyntaxTheme;
 
 #[derive(Debug)]
 pub struct SyntaxSystem {
@@ -35,7 +37,7 @@ pub struct SyntaxEditor<'a> {
     editor: Editor,
     syntax_system: &'a SyntaxSystem,
     syntax: &'a SyntaxReference,
-    theme: &'a Theme,
+    theme: &'a SyntaxTheme,
     highlighter: Highlighter<'a>,
     syntax_cache: Vec<(ParseState, HighlightState)>,
 }
@@ -65,9 +67,11 @@ impl<'a> SyntaxEditor<'a> {
     /// Modifies the theme of the [`SyntaxEditor`], returning false if the theme is missing
     pub fn update_theme(&mut self, theme_name: &str) -> bool {
         if let Some(theme) = self.syntax_system.theme_set.themes.get(theme_name) {
-            self.theme = theme;
-            self.highlighter = Highlighter::new(theme);
-            self.syntax_cache.clear();
+            if self.theme != theme {
+                self.theme = theme;
+                self.highlighter = Highlighter::new(theme);
+                self.syntax_cache.clear();
+            }
 
             true
         } else {
@@ -130,6 +134,11 @@ impl<'a> SyntaxEditor<'a> {
             Color::rgb(0xFF, 0xFF, 0xFF)
         }
     }
+
+    /// Get the current syntect theme
+    pub fn theme(&self) -> &SyntaxTheme {
+        self.theme
+    }
 }
 
 impl<'a> Edit for SyntaxEditor<'a> {
@@ -157,16 +166,50 @@ impl<'a> Edit for SyntaxEditor<'a> {
         self.editor.set_select_opt(select_opt);
     }
 
+    fn auto_indent(&self) -> bool {
+        self.editor.auto_indent()
+    }
+
+    fn set_auto_indent(&mut self, auto_indent: bool) {
+        self.editor.set_auto_indent(auto_indent);
+    }
+
+    fn tab_width(&self) -> u16 {
+        self.editor.tab_width()
+    }
+
+    fn set_tab_width(&mut self, tab_width: u16) {
+        self.editor.set_tab_width(tab_width);
+    }
+
     fn shape_as_needed(&mut self, font_system: &mut FontSystem) {
         #[cfg(feature = "std")]
         let now = std::time::Instant::now();
 
+        let cursor = self.cursor();
         let buffer = self.editor.buffer_mut();
-
+        let lines = buffer.visible_lines();
+        let scroll_end = buffer.scroll() + lines;
+        let mut total_layout = 0;
         let mut highlighted = 0;
         for line_i in 0..buffer.lines.len() {
+            // Break out if we have reached the end of scroll and are past the cursor
+            if total_layout >= scroll_end && line_i > cursor.line {
+                break;
+            }
+
             let line = &mut buffer.lines[line_i];
             if !line.is_reset() && line_i < self.syntax_cache.len() {
+                //TODO: duplicated code!
+                // Perform shaping and layout of this line in order to count if we have reached scroll
+                match buffer.line_layout(font_system, line_i) {
+                    Some(layout_lines) => {
+                        total_layout += layout_lines.len() as i32;
+                    }
+                    None => {
+                        //TODO: should this be possible?
+                    }
+                }
                 continue;
             }
             highlighted += 1;
@@ -221,8 +264,15 @@ impl<'a> Edit for SyntaxEditor<'a> {
             line.set_attrs_list(attrs_list);
             line.set_wrap(Wrap::Word);
 
-            //TODO: efficiently do syntax highlighting without having to shape whole buffer
-            buffer.line_shape(font_system, line_i);
+            // Perform shaping and layout of this line in order to count if we have reached scroll
+            match buffer.line_layout(font_system, line_i) {
+                Some(layout_lines) => {
+                    total_layout += layout_lines.len() as i32;
+                }
+                None => {
+                    //TODO: should this be possible?
+                }
+            }
 
             let cache_item = (parse_state.clone(), highlight_state.clone());
             if line_i < self.syntax_cache.len() {
@@ -260,6 +310,18 @@ impl<'a> Edit for SyntaxEditor<'a> {
 
     fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>) {
         self.editor.insert_string(data, attrs_list);
+    }
+
+    fn apply_change(&mut self, change: &Change) -> bool {
+        self.editor.apply_change(change)
+    }
+
+    fn start_change(&mut self) {
+        self.editor.start_change();
+    }
+
+    fn finish_change(&mut self) -> Option<Change> {
+        self.editor.finish_change()
     }
 
     fn action(&mut self, font_system: &mut FontSystem, action: Action) {
