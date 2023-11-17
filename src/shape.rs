@@ -345,6 +345,7 @@ fn shape_skip(
             .map(|(i, codepoint)| {
                 let glyph_id = charmap.map(codepoint);
                 let x_advance = glyph_metrics.advance_width(glyph_id);
+                let attrs = attrs_list.get_span(i);
 
                 ShapeGlyph {
                     start: i,
