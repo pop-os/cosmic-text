@@ -64,8 +64,9 @@ impl Cursor {
 }
 
 /// Whether to associate cursors placed at a boundary between runs with the run before or after it.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd)]
 pub enum Affinity {
+    #[default]
     Before,
     After,
 }
@@ -93,12 +94,6 @@ impl Affinity {
         } else {
             Self::Before
         }
-    }
-}
-
-impl Default for Affinity {
-    fn default() -> Self {
-        Affinity::Before
     }
 }
 
@@ -601,13 +596,10 @@ impl Buffer {
     pub fn set_size(&mut self, font_system: &mut FontSystem, width: f32, height: f32) {
         let clamped_width = width.max(0.0);
         let clamped_height = height.max(0.0);
-
-        if clamped_width != self.width || clamped_height != self.height {
-            self.width = clamped_width;
-            self.height = clamped_height;
-            self.relayout(font_system);
-            self.shape_until_scroll(font_system);
-        }
+        self.width = clamped_width;
+        self.height = clamped_height;
+        self.relayout(font_system);
+        self.shape_until_scroll(font_system);
     }
 
     /// Get the current scroll location in terms of visual lines
@@ -680,7 +672,7 @@ impl Buffer {
         attrs: Attrs,
         shaping: Shaping,
     ) {
-        self.set_rich_text(font_system, [(text, attrs)], shaping);
+        self.set_rich_text(font_system, [(text, attrs)], attrs, shaping);
     }
 
     /// Set text of buffer, using an iterator of styled spans (pairs of text and attributes)
@@ -696,6 +688,7 @@ impl Buffer {
     ///         ("hello, ", attrs),
     ///         ("cosmic\ntext", attrs.family(Family::Monospace)),
     ///     ],
+    ///     attrs,
     ///     Shaping::Advanced,
     /// );
     /// ```
@@ -703,13 +696,14 @@ impl Buffer {
         &mut self,
         font_system: &mut FontSystem,
         spans: I,
+        default_attrs: Attrs,
         shaping: Shaping,
     ) where
         I: IntoIterator<Item = (&'s str, Attrs<'r>)>,
     {
         self.lines.clear();
 
-        let mut attrs_list = AttrsList::new(Attrs::new());
+        let mut attrs_list = AttrsList::new(default_attrs);
         let mut line_string = String::new();
         let mut end = 0;
         let (string, spans_data): (String, Vec<_>) = spans
@@ -738,7 +732,7 @@ impl Buffer {
                 // this is reached only if this text is empty
                 self.lines.push(BufferLine::new(
                     String::new(),
-                    AttrsList::new(Attrs::new()),
+                    AttrsList::new(default_attrs),
                     shaping,
                 ));
                 break;
@@ -752,7 +746,10 @@ impl Buffer {
                 let text_start = line_string.len();
                 line_string.push_str(text);
                 let text_end = line_string.len();
-                attrs_list.add_span(text_start..text_end, *attrs);
+                // Only add attrs if they don't match the defaults
+                if *attrs != attrs_list.defaults() {
+                    attrs_list.add_span(text_start..text_end, *attrs);
+                }
             }
 
             // we know that at the end of a line,
@@ -767,7 +764,7 @@ impl Buffer {
                 if maybe_line.is_some() {
                     // finalize this line and start a new line
                     let prev_attrs_list =
-                        core::mem::replace(&mut attrs_list, AttrsList::new(Attrs::new()));
+                        core::mem::replace(&mut attrs_list, AttrsList::new(default_attrs));
                     let prev_line_string = core::mem::take(&mut line_string);
                     let buffer_line = BufferLine::new(prev_line_string, prev_attrs_list, shaping);
                     self.lines.push(buffer_line);
@@ -1038,14 +1035,16 @@ impl<'a> BorrowedWithFontSystem<'a, Buffer> {
     ///         ("hello, ", attrs),
     ///         ("cosmic\ntext", attrs.family(Family::Monospace)),
     ///     ],
+    ///     attrs,
     ///     Shaping::Advanced,
     /// );
     /// ```
-    pub fn set_rich_text<'r, 's, I>(&mut self, spans: I, shaping: Shaping)
+    pub fn set_rich_text<'r, 's, I>(&mut self, spans: I, default_attrs: Attrs, shaping: Shaping)
     where
         I: IntoIterator<Item = (&'s str, Attrs<'r>)>,
     {
-        self.inner.set_rich_text(self.font_system, spans, shaping);
+        self.inner
+            .set_rich_text(self.font_system, spans, default_attrs, shaping);
     }
 
     /// Draw the buffer

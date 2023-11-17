@@ -61,10 +61,10 @@
 #![allow(clippy::new_without_default)]
 // TODO: address occurrences and then deny
 //
+// Overflows can produce unpredictable results and are only checked in debug builds
+#![allow(clippy::arithmetic_side_effects)]
 // Indexing a slice can cause panics and that is something we always want to avoid
 #![allow(clippy::indexing_slicing)]
-// Overflows can produce unpredictable results and are only checked in debug builds
-#![allow(clippy::integer_arithmetic)]
 // Soundness issues
 //
 // Dereferencing unaligned pointers may be undefined behavior

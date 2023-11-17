@@ -162,7 +162,7 @@ fn main() {
 
     editor
         .buffer_mut()
-        .set_rich_text(spans.iter().copied(), Shaping::Advanced);
+        .set_rich_text(spans.iter().copied(), attrs, Shaping::Advanced);
 
     let mut swash_cache = SwashCache::new();
 

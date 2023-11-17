@@ -350,6 +350,7 @@ fn shape_skip(
             .map(|(i, codepoint)| {
                 let glyph_id = charmap.map(codepoint);
                 let x_advance = glyph_metrics.advance_width(glyph_id);
+                let attrs = attrs_list.get_span(i);
 
                 ShapeGlyph {
                     start: i,
@@ -1261,12 +1262,10 @@ impl ShapeLine {
             layout_lines.push(LayoutLine {
                 w: if align != Align::Justified {
                     visual_line.w
+                } else if self.rtl {
+                    start_x - x
                 } else {
-                    if self.rtl {
-                        start_x - x
-                    } else {
-                        x
-                    }
+                    x
                 },
                 max_ascent,
                 max_descent,

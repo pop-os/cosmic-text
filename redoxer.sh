@@ -10,12 +10,12 @@ redoxer install \
     --path examples/editor-orbclient \
     --root "target/redoxer"
 
-cmd="env RUST_LOG=cosmic_text=debug,editor_orbclient=debug ./bin/editor-orbclient"
+args=(env RUST_LOG=cosmic_text=debug,editor_orbclient=debug /root/bin/editor-orbclient)
 if [ -f "$1" ]
 then
     filename="$(basename "$1")"
     cp "$1" "target/redoxer/${filename}"
-    cmd="${cmd} '${filename}'"
+    args+=("${filename}")
 fi
 
 cd target/redoxer
@@ -24,5 +24,4 @@ cd target/redoxer
 redoxer exec \
     --gui \
     --folder . \
-    /bin/sh -c \
-    "${cmd}"
+    "${args[@]}"
