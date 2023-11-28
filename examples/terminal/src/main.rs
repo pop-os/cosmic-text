@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+//! Run this example with `cargo run --package terminal`
+//! or `cargo run --package terminal -- "my own text"`
+
+use colored::Colorize;
 use cosmic_text::{Attrs, Buffer, Color, FontSystem, Metrics, Shaping, SwashCache};
-use std::cmp::{self, Ordering};
-use termion::{color, cursor};
+use std::fmt::Write;
 
 fn main() {
     // A FontSystem provides access to detected system fonts, create one per application
@@ -12,7 +15,9 @@ fn main() {
     let mut swash_cache = SwashCache::new();
 
     // Text metrics indicate the font size and line height of a buffer
-    let metrics = Metrics::new(14.0, 20.0);
+    const FONT_SIZE: f32 = 14.0;
+    const LINE_HEIGHT: f32 = FONT_SIZE * 1.2;
+    let metrics = Metrics::new(FONT_SIZE, LINE_HEIGHT);
 
     // A Buffer provides shaping and layout for a UTF-8 string, create one per text widget
     let mut buffer = Buffer::new(&mut font_system, metrics);
@@ -20,99 +25,57 @@ fn main() {
     let mut buffer = buffer.borrow_with(&mut font_system);
 
     // Set a size for the text buffer, in pixels
-    let width = 80u16;
-    let height = 25u16;
-    buffer.set_size(width as f32, height as f32);
+    let width = 80.0;
+    let height = f32::MAX; // The height is unbounded
+    buffer.set_size(width, height);
 
     // Attributes indicate what font to choose
     let attrs = Attrs::new();
 
     // Add some text!
-    buffer.set_text(" Hi, Rust! 🦀", attrs, Shaping::Advanced);
+    let text = std::env::args()
+        .nth(1)
+        .unwrap_or(" Hi, Rust! 🦀 ".to_string());
+    buffer.set_text(&text, attrs, Shaping::Advanced);
 
     // Perform shaping as desired
     buffer.shape_until_scroll();
 
     // Default text color (0xFF, 0xFF, 0xFF is white)
-    let text_color = Color::rgb(0xFF, 0xFF, 0xFF);
+    const TEXT_COLOR: Color = Color::rgb(0xFF, 0xFF, 0xFF);
 
-    // Start on a new line
-    println!();
+    // Set up the canvas
+    let width = buffer.size().0;
+    let height = LINE_HEIGHT * buffer.layout_runs().count() as f32;
+    let mut canvas = vec![vec![None; width as usize]; height as usize];
 
-    // Clear buffer with black background
-    for _y in 0..height {
-        for _x in 0..(buffer.size().0 as i32) {
-            print!(
-                "{} {}",
-                color::Bg(color::Rgb(0, 0, 0)),
-                color::Bg(color::Reset),
-            );
-        }
-        println!();
-    }
-
-    // Go back to start
-    print!("{}", cursor::Up(height));
-
-    // Print the buffer
-    let mut last_x = 0;
-    let mut last_y = 0;
-    buffer.draw(&mut swash_cache, text_color, |x, y, w, h, color| {
+    // Draw to the canvas
+    buffer.draw(&mut swash_cache, TEXT_COLOR, |x, y, w, h, color| {
         let a = color.a();
-        if a == 0 || x < 0 || y < 0 || w != 1 || h != 1 {
+        if a == 0 || x < 0 || x >= width as i32 || y < 0 || y >= height as i32 || w != 1 || h != 1 {
             // Ignore alphas of 0, or invalid x, y coordinates, or unimplemented sizes
             return;
         }
 
         // Scale by alpha (mimics blending with black)
-        let scale = |c: u8| cmp::max(0, cmp::min(255, ((c as i32) * (a as i32)) / 255)) as u8;
+        let scale = |c: u8| (c as i32 * a as i32 / 255).clamp(0, 255) as u8;
 
-        // Navigate to x coordinate
-        match x.cmp(&last_x) {
-            Ordering::Greater => {
-                print!("{}", cursor::Right((x - last_x) as u16));
-                last_x = x;
-            }
-            Ordering::Less => {
-                print!("{}", cursor::Left((last_x - x) as u16));
-                last_x = x;
-            }
-            Ordering::Equal => {}
-        }
-
-        // Navigate to y coordinate
-        match y.cmp(&last_y) {
-            Ordering::Greater => {
-                print!("{}", cursor::Down((y - last_y) as u16));
-                last_y = y;
-            }
-            Ordering::Less => {
-                print!("{}", cursor::Up((last_y - y) as u16));
-                last_y = y;
-            }
-            Ordering::Equal => {}
-        }
-
-        // Print a space with the expected color as the background
-        print!(
-            "{} {}",
-            color::Bg(color::Rgb(
-                scale(color.r()),
-                scale(color.g()),
-                scale(color.b()),
-            )),
-            color::Bg(color::Reset),
-        );
-
-        // Printing a space increases x coordinate
-        last_x += 1;
+        let r = scale(color.r());
+        let g = scale(color.g());
+        let b = scale(color.b());
+        canvas[y as usize][x as usize] = Some((r, g, b));
     });
 
-    // Skip over output
-    if last_x > 0 {
-        print!("{}", cursor::Left(last_x as u16));
+    // Render the canvas
+    let mut output = String::new();
+
+    for row in canvas {
+        for pixel in row {
+            let (r, g, b) = pixel.unwrap_or((0, 0, 0));
+            write!(&mut output, "{}", "  ".on_truecolor(r, g, b)).ok();
+        }
+        writeln!(&mut output).ok();
     }
-    if (last_y as u16) < height {
-        print!("{}", cursor::Down(height - last_y as u16));
-    }
+
+    print!("{}", output);
 }
