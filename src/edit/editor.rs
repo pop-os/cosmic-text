@@ -2,17 +2,14 @@
 
 #[cfg(not(feature = "std"))]
 use alloc::string::{String, ToString};
-use core::{
-    cmp::{self, Ordering},
-    iter::once,
-};
+use core::{cmp, iter::once};
 use unicode_segmentation::UnicodeSegmentation;
 
 #[cfg(feature = "swash")]
 use crate::Color;
 use crate::{
     Action, Affinity, AttrsList, Buffer, BufferLine, Change, ChangeItem, Cursor, Edit, FontSystem,
-    LayoutCursor, Shaping,
+    LayoutCursor, Selection, Shaping,
 };
 
 /// A wrapper of [`Buffer`] for easy editing
@@ -21,7 +18,7 @@ pub struct Editor {
     buffer: Buffer,
     cursor: Cursor,
     cursor_x_opt: Option<i32>,
-    select_opt: Option<Cursor>,
+    selection: Selection,
     cursor_moved: bool,
     auto_indent: bool,
     tab_width: u16,
@@ -35,7 +32,7 @@ impl Editor {
             buffer,
             cursor: Cursor::default(),
             cursor_x_opt: None,
-            select_opt: None,
+            selection: Selection::None,
             cursor_moved: false,
             auto_indent: false,
             tab_width: 4,
@@ -249,13 +246,13 @@ impl Edit for Editor {
         }
     }
 
-    fn select_opt(&self) -> Option<Cursor> {
-        self.select_opt
+    fn selection(&self) -> Selection {
+        self.selection
     }
 
-    fn set_select_opt(&mut self, select_opt: Option<Cursor>) {
-        if self.select_opt != select_opt {
-            self.select_opt = select_opt;
+    fn set_selection(&mut self, selection: Selection) {
+        if self.selection != selection {
+            self.selection = selection;
             self.buffer.set_redraw(true);
         }
     }
@@ -293,21 +290,7 @@ impl Edit for Editor {
     }
 
     fn copy_selection(&self) -> Option<String> {
-        let select = self.select_opt?;
-
-        let (start, end) = match select.line.cmp(&self.cursor.line) {
-            cmp::Ordering::Greater => (self.cursor, select),
-            cmp::Ordering::Less => (select, self.cursor),
-            cmp::Ordering::Equal => {
-                /* select.line == self.cursor.line */
-                if select.index < self.cursor.index {
-                    (select, self.cursor)
-                } else {
-                    /* select.index >= self.cursor.index */
-                    (self.cursor, select)
-                }
-            }
-        };
+        let (start, end) = self.selection_bounds()?;
 
         let mut selection = String::new();
         // Take the selection from the first line
@@ -337,23 +320,9 @@ impl Edit for Editor {
     }
 
     fn delete_selection(&mut self) -> bool {
-        let select = match self.select_opt.take() {
+        let (start, end) = match self.selection_bounds() {
             Some(some) => some,
             None => return false,
-        };
-
-        let (start, end) = match select.line.cmp(&self.cursor.line) {
-            cmp::Ordering::Greater => (self.cursor, select),
-            cmp::Ordering::Less => (select, self.cursor),
-            cmp::Ordering::Equal => {
-                /* select.line == self.cursor.line */
-                if select.index < self.cursor.index {
-                    (select, self.cursor)
-                } else {
-                    /* select.index >= self.cursor.index */
-                    (self.cursor, select)
-                }
-            }
         };
 
         // Reset cursor to start of selection
@@ -575,23 +544,25 @@ impl Edit for Editor {
                 // TODO more efficient
                 let lines = px / self.buffer.metrics().line_height as i32;
                 match lines.cmp(&0) {
-                    Ordering::Less => {
+                    cmp::Ordering::Less => {
                         for _ in 0..-lines {
                             self.action(font_system, Action::Up);
                         }
                     }
-                    Ordering::Greater => {
+                    cmp::Ordering::Greater => {
                         for _ in 0..lines {
                             self.action(font_system, Action::Down);
                         }
                     }
-                    Ordering::Equal => {}
+                    cmp::Ordering::Equal => {}
                 }
             }
             Action::Escape => {
-                if self.select_opt.take().is_some() {
-                    self.buffer.set_redraw(true);
+                match self.selection {
+                    Selection::None => {}
+                    _ => self.buffer.set_redraw(true),
                 }
+                self.selection = Selection::None;
             }
             Action::Insert(character) => {
                 if character.is_control() && !['\t', '\n', '\u{92}'].contains(&character) {
@@ -688,20 +659,8 @@ impl Edit for Editor {
             }
             Action::Indent => {
                 // Get start and end of selection
-                let (start, end) = match self.select_opt {
-                    Some(select) => match select.line.cmp(&self.cursor.line) {
-                        cmp::Ordering::Greater => (self.cursor, select),
-                        cmp::Ordering::Less => (select, self.cursor),
-                        cmp::Ordering::Equal => {
-                            /* select.line == self.cursor.line */
-                            if select.index < self.cursor.index {
-                                (select, self.cursor)
-                            } else {
-                                /* select.index >= self.cursor.index */
-                                (self.cursor, select)
-                            }
-                        }
-                    },
+                let (start, end) = match self.selection_bounds() {
+                    Some(some) => some,
                     None => (self.cursor, self.cursor),
                 };
 
@@ -746,9 +705,17 @@ impl Edit for Editor {
                     }
 
                     // Adjust selection
-                    if let Some(ref mut select) = self.select_opt {
-                        if select.line == line_i && select.index >= after_whitespace {
-                            select.index += required_indent;
+                    match self.selection {
+                        Selection::None => {}
+                        Selection::Normal(ref mut select) => {
+                            if select.line == line_i && select.index >= after_whitespace {
+                                select.index += required_indent;
+                            }
+                        }
+                        Selection::Line(ref mut select) => {
+                            if select.line == line_i && select.index >= after_whitespace {
+                                select.index += required_indent;
+                            }
                         }
                     }
 
@@ -758,20 +725,8 @@ impl Edit for Editor {
             }
             Action::Unindent => {
                 // Get start and end of selection
-                let (start, end) = match self.select_opt {
-                    Some(select) => match select.line.cmp(&self.cursor.line) {
-                        cmp::Ordering::Greater => (self.cursor, select),
-                        cmp::Ordering::Less => (select, self.cursor),
-                        cmp::Ordering::Equal => {
-                            /* select.line == self.cursor.line */
-                            if select.index < self.cursor.index {
-                                (select, self.cursor)
-                            } else {
-                                /* select.index >= self.cursor.index */
-                                (self.cursor, select)
-                            }
-                        }
-                    },
+                let (start, end) = match self.selection_bounds() {
+                    Some(some) => some,
                     None => (self.cursor, self.cursor),
                 };
 
@@ -814,9 +769,12 @@ impl Edit for Editor {
                     }
 
                     // Adjust selection
-                    if let Some(ref mut select) = self.select_opt {
-                        if select.line == line_i && select.index > last_indent {
-                            select.index -= after_whitespace - last_indent;
+                    match self.selection {
+                        Selection::None => {}
+                        Selection::Normal(ref mut select) | Selection::Line(ref mut select) => {
+                            if select.line == line_i && select.index > last_indent {
+                                select.index -= after_whitespace - last_indent;
+                            }
                         }
                     }
 
@@ -825,7 +783,7 @@ impl Edit for Editor {
                 }
             }
             Action::Click { x, y } => {
-                self.select_opt = None;
+                self.set_selection(Selection::None);
 
                 if let Some(new_cursor) = self.buffer.hit(x as f32, y as f32) {
                     if new_cursor != self.cursor {
@@ -837,8 +795,8 @@ impl Edit for Editor {
                 }
             }
             Action::Drag { x, y } => {
-                if self.select_opt.is_none() {
-                    self.select_opt = Some(self.cursor);
+                if self.selection == Selection::None {
+                    self.selection = Selection::Normal(self.cursor);
                     self.buffer.set_redraw(true);
                 }
 
@@ -1012,21 +970,7 @@ impl Edit for Editor {
             };
 
             // Highlight selection (TODO: HIGHLIGHT COLOR!)
-            if let Some(select) = self.select_opt {
-                let (start, end) = match select.line.cmp(&self.cursor.line) {
-                    cmp::Ordering::Greater => (self.cursor, select),
-                    cmp::Ordering::Less => (select, self.cursor),
-                    cmp::Ordering::Equal => {
-                        /* select.line == self.cursor.line */
-                        if select.index < self.cursor.index {
-                            (select, self.cursor)
-                        } else {
-                            /* select.index >= self.cursor.index */
-                            (self.cursor, select)
-                        }
-                    }
-                };
-
+            if let Some((start, end)) = self.selection_bounds() {
                 if line_i >= start.line && line_i <= end.line {
                     let mut range_opt = None;
                     for glyph in run.glyphs.iter() {

@@ -5,7 +5,7 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
     Action, AttrsList, BorrowedWithFontSystem, Buffer, Change, Color, Cursor, Edit, FontSystem,
-    SyntaxEditor, SyntaxTheme,
+    Selection, SyntaxEditor, SyntaxTheme,
 };
 
 pub use modit::{ViMode, ViParser};
@@ -146,7 +146,7 @@ fn select_in<E: Edit>(editor: &mut E, start_c: char, end_c: char, include: bool)
         }
     }
 
-    editor.set_select_opt(Some(start));
+    editor.set_selection(Selection::Normal(start));
     editor.set_cursor(end);
 }
 
@@ -264,12 +264,12 @@ impl<'a> Edit for ViEditor<'a> {
         self.editor.set_cursor(cursor);
     }
 
-    fn select_opt(&self) -> Option<Cursor> {
-        self.editor.select_opt()
+    fn selection(&self) -> Selection {
+        self.editor.selection()
     }
 
-    fn set_select_opt(&mut self, select_opt: Option<Cursor>) {
-        self.editor.set_select_opt(select_opt);
+    fn set_selection(&mut self, selection: Selection) {
+        self.editor.set_selection(selection);
     }
 
     fn auto_indent(&self) -> bool {
@@ -357,7 +357,12 @@ impl<'a> Edit for ViEditor<'a> {
             }
         };
 
-        self.parser.parse(key, false, |event| {
+        let has_selection = match editor.selection() {
+            Selection::None => false,
+            _ => true,
+        };
+
+        self.parser.parse(key, has_selection, |event| {
             log::info!("  Event {:?}", event);
             let action = match event {
                 Event::AutoIndent => {
@@ -390,12 +395,17 @@ impl<'a> Edit for ViEditor<'a> {
                     return;
                 }
                 Event::SelectClear => {
-                    editor.set_select_opt(None);
+                    editor.set_selection(Selection::None);
                     return;
                 }
                 Event::SelectStart => {
                     let cursor = editor.cursor();
-                    editor.set_select_opt(Some(cursor));
+                    editor.set_selection(Selection::Normal(cursor));
+                    return;
+                }
+                Event::SelectLineStart => {
+                    let cursor = editor.cursor();
+                    editor.set_selection(Selection::Line(cursor));
                     return;
                 }
                 Event::SelectTextObject(text_object, include) => {
@@ -409,7 +419,7 @@ impl<'a> Edit for ViEditor<'a> {
                                 Some((value, _)) => {
                                     if search(editor, value, forwards) {
                                         let mut cursor = editor.cursor();
-                                        editor.set_select_opt(Some(cursor));
+                                        editor.set_selection(Selection::Normal(cursor));
                                         //TODO: traverse lines if necessary
                                         cursor.index += value.len();
                                         editor.set_cursor(cursor);
@@ -423,7 +433,7 @@ impl<'a> Edit for ViEditor<'a> {
                         TextObject::Ticks => select_in(editor, '`', '`', include),
                         TextObject::Word(word) => {
                             let mut cursor = editor.cursor();
-                            let mut select_opt = editor.select_opt();
+                            let mut selection = editor.selection();
                             let buffer = editor.buffer();
                             let text = buffer.lines[cursor.line].text();
                             match WordIter::new(text, word)
@@ -431,14 +441,14 @@ impl<'a> Edit for ViEditor<'a> {
                             {
                                 Some((i, w)) => {
                                     cursor.index = i;
-                                    select_opt = Some(cursor);
+                                    selection = Selection::Normal(cursor);
                                     cursor.index += w.len();
                                 }
                                 None => {
                                     //TODO
                                 }
                             }
-                            editor.set_select_opt(select_opt);
+                            editor.set_selection(selection);
                             editor.set_cursor(cursor);
                         }
                         _ => {
@@ -809,21 +819,7 @@ impl<'a> Edit for ViEditor<'a> {
             };
 
             // Highlight selection (TODO: HIGHLIGHT COLOR!)
-            if let Some(select) = self.select_opt() {
-                let (start, end) = match select.line.cmp(&self.cursor().line) {
-                    cmp::Ordering::Greater => (self.cursor(), select),
-                    cmp::Ordering::Less => (select, self.cursor()),
-                    cmp::Ordering::Equal => {
-                        /* select.line == self.cursor.line */
-                        if select.index < self.cursor().index {
-                            (select, self.cursor())
-                        } else {
-                            /* select.index >= self.cursor.index */
-                            (self.cursor(), select)
-                        }
-                    }
-                };
-
+            if let Some((start, end)) = self.selection_bounds() {
                 if line_i >= start.line && line_i <= end.line {
                     let mut range_opt = None;
                     for glyph in run.glyphs.iter() {

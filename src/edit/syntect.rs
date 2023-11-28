@@ -9,7 +9,7 @@ use syntect::parsing::{ParseState, ScopeStack, SyntaxReference, SyntaxSet};
 
 use crate::{
     Action, AttrsList, BorrowedWithFontSystem, Buffer, Change, Color, Cursor, Edit, Editor,
-    FontSystem, Shaping, Style, Weight, Wrap,
+    FontSystem, Selection, Shaping, Style, Weight, Wrap,
 };
 
 pub use syntect::highlighting::Theme as SyntaxTheme;
@@ -158,12 +158,12 @@ impl<'a> Edit for SyntaxEditor<'a> {
         self.editor.set_cursor(cursor);
     }
 
-    fn select_opt(&self) -> Option<Cursor> {
-        self.editor.select_opt()
+    fn selection(&self) -> Selection {
+        self.editor.selection()
     }
 
-    fn set_select_opt(&mut self, select_opt: Option<Cursor>) {
-        self.editor.set_select_opt(select_opt);
+    fn set_selection(&mut self, selection: Selection) {
+        self.editor.set_selection(selection);
     }
 
     fn auto_indent(&self) -> bool {
