@@ -1,4 +1,4 @@
-use alloc::string::String;
+use alloc::{collections::BTreeMap, string::String};
 use core::cmp;
 use modit::{Event, Key, Motion, Parser, TextObject, WordIter};
 use unicode_segmentation::UnicodeSegmentation;
@@ -155,6 +155,7 @@ pub struct ViEditor<'a> {
     editor: SyntaxEditor<'a>,
     parser: ViParser,
     passthrough: bool,
+    registers: BTreeMap<char, (Selection, String)>,
     search_opt: Option<(String, bool)>,
     commands: cosmic_undo_2::Commands<Change>,
     changed: bool,
@@ -166,6 +167,7 @@ impl<'a> ViEditor<'a> {
             editor,
             parser: ViParser::new(),
             passthrough: false,
+            registers: BTreeMap::new(),
             search_opt: None,
             commands: cosmic_undo_2::Commands::new(),
             changed: false,
@@ -378,16 +380,18 @@ impl<'a> Edit for ViEditor<'a> {
                     finish_change(editor, &mut self.commands, &mut self.changed);
                     return;
                 }
-                Event::Copy => {
-                    log::info!("TODO");
-                    return;
-                }
                 Event::Delete => Action::Delete,
                 Event::Escape => Action::Escape,
                 Event::Insert(c) => Action::Insert(c),
                 Event::NewLine => Action::Enter,
-                Event::Paste => {
-                    log::info!("TODO");
+                Event::Put { register, after } => {
+                    if let Some((selection, data)) = self.registers.get(&register) {
+                        editor.start_change();
+                        editor.delete_selection();
+                        //TODO: handle after/before and select by line
+                        editor.insert_string(data, None);
+                        finish_change(editor, &mut self.commands, &mut self.changed);
+                    }
                     return;
                 }
                 Event::Redraw => {
@@ -470,6 +474,12 @@ impl<'a> Edit for ViEditor<'a> {
                 Event::Undo => {
                     for action in self.commands.undo() {
                         undo_2_action(editor, action);
+                    }
+                    return;
+                }
+                Event::Yank { register } => {
+                    if let Some(data) = editor.copy_selection() {
+                        self.registers.insert(register, (editor.selection(), data));
                     }
                     return;
                 }
