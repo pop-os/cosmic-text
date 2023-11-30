@@ -480,7 +480,7 @@ impl Buffer {
         let scroll_end = self.scroll + lines;
         let total_layout = self.shape_until(font_system, scroll_end);
 
-        self.scroll = cmp::max(0, cmp::min(total_layout - (lines - 1), self.scroll));
+        self.scroll = cmp::max(0, cmp::min(total_layout - lines, self.scroll));
     }
 
     pub fn layout_cursor(&self, cursor: &Cursor) -> LayoutCursor {
