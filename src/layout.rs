@@ -8,7 +8,7 @@ use alloc::vec::Vec;
 use crate::{CacheKey, Color};
 
 /// A laid out glyph
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct LayoutGlyph {
     /// Start index of cluster in original line
     pub start: usize,
@@ -52,7 +52,7 @@ pub struct LayoutGlyph {
     pub metadata: usize,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct PhysicalGlyph {
     /// Cache key, see [CacheKey]
     pub cache_key: CacheKey,
@@ -82,7 +82,7 @@ impl LayoutGlyph {
 }
 
 /// A line of laid out glyphs
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct LayoutLine {
     /// Width of the line
     pub w: f32,
