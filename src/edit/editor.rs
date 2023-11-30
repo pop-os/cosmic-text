@@ -328,6 +328,9 @@ impl Edit for Editor {
         // Reset cursor to start of selection
         self.cursor = start;
 
+        // Reset selection to None
+        self.selection = Selection::None;
+
         // Delete from start to end of selection
         self.delete_range(start, end);
 
