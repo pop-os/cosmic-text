@@ -376,6 +376,14 @@ impl<'a> Edit for ViEditor<'a> {
                     return;
                 }
                 Event::Backspace => Action::Backspace,
+                Event::BackspaceInLine => {
+                    let cursor = editor.cursor();
+                    if cursor.index > 0 {
+                        Action::Backspace
+                    } else {
+                        return;
+                    }
+                }
                 Event::ChangeStart => {
                     editor.start_change();
                     return;
@@ -385,15 +393,67 @@ impl<'a> Edit for ViEditor<'a> {
                     return;
                 }
                 Event::Delete => Action::Delete,
+                Event::DeleteInLine => {
+                    let cursor = editor.cursor();
+                    let buffer = editor.buffer();
+                    if cursor.index < buffer.lines[cursor.line].text().len() {
+                        Action::Delete
+                    } else {
+                        return;
+                    }
+                }
                 Event::Escape => Action::Escape,
                 Event::Insert(c) => Action::Insert(c),
                 Event::NewLine => Action::Enter,
                 Event::Put { register, after } => {
                     if let Some((selection, data)) = self.registers.get(&register) {
                         editor.start_change();
-                        editor.delete_selection();
-                        //TODO: handle after/before and select by line
-                        editor.insert_string(data, None);
+                        if editor.delete_selection() {
+                            editor.insert_string(data, None);
+                        } else {
+                            match selection {
+                                Selection::Normal(_) | Selection::None => {
+                                    let mut cursor = editor.cursor();
+                                    if after {
+                                        let buffer = editor.buffer();
+                                        let text = buffer.lines[cursor.line].text();
+                                        if let Some(c) = text[cursor.index..].chars().next() {
+                                            cursor.index += c.len_utf8();
+                                        }
+                                        editor.set_cursor(cursor);
+                                    }
+                                    editor.insert_at(cursor, data, None);
+                                }
+                                Selection::Line(_) => {
+                                    let mut cursor = editor.cursor();
+                                    if after {
+                                        // Insert at next line
+                                        cursor.line += 1;
+                                    } else {
+                                        // Previous line will be moved down, so set cursor to next line
+                                        cursor.line += 1;
+                                        editor.set_cursor(cursor);
+                                        cursor.line -= 1;
+                                    }
+                                    // Insert at start of line
+                                    cursor.index = 0;
+
+                                    // Insert text
+                                    editor.insert_at(cursor, "\n", None);
+                                    editor.insert_at(cursor, data, None);
+
+                                    // Hack to allow immediate up/down
+                                    editor.shape_as_needed(font_system);
+
+                                    // Move to inserted line, preserving cursor x position
+                                    if after {
+                                        editor.action(font_system, Action::Down);
+                                    } else {
+                                        editor.action(font_system, Action::Up);
+                                    }
+                                }
+                            }
+                        }
                         finish_change(editor, &mut self.commands, &mut self.changed);
                     }
                     return;
