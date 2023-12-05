@@ -300,16 +300,20 @@ impl<'a> Edit for SyntaxEditor<'a> {
         self.editor.shape_as_needed(font_system);
     }
 
+    fn delete_range(&mut self, start: Cursor, end: Cursor) {
+        self.editor.delete_range(start, end);
+    }
+
+    fn insert_at(&mut self, cursor: Cursor, data: &str, attrs_list: Option<AttrsList>) -> Cursor {
+        self.editor.insert_at(cursor, data, attrs_list)
+    }
+
     fn copy_selection(&self) -> Option<String> {
         self.editor.copy_selection()
     }
 
     fn delete_selection(&mut self) -> bool {
         self.editor.delete_selection()
-    }
-
-    fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>) {
-        self.editor.insert_string(data, attrs_list);
     }
 
     fn apply_change(&mut self, change: &Change) -> bool {

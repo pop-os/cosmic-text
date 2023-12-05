@@ -73,6 +73,72 @@ impl Editor {
             self.buffer.set_redraw(true);
         }
     }
+}
+
+impl Edit for Editor {
+    fn buffer(&self) -> &Buffer {
+        &self.buffer
+    }
+
+    fn buffer_mut(&mut self) -> &mut Buffer {
+        &mut self.buffer
+    }
+
+    fn cursor(&self) -> Cursor {
+        self.cursor
+    }
+
+    fn set_cursor(&mut self, cursor: Cursor) {
+        if self.cursor != cursor {
+            self.cursor = cursor;
+            self.cursor_moved = true;
+            self.cursor_x_opt = None;
+            self.buffer.set_redraw(true);
+        }
+    }
+
+    fn selection(&self) -> Selection {
+        self.selection
+    }
+
+    fn set_selection(&mut self, selection: Selection) {
+        if self.selection != selection {
+            self.selection = selection;
+            self.buffer.set_redraw(true);
+        }
+    }
+
+    fn auto_indent(&self) -> bool {
+        self.auto_indent
+    }
+
+    fn set_auto_indent(&mut self, auto_indent: bool) {
+        self.auto_indent = auto_indent;
+    }
+
+    fn tab_width(&self) -> u16 {
+        self.tab_width
+    }
+
+    fn set_tab_width(&mut self, tab_width: u16) {
+        // A tab width of 0 is not allowed
+        if tab_width == 0 {
+            return;
+        }
+        if self.tab_width != tab_width {
+            self.tab_width = tab_width;
+            self.buffer.set_redraw(true);
+        }
+    }
+
+    fn shape_as_needed(&mut self, font_system: &mut FontSystem) {
+        if self.cursor_moved {
+            self.buffer.shape_until_cursor(font_system, self.cursor);
+            self.cursor_moved = false;
+        } else {
+            self.buffer.shape_until_scroll(font_system);
+        }
+    }
 
     fn delete_range(&mut self, start: Cursor, end: Cursor) {
         // Collect removed data for change tracking
@@ -222,72 +288,6 @@ impl Editor {
 
         cursor
     }
-}
-
-impl Edit for Editor {
-    fn buffer(&self) -> &Buffer {
-        &self.buffer
-    }
-
-    fn buffer_mut(&mut self) -> &mut Buffer {
-        &mut self.buffer
-    }
-
-    fn cursor(&self) -> Cursor {
-        self.cursor
-    }
-
-    fn set_cursor(&mut self, cursor: Cursor) {
-        if self.cursor != cursor {
-            self.cursor = cursor;
-            self.cursor_moved = true;
-            self.cursor_x_opt = None;
-            self.buffer.set_redraw(true);
-        }
-    }
-
-    fn selection(&self) -> Selection {
-        self.selection
-    }
-
-    fn set_selection(&mut self, selection: Selection) {
-        if self.selection != selection {
-            self.selection = selection;
-            self.buffer.set_redraw(true);
-        }
-    }
-
-    fn auto_indent(&self) -> bool {
-        self.auto_indent
-    }
-
-    fn set_auto_indent(&mut self, auto_indent: bool) {
-        self.auto_indent = auto_indent;
-    }
-
-    fn tab_width(&self) -> u16 {
-        self.tab_width
-    }
-
-    fn set_tab_width(&mut self, tab_width: u16) {
-        // A tab width of 0 is not allowed
-        if tab_width == 0 {
-            return;
-        }
-        if self.tab_width != tab_width {
-            self.tab_width = tab_width;
-            self.buffer.set_redraw(true);
-        }
-    }
-
-    fn shape_as_needed(&mut self, font_system: &mut FontSystem) {
-        if self.cursor_moved {
-            self.buffer.shape_until_cursor(font_system, self.cursor);
-            self.cursor_moved = false;
-        } else {
-            self.buffer.shape_until_scroll(font_system);
-        }
-    }
 
     fn copy_selection(&self) -> Option<String> {
         let (start, end) = self.selection_bounds()?;
@@ -335,12 +335,6 @@ impl Edit for Editor {
         self.delete_range(start, end);
 
         true
-    }
-
-    fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>) {
-        self.delete_selection();
-        let new_cursor = self.insert_at(self.cursor, data, attrs_list);
-        self.set_cursor(new_cursor);
     }
 
     fn apply_change(&mut self, change: &Change) -> bool {

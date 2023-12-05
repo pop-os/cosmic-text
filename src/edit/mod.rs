@@ -220,6 +220,12 @@ pub trait Edit {
     /// Shape lines until scroll, after adjusting scroll if the cursor moved
     fn shape_as_needed(&mut self, font_system: &mut FontSystem);
 
+    /// Delete text starting at start Cursor and ending at end Cursor
+    fn delete_range(&mut self, start: Cursor, end: Cursor);
+
+    /// Insert text at specified cursor with specified attrs_list
+    fn insert_at(&mut self, cursor: Cursor, data: &str, attrs_list: Option<AttrsList>) -> Cursor;
+
     /// Copy selection
     fn copy_selection(&self) -> Option<String>;
 
@@ -229,7 +235,11 @@ pub trait Edit {
 
     /// Insert a string at the current cursor or replacing the current selection with the given
     /// attributes, or with the previous character's attributes if None is given.
-    fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>);
+    fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>) {
+        self.delete_selection();
+        let new_cursor = self.insert_at(self.cursor(), data, attrs_list);
+        self.set_cursor(new_cursor);
+    }
 
     /// Apply a change
     fn apply_change(&mut self, change: &Change) -> bool;
