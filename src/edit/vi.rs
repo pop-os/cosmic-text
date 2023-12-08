@@ -230,7 +230,7 @@ impl<'a> ViEditor<'a> {
 
     /// Redo a change
     pub fn redo(&mut self) {
-        log::info!("Redo");
+        log::debug!("Redo");
         for action in self.commands.redo() {
             undo_2_action(&mut self.editor, action);
             //TODO: clear changed flag when back to last saved state?
@@ -240,7 +240,7 @@ impl<'a> ViEditor<'a> {
 
     /// Undo a change
     pub fn undo(&mut self) {
-        log::info!("Undo");
+        log::debug!("Undo");
         for action in self.commands.undo() {
             undo_2_action(&mut self.editor, action);
             //TODO: clear changed flag when back to last saved state?
@@ -323,7 +323,7 @@ impl<'a> Edit for ViEditor<'a> {
     }
 
     fn action(&mut self, font_system: &mut FontSystem, action: Action) {
-        log::info!("Action {:?}", action);
+        log::debug!("Action {:?}", action);
 
         let editor = &mut self.editor;
 
@@ -355,7 +355,7 @@ impl<'a> Edit for ViEditor<'a> {
             Action::Unindent => Key::Backtab,
             Action::Up => Key::Up,
             _ => {
-                log::info!("pass through action {:?}", action);
+                log::debug!("Pass through action {:?}", action);
                 editor.action(font_system, action);
                 // Always finish change when passing through (TODO: group changes)
                 finish_change(editor, &mut self.commands, &mut self.changed);
@@ -369,10 +369,10 @@ impl<'a> Edit for ViEditor<'a> {
         };
 
         self.parser.parse(key, has_selection, |event| {
-            log::info!("  Event {:?}", event);
+            log::debug!("  Event {:?}", event);
             let action = match event {
                 Event::AutoIndent => {
-                    log::info!("TODO");
+                    log::info!("TODO: AutoIndent");
                     return;
                 }
                 Event::Backspace => Action::Backspace,
@@ -532,7 +532,7 @@ impl<'a> Edit for ViEditor<'a> {
                 Event::ShiftLeft => Action::Unindent,
                 Event::ShiftRight => Action::Indent,
                 Event::SwapCase => {
-                    log::info!("TODO");
+                    log::info!("TODO: SwapCase");
                     return;
                 }
                 Event::Undo => {
