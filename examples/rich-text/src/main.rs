@@ -155,6 +155,12 @@ fn main() {
         ("R", attrs.color(Color::rgb(0xFF, 0x7F, 0x00))),
         ("N\n", attrs.color(Color::rgb(0xFF, 0x00, 0x00))),
         (
+            "\n",
+            attrs
+                .color(Color::rgb(0xFF, 0x00, 0x00))
+                .line_height(LineHeight::Absolute(100.)),
+        ),
+        (
             "生活,삶,जिंदगी 😀 FPS\n",
             attrs.color(Color::rgb(0xFF, 0x00, 0x00)),
         ),

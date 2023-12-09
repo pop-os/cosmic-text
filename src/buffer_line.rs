@@ -221,10 +221,17 @@ impl BufferLine {
         if self.layout_opt.is_none() {
             self.wrap = wrap;
             let align = self.align;
-            let shape = self.shape_in_buffer(scratch, font_system);
 
             let mut layout = Vec::with_capacity(1);
-            shape.layout_to_buffer(scratch, width, wrap, align, &mut layout);
+            let empty_height = if let Some(span) = &self.attrs_list().spans().first() {
+                span.1.line_height.height(span.1.font_size)
+            } else {
+                //TODO: figure out what empty lines without any span info should do.. previosly they defaulted to zero
+                let attrs = self.attrs_list().defaults();
+                attrs.line_height.height(attrs.font_size)
+            };
+            let shape = self.shape_in_buffer(scratch, font_system);
+            shape.layout_to_buffer(scratch, width, wrap, align, &mut layout, empty_height);
 
             let line_heights = layout.iter().map(|line| line.line_height()).collect();
 
@@ -246,7 +253,8 @@ impl BufferLine {
 
     /// Get line height cache
     pub fn line_heights(&self) -> Option<&[f32]> {
-        self.layout_opt.as_ref().map(|l| l.line_heights.as_ref())
+        let r = self.layout_opt.as_ref().map(|l| l.line_heights.as_ref());
+        r
     }
 }
 

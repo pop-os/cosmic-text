@@ -24,12 +24,12 @@ fn stable_wrap() {
     let mut check_wrap = |text: &_, wrap, start_width| {
         let line = ShapeLine::new(&mut font_system, text, &attrs, Shaping::Advanced);
 
-        let layout_unbounded = line.layout(start_width, wrap, Some(Align::Left));
-        let max_width = layout_unbounded.iter().map(|l| l.w).fold(0.0, f32::max);
+        let layout_unbounded = line.layout(start_width, wrap, Some(Align::Left), 20.0);
+        let max_width = layout_unbounded.iter().map(|l| l.width).fold(0.0, f32::max);
         let new_limit = f32::min(start_width, max_width);
 
-        let layout_bounded = line.layout(new_limit, wrap, Some(Align::Left));
-        let bounded_max_width = layout_bounded.iter().map(|l| l.w).fold(0.0, f32::max);
+        let layout_bounded = line.layout(new_limit, wrap, Some(Align::Left), 20.0);
+        let bounded_max_width = layout_bounded.iter().map(|l| l.width).fold(0.0, f32::max);
 
         // For debugging:
         // dbg_layout_lines(text, &layout_unbounded);
@@ -41,7 +41,7 @@ fn stable_wrap() {
             "Wrap \"{wrap:?}\" with text: \"{text}\"",
         );
         for (u, b) in layout_unbounded[1..].iter().zip(layout_bounded[1..].iter()) {
-            assert_eq!(u.w, b.w, "Wrap {wrap:?} with text: \"{text}\"",);
+            assert_eq!(u.width, b.width, "Wrap {wrap:?} with text: \"{text}\"",);
         }
     };
 
