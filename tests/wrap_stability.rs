@@ -14,7 +14,7 @@ fn stable_wrap() {
         Attrs::new()
             .family(Family::Name("FiraMono"))
             .weight(Weight::MEDIUM)
-            .size(font_size),
+            .font_size(font_size),
     );
     let mut font_system =
         FontSystem::new_with_locale_and_db("en-US".into(), fontdb::Database::new());

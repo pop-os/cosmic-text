@@ -94,7 +94,7 @@ impl DrawTestCfg {
             &self.text,
             self.font
                 .as_attrs()
-                .size(self.font_size)
+                .font_size(self.font_size)
                 .line_height(cosmic_text::LineHeight::Absolute(self.line_height)),
             Shaping::Advanced,
         );
