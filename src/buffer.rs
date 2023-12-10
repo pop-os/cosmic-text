@@ -746,10 +746,7 @@ impl Buffer {
                 let text_start = line_string.len();
                 line_string.push_str(text);
                 let text_end = line_string.len();
-                // Only add attrs if they don't match the defaults
-                if *attrs != attrs_list.defaults() {
-                    attrs_list.add_span(text_start..text_end, *attrs);
-                }
+                attrs_list.add_span(text_start..text_end, *attrs);
             }
 
             // we know that at the end of a line,
