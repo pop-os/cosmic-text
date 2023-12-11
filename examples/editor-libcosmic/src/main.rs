@@ -70,7 +70,7 @@ impl FontSize {
 
     pub fn to_attrs(self) -> Attrs<'static> {
         Attrs::new()
-            .size(self.to_font_size())
+            .font_size(self.to_font_size())
             .line_height(self.to_line_height())
     }
 }
@@ -252,7 +252,7 @@ impl Application for Window {
                 self.font_size = font_size;
                 self.attrs = self
                     .attrs
-                    .size(font_size.to_font_size())
+                    .font_size(font_size.to_font_size())
                     .line_height(font_size.to_line_height());
 
                 let mut editor = self.editor.lock().unwrap();

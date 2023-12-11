@@ -652,7 +652,7 @@ pub struct ShapeLine {
 // Visual Line Ranges: (span_index, (first_word_index, first_glyph_index), (last_word_index, last_glyph_index))
 type VlRange = (usize, (usize, usize), (usize, usize));
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 struct VisualLine {
     ranges: Vec<VlRange>,
     spaces: u32,
@@ -866,7 +866,13 @@ impl ShapeLine {
         runs
     }
 
-    pub fn layout(&self, line_width: f32, wrap: Wrap, align: Option<Align>) -> Vec<LayoutLine> {
+    pub fn layout(
+        &self,
+        line_width: f32,
+        wrap: Wrap,
+        align: Option<Align>,
+        empty_height: f32,
+    ) -> Vec<LayoutLine> {
         let mut lines = Vec::with_capacity(1);
         self.layout_to_buffer(
             &mut ShapeBuffer::default(),
@@ -874,6 +880,7 @@ impl ShapeLine {
             wrap,
             align,
             &mut lines,
+            empty_height,
         );
         lines
     }
@@ -885,6 +892,8 @@ impl ShapeLine {
         wrap: Wrap,
         align: Option<Align>,
         layout_lines: &mut Vec<LayoutLine>,
+        // height used to layout empty lines
+        empty_height: f32,
     ) {
         // For each visual line a list of  (span index,  and range of words in that span)
         // Note that a BiDi visual line could have multiple spans or parts of them
@@ -1259,28 +1268,20 @@ impl ShapeLine {
                 }
             }
 
-            layout_lines.push(LayoutLine {
-                w: if align != Align::Justified {
-                    visual_line.w
-                } else if self.rtl {
-                    start_x - x
-                } else {
-                    x
-                },
-                max_ascent,
-                max_descent,
-                glyphs,
-            });
+            let width = if align != Align::Justified {
+                visual_line.w
+            } else if self.rtl {
+                start_x - x
+            } else {
+                x
+            };
+            layout_lines.push(LayoutLine::new(width, max_ascent, max_descent, glyphs));
         }
 
-        // This is used to create a visual line for empty lines (e.g. lines with only a <CR>)
+        // This is used to create a visual line for empty lines e.g. lines with only a `\n`
+        // as the source of its existance
         if layout_lines.is_empty() {
-            layout_lines.push(LayoutLine {
-                w: 0.0,
-                max_ascent: 0.0,
-                max_descent: 0.0,
-                glyphs: Default::default(),
-            });
+            layout_lines.push(LayoutLine::empty_with_height(empty_height));
         }
 
         // Restore the buffer to the scratch set to prevent reallocations.

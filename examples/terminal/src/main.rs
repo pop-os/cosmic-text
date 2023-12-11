@@ -26,7 +26,7 @@ fn main() {
 
     // Attributes indicate what font to choose
     let attrs = Attrs::new()
-        .size(14.0)
+        .font_size(14.0)
         .line_height(LineHeight::Absolute(20.0));
 
     // Add some text!

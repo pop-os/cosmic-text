@@ -163,20 +163,22 @@ impl Editor {
         // we want to see a blank entry if the string ends with a newline
         let addendum = once("").filter(|_| data.ends_with('\n'));
         let mut lines_iter = data.split_inclusive('\n').chain(addendum);
-        if let Some(data_line) = lines_iter.next() {
-            let mut these_attrs = final_attrs.split_off(data_line.len());
-            remaining_split_len -= data_line.len();
-            core::mem::swap(&mut these_attrs, &mut final_attrs);
-            line.append(BufferLine::new(
-                data_line
-                    .strip_suffix(char::is_control)
-                    .unwrap_or(data_line),
-                these_attrs,
-                Shaping::Advanced,
-            ));
-        } else {
-            panic!("str::lines() did not yield any elements");
-        }
+
+        let data_line = lines_iter
+            .next()
+            .expect("str::lines() did not yield any elements");
+
+        let mut these_attrs = final_attrs.split_off(data_line.len());
+        remaining_split_len -= data_line.len();
+        core::mem::swap(&mut these_attrs, &mut final_attrs);
+        line.append(BufferLine::new(
+            data_line
+                .strip_suffix(char::is_control)
+                .unwrap_or(data_line),
+            these_attrs,
+            Shaping::Advanced,
+        ));
+
         if let Some(data_line) = lines_iter.next_back() {
             remaining_split_len -= data_line.len();
             let mut tmp = BufferLine::new(

@@ -185,7 +185,7 @@ impl<'a> Attrs<'a> {
     /// # Panics
     ///
     /// Will panic if font size is zero.
-    pub fn size(mut self, size: f32) -> Self {
+    pub fn font_size(mut self, size: f32) -> Self {
         assert_ne!(size, 0.0, "font size cannot be 0");
         self.font_size = size;
         self

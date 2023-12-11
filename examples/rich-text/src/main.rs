@@ -45,7 +45,7 @@ fn main() {
         .set_size(window.width() as f32, window.height() as f32);
 
     let attrs = Attrs::new()
-        .size(32.0)
+        .font_size(32.0)
         .line_height(LineHeight::Absolute(44.0))
         .scale(display_scale);
     let serif_attrs = attrs.family(Family::Serif);
@@ -102,49 +102,49 @@ fn main() {
             "Red ",
             attrs
                 .color(Color::rgb(0xFF, 0x00, 0x00))
-                .size(attrs.font_size * 1.9)
+                .font_size(attrs.font_size * 1.9)
                 .line_height(LineHeight::Proportional(0.9)),
         ),
         (
             "Orange ",
             attrs
                 .color(Color::rgb(0xFF, 0x7F, 0x00))
-                .size(attrs.font_size * 1.6)
+                .font_size(attrs.font_size * 1.6)
                 .line_height(LineHeight::Proportional(1.0)),
         ),
         (
             "Yellow ",
             attrs
                 .color(Color::rgb(0xFF, 0xFF, 0x00))
-                .size(attrs.font_size * 1.3)
+                .font_size(attrs.font_size * 1.3)
                 .line_height(LineHeight::Proportional(1.1)),
         ),
         (
             "Green ",
             attrs
                 .color(Color::rgb(0x00, 0xFF, 0x00))
-                .size(attrs.font_size * 1.0)
+                .font_size(attrs.font_size * 1.0)
                 .line_height(LineHeight::Proportional(1.2)),
         ),
         (
             "Blue ",
             attrs
                 .color(Color::rgb(0x00, 0x00, 0xFF))
-                .size(attrs.font_size * 0.8)
+                .font_size(attrs.font_size * 0.8)
                 .line_height(LineHeight::Proportional(1.3)),
         ),
         (
             "Indigo ",
             attrs
                 .color(Color::rgb(0x4B, 0x00, 0x82))
-                .size(attrs.font_size * 0.6)
+                .font_size(attrs.font_size * 0.6)
                 .line_height(LineHeight::Proportional(1.4)),
         ),
         (
             "Violet ",
             attrs
                 .color(Color::rgb(0x94, 0x00, 0xD3))
-                .size(attrs.font_size * 0.4)
+                .font_size(attrs.font_size * 0.4)
                 .line_height(LineHeight::Proportional(1.5)),
         ),
         ("U", attrs.color(Color::rgb(0x94, 0x00, 0xD3))),
@@ -154,6 +154,12 @@ fn main() {
         ("O", attrs.color(Color::rgb(0xFF, 0xFF, 0x00))),
         ("R", attrs.color(Color::rgb(0xFF, 0x7F, 0x00))),
         ("N\n", attrs.color(Color::rgb(0xFF, 0x00, 0x00))),
+        (
+            "\n",
+            attrs
+                .color(Color::rgb(0xFF, 0x00, 0x00))
+                .line_height(LineHeight::Absolute(100.)),
+        ),
         (
             "生活,삶,जिंदगी 😀 FPS\n",
             attrs.color(Color::rgb(0xFF, 0x00, 0x00)),

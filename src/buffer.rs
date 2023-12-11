@@ -265,7 +265,7 @@ impl<'b> Iterator for LayoutRunIter<'b> {
                         glyphs: &layout_line.glyphs,
                         line_y,
                         line_top,
-                        line_w: layout_line.w,
+                        line_w: layout_line.width,
                         line_height: self.buffer.line_heights[this_line],
                     }
                 });
@@ -302,7 +302,7 @@ pub struct Buffer {
 }
 
 impl Buffer {
-    /// Create an empty [`Buffer`] with the provided [`Metrics`].
+    /// Create an empty [`Buffer`]
     /// This is useful for initializing a [`Buffer`] without a [`FontSystem`].
     ///
     /// You must populate the [`Buffer`] with at least one [`BufferLine`] before shaping and layout,
@@ -322,7 +322,7 @@ impl Buffer {
         }
     }
 
-    /// Create a new [`Buffer`] with the provided [`FontSystem`] and [`Metrics`]
+    /// Create a new [`Buffer`] with the provided [`FontSystem`]
     pub fn new(font_system: &mut FontSystem) -> Self {
         let mut buffer = Self::new_empty();
         buffer.set_text(font_system, "", Attrs::new(), Shaping::Advanced);
@@ -678,9 +678,9 @@ impl Buffer {
     /// Set text of buffer, using an iterator of styled spans (pairs of text and attributes)
     ///
     /// ```
-    /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, Metrics, Shaping};
+    /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, Shaping};
     /// # let mut font_system = FontSystem::new();
-    /// let mut buffer = Buffer::new_empty(Metrics::new(32.0, 44.0));
+    /// let mut buffer = Buffer::new_empty();
     /// let attrs = Attrs::new().family(Family::Serif);
     /// buffer.set_rich_text(
     ///     &mut font_system,
@@ -763,8 +763,19 @@ impl Buffer {
                 maybe_line = lines_iter.next();
                 if maybe_line.is_some() {
                     // finalize this line and start a new line
-                    let prev_attrs_list =
-                        core::mem::replace(&mut attrs_list, AttrsList::new(default_attrs));
+                    //TODO: there can be newlines, that has their own span attributes, "\n" lines for example
+                    let attr_list = match &maybe_span {
+                        Some((attr, range)) => {
+                            let mut list = AttrsList::new(default_attrs);
+                            list.add_span(range.clone(), attr.to_owned());
+                            list
+                        }
+                        None => {
+                            println!("defaultattrs");
+                            AttrsList::new(default_attrs)
+                        }
+                    };
+                    let prev_attrs_list = core::mem::replace(&mut attrs_list, attr_list);
                     let prev_line_string = core::mem::take(&mut line_string);
                     let buffer_line = BufferLine::new(prev_line_string, prev_attrs_list, shaping);
                     self.lines.push(buffer_line);
@@ -1025,9 +1036,9 @@ impl<'a> BorrowedWithFontSystem<'a, Buffer> {
     /// Set text of buffer, using an iterator of styled spans (pairs of text and attributes)
     ///
     /// ```
-    /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, Metrics, Shaping};
+    /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, Shaping};
     /// # let mut font_system = FontSystem::new();
-    /// let mut buffer = Buffer::new_empty(Metrics::new(32.0, 44.0));
+    /// let mut buffer = Buffer::new_empty();
     /// let mut buffer = buffer.borrow_with(&mut font_system);
     /// let attrs = Attrs::new().family(Family::Serif);
     /// buffer.set_rich_text(
