@@ -401,13 +401,8 @@ fn update_attrs<T: Edit>(editor: &mut T, attrs: Attrs) {
 
 fn update_alignment<T: Edit>(editor: &mut T, align: Align) {
     let current_line = editor.cursor().line;
-    if let Some(select) = editor.select_opt() {
-        let (start, end) = match select.line.cmp(&current_line) {
-            std::cmp::Ordering::Greater => (current_line, select.line),
-            std::cmp::Ordering::Less => (select.line, current_line),
-            std::cmp::Ordering::Equal => (current_line, current_line),
-        };
-        if let Some(lines) = editor.buffer_mut().lines.get_mut(start..=end) {
+    if let Some((start, end)) = editor.selection_bounds() {
+        if let Some(lines) = editor.buffer_mut().lines.get_mut(start.line..=end.line) {
             for line in lines.iter_mut() {
                 line.set_align(Some(align));
             }
