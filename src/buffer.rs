@@ -487,7 +487,7 @@ impl Buffer {
 
         let scroll_end = self.scroll + lines;
         let total_layout = self.shape_until(font_system, scroll_end);
-        self.scroll = (total_layout - (lines - 1)).clamp(0, self.scroll);
+        self.scroll = (total_layout - lines).clamp(0, self.scroll);
     }
 
     pub fn layout_cursor(&self, cursor: &Cursor) -> LayoutCursor {

@@ -1,5 +1,6 @@
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, vec::Vec};
+use core::cmp;
 
 #[cfg(feature = "swash")]
 use crate::Color;
@@ -130,6 +131,18 @@ impl Change {
     }
 }
 
+/// Selection mode
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Selection {
+    /// No selection
+    None,
+    /// Normal selection
+    Normal(Cursor),
+    /// Select by lines
+    Line(Cursor),
+    //TODO: Select block
+}
+
 /// A trait to allow easy replacements of [`Editor`], like `SyntaxEditor`
 pub trait Edit {
     /// Mutably borrows `self` together with an [`FontSystem`] for more convenient methods
@@ -159,10 +172,38 @@ pub trait Edit {
     fn set_cursor(&mut self, cursor: Cursor);
 
     /// Get the current selection position
-    fn select_opt(&self) -> Option<Cursor>;
+    fn selection(&self) -> Selection;
 
     /// Set the current selection position
-    fn set_select_opt(&mut self, select_opt: Option<Cursor>);
+    fn set_selection(&mut self, selection: Selection);
+
+    /// Get the bounds of the current selection
+    //TODO: will not work with Block select
+    fn selection_bounds(&self) -> Option<(Cursor, Cursor)> {
+        let cursor = self.cursor();
+        match self.selection() {
+            Selection::None => None,
+            Selection::Normal(select) => match select.line.cmp(&cursor.line) {
+                cmp::Ordering::Greater => Some((cursor, select)),
+                cmp::Ordering::Less => Some((select, cursor)),
+                cmp::Ordering::Equal => {
+                    /* select.line == cursor.line */
+                    if select.index < cursor.index {
+                        Some((select, cursor))
+                    } else {
+                        /* select.index >= cursor.index */
+                        Some((cursor, select))
+                    }
+                }
+            },
+            Selection::Line(select) => {
+                let start_line = cmp::min(select.line, cursor.line);
+                let end_line = cmp::max(select.line, cursor.line);
+                let end_index = self.buffer().lines[end_line].text().len();
+                Some((Cursor::new(start_line, 0), Cursor::new(end_line, end_index)))
+            }
+        }
+    }
 
     /// Get the current automatic indentation setting
     fn auto_indent(&self) -> bool;
@@ -179,6 +220,12 @@ pub trait Edit {
     /// Shape lines until scroll, after adjusting scroll if the cursor moved
     fn shape_as_needed(&mut self, font_system: &mut FontSystem);
 
+    /// Delete text starting at start Cursor and ending at end Cursor
+    fn delete_range(&mut self, start: Cursor, end: Cursor);
+
+    /// Insert text at specified cursor with specified attrs_list
+    fn insert_at(&mut self, cursor: Cursor, data: &str, attrs_list: Option<AttrsList>) -> Cursor;
+
     /// Copy selection
     fn copy_selection(&self) -> Option<String>;
 
@@ -188,7 +235,11 @@ pub trait Edit {
 
     /// Insert a string at the current cursor or replacing the current selection with the given
     /// attributes, or with the previous character's attributes if None is given.
-    fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>);
+    fn insert_string(&mut self, data: &str, attrs_list: Option<AttrsList>) {
+        self.delete_selection();
+        let new_cursor = self.insert_at(self.cursor(), data, attrs_list);
+        self.set_cursor(new_cursor);
+    }
 
     /// Apply a change
     fn apply_change(&mut self, change: &Change) -> bool;
