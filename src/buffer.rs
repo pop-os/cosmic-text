@@ -13,6 +13,7 @@
 
 #[cfg(not(feature = "std"))]
 use alloc::{
+    borrow::ToOwned,
     string::{String, ToString},
     vec::Vec,
 };
@@ -770,10 +771,7 @@ impl Buffer {
                             list.add_span(range.clone(), attr.to_owned());
                             list
                         }
-                        None => {
-                            println!("defaultattrs");
-                            AttrsList::new(default_attrs)
-                        }
+                        None => AttrsList::new(default_attrs),
                     };
                     let prev_attrs_list = core::mem::replace(&mut attrs_list, attr_list);
                     let prev_line_string = core::mem::take(&mut line_string);
