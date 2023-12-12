@@ -704,12 +704,9 @@ impl Edit for Editor {
                     // Adjust selection
                     match self.selection {
                         Selection::None => {}
-                        Selection::Normal(ref mut select) => {
-                            if select.line == line_i && select.index >= after_whitespace {
-                                select.index += required_indent;
-                            }
-                        }
-                        Selection::Line(ref mut select) => {
+                        Selection::Normal(ref mut select)
+                        | Selection::Line(ref mut select)
+                        | Selection::Word(ref mut select) => {
                             if select.line == line_i && select.index >= after_whitespace {
                                 select.index += required_indent;
                             }
@@ -768,7 +765,9 @@ impl Edit for Editor {
                     // Adjust selection
                     match self.selection {
                         Selection::None => {}
-                        Selection::Normal(ref mut select) | Selection::Line(ref mut select) => {
+                        Selection::Normal(ref mut select)
+                        | Selection::Line(ref mut select)
+                        | Selection::Word(ref mut select) => {
                             if select.line == line_i && select.index > last_indent {
                                 select.index -= after_whitespace - last_indent;
                             }
@@ -789,6 +788,33 @@ impl Edit for Editor {
                         self.cursor.color = color;
                         self.buffer.set_redraw(true);
                     }
+                }
+            }
+            Action::DoubleClick { x, y } => {
+                self.set_selection(Selection::None);
+
+                if let Some(new_cursor) = self.buffer.hit(x as f32, y as f32) {
+                    if new_cursor != self.cursor {
+                        let color = self.cursor.color;
+                        self.cursor = new_cursor;
+                        self.cursor.color = color;
+                        self.buffer.set_redraw(true);
+                    }
+                    self.selection = Selection::Word(self.cursor);
+                    self.buffer.set_redraw(true);
+                }
+            }
+            Action::TripleClick { x, y } => {
+                self.set_selection(Selection::None);
+
+                if let Some(new_cursor) = self.buffer.hit(x as f32, y as f32) {
+                    if new_cursor != self.cursor {
+                        let color = self.cursor.color;
+                        self.cursor = new_cursor;
+                        self.cursor.color = color;
+                    }
+                    self.selection = Selection::Line(self.cursor);
+                    self.buffer.set_redraw(true);
                 }
             }
             Action::Drag { x, y } => {

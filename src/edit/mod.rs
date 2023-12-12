@@ -1,6 +1,7 @@
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, vec::Vec};
 use core::cmp;
+use unicode_segmentation::UnicodeSegmentation;
 
 #[cfg(feature = "swash")]
 use crate::Color;
@@ -66,6 +67,16 @@ pub enum Action {
     Unindent,
     /// Mouse click at specified position
     Click {
+        x: i32,
+        y: i32,
+    },
+    /// Mouse double click at specified position
+    DoubleClick {
+        x: i32,
+        y: i32,
+    },
+    /// Mouse triple click at specified position
+    TripleClick {
         x: i32,
         y: i32,
     },
@@ -140,6 +151,8 @@ pub enum Selection {
     Normal(Cursor),
     /// Select by lines
     Line(Cursor),
+    /// Select by words
+    Word(Cursor),
     //TODO: Select block
 }
 
@@ -201,6 +214,46 @@ pub trait Edit {
                 let end_line = cmp::max(select.line, cursor.line);
                 let end_index = self.buffer().lines[end_line].text().len();
                 Some((Cursor::new(start_line, 0), Cursor::new(end_line, end_index)))
+            }
+            Selection::Word(select) => {
+                let (mut start, mut end) = match select.line.cmp(&cursor.line) {
+                    cmp::Ordering::Greater => (cursor, select),
+                    cmp::Ordering::Less => (select, cursor),
+                    cmp::Ordering::Equal => {
+                        /* select.line == cursor.line */
+                        if select.index < cursor.index {
+                            (select, cursor)
+                        } else {
+                            /* select.index >= cursor.index */
+                            (cursor, select)
+                        }
+                    }
+                };
+
+                // Move start to beginning of word
+                {
+                    let line = &self.buffer().lines[start.line];
+                    start.index = line
+                        .text()
+                        .unicode_word_indices()
+                        .rev()
+                        .map(|(i, _)| i)
+                        .find(|&i| i < start.index)
+                        .unwrap_or(0);
+                }
+
+                // Move end to end of word
+                {
+                    let line = &self.buffer().lines[end.line];
+                    end.index = line
+                        .text()
+                        .unicode_word_indices()
+                        .map(|(i, word)| i + word.len())
+                        .find(|&i| i > end.index)
+                        .unwrap_or(line.text().len());
+                }
+
+                Some((start, end))
             }
         }
     }

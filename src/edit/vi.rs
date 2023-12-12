@@ -413,7 +413,7 @@ impl<'a> Edit for ViEditor<'a> {
                             editor.insert_string(data, None);
                         } else {
                             match selection {
-                                Selection::Normal(_) | Selection::None => {
+                                Selection::None | Selection::Normal(_) | Selection::Word(_) => {
                                     let mut cursor = editor.cursor();
                                     if after {
                                         let buffer = editor.buffer();
