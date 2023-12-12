@@ -28,16 +28,17 @@ fn finish_change<E: Edit>(
     editor: &mut E,
     commands: &mut cosmic_undo_2::Commands<Change>,
     changed: &mut bool,
-) {
+) -> Option<Change> {
     //TODO: join changes together
     match editor.finish_change() {
         Some(change) => {
             if !change.items.is_empty() {
-                commands.push(change);
+                commands.push(change.clone());
                 *changed = true;
             }
+            Some(change)
         }
-        None => {}
+        None => None,
     }
 }
 
@@ -319,7 +320,7 @@ impl<'a> Edit for ViEditor<'a> {
     }
 
     fn finish_change(&mut self) -> Option<Change> {
-        self.editor.finish_change()
+        finish_change(&mut self.editor, &mut self.commands, &mut self.changed)
     }
 
     fn action(&mut self, font_system: &mut FontSystem, action: Action) {
