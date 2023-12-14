@@ -1,0 +1,17 @@
+[package]
+name = "multiview"
+version = "0.1.0"
+authors = ["Jeremy Soller <jeremy@system76.com>"]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[dependencies]
+cosmic-text = { path = "../.." }
+env_logger = "0.10"
+fontdb = "0.13"
+log = "0.4"
+softbuffer = "0.4"
+tiny-skia = "0.11"
+unicode-segmentation = "1.7"
+winit = "0.29"
