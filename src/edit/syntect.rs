@@ -39,7 +39,7 @@ pub struct SyntaxEditor<'a> {
     syntax: &'a SyntaxReference,
     theme: &'a SyntaxTheme,
     highlighter: Highlighter<'a>,
-    syntax_cache: Vec<(ParseState, HighlightState)>,
+    syntax_cache: Vec<(ParseState, ScopeStack)>,
 }
 
 impl<'a> SyntaxEditor<'a> {
@@ -71,6 +71,20 @@ impl<'a> SyntaxEditor<'a> {
                 self.theme = theme;
                 self.highlighter = Highlighter::new(theme);
                 self.syntax_cache.clear();
+
+                // Reset attrs to match default foreground and no highlighting
+                for line in self.editor.buffer_mut().lines.iter_mut() {
+                    let mut attrs = line.attrs_list().defaults();
+                    if let Some(foreground) = self.theme.settings.foreground {
+                        attrs = attrs.color(Color::rgba(
+                            foreground.r,
+                            foreground.g,
+                            foreground.b,
+                            foreground.a,
+                        ));
+                    }
+                    line.set_attrs_list(AttrsList::new(attrs));
+                }
             }
 
             true
@@ -89,9 +103,19 @@ impl<'a> SyntaxEditor<'a> {
         &mut self,
         font_system: &mut FontSystem,
         path: P,
-        attrs: crate::Attrs,
+        mut attrs: crate::Attrs,
     ) -> io::Result<()> {
         let path = path.as_ref();
+
+        // Set attrs to match default foreground
+        if let Some(foreground) = self.theme.settings.foreground {
+            attrs = attrs.color(Color::rgba(
+                foreground.r,
+                foreground.g,
+                foreground.b,
+                foreground.a,
+            ));
+        }
 
         let text = fs::read_to_string(path)?;
         self.editor
@@ -214,16 +238,13 @@ impl<'a> Edit for SyntaxEditor<'a> {
             }
             highlighted += 1;
 
-            let (mut parse_state, mut highlight_state) =
-                if line_i > 0 && line_i <= self.syntax_cache.len() {
-                    self.syntax_cache[line_i - 1].clone()
-                } else {
-                    (
-                        ParseState::new(self.syntax),
-                        HighlightState::new(&self.highlighter, ScopeStack::new()),
-                    )
-                };
-
+            let (mut parse_state, scope_stack) = if line_i > 0 && line_i <= self.syntax_cache.len()
+            {
+                self.syntax_cache[line_i - 1].clone()
+            } else {
+                (ParseState::new(self.syntax), ScopeStack::new())
+            };
+            let mut highlight_state = HighlightState::new(&self.highlighter, scope_stack);
             let ops = parse_state
                 .parse_line(line.text(), &self.syntax_system.syntax_set)
                 .expect("failed to parse syntax");
@@ -237,27 +258,27 @@ impl<'a> Edit for SyntaxEditor<'a> {
             let attrs = line.attrs_list().defaults();
             let mut attrs_list = AttrsList::new(attrs);
             for (style, _, range) in ranges {
-                attrs_list.add_span(
-                    range,
-                    attrs
-                        .color(Color::rgba(
-                            style.foreground.r,
-                            style.foreground.g,
-                            style.foreground.b,
-                            style.foreground.a,
-                        ))
-                        //TODO: background
-                        .style(if style.font_style.contains(FontStyle::ITALIC) {
-                            Style::Italic
-                        } else {
-                            Style::Normal
-                        })
-                        .weight(if style.font_style.contains(FontStyle::BOLD) {
-                            Weight::BOLD
-                        } else {
-                            Weight::NORMAL
-                        }), //TODO: underline
-                );
+                let span_attrs = attrs
+                    .color(Color::rgba(
+                        style.foreground.r,
+                        style.foreground.g,
+                        style.foreground.b,
+                        style.foreground.a,
+                    ))
+                    //TODO: background
+                    .style(if style.font_style.contains(FontStyle::ITALIC) {
+                        Style::Italic
+                    } else {
+                        Style::Normal
+                    })
+                    .weight(if style.font_style.contains(FontStyle::BOLD) {
+                        Weight::BOLD
+                    } else {
+                        Weight::NORMAL
+                    }); //TODO: underline
+                if span_attrs != attrs {
+                    attrs_list.add_span(range, span_attrs);
+                }
             }
 
             // Update line attributes. This operation only resets if the line changes
@@ -274,7 +295,7 @@ impl<'a> Edit for SyntaxEditor<'a> {
                 }
             }
 
-            let cache_item = (parse_state.clone(), highlight_state.clone());
+            let cache_item = (parse_state.clone(), highlight_state.path.clone());
             if line_i < self.syntax_cache.len() {
                 if self.syntax_cache[line_i] != cache_item {
                     self.syntax_cache[line_i] = cache_item;
