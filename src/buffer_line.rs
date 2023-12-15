@@ -172,7 +172,7 @@ impl BufferLine {
         self.shape_in_buffer(&mut ShapeBuffer::default(), font_system)
     }
 
-    /// Shape a line using a pre-existing shape buffer.
+    /// Shape a line using a pre-existing shape buffer, will cache results
     pub fn shape_in_buffer(
         &mut self,
         scratch: &mut ShapeBuffer,
@@ -204,17 +204,16 @@ impl BufferLine {
         width: f32,
         wrap: Wrap,
     ) -> &[LayoutLine] {
-        if self.layout_opt.is_none() {
-            self.wrap = wrap;
-            let align = self.align;
-            let shape = self.shape(font_system);
-            let layout = shape.layout(font_size, width, wrap, align);
-            self.layout_opt = Some(layout);
-        }
-        self.layout_opt.as_ref().expect("layout not found")
+        self.layout_in_buffer(
+            &mut ShapeBuffer::default(),
+            font_system,
+            font_size,
+            width,
+            wrap,
+        )
     }
 
-    /// Layout a line using a pre-existing shape buffer.
+    /// Layout a line using a pre-existing shape buffer, will cache results
     pub fn layout_in_buffer(
         &mut self,
         scratch: &mut ShapeBuffer,
