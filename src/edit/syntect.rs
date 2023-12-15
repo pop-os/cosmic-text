@@ -206,14 +206,15 @@ impl<'a> Edit for SyntaxEditor<'a> {
         self.editor.set_tab_width(tab_width);
     }
 
-    fn shape_as_needed(&mut self, font_system: &mut FontSystem) {
+    fn shape_as_needed(&mut self, font_system: &mut FontSystem, prune: bool) {
         #[cfg(feature = "std")]
         let now = std::time::Instant::now();
 
         let cursor = self.cursor();
         let buffer = self.editor.buffer_mut();
-        let lines = buffer.visible_lines();
-        let scroll_end = buffer.scroll() + lines;
+        let visible_lines = buffer.visible_lines();
+        let scroll = buffer.scroll();
+        let scroll_end = scroll.layout + visible_lines;
         let mut total_layout = 0;
         let mut highlighted = 0;
         for line_i in 0..buffer.lines.len() {
@@ -223,15 +224,17 @@ impl<'a> Edit for SyntaxEditor<'a> {
             }
 
             let line = &mut buffer.lines[line_i];
-            if !line.is_reset() && line_i < self.syntax_cache.len() {
+            if line.metadata().is_some() && line_i < self.syntax_cache.len() {
                 //TODO: duplicated code!
-                // Perform shaping and layout of this line in order to count if we have reached scroll
-                match buffer.line_layout(font_system, line_i) {
-                    Some(layout_lines) => {
-                        total_layout += layout_lines.len() as i32;
-                    }
-                    None => {
-                        //TODO: should this be possible?
+                if line_i >= scroll.line && total_layout < scroll_end {
+                    // Perform shaping and layout of this line in order to count if we have reached scroll
+                    match buffer.line_layout(font_system, line_i) {
+                        Some(layout_lines) => {
+                            total_layout += layout_lines.len() as i32;
+                        }
+                        None => {
+                            //TODO: should this be possible?
+                        }
                     }
                 }
                 continue;
@@ -285,12 +288,14 @@ impl<'a> Edit for SyntaxEditor<'a> {
             line.set_attrs_list(attrs_list);
 
             // Perform shaping and layout of this line in order to count if we have reached scroll
-            match buffer.line_layout(font_system, line_i) {
-                Some(layout_lines) => {
-                    total_layout += layout_lines.len() as i32;
-                }
-                None => {
-                    //TODO: should this be possible?
+            if line_i >= scroll.line && total_layout < scroll_end {
+                match buffer.line_layout(font_system, line_i) {
+                    Some(layout_lines) => {
+                        total_layout += layout_lines.len() as i32;
+                    }
+                    None => {
+                        //TODO: should this be possible?
+                    }
                 }
             }
 
@@ -303,6 +308,7 @@ impl<'a> Edit for SyntaxEditor<'a> {
                     }
                 }
             } else {
+                buffer.lines[line_i].set_metadata(self.syntax_cache.len());
                 self.syntax_cache.push(cache_item);
             }
         }
@@ -317,7 +323,7 @@ impl<'a> Edit for SyntaxEditor<'a> {
             );
         }
 
-        self.editor.shape_as_needed(font_system);
+        self.editor.shape_as_needed(font_system, prune);
     }
 
     fn delete_range(&mut self, start: Cursor, end: Cursor) {

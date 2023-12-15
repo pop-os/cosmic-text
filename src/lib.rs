@@ -39,7 +39,7 @@
 //! buffer.set_text("Hello, Rust! 🦀\n", attrs, Shaping::Advanced);
 //!
 //! // Perform shaping as desired
-//! buffer.shape_until_scroll();
+//! buffer.shape_until_scroll(true);
 //!
 //! // Inspect the output runs
 //! for run in buffer.layout_runs() {

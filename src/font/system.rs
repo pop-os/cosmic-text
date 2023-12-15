@@ -177,7 +177,7 @@ impl FontSystem {
         }
 
         #[cfg(not(target_arch = "wasm32"))]
-        log::info!(
+        log::debug!(
             "Parsed {} font faces in {}ms.",
             db.len(),
             now.elapsed().as_millis()

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use cosmic_text::{Action, Attrs, Buffer, Edit, Family, FontSystem, Metrics, Shaping, SwashCache};
+use cosmic_text::{
+    Action, Attrs, Buffer, Edit, Family, FontSystem, Metrics, Scroll, Shaping, SwashCache,
+};
 use std::{collections::HashMap, env, fs, num::NonZeroU32, rc::Rc, slice};
 use tiny_skia::{Color, Paint, PixmapMut, Rect, Transform};
 use winit::{
@@ -41,7 +43,7 @@ fn main() {
         window: Rc<WinitWindow>,
         context: softbuffer::Context<Rc<WinitWindow>>,
         surface: softbuffer::Surface<Rc<WinitWindow>, Rc<WinitWindow>>,
-        scroll: i32,
+        scroll: Scroll,
     }
     let mut windows = HashMap::new();
     for _ in 0..2 {
@@ -54,7 +56,7 @@ fn main() {
                 window,
                 context,
                 surface,
-                scroll: 0,
+                scroll: Scroll::default(),
             },
         );
     }
@@ -102,7 +104,8 @@ fn main() {
                         // Set size, will relayout and shape until scroll if changed
                         buffer.set_size(width as f32, height as f32);
                         // Shape until scroll, ensures scroll is clamped
-                        buffer.shape_until_scroll();
+                        //TODO: ability to prune with multiple views?
+                        buffer.shape_until_scroll(true);
                         // Update scroll after buffer clamps it
                         *scroll = buffer.scroll();
 
@@ -145,16 +148,16 @@ fn main() {
                         if state == ElementState::Pressed {
                             match logical_key {
                                 Key::Named(NamedKey::ArrowDown) => {
-                                    *scroll += 1;
+                                    scroll.layout += 1;
                                 }
                                 Key::Named(NamedKey::ArrowUp) => {
-                                    *scroll -= 1;
+                                    scroll.layout -= 1;
                                 }
                                 Key::Named(NamedKey::PageDown) => {
-                                    *scroll += buffer.visible_lines();
+                                    scroll.layout += buffer.visible_lines();
                                 }
                                 Key::Named(NamedKey::PageUp) => {
-                                    *scroll -= buffer.visible_lines();
+                                    scroll.layout -= buffer.visible_lines();
                                 }
                                 _ => {}
                             }

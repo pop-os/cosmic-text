@@ -291,8 +291,8 @@ impl<'a> Edit for ViEditor<'a> {
         self.editor.set_tab_width(tab_width);
     }
 
-    fn shape_as_needed(&mut self, font_system: &mut FontSystem) {
-        self.editor.shape_as_needed(font_system);
+    fn shape_as_needed(&mut self, font_system: &mut FontSystem, prune: bool) {
+        self.editor.shape_as_needed(font_system, prune);
     }
 
     fn delete_range(&mut self, start: Cursor, end: Cursor) {
@@ -443,8 +443,8 @@ impl<'a> Edit for ViEditor<'a> {
                                     editor.insert_at(cursor, "\n", None);
                                     editor.insert_at(cursor, data, None);
 
-                                    // Hack to allow immediate up/down
-                                    editor.shape_as_needed(font_system);
+                                    //TODO: Hack to allow immediate up/down
+                                    editor.shape_as_needed(font_system, false);
 
                                     // Move to inserted line, preserving cursor x position
                                     if after {
