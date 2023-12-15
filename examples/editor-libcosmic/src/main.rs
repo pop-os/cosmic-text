@@ -86,9 +86,6 @@ pub struct Window {
     path_opt: Option<PathBuf>,
     attrs: Attrs<'static>,
     font_size: FontSize,
-    #[cfg(not(feature = "vi"))]
-    editor: Mutex<SyntaxEditor<'static>>,
-    #[cfg(feature = "vi")]
     editor: Mutex<cosmic_text::ViEditor<'static>>,
 }
 
@@ -133,7 +130,7 @@ impl Application for Window {
     fn new(_flags: ()) -> (Self, Command<Self::Message>) {
         let attrs = cosmic_text::Attrs::new().family(cosmic_text::Family::Monospace);
 
-        let mut editor = SyntaxEditor::new(
+        let editor = SyntaxEditor::new(
             Buffer::new(
                 &mut FONT_SYSTEM.lock().unwrap(),
                 FontSize::Body.to_metrics(),
@@ -143,8 +140,8 @@ impl Application for Window {
         )
         .unwrap();
 
-        #[cfg(feature = "vi")]
         let mut editor = cosmic_text::ViEditor::new(editor);
+        editor.set_passthrough(cfg!(feature = "vi"));
 
         update_attrs(&mut editor, attrs);
 

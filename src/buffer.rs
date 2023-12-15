@@ -365,10 +365,9 @@ impl Buffer {
             while self.scroll.layout < 0 {
                 if self.scroll.line > 0 {
                     self.scroll.line -= 1;
-                    let layout = self
-                        .line_layout(font_system, self.scroll.line)
-                        .expect("shape_until_scroll invalid scroll.line");
-                    self.scroll.layout += layout.len() as i32;
+                    if let Some(layout) = self.line_layout(font_system, self.scroll.line) {
+                        self.scroll.layout += layout.len() as i32;
+                    }
                 } else {
                     self.scroll.layout = 0;
                     break;
@@ -801,8 +800,9 @@ impl Buffer {
         &mut self,
         font_system: &mut FontSystem,
         mut cursor: Cursor,
+        mut cursor_x_opt: Option<i32>,
         motion: Motion,
-    ) -> Option<Cursor> {
+    ) -> Option<(Cursor, Option<i32>)> {
         match motion {
             Motion::LayoutCursor(layout_cursor) => {
                 let layout = self.line_layout(font_system, layout_cursor.line)?;
@@ -811,7 +811,9 @@ impl Buffer {
                     Some(some) => some,
                     None => match layout.last() {
                         Some(some) => some,
-                        None => return None,
+                        None => {
+                            return None;
+                        }
                     },
                 };
 
@@ -853,7 +855,7 @@ impl Buffer {
                     cursor.index = self.lines.get(cursor.line)?.text().len();
                     cursor.affinity = Affinity::After;
                 }
-                cursor.x_opt = None;
+                cursor_x_opt = None;
             }
             Motion::Next => {
                 let line = self.lines.get(cursor.line)?;
@@ -870,7 +872,7 @@ impl Buffer {
                     cursor.index = 0;
                     cursor.affinity = Affinity::Before;
                 }
-                cursor.x_opt = None;
+                cursor_x_opt = None;
             }
             Motion::Left => {
                 let rtl_opt = self
@@ -878,9 +880,15 @@ impl Buffer {
                     .map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
-                        cursor = self.cursor_motion(font_system, cursor, Motion::Next)?;
+                        (cursor, cursor_x_opt) =
+                            self.cursor_motion(font_system, cursor, cursor_x_opt, Motion::Next)?;
                     } else {
-                        cursor = self.cursor_motion(font_system, cursor, Motion::Previous)?;
+                        (cursor, cursor_x_opt) = self.cursor_motion(
+                            font_system,
+                            cursor,
+                            cursor_x_opt,
+                            Motion::Previous,
+                        )?;
                     }
                 }
             }
@@ -890,17 +898,23 @@ impl Buffer {
                     .map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
-                        cursor = self.cursor_motion(font_system, cursor, Motion::Previous)?;
+                        (cursor, cursor_x_opt) = self.cursor_motion(
+                            font_system,
+                            cursor,
+                            cursor_x_opt,
+                            Motion::Previous,
+                        )?;
                     } else {
-                        cursor = self.cursor_motion(font_system, cursor, Motion::Next)?;
+                        (cursor, cursor_x_opt) =
+                            self.cursor_motion(font_system, cursor, cursor_x_opt, Motion::Next)?;
                     }
                 }
             }
             Motion::Up => {
                 let mut layout_cursor = self.layout_cursor(font_system, cursor)?;
 
-                if cursor.x_opt.is_none() {
-                    cursor.x_opt = Some(
+                if cursor_x_opt.is_none() {
+                    cursor_x_opt = Some(
                         layout_cursor.glyph as i32, //TODO: glyph x position
                     );
                 }
@@ -912,20 +926,24 @@ impl Buffer {
                     layout_cursor.layout = usize::max_value();
                 }
 
-                if let Some(cursor_x) = cursor.x_opt {
+                if let Some(cursor_x) = cursor_x_opt {
                     layout_cursor.glyph = cursor_x as usize; //TODO: glyph x position
                 }
 
-                cursor =
-                    self.cursor_motion(font_system, cursor, Motion::LayoutCursor(layout_cursor))?;
+                (cursor, cursor_x_opt) = self.cursor_motion(
+                    font_system,
+                    cursor,
+                    cursor_x_opt,
+                    Motion::LayoutCursor(layout_cursor),
+                )?;
             }
             Motion::Down => {
                 let mut layout_cursor = self.layout_cursor(font_system, cursor)?;
 
                 let layout_len = self.line_layout(font_system, layout_cursor.line)?.len();
 
-                if cursor.x_opt.is_none() {
-                    cursor.x_opt = Some(
+                if cursor_x_opt.is_none() {
+                    cursor_x_opt = Some(
                         layout_cursor.glyph as i32, //TODO: glyph x position
                     );
                 }
@@ -937,19 +955,30 @@ impl Buffer {
                     layout_cursor.layout = 0;
                 }
 
-                if let Some(cursor_x) = cursor.x_opt {
+                if let Some(cursor_x) = cursor_x_opt {
                     layout_cursor.glyph = cursor_x as usize; //TODO: glyph x position
                 }
 
-                cursor =
-                    self.cursor_motion(font_system, cursor, Motion::LayoutCursor(layout_cursor))?;
+                (cursor, cursor_x_opt) = self.cursor_motion(
+                    font_system,
+                    cursor,
+                    cursor_x_opt,
+                    Motion::LayoutCursor(layout_cursor),
+                )?;
             }
             Motion::Home => {
                 let mut layout_cursor = self.layout_cursor(font_system, cursor)?;
                 layout_cursor.glyph = 0;
-                cursor =
-                    self.cursor_motion(font_system, cursor, Motion::LayoutCursor(layout_cursor))?;
-                cursor.x_opt = None;
+                #[allow(unused_assignments)]
+                {
+                    (cursor, cursor_x_opt) = self.cursor_motion(
+                        font_system,
+                        cursor,
+                        cursor_x_opt,
+                        Motion::LayoutCursor(layout_cursor),
+                    )?;
+                }
+                cursor_x_opt = None;
             }
             Motion::SoftHome => {
                 let line = self.lines.get(cursor.line)?;
@@ -959,34 +988,43 @@ impl Buffer {
                     .filter_map(|(i, c)| if c.is_whitespace() { None } else { Some(i) })
                     .next()
                     .unwrap_or(0);
-                cursor.x_opt = None;
+                cursor_x_opt = None;
             }
             Motion::End => {
                 let mut layout_cursor = self.layout_cursor(font_system, cursor)?;
                 layout_cursor.glyph = usize::max_value();
-                cursor =
-                    self.cursor_motion(font_system, cursor, Motion::LayoutCursor(layout_cursor))?;
-                cursor.x_opt = None;
+                #[allow(unused_assignments)]
+                {
+                    (cursor, cursor_x_opt) = self.cursor_motion(
+                        font_system,
+                        cursor,
+                        cursor_x_opt,
+                        Motion::LayoutCursor(layout_cursor),
+                    )?;
+                }
+                cursor_x_opt = None;
             }
             Motion::ParagraphStart => {
                 cursor.index = 0;
-                cursor.x_opt = None;
+                cursor_x_opt = None;
             }
             Motion::ParagraphEnd => {
                 cursor.index = self.lines.get(cursor.line)?.text().len();
-                cursor.x_opt = None;
+                cursor_x_opt = None;
             }
             Motion::PageUp => {
-                cursor = self.cursor_motion(
+                (cursor, cursor_x_opt) = self.cursor_motion(
                     font_system,
                     cursor,
+                    cursor_x_opt,
                     Motion::Vertical(-self.size().1 as i32),
                 )?;
             }
             Motion::PageDown => {
-                cursor = self.cursor_motion(
+                (cursor, cursor_x_opt) = self.cursor_motion(
                     font_system,
                     cursor,
+                    cursor_x_opt,
                     Motion::Vertical(self.size().1 as i32),
                 )?;
             }
@@ -996,12 +1034,18 @@ impl Buffer {
                 match lines.cmp(&0) {
                     cmp::Ordering::Less => {
                         for _ in 0..-lines {
-                            cursor = self.cursor_motion(font_system, cursor, Motion::Up)?;
+                            (cursor, cursor_x_opt) =
+                                self.cursor_motion(font_system, cursor, cursor_x_opt, Motion::Up)?;
                         }
                     }
                     cmp::Ordering::Greater => {
                         for _ in 0..lines {
-                            cursor = self.cursor_motion(font_system, cursor, Motion::Down)?;
+                            (cursor, cursor_x_opt) = self.cursor_motion(
+                                font_system,
+                                cursor,
+                                cursor_x_opt,
+                                Motion::Down,
+                            )?;
                         }
                     }
                     cmp::Ordering::Equal => {}
@@ -1021,7 +1065,7 @@ impl Buffer {
                     cursor.line -= 1;
                     cursor.index = self.lines.get(cursor.line)?.text().len();
                 }
-                cursor.x_opt = None;
+                cursor_x_opt = None;
             }
             Motion::NextWord => {
                 let line = self.lines.get(cursor.line)?;
@@ -1036,7 +1080,7 @@ impl Buffer {
                     cursor.line += 1;
                     cursor.index = 0;
                 }
-                cursor.x_opt = None;
+                cursor_x_opt = None;
             }
             Motion::LeftWord => {
                 let rtl_opt = self
@@ -1044,9 +1088,19 @@ impl Buffer {
                     .map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
-                        cursor = self.cursor_motion(font_system, cursor, Motion::NextWord)?;
+                        (cursor, cursor_x_opt) = self.cursor_motion(
+                            font_system,
+                            cursor,
+                            cursor_x_opt,
+                            Motion::NextWord,
+                        )?;
                     } else {
-                        cursor = self.cursor_motion(font_system, cursor, Motion::PreviousWord)?;
+                        (cursor, cursor_x_opt) = self.cursor_motion(
+                            font_system,
+                            cursor,
+                            cursor_x_opt,
+                            Motion::PreviousWord,
+                        )?;
                     }
                 }
             }
@@ -1056,30 +1110,44 @@ impl Buffer {
                     .map(|shape| shape.rtl);
                 if let Some(rtl) = rtl_opt {
                     if rtl {
-                        cursor = self.cursor_motion(font_system, cursor, Motion::PreviousWord)?;
+                        (cursor, cursor_x_opt) = self.cursor_motion(
+                            font_system,
+                            cursor,
+                            cursor_x_opt,
+                            Motion::PreviousWord,
+                        )?;
                     } else {
-                        cursor = self.cursor_motion(font_system, cursor, Motion::NextWord)?;
+                        (cursor, cursor_x_opt) = self.cursor_motion(
+                            font_system,
+                            cursor,
+                            cursor_x_opt,
+                            Motion::NextWord,
+                        )?;
                     }
                 }
             }
             Motion::BufferStart => {
                 cursor.line = 0;
                 cursor.index = 0;
-                cursor.x_opt = None;
+                cursor_x_opt = None;
             }
             Motion::BufferEnd => {
                 cursor.line = self.lines.len() - 1;
                 cursor.index = self.lines.get(cursor.line)?.text().len();
-                cursor.x_opt = None;
+                cursor_x_opt = None;
             }
             Motion::GotoLine(line) => {
                 let mut layout_cursor = self.layout_cursor(font_system, cursor)?;
                 layout_cursor.line = line;
-                cursor =
-                    self.cursor_motion(font_system, cursor, Motion::LayoutCursor(layout_cursor))?;
+                (cursor, cursor_x_opt) = self.cursor_motion(
+                    font_system,
+                    cursor,
+                    cursor_x_opt,
+                    Motion::LayoutCursor(layout_cursor),
+                )?;
             }
         }
-        Some(cursor)
+        Some((cursor, cursor_x_opt))
     }
 
     /// Draw the buffer
@@ -1203,8 +1271,14 @@ impl<'a> BorrowedWithFontSystem<'a, Buffer> {
     }
 
     /// Apply a [`Motion`] to a [`Cursor`]
-    pub fn cursor_motion(&mut self, cursor: Cursor, motion: Motion) -> Option<Cursor> {
-        self.inner.cursor_motion(self.font_system, cursor, motion)
+    pub fn cursor_motion(
+        &mut self,
+        cursor: Cursor,
+        cursor_x_opt: Option<i32>,
+        motion: Motion,
+    ) -> Option<(Cursor, Option<i32>)> {
+        self.inner
+            .cursor_motion(self.font_system, cursor, cursor_x_opt, motion)
     }
 
     /// Draw the buffer

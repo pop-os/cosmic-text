@@ -15,6 +15,8 @@ fn redraw(
 ) {
     let bg_color = orbclient::Color::rgb(0x34, 0x34, 0x34);
     let font_color = Color::rgb(0xFF, 0xFF, 0xFF);
+    let cursor_color = Color::rgb(0xFF, 0xFF, 0xFF);
+    let selection_color = Color::rgba(0xFF, 0xFF, 0xFF, 0x33);
 
     editor.shape_as_needed(true);
     if editor.buffer().redraw() {
@@ -22,9 +24,15 @@ fn redraw(
 
         window.set(bg_color);
 
-        editor.draw(swash_cache, font_color, |x, y, w, h, color| {
-            window.rect(x, y, w, h, orbclient::Color { data: color.0 });
-        });
+        editor.draw(
+            swash_cache,
+            font_color,
+            cursor_color,
+            selection_color,
+            |x, y, w, h, color| {
+                window.rect(x, y, w, h, orbclient::Color { data: color.0 });
+            },
+        );
 
         window.sync();
 

@@ -95,8 +95,7 @@ fn main() {
             let bg = editor.background_color();
             window.set(orbclient::Color::rgb(bg.r(), bg.g(), bg.b()));
 
-            let fg = editor.foreground_color();
-            editor.draw(&mut swash_cache, fg, |x, y, w, h, color| {
+            editor.draw(&mut swash_cache, |x, y, w, h, color| {
                 window.rect(
                     line_x as i32 + x,
                     y,

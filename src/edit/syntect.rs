@@ -159,9 +159,51 @@ impl<'a> SyntaxEditor<'a> {
         }
     }
 
+    /// Get the default cursor color
+    pub fn cursor_color(&self) -> Color {
+        if let Some(some) = self.theme.settings.caret {
+            Color::rgba(some.r, some.g, some.b, some.a)
+        } else {
+            self.foreground_color()
+        }
+    }
+
+    /// Get the default selection color
+    pub fn selection_color(&self) -> Color {
+        if let Some(some) = self.theme.settings.selection {
+            Color::rgba(some.r, some.g, some.b, some.a)
+        } else {
+            let foreground_color = self.foreground_color();
+            Color::rgba(
+                foreground_color.r(),
+                foreground_color.g(),
+                foreground_color.b(),
+                0x33,
+            )
+        }
+    }
+
     /// Get the current syntect theme
     pub fn theme(&self) -> &SyntaxTheme {
         self.theme
+    }
+
+    /// Draw the editor
+    #[cfg(feature = "swash")]
+    pub fn draw<F>(&self, font_system: &mut FontSystem, cache: &mut crate::SwashCache, mut f: F)
+    where
+        F: FnMut(i32, i32, u32, u32, Color),
+    {
+        let size = self.buffer().size();
+        f(0, 0, size.0 as u32, size.1 as u32, self.background_color());
+        self.editor.draw(
+            font_system,
+            cache,
+            self.foreground_color(),
+            self.cursor_color(),
+            self.selection_color(),
+            f,
+        );
     }
 }
 
@@ -357,23 +399,6 @@ impl<'a> Edit for SyntaxEditor<'a> {
     fn action(&mut self, font_system: &mut FontSystem, action: Action) {
         self.editor.action(font_system, action);
     }
-
-    /// Draw the editor
-    #[cfg(feature = "swash")]
-    fn draw<F>(
-        &self,
-        font_system: &mut FontSystem,
-        cache: &mut crate::SwashCache,
-        _color: Color,
-        mut f: F,
-    ) where
-        F: FnMut(i32, i32, u32, u32, Color),
-    {
-        let size = self.buffer().size();
-        f(0, 0, size.0 as u32, size.1 as u32, self.background_color());
-        self.editor
-            .draw(font_system, cache, self.foreground_color(), f);
-    }
 }
 
 impl<'a, 'b> BorrowedWithFontSystem<'b, SyntaxEditor<'a>> {
@@ -385,5 +410,13 @@ impl<'a, 'b> BorrowedWithFontSystem<'b, SyntaxEditor<'a>> {
     #[cfg(feature = "std")]
     pub fn load_text<P: AsRef<Path>>(&mut self, path: P, attrs: crate::Attrs) -> io::Result<()> {
         self.inner.load_text(self.font_system, path, attrs)
+    }
+
+    #[cfg(feature = "swash")]
+    pub fn draw<F>(&mut self, cache: &mut crate::SwashCache, f: F)
+    where
+        F: FnMut(i32, i32, u32, u32, Color),
+    {
+        self.inner.draw(self.font_system, cache, f);
     }
 }
