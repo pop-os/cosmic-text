@@ -91,7 +91,7 @@ pub struct LayoutCursor {
 
 impl LayoutCursor {
     /// Create a new [`LayoutCursor`]
-    pub fn new(line: usize, layout: usize, glyph: usize) -> Self {
+    pub const fn new(line: usize, layout: usize, glyph: usize) -> Self {
         Self {
             line,
             layout,
@@ -158,4 +158,11 @@ pub struct Scroll {
     /// Index of [`LayoutLine`] in [`BufferLine::layout`]. This will be adjusted as needed
     /// if it is negative or exceeds the number of layout lines
     pub layout: i32,
+}
+
+impl Scroll {
+    /// Create a new cursor
+    pub const fn new(line: usize, layout: i32) -> Self {
+        Self { line, layout }
+    }
 }
