@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic_text::{
-    Action, Attrs, Buffer, Color, Edit, Editor, Family, FontSystem, Metrics, Shaping, Style,
-    SwashCache, Weight,
+    Action, Attrs, Buffer, Color, Edit, Editor, Family, FontSystem, Metrics, Motion, Shaping,
+    Style, SwashCache, Weight,
 };
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{
@@ -152,14 +152,26 @@ fn main() {
         for event in window.events() {
             match event.to_option() {
                 EventOption::Key(event) => match event.scancode {
-                    orbclient::K_LEFT if event.pressed => editor.action(Action::Left),
-                    orbclient::K_RIGHT if event.pressed => editor.action(Action::Right),
-                    orbclient::K_UP if event.pressed => editor.action(Action::Up),
-                    orbclient::K_DOWN if event.pressed => editor.action(Action::Down),
-                    orbclient::K_HOME if event.pressed => editor.action(Action::Home),
-                    orbclient::K_END if event.pressed => editor.action(Action::End),
-                    orbclient::K_PGUP if event.pressed => editor.action(Action::PageUp),
-                    orbclient::K_PGDN if event.pressed => editor.action(Action::PageDown),
+                    orbclient::K_LEFT if event.pressed => {
+                        editor.action(Action::Motion(Motion::Left))
+                    }
+                    orbclient::K_RIGHT if event.pressed => {
+                        editor.action(Action::Motion(Motion::Right))
+                    }
+                    orbclient::K_UP if event.pressed => editor.action(Action::Motion(Motion::Up)),
+                    orbclient::K_DOWN if event.pressed => {
+                        editor.action(Action::Motion(Motion::Down))
+                    }
+                    orbclient::K_HOME if event.pressed => {
+                        editor.action(Action::Motion(Motion::Home))
+                    }
+                    orbclient::K_END if event.pressed => editor.action(Action::Motion(Motion::End)),
+                    orbclient::K_PGUP if event.pressed => {
+                        editor.action(Action::Motion(Motion::PageUp))
+                    }
+                    orbclient::K_PGDN if event.pressed => {
+                        editor.action(Action::Motion(Motion::PageDown))
+                    }
                     orbclient::K_ENTER if event.pressed => editor.action(Action::Enter),
                     orbclient::K_BKSP if event.pressed => editor.action(Action::Backspace),
                     orbclient::K_DEL if event.pressed => editor.action(Action::Delete),

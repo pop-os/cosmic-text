@@ -1,11 +1,11 @@
 use alloc::{collections::BTreeMap, string::String};
 use core::cmp;
-use modit::{Event, Key, Motion, Parser, TextObject, WordIter};
+use modit::{Event, Key, Parser, TextObject, WordIter};
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
     Action, AttrsList, BorrowedWithFontSystem, Buffer, Change, Color, Cursor, Edit, FontSystem,
-    Selection, SyntaxEditor, SyntaxTheme,
+    Motion, Selection, SyntaxEditor, SyntaxTheme,
 };
 
 pub use modit::{ViMode, ViParser};
@@ -342,19 +342,19 @@ impl<'a> Edit for ViEditor<'a> {
             //TODO: this leaves lots of room for issues in translation, should we directly accept Key?
             Action::Backspace => Key::Backspace,
             Action::Delete => Key::Delete,
-            Action::Down => Key::Down,
-            Action::End => Key::End,
+            Action::Motion(Motion::Down) => Key::Down,
+            Action::Motion(Motion::End) => Key::End,
             Action::Enter => Key::Enter,
             Action::Escape => Key::Escape,
-            Action::Home => Key::Home,
+            Action::Motion(Motion::Home) => Key::Home,
             Action::Indent => Key::Tab,
             Action::Insert(c) => Key::Char(c),
-            Action::Left => Key::Left,
-            Action::PageDown => Key::PageDown,
-            Action::PageUp => Key::PageUp,
-            Action::Right => Key::Right,
+            Action::Motion(Motion::Left) => Key::Left,
+            Action::Motion(Motion::PageDown) => Key::PageDown,
+            Action::Motion(Motion::PageUp) => Key::PageUp,
+            Action::Motion(Motion::Right) => Key::Right,
             Action::Unindent => Key::Backtab,
-            Action::Up => Key::Up,
+            Action::Motion(Motion::Up) => Key::Up,
             _ => {
                 log::debug!("Pass through action {:?}", action);
                 editor.action(font_system, action);
@@ -448,9 +448,9 @@ impl<'a> Edit for ViEditor<'a> {
 
                                     // Move to inserted line, preserving cursor x position
                                     if after {
-                                        editor.action(font_system, Action::Down);
+                                        editor.action(font_system, Action::Motion(Motion::Down));
                                     } else {
-                                        editor.action(font_system, Action::Up);
+                                        editor.action(font_system, Action::Motion(Motion::Up));
                                     }
                                 }
                             }
@@ -550,35 +550,37 @@ impl<'a> Edit for ViEditor<'a> {
                 }
                 Event::Motion(motion) => {
                     match motion {
-                        Motion::Around => {
+                        modit::Motion::Around => {
                             //TODO: what to do for this psuedo-motion?
                             return;
                         }
-                        Motion::Down => Action::Down,
-                        Motion::End => Action::End,
-                        Motion::GotoLine(line) => Action::GotoLine(line.saturating_sub(1)),
-                        Motion::GotoEof => {
-                            Action::GotoLine(editor.buffer().lines.len().saturating_sub(1))
+                        modit::Motion::Down => Action::Motion(Motion::Down),
+                        modit::Motion::End => Action::Motion(Motion::End),
+                        modit::Motion::GotoLine(line) => {
+                            Action::Motion(Motion::GotoLine(line.saturating_sub(1)))
                         }
-                        Motion::Home => Action::Home,
-                        Motion::Inside => {
+                        modit::Motion::GotoEof => Action::Motion(Motion::GotoLine(
+                            editor.buffer().lines.len().saturating_sub(1),
+                        )),
+                        modit::Motion::Home => Action::Motion(Motion::Home),
+                        modit::Motion::Inside => {
                             //TODO: what to do for this psuedo-motion?
                             return;
                         }
-                        Motion::Left => Action::Left,
-                        Motion::LeftInLine => {
+                        modit::Motion::Left => Action::Motion(Motion::Left),
+                        modit::Motion::LeftInLine => {
                             let cursor = editor.cursor();
                             if cursor.index > 0 {
-                                Action::Left
+                                Action::Motion(Motion::Left)
                             } else {
                                 return;
                             }
                         }
-                        Motion::Line => {
+                        modit::Motion::Line => {
                             //TODO: what to do for this psuedo-motion?
                             return;
                         }
-                        Motion::NextChar(find_c) => {
+                        modit::Motion::NextChar(find_c) => {
                             let mut cursor = editor.cursor();
                             let buffer = editor.buffer();
                             let text = buffer.lines[cursor.line].text();
@@ -597,7 +599,7 @@ impl<'a> Edit for ViEditor<'a> {
                             }
                             return;
                         }
-                        Motion::NextCharTill(find_c) => {
+                        modit::Motion::NextCharTill(find_c) => {
                             let mut cursor = editor.cursor();
                             let buffer = editor.buffer();
                             let text = buffer.lines[cursor.line].text();
@@ -615,14 +617,14 @@ impl<'a> Edit for ViEditor<'a> {
                             }
                             return;
                         }
-                        Motion::NextSearch => match &self.search_opt {
+                        modit::Motion::NextSearch => match &self.search_opt {
                             Some((value, forwards)) => {
                                 search(editor, value, *forwards);
                                 return;
                             }
                             None => return,
                         },
-                        Motion::NextWordEnd(word) => {
+                        modit::Motion::NextWordEnd(word) => {
                             let mut cursor = editor.cursor();
                             let buffer = editor.buffer();
                             loop {
@@ -649,7 +651,7 @@ impl<'a> Edit for ViEditor<'a> {
                             editor.set_cursor(cursor);
                             return;
                         }
-                        Motion::NextWordStart(word) => {
+                        modit::Motion::NextWordStart(word) => {
                             let mut cursor = editor.cursor();
                             let buffer = editor.buffer();
                             loop {
@@ -674,9 +676,9 @@ impl<'a> Edit for ViEditor<'a> {
                             editor.set_cursor(cursor);
                             return;
                         }
-                        Motion::PageDown => Action::PageDown,
-                        Motion::PageUp => Action::PageUp,
-                        Motion::PreviousChar(find_c) => {
+                        modit::Motion::PageDown => Action::Motion(Motion::PageDown),
+                        modit::Motion::PageUp => Action::Motion(Motion::PageUp),
+                        modit::Motion::PreviousChar(find_c) => {
                             let mut cursor = editor.cursor();
                             let buffer = editor.buffer();
                             let text = buffer.lines[cursor.line].text();
@@ -695,7 +697,7 @@ impl<'a> Edit for ViEditor<'a> {
                             }
                             return;
                         }
-                        Motion::PreviousCharTill(find_c) => {
+                        modit::Motion::PreviousCharTill(find_c) => {
                             let mut cursor = editor.cursor();
                             let buffer = editor.buffer();
                             let text = buffer.lines[cursor.line].text();
@@ -722,14 +724,14 @@ impl<'a> Edit for ViEditor<'a> {
                             }
                             return;
                         }
-                        Motion::PreviousSearch => match &self.search_opt {
+                        modit::Motion::PreviousSearch => match &self.search_opt {
                             Some((value, forwards)) => {
                                 search(editor, value, !*forwards);
                                 return;
                             }
                             None => return,
                         },
-                        Motion::PreviousWordEnd(word) => {
+                        modit::Motion::PreviousWordEnd(word) => {
                             let mut cursor = editor.cursor();
                             let buffer = editor.buffer();
                             loop {
@@ -757,7 +759,7 @@ impl<'a> Edit for ViEditor<'a> {
                             editor.set_cursor(cursor);
                             return;
                         }
-                        Motion::PreviousWordStart(word) => {
+                        modit::Motion::PreviousWordStart(word) => {
                             let mut cursor = editor.cursor();
                             let buffer = editor.buffer();
                             loop {
@@ -783,38 +785,40 @@ impl<'a> Edit for ViEditor<'a> {
                             editor.set_cursor(cursor);
                             return;
                         }
-                        Motion::Right => Action::Right,
-                        Motion::RightInLine => {
+                        modit::Motion::Right => Action::Motion(Motion::Right),
+                        modit::Motion::RightInLine => {
                             let cursor = editor.cursor();
                             let buffer = editor.buffer();
                             if cursor.index < buffer.lines[cursor.line].text().len() {
-                                Action::Right
+                                Action::Motion(Motion::Right)
                             } else {
                                 return;
                             }
                         }
-                        Motion::ScreenHigh => {
+                        modit::Motion::ScreenHigh => {
                             //TODO: is this efficient?
                             if let Some(first) = editor.buffer().layout_runs().next() {
-                                Action::GotoLine(first.line_i)
+                                Action::Motion(Motion::GotoLine(first.line_i))
                             } else {
                                 return;
                             }
                         }
-                        Motion::ScreenLow => {
+                        modit::Motion::ScreenLow => {
                             //TODO: is this efficient?
                             if let Some(last) = editor.buffer().layout_runs().last() {
-                                Action::GotoLine(last.line_i)
+                                Action::Motion(Motion::GotoLine(last.line_i))
                             } else {
                                 return;
                             }
                         }
-                        Motion::ScreenMiddle => {
+                        modit::Motion::ScreenMiddle => {
                             //TODO: is this efficient?
                             let mut layout_runs = editor.buffer().layout_runs();
                             if let Some(first) = layout_runs.next() {
                                 if let Some(last) = layout_runs.last() {
-                                    Action::GotoLine((last.line_i + first.line_i) / 2)
+                                    Action::Motion(Motion::GotoLine(
+                                        (last.line_i + first.line_i) / 2,
+                                    ))
                                 } else {
                                     return;
                                 }
@@ -822,12 +826,12 @@ impl<'a> Edit for ViEditor<'a> {
                                 return;
                             }
                         }
-                        Motion::Selection => {
+                        modit::Motion::Selection => {
                             //TODO: what to do for this psuedo-motion?
                             return;
                         }
-                        Motion::SoftHome => Action::SoftHome,
-                        Motion::Up => Action::Up,
+                        modit::Motion::SoftHome => Action::Motion(Motion::SoftHome),
+                        modit::Motion::Up => Action::Motion(Motion::Up),
                     }
                 }
             };

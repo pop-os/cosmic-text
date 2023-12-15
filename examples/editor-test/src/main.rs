@@ -2,7 +2,7 @@
 
 use cosmic_text::{
     Action, BidiParagraphs, BorrowedWithFontSystem, Buffer, Color, Edit, Editor, FontSystem,
-    Metrics, SwashCache,
+    Metrics, Motion, SwashCache,
 };
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{env, fs, process, time::Instant};
@@ -106,7 +106,7 @@ fn main() {
             // Test delete of EGC
             {
                 let cursor = editor.cursor();
-                editor.action(Action::Previous);
+                editor.action(Action::Motion(Motion::Previous));
                 editor.action(Action::Delete);
                 for c in grapheme.chars() {
                     editor.action(Action::Insert(c));
@@ -130,7 +130,7 @@ fn main() {
         {
             let cursor = editor.cursor();
             editor.action(Action::Enter);
-            editor.action(Action::Previous);
+            editor.action(Action::Motion(Motion::Previous));
             editor.action(Action::Delete);
             assert_eq!(cursor, editor.cursor());
         }

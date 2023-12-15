@@ -5,7 +5,7 @@ use cosmic::{
     iced_runtime::keyboard::KeyCode,
     theme::{Theme, ThemeType},
 };
-use cosmic_text::{Action, Edit, SwashCache};
+use cosmic_text::{Action, Edit, Motion, SwashCache};
 use std::{cmp, sync::Mutex, time::Instant};
 
 use crate::FONT_SYSTEM;
@@ -281,35 +281,35 @@ where
         match event {
             Event::Keyboard(keyboard::Event::KeyPressed { key_code, .. }) => match key_code {
                 KeyCode::Left => {
-                    editor.action(Action::Left);
+                    editor.action(Action::Motion(Motion::Left));
                     status = Status::Captured;
                 }
                 KeyCode::Right => {
-                    editor.action(Action::Right);
+                    editor.action(Action::Motion(Motion::Right));
                     status = Status::Captured;
                 }
                 KeyCode::Up => {
-                    editor.action(Action::Up);
+                    editor.action(Action::Motion(Motion::Up));
                     status = Status::Captured;
                 }
                 KeyCode::Down => {
-                    editor.action(Action::Down);
+                    editor.action(Action::Motion(Motion::Down));
                     status = Status::Captured;
                 }
                 KeyCode::Home => {
-                    editor.action(Action::Home);
+                    editor.action(Action::Motion(Motion::Home));
                     status = Status::Captured;
                 }
                 KeyCode::End => {
-                    editor.action(Action::End);
+                    editor.action(Action::Motion(Motion::End));
                     status = Status::Captured;
                 }
                 KeyCode::PageUp => {
-                    editor.action(Action::PageUp);
+                    editor.action(Action::Motion(Motion::PageUp));
                     status = Status::Captured;
                 }
                 KeyCode::PageDown => {
-                    editor.action(Action::PageDown);
+                    editor.action(Action::Motion(Motion::PageDown));
                     status = Status::Captured;
                 }
                 KeyCode::Escape => {
