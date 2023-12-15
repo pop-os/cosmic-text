@@ -358,8 +358,9 @@ impl Buffer {
                 self.wrap,
             );
             if line_i == cursor.line {
-                let layout_cursor = self.layout_cursor(&cursor);
-                layout_i += layout_cursor.layout as i32;
+                if let Some(layout_cursor) = self.layout_cursor(font_system, cursor) {
+                    layout_i += layout_cursor.layout as i32;
+                }
                 break;
             } else {
                 layout_i += layout.len() as i32;
@@ -392,11 +393,9 @@ impl Buffer {
         self.scroll = cmp::max(0, cmp::min(total_layout - lines, self.scroll));
     }
 
-    pub fn layout_cursor(&self, cursor: &Cursor) -> LayoutCursor {
-        let line = &self.lines[cursor.line];
-
-        //TODO: ensure layout is done?
-        let layout = line.layout_opt().as_ref().expect("layout not found");
+    /// Convert a [`Cursor`] to a [`LayoutCursor`]
+    pub fn layout_cursor(&mut self, font_system: &mut FontSystem, cursor: Cursor) -> Option<LayoutCursor> {
+        let layout = self.line_layout(font_system, cursor.line)?;
         for (layout_i, layout_line) in layout.iter().enumerate() {
             for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
                 let cursor_end =
@@ -408,18 +407,18 @@ impl Buffer {
                 } else {
                     (cursor_end, cursor_start)
                 };
-                if *cursor == cursor_left {
-                    return LayoutCursor::new(cursor.line, layout_i, glyph_i);
+                if cursor == cursor_left {
+                    return Some(LayoutCursor::new(cursor.line, layout_i, glyph_i));
                 }
-                if *cursor == cursor_right {
-                    return LayoutCursor::new(cursor.line, layout_i, glyph_i + 1);
+                if cursor == cursor_right {
+                    return Some(LayoutCursor::new(cursor.line, layout_i, glyph_i + 1));
                 }
             }
         }
 
         // Fall back to start of line
         //TODO: should this be the end of the line?
-        LayoutCursor::new(cursor.line, 0, 0)
+        Some(LayoutCursor::new(cursor.line, 0, 0))
     }
 
     /// Shape the provided line index and return the result
@@ -858,8 +857,7 @@ impl Buffer {
                 }
             }
             Motion::Up => {
-                //TODO: make this preserve X as best as possible!
-                let mut layout_cursor = self.layout_cursor(&cursor);
+                let mut layout_cursor = self.layout_cursor(font_system, cursor)?;
 
                 if cursor.x_opt.is_none() {
                     cursor.x_opt = Some(
@@ -882,12 +880,10 @@ impl Buffer {
                     self.cursor_motion(font_system, cursor, Motion::LayoutCursor(layout_cursor))?;
             }
             Motion::Down => {
-                //TODO: make this preserve X as best as possible!
-                let mut layout_cursor = self.layout_cursor(&cursor);
+                let mut layout_cursor = self.layout_cursor(font_system, cursor)?;
 
                 let layout_len = self
-                    .line_layout(font_system, layout_cursor.line)
-                    .expect("layout not found")
+                    .line_layout(font_system, layout_cursor.line)?
                     .len();
 
                 if cursor.x_opt.is_none() {
@@ -911,7 +907,7 @@ impl Buffer {
                     self.cursor_motion(font_system, cursor, Motion::LayoutCursor(layout_cursor))?;
             }
             Motion::Home => {
-                let mut layout_cursor = self.layout_cursor(&cursor);
+                let mut layout_cursor = self.layout_cursor(font_system, cursor)?;
                 layout_cursor.glyph = 0;
                 cursor =
                     self.cursor_motion(font_system, cursor, Motion::LayoutCursor(layout_cursor))?;
@@ -928,7 +924,7 @@ impl Buffer {
                 cursor.x_opt = None;
             }
             Motion::End => {
-                let mut layout_cursor = self.layout_cursor(&cursor);
+                let mut layout_cursor = self.layout_cursor(font_system, cursor)?;
                 layout_cursor.glyph = usize::max_value();
                 cursor =
                     self.cursor_motion(font_system, cursor, Motion::LayoutCursor(layout_cursor))?;
@@ -1039,7 +1035,7 @@ impl Buffer {
                 cursor.x_opt = None;
             }
             Motion::GotoLine(line) => {
-                let mut layout_cursor = self.layout_cursor(&cursor);
+                let mut layout_cursor = self.layout_cursor(font_system, cursor)?;
                 layout_cursor.line = line;
                 cursor =
                     self.cursor_motion(font_system, cursor, Motion::LayoutCursor(layout_cursor))?;
