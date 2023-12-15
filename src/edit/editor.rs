@@ -17,7 +17,6 @@ use crate::{
 pub struct Editor {
     buffer: Buffer,
     cursor: Cursor,
-    cursor_x_opt: Option<i32>,
     selection: Selection,
     cursor_moved: bool,
     auto_indent: bool,
@@ -31,7 +30,6 @@ impl Editor {
         Self {
             buffer,
             cursor: Cursor::default(),
-            cursor_x_opt: None,
             selection: Selection::None,
             cursor_moved: false,
             auto_indent: false,
@@ -58,7 +56,6 @@ impl Edit for Editor {
         if self.cursor != cursor {
             self.cursor = cursor;
             self.cursor_moved = true;
-            self.cursor_x_opt = None;
             self.buffer.set_redraw(true);
         }
     }
