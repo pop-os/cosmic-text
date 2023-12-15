@@ -5,7 +5,7 @@ use unicode_segmentation::UnicodeSegmentation;
 
 #[cfg(feature = "swash")]
 use crate::Color;
-use crate::{AttrsList, BorrowedWithFontSystem, Buffer, Cursor, FontSystem};
+use crate::{AttrsList, BorrowedWithFontSystem, Buffer, Cursor, FontSystem, Motion};
 
 pub use self::editor::*;
 mod editor;
@@ -23,34 +23,8 @@ mod vi;
 /// An action to perform on an [`Editor`]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Action {
-    /// Move cursor to previous character ([Self::Left] in LTR, [Self::Right] in RTL)
-    Previous,
-    /// Move cursor to next character ([Self::Right] in LTR, [Self::Left] in RTL)
-    Next,
-    /// Move cursor left
-    Left,
-    /// Move cursor right
-    Right,
-    /// Move cursor up
-    Up,
-    /// Move cursor down
-    Down,
-    /// Move cursor to start of line
-    Home,
-    /// Move cursor to start of line, skipping whitespace
-    SoftHome,
-    /// Move cursor to end of line
-    End,
-    /// Move cursor to start of paragraph
-    ParagraphStart,
-    /// Move cursor to end of paragraph
-    ParagraphEnd,
-    /// Move cursor up one page
-    PageUp,
-    /// Move cursor down one page
-    PageDown,
-    /// Move cursor up or down by a number of pixels
-    Vertical(i32),
+    /// Move the cursor with some motion
+    Motion(Motion),
     /// Escape, clears selection
     Escape,
     /// Insert character at cursor
@@ -89,20 +63,6 @@ pub enum Action {
     Scroll {
         lines: i32,
     },
-    /// Move cursor to previous word boundary
-    PreviousWord,
-    /// Move cursor to next word boundary
-    NextWord,
-    /// Move cursor to next word boundary to the left
-    LeftWord,
-    /// Move cursor to next word boundary to the right
-    RightWord,
-    /// Move cursor to the start of the document
-    BufferStart,
-    /// Move cursor to the end of the document
-    BufferEnd,
-    /// Move cursor to specific line
-    GotoLine(usize),
 }
 
 /// A unique change to an editor

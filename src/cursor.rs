@@ -1,0 +1,147 @@
+use crate::Color;
+
+/// Current cursor location
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Ord, PartialOrd)]
+pub struct Cursor {
+    /// Text line the cursor is on
+    pub line: usize,
+    /// First-byte-index of glyph at cursor (will insert behind this glyph)
+    pub index: usize,
+    /// Whether to associate the cursor with the run before it or the run after it if placed at the
+    /// boundary between two runs
+    pub affinity: Affinity,
+    /// Cached X position used for up and down movement
+    pub x_opt: Option<i32>,
+    /// Cursor color
+    pub color: Option<Color>,
+}
+
+impl Cursor {
+    /// Create a new cursor
+    pub const fn new(line: usize, index: usize) -> Self {
+        Self::new_with_affinity(line, index, Affinity::Before)
+    }
+
+    /// Create a new cursor, specifying the affinity
+    pub const fn new_with_affinity(line: usize, index: usize, affinity: Affinity) -> Self {
+        Self {
+            line,
+            index,
+            affinity,
+            x_opt: None,
+            color: None,
+        }
+    }
+    /// Create a new cursor, specifying the color
+    pub const fn new_with_color(line: usize, index: usize, color: Color) -> Self {
+        Self {
+            line,
+            index,
+            affinity: Affinity::Before,
+            x_opt: None,
+            color: Some(color),
+        }
+    }
+}
+
+/// Whether to associate cursors placed at a boundary between runs with the run before or after it.
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd)]
+pub enum Affinity {
+    #[default]
+    Before,
+    After,
+}
+
+impl Affinity {
+    pub fn before(&self) -> bool {
+        *self == Self::Before
+    }
+
+    pub fn after(&self) -> bool {
+        *self == Self::After
+    }
+
+    pub fn from_before(before: bool) -> Self {
+        if before {
+            Self::Before
+        } else {
+            Self::After
+        }
+    }
+
+    pub fn from_after(after: bool) -> Self {
+        if after {
+            Self::After
+        } else {
+            Self::Before
+        }
+    }
+}
+
+/// The position of a cursor within a [`Buffer`].
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct LayoutCursor {
+    pub line: usize,
+    pub layout: usize,
+    pub glyph: usize,
+}
+
+impl LayoutCursor {
+    /// Create a new [`LayoutCursor`]
+    pub fn new(line: usize, layout: usize, glyph: usize) -> Self {
+        Self {
+            line,
+            layout,
+            glyph,
+        }
+    }
+}
+
+/// A motion to perform on a [`Cursor`]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Motion {
+    /// Apply specific [`LayoutCursor`]
+    LayoutCursor(LayoutCursor),
+    /// Move cursor to previous character ([Self::Left] in LTR, [Self::Right] in RTL)
+    Previous,
+    /// Move cursor to next character ([Self::Right] in LTR, [Self::Left] in RTL)
+    Next,
+    /// Move cursor left
+    Left,
+    /// Move cursor right
+    Right,
+    /// Move cursor up
+    Up,
+    /// Move cursor down
+    Down,
+    /// Move cursor to start of line
+    Home,
+    /// Move cursor to start of line, skipping whitespace
+    SoftHome,
+    /// Move cursor to end of line
+    End,
+    /// Move cursor to start of paragraph
+    ParagraphStart,
+    /// Move cursor to end of paragraph
+    ParagraphEnd,
+    /// Move cursor up one page
+    PageUp,
+    /// Move cursor down one page
+    PageDown,
+    /// Move cursor up or down by a number of pixels
+    Vertical(i32),
+    /// Move cursor to previous word boundary
+    PreviousWord,
+    /// Move cursor to next word boundary
+    NextWord,
+    /// Move cursor to next word boundary to the left
+    LeftWord,
+    /// Move cursor to next word boundary to the right
+    RightWord,
+    /// Move cursor to the start of the document
+    BufferStart,
+    /// Move cursor to the end of the document
+    BufferEnd,
+    /// Move cursor to specific line
+    GotoLine(usize),
+}

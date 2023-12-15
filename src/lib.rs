@@ -111,6 +111,9 @@ mod buffer_line;
 pub use self::glyph_cache::*;
 mod glyph_cache;
 
+pub use self::cursor::*;
+mod cursor;
+
 pub use self::edit::*;
 mod edit;
 

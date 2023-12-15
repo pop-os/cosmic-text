@@ -6,101 +6,10 @@ use core::{cmp, fmt};
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
-    Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem, BufferLine, Color, FontSystem,
-    LayoutGlyph, LayoutLine, ShapeBuffer, ShapeLine, Shaping, Wrap,
+    Affinity, Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem, BufferLine, Color, Cursor,
+    FontSystem, LayoutCursor, LayoutGlyph, LayoutLine, Motion, ShapeBuffer, ShapeLine, Shaping,
+    Wrap,
 };
-
-/// Current cursor location
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Ord, PartialOrd)]
-pub struct Cursor {
-    /// Text line the cursor is on
-    pub line: usize,
-    /// First-byte-index of glyph at cursor (will insert behind this glyph)
-    pub index: usize,
-    /// Whether to associate the cursor with the run before it or the run after it if placed at the
-    /// boundary between two runs
-    pub affinity: Affinity,
-    /// Cursor color
-    pub color: Option<Color>,
-}
-
-impl Cursor {
-    /// Create a new cursor
-    pub const fn new(line: usize, index: usize) -> Self {
-        Self::new_with_affinity(line, index, Affinity::Before)
-    }
-
-    /// Create a new cursor, specifying the affinity
-    pub const fn new_with_affinity(line: usize, index: usize, affinity: Affinity) -> Self {
-        Self {
-            line,
-            index,
-            affinity,
-            color: None,
-        }
-    }
-    /// Create a new cursor, specifying the color
-    pub const fn new_with_color(line: usize, index: usize, color: Color) -> Self {
-        Self {
-            line,
-            index,
-            affinity: Affinity::Before,
-            color: Some(color),
-        }
-    }
-}
-
-/// Whether to associate cursors placed at a boundary between runs with the run before or after it.
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd)]
-pub enum Affinity {
-    #[default]
-    Before,
-    After,
-}
-
-impl Affinity {
-    pub fn before(&self) -> bool {
-        *self == Self::Before
-    }
-
-    pub fn after(&self) -> bool {
-        *self == Self::After
-    }
-
-    pub fn from_before(before: bool) -> Self {
-        if before {
-            Self::Before
-        } else {
-            Self::After
-        }
-    }
-
-    pub fn from_after(after: bool) -> Self {
-        if after {
-            Self::After
-        } else {
-            Self::Before
-        }
-    }
-}
-
-/// The position of a cursor within a [`Buffer`].
-#[derive(Debug)]
-pub struct LayoutCursor {
-    pub line: usize,
-    pub layout: usize,
-    pub glyph: usize,
-}
-
-impl LayoutCursor {
-    pub fn new(line: usize, layout: usize, glyph: usize) -> Self {
-        Self {
-            line,
-            layout,
-            glyph,
-        }
-    }
-}
 
 /// A line of visible text for rendering
 #[derive(Debug)]
@@ -848,6 +757,297 @@ impl Buffer {
         new_cursor_opt
     }
 
+    /// Apply a [`Motion`] to a [`Cursor`]
+    pub fn cursor_motion(
+        &mut self,
+        font_system: &mut FontSystem,
+        mut cursor: Cursor,
+        motion: Motion,
+    ) -> Option<Cursor> {
+        match motion {
+            Motion::LayoutCursor(layout_cursor) => {
+                let layout = self.line_layout(font_system, layout_cursor.line)?;
+
+                let layout_line = match layout.get(layout_cursor.layout) {
+                    Some(some) => some,
+                    None => match layout.last() {
+                        Some(some) => some,
+                        None => return None,
+                    },
+                };
+
+                let (new_index, new_affinity) = match layout_line.glyphs.get(layout_cursor.glyph) {
+                    Some(glyph) => (glyph.start, Affinity::After),
+                    None => match layout_line.glyphs.last() {
+                        Some(glyph) => (glyph.end, Affinity::Before),
+                        //TODO: is this correct?
+                        None => (0, Affinity::After),
+                    },
+                };
+
+                if cursor.line != layout_cursor.line
+                    || cursor.index != new_index
+                    || cursor.affinity != new_affinity
+                {
+                    cursor.line = layout_cursor.line;
+                    cursor.index = new_index;
+                    cursor.affinity = new_affinity;
+                }
+            }
+            Motion::Previous => {
+                let line = self.lines.get(cursor.line)?;
+                if cursor.index > 0 {
+                    // Find previous character index
+                    let mut prev_index = 0;
+                    for (i, _) in line.text().grapheme_indices(true) {
+                        if i < cursor.index {
+                            prev_index = i;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    cursor.index = prev_index;
+                    cursor.affinity = Affinity::After;
+                } else if cursor.line > 0 {
+                    cursor.line -= 1;
+                    cursor.index = self.lines.get(cursor.line)?.text().len();
+                    cursor.affinity = Affinity::After;
+                }
+                cursor.x_opt = None;
+            }
+            Motion::Next => {
+                let line = self.lines.get(cursor.line)?;
+                if cursor.index < line.text().len() {
+                    for (i, c) in line.text().grapheme_indices(true) {
+                        if i == cursor.index {
+                            cursor.index += c.len();
+                            cursor.affinity = Affinity::Before;
+                            break;
+                        }
+                    }
+                } else if cursor.line + 1 < self.lines.len() {
+                    cursor.line += 1;
+                    cursor.index = 0;
+                    cursor.affinity = Affinity::Before;
+                }
+                cursor.x_opt = None;
+            }
+            Motion::Left => {
+                let rtl_opt = self
+                    .line_shape(font_system, cursor.line)
+                    .map(|shape| shape.rtl);
+                if let Some(rtl) = rtl_opt {
+                    if rtl {
+                        cursor = self.cursor_motion(font_system, cursor, Motion::Next)?;
+                    } else {
+                        cursor = self.cursor_motion(font_system, cursor, Motion::Previous)?;
+                    }
+                }
+            }
+            Motion::Right => {
+                let rtl_opt = self
+                    .line_shape(font_system, cursor.line)
+                    .map(|shape| shape.rtl);
+                if let Some(rtl) = rtl_opt {
+                    if rtl {
+                        cursor = self.cursor_motion(font_system, cursor, Motion::Previous)?;
+                    } else {
+                        cursor = self.cursor_motion(font_system, cursor, Motion::Next)?;
+                    }
+                }
+            }
+            Motion::Up => {
+                //TODO: make this preserve X as best as possible!
+                let mut layout_cursor = self.layout_cursor(&cursor);
+
+                if cursor.x_opt.is_none() {
+                    cursor.x_opt = Some(
+                        layout_cursor.glyph as i32, //TODO: glyph x position
+                    );
+                }
+
+                if layout_cursor.layout > 0 {
+                    layout_cursor.layout -= 1;
+                } else if layout_cursor.line > 0 {
+                    layout_cursor.line -= 1;
+                    layout_cursor.layout = usize::max_value();
+                }
+
+                if let Some(cursor_x) = cursor.x_opt {
+                    layout_cursor.glyph = cursor_x as usize; //TODO: glyph x position
+                }
+
+                cursor =
+                    self.cursor_motion(font_system, cursor, Motion::LayoutCursor(layout_cursor))?;
+            }
+            Motion::Down => {
+                //TODO: make this preserve X as best as possible!
+                let mut layout_cursor = self.layout_cursor(&cursor);
+
+                let layout_len = self
+                    .line_layout(font_system, layout_cursor.line)
+                    .expect("layout not found")
+                    .len();
+
+                if cursor.x_opt.is_none() {
+                    cursor.x_opt = Some(
+                        layout_cursor.glyph as i32, //TODO: glyph x position
+                    );
+                }
+
+                if layout_cursor.layout + 1 < layout_len {
+                    layout_cursor.layout += 1;
+                } else if layout_cursor.line + 1 < self.lines.len() {
+                    layout_cursor.line += 1;
+                    layout_cursor.layout = 0;
+                }
+
+                if let Some(cursor_x) = cursor.x_opt {
+                    layout_cursor.glyph = cursor_x as usize; //TODO: glyph x position
+                }
+
+                cursor =
+                    self.cursor_motion(font_system, cursor, Motion::LayoutCursor(layout_cursor))?;
+            }
+            Motion::Home => {
+                let mut layout_cursor = self.layout_cursor(&cursor);
+                layout_cursor.glyph = 0;
+                cursor =
+                    self.cursor_motion(font_system, cursor, Motion::LayoutCursor(layout_cursor))?;
+                cursor.x_opt = None;
+            }
+            Motion::SoftHome => {
+                let line = self.lines.get(cursor.line)?;
+                cursor.index = line
+                    .text()
+                    .char_indices()
+                    .filter_map(|(i, c)| if c.is_whitespace() { None } else { Some(i) })
+                    .next()
+                    .unwrap_or(0);
+                cursor.x_opt = None;
+            }
+            Motion::End => {
+                let mut layout_cursor = self.layout_cursor(&cursor);
+                layout_cursor.glyph = usize::max_value();
+                cursor =
+                    self.cursor_motion(font_system, cursor, Motion::LayoutCursor(layout_cursor))?;
+                cursor.x_opt = None;
+            }
+            Motion::ParagraphStart => {
+                cursor.index = 0;
+                cursor.x_opt = None;
+            }
+            Motion::ParagraphEnd => {
+                cursor.index = self.lines.get(cursor.line)?.text().len();
+                cursor.x_opt = None;
+            }
+            Motion::PageUp => {
+                cursor = self.cursor_motion(
+                    font_system,
+                    cursor,
+                    Motion::Vertical(-self.size().1 as i32),
+                )?;
+            }
+            Motion::PageDown => {
+                cursor = self.cursor_motion(
+                    font_system,
+                    cursor,
+                    Motion::Vertical(self.size().1 as i32),
+                )?;
+            }
+            Motion::Vertical(px) => {
+                // TODO more efficient
+                let lines = px / self.metrics().line_height as i32;
+                match lines.cmp(&0) {
+                    cmp::Ordering::Less => {
+                        for _ in 0..-lines {
+                            cursor = self.cursor_motion(font_system, cursor, Motion::Up)?;
+                        }
+                    }
+                    cmp::Ordering::Greater => {
+                        for _ in 0..lines {
+                            cursor = self.cursor_motion(font_system, cursor, Motion::Down)?;
+                        }
+                    }
+                    cmp::Ordering::Equal => {}
+                }
+            }
+            Motion::PreviousWord => {
+                let line = self.lines.get(cursor.line)?;
+                if cursor.index > 0 {
+                    cursor.index = line
+                        .text()
+                        .unicode_word_indices()
+                        .rev()
+                        .map(|(i, _)| i)
+                        .find(|&i| i < cursor.index)
+                        .unwrap_or(0);
+                } else if cursor.line > 0 {
+                    cursor.line -= 1;
+                    cursor.index = self.lines.get(cursor.line)?.text().len();
+                }
+                cursor.x_opt = None;
+            }
+            Motion::NextWord => {
+                let line = self.lines.get(cursor.line)?;
+                if cursor.index < line.text().len() {
+                    cursor.index = line
+                        .text()
+                        .unicode_word_indices()
+                        .map(|(i, word)| i + word.len())
+                        .find(|&i| i > cursor.index)
+                        .unwrap_or(line.text().len());
+                } else if cursor.line + 1 < self.lines.len() {
+                    cursor.line += 1;
+                    cursor.index = 0;
+                }
+                cursor.x_opt = None;
+            }
+            Motion::LeftWord => {
+                let rtl_opt = self
+                    .line_shape(font_system, cursor.line)
+                    .map(|shape| shape.rtl);
+                if let Some(rtl) = rtl_opt {
+                    if rtl {
+                        cursor = self.cursor_motion(font_system, cursor, Motion::NextWord)?;
+                    } else {
+                        cursor = self.cursor_motion(font_system, cursor, Motion::PreviousWord)?;
+                    }
+                }
+            }
+            Motion::RightWord => {
+                let rtl_opt = self
+                    .line_shape(font_system, cursor.line)
+                    .map(|shape| shape.rtl);
+                if let Some(rtl) = rtl_opt {
+                    if rtl {
+                        cursor = self.cursor_motion(font_system, cursor, Motion::PreviousWord)?;
+                    } else {
+                        cursor = self.cursor_motion(font_system, cursor, Motion::NextWord)?;
+                    }
+                }
+            }
+            Motion::BufferStart => {
+                cursor.line = 0;
+                cursor.index = 0;
+                cursor.x_opt = None;
+            }
+            Motion::BufferEnd => {
+                cursor.line = self.lines.len() - 1;
+                cursor.index = self.lines.get(cursor.line)?.text().len();
+                cursor.x_opt = None;
+            }
+            Motion::GotoLine(line) => {
+                let mut layout_cursor = self.layout_cursor(&cursor);
+                layout_cursor.line = line;
+                cursor =
+                    self.cursor_motion(font_system, cursor, Motion::LayoutCursor(layout_cursor))?;
+            }
+        }
+        Some(cursor)
+    }
+
     /// Draw the buffer
     #[cfg(feature = "swash")]
     pub fn draw<F>(
@@ -970,6 +1170,11 @@ impl<'a> BorrowedWithFontSystem<'a, Buffer> {
     {
         self.inner
             .set_rich_text(self.font_system, spans, default_attrs, shaping);
+    }
+
+    /// Apply a [`Motion`] to a [`Cursor`]
+    pub fn cursor_motion(&mut self, cursor: Cursor, motion: Motion) -> Option<Cursor> {
+        self.inner.cursor_motion(self.font_system, cursor, motion)
     }
 
     /// Draw the buffer
