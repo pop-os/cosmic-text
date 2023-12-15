@@ -131,12 +131,10 @@ where
     fn layout(&self, _renderer: &Renderer, limits: &layout::Limits) -> layout::Node {
         let limits = limits.width(Length::Fill).height(Length::Fill);
 
-        //TODO: allow lazy shape
         let mut editor = self.editor.lock().unwrap();
         editor
             .borrow_with(&mut FONT_SYSTEM.lock().unwrap())
-            .buffer_mut()
-            .shape_until(i32::max_value());
+            .shape_as_needed(true);
 
         let mut layout_lines = 0;
         for line in editor.buffer().lines.iter() {
@@ -148,7 +146,6 @@ where
 
         let height = layout_lines as f32 * editor.buffer().metrics().line_height;
         let size = Size::new(limits.max().width, height);
-        log::info!("size {:?}", size);
 
         layout::Node::new(limits.resolve(size))
     }
@@ -228,7 +225,7 @@ where
         editor.buffer_mut().set_size(image_w as f32, image_h as f32);
 
         // Shape and layout
-        editor.shape_as_needed();
+        editor.shape_as_needed(true);
 
         // Draw to pixel buffer
         let mut pixels = vec![0; image_w as usize * image_h as usize * 4];

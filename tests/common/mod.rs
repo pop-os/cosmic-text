@@ -93,7 +93,7 @@ impl DrawTestCfg {
             (self.canvas_height - margins * 2) as f32,
         );
         buffer.set_text(&self.text, self.font.as_attrs(), Shaping::Advanced);
-        buffer.shape_until_scroll();
+        buffer.shape_until_scroll(true);
 
         // Black
         let text_color = Color::rgb(0x00, 0x00, 0x00);

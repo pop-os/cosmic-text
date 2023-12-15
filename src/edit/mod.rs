@@ -231,7 +231,7 @@ pub trait Edit {
     fn set_tab_width(&mut self, tab_width: u16);
 
     /// Shape lines until scroll, after adjusting scroll if the cursor moved
-    fn shape_as_needed(&mut self, font_system: &mut FontSystem);
+    fn shape_as_needed(&mut self, font_system: &mut FontSystem, prune: bool);
 
     /// Delete text starting at start Cursor and ending at end Cursor
     fn delete_range(&mut self, start: Cursor, end: Cursor);
@@ -288,8 +288,8 @@ impl<'a, T: Edit> BorrowedWithFontSystem<'a, T> {
     }
 
     /// Shape lines until scroll, after adjusting scroll if the cursor moved
-    pub fn shape_as_needed(&mut self) {
-        self.inner.shape_as_needed(self.font_system);
+    pub fn shape_as_needed(&mut self, prune: bool) {
+        self.inner.shape_as_needed(self.font_system, prune);
     }
 
     /// Perform an [Action] on the editor

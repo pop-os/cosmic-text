@@ -13,6 +13,7 @@ pub struct BufferLine {
     shape_opt: Option<ShapeLine>,
     layout_opt: Option<Vec<LayoutLine>>,
     shaping: Shaping,
+    metadata: Option<usize>,
 }
 
 impl BufferLine {
@@ -27,6 +28,7 @@ impl BufferLine {
             shape_opt: None,
             layout_opt: None,
             shaping,
+            metadata: None,
         }
     }
 
@@ -69,7 +71,7 @@ impl BufferLine {
     pub fn set_attrs_list(&mut self, attrs_list: AttrsList) -> bool {
         if attrs_list != self.attrs_list {
             self.attrs_list = attrs_list;
-            self.reset();
+            self.reset_shaping();
             true
         } else {
             false
@@ -129,21 +131,21 @@ impl BufferLine {
         new
     }
 
-    /// Reset shaping and layout information
-    //TODO: make this private
+    /// Reset shaping, layout, and metadata caches
     pub fn reset(&mut self) {
-        self.shape_opt = None;
-        self.layout_opt = None;
+        self.metadata = None;
+        self.reset_shaping();
     }
 
-    /// Reset only layout information
+    /// Reset shaping and layout caches
+    pub fn reset_shaping(&mut self) {
+        self.shape_opt = None;
+        self.reset_layout();
+    }
+
+    /// Reset only layout cache
     pub fn reset_layout(&mut self) {
         self.layout_opt = None;
-    }
-
-    /// Check if shaping and layout information is cleared
-    pub fn is_reset(&self) -> bool {
-        self.shape_opt.is_none()
     }
 
     /// Shape line, will cache results
@@ -214,5 +216,16 @@ impl BufferLine {
     /// Get line layout cache
     pub fn layout_opt(&self) -> &Option<Vec<LayoutLine>> {
         &self.layout_opt
+    }
+
+    /// Get line metadata. This will be None if [`BufferLine::set_metadata`] has not been called
+    /// after the last reset of shaping and layout caches
+    pub fn metadata(&self) -> Option<usize> {
+        self.metadata
+    }
+
+    /// Set line metadata. This is stored until the next line reset
+    pub fn set_metadata(&mut self, metadata: usize) {
+        self.metadata = Some(metadata);
     }
 }

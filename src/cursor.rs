@@ -3,7 +3,7 @@ use crate::Color;
 /// Current cursor location
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Ord, PartialOrd)]
 pub struct Cursor {
-    /// Text line the cursor is on
+    /// Index of [`BufferLine`] in [`Buffer::lines`]
     pub line: usize,
     /// First-byte-index of glyph at cursor (will insert behind this glyph)
     pub index: usize,
@@ -81,8 +81,11 @@ impl Affinity {
 /// The position of a cursor within a [`Buffer`].
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct LayoutCursor {
+    /// Index of [`BufferLine`] in [`Buffer::lines`]
     pub line: usize,
+    /// Index of [`LayoutLine`] in [`BufferLine::layout`]
     pub layout: usize,
+    /// Index of [`LayoutGlyph`] in [`LayoutLine::glyphs`]
     pub glyph: usize,
 }
 
@@ -144,4 +147,15 @@ pub enum Motion {
     BufferEnd,
     /// Move cursor to specific line
     GotoLine(usize),
+}
+
+/// Scroll position in [`Buffer`]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub struct Scroll {
+    /// Index of [`BufferLine`] in [`Buffer::lines`]. This will be adjusted as needed if layout is
+    /// out of bounds
+    pub line: usize,
+    /// Index of [`LayoutLine`] in [`BufferLine::layout`]. This will be adjusted as needed
+    /// if it is negative or exceeds the number of layout lines
+    pub layout: i32,
 }

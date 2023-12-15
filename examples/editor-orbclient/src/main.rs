@@ -88,7 +88,7 @@ fn main() {
     let mut mouse_y = -1;
     let mut mouse_left = false;
     loop {
-        editor.shape_as_needed();
+        editor.shape_as_needed(true);
         if editor.buffer().redraw() {
             let instant = Instant::now();
 

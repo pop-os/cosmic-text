@@ -7,8 +7,8 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
     Affinity, Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem, BufferLine, Color, Cursor,
-    FontSystem, LayoutCursor, LayoutGlyph, LayoutLine, Motion, ShapeBuffer, ShapeLine, Shaping,
-    Wrap,
+    FontSystem, LayoutCursor, LayoutGlyph, LayoutLine, Motion, Scroll, ShapeBuffer, ShapeLine,
+    Shaping, Wrap,
 };
 
 /// A line of visible text for rendering
@@ -101,6 +101,7 @@ impl<'b> LayoutRunIter<'b> {
         let total_layout_lines: usize = buffer
             .lines
             .iter()
+            .skip(buffer.scroll.line)
             .map(|line| {
                 line.layout_opt()
                     .as_ref()
@@ -109,7 +110,7 @@ impl<'b> LayoutRunIter<'b> {
             })
             .sum();
         let top_cropped_layout_lines =
-            total_layout_lines.saturating_sub(buffer.scroll.try_into().unwrap_or_default());
+            total_layout_lines.saturating_sub(buffer.scroll.layout.try_into().unwrap_or_default());
         let maximum_lines = if buffer.metrics.line_height == 0.0 {
             0
         } else {
@@ -124,7 +125,7 @@ impl<'b> LayoutRunIter<'b> {
 
         Self {
             buffer,
-            line_i: 0,
+            line_i: buffer.scroll.line,
             layout_i: 0,
             remaining_len: bottom_cropped_layout_lines,
             total_layout: 0,
@@ -146,7 +147,7 @@ impl<'b> Iterator for LayoutRunIter<'b> {
             while let Some(layout_line) = layout.get(self.layout_i) {
                 self.layout_i += 1;
 
-                let scrolled = self.total_layout < self.buffer.scroll;
+                let scrolled = self.total_layout < self.buffer.scroll.layout;
                 self.total_layout += 1;
                 if scrolled {
                     continue;
@@ -154,7 +155,7 @@ impl<'b> Iterator for LayoutRunIter<'b> {
 
                 let line_top = self
                     .total_layout
-                    .saturating_sub(self.buffer.scroll)
+                    .saturating_sub(self.buffer.scroll.layout)
                     .saturating_sub(1) as f32
                     * self.buffer.metrics.line_height;
                 let glyph_height = layout_line.max_ascent + layout_line.max_descent;
@@ -227,7 +228,7 @@ pub struct Buffer {
     metrics: Metrics,
     width: f32,
     height: f32,
-    scroll: i32,
+    scroll: Scroll,
     /// True if a redraw is requires. Set to false after processing
     redraw: bool,
     wrap: Wrap,
@@ -255,7 +256,7 @@ impl Buffer {
             metrics,
             width: 0.0,
             height: 0.0,
-            scroll: 0,
+            scroll: Scroll::default(),
             redraw: false,
             wrap: Wrap::Word,
             scratch: ShapeBuffer::default(),
@@ -307,96 +308,119 @@ impl Buffer {
         log::debug!("relayout: {:?}", instant.elapsed());
     }
 
-    /// Pre-shape lines in the buffer, up to `lines`, return actual number of layout lines
-    pub fn shape_until(&mut self, font_system: &mut FontSystem, lines: i32) -> i32 {
-        #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
-        let instant = std::time::Instant::now();
-
-        let mut reshaped = 0;
-        let mut total_layout = 0;
-        for line in &mut self.lines {
-            if total_layout >= lines {
-                break;
-            }
-
-            if line.shape_opt().is_none() {
-                reshaped += 1;
-            }
-            let layout = line.layout_in_buffer(
-                &mut self.scratch,
-                font_system,
-                self.metrics.font_size,
-                self.width,
-                self.wrap,
-            );
-            total_layout += layout.len() as i32;
-        }
-
-        if reshaped > 0 {
-            #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
-            log::debug!("shape_until {}: {:?}", reshaped, instant.elapsed());
-            self.redraw = true;
-        }
-
-        total_layout
-    }
-
     /// Shape lines until cursor, also scrolling to include cursor in view
-    pub fn shape_until_cursor(&mut self, font_system: &mut FontSystem, cursor: Cursor) {
-        #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
-        let instant = std::time::Instant::now();
+    pub fn shape_until_cursor(
+        &mut self,
+        font_system: &mut FontSystem,
+        cursor: Cursor,
+        prune: bool,
+    ) {
+        let old_scroll = self.scroll;
 
-        let mut reshaped = 0;
-        let mut layout_i = 0;
-        for (line_i, line) in self.lines.iter_mut().enumerate() {
-            if line_i > cursor.line {
-                break;
-            }
+        let layout_cursor = self
+            .layout_cursor(font_system, cursor)
+            .expect("shape_until_cursor invalid cursor");
 
-            if line.shape_opt().is_none() {
-                reshaped += 1;
-            }
-            let layout = line.layout_in_buffer(
-                &mut self.scratch,
-                font_system,
-                self.metrics.font_size,
-                self.width,
-                self.wrap,
-            );
-            if line_i == cursor.line {
-                if let Some(layout_cursor) = self.layout_cursor(font_system, cursor) {
-                    layout_i += layout_cursor.layout as i32;
+        if self.scroll.line > layout_cursor.line
+            || (self.scroll.line == layout_cursor.line
+                && self.scroll.layout > layout_cursor.layout as i32)
+        {
+            // Adjust scroll backwards if cursor is before it
+            self.scroll.line = layout_cursor.line;
+            self.scroll.layout = layout_cursor.layout as i32;
+        } else {
+            // Adjust scroll forwards if cursor is after it
+            let visible_lines = self.visible_lines();
+            let mut line_i = layout_cursor.line;
+            let mut total_layout = layout_cursor.layout as i32 + 1;
+            while line_i > self.scroll.line {
+                line_i -= 1;
+                let layout = self
+                    .line_layout(font_system, line_i)
+                    .expect("shape_until_cursor failed to scroll forwards");
+                for layout_i in (0..layout.len()).rev() {
+                    total_layout += 1;
+                    if total_layout >= visible_lines {
+                        self.scroll.line = line_i;
+                        self.scroll.layout = layout_i as i32;
+                        break;
+                    }
                 }
-                break;
-            } else {
-                layout_i += layout.len() as i32;
             }
         }
 
-        if reshaped > 0 {
-            #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
-            log::debug!("shape_until_cursor {}: {:?}", reshaped, instant.elapsed());
+        if old_scroll != self.scroll {
             self.redraw = true;
         }
 
-        let lines = self.visible_lines();
-        if layout_i < self.scroll {
-            self.scroll = layout_i;
-        } else if layout_i >= self.scroll + lines {
-            self.scroll = layout_i - (lines - 1);
-        }
-
-        self.shape_until_scroll(font_system);
+        self.shape_until_scroll(font_system, prune);
     }
 
     /// Shape lines until scroll
-    pub fn shape_until_scroll(&mut self, font_system: &mut FontSystem) {
-        let lines = self.visible_lines();
+    pub fn shape_until_scroll(&mut self, font_system: &mut FontSystem, prune: bool) {
+        let old_scroll = self.scroll;
 
-        let scroll_end = self.scroll + lines;
-        let total_layout = self.shape_until(font_system, scroll_end);
+        loop {
+            // Adjust scroll.layout to be positive by moving scroll.line backwards
+            while self.scroll.layout < 0 {
+                if self.scroll.line > 0 {
+                    self.scroll.line -= 1;
+                    let layout = self
+                        .line_layout(font_system, self.scroll.line)
+                        .expect("shape_until_scroll invalid scroll.line");
+                    self.scroll.layout += layout.len() as i32;
+                } else {
+                    self.scroll.layout = 0;
+                    break;
+                }
+            }
 
-        self.scroll = cmp::max(0, cmp::min(total_layout - lines, self.scroll));
+            let visible_lines = self.visible_lines();
+            let scroll_start = self.scroll.layout;
+            let scroll_end = scroll_start + visible_lines;
+
+            let mut total_layout = 0;
+            for line_i in 0..self.lines.len() {
+                if line_i < self.scroll.line {
+                    if prune {
+                        self.lines[line_i].reset_shaping();
+                    }
+                    continue;
+                }
+                if total_layout >= scroll_end {
+                    if prune {
+                        self.lines[line_i].reset_shaping();
+                        continue;
+                    } else {
+                        break;
+                    }
+                }
+
+                let layout = self
+                    .line_layout(font_system, line_i)
+                    .expect("shape_until_scroll invalid line");
+                for layout_i in 0..layout.len() {
+                    if total_layout == scroll_start {
+                        // Adjust scroll.line and scroll.layout
+                        self.scroll.line = line_i;
+                        self.scroll.layout = layout_i as i32;
+                    }
+                    total_layout += 1;
+                }
+            }
+
+            if total_layout < scroll_end && self.scroll.line > 0 {
+                // Need to scroll up to stay inside of buffer
+                self.scroll.layout -= scroll_end - total_layout;
+            } else {
+                // Done adjusting scroll
+                break;
+            }
+        }
+
+        if old_scroll != self.scroll {
+            self.redraw = true;
+        }
     }
 
     /// Convert a [`Cursor`] to a [`LayoutCursor`]
@@ -481,7 +505,7 @@ impl Buffer {
         if wrap != self.wrap {
             self.wrap = wrap;
             self.relayout(font_system);
-            self.shape_until_scroll(font_system);
+            self.shape_until_scroll(font_system, false);
         }
     }
 
@@ -516,17 +540,17 @@ impl Buffer {
             self.width = clamped_width;
             self.height = clamped_height;
             self.relayout(font_system);
-            self.shape_until_scroll(font_system);
+            self.shape_until_scroll(font_system, false);
         }
     }
 
     /// Get the current scroll location
-    pub fn scroll(&self) -> i32 {
+    pub fn scroll(&self) -> Scroll {
         self.scroll
     }
 
     /// Set the current scroll location
-    pub fn set_scroll(&mut self, scroll: i32) {
+    pub fn set_scroll(&mut self, scroll: Scroll) {
         if scroll != self.scroll {
             self.scroll = scroll;
             self.redraw = true;
@@ -651,9 +675,9 @@ impl Buffer {
             }
         }
 
-        self.scroll = 0;
+        self.scroll = Scroll::default();
 
-        self.shape_until_scroll(font_system);
+        self.shape_until_scroll(font_system, false);
     }
 
     /// True if a redraw is needed
@@ -1098,19 +1122,15 @@ impl Buffer {
 }
 
 impl<'a> BorrowedWithFontSystem<'a, Buffer> {
-    /// Pre-shape lines in the buffer, up to `lines`, return actual number of layout lines
-    pub fn shape_until(&mut self, lines: i32) -> i32 {
-        self.inner.shape_until(self.font_system, lines)
-    }
-
     /// Shape lines until cursor, also scrolling to include cursor in view
-    pub fn shape_until_cursor(&mut self, cursor: Cursor) {
-        self.inner.shape_until_cursor(self.font_system, cursor);
+    pub fn shape_until_cursor(&mut self, cursor: Cursor, prune: bool) {
+        self.inner
+            .shape_until_cursor(self.font_system, cursor, prune);
     }
 
     /// Shape lines until scroll
-    pub fn shape_until_scroll(&mut self) {
-        self.inner.shape_until_scroll(self.font_system);
+    pub fn shape_until_scroll(&mut self, prune: bool) {
+        self.inner.shape_until_scroll(self.font_system, prune);
     }
 
     /// Shape the provided line index and return the result

@@ -39,7 +39,7 @@ fn main() {
     buffer.set_text(&text, attrs, Shaping::Advanced);
 
     // Perform shaping as desired
-    buffer.shape_until_scroll();
+    buffer.shape_until_scroll(true);
 
     // Default text color (0xFF, 0xFF, 0xFF is white)
     const TEXT_COLOR: Color = Color::rgb(0xFF, 0xFF, 0xFF);

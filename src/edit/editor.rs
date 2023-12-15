@@ -94,12 +94,13 @@ impl Edit for Editor {
         }
     }
 
-    fn shape_as_needed(&mut self, font_system: &mut FontSystem) {
+    fn shape_as_needed(&mut self, font_system: &mut FontSystem, prune: bool) {
         if self.cursor_moved {
-            self.buffer.shape_until_cursor(font_system, self.cursor);
+            self.buffer
+                .shape_until_cursor(font_system, self.cursor, prune);
             self.cursor_moved = false;
         } else {
-            self.buffer.shape_until_scroll(font_system);
+            self.buffer.shape_until_scroll(font_system, prune);
         }
     }
 
@@ -627,7 +628,7 @@ impl Edit for Editor {
             }
             Action::Scroll { lines } => {
                 let mut scroll = self.buffer.scroll();
-                scroll += lines;
+                scroll.layout += lines;
                 self.buffer.set_scroll(scroll);
             }
         }
