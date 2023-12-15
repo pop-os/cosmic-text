@@ -7,7 +7,7 @@ license = "MIT OR Apache-2.0"
 publish = false
 
 [dependencies]
-cosmic-text = { path = "../../", features = ["syntect"] }
+cosmic-text = { path = "../../", features = ["syntect", "vi"] }
 env_logger = "0.10"
 fontdb = "0.13"
 lazy_static = "1.4"
@@ -26,4 +26,4 @@ version = "0.11"
 
 [features]
 default = []
-vi = ["cosmic-text/vi"]
+vi = []

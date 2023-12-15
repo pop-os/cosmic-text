@@ -1,5 +1,3 @@
-use crate::Color;
-
 /// Current cursor location
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Ord, PartialOrd)]
 pub struct Cursor {
@@ -10,10 +8,6 @@ pub struct Cursor {
     /// Whether to associate the cursor with the run before it or the run after it if placed at the
     /// boundary between two runs
     pub affinity: Affinity,
-    /// Cached X position used for up and down movement
-    pub x_opt: Option<i32>,
-    /// Cursor color
-    pub color: Option<Color>,
 }
 
 impl Cursor {
@@ -28,18 +22,6 @@ impl Cursor {
             line,
             index,
             affinity,
-            x_opt: None,
-            color: None,
-        }
-    }
-    /// Create a new cursor, specifying the color
-    pub const fn new_with_color(line: usize, index: usize, color: Color) -> Self {
-        Self {
-            line,
-            index,
-            affinity: Affinity::Before,
-            x_opt: None,
-            color: Some(color),
         }
     }
 }
@@ -79,7 +61,7 @@ impl Affinity {
 }
 
 /// The position of a cursor within a [`Buffer`].
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub struct LayoutCursor {
     /// Index of [`BufferLine`] in [`Buffer::lines`]
     pub line: usize,
@@ -150,7 +132,7 @@ pub enum Motion {
 }
 
 /// Scroll position in [`Buffer`]
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Ord, PartialOrd)]
 pub struct Scroll {
     /// Index of [`BufferLine`] in [`Buffer::lines`]. This will be adjusted as needed if layout is
     /// out of bounds

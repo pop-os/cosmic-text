@@ -5,14 +5,13 @@ use cosmic::{
     iced_runtime::keyboard::KeyCode,
     theme::{Theme, ThemeType},
 };
-use cosmic_text::{Action, Edit, Motion, SwashCache};
+use cosmic_text::{Action, Edit, Motion, SwashCache, ViEditor};
 use std::{cmp, sync::Mutex, time::Instant};
 
 use crate::FONT_SYSTEM;
 
 pub struct Appearance {
     background_color: Option<Color>,
-    text_color: Color,
 }
 
 pub trait StyleSheet {
@@ -24,23 +23,21 @@ impl StyleSheet for Theme {
         match self.theme_type {
             ThemeType::Dark | ThemeType::HighContrastDark | ThemeType::Custom(_) => Appearance {
                 background_color: Some(Color::from_rgb8(0x34, 0x34, 0x34)),
-                text_color: Color::from_rgb8(0xFF, 0xFF, 0xFF),
             },
             ThemeType::Light | ThemeType::HighContrastLight => Appearance {
                 background_color: Some(Color::from_rgb8(0xFC, 0xFC, 0xFC)),
-                text_color: Color::from_rgb8(0x00, 0x00, 0x00),
             },
         }
     }
 }
 
-pub struct TextBox<'a, Editor> {
-    editor: &'a Mutex<Editor>,
+pub struct TextBox<'a, 'editor> {
+    editor: &'a Mutex<ViEditor<'editor>>,
     padding: Padding,
 }
 
-impl<'a, Editor> TextBox<'a, Editor> {
-    pub fn new(editor: &'a Mutex<Editor>) -> Self {
+impl<'a, 'editor> TextBox<'a, 'editor> {
+    pub fn new(editor: &'a Mutex<ViEditor<'editor>>) -> Self {
         Self {
             editor,
             padding: Padding::new(0.),
@@ -53,7 +50,7 @@ impl<'a, Editor> TextBox<'a, Editor> {
     }
 }
 
-pub fn text_box<'a, Editor>(editor: &'a Mutex<Editor>) -> TextBox<'a, Editor> {
+pub fn text_box<'a, 'editor>(editor: &'a Mutex<ViEditor<'editor>>) -> TextBox<'a, 'editor> {
     TextBox::new(editor)
 }
 
@@ -106,11 +103,10 @@ fn draw_pixel(
     buffer[offset + 3] = (current >> 24) as u8;
 }
 
-impl<'a, 'editor, Editor, Message, Renderer> Widget<Message, Renderer> for TextBox<'a, Editor>
+impl<'a, 'editor, Message, Renderer> Widget<Message, Renderer> for TextBox<'a, 'editor>
 where
     Renderer: cosmic::iced_core::Renderer + image::Renderer<Handle = image::Handle>,
     Renderer::Theme: StyleSheet,
-    Editor: Edit,
 {
     fn tag(&self) -> tree::Tag {
         tree::Tag::of::<State>()
@@ -193,13 +189,6 @@ where
             );
         }
 
-        let text_color = cosmic_text::Color::rgba(
-            cmp::max(0, cmp::min(255, (appearance.text_color.r * 255.0) as i32)) as u8,
-            cmp::max(0, cmp::min(255, (appearance.text_color.g * 255.0) as i32)) as u8,
-            cmp::max(0, cmp::min(255, (appearance.text_color.b * 255.0) as i32)) as u8,
-            cmp::max(0, cmp::min(255, (appearance.text_color.a * 255.0) as i32)) as u8,
-        );
-
         let mut editor = self.editor.lock().unwrap();
 
         let view_w = cmp::min(viewport.width as i32, layout.bounds().width as i32)
@@ -229,18 +218,14 @@ where
 
         // Draw to pixel buffer
         let mut pixels = vec![0; image_w as usize * image_h as usize * 4];
-        editor.draw(
-            &mut state.cache.lock().unwrap(),
-            text_color,
-            |x, y, w, h, color| {
-                //TODO: improve performance
-                for row in 0..h as i32 {
-                    for col in 0..w as i32 {
-                        draw_pixel(&mut pixels, image_w, image_h, x + col, y + row, color);
-                    }
+        editor.draw(&mut state.cache.lock().unwrap(), |x, y, w, h, color| {
+            //TODO: improve performance
+            for row in 0..h as i32 {
+                for col in 0..w as i32 {
+                    draw_pixel(&mut pixels, image_w, image_h, x + col, y + row, color);
                 }
-            },
-        );
+            }
+        });
 
         // Restore original metrics
         editor.buffer_mut().set_metrics(metrics);
@@ -370,14 +355,12 @@ where
     }
 }
 
-impl<'a, 'editor, Editor, Message, Renderer> From<TextBox<'a, Editor>>
-    for Element<'a, Message, Renderer>
+impl<'a, 'editor, Message, Renderer> From<TextBox<'a, 'editor>> for Element<'a, Message, Renderer>
 where
     Renderer: renderer::Renderer + image::Renderer<Handle = image::Handle>,
     Renderer::Theme: StyleSheet,
-    Editor: Edit,
 {
-    fn from(text_box: TextBox<'a, Editor>) -> Self {
+    fn from(text_box: TextBox<'a, 'editor>) -> Self {
         Self::new(text_box)
     }
 }

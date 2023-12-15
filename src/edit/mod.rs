@@ -3,8 +3,6 @@ use alloc::{string::String, vec::Vec};
 use core::cmp;
 use unicode_segmentation::UnicodeSegmentation;
 
-#[cfg(feature = "swash")]
-use crate::Color;
 use crate::{AttrsList, BorrowedWithFontSystem, Buffer, Cursor, FontSystem, Motion};
 
 pub use self::editor::*;
@@ -265,17 +263,6 @@ pub trait Edit {
 
     /// Perform an [Action] on the editor
     fn action(&mut self, font_system: &mut FontSystem, action: Action);
-
-    /// Draw the editor
-    #[cfg(feature = "swash")]
-    fn draw<F>(
-        &self,
-        font_system: &mut FontSystem,
-        cache: &mut crate::SwashCache,
-        color: Color,
-        f: F,
-    ) where
-        F: FnMut(i32, i32, u32, u32, Color);
 }
 
 impl<'a, T: Edit> BorrowedWithFontSystem<'a, T> {
@@ -295,14 +282,5 @@ impl<'a, T: Edit> BorrowedWithFontSystem<'a, T> {
     /// Perform an [Action] on the editor
     pub fn action(&mut self, action: Action) {
         self.inner.action(self.font_system, action);
-    }
-
-    /// Draw the editor
-    #[cfg(feature = "swash")]
-    pub fn draw<F>(&mut self, cache: &mut crate::SwashCache, color: Color, f: F)
-    where
-        F: FnMut(i32, i32, u32, u32, Color),
-    {
-        self.inner.draw(self.font_system, cache, color, f);
     }
 }
