@@ -9,7 +9,7 @@ use syntect::parsing::{ParseState, ScopeStack, SyntaxReference, SyntaxSet};
 
 use crate::{
     Action, AttrsList, BorrowedWithFontSystem, Buffer, Change, Color, Cursor, Edit, Editor,
-    FontSystem, Selection, Shaping, Style, Weight, Wrap,
+    FontSystem, Selection, Shaping, Style, Weight,
 };
 
 pub use syntect::highlighting::Theme as SyntaxTheme;
@@ -283,7 +283,6 @@ impl<'a> Edit for SyntaxEditor<'a> {
 
             // Update line attributes. This operation only resets if the line changes
             line.set_attrs_list(attrs_list);
-            line.set_wrap(Wrap::Word);
 
             // Perform shaping and layout of this line in order to count if we have reached scroll
             match buffer.line_layout(font_system, line_i) {
