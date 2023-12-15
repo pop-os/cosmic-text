@@ -9,7 +9,6 @@ pub struct BufferLine {
     //TODO: make this not pub(crate)
     text: String,
     attrs_list: AttrsList,
-    wrap: Wrap,
     align: Option<Align>,
     shape_opt: Option<ShapeLine>,
     layout_opt: Option<Vec<LayoutLine>>,
@@ -24,7 +23,6 @@ impl BufferLine {
         Self {
             text: text.into(),
             attrs_list,
-            wrap: Wrap::Word,
             align: None,
             shape_opt: None,
             layout_opt: None,
@@ -72,25 +70,6 @@ impl BufferLine {
         if attrs_list != self.attrs_list {
             self.attrs_list = attrs_list;
             self.reset();
-            true
-        } else {
-            false
-        }
-    }
-
-    /// Get wrapping setting (wrap by characters/words or no wrapping)
-    pub fn wrap(&self) -> Wrap {
-        self.wrap
-    }
-
-    /// Set wrapping setting (wrap by characters/words or no wrapping)
-    ///
-    /// Will reset shape and layout if it differs from current wrapping setting.
-    /// Returns true if the line was reset
-    pub fn set_wrap(&mut self, wrap: Wrap) -> bool {
-        if wrap != self.wrap {
-            self.wrap = wrap;
-            self.reset_layout();
             true
         } else {
             false
@@ -146,7 +125,7 @@ impl BufferLine {
         self.reset();
 
         let mut new = Self::new(text, attrs_list, self.shaping);
-        new.wrap = self.wrap;
+        new.align = self.align;
         new
     }
 
@@ -223,7 +202,6 @@ impl BufferLine {
         wrap: Wrap,
     ) -> &[LayoutLine] {
         if self.layout_opt.is_none() {
-            self.wrap = wrap;
             let align = self.align;
             let shape = self.shape_in_buffer(scratch, font_system);
             let mut layout = Vec::with_capacity(1);
