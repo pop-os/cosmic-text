@@ -291,7 +291,13 @@ impl Buffer {
         for line in &mut self.lines {
             if line.shape_opt().is_some() {
                 line.reset_layout();
-                line.layout(font_system, self.metrics.font_size, self.width, self.wrap);
+                line.layout_in_buffer(
+                    &mut self.scratch,
+                    font_system,
+                    self.metrics.font_size,
+                    self.width,
+                    self.wrap,
+                );
             }
         }
 
@@ -394,7 +400,11 @@ impl Buffer {
     }
 
     /// Convert a [`Cursor`] to a [`LayoutCursor`]
-    pub fn layout_cursor(&mut self, font_system: &mut FontSystem, cursor: Cursor) -> Option<LayoutCursor> {
+    pub fn layout_cursor(
+        &mut self,
+        font_system: &mut FontSystem,
+        cursor: Cursor,
+    ) -> Option<LayoutCursor> {
         let layout = self.line_layout(font_system, cursor.line)?;
         for (layout_i, layout_line) in layout.iter().enumerate() {
             for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
@@ -428,7 +438,7 @@ impl Buffer {
         line_i: usize,
     ) -> Option<&ShapeLine> {
         let line = self.lines.get_mut(line_i)?;
-        Some(line.shape(font_system))
+        Some(line.shape_in_buffer(&mut self.scratch, font_system))
     }
 
     /// Lay out the provided line index and return the result
@@ -438,7 +448,13 @@ impl Buffer {
         line_i: usize,
     ) -> Option<&[LayoutLine]> {
         let line = self.lines.get_mut(line_i)?;
-        Some(line.layout(font_system, self.metrics.font_size, self.width, self.wrap))
+        Some(line.layout_in_buffer(
+            &mut self.scratch,
+            font_system,
+            self.metrics.font_size,
+            self.width,
+            self.wrap,
+        ))
     }
 
     /// Get the current [`Metrics`]
@@ -882,9 +898,7 @@ impl Buffer {
             Motion::Down => {
                 let mut layout_cursor = self.layout_cursor(font_system, cursor)?;
 
-                let layout_len = self
-                    .line_layout(font_system, layout_cursor.line)?
-                    .len();
+                let layout_len = self.line_layout(font_system, layout_cursor.line)?.len();
 
                 if cursor.x_opt.is_none() {
                     cursor.x_opt = Some(
