@@ -6,7 +6,7 @@ use alloc::vec::Vec;
 use fontdb::Family;
 use unicode_script::Script;
 
-use crate::{Font, FontSystem};
+use crate::{Font, FontSystem, ShapePlanCache};
 
 use self::platform::*;
 
@@ -101,6 +101,10 @@ impl<'a> FontFallbackIter<'a> {
         } else {
             "invalid font id"
         }
+    }
+
+    pub fn shape_plan_cache(&mut self) -> &mut ShapePlanCache {
+        self.font_system.shape_plan_cache()
     }
 
     fn face_contains_family(&self, id: fontdb::ID, family_name: &str) -> bool {

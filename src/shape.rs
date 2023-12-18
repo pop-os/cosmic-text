@@ -12,7 +12,9 @@ use unicode_script::{Script, UnicodeScript};
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::fallback::FontFallbackIter;
-use crate::{Align, AttrsList, Color, Font, FontSystem, LayoutGlyph, LayoutLine, Wrap};
+use crate::{
+    Align, AttrsList, Color, Font, FontSystem, LayoutGlyph, LayoutLine, ShapePlanCache, Wrap,
+};
 
 /// The shaping strategy of some text.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -85,6 +87,7 @@ impl fmt::Debug for ShapeBuffer {
 fn shape_fallback(
     scratch: &mut ShapeBuffer,
     glyphs: &mut Vec<ShapeGlyph>,
+    shape_plan_cache: &mut ShapePlanCache,
     font: &Font,
     line: &str,
     attrs_list: &AttrsList,
@@ -110,7 +113,8 @@ fn shape_fallback(
     let rtl = matches!(buffer.direction(), rustybuzz::Direction::RightToLeft);
     assert_eq!(rtl, span_rtl);
 
-    let glyph_buffer = rustybuzz::shape(font.rustybuzz(), &[], buffer);
+    let shape_plan = shape_plan_cache.get(font, &buffer);
+    let glyph_buffer = rustybuzz::shape_with_plan(font.rustybuzz(), shape_plan, buffer);
     let glyph_infos = glyph_buffer.glyph_infos();
     let glyph_positions = glyph_buffer.glyph_positions();
 
@@ -218,7 +222,15 @@ fn shape_run(
 
     let glyph_start = glyphs.len();
     let mut missing = shape_fallback(
-        scratch, glyphs, &font, line, attrs_list, start_run, end_run, span_rtl,
+        scratch,
+        glyphs,
+        font_iter.shape_plan_cache(),
+        &font,
+        line,
+        attrs_list,
+        start_run,
+        end_run,
+        span_rtl,
     );
 
     //TODO: improve performance!
@@ -236,6 +248,7 @@ fn shape_run(
         let fb_missing = shape_fallback(
             scratch,
             &mut fb_glyphs,
+            font_iter.shape_plan_cache(),
             &font,
             line,
             attrs_list,

@@ -1,16 +1,9 @@
-use crate::{Attrs, AttrsOwned, Font};
+use crate::{Attrs, AttrsOwned, Font, HashMap, ShapePlanCache};
 use alloc::string::String;
 use alloc::sync::Arc;
 use alloc::vec::Vec;
 use core::fmt;
 use core::ops::{Deref, DerefMut};
-
-type BuildHasher = core::hash::BuildHasherDefault<rustc_hash::FxHasher>;
-
-#[cfg(feature = "std")]
-type HashMap<K, V> = std::collections::HashMap<K, V, BuildHasher>;
-#[cfg(not(feature = "std"))]
-type HashMap<K, V> = hashbrown::HashMap<K, V, BuildHasher>;
 
 // re-export fontdb and rustybuzz
 pub use fontdb;
@@ -29,6 +22,9 @@ pub struct FontSystem {
 
     /// Cache for font matches.
     font_matches_cache: HashMap<AttrsOwned, Arc<Vec<fontdb::ID>>>,
+
+    /// Cache for rustybuzz shape plans.
+    shape_plan_cache: ShapePlanCache,
 }
 
 impl fmt::Debug for FontSystem {
@@ -74,8 +70,9 @@ impl FontSystem {
         Self {
             locale,
             db,
-            font_cache: HashMap::default(),
-            font_matches_cache: HashMap::default(),
+            font_cache: Default::default(),
+            font_matches_cache: Default::default(),
+            shape_plan_cache: ShapePlanCache::default(),
         }
     }
 
@@ -87,6 +84,11 @@ impl FontSystem {
     /// Get the database.
     pub fn db(&self) -> &fontdb::Database {
         &self.db
+    }
+
+    /// Get the shape plan cache.
+    pub(crate) fn shape_plan_cache(&mut self) -> &mut ShapePlanCache {
+        &mut self.shape_plan_cache
     }
 
     /// Get a mutable reference to the database.

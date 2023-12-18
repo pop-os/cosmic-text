@@ -108,8 +108,8 @@ mod buffer;
 pub use self::buffer_line::*;
 mod buffer_line;
 
-pub use self::cache::*;
-mod cache;
+pub use self::glyph_cache::*;
+mod glyph_cache;
 
 pub use self::edit::*;
 mod edit;
@@ -123,7 +123,17 @@ mod layout;
 pub use self::shape::*;
 mod shape;
 
+use self::shape_plan_cache::*;
+mod shape_plan_cache;
+
 #[cfg(feature = "swash")]
 pub use self::swash::*;
 #[cfg(feature = "swash")]
 mod swash;
+
+type BuildHasher = core::hash::BuildHasherDefault<rustc_hash::FxHasher>;
+
+#[cfg(feature = "std")]
+type HashMap<K, V> = std::collections::HashMap<K, V, BuildHasher>;
+#[cfg(not(feature = "std"))]
+type HashMap<K, V> = hashbrown::HashMap<K, V, BuildHasher>;
