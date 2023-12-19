@@ -176,11 +176,7 @@ pub trait Edit<'buffer> {
         match self.buffer_ref_mut() {
             BufferRef::Owned(buffer) => f(buffer),
             BufferRef::Borrowed(buffer) => f(buffer),
-            BufferRef::Arc(arc) => match Arc::get_mut(arc) {
-                Some(buffer) => f(buffer),
-                //TODO: use make_mut?
-                None => panic!("BufferRef::Arc cannot be accessed mutibly"),
-            },
+            BufferRef::Arc(buffer) => f(Arc::make_mut(buffer)),
         }
     }
 

@@ -237,6 +237,21 @@ pub struct Buffer {
     scratch: ShapeBuffer,
 }
 
+impl Clone for Buffer {
+    fn clone(&self) -> Self {
+        Self {
+            lines: self.lines.clone(),
+            metrics: self.metrics,
+            width: self.width,
+            height: self.height,
+            scroll: self.scroll,
+            redraw: self.redraw,
+            wrap: self.wrap,
+            scratch: ShapeBuffer::default(),
+        }
+    }
+}
+
 impl Buffer {
     /// Create an empty [`Buffer`] with the provided [`Metrics`].
     /// This is useful for initializing a [`Buffer`] without a [`FontSystem`].
