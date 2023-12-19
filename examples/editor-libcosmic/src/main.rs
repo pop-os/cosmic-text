@@ -86,7 +86,7 @@ pub struct Window {
     path_opt: Option<PathBuf>,
     attrs: Attrs<'static>,
     font_size: FontSize,
-    editor: Mutex<cosmic_text::ViEditor<'static>>,
+    editor: Mutex<cosmic_text::ViEditor<'static, 'static>>,
 }
 
 #[allow(dead_code)]
@@ -185,10 +185,12 @@ impl Application for Window {
                 if let Some(path) = &self.path_opt {
                     let editor = self.editor.lock().unwrap();
                     let mut text = String::new();
-                    for line in editor.buffer().lines.iter() {
-                        text.push_str(line.text());
-                        text.push('\n');
-                    }
+                    editor.with_buffer(|buffer| {
+                        for line in buffer.lines.iter() {
+                            text.push_str(line.text());
+                            text.push('\n');
+                        }
+                    });
                     match fs::write(path, text) {
                         Ok(()) => {
                             log::info!("saved '{}'", path.display());
@@ -234,15 +236,13 @@ impl Application for Window {
                 let mut editor = self.editor.lock().unwrap();
                 editor
                     .borrow_with(&mut FONT_SYSTEM.lock().unwrap())
-                    .buffer_mut()
-                    .set_metrics(font_size.to_metrics());
+                    .with_buffer_mut(|buffer| buffer.set_metrics(font_size.to_metrics()));
             }
             Message::WrapChanged(wrap) => {
                 let mut editor = self.editor.lock().unwrap();
                 editor
                     .borrow_with(&mut FONT_SYSTEM.lock().unwrap())
-                    .buffer_mut()
-                    .set_wrap(wrap);
+                    .with_buffer_mut(|buffer| buffer.set_wrap(wrap));
             }
             Message::AlignmentChanged(align) => {
                 let mut editor = self.editor.lock().unwrap();
@@ -304,7 +304,7 @@ impl Application for Window {
             let editor = self.editor.lock().unwrap();
             pick_list(
                 WRAP_MODE,
-                Some(editor.buffer().wrap()),
+                Some(editor.with_buffer(|buffer| buffer.wrap())),
                 Message::WrapChanged,
             )
         };
@@ -373,20 +373,25 @@ impl Application for Window {
 }
 
 fn update_attrs<T: Edit>(editor: &mut T, attrs: Attrs) {
-    editor.buffer_mut().lines.iter_mut().for_each(|line| {
-        line.set_attrs_list(AttrsList::new(attrs));
+    editor.with_buffer_mut(|buffer| {
+        buffer.lines.iter_mut().for_each(|line| {
+            line.set_attrs_list(AttrsList::new(attrs));
+        });
     });
 }
 
 fn update_alignment<T: Edit>(editor: &mut T, align: Align) {
     let current_line = editor.cursor().line;
-    if let Some((start, end)) = editor.selection_bounds() {
-        if let Some(lines) = editor.buffer_mut().lines.get_mut(start.line..=end.line) {
-            for line in lines.iter_mut() {
-                line.set_align(Some(align));
+    let selection_bounds_opt = editor.selection_bounds();
+    editor.with_buffer_mut(|buffer| {
+        if let Some((start, end)) = selection_bounds_opt {
+            if let Some(lines) = buffer.lines.get_mut(start.line..=end.line) {
+                for line in lines.iter_mut() {
+                    line.set_align(Some(align));
+                }
             }
+        } else if let Some(line) = buffer.lines.get_mut(current_line) {
+            line.set_align(Some(align));
         }
-    } else if let Some(line) = editor.buffer_mut().lines.get_mut(current_line) {
-        line.set_align(Some(align));
-    }
+    });
 }

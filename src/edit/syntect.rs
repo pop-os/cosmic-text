@@ -8,8 +8,8 @@ use syntect::highlighting::{
 use syntect::parsing::{ParseState, ScopeStack, SyntaxReference, SyntaxSet};
 
 use crate::{
-    Action, AttrsList, BorrowedWithFontSystem, Buffer, Change, Color, Cursor, Edit, Editor,
-    FontSystem, Selection, Shaping, Style, Weight,
+    Action, AttrsList, BorrowedWithFontSystem, Buffer, BufferRef, Change, Color, Cursor, Edit,
+    Editor, FontSystem, Selection, Shaping, Style, Weight,
 };
 
 pub use syntect::highlighting::Theme as SyntaxTheme;
@@ -33,8 +33,8 @@ impl SyntaxSystem {
 
 /// A wrapper of [`Editor`] with syntax highlighting provided by [`SyntaxSystem`]
 #[derive(Debug)]
-pub struct SyntaxEditor<'a> {
-    editor: Editor,
+pub struct SyntaxEditor<'a, 'b> {
+    editor: Editor<'b>,
     syntax_system: &'a SyntaxSystem,
     syntax: &'a SyntaxReference,
     theme: &'a SyntaxTheme,
@@ -42,13 +42,17 @@ pub struct SyntaxEditor<'a> {
     syntax_cache: Vec<(ParseState, ScopeStack)>,
 }
 
-impl<'a> SyntaxEditor<'a> {
+impl<'a, 'b> SyntaxEditor<'a, 'b> {
     /// Create a new [`SyntaxEditor`] with the provided [`Buffer`], [`SyntaxSystem`], and theme name.
     ///
     /// A good default theme name is "base16-eighties.dark".
     ///
     /// Returns None if theme not found
-    pub fn new(buffer: Buffer, syntax_system: &'a SyntaxSystem, theme_name: &str) -> Option<Self> {
+    pub fn new(
+        buffer: impl Into<BufferRef<'b>>,
+        syntax_system: &'a SyntaxSystem,
+        theme_name: &str,
+    ) -> Option<Self> {
         let editor = Editor::new(buffer);
         let syntax = syntax_system.syntax_set.find_syntax_plain_text();
         let theme = syntax_system.theme_set.themes.get(theme_name)?;
@@ -73,18 +77,20 @@ impl<'a> SyntaxEditor<'a> {
                 self.syntax_cache.clear();
 
                 // Reset attrs to match default foreground and no highlighting
-                for line in self.editor.buffer_mut().lines.iter_mut() {
-                    let mut attrs = line.attrs_list().defaults();
-                    if let Some(foreground) = self.theme.settings.foreground {
-                        attrs = attrs.color(Color::rgba(
-                            foreground.r,
-                            foreground.g,
-                            foreground.b,
-                            foreground.a,
-                        ));
+                self.with_buffer_mut(|buffer| {
+                    for line in buffer.lines.iter_mut() {
+                        let mut attrs = line.attrs_list().defaults();
+                        if let Some(foreground) = self.theme.settings.foreground {
+                            attrs = attrs.color(Color::rgba(
+                                foreground.r,
+                                foreground.g,
+                                foreground.b,
+                                foreground.a,
+                            ));
+                        }
+                        line.set_attrs_list(AttrsList::new(attrs));
                     }
-                    line.set_attrs_list(AttrsList::new(attrs));
-                }
+                });
             }
 
             true
@@ -118,9 +124,9 @@ impl<'a> SyntaxEditor<'a> {
         }
 
         let text = fs::read_to_string(path)?;
-        self.editor
-            .buffer_mut()
-            .set_text(font_system, &text, attrs, Shaping::Advanced);
+        self.editor.with_buffer_mut(|buffer| {
+            buffer.set_text(font_system, &text, attrs, Shaping::Advanced)
+        });
 
         //TODO: re-use text
         self.syntax = match self.syntax_system.syntax_set.find_syntax_for_file(path) {
@@ -194,7 +200,7 @@ impl<'a> SyntaxEditor<'a> {
     where
         F: FnMut(i32, i32, u32, u32, Color),
     {
-        let size = self.buffer().size();
+        let size = self.with_buffer(|buffer| buffer.size());
         f(0, 0, size.0 as u32, size.1 as u32, self.background_color());
         self.editor.draw(
             font_system,
@@ -207,13 +213,13 @@ impl<'a> SyntaxEditor<'a> {
     }
 }
 
-impl<'a> Edit for SyntaxEditor<'a> {
-    fn buffer(&self) -> &Buffer {
-        self.editor.buffer()
+impl<'a, 'b> Edit for SyntaxEditor<'a, 'b> {
+    fn with_buffer<F: FnOnce(&Buffer) -> T, T>(&self, f: F) -> T {
+        self.editor.with_buffer(f)
     }
 
-    fn buffer_mut(&mut self) -> &mut Buffer {
-        self.editor.buffer_mut()
+    fn with_buffer_mut<F: FnOnce(&mut Buffer) -> T, T>(&mut self, f: F) -> T {
+        self.editor.with_buffer_mut(f)
     }
 
     fn cursor(&self) -> Cursor {
@@ -253,23 +259,84 @@ impl<'a> Edit for SyntaxEditor<'a> {
         let now = std::time::Instant::now();
 
         let cursor = self.cursor();
-        let buffer = self.editor.buffer_mut();
-        let visible_lines = buffer.visible_lines();
-        let scroll = buffer.scroll();
-        let scroll_end = scroll.layout + visible_lines;
-        let mut total_layout = 0;
-        let mut highlighted = 0;
-        for line_i in 0..buffer.lines.len() {
-            // Break out if we have reached the end of scroll and are past the cursor
-            if total_layout >= scroll_end && line_i > cursor.line {
-                break;
-            }
+        self.editor.with_buffer_mut(|buffer| {
+            let visible_lines = buffer.visible_lines();
+            let scroll = buffer.scroll();
+            let scroll_end = scroll.layout + visible_lines;
+            let mut total_layout = 0;
+            let mut highlighted = 0;
+            for line_i in 0..buffer.lines.len() {
+                // Break out if we have reached the end of scroll and are past the cursor
+                if total_layout >= scroll_end && line_i > cursor.line {
+                    break;
+                }
 
-            let line = &mut buffer.lines[line_i];
-            if line.metadata().is_some() && line_i < self.syntax_cache.len() {
-                //TODO: duplicated code!
+                let line = &mut buffer.lines[line_i];
+                if line.metadata().is_some() && line_i < self.syntax_cache.len() {
+                    //TODO: duplicated code!
+                    if line_i >= scroll.line && total_layout < scroll_end {
+                        // Perform shaping and layout of this line in order to count if we have reached scroll
+                        match buffer.line_layout(font_system, line_i) {
+                            Some(layout_lines) => {
+                                total_layout += layout_lines.len() as i32;
+                            }
+                            None => {
+                                //TODO: should this be possible?
+                            }
+                        }
+                    }
+                    continue;
+                }
+                highlighted += 1;
+
+                let (mut parse_state, scope_stack) =
+                    if line_i > 0 && line_i <= self.syntax_cache.len() {
+                        self.syntax_cache[line_i - 1].clone()
+                    } else {
+                        (ParseState::new(self.syntax), ScopeStack::new())
+                    };
+                let mut highlight_state = HighlightState::new(&self.highlighter, scope_stack);
+                let ops = parse_state
+                    .parse_line(line.text(), &self.syntax_system.syntax_set)
+                    .expect("failed to parse syntax");
+                let ranges = RangedHighlightIterator::new(
+                    &mut highlight_state,
+                    &ops,
+                    line.text(),
+                    &self.highlighter,
+                );
+
+                let attrs = line.attrs_list().defaults();
+                let mut attrs_list = AttrsList::new(attrs);
+                for (style, _, range) in ranges {
+                    let span_attrs = attrs
+                        .color(Color::rgba(
+                            style.foreground.r,
+                            style.foreground.g,
+                            style.foreground.b,
+                            style.foreground.a,
+                        ))
+                        //TODO: background
+                        .style(if style.font_style.contains(FontStyle::ITALIC) {
+                            Style::Italic
+                        } else {
+                            Style::Normal
+                        })
+                        .weight(if style.font_style.contains(FontStyle::BOLD) {
+                            Weight::BOLD
+                        } else {
+                            Weight::NORMAL
+                        }); //TODO: underline
+                    if span_attrs != attrs {
+                        attrs_list.add_span(range, span_attrs);
+                    }
+                }
+
+                // Update line attributes. This operation only resets if the line changes
+                line.set_attrs_list(attrs_list);
+
+                // Perform shaping and layout of this line in order to count if we have reached scroll
                 if line_i >= scroll.line && total_layout < scroll_end {
-                    // Perform shaping and layout of this line in order to count if we have reached scroll
                     match buffer.line_layout(font_system, line_i) {
                         Some(layout_lines) => {
                             total_layout += layout_lines.len() as i32;
@@ -279,91 +346,31 @@ impl<'a> Edit for SyntaxEditor<'a> {
                         }
                     }
                 }
-                continue;
-            }
-            highlighted += 1;
 
-            let (mut parse_state, scope_stack) = if line_i > 0 && line_i <= self.syntax_cache.len()
-            {
-                self.syntax_cache[line_i - 1].clone()
-            } else {
-                (ParseState::new(self.syntax), ScopeStack::new())
-            };
-            let mut highlight_state = HighlightState::new(&self.highlighter, scope_stack);
-            let ops = parse_state
-                .parse_line(line.text(), &self.syntax_system.syntax_set)
-                .expect("failed to parse syntax");
-            let ranges = RangedHighlightIterator::new(
-                &mut highlight_state,
-                &ops,
-                line.text(),
-                &self.highlighter,
-            );
-
-            let attrs = line.attrs_list().defaults();
-            let mut attrs_list = AttrsList::new(attrs);
-            for (style, _, range) in ranges {
-                let span_attrs = attrs
-                    .color(Color::rgba(
-                        style.foreground.r,
-                        style.foreground.g,
-                        style.foreground.b,
-                        style.foreground.a,
-                    ))
-                    //TODO: background
-                    .style(if style.font_style.contains(FontStyle::ITALIC) {
-                        Style::Italic
-                    } else {
-                        Style::Normal
-                    })
-                    .weight(if style.font_style.contains(FontStyle::BOLD) {
-                        Weight::BOLD
-                    } else {
-                        Weight::NORMAL
-                    }); //TODO: underline
-                if span_attrs != attrs {
-                    attrs_list.add_span(range, span_attrs);
+                let cache_item = (parse_state.clone(), highlight_state.path.clone());
+                if line_i < self.syntax_cache.len() {
+                    if self.syntax_cache[line_i] != cache_item {
+                        self.syntax_cache[line_i] = cache_item;
+                        if line_i + 1 < buffer.lines.len() {
+                            buffer.lines[line_i + 1].reset();
+                        }
+                    }
+                } else {
+                    buffer.lines[line_i].set_metadata(self.syntax_cache.len());
+                    self.syntax_cache.push(cache_item);
                 }
             }
 
-            // Update line attributes. This operation only resets if the line changes
-            line.set_attrs_list(attrs_list);
-
-            // Perform shaping and layout of this line in order to count if we have reached scroll
-            if line_i >= scroll.line && total_layout < scroll_end {
-                match buffer.line_layout(font_system, line_i) {
-                    Some(layout_lines) => {
-                        total_layout += layout_lines.len() as i32;
-                    }
-                    None => {
-                        //TODO: should this be possible?
-                    }
-                }
+            if highlighted > 0 {
+                buffer.set_redraw(true);
+                #[cfg(feature = "std")]
+                log::debug!(
+                    "Syntax highlighted {} lines in {:?}",
+                    highlighted,
+                    now.elapsed()
+                );
             }
-
-            let cache_item = (parse_state.clone(), highlight_state.path.clone());
-            if line_i < self.syntax_cache.len() {
-                if self.syntax_cache[line_i] != cache_item {
-                    self.syntax_cache[line_i] = cache_item;
-                    if line_i + 1 < buffer.lines.len() {
-                        buffer.lines[line_i + 1].reset();
-                    }
-                }
-            } else {
-                buffer.lines[line_i].set_metadata(self.syntax_cache.len());
-                self.syntax_cache.push(cache_item);
-            }
-        }
-
-        if highlighted > 0 {
-            buffer.set_redraw(true);
-            #[cfg(feature = "std")]
-            log::debug!(
-                "Syntax highlighted {} lines in {:?}",
-                highlighted,
-                now.elapsed()
-            );
-        }
+        });
 
         self.editor.shape_as_needed(font_system, prune);
     }
@@ -401,7 +408,7 @@ impl<'a> Edit for SyntaxEditor<'a> {
     }
 }
 
-impl<'a, 'b> BorrowedWithFontSystem<'b, SyntaxEditor<'a>> {
+impl<'a, 'b, 'c> BorrowedWithFontSystem<'c, SyntaxEditor<'a, 'b>> {
     /// Load text from a file, and also set syntax to the best option
     ///
     /// ## Errors

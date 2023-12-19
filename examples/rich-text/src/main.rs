@@ -42,9 +42,7 @@ fn main() {
 
     let mut editor = editor.borrow_with(&mut font_system);
 
-    editor
-        .buffer_mut()
-        .set_size(window.width() as f32, window.height() as f32);
+    editor.with_buffer_mut(|buffer| buffer.set_size(window.width() as f32, window.height() as f32));
 
     let attrs = Attrs::new();
     let serif_attrs = attrs.family(Family::Serif);
@@ -117,9 +115,9 @@ fn main() {
         ),
     ];
 
-    editor
-        .buffer_mut()
-        .set_rich_text(spans.iter().copied(), attrs, Shaping::Advanced);
+    editor.with_buffer_mut(|buffer| {
+        buffer.set_rich_text(spans.iter().copied(), attrs, Shaping::Advanced)
+    });
 
     let mut swash_cache = SwashCache::new();
 
@@ -134,7 +132,7 @@ fn main() {
         let selection_color = Color::rgba(0xFF, 0xFF, 0xFF, 0x33);
 
         editor.shape_as_needed(true);
-        if editor.buffer().redraw() {
+        if editor.redraw() {
             let instant = Instant::now();
 
             window.set(bg_color);
@@ -151,7 +149,7 @@ fn main() {
 
             window.sync();
 
-            editor.buffer_mut().set_redraw(false);
+            editor.set_redraw(false);
 
             let duration = instant.elapsed();
             log::debug!("redraw: {:?}", duration);
@@ -206,9 +204,9 @@ fn main() {
                     }
                 }
                 EventOption::Resize(resize) => {
-                    editor
-                        .buffer_mut()
-                        .set_size(resize.width as f32, resize.height as f32);
+                    editor.with_buffer_mut(|buffer| {
+                        buffer.set_size(resize.width as f32, resize.height as f32)
+                    });
                 }
                 EventOption::Quit(_) => process::exit(0),
                 _ => (),

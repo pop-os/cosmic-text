@@ -69,9 +69,9 @@ fn main() {
 
     let mut editor = editor.borrow_with(&mut font_system);
 
-    editor
-        .buffer_mut()
-        .set_size(window.width() as f32 - line_x * 2.0, window.height() as f32);
+    editor.with_buffer_mut(|buffer| {
+        buffer.set_size(window.width() as f32 - line_x * 2.0, window.height() as f32)
+    });
 
     let attrs = Attrs::new().family(Family::Monospace);
     match editor.load_text(&path, attrs) {
@@ -89,7 +89,7 @@ fn main() {
     let mut mouse_left = false;
     loop {
         editor.shape_as_needed(true);
-        if editor.buffer().redraw() {
+        if editor.redraw() {
             let instant = Instant::now();
 
             let bg = editor.background_color();
@@ -109,15 +109,17 @@ fn main() {
             {
                 let mut start_line_opt = None;
                 let mut end_line = 0;
-                for run in editor.buffer().layout_runs() {
-                    end_line = run.line_i;
-                    if start_line_opt.is_none() {
-                        start_line_opt = Some(end_line);
+                editor.with_buffer(|buffer| {
+                    for run in buffer.layout_runs() {
+                        end_line = run.line_i;
+                        if start_line_opt.is_none() {
+                            start_line_opt = Some(end_line);
+                        }
                     }
-                }
+                });
 
                 let start_line = start_line_opt.unwrap_or(end_line);
-                let lines = editor.buffer().lines.len();
+                let lines = editor.with_buffer(|buffer| buffer.lines.len());
                 let start_y = (start_line * window.height() as usize) / lines;
                 let end_y = (end_line * window.height() as usize) / lines;
                 if end_y > start_y {
@@ -133,7 +135,7 @@ fn main() {
 
             window.sync();
 
-            editor.buffer_mut().set_redraw(false);
+            editor.set_redraw(false);
 
             log::debug!("redraw: {:?}", instant.elapsed());
         }
@@ -172,18 +174,23 @@ fn main() {
                     orbclient::K_DEL if event.pressed => editor.action(Action::Delete),
                     orbclient::K_0 if event.pressed && ctrl_pressed => {
                         font_size_i = font_size_default;
-                        editor.buffer_mut().set_metrics(font_sizes[font_size_i]);
+                        editor
+                            .with_buffer_mut(|buffer| buffer.set_metrics(font_sizes[font_size_i]));
                     }
                     orbclient::K_MINUS if event.pressed && ctrl_pressed => {
                         if font_size_i > 0 {
                             font_size_i -= 1;
-                            editor.buffer_mut().set_metrics(font_sizes[font_size_i]);
+                            editor.with_buffer_mut(|buffer| {
+                                buffer.set_metrics(font_sizes[font_size_i])
+                            });
                         }
                     }
                     orbclient::K_EQUALS if event.pressed && ctrl_pressed => {
                         if font_size_i + 1 < font_sizes.len() {
                             font_size_i += 1;
-                            editor.buffer_mut().set_metrics(font_sizes[font_size_i]);
+                            editor.with_buffer_mut(|buffer| {
+                                buffer.set_metrics(font_sizes[font_size_i])
+                            });
                         }
                     }
                     _ => (),
@@ -224,9 +231,9 @@ fn main() {
                     }
                 }
                 EventOption::Resize(event) => {
-                    editor
-                        .buffer_mut()
-                        .set_size(event.width as f32 - line_x * 2.0, event.height as f32);
+                    editor.with_buffer_mut(|buffer| {
+                        buffer.set_size(event.width as f32 - line_x * 2.0, event.height as f32);
+                    });
                 }
                 EventOption::Scroll(event) => {
                     editor.action(Action::Scroll {
