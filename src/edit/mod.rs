@@ -1,3 +1,4 @@
+use alloc::sync::Arc;
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, vec::Vec};
 use core::cmp;
@@ -63,6 +64,31 @@ pub enum Action {
     },
 }
 
+#[derive(Debug)]
+pub enum BufferRef<'buffer> {
+    Owned(Buffer),
+    Borrowed(&'buffer mut Buffer),
+    Arc(Arc<Buffer>),
+}
+
+impl<'buffer> From<Buffer> for BufferRef<'buffer> {
+    fn from(buffer: Buffer) -> Self {
+        Self::Owned(buffer)
+    }
+}
+
+impl<'buffer> From<&'buffer mut Buffer> for BufferRef<'buffer> {
+    fn from(buffer: &'buffer mut Buffer) -> Self {
+        Self::Borrowed(buffer)
+    }
+}
+
+impl<'buffer> From<Arc<Buffer>> for BufferRef<'buffer> {
+    fn from(arc: Arc<Buffer>) -> Self {
+        Self::Arc(arc)
+    }
+}
+
 /// A unique change to an editor
 #[derive(Clone, Debug)]
 pub struct ChangeItem {
@@ -115,12 +141,12 @@ pub enum Selection {
 }
 
 /// A trait to allow easy replacements of [`Editor`], like `SyntaxEditor`
-pub trait Edit {
+pub trait Edit<'buffer> {
     /// Mutably borrows `self` together with an [`FontSystem`] for more convenient methods
-    fn borrow_with<'a>(
-        &'a mut self,
-        font_system: &'a mut FontSystem,
-    ) -> BorrowedWithFontSystem<'a, Self>
+    fn borrow_with<'font_system>(
+        &'font_system mut self,
+        font_system: &'font_system mut FontSystem,
+    ) -> BorrowedWithFontSystem<'font_system, Self>
     where
         Self: Sized,
     {
@@ -130,11 +156,33 @@ pub trait Edit {
         }
     }
 
+    /// Get the internal [`BufferRef`]
+    fn buffer_ref(&self) -> &BufferRef<'buffer>;
+
+    /// Get the internal [`BufferRef`]
+    fn buffer_ref_mut(&mut self) -> &mut BufferRef<'buffer>;
+
     /// Get the internal [`Buffer`]
-    fn with_buffer<F: FnOnce(&Buffer) -> T, T>(&self, f: F) -> T;
+    fn with_buffer<F: FnOnce(&Buffer) -> T, T>(&self, f: F) -> T {
+        match self.buffer_ref() {
+            BufferRef::Owned(buffer) => f(buffer),
+            BufferRef::Borrowed(buffer) => f(buffer),
+            BufferRef::Arc(buffer) => f(buffer),
+        }
+    }
 
     /// Get the internal [`Buffer`], mutably
-    fn with_buffer_mut<F: FnOnce(&mut Buffer) -> T, T>(&mut self, f: F) -> T;
+    fn with_buffer_mut<F: FnOnce(&mut Buffer) -> T, T>(&mut self, f: F) -> T {
+        match self.buffer_ref_mut() {
+            BufferRef::Owned(buffer) => f(buffer),
+            BufferRef::Borrowed(buffer) => f(buffer),
+            BufferRef::Arc(arc) => match Arc::get_mut(arc) {
+                Some(buffer) => f(buffer),
+                //TODO: use make_mut?
+                None => panic!("BufferRef::Arc cannot be accessed mutibly"),
+            },
+        }
+    }
 
     /// Get the [`Buffer`] redraw flag
     fn redraw(&self) -> bool {
@@ -277,7 +325,7 @@ pub trait Edit {
     fn action(&mut self, font_system: &mut FontSystem, action: Action);
 }
 
-impl<'a, E: Edit> BorrowedWithFontSystem<'a, E> {
+impl<'font_system, 'buffer, E: Edit<'buffer>> BorrowedWithFontSystem<'font_system, E> {
     /// Get the internal [`Buffer`], mutably
     pub fn with_buffer_mut<F: FnOnce(&mut BorrowedWithFontSystem<Buffer>) -> T, T>(
         &mut self,

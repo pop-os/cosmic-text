@@ -372,7 +372,7 @@ impl Application for Window {
     }
 }
 
-fn update_attrs<T: Edit>(editor: &mut T, attrs: Attrs) {
+fn update_attrs<'buffer, E: Edit<'buffer>>(editor: &mut E, attrs: Attrs) {
     editor.with_buffer_mut(|buffer| {
         buffer.lines.iter_mut().for_each(|line| {
             line.set_attrs_list(AttrsList::new(attrs));
@@ -380,7 +380,7 @@ fn update_attrs<T: Edit>(editor: &mut T, attrs: Attrs) {
     });
 }
 
-fn update_alignment<T: Edit>(editor: &mut T, align: Align) {
+fn update_alignment<'buffer, E: Edit<'buffer>>(editor: &mut E, align: Align) {
     let current_line = editor.cursor().line;
     let selection_bounds_opt = editor.selection_bounds();
     editor.with_buffer_mut(|buffer| {

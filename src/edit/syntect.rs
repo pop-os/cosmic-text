@@ -8,8 +8,8 @@ use syntect::highlighting::{
 use syntect::parsing::{ParseState, ScopeStack, SyntaxReference, SyntaxSet};
 
 use crate::{
-    Action, AttrsList, BorrowedWithFontSystem, Buffer, BufferRef, Change, Color, Cursor, Edit,
-    Editor, FontSystem, Selection, Shaping, Style, Weight,
+    Action, AttrsList, BorrowedWithFontSystem, BufferRef, Change, Color, Cursor, Edit, Editor,
+    FontSystem, Selection, Shaping, Style, Weight,
 };
 
 pub use syntect::highlighting::Theme as SyntaxTheme;
@@ -33,24 +33,24 @@ impl SyntaxSystem {
 
 /// A wrapper of [`Editor`] with syntax highlighting provided by [`SyntaxSystem`]
 #[derive(Debug)]
-pub struct SyntaxEditor<'a, 'b> {
-    editor: Editor<'b>,
-    syntax_system: &'a SyntaxSystem,
-    syntax: &'a SyntaxReference,
-    theme: &'a SyntaxTheme,
-    highlighter: Highlighter<'a>,
+pub struct SyntaxEditor<'syntax_system, 'buffer> {
+    editor: Editor<'buffer>,
+    syntax_system: &'syntax_system SyntaxSystem,
+    syntax: &'syntax_system SyntaxReference,
+    theme: &'syntax_system SyntaxTheme,
+    highlighter: Highlighter<'syntax_system>,
     syntax_cache: Vec<(ParseState, ScopeStack)>,
 }
 
-impl<'a, 'b> SyntaxEditor<'a, 'b> {
+impl<'syntax_system, 'buffer> SyntaxEditor<'syntax_system, 'buffer> {
     /// Create a new [`SyntaxEditor`] with the provided [`Buffer`], [`SyntaxSystem`], and theme name.
     ///
     /// A good default theme name is "base16-eighties.dark".
     ///
     /// Returns None if theme not found
     pub fn new(
-        buffer: impl Into<BufferRef<'b>>,
-        syntax_system: &'a SyntaxSystem,
+        buffer: impl Into<BufferRef<'buffer>>,
+        syntax_system: &'syntax_system SyntaxSystem,
         theme_name: &str,
     ) -> Option<Self> {
         let editor = Editor::new(buffer);
@@ -213,13 +213,13 @@ impl<'a, 'b> SyntaxEditor<'a, 'b> {
     }
 }
 
-impl<'a, 'b> Edit for SyntaxEditor<'a, 'b> {
-    fn with_buffer<F: FnOnce(&Buffer) -> T, T>(&self, f: F) -> T {
-        self.editor.with_buffer(f)
+impl<'syntax_system, 'buffer> Edit<'buffer> for SyntaxEditor<'syntax_system, 'buffer> {
+    fn buffer_ref(&self) -> &BufferRef<'buffer> {
+        self.editor.buffer_ref()
     }
 
-    fn with_buffer_mut<F: FnOnce(&mut Buffer) -> T, T>(&mut self, f: F) -> T {
-        self.editor.with_buffer_mut(f)
+    fn buffer_ref_mut(&mut self) -> &mut BufferRef<'buffer> {
+        self.editor.buffer_ref_mut()
     }
 
     fn cursor(&self) -> Cursor {
@@ -408,7 +408,9 @@ impl<'a, 'b> Edit for SyntaxEditor<'a, 'b> {
     }
 }
 
-impl<'a, 'b, 'c> BorrowedWithFontSystem<'c, SyntaxEditor<'a, 'b>> {
+impl<'font_system, 'syntax_system, 'buffer>
+    BorrowedWithFontSystem<'font_system, SyntaxEditor<'syntax_system, 'buffer>>
+{
     /// Load text from a file, and also set syntax to the best option
     ///
     /// ## Errors

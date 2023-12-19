@@ -4,13 +4,16 @@ use modit::{Event, Key, Parser, TextObject, WordIter};
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
-    Action, AttrsList, BorrowedWithFontSystem, Buffer, Change, Color, Cursor, Edit, FontSystem,
+    Action, AttrsList, BorrowedWithFontSystem, BufferRef, Change, Color, Cursor, Edit, FontSystem,
     Motion, Selection, SyntaxEditor, SyntaxTheme,
 };
 
 pub use modit::{ViMode, ViParser};
 
-fn undo_2_action<E: Edit>(editor: &mut E, action: cosmic_undo_2::Action<&Change>) {
+fn undo_2_action<'buffer, E: Edit<'buffer>>(
+    editor: &mut E,
+    action: cosmic_undo_2::Action<&Change>,
+) {
     match action {
         cosmic_undo_2::Action::Do(change) => {
             editor.apply_change(change);
@@ -24,7 +27,7 @@ fn undo_2_action<E: Edit>(editor: &mut E, action: cosmic_undo_2::Action<&Change>
     }
 }
 
-fn finish_change<E: Edit>(
+fn finish_change<'buffer, E: Edit<'buffer>>(
     editor: &mut E,
     commands: &mut cosmic_undo_2::Commands<Change>,
     changed: &mut bool,
@@ -42,7 +45,7 @@ fn finish_change<E: Edit>(
     }
 }
 
-fn search<E: Edit>(editor: &mut E, value: &str, forwards: bool) -> bool {
+fn search<'buffer, E: Edit<'buffer>>(editor: &mut E, value: &str, forwards: bool) -> bool {
     let mut cursor = editor.cursor();
     let start_line = cursor.line;
     if forwards {
@@ -94,7 +97,7 @@ fn search<E: Edit>(editor: &mut E, value: &str, forwards: bool) -> bool {
     false
 }
 
-fn select_in<E: Edit>(editor: &mut E, start_c: char, end_c: char, include: bool) {
+fn select_in<'buffer, E: Edit<'buffer>>(editor: &mut E, start_c: char, end_c: char, include: bool) {
     // Find the largest encompasing object, or if there is none, find the next one.
     let cursor = editor.cursor();
     let (start, end) = editor.with_buffer(|buffer| {
@@ -156,8 +159,8 @@ fn select_in<E: Edit>(editor: &mut E, start_c: char, end_c: char, include: bool)
 }
 
 #[derive(Debug)]
-pub struct ViEditor<'a, 'b> {
-    editor: SyntaxEditor<'a, 'b>,
+pub struct ViEditor<'syntax_system, 'buffer> {
+    editor: SyntaxEditor<'syntax_system, 'buffer>,
     parser: ViParser,
     passthrough: bool,
     registers: BTreeMap<char, (Selection, String)>,
@@ -166,8 +169,8 @@ pub struct ViEditor<'a, 'b> {
     changed: bool,
 }
 
-impl<'a, 'b> ViEditor<'a, 'b> {
-    pub fn new(editor: SyntaxEditor<'a, 'b>) -> Self {
+impl<'syntax_system, 'buffer> ViEditor<'syntax_system, 'buffer> {
+    pub fn new(editor: SyntaxEditor<'syntax_system, 'buffer>) -> Self {
         Self {
             editor,
             parser: ViParser::new(),
@@ -477,13 +480,13 @@ impl<'a, 'b> ViEditor<'a, 'b> {
     }
 }
 
-impl<'a, 'b> Edit for ViEditor<'a, 'b> {
-    fn with_buffer<F: FnOnce(&Buffer) -> T, T>(&self, f: F) -> T {
-        self.editor.with_buffer(f)
+impl<'syntax_system, 'buffer> Edit<'buffer> for ViEditor<'syntax_system, 'buffer> {
+    fn buffer_ref(&self) -> &BufferRef<'buffer> {
+        self.editor.buffer_ref()
     }
 
-    fn with_buffer_mut<F: FnOnce(&mut Buffer) -> T, T>(&mut self, f: F) -> T {
-        self.editor.with_buffer_mut(f)
+    fn buffer_ref_mut(&mut self) -> &mut BufferRef<'buffer> {
+        self.editor.buffer_ref_mut()
     }
 
     fn cursor(&self) -> Cursor {
@@ -1098,7 +1101,9 @@ impl<'a, 'b> Edit for ViEditor<'a, 'b> {
     }
 }
 
-impl<'a, 'b, 'c> BorrowedWithFontSystem<'c, ViEditor<'a, 'b>> {
+impl<'font_system, 'syntax_system, 'buffer>
+    BorrowedWithFontSystem<'font_system, ViEditor<'syntax_system, 'buffer>>
+{
     /// Load text from a file, and also set syntax to the best option
     #[cfg(feature = "std")]
     pub fn load_text<P: AsRef<std::path::Path>>(
