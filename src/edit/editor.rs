@@ -2,46 +2,20 @@
 
 #[cfg(not(feature = "std"))]
 use alloc::string::{String, ToString};
-use alloc::sync::Arc;
 use core::{cmp, iter::once};
 use unicode_segmentation::UnicodeSegmentation;
 
 #[cfg(feature = "swash")]
 use crate::Color;
 use crate::{
-    Action, AttrsList, BorrowedWithFontSystem, Buffer, BufferLine, Change, ChangeItem, Cursor,
+    Action, AttrsList, BorrowedWithFontSystem, BufferLine, BufferRef, Change, ChangeItem, Cursor,
     Edit, FontSystem, Selection, Shaping,
 };
 
-#[derive(Debug)]
-pub enum BufferRef<'a> {
-    Owned(Buffer),
-    Borrowed(&'a mut Buffer),
-    Arc(Arc<Buffer>),
-}
-
-impl<'a> From<Buffer> for BufferRef<'a> {
-    fn from(buffer: Buffer) -> Self {
-        Self::Owned(buffer)
-    }
-}
-
-impl<'a> From<&'a mut Buffer> for BufferRef<'a> {
-    fn from(buffer: &'a mut Buffer) -> Self {
-        Self::Borrowed(buffer)
-    }
-}
-
-impl<'a> From<Arc<Buffer>> for BufferRef<'a> {
-    fn from(arc: Arc<Buffer>) -> Self {
-        Self::Arc(arc)
-    }
-}
-
 /// A wrapper of [`Buffer`] for easy editing
 #[derive(Debug)]
-pub struct Editor<'a> {
-    buffer_ref: BufferRef<'a>,
+pub struct Editor<'buffer> {
+    buffer_ref: BufferRef<'buffer>,
     cursor: Cursor,
     cursor_x_opt: Option<i32>,
     selection: Selection,
@@ -51,9 +25,9 @@ pub struct Editor<'a> {
     change: Option<Change>,
 }
 
-impl<'a> Editor<'a> {
+impl<'buffer> Editor<'buffer> {
     /// Create a new [`Editor`] with the provided [`Buffer`]
-    pub fn new(buffer: impl Into<BufferRef<'a>>) -> Self {
+    pub fn new(buffer: impl Into<BufferRef<'buffer>>) -> Self {
         Self {
             buffer_ref: buffer.into(),
             cursor: Cursor::default(),
@@ -241,25 +215,13 @@ impl<'a> Editor<'a> {
     }
 }
 
-impl<'a> Edit for Editor<'a> {
-    fn with_buffer<F: FnOnce(&Buffer) -> T, T>(&self, f: F) -> T {
-        match &self.buffer_ref {
-            BufferRef::Owned(buffer) => f(buffer),
-            BufferRef::Borrowed(buffer) => f(buffer),
-            BufferRef::Arc(buffer) => f(buffer),
-        }
+impl<'buffer> Edit<'buffer> for Editor<'buffer> {
+    fn buffer_ref(&self) -> &BufferRef<'buffer> {
+        &self.buffer_ref
     }
 
-    fn with_buffer_mut<F: FnOnce(&mut Buffer) -> T, T>(&mut self, f: F) -> T {
-        match &mut self.buffer_ref {
-            BufferRef::Owned(buffer) => f(buffer),
-            BufferRef::Borrowed(buffer) => f(buffer),
-            BufferRef::Arc(arc) => match Arc::get_mut(arc) {
-                Some(buffer) => f(buffer),
-                //TODO: use make_mut?
-                None => panic!("BufferRef::Arc cannot be accessed mutibly"),
-            },
-        }
+    fn buffer_ref_mut(&mut self) -> &mut BufferRef<'buffer> {
+        &mut self.buffer_ref
     }
 
     fn cursor(&self) -> Cursor {
@@ -886,7 +848,7 @@ impl<'a> Edit for Editor<'a> {
     }
 }
 
-impl<'a, 'b> BorrowedWithFontSystem<'a, Editor<'b>> {
+impl<'font_system, 'buffer> BorrowedWithFontSystem<'font_system, Editor<'buffer>> {
     #[cfg(feature = "swash")]
     pub fn draw<F>(
         &mut self,
