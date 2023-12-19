@@ -31,13 +31,13 @@ impl StyleSheet for Theme {
     }
 }
 
-pub struct TextBox<'a, 'editor> {
-    editor: &'a Mutex<ViEditor<'editor>>,
+pub struct TextBox<'a, 'editor, 'buffer> {
+    editor: &'a Mutex<ViEditor<'editor, 'buffer>>,
     padding: Padding,
 }
 
-impl<'a, 'editor> TextBox<'a, 'editor> {
-    pub fn new(editor: &'a Mutex<ViEditor<'editor>>) -> Self {
+impl<'a, 'editor, 'buffer> TextBox<'a, 'editor, 'buffer> {
+    pub fn new(editor: &'a Mutex<ViEditor<'editor, 'buffer>>) -> Self {
         Self {
             editor,
             padding: Padding::new(0.),
@@ -50,7 +50,9 @@ impl<'a, 'editor> TextBox<'a, 'editor> {
     }
 }
 
-pub fn text_box<'a, 'editor>(editor: &'a Mutex<ViEditor<'editor>>) -> TextBox<'a, 'editor> {
+pub fn text_box<'a, 'editor, 'buffer>(
+    editor: &'a Mutex<ViEditor<'editor, 'buffer>>,
+) -> TextBox<'a, 'editor, 'buffer> {
     TextBox::new(editor)
 }
 
@@ -103,7 +105,8 @@ fn draw_pixel(
     buffer[offset + 3] = (current >> 24) as u8;
 }
 
-impl<'a, 'editor, Message, Renderer> Widget<Message, Renderer> for TextBox<'a, 'editor>
+impl<'a, 'editor, 'buffer, Message, Renderer> Widget<Message, Renderer>
+    for TextBox<'a, 'editor, 'buffer>
 where
     Renderer: cosmic::iced_core::Renderer + image::Renderer<Handle = image::Handle>,
     Renderer::Theme: StyleSheet,
@@ -133,14 +136,17 @@ where
             .shape_as_needed(true);
 
         let mut layout_lines = 0;
-        for line in editor.buffer().lines.iter() {
-            match line.layout_opt() {
-                Some(layout) => layout_lines += layout.len(),
-                None => (),
+        editor.with_buffer(|buffer| {
+            for line in buffer.lines.iter() {
+                match line.layout_opt() {
+                    Some(layout) => layout_lines += layout.len(),
+                    None => (),
+                }
             }
-        }
+        });
 
-        let height = layout_lines as f32 * editor.buffer().metrics().line_height;
+        let height =
+            layout_lines as f32 * editor.with_buffer(|buffer| buffer.metrics().line_height);
         let size = Size::new(limits.max().width, height);
 
         layout::Node::new(limits.resolve(size))
@@ -205,13 +211,11 @@ where
         let mut editor = editor.borrow_with(&mut font_system);
 
         // Scale metrics
-        let metrics = editor.buffer().metrics();
-        editor
-            .buffer_mut()
-            .set_metrics(metrics.scale(SCALE_FACTOR as f32));
+        let metrics = editor.with_buffer(|buffer| buffer.metrics());
+        editor.with_buffer_mut(|buffer| buffer.set_metrics(metrics.scale(SCALE_FACTOR as f32)));
 
         // Set size
-        editor.buffer_mut().set_size(image_w as f32, image_h as f32);
+        editor.with_buffer_mut(|buffer| buffer.set_size(image_w as f32, image_h as f32));
 
         // Shape and layout
         editor.shape_as_needed(true);
@@ -228,7 +232,7 @@ where
         });
 
         // Restore original metrics
-        editor.buffer_mut().set_metrics(metrics);
+        editor.with_buffer_mut(|buffer| buffer.set_metrics(metrics));
 
         let handle = image::Handle::from_pixels(image_w as u32, image_h as u32, pixels);
         image::Renderer::draw(
@@ -355,12 +359,13 @@ where
     }
 }
 
-impl<'a, 'editor, Message, Renderer> From<TextBox<'a, 'editor>> for Element<'a, Message, Renderer>
+impl<'a, 'editor, 'buffer, Message, Renderer> From<TextBox<'a, 'editor, 'buffer>>
+    for Element<'a, Message, Renderer>
 where
     Renderer: renderer::Renderer + image::Renderer<Handle = image::Handle>,
     Renderer::Theme: StyleSheet,
 {
-    fn from(text_box: TextBox<'a, 'editor>) -> Self {
+    fn from(text_box: TextBox<'a, 'editor, 'buffer>) -> Self {
         Self::new(text_box)
     }
 }

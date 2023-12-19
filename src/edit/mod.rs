@@ -131,10 +131,20 @@ pub trait Edit {
     }
 
     /// Get the internal [`Buffer`]
-    fn buffer(&self) -> &Buffer;
+    fn with_buffer<F: FnOnce(&Buffer) -> T, T>(&self, f: F) -> T;
 
     /// Get the internal [`Buffer`], mutably
-    fn buffer_mut(&mut self) -> &mut Buffer;
+    fn with_buffer_mut<F: FnOnce(&mut Buffer) -> T, T>(&mut self, f: F) -> T;
+
+    /// Get the [`Buffer`] redraw flag
+    fn redraw(&self) -> bool {
+        self.with_buffer(|buffer| buffer.redraw())
+    }
+
+    /// Set the [`Buffer`] redraw flag
+    fn set_redraw(&mut self, redraw: bool) {
+        self.with_buffer_mut(|buffer| buffer.set_redraw(redraw))
+    }
 
     /// Get the current cursor
     fn cursor(&self) -> Cursor;
@@ -151,69 +161,71 @@ pub trait Edit {
     /// Get the bounds of the current selection
     //TODO: will not work with Block select
     fn selection_bounds(&self) -> Option<(Cursor, Cursor)> {
-        let cursor = self.cursor();
-        match self.selection() {
-            Selection::None => None,
-            Selection::Normal(select) => match select.line.cmp(&cursor.line) {
-                cmp::Ordering::Greater => Some((cursor, select)),
-                cmp::Ordering::Less => Some((select, cursor)),
-                cmp::Ordering::Equal => {
-                    /* select.line == cursor.line */
-                    if select.index < cursor.index {
-                        Some((select, cursor))
-                    } else {
-                        /* select.index >= cursor.index */
-                        Some((cursor, select))
-                    }
-                }
-            },
-            Selection::Line(select) => {
-                let start_line = cmp::min(select.line, cursor.line);
-                let end_line = cmp::max(select.line, cursor.line);
-                let end_index = self.buffer().lines[end_line].text().len();
-                Some((Cursor::new(start_line, 0), Cursor::new(end_line, end_index)))
-            }
-            Selection::Word(select) => {
-                let (mut start, mut end) = match select.line.cmp(&cursor.line) {
-                    cmp::Ordering::Greater => (cursor, select),
-                    cmp::Ordering::Less => (select, cursor),
+        self.with_buffer(|buffer| {
+            let cursor = self.cursor();
+            match self.selection() {
+                Selection::None => None,
+                Selection::Normal(select) => match select.line.cmp(&cursor.line) {
+                    cmp::Ordering::Greater => Some((cursor, select)),
+                    cmp::Ordering::Less => Some((select, cursor)),
                     cmp::Ordering::Equal => {
                         /* select.line == cursor.line */
                         if select.index < cursor.index {
-                            (select, cursor)
+                            Some((select, cursor))
                         } else {
                             /* select.index >= cursor.index */
-                            (cursor, select)
+                            Some((cursor, select))
                         }
                     }
-                };
-
-                // Move start to beginning of word
-                {
-                    let line = &self.buffer().lines[start.line];
-                    start.index = line
-                        .text()
-                        .unicode_word_indices()
-                        .rev()
-                        .map(|(i, _)| i)
-                        .find(|&i| i < start.index)
-                        .unwrap_or(0);
+                },
+                Selection::Line(select) => {
+                    let start_line = cmp::min(select.line, cursor.line);
+                    let end_line = cmp::max(select.line, cursor.line);
+                    let end_index = buffer.lines[end_line].text().len();
+                    Some((Cursor::new(start_line, 0), Cursor::new(end_line, end_index)))
                 }
+                Selection::Word(select) => {
+                    let (mut start, mut end) = match select.line.cmp(&cursor.line) {
+                        cmp::Ordering::Greater => (cursor, select),
+                        cmp::Ordering::Less => (select, cursor),
+                        cmp::Ordering::Equal => {
+                            /* select.line == cursor.line */
+                            if select.index < cursor.index {
+                                (select, cursor)
+                            } else {
+                                /* select.index >= cursor.index */
+                                (cursor, select)
+                            }
+                        }
+                    };
 
-                // Move end to end of word
-                {
-                    let line = &self.buffer().lines[end.line];
-                    end.index = line
-                        .text()
-                        .unicode_word_indices()
-                        .map(|(i, word)| i + word.len())
-                        .find(|&i| i > end.index)
-                        .unwrap_or(line.text().len());
+                    // Move start to beginning of word
+                    {
+                        let line = &buffer.lines[start.line];
+                        start.index = line
+                            .text()
+                            .unicode_word_indices()
+                            .rev()
+                            .map(|(i, _)| i)
+                            .find(|&i| i < start.index)
+                            .unwrap_or(0);
+                    }
+
+                    // Move end to end of word
+                    {
+                        let line = &buffer.lines[end.line];
+                        end.index = line
+                            .text()
+                            .unicode_word_indices()
+                            .map(|(i, word)| i + word.len())
+                            .find(|&i| i > end.index)
+                            .unwrap_or(line.text().len());
+                    }
+
+                    Some((start, end))
                 }
-
-                Some((start, end))
             }
-        }
+        })
     }
 
     /// Get the current automatic indentation setting
@@ -265,13 +277,19 @@ pub trait Edit {
     fn action(&mut self, font_system: &mut FontSystem, action: Action);
 }
 
-impl<'a, T: Edit> BorrowedWithFontSystem<'a, T> {
+impl<'a, E: Edit> BorrowedWithFontSystem<'a, E> {
     /// Get the internal [`Buffer`], mutably
-    pub fn buffer_mut(&mut self) -> BorrowedWithFontSystem<Buffer> {
-        BorrowedWithFontSystem {
-            inner: self.inner.buffer_mut(),
-            font_system: self.font_system,
-        }
+    pub fn with_buffer_mut<F: FnOnce(&mut BorrowedWithFontSystem<Buffer>) -> T, T>(
+        &mut self,
+        f: F,
+    ) -> T {
+        self.inner.with_buffer_mut(|buffer| {
+            let mut borrowed = BorrowedWithFontSystem {
+                inner: buffer,
+                font_system: self.font_system,
+            };
+            f(&mut borrowed)
+        })
     }
 
     /// Shape lines until scroll, after adjusting scroll if the cursor moved

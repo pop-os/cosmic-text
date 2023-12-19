@@ -19,7 +19,7 @@ fn redraw(
     let selection_color = Color::rgba(0xFF, 0xFF, 0xFF, 0x33);
 
     editor.shape_as_needed(true);
-    if editor.buffer().redraw() {
+    if editor.redraw() {
         let instant = Instant::now();
 
         window.set(bg_color);
@@ -36,7 +36,7 @@ fn redraw(
 
         window.sync();
 
-        editor.buffer_mut().set_redraw(false);
+        editor.set_redraw(false);
 
         let duration = instant.elapsed();
         log::debug!("redraw: {:?}", duration);
@@ -159,13 +159,15 @@ fn main() {
     log::info!("Test completed in {:?}", test_elapsed);
 
     let mut wrong = 0;
-    for (line_i, line) in text.lines().enumerate() {
-        let buffer_line = &editor.buffer().lines[line_i];
-        if buffer_line.text() != line {
-            log::error!("line {}: {:?} != {:?}", line_i, buffer_line.text(), line);
-            wrong += 1;
+    editor.with_buffer(|buffer| {
+        for (line_i, line) in text.lines().enumerate() {
+            let buffer_line = &buffer.lines[line_i];
+            if buffer_line.text() != line {
+                log::error!("line {}: {:?} != {:?}", line_i, buffer_line.text(), line);
+                wrong += 1;
+            }
         }
-    }
+    });
     if wrong == 0 {
         log::info!("All lines matched!");
         process::exit(0);
