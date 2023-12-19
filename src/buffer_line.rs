@@ -4,7 +4,7 @@ use alloc::{string::String, vec::Vec};
 use crate::{Align, AttrsList, FontSystem, LayoutLine, ShapeBuffer, ShapeLine, Shaping, Wrap};
 
 /// A line (or paragraph) of text that is shaped and laid out
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct BufferLine {
     //TODO: make this not pub(crate)
     text: String,
