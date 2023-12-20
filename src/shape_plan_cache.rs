@@ -1,3 +1,6 @@
+#[cfg(not(feature = "std"))]
+use hashbrown::hash_map::Entry;
+#[cfg(feature = "std")]
 use std::collections::hash_map::Entry;
 
 use crate::{Font, HashMap};
@@ -45,7 +48,7 @@ impl ShapePlanCache {
     }
 }
 
-impl std::fmt::Debug for ShapePlanCache {
+impl core::fmt::Debug for ShapePlanCache {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_tuple("ShapePlanCache").finish()
     }
