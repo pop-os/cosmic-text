@@ -1,17 +1,13 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 #[cfg(not(feature = "std"))]
-use alloc::collections::BTreeMap as Map;
-#[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 use core::fmt;
-#[cfg(feature = "std")]
-use std::collections::HashMap as Map;
 use swash::scale::{image::Content, ScaleContext};
 use swash::scale::{Render, Source, StrikeWith};
 use swash::zeno::{Format, Vector};
 
-use crate::{CacheKey, Color, FontSystem};
+use crate::{CacheKey, Color, FontSystem, HashMap};
 
 pub use swash::scale::image::{Content as SwashContent, Image as SwashImage};
 pub use swash::zeno::{Command, Placement};
@@ -93,8 +89,8 @@ fn swash_outline_commands(
 /// Cache for rasterizing with the swash scaler
 pub struct SwashCache {
     context: ScaleContext,
-    pub image_cache: Map<CacheKey, Option<SwashImage>>,
-    pub outline_command_cache: Map<CacheKey, Option<Vec<swash::zeno::Command>>>,
+    pub image_cache: HashMap<CacheKey, Option<SwashImage>>,
+    pub outline_command_cache: HashMap<CacheKey, Option<Vec<swash::zeno::Command>>>,
 }
 
 impl fmt::Debug for SwashCache {
@@ -108,8 +104,8 @@ impl SwashCache {
     pub fn new() -> Self {
         Self {
             context: ScaleContext::new(),
-            image_cache: Map::new(),
-            outline_command_cache: Map::new(),
+            image_cache: HashMap::default(),
+            outline_command_cache: HashMap::default(),
         }
     }
 
