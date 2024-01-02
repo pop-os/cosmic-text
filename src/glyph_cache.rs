@@ -1,5 +1,15 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+bitflags::bitflags! {
+    /// Flags that change rendering
+    #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[repr(transparent)]
+    pub struct CacheKeyFlags: u32 {
+        /// Skew by 14 degrees to synthesize italic
+        const FAKE_ITALIC = 1;
+    }
+}
+
 /// Key for building a glyph cache
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct CacheKey {
@@ -13,6 +23,8 @@ pub struct CacheKey {
     pub x_bin: SubpixelBin,
     /// Binning of fractional Y offset
     pub y_bin: SubpixelBin,
+    /// [`CacheKeyFlags`]
+    pub flags: CacheKeyFlags,
 }
 
 impl CacheKey {
@@ -21,6 +33,7 @@ impl CacheKey {
         glyph_id: u16,
         font_size: f32,
         pos: (f32, f32),
+        flags: CacheKeyFlags,
     ) -> (Self, i32, i32) {
         let (x, x_bin) = SubpixelBin::new(pos.0);
         let (y, y_bin) = SubpixelBin::new(pos.1);
@@ -31,6 +44,7 @@ impl CacheKey {
                 font_size_bits: font_size.to_bits(),
                 x_bin,
                 y_bin,
+                flags,
             },
             x,
             y,
