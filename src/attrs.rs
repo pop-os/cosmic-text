@@ -6,9 +6,11 @@ use alloc::{
     vec::Vec,
 };
 use core::ops::Range;
+use rangemap::RangeMap;
+
+use crate::CacheKeyFlags;
 
 pub use fontdb::{Family, Stretch, Style, Weight};
-use rangemap::RangeMap;
 
 /// Text color
 #[derive(Clone, Copy, Debug, PartialOrd, Ord, Eq, Hash, PartialEq)]
@@ -109,6 +111,7 @@ pub struct Attrs<'a> {
     pub style: Style,
     pub weight: Weight,
     pub metadata: usize,
+    pub cache_key_flags: CacheKeyFlags,
 }
 
 impl<'a> Attrs<'a> {
@@ -123,6 +126,7 @@ impl<'a> Attrs<'a> {
             style: Style::Normal,
             weight: Weight::NORMAL,
             metadata: 0,
+            cache_key_flags: CacheKeyFlags::empty(),
         }
     }
 
@@ -162,6 +166,12 @@ impl<'a> Attrs<'a> {
         self
     }
 
+    /// Set [`CacheKeyFlags`]
+    pub fn cache_key_flags(mut self, cache_key_flags: CacheKeyFlags) -> Self {
+        self.cache_key_flags = cache_key_flags;
+        self
+    }
+
     /// Check if font matches
     pub fn matches(&self, face: &fontdb::FaceInfo) -> bool {
         //TODO: smarter way of including emoji
@@ -190,6 +200,7 @@ pub struct AttrsOwned {
     pub style: Style,
     pub weight: Weight,
     pub metadata: usize,
+    pub cache_key_flags: CacheKeyFlags,
 }
 
 impl AttrsOwned {
@@ -201,6 +212,7 @@ impl AttrsOwned {
             style: attrs.style,
             weight: attrs.weight,
             metadata: attrs.metadata,
+            cache_key_flags: attrs.cache_key_flags,
         }
     }
 
@@ -212,6 +224,7 @@ impl AttrsOwned {
             style: self.style,
             weight: self.weight,
             metadata: self.metadata,
+            cache_key_flags: self.cache_key_flags,
         }
     }
 }

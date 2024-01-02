@@ -13,7 +13,8 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use crate::fallback::FontFallbackIter;
 use crate::{
-    Align, AttrsList, Color, Font, FontSystem, LayoutGlyph, LayoutLine, ShapePlanCache, Wrap,
+    Align, AttrsList, CacheKeyFlags, Color, Font, FontSystem, LayoutGlyph, LayoutLine,
+    ShapePlanCache, Wrap,
 };
 
 /// The shaping strategy of some text.
@@ -148,6 +149,7 @@ fn shape_fallback(
             //TODO: color should not be related to shaping
             color_opt: attrs.color_opt,
             metadata: attrs.metadata,
+            cache_key_flags: attrs.cache_key_flags,
         });
     }
 
@@ -373,6 +375,7 @@ fn shape_skip(
                     glyph_id,
                     color_opt: attrs.color_opt,
                     metadata: attrs.metadata,
+                    cache_key_flags: attrs.cache_key_flags,
                 }
             }),
     );
@@ -393,6 +396,7 @@ pub struct ShapeGlyph {
     pub glyph_id: u16,
     pub color_opt: Option<Color>,
     pub metadata: usize,
+    pub cache_key_flags: CacheKeyFlags,
 }
 
 impl ShapeGlyph {
@@ -418,6 +422,7 @@ impl ShapeGlyph {
             y_offset: self.y_offset,
             color_opt: self.color_opt,
             metadata: self.metadata,
+            cache_key_flags: self.cache_key_flags,
         }
     }
 }

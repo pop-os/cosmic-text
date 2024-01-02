@@ -7,10 +7,10 @@ use swash::scale::{image::Content, ScaleContext};
 use swash::scale::{Render, Source, StrikeWith};
 use swash::zeno::{Format, Vector};
 
-use crate::{CacheKey, Color, FontSystem, HashMap};
+use crate::{CacheKey, CacheKeyFlags, Color, FontSystem, HashMap};
 
 pub use swash::scale::image::{Content as SwashContent, Image as SwashImage};
-pub use swash::zeno::{Command, Placement};
+pub use swash::zeno::{Angle, Command, Placement, Transform};
 
 fn swash_image(
     font_system: &mut FontSystem,
@@ -49,6 +49,14 @@ fn swash_image(
     .format(Format::Alpha)
     // Apply the fractional offset
     .offset(offset)
+    .transform(if cache_key.flags.contains(CacheKeyFlags::FAKE_ITALIC) {
+        Some(Transform::skew(
+            Angle::from_degrees(14.0),
+            Angle::from_degrees(0.0),
+        ))
+    } else {
+        None
+    })
     // Render the image
     .render(&mut scaler, cache_key.glyph_id)
 }
