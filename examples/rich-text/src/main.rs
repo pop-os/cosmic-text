@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic_text::{
-    Action, Attrs, Buffer, Color, Edit, Editor, Family, FontSystem, Metrics, Motion, Shaping,
-    Style, SwashCache, Weight,
+    Action, Attrs, Buffer, CacheKeyFlags, Color, Edit, Editor, Family, FontSystem, Metrics, Motion,
+    Shaping, Style, SwashCache, Weight,
 };
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{
@@ -63,6 +63,10 @@ fn main() {
         ("Sans-Serif Normal ", attrs),
         ("Sans-Serif Bold ", attrs.weight(Weight::BOLD)),
         ("Sans-Serif Italic ", attrs.style(Style::Italic)),
+        (
+            "Sans-Serif Fake Italic ",
+            attrs.cache_key_flags(CacheKeyFlags::FAKE_ITALIC),
+        ),
         (
             "Sans-Serif Bold Italic\n",
             attrs.weight(Weight::BOLD).style(Style::Italic),

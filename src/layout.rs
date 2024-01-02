@@ -5,7 +5,7 @@ use core::fmt::Display;
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 
-use crate::{CacheKey, Color};
+use crate::{CacheKey, CacheKeyFlags, Color};
 
 /// A laid out glyph
 #[derive(Clone, Debug)]
@@ -50,6 +50,8 @@ pub struct LayoutGlyph {
     pub color_opt: Option<Color>,
     /// Metadata from `Attrs`
     pub metadata: usize,
+    /// [`CacheKeyFlags`]
+    pub cache_key_flags: CacheKeyFlags,
 }
 
 #[derive(Clone, Debug)]
@@ -75,6 +77,7 @@ impl LayoutGlyph {
                 (self.x + x_offset) * scale + offset.0,
                 libm::truncf((self.y - y_offset) * scale + offset.1), // Hinting in Y axis
             ),
+            self.cache_key_flags,
         );
 
         PhysicalGlyph { cache_key, x, y }
