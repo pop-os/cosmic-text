@@ -167,9 +167,6 @@ impl FontSystem {
         #[cfg(not(target_arch = "wasm32"))]
         let now = std::time::Instant::now();
 
-        #[cfg(target_os = "redox")]
-        db.load_fonts_dir("/ui/fonts");
-
         db.load_system_fonts();
 
         for source in fonts {
