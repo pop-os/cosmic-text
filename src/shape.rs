@@ -678,11 +678,12 @@ impl ShapeLine {
         )
     }
 
-    /// Shape a line into a set of spans, using a scratch buffer.
+    /// Shape a line into a set of spans, using a scratch buffer. If [`unicode_bidi::BidiInfo`]
+    /// detects multiple paragraphs, they will be joined.
     ///
     /// # Panics
     ///
-    /// Will panic if `line` contains more than one paragraph.
+    /// Will panic if `line` contains multiple paragraphs that do not have matching direction
     pub fn new_in_buffer(
         scratch: &mut ShapeBuffer,
         font_system: &mut FontSystem,
@@ -696,11 +697,14 @@ impl ShapeLine {
         let rtl = if bidi.paragraphs.is_empty() {
             false
         } else {
-            assert_eq!(bidi.paragraphs.len(), 1);
-            let para_info = &bidi.paragraphs[0];
-            let line_rtl = para_info.level.is_rtl();
+            bidi.paragraphs[0].level.is_rtl()
+        };
 
-            log::trace!("Line {}: '{}'", if line_rtl { "RTL" } else { "LTR" }, line);
+        log::trace!("Line {}: '{}'", if rtl { "RTL" } else { "LTR" }, line);
+
+        for para_info in bidi.paragraphs.iter() {
+            let line_rtl = para_info.level.is_rtl();
+            assert_eq!(line_rtl, rtl);
 
             let line_range = para_info.range.clone();
             let levels = Self::adjust_levels(&unicode_bidi::Paragraph::new(&bidi, para_info));
@@ -743,8 +747,7 @@ impl ShapeLine {
                 run_level,
                 shaping,
             ));
-            line_rtl
-        };
+        }
 
         Self { rtl, spans }
     }
