@@ -8,8 +8,8 @@ use unicode_segmentation::UnicodeSegmentation;
 #[cfg(feature = "swash")]
 use crate::Color;
 use crate::{
-    Action, AttrsList, BorrowedWithFontSystem, BufferLine, BufferRef, Change, ChangeItem, Cursor,
-    Edit, FontSystem, Selection, Shaping,
+    Action, Attrs, AttrsList, BorrowedWithFontSystem, BufferLine, BufferRef, Change, ChangeItem,
+    Cursor, Edit, FontSystem, Selection, Shaping,
 };
 
 /// A wrapper of [`Buffer`] for easy editing
@@ -356,6 +356,24 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
         let change_item = self.with_buffer_mut(|buffer| {
             // Save cursor for change tracking
             let start = cursor;
+
+            // Ensure there are enough lines in the buffer to handle this cursor
+            while cursor.line >= buffer.lines.len() {
+                let line = BufferLine::new(
+                    String::new(),
+                    AttrsList::new(attrs_list.as_ref().map_or_else(
+                        || {
+                            buffer
+                                .lines
+                                .last()
+                                .map_or(Attrs::new(), |line| line.attrs_list().defaults())
+                        },
+                        |x| x.defaults(),
+                    )),
+                    Shaping::Advanced,
+                );
+                buffer.lines.push(line);
+            }
 
             let line: &mut BufferLine = &mut buffer.lines[cursor.line];
             let insert_line = cursor.line + 1;
