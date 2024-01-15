@@ -944,7 +944,6 @@ impl ShapeLine {
         } else {
             for (span_index, span) in self.spans.iter().enumerate() {
                 let mut word_range_width = 0.;
-                let mut width_before_last_blank = 0.;
                 let mut number_of_blanks: u32 = 0;
 
                 // Create the word ranges that fits in a visual line
@@ -967,7 +966,6 @@ impl ShapeLine {
                             // fits
                             if word.blank {
                                 number_of_blanks += 1;
-                                width_before_last_blank = word_range_width;
                             }
                             word_range_width += word_width;
                             continue;
@@ -1013,24 +1011,17 @@ impl ShapeLine {
                                 .map_or(false, |previous_word| previous_word.blank);
                             if trailing_blank {
                                 number_of_blanks = number_of_blanks.saturating_sub(1);
-                                add_to_visual_line(
-                                    &mut current_visual_line,
-                                    span_index,
-                                    (i + 2, 0),
-                                    fitting_start,
-                                    width_before_last_blank,
-                                    number_of_blanks,
-                                );
-                            } else {
-                                add_to_visual_line(
-                                    &mut current_visual_line,
-                                    span_index,
-                                    (i + 1, 0),
-                                    fitting_start,
-                                    word_range_width,
-                                    number_of_blanks,
-                                );
                             }
+
+                            add_to_visual_line(
+                                &mut current_visual_line,
+                                span_index,
+                                (i + 1, 0),
+                                fitting_start,
+                                word_range_width,
+                                number_of_blanks,
+                            );
+
                             visual_lines.push(current_visual_line);
                             current_visual_line = VisualLine::default();
 
@@ -1067,7 +1058,6 @@ impl ShapeLine {
                             // fits
                             if word.blank {
                                 number_of_blanks += 1;
-                                width_before_last_blank = word_range_width;
                             }
                             word_range_width += word_width;
                             continue;
@@ -1104,24 +1094,17 @@ impl ShapeLine {
                             let trailing_blank = i > 0 && span.words[i - 1].blank;
                             if trailing_blank {
                                 number_of_blanks = number_of_blanks.saturating_sub(1);
-                                add_to_visual_line(
-                                    &mut current_visual_line,
-                                    span_index,
-                                    fitting_start,
-                                    (i - 1, 0),
-                                    width_before_last_blank,
-                                    number_of_blanks,
-                                );
-                            } else {
-                                add_to_visual_line(
-                                    &mut current_visual_line,
-                                    span_index,
-                                    fitting_start,
-                                    (i, 0),
-                                    word_range_width,
-                                    number_of_blanks,
-                                );
                             }
+
+                            add_to_visual_line(
+                                &mut current_visual_line,
+                                span_index,
+                                fitting_start,
+                                (i, 0),
+                                word_range_width,
+                                number_of_blanks,
+                            );
+
                             visual_lines.push(current_visual_line);
                             current_visual_line = VisualLine::default();
                             number_of_blanks = 0;

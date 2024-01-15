@@ -71,6 +71,45 @@ fn stable_wrap() {
     }
 }
 
+// Test for https://github.com/pop-os/cosmic-text/issues/155
+//
+// Ensure that a single between two words aren't wrapped onto a newline by itself.
+#[test]
+fn trailing_space_wrap() {
+    let attrs = AttrsList::new(
+        Attrs::new()
+            .family(Family::Name("FiraMono"))
+            .weight(Weight::MEDIUM),
+    );
+    let mut font_system =
+        FontSystem::new_with_locale_and_db("en-US".into(), fontdb::Database::new());
+    let font = std::fs::read("fonts/FiraMono-Medium.ttf").unwrap();
+    font_system.db_mut().load_font_data(font);
+
+    let line = ShapeLine::new(
+        &mut font_system,
+        "Testing spacing",
+        &attrs,
+        Shaping::Advanced,
+    );
+
+    // Set the width limit to be somewhere in the middle of the first word  so that we force the
+    // line to wrap.
+    let position_somewhere_in_first_word = 20.0;
+
+    let layout = line.layout(
+        32.0,
+        position_somewhere_in_first_word,
+        Wrap::Word,
+        Some(Align::Left),
+    );
+
+    // We should only end up with two lines:
+    // - "Testing " (including the trailing space)
+    // - "spacing"
+    assert_eq!(layout.len(), 2);
+}
+
 #[allow(dead_code)]
 fn dbg_layout_lines(text: &str, lines: &[LayoutLine]) {
     for line in lines {
