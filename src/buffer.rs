@@ -232,6 +232,7 @@ pub struct Buffer {
     /// True if a redraw is requires. Set to false after processing
     redraw: bool,
     wrap: Wrap,
+    monospace_width: Option<f32>,
 
     /// Scratch buffer for shaping and laying out.
     scratch: ShapeBuffer,
@@ -247,6 +248,7 @@ impl Clone for Buffer {
             scroll: self.scroll,
             redraw: self.redraw,
             wrap: self.wrap,
+            monospace_width: self.monospace_width,
             scratch: ShapeBuffer::default(),
         }
     }
@@ -275,6 +277,7 @@ impl Buffer {
             redraw: false,
             wrap: Wrap::Word,
             scratch: ShapeBuffer::default(),
+            monospace_width: None,
         }
     }
 
@@ -313,6 +316,7 @@ impl Buffer {
                     self.metrics.font_size,
                     self.width,
                     self.wrap,
+                    self.monospace_width,
                 );
             }
         }
@@ -492,6 +496,7 @@ impl Buffer {
             self.metrics.font_size,
             self.width,
             self.wrap,
+            self.monospace_width,
         ))
     }
 
@@ -518,6 +523,20 @@ impl Buffer {
     pub fn set_wrap(&mut self, font_system: &mut FontSystem, wrap: Wrap) {
         if wrap != self.wrap {
             self.wrap = wrap;
+            self.relayout(font_system);
+            self.shape_until_scroll(font_system, false);
+        }
+    }
+
+    /// Get the current `monospace_width`
+    pub fn monospace_width(&self) -> Option<f32> {
+        self.monospace_width
+    }
+
+    /// Set monospace width monospace glyphs should be resized to match. `None` means don't resize
+    pub fn set_monospace_width(&mut self, font_system: &mut FontSystem, monospace_width: Option<f32>) {
+        if monospace_width != self.monospace_width {
+            self.monospace_width = monospace_width;
             self.relayout(font_system);
             self.shape_until_scroll(font_system, false);
         }
