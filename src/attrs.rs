@@ -177,7 +177,8 @@ impl<'a> Attrs<'a> {
         //TODO: smarter way of including emoji
         face.post_script_name.contains("Emoji")
             || (face.style == self.style
-                && face.weight == self.weight
+                // Relax exact weight matching for the Monospace fallback use-case
+                && face.weight <= self.weight
                 && face.stretch == self.stretch)
     }
 

@@ -144,6 +144,7 @@ fn shape_fallback(
             y_offset,
             ascent,
             descent,
+            font_monospace_em_width: font.monospace_em_width(),
             font_id: font.id(),
             glyph_id: info.glyph_id.try_into().expect("failed to cast glyph ID"),
             //TODO: color should not be related to shaping
@@ -344,6 +345,7 @@ fn shape_skip(
 
     let font = font_iter.next().expect("no default font found");
     let font_id = font.id();
+    let font_monospace_em_width = font.monospace_em_width();
     let font = font.as_swash();
 
     let charmap = font.charmap();
@@ -371,6 +373,7 @@ fn shape_skip(
                     y_offset: 0.0,
                     ascent,
                     descent,
+                    font_monospace_em_width,
                     font_id,
                     glyph_id,
                     color_opt: attrs.color_opt,
@@ -392,6 +395,7 @@ pub struct ShapeGlyph {
     pub y_offset: f32,
     pub ascent: f32,
     pub descent: f32,
+    pub font_monospace_em_width: Option<f32>,
     pub font_id: fontdb::ID,
     pub glyph_id: u16,
     pub color_opt: Option<Color>,
@@ -875,6 +879,7 @@ impl ShapeLine {
         line_width: f32,
         wrap: Wrap,
         align: Option<Align>,
+        match_mono_width: Option<f32>,
     ) -> Vec<LayoutLine> {
         let mut lines = Vec::with_capacity(1);
         self.layout_to_buffer(
@@ -884,6 +889,7 @@ impl ShapeLine {
             wrap,
             align,
             &mut lines,
+            match_mono_width,
         );
         lines
     }
@@ -896,6 +902,7 @@ impl ShapeLine {
         wrap: Wrap,
         align: Option<Align>,
         layout_lines: &mut Vec<LayoutLine>,
+        match_mono_width: Option<f32>,
     ) {
         // For each visual line a list of  (span index,  and range of words in that span)
         // Note that a BiDi visual line could have multiple spans or parts of them
@@ -1236,8 +1243,20 @@ impl ShapeLine {
                             (false, true) => &word.glyphs[..ending_glyph],
                             (true, true) => &word.glyphs[starting_glyph..ending_glyph],
                         };
+
+                        let match_mono_em_width = match_mono_width.map(|w| w / font_size);
+
                         for glyph in included_glyphs {
-                            let x_advance = font_size * glyph.x_advance
+                            let glyph_font_size = match(match_mono_em_width, glyph.font_monospace_em_width) {
+                                (Some(match_em_width), Some(glyph_em_width)) if glyph_em_width != match_em_width => {
+                                    let glyph_font_size = font_size * (match_em_width / glyph_em_width);
+                                    log::trace!("Adjusted glyph font size ({font_size} => {glyph_font_size})");
+                                    glyph_font_size
+                                },
+                                _ => font_size,
+                            };
+
+                            let x_advance = glyph_font_size * glyph.x_advance
                                 + if word.blank {
                                     justification_expansion
                                 } else {
@@ -1246,8 +1265,8 @@ impl ShapeLine {
                             if self.rtl {
                                 x -= x_advance;
                             }
-                            let y_advance = font_size * glyph.y_advance;
-                            glyphs.push(glyph.layout(font_size, x, y, x_advance, span.level));
+                            let y_advance = glyph_font_size * glyph.y_advance;
+                            glyphs.push(glyph.layout(glyph_font_size, x, y, x_advance, span.level));
                             if !self.rtl {
                                 x += x_advance;
                             }
