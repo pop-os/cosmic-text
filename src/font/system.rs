@@ -120,7 +120,10 @@ impl FontSystem {
                 match Font::new(&self.db, id) {
                     Some(font) => Some(Arc::new(font)),
                     None => {
-                        log::warn!("failed to load font '{}'", self.db.face(id)?.post_script_name);
+                        log::warn!(
+                            "failed to load font '{}'",
+                            self.db.face(id)?.post_script_name
+                        );
                         None
                     }
                 }
@@ -140,7 +143,10 @@ impl FontSystem {
                     .db
                     .faces()
                     .filter(|face| attrs.matches(face))
-                    .map(|face| FontMatchKey{ weight_offset: attrs.weight.0 - face.weight.0, id: face.id })
+                    .map(|face| FontMatchKey {
+                        weight_offset: attrs.weight.0 - face.weight.0,
+                        id: face.id,
+                    })
                     .collect::<Vec<_>>();
 
                 // Sort so we get the keys with weight_offset=0 first

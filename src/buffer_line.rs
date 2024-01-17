@@ -210,7 +210,15 @@ impl BufferLine {
             let align = self.align;
             let shape = self.shape_in_buffer(scratch, font_system);
             let mut layout = Vec::with_capacity(1);
-            shape.layout_to_buffer(scratch, font_size, width, wrap, align, &mut layout, match_mono_width);
+            shape.layout_to_buffer(
+                scratch,
+                font_size,
+                width,
+                wrap,
+                align,
+                &mut layout,
+                match_mono_width,
+            );
             self.layout_opt = Some(layout);
         }
         self.layout_opt.as_ref().expect("layout not found")

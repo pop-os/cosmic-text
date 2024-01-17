@@ -1247,12 +1247,18 @@ impl ShapeLine {
                         let match_mono_em_width = match_mono_width.map(|w| w / font_size);
 
                         for glyph in included_glyphs {
-                            let glyph_font_size = match(match_mono_em_width, glyph.font_monospace_em_width) {
-                                (Some(match_em_width), Some(glyph_em_width)) if glyph_em_width != match_em_width => {
-                                    let glyph_font_size = font_size * (match_em_width / glyph_em_width);
+                            let glyph_font_size = match (
+                                match_mono_em_width,
+                                glyph.font_monospace_em_width,
+                            ) {
+                                (Some(match_em_width), Some(glyph_em_width))
+                                    if glyph_em_width != match_em_width =>
+                                {
+                                    let glyph_font_size =
+                                        font_size * (match_em_width / glyph_em_width);
                                     log::trace!("Adjusted glyph font size ({font_size} => {glyph_font_size})");
                                     glyph_font_size
-                                },
+                                }
                                 _ => font_size,
                             };
 

@@ -534,7 +534,11 @@ impl Buffer {
     }
 
     /// Set monospace width monospace glyphs should be resized to match. `None` means don't resize
-    pub fn set_monospace_width(&mut self, font_system: &mut FontSystem, monospace_width: Option<f32>) {
+    pub fn set_monospace_width(
+        &mut self,
+        font_system: &mut FontSystem,
+        monospace_width: Option<f32>,
+    ) {
         if monospace_width != self.monospace_width {
             self.monospace_width = monospace_width;
             self.relayout(font_system);
