@@ -78,17 +78,23 @@ impl Font {
         let (monospace_em_width, scripts) = {
             db.with_face_data(id, |font_data, face_index| {
                 let face = ttf_parser::Face::parse(font_data, face_index).ok()?;
-                let monospace_em_width = info.monospaced.then(|| {
-                    let hor_advance = face.glyph_hor_advance(face.glyph_index(' ')?)? as f32;
-                    let upem = face.units_per_em() as f32;
-                    Some(hor_advance/upem)
-                }).flatten();
+                let monospace_em_width = info
+                    .monospaced
+                    .then(|| {
+                        let hor_advance = face.glyph_hor_advance(face.glyph_index(' ')?)? as f32;
+                        let upem = face.units_per_em() as f32;
+                        Some(hor_advance / upem)
+                    })
+                    .flatten();
 
                 if info.monospaced && monospace_em_width.is_none() {
                     None?;
                 }
 
-                let scripts = face.tables().gpos.into_iter()
+                let scripts = face
+                    .tables()
+                    .gpos
+                    .into_iter()
                     .chain(face.tables().gsub)
                     .map(|table| table.scripts)
                     .flatten()

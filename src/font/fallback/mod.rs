@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+use alloc::collections::BTreeSet;
 use alloc::sync::Arc;
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
-use alloc::collections::BTreeSet;
 use fontdb::Family;
 use unicode_script::Script;
 
-use crate::{Font, FontSystem, ShapePlanCache, FontMatchKey};
+use crate::{Font, FontMatchKey, FontSystem, ShapePlanCache};
 
 use self::platform::*;
 
@@ -138,9 +138,11 @@ impl<'a> Iterator for FontFallbackIter<'a> {
             }
         }
 
-        let font_match_keys_iter = |is_mono| self.font_match_keys
+        let font_match_keys_iter = |is_mono| {
+            self.font_match_keys
                 .iter()
-                .filter(move |m_key| m_key.weight_offset == 0 || is_mono);
+                .filter(move |m_key| m_key.weight_offset == 0 || is_mono)
+        };
 
         while self.default_i < self.default_families.len() {
             self.default_i += 1;
@@ -160,7 +162,7 @@ impl<'a> Iterator for FontFallbackIter<'a> {
                             let fallback_info = MonospaceFallbackInfo {
                                 weight_offset: None,
                                 script_non_matches: None,
-                                id: m_key.id
+                                id: m_key.id,
                             };
                             assert_eq!(self.monospace_fallbacks.insert(fallback_info), true);
                         }
@@ -168,25 +170,33 @@ impl<'a> Iterator for FontFallbackIter<'a> {
                 }
                 // Set a monospace fallback if Monospace family is not found
                 if is_mono {
-                    let script_tags = self.scripts.iter()
+                    let script_tags = self
+                        .scripts
+                        .iter()
                         .filter_map(|script| {
                             let script_as_lower = script.short_name().to_lowercase();
                             <[u8; 4]>::try_from(script_as_lower.as_bytes()).ok()
-                        }).collect::<Vec<_>>();
+                        })
+                        .collect::<Vec<_>>();
 
                     if let Some(face_info) = self.font_system.db().face(m_key.id) {
                         // Don't use emoji fonts as Monospace
                         if face_info.monospaced && !face_info.post_script_name.contains("Emoji") {
                             if let Some(font) = self.font_system.get_font(m_key.id) {
-                                let script_non_matches = self.scripts.len() - script_tags.iter()
-                                    .filter(|&&script_tag| {
-                                        font.scripts().iter().any(|&tag_bytes| tag_bytes == script_tag)
-                                    }).count();
+                                let script_non_matches = self.scripts.len()
+                                    - script_tags
+                                        .iter()
+                                        .filter(|&&script_tag| {
+                                            font.scripts()
+                                                .iter()
+                                                .any(|&tag_bytes| tag_bytes == script_tag)
+                                        })
+                                        .count();
 
                                 let fallback_info = MonospaceFallbackInfo {
                                     weight_offset: Some(m_key.weight_offset),
                                     script_non_matches: Some(script_non_matches),
-                                    id: m_key.id
+                                    id: m_key.id,
                                 };
                                 assert_eq!(self.monospace_fallbacks.insert(fallback_info), true);
                             }
