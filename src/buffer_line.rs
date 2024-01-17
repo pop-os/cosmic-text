@@ -184,6 +184,7 @@ impl BufferLine {
         font_size: f32,
         width: f32,
         wrap: Wrap,
+        match_mono_width: Option<f32>,
     ) -> &[LayoutLine] {
         self.layout_in_buffer(
             &mut ShapeBuffer::default(),
@@ -191,6 +192,7 @@ impl BufferLine {
             font_size,
             width,
             wrap,
+            match_mono_width,
         )
     }
 
@@ -202,12 +204,13 @@ impl BufferLine {
         font_size: f32,
         width: f32,
         wrap: Wrap,
+        match_mono_width: Option<f32>,
     ) -> &[LayoutLine] {
         if self.layout_opt.is_none() {
             let align = self.align;
             let shape = self.shape_in_buffer(scratch, font_system);
             let mut layout = Vec::with_capacity(1);
-            shape.layout_to_buffer(scratch, font_size, width, wrap, align, &mut layout);
+            shape.layout_to_buffer(scratch, font_size, width, wrap, align, &mut layout, match_mono_width);
             self.layout_opt = Some(layout);
         }
         self.layout_opt.as_ref().expect("layout not found")

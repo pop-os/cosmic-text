@@ -27,6 +27,8 @@ pub struct Font {
     rustybuzz: OwnedFace,
     data: Arc<dyn AsRef<[u8]> + Send + Sync>,
     id: fontdb::ID,
+    monospace_em_width: Option<f32>,
+    scripts: Vec<[u8; 4]>,
 }
 
 impl fmt::Debug for Font {
@@ -40,6 +42,14 @@ impl fmt::Debug for Font {
 impl Font {
     pub fn id(&self) -> fontdb::ID {
         self.id
+    }
+
+    pub fn monospace_em_width(&self) -> Option<f32> {
+        self.monospace_em_width
+    }
+
+    pub fn scripts(&self) -> &[[u8; 4]] {
+        &self.scripts
     }
 
     pub fn data(&self) -> &[u8] {
@@ -62,7 +72,32 @@ impl Font {
 }
 
 impl Font {
-    pub fn new(info: &fontdb::FaceInfo) -> Option<Self> {
+    pub fn new(db: &fontdb::Database, id: fontdb::ID) -> Option<Self> {
+        let info = db.face(id)?;
+
+        let (monospace_em_width, scripts) = {
+            db.with_face_data(id, |font_data, face_index| {
+                let face = ttf_parser::Face::parse(font_data, face_index).ok()?;
+                let monospace_em_width = info.monospaced.then(|| {
+                    let hor_advance = face.glyph_hor_advance(face.glyph_index(' ')?)? as f32;
+                    let upem = face.units_per_em() as f32;
+                    Some(hor_advance/upem)
+                }).flatten();
+
+                if info.monospaced && monospace_em_width.is_none() {
+                    None?;
+                }
+
+                let scripts = face.tables().gpos.into_iter()
+                    .chain(face.tables().gsub)
+                    .map(|table| table.scripts)
+                    .flatten()
+                    .map(|script| script.tag.to_bytes())
+                    .collect();
+                Some((monospace_em_width, scripts))
+            })?
+        }?;
+
         let data = match &info.source {
             fontdb::Source::Binary(data) => Arc::clone(data),
             #[cfg(feature = "std")]
@@ -76,6 +111,8 @@ impl Font {
 
         Some(Self {
             id: info.id,
+            monospace_em_width,
+            scripts,
             #[cfg(feature = "swash")]
             swash: {
                 let swash = swash::FontRef::from_index((*data).as_ref(), info.index as usize)?;

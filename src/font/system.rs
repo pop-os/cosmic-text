@@ -9,6 +9,12 @@ use core::ops::{Deref, DerefMut};
 pub use fontdb;
 pub use rustybuzz;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct FontMatchKey {
+    pub(crate) weight_offset: u16,
+    pub(crate) id: fontdb::ID,
+}
+
 /// Access to the system fonts.
 pub struct FontSystem {
     /// The locale of the system.
@@ -21,7 +27,7 @@ pub struct FontSystem {
     font_cache: HashMap<fontdb::ID, Option<Arc<Font>>>,
 
     /// Cache for font matches.
-    font_matches_cache: HashMap<AttrsOwned, Arc<Vec<fontdb::ID>>>,
+    font_matches_cache: HashMap<AttrsOwned, Arc<Vec<FontMatchKey>>>,
 
     /// Cache for rustybuzz shape plans.
     shape_plan_cache: ShapePlanCache,
@@ -111,11 +117,10 @@ impl FontSystem {
                 unsafe {
                     self.db.make_shared_face_data(id);
                 }
-                let face = self.db.face(id)?;
-                match Font::new(face) {
+                match Font::new(&self.db, id) {
                     Some(font) => Some(Arc::new(font)),
                     None => {
-                        log::warn!("failed to load font '{}'", face.post_script_name);
+                        log::warn!("failed to load font '{}'", self.db.face(id)?.post_script_name);
                         None
                     }
                 }
@@ -123,7 +128,7 @@ impl FontSystem {
             .clone()
     }
 
-    pub fn get_font_matches(&mut self, attrs: Attrs<'_>) -> Arc<Vec<fontdb::ID>> {
+    pub fn get_font_matches(&mut self, attrs: Attrs<'_>) -> Arc<Vec<FontMatchKey>> {
         self.font_matches_cache
             //TODO: do not create AttrsOwned unless entry does not already exist
             .entry(AttrsOwned::new(attrs))
@@ -131,12 +136,15 @@ impl FontSystem {
                 #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
                 let now = std::time::Instant::now();
 
-                let ids = self
+                let mut font_match_keys = self
                     .db
                     .faces()
                     .filter(|face| attrs.matches(face))
-                    .map(|face| face.id)
+                    .map(|face| FontMatchKey{ weight_offset: attrs.weight.0 - face.weight.0, id: face.id })
                     .collect::<Vec<_>>();
+
+                // Sort so we get the keys with weight_offset=0 first
+                font_match_keys.sort();
 
                 #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
                 {
@@ -144,7 +152,7 @@ impl FontSystem {
                     log::debug!("font matches for {:?} in {:?}", attrs, elapsed);
                 }
 
-                Arc::new(ids)
+                Arc::new(font_match_keys)
             })
             .clone()
     }
