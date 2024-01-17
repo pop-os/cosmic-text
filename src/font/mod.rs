@@ -4,6 +4,8 @@ pub(crate) mod fallback;
 use core::fmt;
 
 use alloc::sync::Arc;
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
 
 use rustybuzz::Face as RustybuzzFace;
 use self_cell::self_cell;
