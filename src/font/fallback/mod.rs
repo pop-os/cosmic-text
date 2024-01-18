@@ -141,7 +141,7 @@ impl<'a> Iterator for FontFallbackIter<'a> {
         let font_match_keys_iter = |is_mono| {
             self.font_match_keys
                 .iter()
-                .filter(move |m_key| m_key.weight_offset == 0 || is_mono)
+                .filter(move |m_key| m_key.weight_offset == Some(0) || is_mono)
         };
 
         while self.default_i < self.default_families.len() {
@@ -157,7 +157,7 @@ impl<'a> Iterator for FontFallbackIter<'a> {
                     if let Some(font) = self.font_system.get_font(m_key.id) {
                         if !is_mono {
                             return Some(font);
-                        } else if m_key.weight_offset == 0 {
+                        } else if m_key.weight_offset == Some(0) {
                             // Default font
                             let fallback_info = MonospaceFallbackInfo {
                                 weight_offset: None,
@@ -194,7 +194,7 @@ impl<'a> Iterator for FontFallbackIter<'a> {
                                         .count();
 
                                 let fallback_info = MonospaceFallbackInfo {
-                                    weight_offset: Some(m_key.weight_offset),
+                                    weight_offset: m_key.weight_offset,
                                     script_non_matches: Some(script_non_matches),
                                     id: m_key.id,
                                 };
