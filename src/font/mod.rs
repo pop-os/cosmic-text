@@ -30,7 +30,7 @@ pub struct Font {
     data: Arc<dyn AsRef<[u8]> + Send + Sync>,
     id: fontdb::ID,
     monospace_em_width: Option<f32>,
-    scripts: Vec<[u8; 4]>,
+    unicode_codepoints: Vec<u32>,
 }
 
 impl fmt::Debug for Font {
@@ -50,8 +50,8 @@ impl Font {
         self.monospace_em_width
     }
 
-    pub fn scripts(&self) -> &[[u8; 4]] {
-        &self.scripts
+    pub fn unicode_codepoints(&self) -> &[u32] {
+        &self.unicode_codepoints
     }
 
     pub fn data(&self) -> &[u8] {
@@ -77,7 +77,7 @@ impl Font {
     pub fn new(db: &fontdb::Database, id: fontdb::ID) -> Option<Self> {
         let info = db.face(id)?;
 
-        let (monospace_em_width, scripts) = {
+        let (monospace_em_width, unicode_codepoints) = {
             db.with_face_data(id, |font_data, face_index| {
                 let face = ttf_parser::Face::parse(font_data, face_index).ok()?;
                 let monospace_em_width = info
@@ -93,16 +93,25 @@ impl Font {
                     None?;
                 }
 
-                let scripts = face
-                    .tables()
-                    .gpos
+                let mut unicode_codepoints = Vec::new();
+
+                face.tables()
+                    .cmap?
+                    .subtables
                     .into_iter()
-                    .chain(face.tables().gsub)
-                    .map(|table| table.scripts)
-                    .flatten()
-                    .map(|script| script.tag.to_bytes())
-                    .collect();
-                Some((monospace_em_width, scripts))
+                    .filter(|subtable| subtable.is_unicode())
+                    .for_each(|subtable| {
+                        unicode_codepoints.reserve(1024);
+                        subtable.codepoints(|code_point| {
+                            if subtable.glyph_index(code_point).is_some() {
+                                unicode_codepoints.push(code_point);
+                            }
+                        });
+                    });
+
+                unicode_codepoints.shrink_to_fit();
+
+                Some((monospace_em_width, unicode_codepoints))
             })?
         }?;
 
@@ -120,7 +129,7 @@ impl Font {
         Some(Self {
             id: info.id,
             monospace_em_width,
-            scripts,
+            unicode_codepoints,
             #[cfg(feature = "swash")]
             swash: {
                 let swash = swash::FontRef::from_index((*data).as_ref(), info.index as usize)?;

@@ -38,7 +38,7 @@ use log::warn as missing_warn;
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 struct MonospaceFallbackInfo {
     weight_offset: Option<u16>,
-    script_non_matches: Option<usize>,
+    codepoint_non_matches: Option<usize>,
     id: fontdb::ID,
 }
 
@@ -49,6 +49,7 @@ pub struct FontFallbackIter<'a> {
     monospace_fallbacks: BTreeSet<MonospaceFallbackInfo>,
     default_i: usize,
     scripts: &'a [Script],
+    word: &'a str,
     script_i: (usize, usize),
     common_i: usize,
     other_i: usize,
@@ -61,6 +62,7 @@ impl<'a> FontFallbackIter<'a> {
         font_match_keys: &'a [FontMatchKey],
         default_families: &'a [&'a Family<'a>],
         scripts: &'a [Script],
+        word: &'a str,
     ) -> Self {
         Self {
             font_system,
@@ -69,6 +71,7 @@ impl<'a> FontFallbackIter<'a> {
             monospace_fallbacks: BTreeSet::new(),
             default_i: 0,
             scripts,
+            word,
             script_i: (0, 0),
             common_i: 0,
             other_i: 0,
@@ -161,44 +164,34 @@ impl<'a> Iterator for FontFallbackIter<'a> {
                             // Default font
                             let fallback_info = MonospaceFallbackInfo {
                                 weight_offset: None,
-                                script_non_matches: None,
+                                codepoint_non_matches: None,
                                 id: m_key.id,
                             };
-                            assert_eq!(self.monospace_fallbacks.insert(fallback_info), true);
+                            assert!(self.monospace_fallbacks.insert(fallback_info));
                         }
                     }
                 }
                 // Set a monospace fallback if Monospace family is not found
                 if is_mono {
-                    let script_tags = self
-                        .scripts
-                        .iter()
-                        .filter_map(|script| {
-                            let script_as_lower = script.short_name().to_lowercase();
-                            <[u8; 4]>::try_from(script_as_lower.as_bytes()).ok()
-                        })
-                        .collect::<Vec<_>>();
-
                     if let Some(face_info) = self.font_system.db().face(m_key.id) {
                         // Don't use emoji fonts as Monospace
                         if face_info.monospaced && !face_info.post_script_name.contains("Emoji") {
                             if let Some(font) = self.font_system.get_font(m_key.id) {
-                                let script_non_matches = self.scripts.len()
-                                    - script_tags
-                                        .iter()
-                                        .filter(|&&script_tag| {
-                                            font.scripts()
-                                                .iter()
-                                                .any(|&tag_bytes| tag_bytes == script_tag)
+                                let codepoint_non_matches = self.word.chars().count()
+                                    - self
+                                        .word
+                                        .chars()
+                                        .filter(|ch| {
+                                            font.unicode_codepoints().contains(&u32::from(*ch))
                                         })
                                         .count();
 
                                 let fallback_info = MonospaceFallbackInfo {
                                     weight_offset: m_key.weight_offset,
-                                    script_non_matches: Some(script_non_matches),
+                                    codepoint_non_matches: Some(codepoint_non_matches),
                                     id: m_key.id,
                                 };
-                                assert_eq!(self.monospace_fallbacks.insert(fallback_info), true);
+                                assert!(self.monospace_fallbacks.insert(fallback_info));
                             }
                         }
                     }
