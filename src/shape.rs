@@ -1254,8 +1254,10 @@ impl ShapeLine {
                                 (Some(match_em_width), Some(glyph_em_width))
                                     if glyph_em_width != match_em_width =>
                                 {
-                                    let glyph_font_size =
-                                        font_size * (match_em_width / glyph_em_width);
+                                    let glyph_to_match_factor = glyph_em_width / match_em_width;
+                                    let glyph_font_size = glyph_to_match_factor.round().max(1.0)
+                                        / glyph_to_match_factor
+                                        * font_size;
                                     log::trace!("Adjusted glyph font size ({font_size} => {glyph_font_size})");
                                     glyph_font_size
                                 }
