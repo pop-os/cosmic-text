@@ -43,6 +43,7 @@ impl fmt::Debug for FontSystem {
 }
 
 impl FontSystem {
+    const FONT_MATCHES_CACHE_SIZE_LIMIT: usize = 256;
     /// Create a new [`FontSystem`], that allows access to any installed system fonts
     ///
     /// # Timing
@@ -132,6 +133,12 @@ impl FontSystem {
     }
 
     pub fn get_font_matches(&mut self, attrs: Attrs<'_>) -> Arc<Vec<FontMatchKey>> {
+        // Clear the cache first if it reached the size limit
+        if self.font_matches_cache.len() >= Self::FONT_MATCHES_CACHE_SIZE_LIMIT {
+            log::trace!("clear font mache cache");
+            self.font_matches_cache.clear();
+        }
+
         self.font_matches_cache
             //TODO: do not create AttrsOwned unless entry does not already exist
             .entry(AttrsOwned::new(attrs))
