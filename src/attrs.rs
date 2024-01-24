@@ -191,6 +191,26 @@ impl<'a> Attrs<'a> {
     }
 }
 
+/// Font-specific part of [`Attrs`] to be used for matching
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct FontMatchAttrs {
+    family: FamilyOwned,
+    stretch: Stretch,
+    style: Style,
+    weight: Weight,
+}
+
+impl<'a> From<Attrs<'a>> for FontMatchAttrs {
+    fn from(attrs: Attrs<'a>) -> Self {
+        Self {
+            family: FamilyOwned::new(attrs.family),
+            stretch: attrs.stretch,
+            style: attrs.style,
+            weight: attrs.weight,
+        }
+    }
+}
+
 /// An owned version of [`Attrs`]
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct AttrsOwned {
