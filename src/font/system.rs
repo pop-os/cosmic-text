@@ -1,4 +1,4 @@
-use crate::{Attrs, AttrsOwned, Font, HashMap, ShapePlanCache};
+use crate::{Attrs, Font, FontMatchAttrs, HashMap, ShapePlanCache};
 use alloc::string::String;
 use alloc::sync::Arc;
 use alloc::vec::Vec;
@@ -27,7 +27,7 @@ pub struct FontSystem {
     font_cache: HashMap<fontdb::ID, Option<Arc<Font>>>,
 
     /// Cache for font matches.
-    font_matches_cache: HashMap<AttrsOwned, Arc<Vec<FontMatchKey>>>,
+    font_matches_cache: HashMap<FontMatchAttrs, Arc<Vec<FontMatchKey>>>,
 
     /// Cache for rustybuzz shape plans.
     shape_plan_cache: ShapePlanCache,
@@ -141,7 +141,7 @@ impl FontSystem {
 
         self.font_matches_cache
             //TODO: do not create AttrsOwned unless entry does not already exist
-            .entry(AttrsOwned::new(attrs))
+            .entry(attrs.into())
             .or_insert_with(|| {
                 #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
                 let now = std::time::Instant::now();
