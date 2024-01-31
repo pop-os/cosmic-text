@@ -11,7 +11,8 @@ pub use rustybuzz;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FontMatchKey {
-    pub(crate) weight_offset: Option<u16>,
+    pub(crate) font_weight_diff: u16,
+    pub(crate) font_weight: u16,
     pub(crate) id: fontdb::ID,
 }
 
@@ -151,7 +152,8 @@ impl FontSystem {
                     .faces()
                     .filter(|face| attrs.matches(face))
                     .map(|face| FontMatchKey {
-                        weight_offset: attrs.weight.0.checked_sub(face.weight.0),
+                        font_weight_diff: attrs.weight.0.abs_diff(face.weight.0),
+                        font_weight: face.weight.0,
                         id: face.id,
                     })
                     .collect::<Vec<_>>();
