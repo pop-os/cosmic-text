@@ -283,7 +283,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
     fn delete_range(&mut self, start: Cursor, end: Cursor) {
         let change_item = self.with_buffer_mut(|buffer| {
             // Collect removed data for change tracking
-            let mut change_text = String::new();
+            let mut change_lines = Vec::new();
 
             // Delete the selection from the last line
             let end_line_opt = if end.line > start.line {
@@ -292,7 +292,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
 
                 // Remove end line
                 let removed = buffer.lines.remove(end.line);
-                change_text.insert_str(0, removed.text());
+                change_lines.insert(0, removed.text().to_string());
 
                 Some(after)
             } else {
@@ -302,7 +302,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
             // Delete interior lines (in reverse for safety)
             for line_i in (start.line + 1..end.line).rev() {
                 let removed = buffer.lines.remove(line_i);
-                change_text.insert_str(0, removed.text());
+                change_lines.insert(0, removed.text().to_string());
             }
 
             // Delete the selection from the first line
@@ -316,7 +316,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
 
                 // Delete selected part of line
                 let removed = buffer.lines[start.line].split_off(start.index);
-                change_text.insert_str(0, removed.text());
+                change_lines.insert(0, removed.text().to_string());
 
                 // Re-add part of line after selection
                 if let Some(after) = after_opt {
@@ -332,7 +332,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
             ChangeItem {
                 start,
                 end,
-                text: change_text,
+                text: change_lines.join("\n"),
                 insert: false,
             }
         });
