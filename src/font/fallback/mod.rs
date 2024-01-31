@@ -32,13 +32,14 @@ use log::debug as missing_warn;
 #[cfg(feature = "warn_on_missing_glyphs")]
 use log::warn as missing_warn;
 
-// Match on lowest weight_offset, then script_non_matches
+// Match on lowest font_weight_diff, then script_non_matches, then font_weight
 // Default font gets None for both `weight_offset` and `script_non_matches`, and thus, it is
 // always the first to be popped from the set.
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 struct MonospaceFallbackInfo {
-    weight_offset: Option<u16>,
+    font_weight_diff: Option<u16>,
     codepoint_non_matches: Option<usize>,
+    font_weight: u16,
     id: fontdb::ID,
 }
 
@@ -144,7 +145,7 @@ impl<'a> Iterator for FontFallbackIter<'a> {
         let font_match_keys_iter = |is_mono| {
             self.font_match_keys
                 .iter()
-                .filter(move |m_key| m_key.weight_offset == Some(0) || is_mono)
+                .filter(move |m_key| m_key.font_weight_diff == 0 || is_mono)
         };
 
         while self.default_i < self.default_families.len() {
@@ -160,11 +161,12 @@ impl<'a> Iterator for FontFallbackIter<'a> {
                     if let Some(font) = self.font_system.get_font(m_key.id) {
                         if !is_mono {
                             return Some(font);
-                        } else if m_key.weight_offset == Some(0) {
+                        } else if m_key.font_weight_diff == 0 {
                             // Default font
                             let fallback_info = MonospaceFallbackInfo {
-                                weight_offset: None,
+                                font_weight_diff: None,
                                 codepoint_non_matches: None,
+                                font_weight: m_key.font_weight,
                                 id: m_key.id,
                             };
                             assert!(self.monospace_fallbacks.insert(fallback_info));
@@ -187,8 +189,9 @@ impl<'a> Iterator for FontFallbackIter<'a> {
                                         .count();
 
                                 let fallback_info = MonospaceFallbackInfo {
-                                    weight_offset: m_key.weight_offset,
+                                    font_weight_diff: Some(m_key.font_weight_diff),
                                     codepoint_non_matches: Some(codepoint_non_matches),
+                                    font_weight: m_key.font_weight,
                                     id: m_key.id,
                                 };
                                 assert!(self.monospace_fallbacks.insert(fallback_info));

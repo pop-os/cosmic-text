@@ -176,10 +176,7 @@ impl<'a> Attrs<'a> {
     pub fn matches(&self, face: &fontdb::FaceInfo) -> bool {
         //TODO: smarter way of including emoji
         face.post_script_name.contains("Emoji")
-            || (face.style == self.style
-                // Relax exact weight matching for the Monospace fallback use-case
-                && face.weight <= self.weight
-                && face.stretch == self.stretch)
+            || (face.style == self.style && face.stretch == self.stretch)
     }
 
     /// Check if this set of attributes can be shaped with another
