@@ -1383,6 +1383,9 @@
 <a href="#1383" id="1383">1383</a>
 <a href="#1384" id="1384">1384</a>
 <a href="#1385" id="1385">1385</a>
+<a href="#1386" id="1386">1386</a>
+<a href="#1387" id="1387">1387</a>
+<a href="#1388" id="1388">1388</a>
 </pre></div><pre class="rust"><code><span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0
 
 </span><span class="attr">#![allow(clippy::too_many_arguments)]
@@ -2431,42 +2434,40 @@
                         } <span class="kw">else </span>{
                             <span class="comment">// Wrap::Word, Wrap::WordOrGlyph
 
-                            // TODO: What if the previous span ended with whitespace and the next
-                            // span wraps a new line? Is that possible?
-                            //
-                            // TODO: This comment it outdated, the current word can be a
-                            // whitespace.
-                            //
-                            // Current word causing a wrap is not whitespace, so we ignore the
-                            // previous word if it&#39;s a whitespace
-                            </span><span class="kw">let </span>trailing_blank = span
-                                .words
-                                .get(i + <span class="number">1</span>)
-                                .map_or(<span class="bool-val">false</span>, |previous_word| previous_word.blank);
-                            <span class="kw">if </span>trailing_blank {
-                                number_of_blanks = number_of_blanks.saturating_sub(<span class="number">1</span>);
-                                add_to_visual_line(
-                                    <span class="kw-2">&amp;mut </span>current_visual_line,
-                                    span_index,
-                                    (i + <span class="number">2</span>, <span class="number">0</span>),
-                                    fitting_start,
-                                    width_before_last_blank,
-                                    number_of_blanks,
-                                );
-                            } <span class="kw">else </span>{
-                                add_to_visual_line(
-                                    <span class="kw-2">&amp;mut </span>current_visual_line,
-                                    span_index,
-                                    (i + <span class="number">1</span>, <span class="number">0</span>),
-                                    fitting_start,
-                                    word_range_width,
-                                    number_of_blanks,
-                                );
-                            }
-                            visual_lines.push(current_visual_line);
-                            current_visual_line = VisualLine::default();
+                            // If we had a previous range, commit that line before the next word.
+                            </span><span class="kw">if </span>word_range_width &gt; <span class="number">0. </span>{
+                                <span class="comment">// Current word causing a wrap is not whitespace, so we ignore the
+                                // previous word if it&#39;s a whitespace
+                                </span><span class="kw">let </span>trailing_blank = span
+                                    .words
+                                    .get(i + <span class="number">1</span>)
+                                    .map_or(<span class="bool-val">false</span>, |previous_word| previous_word.blank);
+                                <span class="kw">if </span>trailing_blank {
+                                    number_of_blanks = number_of_blanks.saturating_sub(<span class="number">1</span>);
+                                    add_to_visual_line(
+                                        <span class="kw-2">&amp;mut </span>current_visual_line,
+                                        span_index,
+                                        (i + <span class="number">2</span>, <span class="number">0</span>),
+                                        fitting_start,
+                                        width_before_last_blank,
+                                        number_of_blanks,
+                                    );
+                                } <span class="kw">else </span>{
+                                    add_to_visual_line(
+                                        <span class="kw-2">&amp;mut </span>current_visual_line,
+                                        span_index,
+                                        (i + <span class="number">1</span>, <span class="number">0</span>),
+                                        fitting_start,
+                                        word_range_width,
+                                        number_of_blanks,
+                                    );
+                                }
 
-                            number_of_blanks = <span class="number">0</span>;
+                                visual_lines.push(current_visual_line);
+                                current_visual_line = VisualLine::default();
+                                number_of_blanks = <span class="number">0</span>;
+                            }
+
                             <span class="kw">if </span>word.blank {
                                 word_range_width = <span class="number">0.</span>;
                                 fitting_start = (i, <span class="number">0</span>);
@@ -2557,32 +2558,37 @@
                         } <span class="kw">else </span>{
                             <span class="comment">// Wrap::Word, Wrap::WordOrGlyph
 
-                            // Current word causing a wrap is not whitespace, so we ignore the
-                            // previous word if it&#39;s a whitespace
-                            </span><span class="kw">let </span>trailing_blank = i &gt; <span class="number">0 </span>&amp;&amp; span.words[i - <span class="number">1</span>].blank;
-                            <span class="kw">if </span>trailing_blank {
-                                number_of_blanks = number_of_blanks.saturating_sub(<span class="number">1</span>);
-                                add_to_visual_line(
-                                    <span class="kw-2">&amp;mut </span>current_visual_line,
-                                    span_index,
-                                    fitting_start,
-                                    (i - <span class="number">1</span>, <span class="number">0</span>),
-                                    width_before_last_blank,
-                                    number_of_blanks,
-                                );
-                            } <span class="kw">else </span>{
-                                add_to_visual_line(
-                                    <span class="kw-2">&amp;mut </span>current_visual_line,
-                                    span_index,
-                                    fitting_start,
-                                    (i, <span class="number">0</span>),
-                                    word_range_width,
-                                    number_of_blanks,
-                                );
+                            // If we had a previous range, commit that line before the next word.
+                            </span><span class="kw">if </span>word_range_width &gt; <span class="number">0. </span>{
+                                <span class="comment">// Current word causing a wrap is not whitespace, so we ignore the
+                                // previous word if it&#39;s a whitespace.
+                                </span><span class="kw">let </span>trailing_blank = i &gt; <span class="number">0 </span>&amp;&amp; span.words[i - <span class="number">1</span>].blank;
+
+                                <span class="kw">if </span>trailing_blank {
+                                    number_of_blanks = number_of_blanks.saturating_sub(<span class="number">1</span>);
+                                    add_to_visual_line(
+                                        <span class="kw-2">&amp;mut </span>current_visual_line,
+                                        span_index,
+                                        fitting_start,
+                                        (i - <span class="number">1</span>, <span class="number">0</span>),
+                                        width_before_last_blank,
+                                        number_of_blanks,
+                                    );
+                                } <span class="kw">else </span>{
+                                    add_to_visual_line(
+                                        <span class="kw-2">&amp;mut </span>current_visual_line,
+                                        span_index,
+                                        fitting_start,
+                                        (i, <span class="number">0</span>),
+                                        word_range_width,
+                                        number_of_blanks,
+                                    );
+                                }
+
+                                visual_lines.push(current_visual_line);
+                                current_visual_line = VisualLine::default();
+                                number_of_blanks = <span class="number">0</span>;
                             }
-                            visual_lines.push(current_visual_line);
-                            current_visual_line = VisualLine::default();
-                            number_of_blanks = <span class="number">0</span>;
 
                             <span class="kw">if </span>word.blank {
                                 word_range_width = <span class="number">0.</span>;
