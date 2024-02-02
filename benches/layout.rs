@@ -27,7 +27,7 @@ fn layout(c: &mut Criterion) {
             let mut run_on_text = |text: &str| {
                 buffer.lines.clear();
                 buffer.set_text(&mut fs, text, ct::Attrs::new(), *shape);
-                buffer.shape_until_scroll(&mut fs);
+                buffer.shape_until_scroll(&mut fs, false);
             };
 
             group.bench_function("small amount of text", |b| {
