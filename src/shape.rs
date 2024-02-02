@@ -992,7 +992,30 @@ impl ShapeLine {
                             }
                             word_range_width += word_width;
                             continue;
-                        } else if wrap == Wrap::Glyph {
+                        } else if wrap == Wrap::Glyph
+                            // Make sure that the word is able to fit on it's own line, if not, fall back to Glyph wrapping.
+                            || word_width > line_width
+                        {
+                            // Commit the current line so that the word starts on the next line.
+                            if word_range_width > 0. && word_width > line_width {
+                                add_to_visual_line(
+                                    &mut current_visual_line,
+                                    span_index,
+                                    (i + 1, 0),
+                                    fitting_start,
+                                    word_range_width,
+                                    number_of_blanks,
+                                );
+
+                                visual_lines.push(current_visual_line);
+                                current_visual_line = VisualLine::default();
+
+                                number_of_blanks = 0;
+                                word_range_width = 0.;
+
+                                fitting_start = (i, 0);
+                            }
+
                             for (glyph_i, glyph) in word.glyphs.iter().enumerate().rev() {
                                 let glyph_width = font_size * glyph.x_advance;
                                 if current_visual_line.w + (word_range_width + glyph_width)
@@ -1092,7 +1115,30 @@ impl ShapeLine {
                             }
                             word_range_width += word_width;
                             continue;
-                        } else if wrap == Wrap::Glyph {
+                        } else if wrap == Wrap::Glyph
+                            // Make sure that the word is able to fit on it's own line, if not, fall back to Glyph wrapping.
+                            || word_width > line_width
+                        {
+                            // Commit the current line so that the word starts on the next line.
+                            if word_range_width > 0. && word_width > line_width {
+                                add_to_visual_line(
+                                    &mut current_visual_line,
+                                    span_index,
+                                    fitting_start,
+                                    (i, 0),
+                                    word_range_width,
+                                    number_of_blanks,
+                                );
+
+                                visual_lines.push(current_visual_line);
+                                current_visual_line = VisualLine::default();
+
+                                number_of_blanks = 0;
+                                word_range_width = 0.;
+
+                                fitting_start = (i, 0);
+                            }
+
                             for (glyph_i, glyph) in word.glyphs.iter().enumerate() {
                                 let glyph_width = font_size * glyph.x_advance;
                                 if current_visual_line.w + (word_range_width + glyph_width)
