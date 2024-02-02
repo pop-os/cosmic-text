@@ -11,7 +11,7 @@ fn test_hebrew_word_rendering() {
         .font_size(36., 40.)
         .font_attrs(attrs)
         .text("בדיקה")
-        .canvas(120, 60)
+        .canvas(100, 60)
         .validate_text_rendering();
 }
 
@@ -46,7 +46,7 @@ fn test_arabic_word_rendering() {
         .font_size(36., 40.)
         .font_attrs(attrs)
         .text("خالصة")
-        .canvas(120, 60)
+        .canvas(100, 60)
         .validate_text_rendering();
 }
 
