@@ -1,6 +1,6 @@
 use cosmic_text::{
-    fontdb, Align, Attrs, AttrsList, BidiParagraphs, Family, FontSystem, LayoutLine, ShapeLine,
-    Shaping, Weight, Wrap,
+    fontdb, Align, Attrs, AttrsList, BidiParagraphs, Buffer, Family, FontSystem, LayoutLine,
+    Metrics, ShapeLine, Shaping, Weight, Wrap,
 };
 
 // Test for https://github.com/pop-os/cosmic-text/issues/134
@@ -69,6 +69,32 @@ fn stable_wrap() {
             }
         }
     }
+}
+
+#[test]
+fn wrap_extra_line() {
+    let mut font_system = FontSystem::new();
+    let metrics = Metrics::new(14.0, 20.0);
+
+    let mut buffer = Buffer::new(&mut font_system, metrics);
+
+    let mut buffer = buffer.borrow_with(&mut font_system);
+
+    // Add some text!
+    buffer.set_wrap(Wrap::Word);
+    buffer.set_text("Lorem ipsum dolor sit amet, qui minim labore adipisicing\n\nweeewoooo minim sint cillum sint consectetur cupidatat.", Attrs::new().family(cosmic_text::Family::Name("Inter")), Shaping::Advanced);
+
+    // Set a size for the text buffer, in pixels
+    buffer.set_size(50.0, 1000.0);
+
+    // Perform shaping as desired
+    buffer.shape_until_scroll(false);
+
+    let empty_lines = buffer.layout_runs().filter(|x| x.line_w == 0.).count();
+    let overflow_lines = buffer.layout_runs().filter(|x| x.line_w > 50.).count();
+
+    assert_eq!(empty_lines, 1);
+    assert_eq!(overflow_lines, 4);
 }
 
 #[allow(dead_code)]
