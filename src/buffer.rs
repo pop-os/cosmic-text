@@ -275,7 +275,7 @@ impl Buffer {
             height: 0.0,
             scroll: Scroll::default(),
             redraw: false,
-            wrap: Wrap::Word,
+            wrap: Wrap::WordOrGlyph,
             scratch: ShapeBuffer::default(),
             monospace_width: None,
         }
