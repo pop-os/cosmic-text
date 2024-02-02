@@ -1046,42 +1046,40 @@ impl ShapeLine {
                         } else {
                             // Wrap::Word, Wrap::WordOrGlyph
 
-                            // TODO: What if the previous span ended with whitespace and the next
-                            // span wraps a new line? Is that possible?
-                            //
-                            // TODO: This comment it outdated, the current word can be a
-                            // whitespace.
-                            //
-                            // Current word causing a wrap is not whitespace, so we ignore the
-                            // previous word if it's a whitespace
-                            let trailing_blank = span
-                                .words
-                                .get(i + 1)
-                                .map_or(false, |previous_word| previous_word.blank);
-                            if trailing_blank {
-                                number_of_blanks = number_of_blanks.saturating_sub(1);
-                                add_to_visual_line(
-                                    &mut current_visual_line,
-                                    span_index,
-                                    (i + 2, 0),
-                                    fitting_start,
-                                    width_before_last_blank,
-                                    number_of_blanks,
-                                );
-                            } else {
-                                add_to_visual_line(
-                                    &mut current_visual_line,
-                                    span_index,
-                                    (i + 1, 0),
-                                    fitting_start,
-                                    word_range_width,
-                                    number_of_blanks,
-                                );
-                            }
-                            visual_lines.push(current_visual_line);
-                            current_visual_line = VisualLine::default();
+                            // If we had a previous range, commit that line before the next word.
+                            if word_range_width > 0. {
+                                // Current word causing a wrap is not whitespace, so we ignore the
+                                // previous word if it's a whitespace
+                                let trailing_blank = span
+                                    .words
+                                    .get(i + 1)
+                                    .map_or(false, |previous_word| previous_word.blank);
+                                if trailing_blank {
+                                    number_of_blanks = number_of_blanks.saturating_sub(1);
+                                    add_to_visual_line(
+                                        &mut current_visual_line,
+                                        span_index,
+                                        (i + 2, 0),
+                                        fitting_start,
+                                        width_before_last_blank,
+                                        number_of_blanks,
+                                    );
+                                } else {
+                                    add_to_visual_line(
+                                        &mut current_visual_line,
+                                        span_index,
+                                        (i + 1, 0),
+                                        fitting_start,
+                                        word_range_width,
+                                        number_of_blanks,
+                                    );
+                                }
 
-                            number_of_blanks = 0;
+                                visual_lines.push(current_visual_line);
+                                current_visual_line = VisualLine::default();
+                                number_of_blanks = 0;
+                            }
+
                             if word.blank {
                                 word_range_width = 0.;
                                 fitting_start = (i, 0);
@@ -1172,32 +1170,37 @@ impl ShapeLine {
                         } else {
                             // Wrap::Word, Wrap::WordOrGlyph
 
-                            // Current word causing a wrap is not whitespace, so we ignore the
-                            // previous word if it's a whitespace
-                            let trailing_blank = i > 0 && span.words[i - 1].blank;
-                            if trailing_blank {
-                                number_of_blanks = number_of_blanks.saturating_sub(1);
-                                add_to_visual_line(
-                                    &mut current_visual_line,
-                                    span_index,
-                                    fitting_start,
-                                    (i - 1, 0),
-                                    width_before_last_blank,
-                                    number_of_blanks,
-                                );
-                            } else {
-                                add_to_visual_line(
-                                    &mut current_visual_line,
-                                    span_index,
-                                    fitting_start,
-                                    (i, 0),
-                                    word_range_width,
-                                    number_of_blanks,
-                                );
+                            // If we had a previous range, commit that line before the next word.
+                            if word_range_width > 0. {
+                                // Current word causing a wrap is not whitespace, so we ignore the
+                                // previous word if it's a whitespace.
+                                let trailing_blank = i > 0 && span.words[i - 1].blank;
+
+                                if trailing_blank {
+                                    number_of_blanks = number_of_blanks.saturating_sub(1);
+                                    add_to_visual_line(
+                                        &mut current_visual_line,
+                                        span_index,
+                                        fitting_start,
+                                        (i - 1, 0),
+                                        width_before_last_blank,
+                                        number_of_blanks,
+                                    );
+                                } else {
+                                    add_to_visual_line(
+                                        &mut current_visual_line,
+                                        span_index,
+                                        fitting_start,
+                                        (i, 0),
+                                        word_range_width,
+                                        number_of_blanks,
+                                    );
+                                }
+
+                                visual_lines.push(current_visual_line);
+                                current_visual_line = VisualLine::default();
+                                number_of_blanks = 0;
                             }
-                            visual_lines.push(current_visual_line);
-                            current_visual_line = VisualLine::default();
-                            number_of_blanks = 0;
 
                             if word.blank {
                                 word_range_width = 0.;
