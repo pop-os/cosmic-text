@@ -139,6 +139,9 @@
 <a href="#139" id="139">139</a>
 <a href="#140" id="140">140</a>
 <a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
 </pre></div><pre class="rust"><code><span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0
 
 </span><span class="kw">use </span>core::fmt::Display;
@@ -245,8 +248,10 @@
     </span><span class="prelude-val">None</span>,
     <span class="doccomment">/// Wraps at a glyph level
     </span>Glyph,
-    <span class="doccomment">/// Word Wrapping
+    <span class="doccomment">/// Wraps at the word level
     </span>Word,
+    <span class="doccomment">/// Wraps at the word level, or fallback to glyph level if a word can&#39;t fit on a line by itself
+    </span>WordOrGlyph,
 }
 
 <span class="kw">impl </span>Display <span class="kw">for </span>Wrap {
@@ -254,6 +259,7 @@
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::None =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;No Wrap&quot;</span>),
             <span class="self">Self</span>::Word =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;Word Wrap&quot;</span>),
+            <span class="self">Self</span>::WordOrGlyph =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;Word Wrap or Character&quot;</span>),
             <span class="self">Self</span>::Glyph =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;Character&quot;</span>),
         }
     }
