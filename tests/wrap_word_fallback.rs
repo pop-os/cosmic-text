@@ -11,7 +11,7 @@ fn wrap_word_fallback() {
 
     let mut buffer = buffer.borrow_with(&mut font_system);
 
-    buffer.set_wrap(Wrap::Word);
+    buffer.set_wrap(Wrap::WordOrGlyph);
     buffer.set_text("Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.", Attrs::new().family(cosmic_text::Family::Name("Inter")), Shaping::Advanced);
     buffer.set_size(50.0, 1000.0);
 

@@ -994,10 +994,13 @@ impl ShapeLine {
                             continue;
                         } else if wrap == Wrap::Glyph
                             // Make sure that the word is able to fit on it's own line, if not, fall back to Glyph wrapping.
-                            || word_width > line_width
+                            || (wrap == Wrap::WordOrGlyph && word_width > line_width)
                         {
                             // Commit the current line so that the word starts on the next line.
-                            if word_range_width > 0. && word_width > line_width {
+                            if word_range_width > 0.
+                                && wrap == Wrap::WordOrGlyph
+                                && word_width > line_width
+                            {
                                 add_to_visual_line(
                                     &mut current_visual_line,
                                     span_index,
@@ -1041,7 +1044,7 @@ impl ShapeLine {
                                 }
                             }
                         } else {
-                            // Wrap::Word
+                            // Wrap::Word, Wrap::WordOrGlyph
 
                             // TODO: What if the previous span ended with whitespace and the next
                             // span wraps a new line? Is that possible?
@@ -1117,10 +1120,13 @@ impl ShapeLine {
                             continue;
                         } else if wrap == Wrap::Glyph
                             // Make sure that the word is able to fit on it's own line, if not, fall back to Glyph wrapping.
-                            || word_width > line_width
+                            || (wrap == Wrap::WordOrGlyph && word_width > line_width)
                         {
                             // Commit the current line so that the word starts on the next line.
-                            if word_range_width > 0. && word_width > line_width {
+                            if word_range_width > 0.
+                                && wrap == Wrap::WordOrGlyph
+                                && word_width > line_width
+                            {
                                 add_to_visual_line(
                                     &mut current_visual_line,
                                     span_index,
@@ -1164,7 +1170,7 @@ impl ShapeLine {
                                 }
                             }
                         } else {
-                            // Wrap::Word
+                            // Wrap::Word, Wrap::WordOrGlyph
 
                             // Current word causing a wrap is not whitespace, so we ignore the
                             // previous word if it's a whitespace

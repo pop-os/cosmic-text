@@ -104,8 +104,10 @@ pub enum Wrap {
     None,
     /// Wraps at a glyph level
     Glyph,
-    /// Word Wrapping
+    /// Wraps at the word level
     Word,
+    /// Wraps at the word level, or fallback to glyph level if a word can't fit on a line by itself
+    WordOrGlyph,
 }
 
 impl Display for Wrap {
@@ -113,6 +115,7 @@ impl Display for Wrap {
         match self {
             Self::None => write!(f, "No Wrap"),
             Self::Word => write!(f, "Word Wrap"),
+            Self::WordOrGlyph => write!(f, "Word Wrap or Character"),
             Self::Glyph => write!(f, "Character"),
         }
     }
