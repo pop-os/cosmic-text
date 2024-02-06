@@ -44,6 +44,7 @@ std = [
     "rustybuzz/std",
     "sys-locale",
     "unicode-bidi/std",
+    "serde?/std"
 ]
 vi = ["modit", "syntect", "cosmic_undo_2"]
 wasm-web = ["sys-locale?/js"]
