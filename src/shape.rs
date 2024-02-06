@@ -17,8 +17,12 @@ use crate::{
     ShapePlanCache, Wrap,
 };
 
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 /// The shaping strategy of some text.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub enum Shaping {
     /// Basic shaping with no font fallback.
     ///

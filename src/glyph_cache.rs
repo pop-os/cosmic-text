@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 bitflags::bitflags! {
     /// Flags that change rendering
     #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
     #[repr(transparent)]
+    #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
     pub struct CacheKeyFlags: u32 {
         /// Skew by 14 degrees to synthesize italic
         const FAKE_ITALIC = 1;
@@ -54,6 +57,7 @@ impl CacheKey {
 
 /// Binning of subpixel position for cache optimization
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub enum SubpixelBin {
     Zero,
     One,

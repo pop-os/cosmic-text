@@ -5,6 +5,9 @@ use alloc::{string::String, vec::Vec};
 use core::{cmp, fmt};
 use unicode_segmentation::UnicodeSegmentation;
 
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 use crate::{
     Affinity, Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem, BufferLine, Color, Cursor,
     FontSystem, LayoutCursor, LayoutGlyph, LayoutLine, Motion, Scroll, ShapeBuffer, ShapeLine,
@@ -191,6 +194,7 @@ impl<'b> ExactSizeIterator for LayoutRunIter<'b> {}
 
 /// Metrics of text
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Metrics {
     /// Font size in pixels
     pub font_size: f32,

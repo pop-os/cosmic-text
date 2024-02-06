@@ -7,6 +7,9 @@ use alloc::vec::Vec;
 
 use crate::{CacheKey, CacheKeyFlags, Color};
 
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 /// A laid out glyph
 #[derive(Clone, Debug)]
 pub struct LayoutGlyph {
@@ -99,6 +102,7 @@ pub struct LayoutLine {
 
 /// Wrapping mode
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub enum Wrap {
     /// No wrapping
     None,
@@ -123,6 +127,7 @@ impl Display for Wrap {
 
 /// Align or justify
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub enum Align {
     Left,
     Right,
