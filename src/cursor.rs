@@ -1,5 +1,9 @@
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 /// Current cursor location
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Ord, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Cursor {
     /// Index of [`BufferLine`] in [`Buffer::lines`]
     pub line: usize,
@@ -28,6 +32,7 @@ impl Cursor {
 
 /// Whether to associate cursors placed at a boundary between runs with the run before or after it.
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub enum Affinity {
     #[default]
     Before,

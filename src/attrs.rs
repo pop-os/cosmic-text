@@ -7,6 +7,8 @@ use alloc::{
 };
 use core::ops::Range;
 use rangemap::RangeMap;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 use crate::CacheKeyFlags;
 
@@ -14,6 +16,7 @@ pub use fontdb::{Family, Stretch, Style, Weight};
 
 /// Text color
 #[derive(Clone, Copy, Debug, PartialOrd, Ord, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Color(pub u32);
 
 impl Color {
@@ -68,6 +71,7 @@ impl Color {
 
 /// An owned version of [`Family`]
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub enum FamilyOwned {
     Name(String),
     Serif,
@@ -103,9 +107,11 @@ impl FamilyOwned {
 
 /// Text attributes
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Attrs<'a> {
     //TODO: should this be an option?
     pub color_opt: Option<Color>,
+    #[cfg_attr(feature = "serde", serde(borrow))]
     pub family: Family<'a>,
     pub stretch: Stretch,
     pub style: Style,
@@ -190,6 +196,7 @@ impl<'a> Attrs<'a> {
 
 /// Font-specific part of [`Attrs`] to be used for matching
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct FontMatchAttrs {
     family: FamilyOwned,
     stretch: Stretch,
@@ -210,6 +217,7 @@ impl<'a> From<Attrs<'a>> for FontMatchAttrs {
 
 /// An owned version of [`Attrs`]
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct AttrsOwned {
     //TODO: should this be an option?
     pub color_opt: Option<Color>,
@@ -250,6 +258,7 @@ impl AttrsOwned {
 /// List of text attributes to apply to a line
 //TODO: have this clean up the spans when changes are made
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct AttrsList {
     defaults: AttrsOwned,
     spans: RangeMap<usize, AttrsOwned>,
