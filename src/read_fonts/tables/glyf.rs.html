@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.2/src/tables/glyf.rs`."><title>glyf.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.3/src/tables/glyf.rs`."><title>glyf.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1070,33 +1070,12 @@
 <a href="#1070" id="1070">1070</a>
 <a href="#1071" id="1071">1071</a>
 <a href="#1072" id="1072">1072</a>
-<a href="#1073" id="1073">1073</a>
-<a href="#1074" id="1074">1074</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! The [glyf (Glyph Data)](https://docs.microsoft.com/en-us/typography/opentype/spec/glyf) table
 
 </span><span class="kw">use </span>std::fmt;
 <span class="kw">use </span>types::{F26Dot6, Pen, Point};
 
 <span class="macro">include!</span>(<span class="string">&quot;../../generated/generated_glyf.rs&quot;</span>);
-
-<span class="macro">macro_rules! </span>field_getter {
-    (<span class="macro-nonterminal">$field</span>:ident, <span class="macro-nonterminal">$ty</span>:ty) =&gt; {
-        <span class="kw">pub fn </span><span class="macro-nonterminal">$field</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="macro-nonterminal">$ty </span>{
-            <span class="kw">match </span><span class="self">self </span>{
-                <span class="self">Self</span>::Simple(table) =&gt; table.<span class="macro-nonterminal">$field</span>(),
-                <span class="self">Self</span>::Composite(table) =&gt; table.<span class="macro-nonterminal">$field</span>(),
-            }
-        }
-    };
-}
-
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Glyph&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="macro">field_getter!</span>(number_of_contours, i16);
-    <span class="macro">field_getter!</span>(x_min, i16);
-    <span class="macro">field_getter!</span>(x_max, i16);
-    <span class="macro">field_getter!</span>(y_min, i16);
-    <span class="macro">field_getter!</span>(y_max, i16);
-}
 
 <span class="doccomment">/// Marker bits for point flags that are set during variation delta
 /// processing and hinting.
@@ -1110,15 +1089,15 @@
 
     <span class="doccomment">/// Marker that signifies that the x coordinate of a point has been touched
     /// by an IUP hinting instruction.
-    </span><span class="kw">pub const </span>TOUCHED_X: <span class="self">Self </span>= <span class="self">Self</span>(<span class="number">0x8</span>);
+    </span><span class="kw">pub const </span>TOUCHED_X: <span class="self">Self </span>= <span class="self">Self</span>(<span class="number">0x10</span>);
 
     <span class="doccomment">/// Marker that signifies that the y coordinate of a point has been touched
     /// by an IUP hinting instruction.
-    </span><span class="kw">pub const </span>TOUCHED_Y: <span class="self">Self </span>= <span class="self">Self</span>(<span class="number">0x10</span>);
+    </span><span class="kw">pub const </span>TOUCHED_Y: <span class="self">Self </span>= <span class="self">Self</span>(<span class="number">0x20</span>);
 
     <span class="doccomment">/// Marker that signifies that the both coordinates of a point has been touched
     /// by an IUP hinting instruction.
-    </span><span class="kw">pub const </span>TOUCHED: <span class="self">Self </span>= <span class="self">Self</span>(<span class="number">0x8 </span>| <span class="number">0x10</span>);
+    </span><span class="kw">pub const </span>TOUCHED: <span class="self">Self </span>= <span class="self">Self</span>(<span class="self">Self</span>::TOUCHED_X.<span class="number">0 </span>| <span class="self">Self</span>::TOUCHED_Y.<span class="number">0</span>);
 }
 
 <span class="doccomment">/// Flags describing the properties of a point.
@@ -1133,9 +1112,9 @@
 <span class="kw">impl </span>PointFlags {
     <span class="comment">// Note: OFF_CURVE_QUAD is signified by the absence of both ON_CURVE
     // and OFF_CURVE_CUBIC bits, per FreeType and TrueType convention.
-    </span><span class="kw">const </span>CURVE_MASK: u8 = <span class="number">0x81</span>;
-    <span class="kw">const </span>ON_CURVE: u8 = <span class="number">0x1</span>;
+    </span><span class="kw">const </span>ON_CURVE: u8 = <span class="number">0x1</span>;
     <span class="kw">const </span>OFF_CURVE_CUBIC: u8 = <span class="number">0x8</span>;
+    <span class="kw">const </span>CURVE_MASK: u8 = <span class="self">Self</span>::ON_CURVE | <span class="self">Self</span>::OFF_CURVE_CUBIC;
 
     <span class="doccomment">/// Creates a new on curve point flag.
     </span><span class="kw">pub fn </span>on_curve() -&gt; <span class="self">Self </span>{
@@ -2144,6 +2123,23 @@
             make_xform(<span class="number">2.0</span>, <span class="number">0.</span>, <span class="number">1.0</span>, <span class="number">1.0</span>).compute_flags(),
             CompositeGlyphFlags::WE_HAVE_A_TWO_BY_TWO
         );
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>point_flags_and_marker_bits() {
+        <span class="kw">let </span>bits = [
+            PointFlags::OFF_CURVE_CUBIC,
+            PointFlags::ON_CURVE,
+            PointMarker::HAS_DELTA.<span class="number">0</span>,
+            PointMarker::TOUCHED_X.<span class="number">0</span>,
+            PointMarker::TOUCHED_Y.<span class="number">0</span>,
+        ];
+        <span class="comment">// Ensure bits don&#39;t overlap
+        </span><span class="kw">for </span>(i, a) <span class="kw">in </span>bits.iter().enumerate() {
+            <span class="kw">for </span>b <span class="kw">in </span><span class="kw-2">&amp;</span>bits[i + <span class="number">1</span>..] {
+                <span class="macro">assert_eq!</span>(a &amp; b, <span class="number">0</span>);
+            }
+        }
     }
 }
 </code></pre></div></section></main></body></html>

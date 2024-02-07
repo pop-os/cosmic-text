@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.2/src/tables/../../generated/generated_layout.rs`."><title>generated_layout.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.3/src/tables/../../generated/generated_layout.rs`."><title>generated_layout.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -4674,6 +4674,78 @@
 <a href="#4674" id="4674">4674</a>
 <a href="#4675" id="4675">4675</a>
 <a href="#4676" id="4676">4676</a>
+<a href="#4677" id="4677">4677</a>
+<a href="#4678" id="4678">4678</a>
+<a href="#4679" id="4679">4679</a>
+<a href="#4680" id="4680">4680</a>
+<a href="#4681" id="4681">4681</a>
+<a href="#4682" id="4682">4682</a>
+<a href="#4683" id="4683">4683</a>
+<a href="#4684" id="4684">4684</a>
+<a href="#4685" id="4685">4685</a>
+<a href="#4686" id="4686">4686</a>
+<a href="#4687" id="4687">4687</a>
+<a href="#4688" id="4688">4688</a>
+<a href="#4689" id="4689">4689</a>
+<a href="#4690" id="4690">4690</a>
+<a href="#4691" id="4691">4691</a>
+<a href="#4692" id="4692">4692</a>
+<a href="#4693" id="4693">4693</a>
+<a href="#4694" id="4694">4694</a>
+<a href="#4695" id="4695">4695</a>
+<a href="#4696" id="4696">4696</a>
+<a href="#4697" id="4697">4697</a>
+<a href="#4698" id="4698">4698</a>
+<a href="#4699" id="4699">4699</a>
+<a href="#4700" id="4700">4700</a>
+<a href="#4701" id="4701">4701</a>
+<a href="#4702" id="4702">4702</a>
+<a href="#4703" id="4703">4703</a>
+<a href="#4704" id="4704">4704</a>
+<a href="#4705" id="4705">4705</a>
+<a href="#4706" id="4706">4706</a>
+<a href="#4707" id="4707">4707</a>
+<a href="#4708" id="4708">4708</a>
+<a href="#4709" id="4709">4709</a>
+<a href="#4710" id="4710">4710</a>
+<a href="#4711" id="4711">4711</a>
+<a href="#4712" id="4712">4712</a>
+<a href="#4713" id="4713">4713</a>
+<a href="#4714" id="4714">4714</a>
+<a href="#4715" id="4715">4715</a>
+<a href="#4716" id="4716">4716</a>
+<a href="#4717" id="4717">4717</a>
+<a href="#4718" id="4718">4718</a>
+<a href="#4719" id="4719">4719</a>
+<a href="#4720" id="4720">4720</a>
+<a href="#4721" id="4721">4721</a>
+<a href="#4722" id="4722">4722</a>
+<a href="#4723" id="4723">4723</a>
+<a href="#4724" id="4724">4724</a>
+<a href="#4725" id="4725">4725</a>
+<a href="#4726" id="4726">4726</a>
+<a href="#4727" id="4727">4727</a>
+<a href="#4728" id="4728">4728</a>
+<a href="#4729" id="4729">4729</a>
+<a href="#4730" id="4730">4730</a>
+<a href="#4731" id="4731">4731</a>
+<a href="#4732" id="4732">4732</a>
+<a href="#4733" id="4733">4733</a>
+<a href="#4734" id="4734">4734</a>
+<a href="#4735" id="4735">4735</a>
+<a href="#4736" id="4736">4736</a>
+<a href="#4737" id="4737">4737</a>
+<a href="#4738" id="4738">4738</a>
+<a href="#4739" id="4739">4739</a>
+<a href="#4740" id="4740">4740</a>
+<a href="#4741" id="4741">4741</a>
+<a href="#4742" id="4742">4742</a>
+<a href="#4743" id="4743">4743</a>
+<a href="#4744" id="4744">4744</a>
+<a href="#4745" id="4745">4745</a>
+<a href="#4746" id="4746">4746</a>
+<a href="#4747" id="4747">4747</a>
+<a href="#4748" id="4748">4748</a>
 </pre></div><pre class="rust"><code><span class="comment">// THIS FILE IS AUTOGENERATED.
 // Any changes to this file will be overwritten.
 // For more information about how codegen works, see font-codegen/README.md
@@ -5373,6 +5445,21 @@
     }
 }
 
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; LookupList&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+    <span class="attr">#[allow(dead_code)]
+    </span><span class="doccomment">/// Replace the specific generic type on this implementation with `()`
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>of_unit_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LookupList&lt;<span class="lifetime">&#39;a</span>, ()&gt; {
+        <span class="kw">let </span>TableRef { data, shape } = <span class="self">self</span>;
+        TableRef {
+            shape: LookupListMarker {
+                lookup_offsets_byte_len: shape.lookup_offsets_byte_len,
+                offset_type: std::marker::PhantomData,
+            },
+            data: <span class="kw-2">*</span>data,
+        }
+    }
+}
+
 <span class="doccomment">/// [Lookup List Table](https://docs.microsoft.com/en-us/typography/opentype/spec/chapter2#lookup-list-table)
 </span><span class="kw">pub type </span>LookupList&lt;<span class="lifetime">&#39;a</span>, T&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, LookupListMarker&lt;T&gt;&gt;;
 
@@ -5500,6 +5587,21 @@
                 offset_type: std::marker::PhantomData,
             },
             data,
+        }
+    }
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Lookup&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+    <span class="attr">#[allow(dead_code)]
+    </span><span class="doccomment">/// Replace the specific generic type on this implementation with `()`
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>of_unit_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Lookup&lt;<span class="lifetime">&#39;a</span>, ()&gt; {
+        <span class="kw">let </span>TableRef { data, shape } = <span class="self">self</span>;
+        TableRef {
+            shape: LookupMarker {
+                subtable_offsets_byte_len: shape.subtable_offsets_byte_len,
+                offset_type: std::marker::PhantomData,
+            },
+            data: <span class="kw-2">*</span>data,
         }
     }
 }
@@ -5831,6 +5933,16 @@
     Format2(CoverageFormat2&lt;<span class="lifetime">&#39;a</span>&gt;),
 }
 
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; CoverageTable&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="doccomment">/// Format identifier — format = 1
+    </span><span class="kw">pub fn </span>coverage_format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="self">Self</span>::Format1(item) =&gt; item.coverage_format(),
+            <span class="self">Self</span>::Format2(item) =&gt; item.coverage_format(),
+        }
+    }
+}
+
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>CoverageTable&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span>format: u16 = data.read_at(<span class="number">0usize</span>)<span class="question-mark">?</span>;
@@ -6119,6 +6231,16 @@
 </span><span class="kw">pub enum </span>ClassDef&lt;<span class="lifetime">&#39;a</span>&gt; {
     Format1(ClassDefFormat1&lt;<span class="lifetime">&#39;a</span>&gt;),
     Format2(ClassDefFormat2&lt;<span class="lifetime">&#39;a</span>&gt;),
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ClassDef&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="doccomment">/// Format identifier — format = 1
+    </span><span class="kw">pub fn </span>class_format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="self">Self</span>::Format1(item) =&gt; item.class_format(),
+            <span class="self">Self</span>::Format2(item) =&gt; item.class_format(),
+        }
+    }
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>ClassDef&lt;<span class="lifetime">&#39;a</span>&gt; {
@@ -7026,6 +7148,17 @@
     Format1(SequenceContextFormat1&lt;<span class="lifetime">&#39;a</span>&gt;),
     Format2(SequenceContextFormat2&lt;<span class="lifetime">&#39;a</span>&gt;),
     Format3(SequenceContextFormat3&lt;<span class="lifetime">&#39;a</span>&gt;),
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SequenceContext&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="doccomment">/// Format identifier: format = 1
+    </span><span class="kw">pub fn </span>format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="self">Self</span>::Format1(item) =&gt; item.format(),
+            <span class="self">Self</span>::Format2(item) =&gt; item.format(),
+            <span class="self">Self</span>::Format3(item) =&gt; item.format(),
+        }
+    }
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>SequenceContext&lt;<span class="lifetime">&#39;a</span>&gt; {
@@ -8169,6 +8302,17 @@
     Format1(ChainedSequenceContextFormat1&lt;<span class="lifetime">&#39;a</span>&gt;),
     Format2(ChainedSequenceContextFormat2&lt;<span class="lifetime">&#39;a</span>&gt;),
     Format3(ChainedSequenceContextFormat3&lt;<span class="lifetime">&#39;a</span>&gt;),
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ChainedSequenceContext&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="doccomment">/// Format identifier: format = 1
+    </span><span class="kw">pub fn </span>format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="self">Self</span>::Format1(item) =&gt; item.format(),
+            <span class="self">Self</span>::Format2(item) =&gt; item.format(),
+            <span class="self">Self</span>::Format3(item) =&gt; item.format(),
+        }
+    }
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>ChainedSequenceContext&lt;<span class="lifetime">&#39;a</span>&gt; {

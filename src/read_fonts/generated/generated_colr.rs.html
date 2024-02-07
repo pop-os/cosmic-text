@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.2/src/tables/../../generated/generated_colr.rs`."><title>generated_colr.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.3/src/tables/../../generated/generated_colr.rs`."><title>generated_colr.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -5611,6 +5611,88 @@
 <a href="#5611" id="5611">5611</a>
 <a href="#5612" id="5612">5612</a>
 <a href="#5613" id="5613">5613</a>
+<a href="#5614" id="5614">5614</a>
+<a href="#5615" id="5615">5615</a>
+<a href="#5616" id="5616">5616</a>
+<a href="#5617" id="5617">5617</a>
+<a href="#5618" id="5618">5618</a>
+<a href="#5619" id="5619">5619</a>
+<a href="#5620" id="5620">5620</a>
+<a href="#5621" id="5621">5621</a>
+<a href="#5622" id="5622">5622</a>
+<a href="#5623" id="5623">5623</a>
+<a href="#5624" id="5624">5624</a>
+<a href="#5625" id="5625">5625</a>
+<a href="#5626" id="5626">5626</a>
+<a href="#5627" id="5627">5627</a>
+<a href="#5628" id="5628">5628</a>
+<a href="#5629" id="5629">5629</a>
+<a href="#5630" id="5630">5630</a>
+<a href="#5631" id="5631">5631</a>
+<a href="#5632" id="5632">5632</a>
+<a href="#5633" id="5633">5633</a>
+<a href="#5634" id="5634">5634</a>
+<a href="#5635" id="5635">5635</a>
+<a href="#5636" id="5636">5636</a>
+<a href="#5637" id="5637">5637</a>
+<a href="#5638" id="5638">5638</a>
+<a href="#5639" id="5639">5639</a>
+<a href="#5640" id="5640">5640</a>
+<a href="#5641" id="5641">5641</a>
+<a href="#5642" id="5642">5642</a>
+<a href="#5643" id="5643">5643</a>
+<a href="#5644" id="5644">5644</a>
+<a href="#5645" id="5645">5645</a>
+<a href="#5646" id="5646">5646</a>
+<a href="#5647" id="5647">5647</a>
+<a href="#5648" id="5648">5648</a>
+<a href="#5649" id="5649">5649</a>
+<a href="#5650" id="5650">5650</a>
+<a href="#5651" id="5651">5651</a>
+<a href="#5652" id="5652">5652</a>
+<a href="#5653" id="5653">5653</a>
+<a href="#5654" id="5654">5654</a>
+<a href="#5655" id="5655">5655</a>
+<a href="#5656" id="5656">5656</a>
+<a href="#5657" id="5657">5657</a>
+<a href="#5658" id="5658">5658</a>
+<a href="#5659" id="5659">5659</a>
+<a href="#5660" id="5660">5660</a>
+<a href="#5661" id="5661">5661</a>
+<a href="#5662" id="5662">5662</a>
+<a href="#5663" id="5663">5663</a>
+<a href="#5664" id="5664">5664</a>
+<a href="#5665" id="5665">5665</a>
+<a href="#5666" id="5666">5666</a>
+<a href="#5667" id="5667">5667</a>
+<a href="#5668" id="5668">5668</a>
+<a href="#5669" id="5669">5669</a>
+<a href="#5670" id="5670">5670</a>
+<a href="#5671" id="5671">5671</a>
+<a href="#5672" id="5672">5672</a>
+<a href="#5673" id="5673">5673</a>
+<a href="#5674" id="5674">5674</a>
+<a href="#5675" id="5675">5675</a>
+<a href="#5676" id="5676">5676</a>
+<a href="#5677" id="5677">5677</a>
+<a href="#5678" id="5678">5678</a>
+<a href="#5679" id="5679">5679</a>
+<a href="#5680" id="5680">5680</a>
+<a href="#5681" id="5681">5681</a>
+<a href="#5682" id="5682">5682</a>
+<a href="#5683" id="5683">5683</a>
+<a href="#5684" id="5684">5684</a>
+<a href="#5685" id="5685">5685</a>
+<a href="#5686" id="5686">5686</a>
+<a href="#5687" id="5687">5687</a>
+<a href="#5688" id="5688">5688</a>
+<a href="#5689" id="5689">5689</a>
+<a href="#5690" id="5690">5690</a>
+<a href="#5691" id="5691">5691</a>
+<a href="#5692" id="5692">5692</a>
+<a href="#5693" id="5693">5693</a>
+<a href="#5694" id="5694">5694</a>
+<a href="#5695" id="5695">5695</a>
 </pre></div><pre class="rust"><code><span class="comment">// THIS FILE IS AUTOGENERATED.
 // Any changes to this file will be overwritten.
 // For more information about how codegen works, see font-codegen/README.md
@@ -6398,6 +6480,48 @@
     Format2(ClipBoxFormat2&lt;<span class="lifetime">&#39;a</span>&gt;),
 }
 
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ClipBox&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="doccomment">/// Set to 1.
+    </span><span class="kw">pub fn </span>format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="self">Self</span>::Format1(item) =&gt; item.format(),
+            <span class="self">Self</span>::Format2(item) =&gt; item.format(),
+        }
+    }
+
+    <span class="doccomment">/// Minimum x of clip box.
+    </span><span class="kw">pub fn </span>x_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FWord {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="self">Self</span>::Format1(item) =&gt; item.x_min(),
+            <span class="self">Self</span>::Format2(item) =&gt; item.x_min(),
+        }
+    }
+
+    <span class="doccomment">/// Minimum y of clip box.
+    </span><span class="kw">pub fn </span>y_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FWord {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="self">Self</span>::Format1(item) =&gt; item.y_min(),
+            <span class="self">Self</span>::Format2(item) =&gt; item.y_min(),
+        }
+    }
+
+    <span class="doccomment">/// Maximum x of clip box.
+    </span><span class="kw">pub fn </span>x_max(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FWord {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="self">Self</span>::Format1(item) =&gt; item.x_max(),
+            <span class="self">Self</span>::Format2(item) =&gt; item.x_max(),
+        }
+    }
+
+    <span class="doccomment">/// Maximum y of clip box.
+    </span><span class="kw">pub fn </span>y_max(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FWord {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="self">Self</span>::Format1(item) =&gt; item.y_max(),
+            <span class="self">Self</span>::Format2(item) =&gt; item.y_max(),
+        }
+    }
+}
+
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>ClipBox&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span>format: u8 = data.read_at(<span class="number">0usize</span>)<span class="question-mark">?</span>;
@@ -7136,6 +7260,46 @@
     SkewAroundCenter(PaintSkewAroundCenter&lt;<span class="lifetime">&#39;a</span>&gt;),
     VarSkewAroundCenter(PaintVarSkewAroundCenter&lt;<span class="lifetime">&#39;a</span>&gt;),
     Composite(PaintComposite&lt;<span class="lifetime">&#39;a</span>&gt;),
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Paint&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="doccomment">/// Set to 1.
+    </span><span class="kw">pub fn </span>format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u8 {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="self">Self</span>::ColrLayers(item) =&gt; item.format(),
+            <span class="self">Self</span>::Solid(item) =&gt; item.format(),
+            <span class="self">Self</span>::VarSolid(item) =&gt; item.format(),
+            <span class="self">Self</span>::LinearGradient(item) =&gt; item.format(),
+            <span class="self">Self</span>::VarLinearGradient(item) =&gt; item.format(),
+            <span class="self">Self</span>::RadialGradient(item) =&gt; item.format(),
+            <span class="self">Self</span>::VarRadialGradient(item) =&gt; item.format(),
+            <span class="self">Self</span>::SweepGradient(item) =&gt; item.format(),
+            <span class="self">Self</span>::VarSweepGradient(item) =&gt; item.format(),
+            <span class="self">Self</span>::Glyph(item) =&gt; item.format(),
+            <span class="self">Self</span>::ColrGlyph(item) =&gt; item.format(),
+            <span class="self">Self</span>::Transform(item) =&gt; item.format(),
+            <span class="self">Self</span>::VarTransform(item) =&gt; item.format(),
+            <span class="self">Self</span>::Translate(item) =&gt; item.format(),
+            <span class="self">Self</span>::VarTranslate(item) =&gt; item.format(),
+            <span class="self">Self</span>::Scale(item) =&gt; item.format(),
+            <span class="self">Self</span>::VarScale(item) =&gt; item.format(),
+            <span class="self">Self</span>::ScaleAroundCenter(item) =&gt; item.format(),
+            <span class="self">Self</span>::VarScaleAroundCenter(item) =&gt; item.format(),
+            <span class="self">Self</span>::ScaleUniform(item) =&gt; item.format(),
+            <span class="self">Self</span>::VarScaleUniform(item) =&gt; item.format(),
+            <span class="self">Self</span>::ScaleUniformAroundCenter(item) =&gt; item.format(),
+            <span class="self">Self</span>::VarScaleUniformAroundCenter(item) =&gt; item.format(),
+            <span class="self">Self</span>::Rotate(item) =&gt; item.format(),
+            <span class="self">Self</span>::VarRotate(item) =&gt; item.format(),
+            <span class="self">Self</span>::RotateAroundCenter(item) =&gt; item.format(),
+            <span class="self">Self</span>::VarRotateAroundCenter(item) =&gt; item.format(),
+            <span class="self">Self</span>::Skew(item) =&gt; item.format(),
+            <span class="self">Self</span>::VarSkew(item) =&gt; item.format(),
+            <span class="self">Self</span>::SkewAroundCenter(item) =&gt; item.format(),
+            <span class="self">Self</span>::VarSkewAroundCenter(item) =&gt; item.format(),
+            <span class="self">Self</span>::Composite(item) =&gt; item.format(),
+        }
+    }
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>Paint&lt;<span class="lifetime">&#39;a</span>&gt; {

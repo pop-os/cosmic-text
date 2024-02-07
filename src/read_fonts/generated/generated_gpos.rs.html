@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.2/src/tables/../../generated/generated_gpos.rs`."><title>generated_gpos.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.3/src/tables/../../generated/generated_gpos.rs`."><title>generated_gpos.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -3637,6 +3637,150 @@
 <a href="#3637" id="3637">3637</a>
 <a href="#3638" id="3638">3638</a>
 <a href="#3639" id="3639">3639</a>
+<a href="#3640" id="3640">3640</a>
+<a href="#3641" id="3641">3641</a>
+<a href="#3642" id="3642">3642</a>
+<a href="#3643" id="3643">3643</a>
+<a href="#3644" id="3644">3644</a>
+<a href="#3645" id="3645">3645</a>
+<a href="#3646" id="3646">3646</a>
+<a href="#3647" id="3647">3647</a>
+<a href="#3648" id="3648">3648</a>
+<a href="#3649" id="3649">3649</a>
+<a href="#3650" id="3650">3650</a>
+<a href="#3651" id="3651">3651</a>
+<a href="#3652" id="3652">3652</a>
+<a href="#3653" id="3653">3653</a>
+<a href="#3654" id="3654">3654</a>
+<a href="#3655" id="3655">3655</a>
+<a href="#3656" id="3656">3656</a>
+<a href="#3657" id="3657">3657</a>
+<a href="#3658" id="3658">3658</a>
+<a href="#3659" id="3659">3659</a>
+<a href="#3660" id="3660">3660</a>
+<a href="#3661" id="3661">3661</a>
+<a href="#3662" id="3662">3662</a>
+<a href="#3663" id="3663">3663</a>
+<a href="#3664" id="3664">3664</a>
+<a href="#3665" id="3665">3665</a>
+<a href="#3666" id="3666">3666</a>
+<a href="#3667" id="3667">3667</a>
+<a href="#3668" id="3668">3668</a>
+<a href="#3669" id="3669">3669</a>
+<a href="#3670" id="3670">3670</a>
+<a href="#3671" id="3671">3671</a>
+<a href="#3672" id="3672">3672</a>
+<a href="#3673" id="3673">3673</a>
+<a href="#3674" id="3674">3674</a>
+<a href="#3675" id="3675">3675</a>
+<a href="#3676" id="3676">3676</a>
+<a href="#3677" id="3677">3677</a>
+<a href="#3678" id="3678">3678</a>
+<a href="#3679" id="3679">3679</a>
+<a href="#3680" id="3680">3680</a>
+<a href="#3681" id="3681">3681</a>
+<a href="#3682" id="3682">3682</a>
+<a href="#3683" id="3683">3683</a>
+<a href="#3684" id="3684">3684</a>
+<a href="#3685" id="3685">3685</a>
+<a href="#3686" id="3686">3686</a>
+<a href="#3687" id="3687">3687</a>
+<a href="#3688" id="3688">3688</a>
+<a href="#3689" id="3689">3689</a>
+<a href="#3690" id="3690">3690</a>
+<a href="#3691" id="3691">3691</a>
+<a href="#3692" id="3692">3692</a>
+<a href="#3693" id="3693">3693</a>
+<a href="#3694" id="3694">3694</a>
+<a href="#3695" id="3695">3695</a>
+<a href="#3696" id="3696">3696</a>
+<a href="#3697" id="3697">3697</a>
+<a href="#3698" id="3698">3698</a>
+<a href="#3699" id="3699">3699</a>
+<a href="#3700" id="3700">3700</a>
+<a href="#3701" id="3701">3701</a>
+<a href="#3702" id="3702">3702</a>
+<a href="#3703" id="3703">3703</a>
+<a href="#3704" id="3704">3704</a>
+<a href="#3705" id="3705">3705</a>
+<a href="#3706" id="3706">3706</a>
+<a href="#3707" id="3707">3707</a>
+<a href="#3708" id="3708">3708</a>
+<a href="#3709" id="3709">3709</a>
+<a href="#3710" id="3710">3710</a>
+<a href="#3711" id="3711">3711</a>
+<a href="#3712" id="3712">3712</a>
+<a href="#3713" id="3713">3713</a>
+<a href="#3714" id="3714">3714</a>
+<a href="#3715" id="3715">3715</a>
+<a href="#3716" id="3716">3716</a>
+<a href="#3717" id="3717">3717</a>
+<a href="#3718" id="3718">3718</a>
+<a href="#3719" id="3719">3719</a>
+<a href="#3720" id="3720">3720</a>
+<a href="#3721" id="3721">3721</a>
+<a href="#3722" id="3722">3722</a>
+<a href="#3723" id="3723">3723</a>
+<a href="#3724" id="3724">3724</a>
+<a href="#3725" id="3725">3725</a>
+<a href="#3726" id="3726">3726</a>
+<a href="#3727" id="3727">3727</a>
+<a href="#3728" id="3728">3728</a>
+<a href="#3729" id="3729">3729</a>
+<a href="#3730" id="3730">3730</a>
+<a href="#3731" id="3731">3731</a>
+<a href="#3732" id="3732">3732</a>
+<a href="#3733" id="3733">3733</a>
+<a href="#3734" id="3734">3734</a>
+<a href="#3735" id="3735">3735</a>
+<a href="#3736" id="3736">3736</a>
+<a href="#3737" id="3737">3737</a>
+<a href="#3738" id="3738">3738</a>
+<a href="#3739" id="3739">3739</a>
+<a href="#3740" id="3740">3740</a>
+<a href="#3741" id="3741">3741</a>
+<a href="#3742" id="3742">3742</a>
+<a href="#3743" id="3743">3743</a>
+<a href="#3744" id="3744">3744</a>
+<a href="#3745" id="3745">3745</a>
+<a href="#3746" id="3746">3746</a>
+<a href="#3747" id="3747">3747</a>
+<a href="#3748" id="3748">3748</a>
+<a href="#3749" id="3749">3749</a>
+<a href="#3750" id="3750">3750</a>
+<a href="#3751" id="3751">3751</a>
+<a href="#3752" id="3752">3752</a>
+<a href="#3753" id="3753">3753</a>
+<a href="#3754" id="3754">3754</a>
+<a href="#3755" id="3755">3755</a>
+<a href="#3756" id="3756">3756</a>
+<a href="#3757" id="3757">3757</a>
+<a href="#3758" id="3758">3758</a>
+<a href="#3759" id="3759">3759</a>
+<a href="#3760" id="3760">3760</a>
+<a href="#3761" id="3761">3761</a>
+<a href="#3762" id="3762">3762</a>
+<a href="#3763" id="3763">3763</a>
+<a href="#3764" id="3764">3764</a>
+<a href="#3765" id="3765">3765</a>
+<a href="#3766" id="3766">3766</a>
+<a href="#3767" id="3767">3767</a>
+<a href="#3768" id="3768">3768</a>
+<a href="#3769" id="3769">3769</a>
+<a href="#3770" id="3770">3770</a>
+<a href="#3771" id="3771">3771</a>
+<a href="#3772" id="3772">3772</a>
+<a href="#3773" id="3773">3773</a>
+<a href="#3774" id="3774">3774</a>
+<a href="#3775" id="3775">3775</a>
+<a href="#3776" id="3776">3776</a>
+<a href="#3777" id="3777">3777</a>
+<a href="#3778" id="3778">3778</a>
+<a href="#3779" id="3779">3779</a>
+<a href="#3780" id="3780">3780</a>
+<a href="#3781" id="3781">3781</a>
+<a href="#3782" id="3782">3782</a>
+<a href="#3783" id="3783">3783</a>
 </pre></div><pre class="rust"><code><span class="comment">// THIS FILE IS AUTOGENERATED.
 // Any changes to this file will be overwritten.
 // For more information about how codegen works, see font-codegen/README.md
@@ -3826,6 +3970,26 @@
             <span class="number">8 </span>=&gt; <span class="prelude-val">Ok</span>(PositionLookup::ChainContextual(untyped.into_concrete())),
             <span class="number">9 </span>=&gt; <span class="prelude-val">Ok</span>(PositionLookup::Extension(untyped.into_concrete())),
             other =&gt; <span class="prelude-val">Err</span>(ReadError::InvalidFormat(other.into())),
+        }
+    }
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; PositionLookup&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="attr">#[allow(dead_code)]
+    </span><span class="doccomment">/// Return the inner table, removing the specific generics.
+    ///
+    /// This lets us return a single concrete type we can call methods on.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>of_unit_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Lookup&lt;<span class="lifetime">&#39;a</span>, ()&gt; {
+        <span class="kw">match </span><span class="self">self </span>{
+            PositionLookup::Single(inner) =&gt; inner.of_unit_type(),
+            PositionLookup::Pair(inner) =&gt; inner.of_unit_type(),
+            PositionLookup::Cursive(inner) =&gt; inner.of_unit_type(),
+            PositionLookup::MarkToBase(inner) =&gt; inner.of_unit_type(),
+            PositionLookup::MarkToLig(inner) =&gt; inner.of_unit_type(),
+            PositionLookup::MarkToMark(inner) =&gt; inner.of_unit_type(),
+            PositionLookup::Contextual(inner) =&gt; inner.of_unit_type(),
+            PositionLookup::ChainContextual(inner) =&gt; inner.of_unit_type(),
+            PositionLookup::Extension(inner) =&gt; inner.of_unit_type(),
         }
     }
 }
@@ -4213,6 +4377,35 @@
     Format1(AnchorFormat1&lt;<span class="lifetime">&#39;a</span>&gt;),
     Format2(AnchorFormat2&lt;<span class="lifetime">&#39;a</span>&gt;),
     Format3(AnchorFormat3&lt;<span class="lifetime">&#39;a</span>&gt;),
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; AnchorTable&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="doccomment">/// Format identifier, = 1
+    </span><span class="kw">pub fn </span>anchor_format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="self">Self</span>::Format1(item) =&gt; item.anchor_format(),
+            <span class="self">Self</span>::Format2(item) =&gt; item.anchor_format(),
+            <span class="self">Self</span>::Format3(item) =&gt; item.anchor_format(),
+        }
+    }
+
+    <span class="doccomment">/// Horizontal value, in design units
+    </span><span class="kw">pub fn </span>x_coordinate(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; i16 {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="self">Self</span>::Format1(item) =&gt; item.x_coordinate(),
+            <span class="self">Self</span>::Format2(item) =&gt; item.x_coordinate(),
+            <span class="self">Self</span>::Format3(item) =&gt; item.x_coordinate(),
+        }
+    }
+
+    <span class="doccomment">/// Vertical value, in design units
+    </span><span class="kw">pub fn </span>y_coordinate(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; i16 {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="self">Self</span>::Format1(item) =&gt; item.y_coordinate(),
+            <span class="self">Self</span>::Format2(item) =&gt; item.y_coordinate(),
+            <span class="self">Self</span>::Format3(item) =&gt; item.y_coordinate(),
+        }
+    }
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>AnchorTable&lt;<span class="lifetime">&#39;a</span>&gt; {
@@ -4693,6 +4886,32 @@
     Format2(SinglePosFormat2&lt;<span class="lifetime">&#39;a</span>&gt;),
 }
 
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SinglePos&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="doccomment">/// Format identifier: format = 1
+    </span><span class="kw">pub fn </span>pos_format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="self">Self</span>::Format1(item) =&gt; item.pos_format(),
+            <span class="self">Self</span>::Format2(item) =&gt; item.pos_format(),
+        }
+    }
+
+    <span class="doccomment">/// Offset to Coverage table, from beginning of SinglePos subtable.
+    </span><span class="kw">pub fn </span>coverage_offset(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Offset16 {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="self">Self</span>::Format1(item) =&gt; item.coverage_offset(),
+            <span class="self">Self</span>::Format2(item) =&gt; item.coverage_offset(),
+        }
+    }
+
+    <span class="doccomment">/// Defines the types of data in the ValueRecord.
+    </span><span class="kw">pub fn </span>value_format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ValueFormat {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="self">Self</span>::Format1(item) =&gt; item.value_format(),
+            <span class="self">Self</span>::Format2(item) =&gt; item.value_format(),
+        }
+    }
+}
+
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>SinglePos&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span>format: u16 = data.read_at(<span class="number">0usize</span>)<span class="question-mark">?</span>;
@@ -4975,6 +5194,42 @@
 </span><span class="kw">pub enum </span>PairPos&lt;<span class="lifetime">&#39;a</span>&gt; {
     Format1(PairPosFormat1&lt;<span class="lifetime">&#39;a</span>&gt;),
     Format2(PairPosFormat2&lt;<span class="lifetime">&#39;a</span>&gt;),
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; PairPos&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="doccomment">/// Format identifier: format = 1
+    </span><span class="kw">pub fn </span>pos_format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="self">Self</span>::Format1(item) =&gt; item.pos_format(),
+            <span class="self">Self</span>::Format2(item) =&gt; item.pos_format(),
+        }
+    }
+
+    <span class="doccomment">/// Offset to Coverage table, from beginning of PairPos subtable.
+    </span><span class="kw">pub fn </span>coverage_offset(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Offset16 {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="self">Self</span>::Format1(item) =&gt; item.coverage_offset(),
+            <span class="self">Self</span>::Format2(item) =&gt; item.coverage_offset(),
+        }
+    }
+
+    <span class="doccomment">/// Defines the types of data in valueRecord1 — for the first
+    /// glyph in the pair (may be zero).
+    </span><span class="kw">pub fn </span>value_format1(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ValueFormat {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="self">Self</span>::Format1(item) =&gt; item.value_format1(),
+            <span class="self">Self</span>::Format2(item) =&gt; item.value_format1(),
+        }
+    }
+
+    <span class="doccomment">/// Defines the types of data in valueRecord2 — for the second
+    /// glyph in the pair (may be zero).
+    </span><span class="kw">pub fn </span>value_format2(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ValueFormat {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="self">Self</span>::Format1(item) =&gt; item.value_format2(),
+            <span class="self">Self</span>::Format2(item) =&gt; item.value_format2(),
+        }
+    }
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>PairPos&lt;<span class="lifetime">&#39;a</span>&gt; {
@@ -7152,6 +7407,20 @@
     }
 }
 
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; ExtensionPosFormat1&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+    <span class="attr">#[allow(dead_code)]
+    </span><span class="doccomment">/// Replace the specific generic type on this implementation with `()`
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>of_unit_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ExtensionPosFormat1&lt;<span class="lifetime">&#39;a</span>, ()&gt; {
+        <span class="kw">let </span>TableRef { data, .. } = <span class="self">self</span>;
+        TableRef {
+            shape: ExtensionPosFormat1Marker {
+                offset_type: std::marker::PhantomData,
+            },
+            data: <span class="kw-2">*</span>data,
+        }
+    }
+}
+
 <span class="doccomment">/// [Extension Positioning Subtable Format 1](https://docs.microsoft.com/en-us/typography/opentype/spec/gpos#extension-positioning-subtable-format-1)
 </span><span class="kw">pub type </span>ExtensionPosFormat1&lt;<span class="lifetime">&#39;a</span>, T&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, ExtensionPosFormat1Marker&lt;T&gt;&gt;;
 
@@ -7240,6 +7509,25 @@
             <span class="number">7 </span>=&gt; <span class="prelude-val">Ok</span>(ExtensionSubtable::Contextual(untyped.into_concrete())),
             <span class="number">8 </span>=&gt; <span class="prelude-val">Ok</span>(ExtensionSubtable::ChainContextual(untyped.into_concrete())),
             other =&gt; <span class="prelude-val">Err</span>(ReadError::InvalidFormat(other.into())),
+        }
+    }
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ExtensionSubtable&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="attr">#[allow(dead_code)]
+    </span><span class="doccomment">/// Return the inner table, removing the specific generics.
+    ///
+    /// This lets us return a single concrete type we can call methods on.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>of_unit_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ExtensionPosFormat1&lt;<span class="lifetime">&#39;a</span>, ()&gt; {
+        <span class="kw">match </span><span class="self">self </span>{
+            ExtensionSubtable::Single(inner) =&gt; inner.of_unit_type(),
+            ExtensionSubtable::Pair(inner) =&gt; inner.of_unit_type(),
+            ExtensionSubtable::Cursive(inner) =&gt; inner.of_unit_type(),
+            ExtensionSubtable::MarkToBase(inner) =&gt; inner.of_unit_type(),
+            ExtensionSubtable::MarkToLig(inner) =&gt; inner.of_unit_type(),
+            ExtensionSubtable::MarkToMark(inner) =&gt; inner.of_unit_type(),
+            ExtensionSubtable::Contextual(inner) =&gt; inner.of_unit_type(),
+            ExtensionSubtable::ChainContextual(inner) =&gt; inner.of_unit_type(),
         }
     }
 }
