@@ -5,6 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2024-02-07
+
+### Added
+
+- Add function to set metrics and size simultaneously
+- Cache `rustybuzz` shape plans
+- Add capability to synthesize italic
+- New wrapping option `WordOrGlyph` to allow word to glyph fallback
+
+### Fixed
+
+- `Buffer::set_rich_text`: Only add attrs if they do not match the defaults
+- Do not use Emoji fonts as monospace fallback
+- Refresh the attrs more often in basic shaping
+- `Buffer`: fix max scroll going one line beyond end
+- Improve reliability of `layout_cursor`
+- Handle multiple BiDi paragraphs in `ShapeLine` gracefully
+- Improved monospace font fallback
+- Only commit a previous word range if we had an existing visual line
+
+### Changed
+
+- Update terminal example using `colored`
+- Significant improvements for `Editor`, `SyntaxEditor`, and `ViEditor`
+- Require default Attrs to be specified in `Buffer::set_rich_text`
+- Bump `fontdb` to `0.16`
+- Allow Clone of layout structs
+- Move cursor motions to new `Motion` enum, move handling to `Buffer`
+- Ensure that all shaping and layout uses scratch buffer
+- `BufferLine`: user `layout_in_buffer` to implement layout
+- `BufferLine`: remove wrap from struct, as wrap is passed to layout
+- Refactor of scroll and shaping
+- Move `color` and `x_opt` out of Cursor
+- Add size limit to `font_matches_cache` and clear it when it is reached
+- Update `swash` to `0.1.12`
+- Set default buffer wrap to `WordOrGlyph`
+
+## Removed
+- Remove patch to load Redox system fonts, as fontdb does it now
+
 ## [0.10.0] - 2023-10-19
 
 ### Added
