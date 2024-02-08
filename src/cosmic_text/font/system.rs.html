@@ -232,6 +232,12 @@
 <a href="#232" id="232">232</a>
 <a href="#233" id="233">233</a>
 <a href="#234" id="234">234</a>
+<a href="#235" id="235">235</a>
+<a href="#236" id="236">236</a>
+<a href="#237" id="237">237</a>
+<a href="#238" id="238">238</a>
+<a href="#239" id="239">239</a>
+<a href="#240" id="240">240</a>
 </pre></div><pre class="rust"><code><span class="kw">use crate</span>::{Attrs, Font, FontMatchAttrs, HashMap, ShapePlanCache};
 <span class="kw">use </span>alloc::string::String;
 <span class="kw">use </span>alloc::sync::Arc;
@@ -266,6 +272,10 @@
 
     <span class="doccomment">/// Cache for rustybuzz shape plans.
     </span>shape_plan_cache: ShapePlanCache,
+
+    <span class="doccomment">/// Cache for shaped runs
+    </span><span class="attr">#[cfg(feature = <span class="string">&quot;shape-run-cache&quot;</span>)]
+    </span><span class="kw">pub </span>shape_run_cache: <span class="kw">crate</span>::ShapeRunCache,
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>FontSystem {
@@ -315,6 +325,8 @@
             font_cache: Default::default(),
             font_matches_cache: Default::default(),
             shape_plan_cache: ShapePlanCache::default(),
+            <span class="attr">#[cfg(feature = <span class="string">&quot;shape-run-cache&quot;</span>)]
+            </span>shape_run_cache: <span class="kw">crate</span>::ShapeRunCache::default(),
         }
     }
 

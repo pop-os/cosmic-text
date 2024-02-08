@@ -1,7 +1,7 @@
 var srcIndex = JSON.parse('{\
 "bitflags":["",[],["external.rs","internal.rs","iter.rs","lib.rs","parser.rs","public.rs","traits.rs"]],\
 "bytemuck":["",[],["allocation.rs","anybitpattern.rs","checked.rs","contiguous.rs","internal.rs","lib.rs","no_uninit.rs","offset_of.rs","pod.rs","pod_in_option.rs","transparent.rs","zeroable.rs","zeroable_in_option.rs"]],\
-"cosmic_text":["",[["edit",[],["editor.rs","mod.rs"]],["font",[["fallback",[],["mod.rs","unix.rs"]]],["mod.rs","system.rs"]]],["attrs.rs","bidi_para.rs","buffer.rs","buffer_line.rs","cursor.rs","glyph_cache.rs","layout.rs","lib.rs","shape.rs","shape_plan_cache.rs","swash.rs"]],\
+"cosmic_text":["",[["edit",[],["editor.rs","mod.rs"]],["font",[["fallback",[],["mod.rs","unix.rs"]]],["mod.rs","system.rs"]]],["attrs.rs","bidi_para.rs","buffer.rs","buffer_line.rs","cursor.rs","glyph_cache.rs","layout.rs","lib.rs","shape.rs","shape_plan_cache.rs","shape_run_cache.rs","swash.rs"]],\
 "font_types":["",[],["bbox.rs","fixed.rs","fword.rs","glyph_id.rs","lib.rs","longdatetime.rs","name_id.rs","offset.rs","pen.rs","point.rs","raw.rs","tag.rs","uint24.rs","version.rs"]],\
 "fontconfig_parser":["",[["types",[["match_",[],["edit.rs","test.rs"]]],["alias.rs","config.rs","constant.rs","dir.rs","document.rs","match_.rs","property.rs","selectfont.rs","value.rs"]]],["error.rs","lib.rs","parser.rs","types.rs","util.rs"]],\
 "fontdb":["",[],["lib.rs"]],\
