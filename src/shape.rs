@@ -52,7 +52,19 @@ impl Shaping {
         match self {
             #[cfg(feature = "swash")]
             Self::Basic => shape_skip(font_system, glyphs, line, attrs_list, start_run, end_run),
+            #[cfg(not(feature = "shape-run-cache"))]
             Self::Advanced => shape_run(
+                scratch,
+                glyphs,
+                font_system,
+                line,
+                attrs_list,
+                start_run,
+                end_run,
+                span_rtl,
+            ),
+            #[cfg(feature = "shape-run-cache")]
+            Self::Advanced => shape_run_cached(
                 scratch,
                 glyphs,
                 font_system,
@@ -332,6 +344,63 @@ fn shape_run(
 
     // Restore the scripts buffer.
     scratch.scripts = scripts;
+}
+
+#[cfg(feature = "shape-run-cache")]
+fn shape_run_cached(
+    scratch: &mut ShapeBuffer,
+    glyphs: &mut Vec<ShapeGlyph>,
+    font_system: &mut FontSystem,
+    line: &str,
+    attrs_list: &AttrsList,
+    start_run: usize,
+    end_run: usize,
+    span_rtl: bool,
+) {
+    use crate::{AttrsOwned, ShapeRunKey};
+
+    let run_range = start_run..end_run;
+    let mut key = ShapeRunKey {
+        text: line[run_range.clone()].to_string(),
+        default_attrs: AttrsOwned::new(attrs_list.defaults()),
+        attrs_spans: Vec::new(),
+    };
+    for (attrs_range, attrs) in attrs_list.spans.overlapping(&run_range) {
+        if attrs == &key.default_attrs {
+            // Skip if attrs matches default attrs
+            continue;
+        }
+        let start = max(attrs_range.start, start_run)
+            .checked_sub(start_run)
+            .unwrap_or(0);
+        let end = min(attrs_range.end, end_run)
+            .checked_sub(start_run)
+            .unwrap_or(0);
+        if end > start {
+            let range = start..end;
+            key.attrs_spans.push((range, attrs.clone()));
+        }
+    }
+    if let Some(cache_glyphs) = font_system.shape_run_cache.get(&key) {
+        // Use cached glyphs
+        glyphs.extend_from_slice(&cache_glyphs);
+        return;
+    }
+
+    // Fill in cache if not already set
+    let mut cache_glyphs = Vec::new();
+    shape_run(
+        scratch,
+        &mut cache_glyphs,
+        font_system,
+        line,
+        attrs_list,
+        start_run,
+        end_run,
+        span_rtl,
+    );
+    glyphs.extend_from_slice(&cache_glyphs);
+    font_system.shape_run_cache.insert(key, cache_glyphs);
 }
 
 #[cfg(feature = "swash")]

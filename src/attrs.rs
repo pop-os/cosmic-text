@@ -252,7 +252,7 @@ impl AttrsOwned {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AttrsList {
     defaults: AttrsOwned,
-    spans: RangeMap<usize, AttrsOwned>,
+    pub(crate) spans: RangeMap<usize, AttrsOwned>,
 }
 
 impl AttrsList {

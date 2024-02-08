@@ -36,7 +36,9 @@ features = ["hardcoded-data"]
 
 [features]
 default = ["std", "swash", "fontconfig"]
+fontconfig = ["fontdb/fontconfig", "std"]
 no_std = ["rustybuzz/libm", "hashbrown"]
+shape-run-cache = []
 std = [
     "fontdb/memmap",
     "fontdb/std",
@@ -47,7 +49,6 @@ std = [
 vi = ["modit", "syntect", "cosmic_undo_2"]
 wasm-web = ["sys-locale?/js"]
 warn_on_missing_glyphs = []
-fontconfig = ["fontdb/fontconfig", "std"]
 
 [[bench]]
 name = "layout"

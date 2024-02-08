@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Add `shape-run-cache` feature, that can significantly improve shaping performance
+
 ### Removed
 
 - Remove editor-libcosmic, see cosmic-edit instead

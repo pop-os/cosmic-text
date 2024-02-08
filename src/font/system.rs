@@ -32,6 +32,10 @@ pub struct FontSystem {
 
     /// Cache for rustybuzz shape plans.
     shape_plan_cache: ShapePlanCache,
+
+    /// Cache for shaped runs
+    #[cfg(feature = "shape-run-cache")]
+    pub shape_run_cache: crate::ShapeRunCache,
 }
 
 impl fmt::Debug for FontSystem {
@@ -81,6 +85,8 @@ impl FontSystem {
             font_cache: Default::default(),
             font_matches_cache: Default::default(),
             shape_plan_cache: ShapePlanCache::default(),
+            #[cfg(feature = "shape-run-cache")]
+            shape_run_cache: crate::ShapeRunCache::default(),
         }
     }
 
