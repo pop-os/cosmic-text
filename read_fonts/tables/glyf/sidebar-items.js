@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["Anchor","Glyph","ToPathError"],"fn":["to_path"],"struct":["Component","CompositeGlyphFlags","CurvePoint","PointFlags","PointMarker","SimpleGlyphFlags","Transform"],"type":["CompositeGlyph","Glyf","SimpleGlyph"]};
+window.SIDEBAR_ITEMS = {"enum":["Anchor","Glyph","ToPathError"],"fn":["to_path"],"mod":["bytecode"],"struct":["Component","CompositeGlyphFlags","CurvePoint","PointFlags","PointMarker","SimpleGlyphFlags","Transform"],"type":["CompositeGlyph","Glyf","SimpleGlyph"]};

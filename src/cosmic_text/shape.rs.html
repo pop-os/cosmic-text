@@ -1455,6 +1455,15 @@
 <a href="#1455" id="1455">1455</a>
 <a href="#1456" id="1456">1456</a>
 <a href="#1457" id="1457">1457</a>
+<a href="#1458" id="1458">1458</a>
+<a href="#1459" id="1459">1459</a>
+<a href="#1460" id="1460">1460</a>
+<a href="#1461" id="1461">1461</a>
+<a href="#1462" id="1462">1462</a>
+<a href="#1463" id="1463">1463</a>
+<a href="#1464" id="1464">1464</a>
+<a href="#1465" id="1465">1465</a>
+<a href="#1466" id="1466">1466</a>
 </pre></div><pre class="rust"><code><span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0
 
 </span><span class="attr">#![allow(clippy::too_many_arguments)]
@@ -1839,8 +1848,12 @@
         }
     }
     <span class="kw">if let </span><span class="prelude-val">Some</span>(cache_glyphs) = font_system.shape_run_cache.get(<span class="kw-2">&amp;</span>key) {
-        <span class="comment">// Use cached glyphs
-        </span>glyphs.extend_from_slice(<span class="kw-2">&amp;</span>cache_glyphs);
+        <span class="kw">for </span><span class="kw-2">mut </span>glyph <span class="kw">in </span>cache_glyphs.iter().cloned() {
+            <span class="comment">// Adjust glyph start and end to match run position
+            </span>glyph.start += start_run;
+            glyph.end += start_run;
+            glyphs.push(glyph);
+        }
         <span class="kw">return</span>;
     }
 
@@ -1857,6 +1870,11 @@
         span_rtl,
     );
     glyphs.extend_from_slice(<span class="kw-2">&amp;</span>cache_glyphs);
+    <span class="kw">for </span>glyph <span class="kw">in </span>cache_glyphs.iter_mut() {
+        <span class="comment">// Adjust glyph start and end to remove run position
+        </span>glyph.start -= start_run;
+        glyph.end -= start_run;
+    }
     font_system.shape_run_cache.insert(key, cache_glyphs);
 }
 

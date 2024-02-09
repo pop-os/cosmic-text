@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["Gaps","IntoIter","Iter","Overlapping","RangeSet"]};
+window.SIDEBAR_ITEMS = {"struct":["Gaps","IntoIter","Iter","Overlapping","RangeSet"],"type":["Intersection","Union"]};
