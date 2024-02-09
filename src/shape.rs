@@ -382,8 +382,12 @@ fn shape_run_cached(
         }
     }
     if let Some(cache_glyphs) = font_system.shape_run_cache.get(&key) {
-        // Use cached glyphs
-        glyphs.extend_from_slice(&cache_glyphs);
+        for mut glyph in cache_glyphs.iter().cloned() {
+            // Adjust glyph start and end to match run position
+            glyph.start += start_run;
+            glyph.end += start_run;
+            glyphs.push(glyph);
+        }
         return;
     }
 
@@ -400,6 +404,11 @@ fn shape_run_cached(
         span_rtl,
     );
     glyphs.extend_from_slice(&cache_glyphs);
+    for glyph in cache_glyphs.iter_mut() {
+        // Adjust glyph start and end to remove run position
+        glyph.start -= start_run;
+        glyph.end -= start_run;
+    }
     font_system.shape_run_cache.insert(key, cache_glyphs);
 }
 
