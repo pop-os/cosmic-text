@@ -63,8 +63,9 @@ pub enum SubpixelBin {
 
 impl SubpixelBin {
     pub fn new(pos: f32) -> (i32, Self) {
-        let (fract, truncf) = libm::modff(pos);
-        let trunc = truncf as i32;
+        let trunc = pos as i32;
+        let fract = pos - trunc as f32;
+
         if pos.is_sign_negative() {
             if fract > -0.125 {
                 (trunc, Self::Zero)

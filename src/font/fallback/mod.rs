@@ -2,8 +2,6 @@
 
 use alloc::collections::BTreeSet;
 use alloc::sync::Arc;
-#[cfg(not(feature = "std"))]
-use alloc::vec::Vec;
 use fontdb::Family;
 use unicode_script::Script;
 

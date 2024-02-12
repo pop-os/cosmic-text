@@ -13,8 +13,12 @@ cargo fmt --check
 echo Build with default features
 build
 
+echo Install target for no_std build
+# This is necessary because Rust otherwise may silently use std regardless.
+rustup target add thumbv8m.main-none-eabihf
+
 echo Build with only no_std feature
-build --no-default-features --features no_std
+build --no-default-features --features no_std --target thumbv8m.main-none-eabihf
 
 echo Build with only std feature
 build --no-default-features --features std
