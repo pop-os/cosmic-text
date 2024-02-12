@@ -14,7 +14,7 @@ bitflags = "2.4.1"
 cosmic_undo_2 = { version = "0.2.0", optional = true }
 fontdb = { version = "0.16.0", default-features = false }
 hashbrown = { version = "0.14.1", optional = true, default-features = false }
-libm = "0.2.8"
+libm = { version = "0.2.8", optional = true }
 log = "0.4.20"
 modit = { version = "0.1.4", optional = true }
 rangemap = "1.4.0"
@@ -38,7 +38,7 @@ features = ["hardcoded-data"]
 [features]
 default = ["std", "swash", "fontconfig"]
 fontconfig = ["fontdb/fontconfig", "std"]
-no_std = ["rustybuzz/libm", "hashbrown"]
+no_std = ["rustybuzz/libm", "hashbrown", "dep:libm"]
 shape-run-cache = []
 std = [
     "fontdb/memmap",
