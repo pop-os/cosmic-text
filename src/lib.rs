@@ -137,6 +137,8 @@ pub use self::swash::*;
 #[cfg(feature = "swash")]
 mod swash;
 
+mod math;
+
 type BuildHasher = core::hash::BuildHasherDefault<rustc_hash::FxHasher>;
 
 #[cfg(feature = "std")]

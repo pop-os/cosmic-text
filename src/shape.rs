@@ -13,7 +13,7 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use crate::fallback::FontFallbackIter;
 use crate::{
-    Align, AttrsList, CacheKeyFlags, Color, Font, FontSystem, LayoutGlyph, LayoutLine,
+    math, Align, AttrsList, CacheKeyFlags, Color, Font, FontSystem, LayoutGlyph, LayoutLine,
     ShapePlanCache, Wrap,
 };
 
@@ -1394,7 +1394,8 @@ impl ShapeLine {
                                     if glyph_em_width != match_em_width =>
                                 {
                                     let glyph_to_match_factor = glyph_em_width / match_em_width;
-                                    let glyph_font_size = glyph_to_match_factor.round().max(1.0)
+                                    let glyph_font_size = math::roundf(glyph_to_match_factor)
+                                        .max(1.0)
                                         / glyph_to_match_factor
                                         * font_size;
                                     log::trace!("Adjusted glyph font size ({font_size} => {glyph_font_size})");

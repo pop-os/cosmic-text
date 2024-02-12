@@ -5,7 +5,7 @@ use core::fmt::Display;
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 
-use crate::{CacheKey, CacheKeyFlags, Color};
+use crate::{math, CacheKey, CacheKeyFlags, Color};
 
 /// A laid out glyph
 #[derive(Clone, Debug)]
@@ -75,7 +75,7 @@ impl LayoutGlyph {
             self.font_size * scale,
             (
                 (self.x + x_offset) * scale + offset.0,
-                libm::truncf((self.y - y_offset) * scale + offset.1), // Hinting in Y axis
+                math::truncf((self.y - y_offset) * scale + offset.1), // Hinting in Y axis
             ),
             self.cache_key_flags,
         );
