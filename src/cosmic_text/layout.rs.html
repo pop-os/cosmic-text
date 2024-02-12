@@ -149,7 +149,7 @@
 <span class="attr">#[cfg(not(feature = <span class="string">&quot;std&quot;</span>))]
 </span><span class="kw">use </span>alloc::vec::Vec;
 
-<span class="kw">use crate</span>::{CacheKey, CacheKeyFlags, Color};
+<span class="kw">use crate</span>::{math, CacheKey, CacheKeyFlags, Color};
 
 <span class="doccomment">/// A laid out glyph
 </span><span class="attr">#[derive(Clone, Debug)]
@@ -219,7 +219,7 @@
             <span class="self">self</span>.font_size * scale,
             (
                 (<span class="self">self</span>.x + x_offset) * scale + offset.<span class="number">0</span>,
-                libm::truncf((<span class="self">self</span>.y - y_offset) * scale + offset.<span class="number">1</span>), <span class="comment">// Hinting in Y axis
+                math::truncf((<span class="self">self</span>.y - y_offset) * scale + offset.<span class="number">1</span>), <span class="comment">// Hinting in Y axis
             </span>),
             <span class="self">self</span>.cache_key_flags,
         );

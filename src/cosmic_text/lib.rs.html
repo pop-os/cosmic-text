@@ -143,6 +143,8 @@
 <a href="#143" id="143">143</a>
 <a href="#144" id="144">144</a>
 <a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
 </pre></div><pre class="rust"><code><span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0
 
 </span><span class="doccomment">//! # COSMIC Text
@@ -281,6 +283,8 @@
 </span><span class="kw">pub use </span><span class="self">self</span>::swash::<span class="kw-2">*</span>;
 <span class="attr">#[cfg(feature = <span class="string">&quot;swash&quot;</span>)]
 </span><span class="kw">mod </span>swash;
+
+<span class="kw">mod </span>math;
 
 <span class="kw">type </span>BuildHasher = core::hash::BuildHasherDefault&lt;rustc_hash::FxHasher&gt;;
 

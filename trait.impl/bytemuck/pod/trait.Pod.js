@@ -1,4 +1,4 @@
 (function() {var implementors = {
 "bytemuck":[],
-"rustybuzz":[["impl <a class=\"trait\" href=\"bytemuck/pod/trait.Pod.html\" title=\"trait bytemuck::pod::Pod\">Pod</a> for <a class=\"struct\" href=\"rustybuzz/struct.GlyphPosition.html\" title=\"struct rustybuzz::GlyphPosition\">GlyphPosition</a>"],["impl <a class=\"trait\" href=\"bytemuck/pod/trait.Pod.html\" title=\"trait bytemuck::pod::Pod\">Pod</a> for <a class=\"struct\" href=\"rustybuzz/struct.GlyphInfo.html\" title=\"struct rustybuzz::GlyphInfo\">GlyphInfo</a>"]]
+"rustybuzz":[["impl <a class=\"trait\" href=\"bytemuck/pod/trait.Pod.html\" title=\"trait bytemuck::pod::Pod\">Pod</a> for <a class=\"struct\" href=\"rustybuzz/struct.GlyphInfo.html\" title=\"struct rustybuzz::GlyphInfo\">GlyphInfo</a>"],["impl <a class=\"trait\" href=\"bytemuck/pod/trait.Pod.html\" title=\"trait bytemuck::pod::Pod\">Pod</a> for <a class=\"struct\" href=\"rustybuzz/struct.GlyphPosition.html\" title=\"struct rustybuzz::GlyphPosition\">GlyphPosition</a>"]]
 };if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

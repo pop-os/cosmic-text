@@ -1464,6 +1464,7 @@
 <a href="#1464" id="1464">1464</a>
 <a href="#1465" id="1465">1465</a>
 <a href="#1466" id="1466">1466</a>
+<a href="#1467" id="1467">1467</a>
 </pre></div><pre class="rust"><code><span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0
 
 </span><span class="attr">#![allow(clippy::too_many_arguments)]
@@ -1479,7 +1480,7 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::fallback::FontFallbackIter;
 <span class="kw">use crate</span>::{
-    Align, AttrsList, CacheKeyFlags, Color, Font, FontSystem, LayoutGlyph, LayoutLine,
+    math, Align, AttrsList, CacheKeyFlags, Color, Font, FontSystem, LayoutGlyph, LayoutLine,
     ShapePlanCache, Wrap,
 };
 
@@ -2860,7 +2861,8 @@
                                     <span class="kw">if </span>glyph_em_width != match_em_width =&gt;
                                 {
                                     <span class="kw">let </span>glyph_to_match_factor = glyph_em_width / match_em_width;
-                                    <span class="kw">let </span>glyph_font_size = glyph_to_match_factor.round().max(<span class="number">1.0</span>)
+                                    <span class="kw">let </span>glyph_font_size = math::roundf(glyph_to_match_factor)
+                                        .max(<span class="number">1.0</span>)
                                         / glyph_to_match_factor
                                         * font_size;
                                     <span class="macro">log::trace!</span>(<span class="string">&quot;Adjusted glyph font size ({font_size} =&gt; {glyph_font_size})&quot;</span>);
