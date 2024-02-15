@@ -57,11 +57,11 @@ impl<'buffer> Editor<'buffer> {
         F: FnMut(i32, i32, u32, u32, Color),
     {
         self.with_buffer(|buffer| {
-            let line_height = buffer.metrics().line_height;
             for run in buffer.layout_runs() {
                 let line_i = run.line_i;
                 let line_y = run.line_y;
                 let line_top = run.line_top;
+                let line_height = run.line_height;
 
                 let cursor_glyph_opt = |cursor: &Cursor| -> Option<(usize, f32)> {
                     if cursor.line == line_i {

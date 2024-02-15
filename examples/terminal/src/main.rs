@@ -4,8 +4,12 @@
 //! or `cargo run --package terminal -- "my own text"`
 
 use colored::Colorize;
-use cosmic_text::{Attrs, Buffer, Color, FontSystem, Metrics, Shaping, SwashCache};
+use cosmic_text::{Attrs, Buffer, Color, FontSystem, LineHeight, Shaping, SwashCache};
 use std::fmt::Write;
+
+// Text metrics indicate the font size and line height of a buffer
+const FONT_SIZE: f32 = 14.0;
+const LINE_HEIGHT: f32 = FONT_SIZE * 1.2;
 
 fn main() {
     // A FontSystem provides access to detected system fonts, create one per application
@@ -14,13 +18,8 @@ fn main() {
     // A SwashCache stores rasterized glyphs, create one per application
     let mut swash_cache = SwashCache::new();
 
-    // Text metrics indicate the font size and line height of a buffer
-    const FONT_SIZE: f32 = 14.0;
-    const LINE_HEIGHT: f32 = FONT_SIZE * 1.2;
-    let metrics = Metrics::new(FONT_SIZE, LINE_HEIGHT);
-
     // A Buffer provides shaping and layout for a UTF-8 string, create one per text widget
-    let mut buffer = Buffer::new(&mut font_system, metrics);
+    let mut buffer = Buffer::new(&mut font_system);
 
     let mut buffer = buffer.borrow_with(&mut font_system);
 
@@ -30,7 +29,9 @@ fn main() {
     buffer.set_size(width, height);
 
     // Attributes indicate what font to choose
-    let attrs = Attrs::new();
+    let attrs = Attrs::new()
+        .size(FONT_SIZE)
+        .line_height(LineHeight::Absolute(LINE_HEIGHT));
 
     // Add some text!
     let text = std::env::args()

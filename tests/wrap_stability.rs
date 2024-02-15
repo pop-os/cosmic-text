@@ -1,6 +1,6 @@
 use cosmic_text::{
     fontdb, Align, Attrs, AttrsList, BidiParagraphs, Buffer, Family, FontSystem, LayoutLine,
-    Metrics, ShapeLine, Shaping, Weight, Wrap,
+    ShapeLine, Shaping, Weight, Wrap,
 };
 
 // Test for https://github.com/pop-os/cosmic-text/issues/134
@@ -13,7 +13,8 @@ fn stable_wrap() {
     let attrs = AttrsList::new(
         Attrs::new()
             .family(Family::Name("FiraMono"))
-            .weight(Weight::MEDIUM),
+            .weight(Weight::MEDIUM)
+            .size(font_size),
     );
     let mut font_system =
         FontSystem::new_with_locale_and_db("en-US".into(), fontdb::Database::new());
@@ -23,11 +24,21 @@ fn stable_wrap() {
     let mut check_wrap = |text: &_, wrap, start_width| {
         let line = ShapeLine::new(&mut font_system, text, &attrs, Shaping::Advanced);
 
-        let layout_unbounded = line.layout(font_size, start_width, wrap, Some(Align::Left), None);
+        let layout_unbounded = line.layout(
+            /*font_size, */ start_width,
+            wrap,
+            Some(Align::Left),
+            None,
+        );
         let max_width = layout_unbounded.iter().map(|l| l.w).fold(0.0, f32::max);
         let new_limit = f32::min(start_width, max_width);
 
-        let layout_bounded = line.layout(font_size, new_limit, wrap, Some(Align::Left), None);
+        let layout_bounded = line.layout(
+            /*font_size, */ new_limit,
+            wrap,
+            Some(Align::Left),
+            None,
+        );
         let bounded_max_width = layout_bounded.iter().map(|l| l.w).fold(0.0, f32::max);
 
         // For debugging:
@@ -74,15 +85,17 @@ fn stable_wrap() {
 #[test]
 fn wrap_extra_line() {
     let mut font_system = FontSystem::new();
-    let metrics = Metrics::new(14.0, 20.0);
+    let attrs = Attrs::new()
+        .family(cosmic_text::Family::Name("Inter"))
+        .size(14.0)
+        .line_height(cosmic_text::LineHeight::Absolute(20.0));
 
-    let mut buffer = Buffer::new(&mut font_system, metrics);
-
+    let mut buffer = Buffer::new(&mut font_system);
     let mut buffer = buffer.borrow_with(&mut font_system);
 
     // Add some text!
     buffer.set_wrap(Wrap::Word);
-    buffer.set_text("Lorem ipsum dolor sit amet, qui minim labore adipisicing\n\nweeewoooo minim sint cillum sint consectetur cupidatat.", Attrs::new().family(cosmic_text::Family::Name("Inter")), Shaping::Advanced);
+    buffer.set_text("Lorem ipsum dolor sit amet, qui minim labore adipisicing\n\nweeewoooo minim sint cillum sint consectetur cupidatat.", attrs, Shaping::Advanced);
 
     // Set a size for the text buffer, in pixels
     buffer.set_size(50.0, 1000.0);

@@ -16,6 +16,8 @@ pub struct LayoutGlyph {
     pub end: usize,
     /// Font size of the glyph
     pub font_size: f32,
+    /// Line height
+    pub line_height: f32,
     /// Font id of the glyph
     pub font_id: fontdb::ID,
     /// Font id of the glyph
@@ -95,6 +97,16 @@ pub struct LayoutLine {
     pub max_descent: f32,
     /// Glyphs in line
     pub glyphs: Vec<LayoutGlyph>,
+}
+
+impl LayoutLine {
+    pub fn line_height(&self) -> f32 {
+        self.glyphs
+            .iter()
+            .map(|g| g.line_height)
+            .reduce(f32::max)
+            .unwrap_or_default()
+    }
 }
 
 /// Wrapping mode

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic_text::{
-    Action, Attrs, Buffer, Edit, Family, FontSystem, Metrics, Scroll, Shaping, SwashCache,
+    Action, Attrs, Buffer, Edit, Family, FontSystem, LineHeight, Scroll, Shaping, SwashCache,
 };
 use std::{collections::HashMap, env, fs, num::NonZeroU32, rc::Rc, slice};
 use tiny_skia::{Color, Paint, PixmapMut, Rect, Transform};
@@ -18,24 +18,27 @@ fn main() {
     let path = if let Some(arg) = env::args().nth(1) {
         arg
     } else {
-        "sample/hello.txt".to_string()
+        "../../sample/hello.txt".to_string()
     };
 
     let mut font_system = FontSystem::new();
 
     let mut swash_cache = SwashCache::new();
 
-    let mut buffer = Buffer::new_empty(Metrics::new(14.0, 20.0));
+    let mut buffer = Buffer::new_empty();
 
     let mut buffer = buffer.borrow_with(&mut font_system);
 
-    let attrs = Attrs::new().family(Family::Monospace);
-    match fs::read_to_string(&path) {
-        Ok(text) => buffer.set_text(&text, attrs, Shaping::Advanced),
+    let attrs = Attrs::new()
+        .family(Family::Monospace)
+        .size(14.0)
+        .line_height(LineHeight::Proportional(1.2));
+    let text = match fs::read_to_string(&path) {
+        Ok(text) => text,
         Err(err) => {
-            log::error!("failed to load {:?}: {}", path, err);
+            panic!("failed to load {:?}: {}", path, err);
         }
-    }
+    };
 
     let event_loop = EventLoop::new().unwrap();
 
@@ -81,6 +84,8 @@ fn main() {
                             let size = window.inner_size();
                             (size.width, size.height)
                         };
+                        let scale = window.scale_factor() as f32;
+                        buffer.set_text(&text, attrs.scale(scale), Shaping::Advanced);
                         surface
                             .resize(
                                 NonZeroU32::new(width).unwrap(),
