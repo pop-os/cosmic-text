@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.4/src/tables/../../generated/generated_bitmap.rs`."><title>generated_bitmap.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.5/src/tables/../../generated/generated_bitmap.rs`."><title>generated_bitmap.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1722,30 +1723,30 @@
     <span class="kw">fn </span>this_trait_should_only_be_implemented_in_generated_code() {}
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeRecord&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>BitmapSize {
-    <span class="kw">fn </span>traverse(<span class="self">self</span>, data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; RecordResolver&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeRecord&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>BitmapSize {
+    <span class="kw">fn </span>traverse(<span class="self">self</span>, data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; RecordResolver&lt;<span class="lifetime">'a</span>&gt; {
         RecordResolver {
-            name: <span class="string">&quot;BitmapSize&quot;</span>,
+            name: <span class="string">"BitmapSize"</span>,
             get_field: Box::new(<span class="kw">move </span>|idx, _data| <span class="kw">match </span>idx {
                 <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                    <span class="string">&quot;index_subtable_array_offset&quot;</span>,
+                    <span class="string">"index_subtable_array_offset"</span>,
                     <span class="self">self</span>.index_subtable_array_offset(),
                 )),
-                <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;index_tables_size&quot;</span>, <span class="self">self</span>.index_tables_size())),
+                <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"index_tables_size"</span>, <span class="self">self</span>.index_tables_size())),
                 <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                    <span class="string">&quot;number_of_index_subtables&quot;</span>,
+                    <span class="string">"number_of_index_subtables"</span>,
                     <span class="self">self</span>.number_of_index_subtables(),
                 )),
-                <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;color_ref&quot;</span>, <span class="self">self</span>.color_ref())),
-                <span class="number">4usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;hori&quot;</span>, <span class="self">self</span>.hori().traversal_type(_data))),
-                <span class="number">5usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;vert&quot;</span>, <span class="self">self</span>.vert().traversal_type(_data))),
-                <span class="number">6usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;start_glyph_index&quot;</span>, <span class="self">self</span>.start_glyph_index())),
-                <span class="number">7usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;end_glyph_index&quot;</span>, <span class="self">self</span>.end_glyph_index())),
-                <span class="number">8usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;ppem_x&quot;</span>, <span class="self">self</span>.ppem_x())),
-                <span class="number">9usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;ppem_y&quot;</span>, <span class="self">self</span>.ppem_y())),
-                <span class="number">10usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;bit_depth&quot;</span>, <span class="self">self</span>.bit_depth())),
-                <span class="number">11usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;flags&quot;</span>, <span class="self">self</span>.flags())),
+                <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"color_ref"</span>, <span class="self">self</span>.color_ref())),
+                <span class="number">4usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"hori"</span>, <span class="self">self</span>.hori().traversal_type(_data))),
+                <span class="number">5usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"vert"</span>, <span class="self">self</span>.vert().traversal_type(_data))),
+                <span class="number">6usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"start_glyph_index"</span>, <span class="self">self</span>.start_glyph_index())),
+                <span class="number">7usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"end_glyph_index"</span>, <span class="self">self</span>.end_glyph_index())),
+                <span class="number">8usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"ppem_x"</span>, <span class="self">self</span>.ppem_x())),
+                <span class="number">9usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"ppem_y"</span>, <span class="self">self</span>.ppem_y())),
+                <span class="number">10usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"bit_depth"</span>, <span class="self">self</span>.bit_depth())),
+                <span class="number">11usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"flags"</span>, <span class="self">self</span>.flags())),
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
             }),
             data,
@@ -1844,30 +1845,30 @@
     <span class="kw">fn </span>this_trait_should_only_be_implemented_in_generated_code() {}
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeRecord&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>SbitLineMetrics {
-    <span class="kw">fn </span>traverse(<span class="self">self</span>, data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; RecordResolver&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeRecord&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>SbitLineMetrics {
+    <span class="kw">fn </span>traverse(<span class="self">self</span>, data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; RecordResolver&lt;<span class="lifetime">'a</span>&gt; {
         RecordResolver {
-            name: <span class="string">&quot;SbitLineMetrics&quot;</span>,
+            name: <span class="string">"SbitLineMetrics"</span>,
             get_field: Box::new(<span class="kw">move </span>|idx, _data| <span class="kw">match </span>idx {
-                <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;ascender&quot;</span>, <span class="self">self</span>.ascender())),
-                <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;descender&quot;</span>, <span class="self">self</span>.descender())),
-                <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;width_max&quot;</span>, <span class="self">self</span>.width_max())),
+                <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"ascender"</span>, <span class="self">self</span>.ascender())),
+                <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"descender"</span>, <span class="self">self</span>.descender())),
+                <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"width_max"</span>, <span class="self">self</span>.width_max())),
                 <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                    <span class="string">&quot;caret_slope_numerator&quot;</span>,
+                    <span class="string">"caret_slope_numerator"</span>,
                     <span class="self">self</span>.caret_slope_numerator(),
                 )),
                 <span class="number">4usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                    <span class="string">&quot;caret_slope_denominator&quot;</span>,
+                    <span class="string">"caret_slope_denominator"</span>,
                     <span class="self">self</span>.caret_slope_denominator(),
                 )),
-                <span class="number">5usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;caret_offset&quot;</span>, <span class="self">self</span>.caret_offset())),
-                <span class="number">6usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;min_origin_sb&quot;</span>, <span class="self">self</span>.min_origin_sb())),
-                <span class="number">7usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;min_advance_sb&quot;</span>, <span class="self">self</span>.min_advance_sb())),
-                <span class="number">8usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;max_before_bl&quot;</span>, <span class="self">self</span>.max_before_bl())),
-                <span class="number">9usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;min_after_bl&quot;</span>, <span class="self">self</span>.min_after_bl())),
-                <span class="number">10usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;pad1&quot;</span>, <span class="self">self</span>.pad1())),
-                <span class="number">11usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;pad2&quot;</span>, <span class="self">self</span>.pad2())),
+                <span class="number">5usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"caret_offset"</span>, <span class="self">self</span>.caret_offset())),
+                <span class="number">6usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"min_origin_sb"</span>, <span class="self">self</span>.min_origin_sb())),
+                <span class="number">7usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"min_advance_sb"</span>, <span class="self">self</span>.min_advance_sb())),
+                <span class="number">8usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"max_before_bl"</span>, <span class="self">self</span>.max_before_bl())),
+                <span class="number">9usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"min_after_bl"</span>, <span class="self">self</span>.min_after_bl())),
+                <span class="number">10usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"pad1"</span>, <span class="self">self</span>.pad1())),
+                <span class="number">11usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"pad2"</span>, <span class="self">self</span>.pad2())),
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
             }),
             data,
@@ -1877,7 +1878,7 @@
 
 <span class="doccomment">/// [Bitmap flags](https://learn.microsoft.com/en-us/typography/opentype/spec/eblc#bitmap-flags).
 </span><span class="attr">#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = <span class="string">&quot;serde&quot;</span>, derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = <span class="string">"serde"</span>, derive(serde::Serialize, serde::Deserialize))]
 </span><span class="kw">pub struct </span>BitmapFlags {
     bits: u8,
 }
@@ -2011,7 +2012,7 @@
     /// Specifically, the returned set contains all flags present in
     /// `self`, except for the ones present in `other`.
     ///
-    /// It is also conceptually equivalent to the &quot;bit-clear&quot; operation:
+    /// It is also conceptually equivalent to the "bit-clear" operation:
     /// `flags &amp; !other` (and this syntax is also supported).
     ///
     /// This is equivalent to using the `-` operator (e.g.
@@ -2120,21 +2121,21 @@
 <span class="kw">impl </span>std::fmt::Debug <span class="kw">for </span>BitmapFlags {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter) -&gt; std::fmt::Result {
         <span class="kw">let </span>members: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span>str, <span class="self">Self</span>)] = <span class="kw-2">&amp;</span>[
-            (<span class="string">&quot;HORIZONTAL_METRICS&quot;</span>, <span class="self">Self</span>::HORIZONTAL_METRICS),
-            (<span class="string">&quot;VERTICAL_METRICS&quot;</span>, <span class="self">Self</span>::VERTICAL_METRICS),
+            (<span class="string">"HORIZONTAL_METRICS"</span>, <span class="self">Self</span>::HORIZONTAL_METRICS),
+            (<span class="string">"VERTICAL_METRICS"</span>, <span class="self">Self</span>::VERTICAL_METRICS),
         ];
         <span class="kw">let </span><span class="kw-2">mut </span>first = <span class="bool-val">true</span>;
         <span class="kw">for </span>(name, value) <span class="kw">in </span>members {
             <span class="kw">if </span><span class="self">self</span>.contains(<span class="kw-2">*</span>value) {
                 <span class="kw">if </span>!first {
-                    f.write_str(<span class="string">&quot; | &quot;</span>)<span class="question-mark">?</span>;
+                    f.write_str(<span class="string">" | "</span>)<span class="question-mark">?</span>;
                 }
                 first = <span class="bool-val">false</span>;
                 f.write_str(name)<span class="question-mark">?</span>;
             }
         }
         <span class="kw">if </span>first {
-            f.write_str(<span class="string">&quot;(empty)&quot;</span>)<span class="question-mark">?</span>;
+            f.write_str(<span class="string">"(empty)"</span>)<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
     }
@@ -2175,9 +2176,9 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;BitmapFlags&gt; <span class="kw">for </span>FieldType&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>from(src: BitmapFlags) -&gt; FieldType&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; From&lt;BitmapFlags&gt; <span class="kw">for </span>FieldType&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>from(src: BitmapFlags) -&gt; FieldType&lt;<span class="lifetime">'a</span>&gt; {
         src.bits().into()
     }
 }
@@ -2265,20 +2266,20 @@
     <span class="kw">fn </span>this_trait_should_only_be_implemented_in_generated_code() {}
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeRecord&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>BigGlyphMetrics {
-    <span class="kw">fn </span>traverse(<span class="self">self</span>, data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; RecordResolver&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeRecord&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>BigGlyphMetrics {
+    <span class="kw">fn </span>traverse(<span class="self">self</span>, data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; RecordResolver&lt;<span class="lifetime">'a</span>&gt; {
         RecordResolver {
-            name: <span class="string">&quot;BigGlyphMetrics&quot;</span>,
+            name: <span class="string">"BigGlyphMetrics"</span>,
             get_field: Box::new(<span class="kw">move </span>|idx, _data| <span class="kw">match </span>idx {
-                <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;height&quot;</span>, <span class="self">self</span>.height())),
-                <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;width&quot;</span>, <span class="self">self</span>.width())),
-                <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;hori_bearing_x&quot;</span>, <span class="self">self</span>.hori_bearing_x())),
-                <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;hori_bearing_y&quot;</span>, <span class="self">self</span>.hori_bearing_y())),
-                <span class="number">4usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;hori_advance&quot;</span>, <span class="self">self</span>.hori_advance())),
-                <span class="number">5usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;vert_bearing_x&quot;</span>, <span class="self">self</span>.vert_bearing_x())),
-                <span class="number">6usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;vert_bearing_y&quot;</span>, <span class="self">self</span>.vert_bearing_y())),
-                <span class="number">7usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;vert_advance&quot;</span>, <span class="self">self</span>.vert_advance())),
+                <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"height"</span>, <span class="self">self</span>.height())),
+                <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"width"</span>, <span class="self">self</span>.width())),
+                <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"hori_bearing_x"</span>, <span class="self">self</span>.hori_bearing_x())),
+                <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"hori_bearing_y"</span>, <span class="self">self</span>.hori_bearing_y())),
+                <span class="number">4usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"hori_advance"</span>, <span class="self">self</span>.hori_advance())),
+                <span class="number">5usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"vert_bearing_x"</span>, <span class="self">self</span>.vert_bearing_x())),
+                <span class="number">6usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"vert_bearing_y"</span>, <span class="self">self</span>.vert_bearing_y())),
+                <span class="number">7usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"vert_advance"</span>, <span class="self">self</span>.vert_advance())),
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
             }),
             data,
@@ -2345,17 +2346,17 @@
     <span class="kw">fn </span>this_trait_should_only_be_implemented_in_generated_code() {}
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeRecord&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>SmallGlyphMetrics {
-    <span class="kw">fn </span>traverse(<span class="self">self</span>, data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; RecordResolver&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeRecord&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>SmallGlyphMetrics {
+    <span class="kw">fn </span>traverse(<span class="self">self</span>, data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; RecordResolver&lt;<span class="lifetime">'a</span>&gt; {
         RecordResolver {
-            name: <span class="string">&quot;SmallGlyphMetrics&quot;</span>,
+            name: <span class="string">"SmallGlyphMetrics"</span>,
             get_field: Box::new(<span class="kw">move </span>|idx, _data| <span class="kw">match </span>idx {
-                <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;height&quot;</span>, <span class="self">self</span>.height())),
-                <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;width&quot;</span>, <span class="self">self</span>.width())),
-                <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;bearing_x&quot;</span>, <span class="self">self</span>.bearing_x())),
-                <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;bearing_y&quot;</span>, <span class="self">self</span>.bearing_y())),
-                <span class="number">4usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;advance&quot;</span>, <span class="self">self</span>.advance())),
+                <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"height"</span>, <span class="self">self</span>.height())),
+                <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"width"</span>, <span class="self">self</span>.width())),
+                <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"bearing_x"</span>, <span class="self">self</span>.bearing_x())),
+                <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"bearing_y"</span>, <span class="self">self</span>.bearing_y())),
+                <span class="number">4usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"advance"</span>, <span class="self">self</span>.advance())),
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
             }),
             data,
@@ -2383,8 +2384,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>IndexSubtableArray&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>IndexSubtableArray&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>cursor = data.cursor();
         cursor.advance::&lt;GlyphId&gt;();
         cursor.advance::&lt;GlyphId&gt;();
@@ -2394,9 +2395,9 @@
 }
 
 <span class="doccomment">/// [IndexSubtableArray](https://learn.microsoft.com/en-us/typography/opentype/spec/eblc#indexsubtablearray) table.
-</span><span class="kw">pub type </span>IndexSubtableArray&lt;<span class="lifetime">&#39;a</span>&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, IndexSubtableArrayMarker&gt;;
+</span><span class="kw">pub type </span>IndexSubtableArray&lt;<span class="lifetime">'a</span>&gt; = TableRef&lt;<span class="lifetime">'a</span>, IndexSubtableArrayMarker&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IndexSubtableArray&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; IndexSubtableArray&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// First glyph ID of this range.
     </span><span class="kw">pub fn </span>first_glyph_index(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; GlyphId {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.first_glyph_index_byte_range();
@@ -2416,17 +2417,17 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>IndexSubtableArray&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>IndexSubtableArray&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;IndexSubtableArray&quot;
+        <span class="string">"IndexSubtableArray"
     </span>}
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">match </span>idx {
-            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;first_glyph_index&quot;</span>, <span class="self">self</span>.first_glyph_index())),
-            <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;last_glyph_index&quot;</span>, <span class="self">self</span>.last_glyph_index())),
+            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"first_glyph_index"</span>, <span class="self">self</span>.first_glyph_index())),
+            <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"last_glyph_index"</span>, <span class="self">self</span>.last_glyph_index())),
             <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                <span class="string">&quot;additional_offset_to_index_subtable&quot;</span>,
+                <span class="string">"additional_offset_to_index_subtable"</span>,
                 <span class="self">self</span>.additional_offset_to_index_subtable(),
             )),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
@@ -2434,24 +2435,24 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>IndexSubtableArray&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt;).fmt(f)
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>IndexSubtableArray&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt;).fmt(f)
     }
 }
 
 <span class="doccomment">/// [IndexSubtables](https://learn.microsoft.com/en-us/typography/opentype/spec/eblc#indexsubtables) format type.
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub enum </span>IndexSubtable&lt;<span class="lifetime">&#39;a</span>&gt; {
-    Format1(IndexSubtable1&lt;<span class="lifetime">&#39;a</span>&gt;),
-    Format2(IndexSubtable2&lt;<span class="lifetime">&#39;a</span>&gt;),
-    Format3(IndexSubtable3&lt;<span class="lifetime">&#39;a</span>&gt;),
-    Format4(IndexSubtable4&lt;<span class="lifetime">&#39;a</span>&gt;),
-    Format5(IndexSubtable5&lt;<span class="lifetime">&#39;a</span>&gt;),
+</span><span class="kw">pub enum </span>IndexSubtable&lt;<span class="lifetime">'a</span>&gt; {
+    Format1(IndexSubtable1&lt;<span class="lifetime">'a</span>&gt;),
+    Format2(IndexSubtable2&lt;<span class="lifetime">'a</span>&gt;),
+    Format3(IndexSubtable3&lt;<span class="lifetime">'a</span>&gt;),
+    Format4(IndexSubtable4&lt;<span class="lifetime">'a</span>&gt;),
+    Format5(IndexSubtable5&lt;<span class="lifetime">'a</span>&gt;),
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IndexSubtable&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; IndexSubtable&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Format of this IndexSubTable.
     </span><span class="kw">pub fn </span>index_format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="kw">match </span><span class="self">self </span>{
@@ -2486,8 +2487,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>IndexSubtable&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>IndexSubtable&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span>format: u16 = data.read_at(<span class="number">0usize</span>)<span class="question-mark">?</span>;
         <span class="kw">match </span>format {
             IndexSubtable1Marker::FORMAT =&gt; <span class="prelude-val">Ok</span>(<span class="self">Self</span>::Format1(FontRead::read(data)<span class="question-mark">?</span>)),
@@ -2500,9 +2501,9 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IndexSubtable&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>dyn_inner&lt;<span class="lifetime">&#39;b</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; IndexSubtable&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>dyn_inner&lt;<span class="lifetime">'b</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::Format1(table) =&gt; table,
             <span class="self">Self</span>::Format2(table) =&gt; table,
@@ -2513,19 +2514,19 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>IndexSubtable&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>IndexSubtable&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
         <span class="self">self</span>.dyn_inner().fmt(f)
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>IndexSubtable&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>IndexSubtable&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
         <span class="self">self</span>.dyn_inner().type_name()
     }
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="self">self</span>.dyn_inner().get_field(idx)
     }
 }
@@ -2560,8 +2561,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>IndexSubtable1&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>IndexSubtable1&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>cursor = data.cursor();
         cursor.advance::&lt;u16&gt;();
         cursor.advance::&lt;u16&gt;();
@@ -2575,9 +2576,9 @@
 }
 
 <span class="doccomment">/// [IndexSubTable1](https://learn.microsoft.com/en-us/typography/opentype/spec/eblc#indexsubtable1-variable-metrics-glyphs-with-4-byte-offsets): variable-metrics glyphs with 4-byte offsets.
-</span><span class="kw">pub type </span>IndexSubtable1&lt;<span class="lifetime">&#39;a</span>&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, IndexSubtable1Marker&gt;;
+</span><span class="kw">pub type </span>IndexSubtable1&lt;<span class="lifetime">'a</span>&gt; = TableRef&lt;<span class="lifetime">'a</span>, IndexSubtable1Marker&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IndexSubtable1&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; IndexSubtable1&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Format of this IndexSubTable.
     </span><span class="kw">pub fn </span>index_format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.index_format_byte_range();
@@ -2596,32 +2597,32 @@
         <span class="self">self</span>.data.read_at(range.start).unwrap()
     }
 
-    <span class="kw">pub fn </span>sbit_offsets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[BigEndian&lt;u32&gt;] {
+    <span class="kw">pub fn </span>sbit_offsets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[BigEndian&lt;u32&gt;] {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.sbit_offsets_byte_range();
         <span class="self">self</span>.data.read_array(range).unwrap()
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>IndexSubtable1&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>IndexSubtable1&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;IndexSubtable1&quot;
+        <span class="string">"IndexSubtable1"
     </span>}
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">match </span>idx {
-            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;index_format&quot;</span>, <span class="self">self</span>.index_format())),
-            <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;image_format&quot;</span>, <span class="self">self</span>.image_format())),
-            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;image_data_offset&quot;</span>, <span class="self">self</span>.image_data_offset())),
-            <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;sbit_offsets&quot;</span>, <span class="self">self</span>.sbit_offsets())),
+            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"index_format"</span>, <span class="self">self</span>.index_format())),
+            <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"image_format"</span>, <span class="self">self</span>.image_format())),
+            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"image_data_offset"</span>, <span class="self">self</span>.image_data_offset())),
+            <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"sbit_offsets"</span>, <span class="self">self</span>.sbit_offsets())),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         }
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>IndexSubtable1&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt;).fmt(f)
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>IndexSubtable1&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt;).fmt(f)
     }
 }
 
@@ -2659,8 +2660,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>IndexSubtable2&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>IndexSubtable2&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>cursor = data.cursor();
         cursor.advance::&lt;u16&gt;();
         cursor.advance::&lt;u16&gt;();
@@ -2675,9 +2676,9 @@
 }
 
 <span class="doccomment">/// [IndexSubTable2](https://learn.microsoft.com/en-us/typography/opentype/spec/eblc#indexsubtable2-all-glyphs-have-identical-metrics): all glyphs have identical metrics.
-</span><span class="kw">pub type </span>IndexSubtable2&lt;<span class="lifetime">&#39;a</span>&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, IndexSubtable2Marker&gt;;
+</span><span class="kw">pub type </span>IndexSubtable2&lt;<span class="lifetime">'a</span>&gt; = TableRef&lt;<span class="lifetime">'a</span>, IndexSubtable2Marker&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IndexSubtable2&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; IndexSubtable2&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Format of this IndexSubTable.
     </span><span class="kw">pub fn </span>index_format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.index_format_byte_range();
@@ -2703,25 +2704,25 @@
     }
 
     <span class="doccomment">/// All glyphs have the same metrics; glyph data may be compressed, byte-aligned, or bit-aligned.
-    </span><span class="kw">pub fn </span>big_metrics(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[BigGlyphMetrics] {
+    </span><span class="kw">pub fn </span>big_metrics(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[BigGlyphMetrics] {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.big_metrics_byte_range();
         <span class="self">self</span>.data.read_array(range).unwrap()
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>IndexSubtable2&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>IndexSubtable2&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;IndexSubtable2&quot;
+        <span class="string">"IndexSubtable2"
     </span>}
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">match </span>idx {
-            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;index_format&quot;</span>, <span class="self">self</span>.index_format())),
-            <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;image_format&quot;</span>, <span class="self">self</span>.image_format())),
-            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;image_data_offset&quot;</span>, <span class="self">self</span>.image_data_offset())),
-            <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;image_size&quot;</span>, <span class="self">self</span>.image_size())),
+            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"index_format"</span>, <span class="self">self</span>.index_format())),
+            <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"image_format"</span>, <span class="self">self</span>.image_format())),
+            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"image_data_offset"</span>, <span class="self">self</span>.image_data_offset())),
+            <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"image_size"</span>, <span class="self">self</span>.image_size())),
             <span class="number">4usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                <span class="string">&quot;big_metrics&quot;</span>,
+                <span class="string">"big_metrics"</span>,
                 traversal::FieldType::array_of_records(
                     <span class="macro">stringify!</span>(BigGlyphMetrics),
                     <span class="self">self</span>.big_metrics(),
@@ -2733,10 +2734,10 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>IndexSubtable2&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt;).fmt(f)
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>IndexSubtable2&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt;).fmt(f)
     }
 }
 
@@ -2770,8 +2771,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>IndexSubtable3&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>IndexSubtable3&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>cursor = data.cursor();
         cursor.advance::&lt;u16&gt;();
         cursor.advance::&lt;u16&gt;();
@@ -2785,9 +2786,9 @@
 }
 
 <span class="doccomment">/// [IndexSubTable3](https://learn.microsoft.com/en-us/typography/opentype/spec/eblc#indexsubtable3-variable-metrics-glyphs-with-2-byte-offsets): variable-metrics glyphs with 2-byte offsets.
-</span><span class="kw">pub type </span>IndexSubtable3&lt;<span class="lifetime">&#39;a</span>&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, IndexSubtable3Marker&gt;;
+</span><span class="kw">pub type </span>IndexSubtable3&lt;<span class="lifetime">'a</span>&gt; = TableRef&lt;<span class="lifetime">'a</span>, IndexSubtable3Marker&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IndexSubtable3&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; IndexSubtable3&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Format of this IndexSubTable.
     </span><span class="kw">pub fn </span>index_format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.index_format_byte_range();
@@ -2806,32 +2807,32 @@
         <span class="self">self</span>.data.read_at(range.start).unwrap()
     }
 
-    <span class="kw">pub fn </span>sbit_offsets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[BigEndian&lt;u16&gt;] {
+    <span class="kw">pub fn </span>sbit_offsets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[BigEndian&lt;u16&gt;] {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.sbit_offsets_byte_range();
         <span class="self">self</span>.data.read_array(range).unwrap()
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>IndexSubtable3&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>IndexSubtable3&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;IndexSubtable3&quot;
+        <span class="string">"IndexSubtable3"
     </span>}
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">match </span>idx {
-            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;index_format&quot;</span>, <span class="self">self</span>.index_format())),
-            <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;image_format&quot;</span>, <span class="self">self</span>.image_format())),
-            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;image_data_offset&quot;</span>, <span class="self">self</span>.image_data_offset())),
-            <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;sbit_offsets&quot;</span>, <span class="self">self</span>.sbit_offsets())),
+            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"index_format"</span>, <span class="self">self</span>.index_format())),
+            <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"image_format"</span>, <span class="self">self</span>.image_format())),
+            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"image_data_offset"</span>, <span class="self">self</span>.image_data_offset())),
+            <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"sbit_offsets"</span>, <span class="self">self</span>.sbit_offsets())),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         }
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>IndexSubtable3&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt;).fmt(f)
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>IndexSubtable3&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt;).fmt(f)
     }
 }
 
@@ -2869,8 +2870,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>IndexSubtable4&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>IndexSubtable4&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>cursor = data.cursor();
         cursor.advance::&lt;u16&gt;();
         cursor.advance::&lt;u16&gt;();
@@ -2886,9 +2887,9 @@
 }
 
 <span class="doccomment">/// [IndexSubTable4](https://learn.microsoft.com/en-us/typography/opentype/spec/eblc#indexsubtable3-variable-metrics-glyphs-with-2-byte-offsets): variable-metrics glyphs with sparse glyph codes.
-</span><span class="kw">pub type </span>IndexSubtable4&lt;<span class="lifetime">&#39;a</span>&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, IndexSubtable4Marker&gt;;
+</span><span class="kw">pub type </span>IndexSubtable4&lt;<span class="lifetime">'a</span>&gt; = TableRef&lt;<span class="lifetime">'a</span>, IndexSubtable4Marker&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IndexSubtable4&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; IndexSubtable4&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Format of this IndexSubTable.
     </span><span class="kw">pub fn </span>index_format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.index_format_byte_range();
@@ -2914,25 +2915,25 @@
     }
 
     <span class="doccomment">/// One per glyph.
-    </span><span class="kw">pub fn </span>glyph_array(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[GlyphIdOffsetPair] {
+    </span><span class="kw">pub fn </span>glyph_array(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[GlyphIdOffsetPair] {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.glyph_array_byte_range();
         <span class="self">self</span>.data.read_array(range).unwrap()
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>IndexSubtable4&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>IndexSubtable4&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;IndexSubtable4&quot;
+        <span class="string">"IndexSubtable4"
     </span>}
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">match </span>idx {
-            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;index_format&quot;</span>, <span class="self">self</span>.index_format())),
-            <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;image_format&quot;</span>, <span class="self">self</span>.image_format())),
-            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;image_data_offset&quot;</span>, <span class="self">self</span>.image_data_offset())),
-            <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;num_glyphs&quot;</span>, <span class="self">self</span>.num_glyphs())),
+            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"index_format"</span>, <span class="self">self</span>.index_format())),
+            <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"image_format"</span>, <span class="self">self</span>.image_format())),
+            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"image_data_offset"</span>, <span class="self">self</span>.image_data_offset())),
+            <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"num_glyphs"</span>, <span class="self">self</span>.num_glyphs())),
             <span class="number">4usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                <span class="string">&quot;glyph_array&quot;</span>,
+                <span class="string">"glyph_array"</span>,
                 traversal::FieldType::array_of_records(
                     <span class="macro">stringify!</span>(GlyphIdOffsetPair),
                     <span class="self">self</span>.glyph_array(),
@@ -2944,10 +2945,10 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>IndexSubtable4&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt;).fmt(f)
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>IndexSubtable4&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt;).fmt(f)
     }
 }
 
@@ -2985,14 +2986,14 @@
     <span class="kw">fn </span>this_trait_should_only_be_implemented_in_generated_code() {}
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeRecord&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>GlyphIdOffsetPair {
-    <span class="kw">fn </span>traverse(<span class="self">self</span>, data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; RecordResolver&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeRecord&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>GlyphIdOffsetPair {
+    <span class="kw">fn </span>traverse(<span class="self">self</span>, data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; RecordResolver&lt;<span class="lifetime">'a</span>&gt; {
         RecordResolver {
-            name: <span class="string">&quot;GlyphIdOffsetPair&quot;</span>,
+            name: <span class="string">"GlyphIdOffsetPair"</span>,
             get_field: Box::new(<span class="kw">move </span>|idx, _data| <span class="kw">match </span>idx {
-                <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;glyph_id&quot;</span>, <span class="self">self</span>.glyph_id())),
-                <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;sbit_offset&quot;</span>, <span class="self">self</span>.sbit_offset())),
+                <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"glyph_id"</span>, <span class="self">self</span>.glyph_id())),
+                <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"sbit_offset"</span>, <span class="self">self</span>.sbit_offset())),
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
             }),
             data,
@@ -3043,8 +3044,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>IndexSubtable5&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>IndexSubtable5&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>cursor = data.cursor();
         cursor.advance::&lt;u16&gt;();
         cursor.advance::&lt;u16&gt;();
@@ -3063,9 +3064,9 @@
 }
 
 <span class="doccomment">/// [IndexSubTable5](https://learn.microsoft.com/en-us/typography/opentype/spec/eblc#indexsubtable5-constant-metrics-glyphs-with-sparse-glyph-codes): constant-metrics glyphs with sparse glyph codes
-</span><span class="kw">pub type </span>IndexSubtable5&lt;<span class="lifetime">&#39;a</span>&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, IndexSubtable5Marker&gt;;
+</span><span class="kw">pub type </span>IndexSubtable5&lt;<span class="lifetime">'a</span>&gt; = TableRef&lt;<span class="lifetime">'a</span>, IndexSubtable5Marker&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IndexSubtable5&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; IndexSubtable5&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Format of this IndexSubTable.
     </span><span class="kw">pub fn </span>index_format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.index_format_byte_range();
@@ -3091,7 +3092,7 @@
     }
 
     <span class="doccomment">/// All glyphs have the same metrics.
-    </span><span class="kw">pub fn </span>big_metrics(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[BigGlyphMetrics] {
+    </span><span class="kw">pub fn </span>big_metrics(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[BigGlyphMetrics] {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.big_metrics_byte_range();
         <span class="self">self</span>.data.read_array(range).unwrap()
     }
@@ -3103,42 +3104,42 @@
     }
 
     <span class="doccomment">/// One per glyph, sorted by glyhph ID.
-    </span><span class="kw">pub fn </span>glyph_array(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[BigEndian&lt;GlyphId&gt;] {
+    </span><span class="kw">pub fn </span>glyph_array(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[BigEndian&lt;GlyphId&gt;] {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.glyph_array_byte_range();
         <span class="self">self</span>.data.read_array(range).unwrap()
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>IndexSubtable5&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>IndexSubtable5&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;IndexSubtable5&quot;
+        <span class="string">"IndexSubtable5"
     </span>}
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">match </span>idx {
-            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;index_format&quot;</span>, <span class="self">self</span>.index_format())),
-            <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;image_format&quot;</span>, <span class="self">self</span>.image_format())),
-            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;image_data_offset&quot;</span>, <span class="self">self</span>.image_data_offset())),
-            <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;image_size&quot;</span>, <span class="self">self</span>.image_size())),
+            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"index_format"</span>, <span class="self">self</span>.index_format())),
+            <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"image_format"</span>, <span class="self">self</span>.image_format())),
+            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"image_data_offset"</span>, <span class="self">self</span>.image_data_offset())),
+            <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"image_size"</span>, <span class="self">self</span>.image_size())),
             <span class="number">4usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                <span class="string">&quot;big_metrics&quot;</span>,
+                <span class="string">"big_metrics"</span>,
                 traversal::FieldType::array_of_records(
                     <span class="macro">stringify!</span>(BigGlyphMetrics),
                     <span class="self">self</span>.big_metrics(),
                     <span class="self">self</span>.offset_data(),
                 ),
             )),
-            <span class="number">5usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;num_glyphs&quot;</span>, <span class="self">self</span>.num_glyphs())),
-            <span class="number">6usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;glyph_array&quot;</span>, <span class="self">self</span>.glyph_array())),
+            <span class="number">5usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"num_glyphs"</span>, <span class="self">self</span>.num_glyphs())),
+            <span class="number">6usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"glyph_array"</span>, <span class="self">self</span>.glyph_array())),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         }
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>IndexSubtable5&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt;).fmt(f)
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>IndexSubtable5&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt;).fmt(f)
     }
 }
 
@@ -3183,15 +3184,15 @@
     <span class="kw">fn </span>this_trait_should_only_be_implemented_in_generated_code() {}
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeRecord&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>BdtComponent {
-    <span class="kw">fn </span>traverse(<span class="self">self</span>, data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; RecordResolver&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeRecord&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>BdtComponent {
+    <span class="kw">fn </span>traverse(<span class="self">self</span>, data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; RecordResolver&lt;<span class="lifetime">'a</span>&gt; {
         RecordResolver {
-            name: <span class="string">&quot;BdtComponent&quot;</span>,
+            name: <span class="string">"BdtComponent"</span>,
             get_field: Box::new(<span class="kw">move </span>|idx, _data| <span class="kw">match </span>idx {
-                <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;glyph_id&quot;</span>, <span class="self">self</span>.glyph_id())),
-                <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;x_offset&quot;</span>, <span class="self">self</span>.x_offset())),
-                <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;y_offset&quot;</span>, <span class="self">self</span>.y_offset())),
+                <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"glyph_id"</span>, <span class="self">self</span>.glyph_id())),
+                <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"x_offset"</span>, <span class="self">self</span>.x_offset())),
+                <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"y_offset"</span>, <span class="self">self</span>.y_offset())),
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
             }),
             data,

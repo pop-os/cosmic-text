@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ttf-parser-0.20.0/src/tables/morx.rs`."><title>morx.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ttf_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ttf-parser-0.20.0/src/tables/morx.rs`."><title>morx.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ttf_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -491,7 +492,7 @@
 </span><span class="kw">pub struct </span>Feature {
     <span class="doccomment">/// The type of feature.
     </span><span class="kw">pub </span>kind: u16,
-    <span class="doccomment">/// The feature&#39;s setting (aka selector).
+    <span class="doccomment">/// The feature's setting (aka selector).
     </span><span class="kw">pub </span>setting: u16,
     <span class="doccomment">/// Flags for the settings that this feature and setting enables.
     </span><span class="kw">pub </span>enable_flags: u32,
@@ -538,23 +539,23 @@
 
 <span class="doccomment">/// A contextual subtable.
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>ContextualSubtable&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>ContextualSubtable&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// The contextual glyph substitution state table.
-    </span><span class="kw">pub </span>state: aat::ExtendedStateTable&lt;<span class="lifetime">&#39;a</span>, ContextualEntryData&gt;,
-    offsets_data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
-    offsets: LazyArray32&lt;<span class="lifetime">&#39;a</span>, Offset32&gt;,
+    </span><span class="kw">pub </span>state: aat::ExtendedStateTable&lt;<span class="lifetime">'a</span>, ContextualEntryData&gt;,
+    offsets_data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
+    offsets: LazyArray32&lt;<span class="lifetime">'a</span>, Offset32&gt;,
     number_of_glyphs: NonZeroU16,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ContextualSubtable&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(number_of_glyphs: NonZeroU16, data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ContextualSubtable&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(number_of_glyphs: NonZeroU16, data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
 
         <span class="kw">let </span>state = aat::ExtendedStateTable::parse(number_of_glyphs, <span class="kw-2">&amp;mut </span>s)<span class="question-mark">?</span>;
 
         <span class="comment">// While the spec clearly states that this is an
-        // &#39;offset from the beginning of the state subtable&#39;,
-        // it&#39;s actually not. Subtable header should not be included.
+        // 'offset from the beginning of the state subtable',
+        // it's actually not. Subtable header should not be included.
         </span><span class="kw">let </span>offset = s.read::&lt;Offset32&gt;()<span class="question-mark">?</span>.to_usize();
 
         <span class="comment">// The offsets list is unsized.
@@ -570,34 +571,34 @@
     }
 
     <span class="doccomment">/// Returns a [Lookup](aat::Lookup) at index.
-    </span><span class="kw">pub fn </span>lookup(<span class="kw-2">&amp;</span><span class="self">self</span>, index: u32) -&gt; <span class="prelude-ty">Option</span>&lt;aat::Lookup&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>lookup(<span class="kw-2">&amp;</span><span class="self">self</span>, index: u32) -&gt; <span class="prelude-ty">Option</span>&lt;aat::Lookup&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">let </span>offset = <span class="self">self</span>.offsets.get(index)<span class="question-mark">?</span>.to_usize();
         <span class="kw">let </span>lookup_data = <span class="self">self</span>.offsets_data.get(offset..)<span class="question-mark">?</span>;
         aat::Lookup::parse(<span class="self">self</span>.number_of_glyphs, lookup_data)
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>ContextualSubtable&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>ContextualSubtable&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;ContextualSubtable {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"ContextualSubtable {{ ... }}"</span>)
     }
 }
 
 <span class="doccomment">/// A ligature subtable.
 </span><span class="attr">#[derive(Clone, Debug)]
-</span><span class="kw">pub struct </span>LigatureSubtable&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>LigatureSubtable&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// A state table.
-    </span><span class="kw">pub </span>state: aat::ExtendedStateTable&lt;<span class="lifetime">&#39;a</span>, u16&gt;,
+    </span><span class="kw">pub </span>state: aat::ExtendedStateTable&lt;<span class="lifetime">'a</span>, u16&gt;,
     <span class="doccomment">/// Ligature actions.
-    </span><span class="kw">pub </span>ligature_actions: LazyArray32&lt;<span class="lifetime">&#39;a</span>, u32&gt;,
+    </span><span class="kw">pub </span>ligature_actions: LazyArray32&lt;<span class="lifetime">'a</span>, u32&gt;,
     <span class="doccomment">/// Ligature components.
-    </span><span class="kw">pub </span>components: LazyArray32&lt;<span class="lifetime">&#39;a</span>, u16&gt;,
+    </span><span class="kw">pub </span>components: LazyArray32&lt;<span class="lifetime">'a</span>, u16&gt;,
     <span class="doccomment">/// Ligatures.
-    </span><span class="kw">pub </span>ligatures: LazyArray32&lt;<span class="lifetime">&#39;a</span>, GlyphId&gt;,
+    </span><span class="kw">pub </span>ligatures: LazyArray32&lt;<span class="lifetime">'a</span>, GlyphId&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; LigatureSubtable&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(number_of_glyphs: NonZeroU16, data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; LigatureSubtable&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(number_of_glyphs: NonZeroU16, data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
 
         <span class="kw">let </span>state = aat::ExtendedStateTable::parse(number_of_glyphs, <span class="kw-2">&amp;mut </span>s)<span class="question-mark">?</span>;
@@ -607,7 +608,7 @@
         <span class="kw">let </span>component_offset = s.read::&lt;Offset32&gt;()<span class="question-mark">?</span>.to_usize();
         <span class="kw">let </span>ligature_offset = s.read::&lt;Offset32&gt;()<span class="question-mark">?</span>.to_usize();
 
-        <span class="comment">// All three arrays are unsized, so we&#39;re simply reading/mapping all the data past offset.
+        <span class="comment">// All three arrays are unsized, so we're simply reading/mapping all the data past offset.
         </span><span class="kw">let </span>ligature_actions = LazyArray32::&lt;u32&gt;::new(data.get(ligature_action_offset..)<span class="question-mark">?</span>);
         <span class="kw">let </span>components = LazyArray32::&lt;u16&gt;::new(data.get(component_offset..)<span class="question-mark">?</span>);
         <span class="kw">let </span>ligatures = LazyArray32::&lt;GlyphId&gt;::new(data.get(ligature_offset..)<span class="question-mark">?</span>);
@@ -645,15 +646,15 @@
 
 <span class="doccomment">/// An insertion subtable.
 </span><span class="attr">#[derive(Clone, Debug)]
-</span><span class="kw">pub struct </span>InsertionSubtable&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>InsertionSubtable&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// A state table.
-    </span><span class="kw">pub </span>state: aat::ExtendedStateTable&lt;<span class="lifetime">&#39;a</span>, InsertionEntryData&gt;,
+    </span><span class="kw">pub </span>state: aat::ExtendedStateTable&lt;<span class="lifetime">'a</span>, InsertionEntryData&gt;,
     <span class="doccomment">/// Insertion glyphs.
-    </span><span class="kw">pub </span>glyphs: LazyArray32&lt;<span class="lifetime">&#39;a</span>, GlyphId&gt;,
+    </span><span class="kw">pub </span>glyphs: LazyArray32&lt;<span class="lifetime">'a</span>, GlyphId&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; InsertionSubtable&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(number_of_glyphs: NonZeroU16, data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; InsertionSubtable&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(number_of_glyphs: NonZeroU16, data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">let </span>state = aat::ExtendedStateTable::parse(number_of_glyphs, <span class="kw-2">&amp;mut </span>s)<span class="question-mark">?</span>;
         <span class="kw">let </span>offset = s.read::&lt;Offset32&gt;()<span class="question-mark">?</span>.to_usize();
@@ -669,12 +670,12 @@
 <span class="doccomment">/// A subtable kind.
 </span><span class="attr">#[allow(missing_docs)]
 #[derive(Clone, Debug)]
-</span><span class="kw">pub enum </span>SubtableKind&lt;<span class="lifetime">&#39;a</span>&gt; {
-    Rearrangement(aat::ExtendedStateTable&lt;<span class="lifetime">&#39;a</span>, ()&gt;),
-    Contextual(ContextualSubtable&lt;<span class="lifetime">&#39;a</span>&gt;),
-    Ligature(LigatureSubtable&lt;<span class="lifetime">&#39;a</span>&gt;),
-    NonContextual(aat::Lookup&lt;<span class="lifetime">&#39;a</span>&gt;),
-    Insertion(InsertionSubtable&lt;<span class="lifetime">&#39;a</span>&gt;),
+</span><span class="kw">pub enum </span>SubtableKind&lt;<span class="lifetime">'a</span>&gt; {
+    Rearrangement(aat::ExtendedStateTable&lt;<span class="lifetime">'a</span>, ()&gt;),
+    Contextual(ContextualSubtable&lt;<span class="lifetime">'a</span>&gt;),
+    Ligature(LigatureSubtable&lt;<span class="lifetime">'a</span>&gt;),
+    NonContextual(aat::Lookup&lt;<span class="lifetime">'a</span>&gt;),
+    Insertion(InsertionSubtable&lt;<span class="lifetime">'a</span>&gt;),
 }
 
 <span class="doccomment">/// A subtable coverage.
@@ -697,9 +698,9 @@
 
 <span class="doccomment">/// A subtable in a metamorphosis chain.
 </span><span class="attr">#[derive(Clone, Debug)]
-</span><span class="kw">pub struct </span>Subtable&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Subtable&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// A subtable kind.
-    </span><span class="kw">pub </span>kind: SubtableKind&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub </span>kind: SubtableKind&lt;<span class="lifetime">'a</span>&gt;,
     <span class="doccomment">/// A subtable coverage.
     </span><span class="kw">pub </span>coverage: Coverage,
     <span class="doccomment">/// Subtable feature flags.
@@ -709,17 +710,17 @@
 <span class="doccomment">/// A list of subtables in a metamorphosis chain.
 ///
 /// The internal data layout is not designed for random access,
-/// therefore we&#39;re not providing the `get()` method and only an iterator.
+/// therefore we're not providing the `get()` method and only an iterator.
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>Subtables&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Subtables&lt;<span class="lifetime">'a</span>&gt; {
     count: u32,
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     number_of_glyphs: NonZeroU16,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IntoIterator <span class="kw">for </span>Subtables&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">type </span>Item = Subtable&lt;<span class="lifetime">&#39;a</span>&gt;;
-    <span class="kw">type </span>IntoIter = SubtablesIter&lt;<span class="lifetime">&#39;a</span>&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; IntoIterator <span class="kw">for </span>Subtables&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">type </span>Item = Subtable&lt;<span class="lifetime">'a</span>&gt;;
+    <span class="kw">type </span>IntoIter = SubtablesIter&lt;<span class="lifetime">'a</span>&gt;;
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
@@ -732,24 +733,24 @@
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Subtables&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Subtables&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;Subtables {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"Subtables {{ ... }}"</span>)
     }
 }
 
 <span class="doccomment">/// An iterator over a metamorphosis chain subtables.
 </span><span class="attr">#[allow(missing_debug_implementations)]
 #[derive(Clone)]
-</span><span class="kw">pub struct </span>SubtablesIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>SubtablesIter&lt;<span class="lifetime">'a</span>&gt; {
     index: u32,
     count: u32,
-    stream: Stream&lt;<span class="lifetime">&#39;a</span>&gt;,
+    stream: Stream&lt;<span class="lifetime">'a</span>&gt;,
     number_of_glyphs: NonZeroU16,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>SubtablesIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">type </span>Item = Subtable&lt;<span class="lifetime">&#39;a</span>&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>SubtablesIter&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">type </span>Item = Subtable&lt;<span class="lifetime">'a</span>&gt;;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">if </span><span class="self">self</span>.index == <span class="self">self</span>.count {
@@ -807,28 +808,28 @@
 
 <span class="doccomment">/// A metamorphosis chain.
 </span><span class="attr">#[derive(Clone, Copy, Debug)]
-</span><span class="kw">pub struct </span>Chain&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Chain&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Default chain features.
     </span><span class="kw">pub </span>default_flags: u32,
     <span class="doccomment">/// A list of chain features.
-    </span><span class="kw">pub </span>features: LazyArray32&lt;<span class="lifetime">&#39;a</span>, Feature&gt;,
+    </span><span class="kw">pub </span>features: LazyArray32&lt;<span class="lifetime">'a</span>, Feature&gt;,
     <span class="doccomment">/// A list of chain subtables.
-    </span><span class="kw">pub </span>subtables: Subtables&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub </span>subtables: Subtables&lt;<span class="lifetime">'a</span>&gt;,
 }
 
 <span class="doccomment">/// A list of metamorphosis chains.
 ///
 /// The internal data layout is not designed for random access,
-/// therefore we&#39;re not providing the `get()` method and only an iterator.
+/// therefore we're not providing the `get()` method and only an iterator.
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>Chains&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+</span><span class="kw">pub struct </span>Chains&lt;<span class="lifetime">'a</span>&gt; {
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     count: u32,
     number_of_glyphs: NonZeroU16,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Chains&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(number_of_glyphs: NonZeroU16, data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Chains&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(number_of_glyphs: NonZeroU16, data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
 
         s.skip::&lt;u16&gt;(); <span class="comment">// version
@@ -843,9 +844,9 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IntoIterator <span class="kw">for </span>Chains&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">type </span>Item = Chain&lt;<span class="lifetime">&#39;a</span>&gt;;
-    <span class="kw">type </span>IntoIter = ChainsIter&lt;<span class="lifetime">&#39;a</span>&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; IntoIterator <span class="kw">for </span>Chains&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">type </span>Item = Chain&lt;<span class="lifetime">'a</span>&gt;;
+    <span class="kw">type </span>IntoIter = ChainsIter&lt;<span class="lifetime">'a</span>&gt;;
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
@@ -858,24 +859,24 @@
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Chains&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Chains&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;Chains {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"Chains {{ ... }}"</span>)
     }
 }
 
 <span class="doccomment">/// An iterator over metamorphosis chains.
 </span><span class="attr">#[allow(missing_debug_implementations)]
 #[derive(Clone)]
-</span><span class="kw">pub struct </span>ChainsIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>ChainsIter&lt;<span class="lifetime">'a</span>&gt; {
     index: u32,
     count: u32,
-    stream: Stream&lt;<span class="lifetime">&#39;a</span>&gt;,
+    stream: Stream&lt;<span class="lifetime">'a</span>&gt;,
     number_of_glyphs: NonZeroU16,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>ChainsIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">type </span>Item = Chain&lt;<span class="lifetime">&#39;a</span>&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>ChainsIter&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">type </span>Item = Chain&lt;<span class="lifetime">'a</span>&gt;;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">if </span><span class="self">self</span>.index == <span class="self">self</span>.count {
@@ -919,22 +920,22 @@
 ///
 /// Subtable Glyph Coverage used by morx v3 is not supported.
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>Table&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Table&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// A list of metamorphosis chains.
-    </span><span class="kw">pub </span>chains: Chains&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub </span>chains: Chains&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Table&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Table&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;Table {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"Table {{ ... }}"</span>)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Table&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Table&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Parses a table from raw data.
     ///
     /// `number_of_glyphs` is from the `maxp` table.
-    </span><span class="kw">pub fn </span>parse(number_of_glyphs: NonZeroU16, data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">pub fn </span>parse(number_of_glyphs: NonZeroU16, data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         Chains::parse(number_of_glyphs, data).map(|chains| <span class="self">Self </span>{ chains })
     }
 }

@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/self_cell-1.0.3/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="self_cell" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/self_cell-1.0.3/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="self_cell" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -697,10 +698,10 @@
 //! impl NewStructName {
 //!     fn new(
 //!         owner: Owner,
-//!         dependent_builder: impl for&lt;&#39;a&gt; ::core::ops::FnOnce(&amp;&#39;a Owner) -&gt; Dependent&lt;&#39;a&gt;
+//!         dependent_builder: impl for&lt;'a&gt; ::core::ops::FnOnce(&amp;'a Owner) -&gt; Dependent&lt;'a&gt;
 //!     ) -&gt; NewStructName { ... }
-//!     fn borrow_owner&lt;&#39;a&gt;(&amp;&#39;a self) -&gt; &amp;&#39;a Owner { ... }
-//!     fn borrow_dependent&lt;&#39;a&gt;(&amp;&#39;a self) -&gt; &amp;&#39;a Dependent&lt;&#39;a&gt; { ... }
+//!     fn borrow_owner&lt;'a&gt;(&amp;'a self) -&gt; &amp;'a Owner { ... }
+//!     fn borrow_dependent&lt;'a&gt;(&amp;'a self) -&gt; &amp;'a Dependent&lt;'a&gt; { ... }
 //! }
 //!
 //! impl Debug for NewStructName { ... }
@@ -741,7 +742,7 @@
 //! use self_cell::self_cell;
 //!
 //! #[derive(Debug, Eq, PartialEq)]
-//! struct Ast&lt;&#39;a&gt;(pub Vec&lt;&amp;&#39;a str&gt;);
+//! struct Ast&lt;'a&gt;(pub Vec&lt;&amp;'a str&gt;);
 //!
 //! self_cell!(
 //!     struct AstCell {
@@ -761,31 +762,31 @@
 //!     // Move String into AstCell, then build Ast inplace.
 //!     AstCell::new(
 //!        pre_processed_code,
-//!        |code| Ast(code.split(&#39; &#39;).filter(|word| word.len() &gt; 1).collect())
+//!        |code| Ast(code.split(' ').filter(|word| word.len() &gt; 1).collect())
 //!     )
 //! }
 //!
 //! fn main() {
-//!     let ast_cell = build_ast_cell(&quot;fox = cat + dog&quot;);
+//!     let ast_cell = build_ast_cell("fox = cat + dog");
 //!
-//!     println!(&quot;ast_cell -&gt; {:?}&quot;, &amp;ast_cell);
-//!     println!(&quot;ast_cell.borrow_owner() -&gt; {:?}&quot;, ast_cell.borrow_owner());
-//!     println!(&quot;ast_cell.borrow_dependent().0[1] -&gt; {:?}&quot;, ast_cell.borrow_dependent().0[1]);
+//!     println!("ast_cell -&gt; {:?}", &amp;ast_cell);
+//!     println!("ast_cell.borrow_owner() -&gt; {:?}", ast_cell.borrow_owner());
+//!     println!("ast_cell.borrow_dependent().0[1] -&gt; {:?}", ast_cell.borrow_dependent().0[1]);
 //! }
 //! ```
 //!
 //! ```txt
 //! $ cargo run
 //!
-//! ast_cell -&gt; AstCell { owner: &quot;fox = cat + dog&quot;, dependent: Ast([&quot;fox&quot;, &quot;cat&quot;, &quot;dog&quot;]) }
-//! ast_cell.borrow_owner() -&gt; &quot;fox = cat + dog&quot;
-//! ast_cell.borrow_dependent().0[1] -&gt; &quot;cat&quot;
+//! ast_cell -&gt; AstCell { owner: "fox = cat + dog", dependent: Ast(["fox", "cat", "dog"]) }
+//! ast_cell.borrow_owner() -&gt; "fox = cat + dog"
+//! ast_cell.borrow_dependent().0[1] -&gt; "cat"
 //! ```
 //!
 //! There is no way in safe Rust to have an API like `build_ast_cell`, as soon
-//! as `Ast` depends on stack variables like `pre_processed_code` you can&#39;t
+//! as `Ast` depends on stack variables like `pre_processed_code` you can't
 //! return the value out of the function anymore. You could move the
-//! pre-processing into the caller but that gets ugly quickly because you can&#39;t
+//! pre-processing into the caller but that gets ugly quickly because you can't
 //! encapsulate things anymore. Note this is a somewhat niche use case,
 //! self-referential structs should only be used when there is no good
 //! alternative.
@@ -812,7 +813,7 @@
 //!
 //! By default the minimum required rustc version is 1.51.
 //!
-//! There is an optional feature you can enable called &quot;old_rust&quot; that enables
+//! There is an optional feature you can enable called "old_rust" that enables
 //! support down to rustc version 1.36. However this requires polyfilling std
 //! library functionality for older rustc with technically UB versions. Testing
 //! does not show older rustc versions (ab)using this. Use at your own risk.
@@ -837,7 +838,7 @@
 /// use self_cell::self_cell;
 ///
 /// #[derive(Debug, Eq, PartialEq)]
-/// struct Ast&lt;&#39;a&gt;(Vec&lt;&amp;&#39;a str&gt;);
+/// struct Ast&lt;'a&gt;(Vec&lt;&amp;'a str&gt;);
 ///
 /// self_cell!(
 ///     #[doc(hidden)]
@@ -861,46 +862,46 @@
 /// ```ignore
 /// fn new(
 ///     owner: $Owner,
-///     dependent_builder: impl for&lt;&#39;a&gt; ::core::ops::FnOnce(&amp;&#39;a $Owner) -&gt; $Dependent&lt;&#39;a&gt;
+///     dependent_builder: impl for&lt;'a&gt; ::core::ops::FnOnce(&amp;'a $Owner) -&gt; $Dependent&lt;'a&gt;
 /// ) -&gt; Self
 /// ```
 ///
 /// ```ignore
 /// fn try_new&lt;Err&gt;(
 ///     owner: $Owner,
-///     dependent_builder: impl for&lt;&#39;a&gt; ::core::ops::FnOnce(&amp;&#39;a $Owner) -&gt; Result&lt;$Dependent&lt;&#39;a&gt;, Err&gt;
+///     dependent_builder: impl for&lt;'a&gt; ::core::ops::FnOnce(&amp;'a $Owner) -&gt; Result&lt;$Dependent&lt;'a&gt;, Err&gt;
 /// ) -&gt; Result&lt;Self, Err&gt;
 /// ```
 ///
 /// ```ignore
 /// fn try_new_or_recover&lt;Err&gt;(
 ///     owner: $Owner,
-///     dependent_builder: impl for&lt;&#39;a&gt; ::core::ops::FnOnce(&amp;&#39;a $Owner) -&gt; Result&lt;$Dependent&lt;&#39;a&gt;, Err&gt;
+///     dependent_builder: impl for&lt;'a&gt; ::core::ops::FnOnce(&amp;'a $Owner) -&gt; Result&lt;$Dependent&lt;'a&gt;, Err&gt;
 /// ) -&gt; Result&lt;Self, ($Owner, Err)&gt;
 /// ```
 ///
 /// The macro implements these methods:
 ///
 /// ```ignore
-/// fn borrow_owner&lt;&#39;a&gt;(&amp;&#39;a self) -&gt; &amp;&#39;a $Owner
+/// fn borrow_owner&lt;'a&gt;(&amp;'a self) -&gt; &amp;'a $Owner
 /// ```
 ///
 /// ```ignore
 /// // Only available if dependent is covariant.
-/// fn borrow_dependent&lt;&#39;a&gt;(&amp;&#39;a self) -&gt; &amp;&#39;a $Dependent&lt;&#39;a&gt;
+/// fn borrow_dependent&lt;'a&gt;(&amp;'a self) -&gt; &amp;'a $Dependent&lt;'a&gt;
 /// ```
 ///
 /// ```ignore
-/// fn with_dependent&lt;&#39;outer_fn, Ret&gt;(
-///     &amp;&#39;outer_fn self,
-///     func: impl for&lt;&#39;a&gt; ::core::ops::FnOnce(&amp;&#39;a $Owner, &amp;&#39;outer_fn $Dependent&lt;&#39;a&gt;
+/// fn with_dependent&lt;'outer_fn, Ret&gt;(
+///     &amp;'outer_fn self,
+///     func: impl for&lt;'a&gt; ::core::ops::FnOnce(&amp;'a $Owner, &amp;'outer_fn $Dependent&lt;'a&gt;
 /// ) -&gt; Ret) -&gt; Ret
 /// ```
 ///
 /// ```ignore
-/// fn with_dependent_mut&lt;&#39;outer_fn, Ret&gt;(
-///     &amp;&#39;outer_fn mut self,
-///     func: impl for&lt;&#39;a&gt; ::core::ops::FnOnce(&amp;&#39;a $Owner, &amp;&#39;outer_fn mut $Dependent&lt;&#39;a&gt;) -&gt; Ret
+/// fn with_dependent_mut&lt;'outer_fn, Ret&gt;(
+///     &amp;'outer_fn mut self,
+///     func: impl for&lt;'a&gt; ::core::ops::FnOnce(&amp;'a $Owner, &amp;'outer_fn mut $Dependent&lt;'a&gt;) -&gt; Ret
 /// ) -&gt; Ret
 /// ```
 ///
@@ -919,13 +920,13 @@
 ///   `$(#[$StructMeta:meta])*` allows you specify further meta items for this
 ///   struct, eg. `#[doc(hidden)] struct AstCell`.
 ///
-/// - `$Owner:ty` Type of owner. This has to have a `&#39;static` lifetime. Example:
+/// - `$Owner:ty` Type of owner. This has to have a `'static` lifetime. Example:
 ///   `String`.
 ///
 /// - `$Dependent:ident` Name of the dependent type without specified lifetime.
-///   This can&#39;t be a nested type name. As workaround either create a type alias
-///   `type Dep&lt;&#39;a&gt; = Option&lt;Vec&lt;&amp;&#39;a str&gt;&gt;;` or create a new-type `struct
-///   Dep&lt;&#39;a&gt;(Option&lt;Vec&lt;&amp;&#39;a str&gt;&gt;);`. Example: `Ast`.
+///   This can't be a nested type name. As workaround either create a type alias
+///   `type Dep&lt;'a&gt; = Option&lt;Vec&lt;&amp;'a str&gt;&gt;;` or create a new-type `struct
+///   Dep&lt;'a&gt;(Option&lt;Vec&lt;&amp;'a str&gt;&gt;);`. Example: `Ast`.
 ///
 ///   `$Covariance:ident` Marker declaring if `$Dependent` is
 ///   [covariant](https://doc.rust-lang.org/nightly/nomicon/subtyping.html).
@@ -933,7 +934,7 @@
 ///
 ///   * **covariant**: This generates the direct reference accessor function
 ///     `borrow_dependent`. This is only safe to do if this compiles `fn
-///     _assert_covariance&lt;&#39;x: &#39;y, &#39;y&gt;(x: &amp;&#39;y $Dependent&lt;&#39;x&gt;) -&gt; &amp;&#39;y $Dependent&lt;&#39;y&gt;
+///     _assert_covariance&lt;'x: 'y, 'y&gt;(x: &amp;'y $Dependent&lt;'x&gt;) -&gt; &amp;'y $Dependent&lt;'y&gt;
 ///     {x}`. Otherwise you could choose a lifetime that is too short for types
 ///     with interior mutability like `Cell`, which can lead to UB in safe code.
 ///     Which would violate the promise of this library that it is safe-to-use.
@@ -953,29 +954,29 @@
 ///   optional automatic trait implementations. Possible Values:
 ///
 ///   * **Debug**: Prints the debug representation of owner and dependent.
-///     Example: `AstCell { owner: &quot;fox = cat + dog&quot;, dependent: Ast([&quot;fox&quot;,
-///     &quot;cat&quot;, &quot;dog&quot;]) }`
+///     Example: `AstCell { owner: "fox = cat + dog", dependent: Ast(["fox",
+///     "cat", "dog"]) }`
 ///
 ///   * **PartialEq**: Logic `*self.borrow_owner() == *other.borrow_owner()`,
-///     this assumes that `Dependent&lt;&#39;a&gt;::From&lt;&amp;&#39;a Owner&gt;` is deterministic, so
+///     this assumes that `Dependent&lt;'a&gt;::From&lt;&amp;'a Owner&gt;` is deterministic, so
 ///     that only comparing owner is enough.
 ///
 ///   * **Eq**: Will implement the trait marker `Eq` for `$StructName`. Beware
 ///     if you select this `Eq` will be implemented regardless if `$Owner`
-///     implements `Eq`, that&#39;s an unfortunate technical limitation.
+///     implements `Eq`, that's an unfortunate technical limitation.
 ///
 ///   * **Hash**: Logic `self.borrow_owner().hash(state);`, this assumes that
-///     `Dependent&lt;&#39;a&gt;::From&lt;&amp;&#39;a Owner&gt;` is deterministic, so that only hashing
+///     `Dependent&lt;'a&gt;::From&lt;&amp;'a Owner&gt;` is deterministic, so that only hashing
 ///     owner is enough.
 ///
 ///   All `AutomaticDerive` are optional and you can implement you own version
 ///   of these traits. The declared struct is part of your module and you are
 ///   free to implement any trait in any way you want. Access to the unsafe
-///   internals is only possible via unsafe functions, so you can&#39;t accidentally
+///   internals is only possible via unsafe functions, so you can't accidentally
 ///   use them in safe code.
 ///
 ///   There is limited nested cell support. Eg, having an owner with non static
-///   references. Eg `struct ChildCell&lt;&#39;a&gt; { owner: &amp;&#39;a String, ...`. You can
+///   references. Eg `struct ChildCell&lt;'a&gt; { owner: &amp;'a String, ...`. You can
 ///   use any lifetime name you want, except `_q` and only a single lifetime is
 ///   supported, and can only be used in the owner. Due to macro_rules
 ///   limitations, no `AutomaticDerive` are supported if an owner lifetime is
@@ -1000,7 +1001,7 @@
         unsafe_self_cell: <span class="macro-nonterminal">$crate::unsafe_self_cell::UnsafeSelfCell</span>&lt;
             <span class="macro-nonterminal">$StructName</span>$(&lt;<span class="macro-nonterminal">$OwnerLifetime</span>&gt;)<span class="question-mark">?</span>,
             <span class="macro-nonterminal">$Owner</span>,
-            <span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">&#39;static</span>&gt;
+            <span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">'static</span>&gt;
         &gt;,
 
         $(owner_marker: <span class="macro-nonterminal">$</span><span class="macro">crate::_covariant_owner_marker!</span>(<span class="macro-nonterminal">$Covariance</span>, <span class="macro-nonterminal">$OwnerLifetime</span>) ,)<span class="question-mark">?
@@ -1015,25 +1016,25 @@
         /// remains valid for the lifetime of the constructed struct.
         </span><span class="macro-nonterminal">$Vis </span><span class="kw">fn </span>new(
             owner: <span class="macro-nonterminal">$Owner</span>,
-            dependent_builder: <span class="kw">impl for</span>&lt;<span class="lifetime">&#39;_q</span>&gt; ::core::ops::FnOnce(<span class="kw-2">&amp;</span><span class="lifetime">&#39;_q </span><span class="macro-nonterminal">$Owner</span>) -&gt; <span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">&#39;_q</span>&gt;
+            dependent_builder: <span class="kw">impl for</span>&lt;<span class="lifetime">'_q</span>&gt; ::core::ops::FnOnce(<span class="kw-2">&amp;</span><span class="lifetime">'_q </span><span class="macro-nonterminal">$Owner</span>) -&gt; <span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">'_q</span>&gt;
         ) -&gt; <span class="self">Self </span>{
             <span class="kw">use </span>::core::ptr::NonNull;
 
             <span class="kw">unsafe </span>{
                 <span class="comment">// All this has to happen here, because there is not good way
                 // of passing the appropriate logic into UnsafeSelfCell::new
-                // short of assuming Dependent&lt;&#39;static&gt; is the same as
-                // Dependent&lt;&#39;_q&gt;, which I&#39;m not confident is safe.
+                // short of assuming Dependent&lt;'static&gt; is the same as
+                // Dependent&lt;'_q&gt;, which I'm not confident is safe.
 
                 // For this API to be safe there has to be no safe way to
                 // capture additional references in `dependent_builder` and then
                 // return them as part of Dependent. Eg. it should be impossible
-                // to express: &#39;_q should outlive &#39;x here `fn
-                // bad&lt;&#39;_q&gt;(outside_ref: &amp;&#39;_q String) -&gt; impl for&lt;&#39;x&gt; ::core::ops::FnOnce(&amp;&#39;x
-                // Owner) -&gt; Dependent&lt;&#39;x&gt;`.
+                // to express: '_q should outlive 'x here `fn
+                // bad&lt;'_q&gt;(outside_ref: &amp;'_q String) -&gt; impl for&lt;'x&gt; ::core::ops::FnOnce(&amp;'x
+                // Owner) -&gt; Dependent&lt;'x&gt;`.
 
-                </span><span class="kw">type </span>JoinedCell&lt;<span class="lifetime">&#39;_q </span>$(, <span class="macro-nonterminal">$OwnerLifetime</span>)<span class="question-mark">?</span>&gt; =
-                    <span class="macro-nonterminal">$crate::unsafe_self_cell::JoinedCell</span>&lt;<span class="macro-nonterminal">$Owner</span>, <span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">&#39;_q</span>&gt;&gt;;
+                </span><span class="kw">type </span>JoinedCell&lt;<span class="lifetime">'_q </span>$(, <span class="macro-nonterminal">$OwnerLifetime</span>)<span class="question-mark">?</span>&gt; =
+                    <span class="macro-nonterminal">$crate::unsafe_self_cell::JoinedCell</span>&lt;<span class="macro-nonterminal">$Owner</span>, <span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">'_q</span>&gt;&gt;;
 
                 <span class="kw">let </span>layout = <span class="macro-nonterminal">$crate::alloc::alloc::Layout::new</span>::&lt;JoinedCell&gt;();
                 <span class="macro">assert!</span>(layout.size() != <span class="number">0</span>);
@@ -1070,15 +1071,15 @@
         </span><span class="macro-nonterminal">$Vis </span><span class="kw">fn </span>try_new&lt;<span class="prelude-val">Err</span>&gt;(
             owner: <span class="macro-nonterminal">$Owner</span>,
             dependent_builder:
-                <span class="kw">impl for</span>&lt;<span class="lifetime">&#39;_q</span>&gt; ::core::ops::FnOnce(<span class="kw-2">&amp;</span><span class="lifetime">&#39;_q </span><span class="macro-nonterminal">$Owner</span>) -&gt; ::core::result::Result&lt;<span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">&#39;_q</span>&gt;, <span class="prelude-val">Err</span>&gt;
+                <span class="kw">impl for</span>&lt;<span class="lifetime">'_q</span>&gt; ::core::ops::FnOnce(<span class="kw-2">&amp;</span><span class="lifetime">'_q </span><span class="macro-nonterminal">$Owner</span>) -&gt; ::core::result::Result&lt;<span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">'_q</span>&gt;, <span class="prelude-val">Err</span>&gt;
         ) -&gt; ::core::result::Result&lt;<span class="self">Self</span>, <span class="prelude-val">Err</span>&gt; {
             <span class="kw">use </span>::core::ptr::NonNull;
 
             <span class="kw">unsafe </span>{
                 <span class="comment">// See fn new for more explanation.
 
-                </span><span class="kw">type </span>JoinedCell&lt;<span class="lifetime">&#39;_q </span>$(, <span class="macro-nonterminal">$OwnerLifetime</span>)<span class="question-mark">?</span>&gt; =
-                    <span class="macro-nonterminal">$crate::unsafe_self_cell::JoinedCell</span>&lt;<span class="macro-nonterminal">$Owner</span>, <span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">&#39;_q</span>&gt;&gt;;
+                </span><span class="kw">type </span>JoinedCell&lt;<span class="lifetime">'_q </span>$(, <span class="macro-nonterminal">$OwnerLifetime</span>)<span class="question-mark">?</span>&gt; =
+                    <span class="macro-nonterminal">$crate::unsafe_self_cell::JoinedCell</span>&lt;<span class="macro-nonterminal">$Owner</span>, <span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">'_q</span>&gt;&gt;;
 
                 <span class="kw">let </span>layout = <span class="macro-nonterminal">$crate::alloc::alloc::Layout::new</span>::&lt;JoinedCell&gt;();
                 <span class="macro">assert!</span>(layout.size() != <span class="number">0</span>);
@@ -1119,15 +1120,15 @@
         </span><span class="macro-nonterminal">$Vis </span><span class="kw">fn </span>try_new_or_recover&lt;<span class="prelude-val">Err</span>&gt;(
             owner: <span class="macro-nonterminal">$Owner</span>,
             dependent_builder:
-                <span class="kw">impl for</span>&lt;<span class="lifetime">&#39;_q</span>&gt; ::core::ops::FnOnce(<span class="kw-2">&amp;</span><span class="lifetime">&#39;_q </span><span class="macro-nonterminal">$Owner</span>) -&gt; ::core::result::Result&lt;<span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">&#39;_q</span>&gt;, <span class="prelude-val">Err</span>&gt;
+                <span class="kw">impl for</span>&lt;<span class="lifetime">'_q</span>&gt; ::core::ops::FnOnce(<span class="kw-2">&amp;</span><span class="lifetime">'_q </span><span class="macro-nonterminal">$Owner</span>) -&gt; ::core::result::Result&lt;<span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">'_q</span>&gt;, <span class="prelude-val">Err</span>&gt;
         ) -&gt; ::core::result::Result&lt;<span class="self">Self</span>, (<span class="macro-nonterminal">$Owner</span>, <span class="prelude-val">Err</span>)&gt; {
             <span class="kw">use </span>::core::ptr::NonNull;
 
             <span class="kw">unsafe </span>{
                 <span class="comment">// See fn new for more explanation.
 
-                </span><span class="kw">type </span>JoinedCell&lt;<span class="lifetime">&#39;_q </span>$(, <span class="macro-nonterminal">$OwnerLifetime</span>)<span class="question-mark">?</span>&gt; =
-                    <span class="macro-nonterminal">$crate::unsafe_self_cell::JoinedCell</span>&lt;<span class="macro-nonterminal">$Owner</span>, <span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">&#39;_q</span>&gt;&gt;;
+                </span><span class="kw">type </span>JoinedCell&lt;<span class="lifetime">'_q </span>$(, <span class="macro-nonterminal">$OwnerLifetime</span>)<span class="question-mark">?</span>&gt; =
+                    <span class="macro-nonterminal">$crate::unsafe_self_cell::JoinedCell</span>&lt;<span class="macro-nonterminal">$Owner</span>, <span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">'_q</span>&gt;&gt;;
 
                 <span class="kw">let </span>layout = <span class="macro-nonterminal">$crate::alloc::alloc::Layout::new</span>::&lt;JoinedCell&gt;();
                 <span class="macro">assert!</span>(layout.size() != <span class="number">0</span>);
@@ -1160,8 +1161,8 @@
                     ::core::result::Result::Err(err) =&gt; {
                         <span class="comment">// In contrast to into_owner ptr::read, here no dependent
                         // ever existed in this function and so we are sure its
-                        // drop impl can&#39;t access owner after the read.
-                        // And err can&#39;t return a reference to owner.
+                        // drop impl can't access owner after the read.
+                        // And err can't return a reference to owner.
                         </span><span class="kw">let </span>owner_on_err = ::core::ptr::read(owner_ptr);
 
                         <span class="comment">// Allowing drop_guard to finish would let it double free owner.
@@ -1176,14 +1177,14 @@
         }
 
         <span class="doccomment">/// Borrows owner.
-        </span><span class="macro-nonterminal">$Vis </span><span class="kw">fn </span>borrow_owner&lt;<span class="lifetime">&#39;_q</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;_q </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;_q </span><span class="macro-nonterminal">$Owner </span>{
-            <span class="kw">unsafe </span>{ <span class="self">self</span>.unsafe_self_cell.borrow_owner::&lt;<span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">&#39;_q</span>&gt;&gt;() }
+        </span><span class="macro-nonterminal">$Vis </span><span class="kw">fn </span>borrow_owner&lt;<span class="lifetime">'_q</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'_q </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'_q </span><span class="macro-nonterminal">$Owner </span>{
+            <span class="kw">unsafe </span>{ <span class="self">self</span>.unsafe_self_cell.borrow_owner::&lt;<span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">'_q</span>&gt;&gt;() }
         }
 
         <span class="doccomment">/// Calls given closure `func` with a shared reference to dependent.
-        </span><span class="macro-nonterminal">$Vis </span><span class="kw">fn </span>with_dependent&lt;<span class="lifetime">&#39;outer_fn</span>, Ret&gt;(
-            <span class="kw-2">&amp;</span><span class="lifetime">&#39;outer_fn </span><span class="self">self</span>,
-            func: <span class="kw">impl for</span>&lt;<span class="lifetime">&#39;_q</span>&gt; ::core::ops::FnOnce(<span class="kw-2">&amp;</span><span class="lifetime">&#39;_q </span><span class="macro-nonterminal">$Owner</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;outer_fn </span><span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">&#39;_q</span>&gt;
+        </span><span class="macro-nonterminal">$Vis </span><span class="kw">fn </span>with_dependent&lt;<span class="lifetime">'outer_fn</span>, Ret&gt;(
+            <span class="kw-2">&amp;</span><span class="lifetime">'outer_fn </span><span class="self">self</span>,
+            func: <span class="kw">impl for</span>&lt;<span class="lifetime">'_q</span>&gt; ::core::ops::FnOnce(<span class="kw-2">&amp;</span><span class="lifetime">'_q </span><span class="macro-nonterminal">$Owner</span>, <span class="kw-2">&amp;</span><span class="lifetime">'outer_fn </span><span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">'_q</span>&gt;
         ) -&gt; Ret) -&gt; Ret {
             <span class="kw">unsafe </span>{
                 func(
@@ -1194,9 +1195,9 @@
         }
 
         <span class="doccomment">/// Calls given closure `func` with an unique reference to dependent.
-        </span><span class="macro-nonterminal">$Vis </span><span class="kw">fn </span>with_dependent_mut&lt;<span class="lifetime">&#39;outer_fn</span>, Ret&gt;(
-            <span class="kw-2">&amp;</span><span class="lifetime">&#39;outer_fn </span><span class="kw-2">mut </span><span class="self">self</span>,
-            func: <span class="kw">impl for</span>&lt;<span class="lifetime">&#39;_q</span>&gt; ::core::ops::FnOnce(<span class="kw-2">&amp;</span><span class="lifetime">&#39;_q </span><span class="macro-nonterminal">$Owner</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;outer_fn </span><span class="kw-2">mut </span><span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">&#39;_q</span>&gt;) -&gt; Ret
+        </span><span class="macro-nonterminal">$Vis </span><span class="kw">fn </span>with_dependent_mut&lt;<span class="lifetime">'outer_fn</span>, Ret&gt;(
+            <span class="kw-2">&amp;</span><span class="lifetime">'outer_fn </span><span class="kw-2">mut </span><span class="self">self</span>,
+            func: <span class="kw">impl for</span>&lt;<span class="lifetime">'_q</span>&gt; ::core::ops::FnOnce(<span class="kw-2">&amp;</span><span class="lifetime">'_q </span><span class="macro-nonterminal">$Owner</span>, <span class="kw-2">&amp;</span><span class="lifetime">'outer_fn </span><span class="kw-2">mut </span><span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">'_q</span>&gt;) -&gt; Ret
         ) -&gt; Ret {
             <span class="kw">let </span>(owner, dependent) = <span class="kw">unsafe </span>{
                     <span class="self">self</span>.unsafe_self_cell.borrow_mut()
@@ -1215,7 +1216,7 @@
                 <span class="macro-nonterminal">$crate::unsafe_self_cell::UnsafeSelfCell</span>&lt;
                     <span class="macro-nonterminal">$StructName</span>$(&lt;<span class="macro-nonterminal">$OwnerLifetime</span>&gt;)<span class="question-mark">?</span>,
                     <span class="macro-nonterminal">$Owner</span>,
-                    <span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">&#39;static</span>&gt;
+                    <span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">'static</span>&gt;
                 &gt;
             &gt;(<span class="self">self</span>) };
 
@@ -1246,8 +1247,8 @@
 </span><span class="macro">macro_rules! </span>_covariant_access {
     (covariant, <span class="macro-nonterminal">$Vis</span>:vis, <span class="macro-nonterminal">$Dependent</span>:ident) =&gt; {
         <span class="doccomment">/// Borrows dependent.
-        </span><span class="macro-nonterminal">$Vis </span><span class="kw">fn </span>borrow_dependent&lt;<span class="lifetime">&#39;_q</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;_q </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;_q </span><span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">&#39;_q</span>&gt; {
-            <span class="kw">fn </span>_assert_covariance&lt;<span class="lifetime">&#39;x</span>: <span class="lifetime">&#39;y</span>, <span class="lifetime">&#39;y</span>&gt;(x: <span class="kw-2">&amp;</span><span class="lifetime">&#39;y </span><span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">&#39;x</span>&gt;) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;y </span><span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">&#39;y</span>&gt; {
+        </span><span class="macro-nonterminal">$Vis </span><span class="kw">fn </span>borrow_dependent&lt;<span class="lifetime">'_q</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'_q </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'_q </span><span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">'_q</span>&gt; {
+            <span class="kw">fn </span>_assert_covariance&lt;<span class="lifetime">'x</span>: <span class="lifetime">'y</span>, <span class="lifetime">'y</span>&gt;(x: <span class="kw-2">&amp;</span><span class="lifetime">'y </span><span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">'x</span>&gt;) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'y </span><span class="macro-nonterminal">$Dependent</span>&lt;<span class="lifetime">'y</span>&gt; {
                 <span class="comment">//  This function only compiles for covariant types.
                 </span>x <span class="comment">// Change the macro invocation to not_covariant.
             </span>}
@@ -1256,13 +1257,13 @@
         }
     };
     (not_covariant, <span class="macro-nonterminal">$Vis</span>:vis, <span class="macro-nonterminal">$Dependent</span>:ident) =&gt; {
-        <span class="comment">// For types that are not covariant it&#39;s unsafe to allow
+        <span class="comment">// For types that are not covariant it's unsafe to allow
         // returning direct references.
         // For example a lifetime that is too short could be chosen:
         // See https://github.com/Voultapher/self_cell/issues/5
     </span>};
     (<span class="macro-nonterminal">$x</span>:ident, <span class="macro-nonterminal">$Vis</span>:vis, <span class="macro-nonterminal">$Dependent</span>:ident) =&gt; {
-        <span class="macro">compile_error!</span>(<span class="string">&quot;This macro only accepts `covariant` or `not_covariant`&quot;</span>);
+        <span class="macro">compile_error!</span>(<span class="string">"This macro only accepts `covariant` or `not_covariant`"</span>);
     };
 }
 
@@ -1270,7 +1271,7 @@
 #[macro_export]
 </span><span class="macro">macro_rules! </span>_covariant_owner_marker {
     (covariant, <span class="macro-nonterminal">$OwnerLifetime</span>:lifetime) =&gt; {
-        <span class="comment">// Ensure that contravariant owners don&#39;t imply covariance
+        <span class="comment">// Ensure that contravariant owners don't imply covariance
         // over the dependent. See issue https://github.com/Voultapher/self_cell/issues/18
         </span>::core::marker::PhantomData&lt;<span class="kw-2">&amp;</span><span class="macro-nonterminal">$OwnerLifetime </span>()&gt;
     };
@@ -1282,7 +1283,7 @@
         </span>::core::marker::PhantomData&lt;<span class="kw">fn</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$OwnerLifetime </span>()) -&gt; <span class="kw-2">&amp;</span><span class="macro-nonterminal">$OwnerLifetime </span>()&gt;
     };
     (<span class="macro-nonterminal">$x</span>:ident, <span class="macro-nonterminal">$OwnerLifetime</span>:lifetime) =&gt; {
-        <span class="macro">compile_error!</span>(<span class="string">&quot;This macro only accepts `covariant` or `not_covariant`&quot;</span>);
+        <span class="macro">compile_error!</span>(<span class="string">"This macro only accepts `covariant` or `not_covariant`"</span>);
     };
 }
 
@@ -1306,8 +1307,8 @@
             ) -&gt; ::core::result::Result&lt;(), ::core::fmt::Error&gt; {
                 <span class="self">self</span>.with_dependent(|owner, dependent| {
                     fmt.debug_struct(<span class="macro">stringify!</span>(<span class="macro-nonterminal">$StructName</span>))
-                        .field(<span class="string">&quot;owner&quot;</span>, owner)
-                        .field(<span class="string">&quot;dependent&quot;</span>, dependent)
+                        .field(<span class="string">"owner"</span>, owner)
+                        .field(<span class="string">"dependent"</span>, dependent)
                         .finish()
                 })
             }
@@ -1333,7 +1334,7 @@
     };
     (<span class="macro-nonterminal">$x</span>:ident, <span class="macro-nonterminal">$StructName</span>:ident) =&gt; {
         <span class="macro">compile_error!</span>(<span class="macro">concat!</span>(
-            <span class="string">&quot;No automatic trait impl for trait: &quot;</span>,
+            <span class="string">"No automatic trait impl for trait: "</span>,
             <span class="macro">stringify!</span>(<span class="macro-nonterminal">$x</span>)
         ));
     };

@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ttf-parser-0.20.0/src/aat.rs`."><title>aat.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="ttf_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ttf-parser-0.20.0/src/aat.rs`."><title>aat.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="ttf_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -688,18 +689,18 @@ related types.
 ///
 /// Currently used by `kern` table.
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>StateTable&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>StateTable&lt;<span class="lifetime">'a</span>&gt; {
     number_of_classes: u16,
     first_glyph: GlyphId,
-    class_table: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    class_table: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     state_array_offset: u16,
-    state_array: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
-    entry_table: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
-    actions: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    state_array: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
+    entry_table: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
+    actions: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; StateTable&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; StateTable&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
 
         <span class="kw">let </span>number_of_classes: u16 = s.read()<span class="question-mark">?</span>;
@@ -709,13 +710,13 @@ related types.
         </span><span class="kw">let </span>class_table_offset = s.read::&lt;Offset16&gt;()<span class="question-mark">?</span>.to_usize();
         <span class="kw">let </span>state_array_offset = s.read::&lt;Offset16&gt;()<span class="question-mark">?</span>.to_usize();
         <span class="kw">let </span>entry_table_offset = s.read::&lt;Offset16&gt;()<span class="question-mark">?</span>.to_usize();
-        <span class="comment">// Ignore `values_offset` since we don&#39;t use it.
+        <span class="comment">// Ignore `values_offset` since we don't use it.
 
         // Parse class subtable.
         </span><span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new_at(data, class_table_offset)<span class="question-mark">?</span>;
         <span class="kw">let </span>first_glyph: GlyphId = s.read()<span class="question-mark">?</span>;
         <span class="kw">let </span>number_of_glyphs: u16 = s.read()<span class="question-mark">?</span>;
-        <span class="comment">// The class table contains u8, so it&#39;s easier to use just a slice
+        <span class="comment">// The class table contains u8, so it's easier to use just a slice
         // instead of a LazyArray.
         </span><span class="kw">let </span>class_table = s.read_bytes(usize::from(number_of_glyphs))<span class="question-mark">?</span>;
 
@@ -724,7 +725,7 @@ related types.
             first_glyph,
             class_table,
             state_array_offset: state_array_offset <span class="kw">as </span>u16,
-            <span class="comment">// We don&#39;t know the actual data size and it&#39;s kinda expensive to calculate.
+            <span class="comment">// We don't know the actual data size and it's kinda expensive to calculate.
             // So we are simply storing all the data past the offset.
             // Despite the fact that they may overlap.
             </span>state_array: data.get(state_array_offset..)<span class="question-mark">?</span>,
@@ -777,9 +778,9 @@ related types.
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>StateTable&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>StateTable&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;StateTable {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"StateTable {{ ... }}"</span>)
     }
 }
 
@@ -790,20 +791,20 @@ related types.
 ///
 /// Currently used by `kerx` and `morx` tables.
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>ExtendedStateTable&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+</span><span class="kw">pub struct </span>ExtendedStateTable&lt;<span class="lifetime">'a</span>, T&gt; {
     number_of_classes: u32,
-    lookup: Lookup&lt;<span class="lifetime">&#39;a</span>&gt;,
-    state_array: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
-    entry_table: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    lookup: Lookup&lt;<span class="lifetime">'a</span>&gt;,
+    state_array: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
+    entry_table: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     entry_type: core::marker::PhantomData&lt;T&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: FromData&gt; ExtendedStateTable&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: FromData&gt; ExtendedStateTable&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="comment">// TODO: make private
     </span><span class="doccomment">/// Parses an Extended State Table from a stream.
     ///
     /// `number_of_glyphs` is from the `maxp` table.
-    </span><span class="kw">pub fn </span>parse(number_of_glyphs: NonZeroU16, s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">pub fn </span>parse(number_of_glyphs: NonZeroU16, s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>data = s.tail()<span class="question-mark">?</span>;
 
         <span class="kw">let </span>number_of_classes = s.read::&lt;u32&gt;()<span class="question-mark">?</span>;
@@ -817,7 +818,7 @@ related types.
         <span class="prelude-val">Some</span>(ExtendedStateTable {
             number_of_classes,
             lookup: Lookup::parse(number_of_glyphs, data.get(lookup_table_offset..)<span class="question-mark">?</span>)<span class="question-mark">?</span>,
-            <span class="comment">// We don&#39;t know the actual data size and it&#39;s kinda expensive to calculate.
+            <span class="comment">// We don't know the actual data size and it's kinda expensive to calculate.
             // So we are simply storing all the data past the offset.
             // Despite the fact that they may overlap.
             </span>state_array: data.get(state_array_offset..)<span class="question-mark">?</span>,
@@ -854,9 +855,9 @@ related types.
     }
 }
 
-<span class="kw">impl</span>&lt;T&gt; core::fmt::Debug <span class="kw">for </span>ExtendedStateTable&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+<span class="kw">impl</span>&lt;T&gt; core::fmt::Debug <span class="kw">for </span>ExtendedStateTable&lt;<span class="lifetime">'_</span>, T&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;ExtendedStateTable {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"ExtendedStateTable {{ ... }}"</span>)
     }
 }
 
@@ -866,16 +867,16 @@ related types.
 /// u32 values in Format10 tables will be truncated to u16.
 /// u64 values in Format10 tables are not supported.
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>Lookup&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: LookupInner&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>Lookup&lt;<span class="lifetime">'a</span>&gt; {
+    data: LookupInner&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Lookup&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Lookup&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Parses a lookup table from raw data.
     ///
     /// `number_of_glyphs` is from the `maxp` table.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>parse(number_of_glyphs: NonZeroU16, data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">pub fn </span>parse(number_of_glyphs: NonZeroU16, data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         LookupInner::parse(number_of_glyphs, data).map(|data| <span class="self">Self </span>{ data })
     }
 
@@ -886,32 +887,32 @@ related types.
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Lookup&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Lookup&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;Lookup {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"Lookup {{ ... }}"</span>)
     }
 }
 
 <span class="attr">#[derive(Clone)]
-</span><span class="kw">enum </span>LookupInner&lt;<span class="lifetime">&#39;a</span>&gt; {
-    Format1(LazyArray16&lt;<span class="lifetime">&#39;a</span>, u16&gt;),
-    Format2(BinarySearchTable&lt;<span class="lifetime">&#39;a</span>, LookupSegment&gt;),
-    Format4(BinarySearchTable&lt;<span class="lifetime">&#39;a</span>, LookupSegment&gt;, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]),
-    Format6(BinarySearchTable&lt;<span class="lifetime">&#39;a</span>, LookupSingle&gt;),
+</span><span class="kw">enum </span>LookupInner&lt;<span class="lifetime">'a</span>&gt; {
+    Format1(LazyArray16&lt;<span class="lifetime">'a</span>, u16&gt;),
+    Format2(BinarySearchTable&lt;<span class="lifetime">'a</span>, LookupSegment&gt;),
+    Format4(BinarySearchTable&lt;<span class="lifetime">'a</span>, LookupSegment&gt;, <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]),
+    Format6(BinarySearchTable&lt;<span class="lifetime">'a</span>, LookupSingle&gt;),
     Format8 {
         first_glyph: u16,
-        values: LazyArray16&lt;<span class="lifetime">&#39;a</span>, u16&gt;,
+        values: LazyArray16&lt;<span class="lifetime">'a</span>, u16&gt;,
     },
     Format10 {
         value_size: u16,
         first_glyph: u16,
         glyph_count: u16,
-        data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+        data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     },
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; LookupInner&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(number_of_glyphs: NonZeroU16, data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; LookupInner&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(number_of_glyphs: NonZeroU16, data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">let </span>format = s.read::&lt;u16&gt;()<span class="question-mark">?</span>;
         <span class="kw">match </span>format {
@@ -1001,14 +1002,14 @@ related types.
 <span class="doccomment">/// A binary searching table as defined at
 /// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6Tables.html
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">struct </span>BinarySearchTable&lt;<span class="lifetime">&#39;a</span>, T: BinarySearchValue&gt; {
-    values: LazyArray16&lt;<span class="lifetime">&#39;a</span>, T&gt;,
+</span><span class="kw">struct </span>BinarySearchTable&lt;<span class="lifetime">'a</span>, T: BinarySearchValue&gt; {
+    values: LazyArray16&lt;<span class="lifetime">'a</span>, T&gt;,
     len: NonZeroU16, <span class="comment">// values length excluding termination segment
 </span>}
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: BinarySearchValue + core::fmt::Debug&gt; BinarySearchTable&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: BinarySearchValue + core::fmt::Debug&gt; BinarySearchTable&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="attr">#[inline(never)]
-    </span><span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">let </span>segment_size = s.read::&lt;u16&gt;()<span class="question-mark">?</span>;
         <span class="kw">let </span>number_of_segments = s.read::&lt;u16&gt;()<span class="question-mark">?</span>;
@@ -1024,8 +1025,8 @@ related types.
 
         <span class="kw">let </span>values = s.read_array16::&lt;T&gt;(number_of_segments)<span class="question-mark">?</span>;
 
-        <span class="comment">// &#39;The number of termination values that need to be included is table-specific.
-        // The value that indicates binary search termination is 0xFFFF.&#39;
+        <span class="comment">// 'The number of termination values that need to be included is table-specific.
+        // The value that indicates binary search termination is 0xFFFF.'
         </span><span class="kw">let </span><span class="kw-2">mut </span>len = number_of_segments;
         <span class="kw">if </span>values.last()<span class="question-mark">?</span>.is_termination() {
             len = len.checked_sub(<span class="number">1</span>)<span class="question-mark">?</span>;

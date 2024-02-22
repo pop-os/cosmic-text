@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/libc-0.2.153/src/unix/linux_like/linux/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="libc" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/libc-0.2.153/src/unix/linux_like/linux/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="libc" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -5743,7 +5744,7 @@
 
 <span class="kw">pub type </span>eventfd_t = u64;
 <span class="macro">missing! </span>{
-    <span class="attr">#[cfg_attr(feature = <span class="string">&quot;extra_traits&quot;</span>, derive(Debug))]
+    <span class="attr">#[cfg_attr(feature = <span class="string">"extra_traits"</span>, derive(Debug))]
     </span><span class="kw">pub enum </span>fpos64_t {} <span class="comment">// FIXME: fill this out with a struct
 </span>}
 
@@ -5837,11 +5838,11 @@
     }
 
     <span class="kw">pub struct </span>cpu_set_t {
-        <span class="attr">#[cfg(all(target_pointer_width = <span class="string">&quot;32&quot;</span>,
-                  not(target_arch = <span class="string">&quot;x86_64&quot;</span>)))]
+        <span class="attr">#[cfg(all(target_pointer_width = <span class="string">"32"</span>,
+                  not(target_arch = <span class="string">"x86_64"</span>)))]
         </span>bits: [u32; <span class="number">32</span>],
-        <span class="attr">#[cfg(not(all(target_pointer_width = <span class="string">&quot;32&quot;</span>,
-                      not(target_arch = <span class="string">&quot;x86_64&quot;</span>))))]
+        <span class="attr">#[cfg(not(all(target_pointer_width = <span class="string">"32"</span>,
+                      not(target_arch = <span class="string">"x86_64"</span>))))]
         </span>bits: [u64; <span class="number">16</span>],
     }
 
@@ -5969,9 +5970,9 @@
         <span class="kw">pub </span>trigger: ff_trigger,
         <span class="kw">pub </span>replay: ff_replay,
         <span class="comment">// FIXME this is actually a union
-        </span><span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;64&quot;</span>)]
+        </span><span class="attr">#[cfg(target_pointer_width = <span class="string">"64"</span>)]
         </span><span class="kw">pub </span>u: [u64; <span class="number">4</span>],
-        <span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;32&quot;</span>)]
+        <span class="attr">#[cfg(target_pointer_width = <span class="string">"32"</span>)]
         </span><span class="kw">pub </span>u: [u32; <span class="number">7</span>],
     }
 
@@ -5994,35 +5995,35 @@
     }
 
     <span class="kw">pub struct </span>dl_phdr_info {
-        <span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;64&quot;</span>)]
+        <span class="attr">#[cfg(target_pointer_width = <span class="string">"64"</span>)]
         </span><span class="kw">pub </span>dlpi_addr: Elf64_Addr,
-        <span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;32&quot;</span>)]
+        <span class="attr">#[cfg(target_pointer_width = <span class="string">"32"</span>)]
         </span><span class="kw">pub </span>dlpi_addr: Elf32_Addr,
 
         <span class="kw">pub </span>dlpi_name: <span class="kw-2">*const </span>::c_char,
 
-        <span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;64&quot;</span>)]
+        <span class="attr">#[cfg(target_pointer_width = <span class="string">"64"</span>)]
         </span><span class="kw">pub </span>dlpi_phdr: <span class="kw-2">*const </span>Elf64_Phdr,
-        <span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;32&quot;</span>)]
+        <span class="attr">#[cfg(target_pointer_width = <span class="string">"32"</span>)]
         </span><span class="kw">pub </span>dlpi_phdr: <span class="kw-2">*const </span>Elf32_Phdr,
 
-        <span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;64&quot;</span>)]
+        <span class="attr">#[cfg(target_pointer_width = <span class="string">"64"</span>)]
         </span><span class="kw">pub </span>dlpi_phnum: Elf64_Half,
-        <span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;32&quot;</span>)]
+        <span class="attr">#[cfg(target_pointer_width = <span class="string">"32"</span>)]
         </span><span class="kw">pub </span>dlpi_phnum: Elf32_Half,
 
         <span class="comment">// As of uClibc 1.0.36, the following fields are
-        // gated behind a &quot;#if 0&quot; block which always evaluates
-        // to false. So I&#39;m just removing these, and if uClibc changes
+        // gated behind a "#if 0" block which always evaluates
+        // to false. So I'm just removing these, and if uClibc changes
         // the #if block in the future to include the following fields, these
         // will probably need including here. tsidea, skrap
-        </span><span class="attr">#[cfg(not(target_env = <span class="string">&quot;uclibc&quot;</span>))]
+        </span><span class="attr">#[cfg(not(target_env = <span class="string">"uclibc"</span>))]
         </span><span class="kw">pub </span>dlpi_adds: ::c_ulonglong,
-        <span class="attr">#[cfg(not(target_env = <span class="string">&quot;uclibc&quot;</span>))]
+        <span class="attr">#[cfg(not(target_env = <span class="string">"uclibc"</span>))]
         </span><span class="kw">pub </span>dlpi_subs: ::c_ulonglong,
-        <span class="attr">#[cfg(not(target_env = <span class="string">&quot;uclibc&quot;</span>))]
+        <span class="attr">#[cfg(not(target_env = <span class="string">"uclibc"</span>))]
         </span><span class="kw">pub </span>dlpi_tls_modid: ::size_t,
-        <span class="attr">#[cfg(not(target_env = <span class="string">&quot;uclibc&quot;</span>))]
+        <span class="attr">#[cfg(not(target_env = <span class="string">"uclibc"</span>))]
         </span><span class="kw">pub </span>dlpi_tls_data: <span class="kw-2">*mut </span>::c_void,
     }
 
@@ -6153,9 +6154,9 @@
         __pgrp: ::pid_t,
         __sd: ::sigset_t,
         __ss: ::sigset_t,
-        <span class="attr">#[cfg(any(target_env = <span class="string">&quot;musl&quot;</span>, target_env = <span class="string">&quot;ohos&quot;</span>))]
+        <span class="attr">#[cfg(any(target_env = <span class="string">"musl"</span>, target_env = <span class="string">"ohos"</span>))]
         </span>__prio: ::c_int,
-        <span class="attr">#[cfg(not(any(target_env = <span class="string">&quot;musl&quot;</span>, target_env = <span class="string">&quot;ohos&quot;</span>)))]
+        <span class="attr">#[cfg(not(any(target_env = <span class="string">"musl"</span>, target_env = <span class="string">"ohos"</span>)))]
         </span>__sp: ::sched_param,
         __policy: ::c_int,
         __pad: [::c_int; <span class="number">16</span>],
@@ -6476,9 +6477,9 @@
     <span class="doccomment">/// WARNING: The `PartialEq`, `Eq` and `Hash` implementations of this
     /// type are unsound and will be removed in the future.
     </span><span class="attr">#[deprecated(
-        note = <span class="string">&quot;this struct has unsafe trait implementations that will be \
-                removed in the future&quot;</span>,
-        since = <span class="string">&quot;0.2.80&quot;
+        note = <span class="string">"this struct has unsafe trait implementations that will be \
+                removed in the future"</span>,
+        since = <span class="string">"0.2.80"
     </span>)]
     </span><span class="kw">pub struct </span>af_alg_iv {
         <span class="kw">pub </span>ivlen: u32,
@@ -6488,26 +6489,26 @@
     <span class="comment">// x32 compatibility
     // See https://sourceware.org/bugzilla/show_bug.cgi?id=21279
     </span><span class="kw">pub struct </span>mq_attr {
-        <span class="attr">#[cfg(all(target_arch = <span class="string">&quot;x86_64&quot;</span>, target_pointer_width = <span class="string">&quot;32&quot;</span>))]
+        <span class="attr">#[cfg(all(target_arch = <span class="string">"x86_64"</span>, target_pointer_width = <span class="string">"32"</span>))]
         </span><span class="kw">pub </span>mq_flags: i64,
-        <span class="attr">#[cfg(all(target_arch = <span class="string">&quot;x86_64&quot;</span>, target_pointer_width = <span class="string">&quot;32&quot;</span>))]
+        <span class="attr">#[cfg(all(target_arch = <span class="string">"x86_64"</span>, target_pointer_width = <span class="string">"32"</span>))]
         </span><span class="kw">pub </span>mq_maxmsg: i64,
-        <span class="attr">#[cfg(all(target_arch = <span class="string">&quot;x86_64&quot;</span>, target_pointer_width = <span class="string">&quot;32&quot;</span>))]
+        <span class="attr">#[cfg(all(target_arch = <span class="string">"x86_64"</span>, target_pointer_width = <span class="string">"32"</span>))]
         </span><span class="kw">pub </span>mq_msgsize: i64,
-        <span class="attr">#[cfg(all(target_arch = <span class="string">&quot;x86_64&quot;</span>, target_pointer_width = <span class="string">&quot;32&quot;</span>))]
+        <span class="attr">#[cfg(all(target_arch = <span class="string">"x86_64"</span>, target_pointer_width = <span class="string">"32"</span>))]
         </span><span class="kw">pub </span>mq_curmsgs: i64,
-        <span class="attr">#[cfg(all(target_arch = <span class="string">&quot;x86_64&quot;</span>, target_pointer_width = <span class="string">&quot;32&quot;</span>))]
+        <span class="attr">#[cfg(all(target_arch = <span class="string">"x86_64"</span>, target_pointer_width = <span class="string">"32"</span>))]
         </span>pad: [i64; <span class="number">4</span>],
 
-        <span class="attr">#[cfg(not(all(target_arch = <span class="string">&quot;x86_64&quot;</span>, target_pointer_width = <span class="string">&quot;32&quot;</span>)))]
+        <span class="attr">#[cfg(not(all(target_arch = <span class="string">"x86_64"</span>, target_pointer_width = <span class="string">"32"</span>)))]
         </span><span class="kw">pub </span>mq_flags: ::c_long,
-        <span class="attr">#[cfg(not(all(target_arch = <span class="string">&quot;x86_64&quot;</span>, target_pointer_width = <span class="string">&quot;32&quot;</span>)))]
+        <span class="attr">#[cfg(not(all(target_arch = <span class="string">"x86_64"</span>, target_pointer_width = <span class="string">"32"</span>)))]
         </span><span class="kw">pub </span>mq_maxmsg: ::c_long,
-        <span class="attr">#[cfg(not(all(target_arch = <span class="string">&quot;x86_64&quot;</span>, target_pointer_width = <span class="string">&quot;32&quot;</span>)))]
+        <span class="attr">#[cfg(not(all(target_arch = <span class="string">"x86_64"</span>, target_pointer_width = <span class="string">"32"</span>)))]
         </span><span class="kw">pub </span>mq_msgsize: ::c_long,
-        <span class="attr">#[cfg(not(all(target_arch = <span class="string">&quot;x86_64&quot;</span>, target_pointer_width = <span class="string">&quot;32&quot;</span>)))]
+        <span class="attr">#[cfg(not(all(target_arch = <span class="string">"x86_64"</span>, target_pointer_width = <span class="string">"32"</span>)))]
         </span><span class="kw">pub </span>mq_curmsgs: ::c_long,
-        <span class="attr">#[cfg(not(all(target_arch = <span class="string">&quot;x86_64&quot;</span>, target_pointer_width = <span class="string">&quot;32&quot;</span>)))]
+        <span class="attr">#[cfg(not(all(target_arch = <span class="string">"x86_64"</span>, target_pointer_width = <span class="string">"32"</span>)))]
         </span>pad: [::c_long; <span class="number">4</span>],
     }
 
@@ -6529,7 +6530,7 @@
     }
 
     <span class="kw">pub struct </span>ifreq {
-        <span class="doccomment">/// interface name, e.g. &quot;en0&quot;
+        <span class="doccomment">/// interface name, e.g. "en0"
         </span><span class="kw">pub </span>ifr_name: [::c_char; ::IFNAMSIZ],
         <span class="attr">#[cfg(libc_union)]
         </span><span class="kw">pub </span>ifr_ifru: __c_anonymous_ifr_ifru,
@@ -6610,7 +6611,7 @@
 }
 
 <span class="macro">cfg_if! </span>{
-    <span class="kw">if </span><span class="attr">#[cfg(feature = <span class="string">&quot;extra_traits&quot;</span>)] </span>{
+    <span class="kw">if </span><span class="attr">#[cfg(feature = <span class="string">"extra_traits"</span>)] </span>{
         <span class="kw">impl </span>PartialEq <span class="kw">for </span>sockaddr_nl {
             <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>sockaddr_nl) -&gt; bool {
                 <span class="self">self</span>.nl_family == other.nl_family &amp;&amp;
@@ -6621,10 +6622,10 @@
         <span class="kw">impl </span>Eq <span class="kw">for </span>sockaddr_nl {}
         <span class="kw">impl </span>::fmt::Debug <span class="kw">for </span>sockaddr_nl {
             <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>::fmt::Formatter) -&gt; ::fmt::Result {
-                f.debug_struct(<span class="string">&quot;sockaddr_nl&quot;</span>)
-                    .field(<span class="string">&quot;nl_family&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.nl_family)
-                    .field(<span class="string">&quot;nl_pid&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.nl_pid)
-                    .field(<span class="string">&quot;nl_groups&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.nl_groups)
+                f.debug_struct(<span class="string">"sockaddr_nl"</span>)
+                    .field(<span class="string">"nl_family"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.nl_family)
+                    .field(<span class="string">"nl_pid"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.nl_pid)
+                    .field(<span class="string">"nl_groups"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.nl_groups)
                     .finish()
             }
         }
@@ -6654,12 +6655,12 @@
 
         <span class="kw">impl </span>::fmt::Debug <span class="kw">for </span>dirent {
             <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>::fmt::Formatter) -&gt; ::fmt::Result {
-                f.debug_struct(<span class="string">&quot;dirent&quot;</span>)
-                    .field(<span class="string">&quot;d_ino&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.d_ino)
-                    .field(<span class="string">&quot;d_off&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.d_off)
-                    .field(<span class="string">&quot;d_reclen&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.d_reclen)
-                    .field(<span class="string">&quot;d_type&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.d_type)
-                <span class="comment">// FIXME: .field(&quot;d_name&quot;, &amp;self.d_name)
+                f.debug_struct(<span class="string">"dirent"</span>)
+                    .field(<span class="string">"d_ino"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.d_ino)
+                    .field(<span class="string">"d_off"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.d_off)
+                    .field(<span class="string">"d_reclen"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.d_reclen)
+                    .field(<span class="string">"d_type"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.d_type)
+                <span class="comment">// FIXME: .field("d_name", &amp;self.d_name)
                     </span>.finish()
             }
         }
@@ -6692,12 +6693,12 @@
 
         <span class="kw">impl </span>::fmt::Debug <span class="kw">for </span>dirent64 {
             <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>::fmt::Formatter) -&gt; ::fmt::Result {
-                f.debug_struct(<span class="string">&quot;dirent64&quot;</span>)
-                    .field(<span class="string">&quot;d_ino&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.d_ino)
-                    .field(<span class="string">&quot;d_off&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.d_off)
-                    .field(<span class="string">&quot;d_reclen&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.d_reclen)
-                    .field(<span class="string">&quot;d_type&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.d_type)
-                <span class="comment">// FIXME: .field(&quot;d_name&quot;, &amp;self.d_name)
+                f.debug_struct(<span class="string">"dirent64"</span>)
+                    .field(<span class="string">"d_ino"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.d_ino)
+                    .field(<span class="string">"d_off"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.d_off)
+                    .field(<span class="string">"d_reclen"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.d_reclen)
+                    .field(<span class="string">"d_type"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.d_type)
+                <span class="comment">// FIXME: .field("d_name", &amp;self.d_name)
                     </span>.finish()
             }
         }
@@ -6722,8 +6723,8 @@
 
         <span class="kw">impl </span>::fmt::Debug <span class="kw">for </span>pthread_cond_t {
             <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>::fmt::Formatter) -&gt; ::fmt::Result {
-                f.debug_struct(<span class="string">&quot;pthread_cond_t&quot;</span>)
-                <span class="comment">// FIXME: .field(&quot;size&quot;, &amp;self.size)
+                f.debug_struct(<span class="string">"pthread_cond_t"</span>)
+                <span class="comment">// FIXME: .field("size", &amp;self.size)
                     </span>.finish()
             }
         }
@@ -6744,8 +6745,8 @@
 
         <span class="kw">impl </span>::fmt::Debug <span class="kw">for </span>pthread_mutex_t {
             <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>::fmt::Formatter) -&gt; ::fmt::Result {
-                f.debug_struct(<span class="string">&quot;pthread_mutex_t&quot;</span>)
-                <span class="comment">// FIXME: .field(&quot;size&quot;, &amp;self.size)
+                f.debug_struct(<span class="string">"pthread_mutex_t"</span>)
+                <span class="comment">// FIXME: .field("size", &amp;self.size)
                     </span>.finish()
             }
         }
@@ -6766,8 +6767,8 @@
 
         <span class="kw">impl </span>::fmt::Debug <span class="kw">for </span>pthread_rwlock_t {
             <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>::fmt::Formatter) -&gt; ::fmt::Result {
-                f.debug_struct(<span class="string">&quot;pthread_rwlock_t&quot;</span>)
-                <span class="comment">// FIXME: .field(&quot;size&quot;, &amp;self.size)
+                f.debug_struct(<span class="string">"pthread_rwlock_t"</span>)
+                <span class="comment">// FIXME: .field("size", &amp;self.size)
                     </span>.finish()
             }
         }
@@ -6788,8 +6789,8 @@
 
         <span class="kw">impl </span>::fmt::Debug <span class="kw">for </span>pthread_barrier_t {
             <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>::fmt::Formatter) -&gt; ::fmt::Result {
-                f.debug_struct(<span class="string">&quot;pthread_barrier_t&quot;</span>)
-                    .field(<span class="string">&quot;size&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.size)
+                f.debug_struct(<span class="string">"pthread_barrier_t"</span>)
+                    .field(<span class="string">"size"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.size)
                     .finish()
             }
         }
@@ -6822,12 +6823,12 @@
 
         <span class="kw">impl </span>::fmt::Debug <span class="kw">for </span>sockaddr_alg {
             <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>::fmt::Formatter) -&gt; ::fmt::Result {
-                f.debug_struct(<span class="string">&quot;sockaddr_alg&quot;</span>)
-                    .field(<span class="string">&quot;salg_family&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.salg_family)
-                    .field(<span class="string">&quot;salg_type&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.salg_type)
-                    .field(<span class="string">&quot;salg_feat&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.salg_feat)
-                    .field(<span class="string">&quot;salg_mask&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.salg_mask)
-                    .field(<span class="string">&quot;salg_name&quot;</span>, &amp;&amp;<span class="self">self</span>.salg_name[..])
+                f.debug_struct(<span class="string">"sockaddr_alg"</span>)
+                    .field(<span class="string">"salg_family"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.salg_family)
+                    .field(<span class="string">"salg_type"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.salg_type)
+                    .field(<span class="string">"salg_feat"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.salg_feat)
+                    .field(<span class="string">"salg_mask"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.salg_mask)
+                    .field(<span class="string">"salg_name"</span>, &amp;&amp;<span class="self">self</span>.salg_name[..])
                     .finish()
             }
         }
@@ -6853,10 +6854,10 @@
 
         <span class="kw">impl </span>::fmt::Debug <span class="kw">for </span>uinput_setup {
             <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>::fmt::Formatter) -&gt; ::fmt::Result {
-                f.debug_struct(<span class="string">&quot;uinput_setup&quot;</span>)
-                    .field(<span class="string">&quot;id&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.id)
-                    .field(<span class="string">&quot;name&quot;</span>, &amp;&amp;<span class="self">self</span>.name[..])
-                    .field(<span class="string">&quot;ff_effects_max&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.ff_effects_max)
+                f.debug_struct(<span class="string">"uinput_setup"</span>)
+                    .field(<span class="string">"id"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.id)
+                    .field(<span class="string">"name"</span>, &amp;&amp;<span class="self">self</span>.name[..])
+                    .field(<span class="string">"ff_effects_max"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.ff_effects_max)
                     .finish()
             }
         }
@@ -6884,14 +6885,14 @@
 
         <span class="kw">impl </span>::fmt::Debug <span class="kw">for </span>uinput_user_dev {
             <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>::fmt::Formatter) -&gt; ::fmt::Result {
-                f.debug_struct(<span class="string">&quot;uinput_setup&quot;</span>)
-                    .field(<span class="string">&quot;name&quot;</span>, &amp;&amp;<span class="self">self</span>.name[..])
-                    .field(<span class="string">&quot;id&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.id)
-                    .field(<span class="string">&quot;ff_effects_max&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.ff_effects_max)
-                    .field(<span class="string">&quot;absmax&quot;</span>, &amp;&amp;<span class="self">self</span>.absmax[..])
-                    .field(<span class="string">&quot;absmin&quot;</span>, &amp;&amp;<span class="self">self</span>.absmin[..])
-                    .field(<span class="string">&quot;absfuzz&quot;</span>, &amp;&amp;<span class="self">self</span>.absfuzz[..])
-                    .field(<span class="string">&quot;absflat&quot;</span>, &amp;&amp;<span class="self">self</span>.absflat[..])
+                f.debug_struct(<span class="string">"uinput_setup"</span>)
+                    .field(<span class="string">"name"</span>, &amp;&amp;<span class="self">self</span>.name[..])
+                    .field(<span class="string">"id"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.id)
+                    .field(<span class="string">"ff_effects_max"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.ff_effects_max)
+                    .field(<span class="string">"absmax"</span>, &amp;&amp;<span class="self">self</span>.absmax[..])
+                    .field(<span class="string">"absmin"</span>, &amp;&amp;<span class="self">self</span>.absmin[..])
+                    .field(<span class="string">"absfuzz"</span>, &amp;&amp;<span class="self">self</span>.absfuzz[..])
+                    .field(<span class="string">"absflat"</span>, &amp;&amp;<span class="self">self</span>.absflat[..])
                     .finish()
             }
         }
@@ -6933,8 +6934,8 @@
         <span class="attr">#[allow(deprecated)]
         </span><span class="kw">impl </span>::fmt::Debug <span class="kw">for </span>af_alg_iv {
             <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>::fmt::Formatter) -&gt; ::fmt::Result {
-                f.debug_struct(<span class="string">&quot;af_alg_iv&quot;</span>)
-                    .field(<span class="string">&quot;ivlen&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.ivlen)
+                f.debug_struct(<span class="string">"af_alg_iv"</span>)
+                    .field(<span class="string">"ivlen"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.ivlen)
                     .finish()
             }
         }
@@ -6957,11 +6958,11 @@
         <span class="kw">impl </span>Eq <span class="kw">for </span>mq_attr {}
         <span class="kw">impl </span>::fmt::Debug <span class="kw">for </span>mq_attr {
             <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>::fmt::Formatter) -&gt; ::fmt::Result {
-                f.debug_struct(<span class="string">&quot;mq_attr&quot;</span>)
-                    .field(<span class="string">&quot;mq_flags&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.mq_flags)
-                    .field(<span class="string">&quot;mq_maxmsg&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.mq_maxmsg)
-                    .field(<span class="string">&quot;mq_msgsize&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.mq_msgsize)
-                    .field(<span class="string">&quot;mq_curmsgs&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.mq_curmsgs)
+                f.debug_struct(<span class="string">"mq_attr"</span>)
+                    .field(<span class="string">"mq_flags"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.mq_flags)
+                    .field(<span class="string">"mq_maxmsg"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.mq_maxmsg)
+                    .field(<span class="string">"mq_msgsize"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.mq_msgsize)
+                    .field(<span class="string">"mq_curmsgs"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.mq_curmsgs)
                     .finish()
             }
         }
@@ -6976,28 +6977,28 @@
         <span class="attr">#[cfg(libc_union)]
         </span><span class="kw">impl </span>::fmt::Debug <span class="kw">for </span>__c_anonymous_ifr_ifru {
             <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>::fmt::Formatter) -&gt; ::fmt::Result {
-                f.debug_struct(<span class="string">&quot;ifr_ifru&quot;</span>)
-                    .field(<span class="string">&quot;ifru_addr&quot;</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_addr })
-                    .field(<span class="string">&quot;ifru_dstaddr&quot;</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_dstaddr })
-                    .field(<span class="string">&quot;ifru_broadaddr&quot;</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_broadaddr })
-                    .field(<span class="string">&quot;ifru_netmask&quot;</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_netmask })
-                    .field(<span class="string">&quot;ifru_hwaddr&quot;</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_hwaddr })
-                    .field(<span class="string">&quot;ifru_flags&quot;</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_flags })
-                    .field(<span class="string">&quot;ifru_ifindex&quot;</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_ifindex })
-                    .field(<span class="string">&quot;ifru_metric&quot;</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_metric })
-                    .field(<span class="string">&quot;ifru_mtu&quot;</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_mtu })
-                    .field(<span class="string">&quot;ifru_map&quot;</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_map })
-                    .field(<span class="string">&quot;ifru_slave&quot;</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_slave })
-                    .field(<span class="string">&quot;ifru_newname&quot;</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_newname })
-                    .field(<span class="string">&quot;ifru_data&quot;</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_data })
+                f.debug_struct(<span class="string">"ifr_ifru"</span>)
+                    .field(<span class="string">"ifru_addr"</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_addr })
+                    .field(<span class="string">"ifru_dstaddr"</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_dstaddr })
+                    .field(<span class="string">"ifru_broadaddr"</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_broadaddr })
+                    .field(<span class="string">"ifru_netmask"</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_netmask })
+                    .field(<span class="string">"ifru_hwaddr"</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_hwaddr })
+                    .field(<span class="string">"ifru_flags"</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_flags })
+                    .field(<span class="string">"ifru_ifindex"</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_ifindex })
+                    .field(<span class="string">"ifru_metric"</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_metric })
+                    .field(<span class="string">"ifru_mtu"</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_mtu })
+                    .field(<span class="string">"ifru_map"</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_map })
+                    .field(<span class="string">"ifru_slave"</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_slave })
+                    .field(<span class="string">"ifru_newname"</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_newname })
+                    .field(<span class="string">"ifru_data"</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifru_data })
                     .finish()
             }
         }
         <span class="kw">impl </span>::fmt::Debug <span class="kw">for </span>ifreq {
             <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>::fmt::Formatter) -&gt; ::fmt::Result {
-                f.debug_struct(<span class="string">&quot;ifreq&quot;</span>)
-                    .field(<span class="string">&quot;ifr_name&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.ifr_name)
-                    .field(<span class="string">&quot;ifr_ifru&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.ifr_ifru)
+                f.debug_struct(<span class="string">"ifreq"</span>)
+                    .field(<span class="string">"ifr_name"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.ifr_name)
+                    .field(<span class="string">"ifr_ifru"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.ifr_ifru)
                     .finish()
             }
         }
@@ -7005,26 +7006,26 @@
         <span class="attr">#[cfg(libc_union)]
         </span><span class="kw">impl </span>::fmt::Debug <span class="kw">for </span>__c_anonymous_ifc_ifcu {
             <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>::fmt::Formatter) -&gt; ::fmt::Result {
-                f.debug_struct(<span class="string">&quot;ifr_ifru&quot;</span>)
-                    .field(<span class="string">&quot;ifcu_buf&quot;</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifcu_buf })
-                    .field(<span class="string">&quot;ifcu_req&quot;</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifcu_req })
+                f.debug_struct(<span class="string">"ifr_ifru"</span>)
+                    .field(<span class="string">"ifcu_buf"</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifcu_buf })
+                    .field(<span class="string">"ifcu_req"</span>, <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span><span class="self">self</span>.ifcu_req })
                     .finish()
             }
         }
         <span class="kw">impl </span>::fmt::Debug <span class="kw">for </span>ifconf {
             <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>::fmt::Formatter) -&gt; ::fmt::Result {
-                f.debug_struct(<span class="string">&quot;ifconf&quot;</span>)
-                    .field(<span class="string">&quot;ifc_len&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.ifc_len)
-                    .field(<span class="string">&quot;ifc_ifcu&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.ifc_ifcu)
+                f.debug_struct(<span class="string">"ifconf"</span>)
+                    .field(<span class="string">"ifc_len"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.ifc_len)
+                    .field(<span class="string">"ifc_ifcu"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.ifc_ifcu)
                     .finish()
             }
         }
         <span class="kw">impl </span>::fmt::Debug <span class="kw">for </span>hwtstamp_config {
             <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>::fmt::Formatter) -&gt; ::fmt::Result {
-                f.debug_struct(<span class="string">&quot;hwtstamp_config&quot;</span>)
-                    .field(<span class="string">&quot;flags&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.flags)
-                    .field(<span class="string">&quot;tx_type&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.tx_type)
-                    .field(<span class="string">&quot;rx_filter&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.rx_filter)
+                f.debug_struct(<span class="string">"hwtstamp_config"</span>)
+                    .field(<span class="string">"flags"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.flags)
+                    .field(<span class="string">"tx_type"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.tx_type)
+                    .field(<span class="string">"rx_filter"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.rx_filter)
                     .finish()
             }
         }
@@ -7046,15 +7047,15 @@
 
         <span class="kw">impl </span>::fmt::Debug <span class="kw">for </span>sched_attr {
             <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>::fmt::Formatter) -&gt; ::fmt::Result {
-                f.debug_struct(<span class="string">&quot;sched_attr&quot;</span>)
-                    .field(<span class="string">&quot;size&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.size)
-                    .field(<span class="string">&quot;sched_policy&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.sched_policy)
-                    .field(<span class="string">&quot;sched_flags&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.sched_flags)
-                    .field(<span class="string">&quot;sched_nice&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.sched_nice)
-                    .field(<span class="string">&quot;sched_priority&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.sched_priority)
-                    .field(<span class="string">&quot;sched_runtime&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.sched_runtime)
-                    .field(<span class="string">&quot;sched_deadline&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.sched_deadline)
-                    .field(<span class="string">&quot;sched_period&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.sched_period)
+                f.debug_struct(<span class="string">"sched_attr"</span>)
+                    .field(<span class="string">"size"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.size)
+                    .field(<span class="string">"sched_policy"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.sched_policy)
+                    .field(<span class="string">"sched_flags"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.sched_flags)
+                    .field(<span class="string">"sched_nice"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.sched_nice)
+                    .field(<span class="string">"sched_priority"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.sched_priority)
+                    .field(<span class="string">"sched_runtime"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.sched_runtime)
+                    .field(<span class="string">"sched_deadline"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.sched_deadline)
+                    .field(<span class="string">"sched_period"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.sched_period)
                     .finish()
             }
         }
@@ -7087,7 +7088,7 @@
 }
 
 <span class="macro">cfg_if! </span>{
-    <span class="kw">if </span><span class="attr">#[cfg(any(target_env = <span class="string">&quot;gnu&quot;</span>, target_env = <span class="string">&quot;musl&quot;</span>, target_env = <span class="string">&quot;ohos&quot;</span>))] </span>{
+    <span class="kw">if </span><span class="attr">#[cfg(any(target_env = <span class="string">"gnu"</span>, target_env = <span class="string">"musl"</span>, target_env = <span class="string">"ohos"</span>))] </span>{
         <span class="kw">pub const </span>ABDAY_1: ::nl_item = <span class="number">0x20000</span>;
         <span class="kw">pub const </span>ABDAY_2: ::nl_item = <span class="number">0x20001</span>;
         <span class="kw">pub const </span>ABDAY_3: ::nl_item = <span class="number">0x20002</span>;
@@ -7332,11 +7333,11 @@
 <span class="kw">pub const </span>EI_MAG0: usize = <span class="number">0</span>;
 <span class="kw">pub const </span>ELFMAG0: u8 = <span class="number">0x7f</span>;
 <span class="kw">pub const </span>EI_MAG1: usize = <span class="number">1</span>;
-<span class="kw">pub const </span>ELFMAG1: u8 = <span class="string">b&#39;E&#39;</span>;
+<span class="kw">pub const </span>ELFMAG1: u8 = <span class="string">b'E'</span>;
 <span class="kw">pub const </span>EI_MAG2: usize = <span class="number">2</span>;
-<span class="kw">pub const </span>ELFMAG2: u8 = <span class="string">b&#39;L&#39;</span>;
+<span class="kw">pub const </span>ELFMAG2: u8 = <span class="string">b'L'</span>;
 <span class="kw">pub const </span>EI_MAG3: usize = <span class="number">3</span>;
-<span class="kw">pub const </span>ELFMAG3: u8 = <span class="string">b&#39;F&#39;</span>;
+<span class="kw">pub const </span>ELFMAG3: u8 = <span class="string">b'F'</span>;
 <span class="kw">pub const </span>SELFMAG: usize = <span class="number">4</span>;
 
 <span class="kw">pub const </span>EI_CLASS: usize = <span class="number">4</span>;
@@ -7776,10 +7777,10 @@
 // NOTE: These are in addition to the constants defined in src/unix/mod.rs
 
 </span><span class="attr">#[deprecated(
-    since = <span class="string">&quot;0.2.80&quot;</span>,
-    note = <span class="string">&quot;This value was increased in the newer kernel \
-            and we&#39;ll change this following upstream in the future release. \
-            See #1896 for more info.&quot;
+    since = <span class="string">"0.2.80"</span>,
+    note = <span class="string">"This value was increased in the newer kernel \
+            and we'll change this following upstream in the future release. \
+            See #1896 for more info."
 </span>)]
 </span><span class="kw">pub const </span>IPPROTO_MAX: ::c_int = <span class="number">256</span>;
 
@@ -7813,7 +7814,7 @@
 <span class="kw">pub const </span>SHM_UNLOCK: ::c_int = <span class="number">12</span>;
 
 <span class="kw">pub const </span>SHM_HUGETLB: ::c_int = <span class="number">0o4000</span>;
-<span class="attr">#[cfg(not(all(target_env = <span class="string">&quot;uclibc&quot;</span>, target_arch = <span class="string">&quot;mips&quot;</span>)))]
+<span class="attr">#[cfg(not(all(target_env = <span class="string">"uclibc"</span>, target_arch = <span class="string">"mips"</span>)))]
 </span><span class="kw">pub const </span>SHM_NORESERVE: ::c_int = <span class="number">0o10000</span>;
 
 <span class="kw">pub const </span>QFMT_VFS_OLD: ::c_int = <span class="number">1</span>;
@@ -7867,7 +7868,7 @@
 <span class="kw">pub const </span>SYNC_FILE_RANGE_WAIT_AFTER: ::c_uint = <span class="number">4</span>;
 
 <span class="macro">cfg_if! </span>{
-    <span class="kw">if </span><span class="attr">#[cfg(not(target_env = <span class="string">&quot;uclibc&quot;</span>))] </span>{
+    <span class="kw">if </span><span class="attr">#[cfg(not(target_env = <span class="string">"uclibc"</span>))] </span>{
         <span class="kw">pub const </span>AIO_CANCELED: ::c_int = <span class="number">0</span>;
         <span class="kw">pub const </span>AIO_NOTCANCELED: ::c_int = <span class="number">1</span>;
         <span class="kw">pub const </span>AIO_ALLDONE: ::c_int = <span class="number">2</span>;
@@ -8084,8 +8085,8 @@
 <span class="kw">pub const </span>FALLOC_FL_UNSHARE_RANGE: ::c_int = <span class="number">0x40</span>;
 
 <span class="attr">#[deprecated(
-    since = <span class="string">&quot;0.2.55&quot;</span>,
-    note = <span class="string">&quot;ENOATTR is not available on Linux; use ENODATA instead&quot;
+    since = <span class="string">"0.2.55"</span>,
+    note = <span class="string">"ENOATTR is not available on Linux; use ENODATA instead"
 </span>)]
 </span><span class="kw">pub const </span>ENOATTR: ::c_int = ::ENODATA;
 
@@ -8116,7 +8117,7 @@
 <span class="kw">pub const </span>SK_MEMINFO_DROPS: ::c_int = <span class="number">8</span>;
 
 <span class="kw">pub const </span>IUTF8: ::tcflag_t = <span class="number">0x00004000</span>;
-<span class="attr">#[cfg(not(all(target_env = <span class="string">&quot;uclibc&quot;</span>, target_arch = <span class="string">&quot;mips&quot;</span>)))]
+<span class="attr">#[cfg(not(all(target_env = <span class="string">"uclibc"</span>, target_arch = <span class="string">"mips"</span>)))]
 </span><span class="kw">pub const </span>CMSPAR: ::tcflag_t = <span class="number">0o10000000000</span>;
 
 <span class="kw">pub const </span>MFD_CLOEXEC: ::c_uint = <span class="number">0x0001</span>;
@@ -8222,7 +8223,7 @@
 <span class="kw">pub const </span>ETH_FRAME_LEN: ::c_int = <span class="number">1514</span>;
 <span class="kw">pub const </span>ETH_FCS_LEN: ::c_int = <span class="number">4</span>;
 
-<span class="comment">// These are the defined Ethernet Protocol ID&#39;s.
+<span class="comment">// These are the defined Ethernet Protocol ID's.
 </span><span class="kw">pub const </span>ETH_P_LOOP: ::c_int = <span class="number">0x0060</span>;
 <span class="kw">pub const </span>ETH_P_PUP: ::c_int = <span class="number">0x0200</span>;
 <span class="kw">pub const </span>ETH_P_PUPAT: ::c_int = <span class="number">0x0201</span>;
@@ -8281,7 +8282,7 @@
 
 <span class="kw">pub const </span>ETH_P_802_3_MIN: ::c_int = <span class="number">0x0600</span>;
 
-<span class="comment">// Non DIX types. Won&#39;t clash for 1500 types.
+<span class="comment">// Non DIX types. Won't clash for 1500 types.
 </span><span class="kw">pub const </span>ETH_P_802_3: ::c_int = <span class="number">0x0001</span>;
 <span class="kw">pub const </span>ETH_P_AX25: ::c_int = <span class="number">0x0002</span>;
 <span class="kw">pub const </span>ETH_P_ALL: ::c_int = <span class="number">0x0003</span>;
@@ -9411,9 +9412,9 @@
 </span><span class="kw">pub const </span>VMADDR_CID_ANY: ::c_uint = <span class="number">0xFFFFFFFF</span>;
 <span class="kw">pub const </span>VMADDR_CID_HYPERVISOR: ::c_uint = <span class="number">0</span>;
 <span class="attr">#[deprecated(
-    since = <span class="string">&quot;0.2.74&quot;</span>,
-    note = <span class="string">&quot;VMADDR_CID_RESERVED is removed since Linux v5.6 and \
-            replaced with VMADDR_CID_LOCAL&quot;
+    since = <span class="string">"0.2.74"</span>,
+    note = <span class="string">"VMADDR_CID_RESERVED is removed since Linux v5.6 and \
+            replaced with VMADDR_CID_LOCAL"
 </span>)]
 </span><span class="kw">pub const </span>VMADDR_CID_RESERVED: ::c_uint = <span class="number">1</span>;
 <span class="kw">pub const </span>VMADDR_CID_LOCAL: ::c_uint = <span class="number">1</span>;
@@ -9569,7 +9570,7 @@
 <span class="kw">pub const </span>NFT_MSG_GETGEN: ::c_int = <span class="number">16</span>;
 <span class="kw">pub const </span>NFT_MSG_TRACE: ::c_int = <span class="number">17</span>;
 <span class="macro">cfg_if! </span>{
-    <span class="kw">if </span><span class="attr">#[cfg(not(target_arch = <span class="string">&quot;sparc64&quot;</span>))] </span>{
+    <span class="kw">if </span><span class="attr">#[cfg(not(target_arch = <span class="string">"sparc64"</span>))] </span>{
         <span class="kw">pub const </span>NFT_MSG_NEWOBJ: ::c_int = <span class="number">18</span>;
         <span class="kw">pub const </span>NFT_MSG_GETOBJ: ::c_int = <span class="number">19</span>;
         <span class="kw">pub const </span>NFT_MSG_DELOBJ: ::c_int = <span class="number">20</span>;
@@ -10522,8 +10523,8 @@
 }
 
 <span class="macro">cfg_if! </span>{
-    <span class="kw">if </span><span class="attr">#[cfg(all(not(target_env = <span class="string">&quot;uclibc&quot;</span>), not(target_env = <span class="string">&quot;ohos&quot;</span>)))] </span>{
-        <span class="kw">extern </span><span class="string">&quot;C&quot; </span>{
+    <span class="kw">if </span><span class="attr">#[cfg(all(not(target_env = <span class="string">"uclibc"</span>), not(target_env = <span class="string">"ohos"</span>)))] </span>{
+        <span class="kw">extern </span><span class="string">"C" </span>{
             <span class="kw">pub fn </span>aio_read(aiocbp: <span class="kw-2">*mut </span>aiocb) -&gt; ::c_int;
             <span class="kw">pub fn </span>aio_write(aiocbp: <span class="kw-2">*mut </span>aiocb) -&gt; ::c_int;
             <span class="kw">pub fn </span>aio_fsync(op: ::c_int, aiocbp: <span class="kw-2">*mut </span>aiocb) -&gt; ::c_int;
@@ -10546,8 +10547,8 @@
 }
 
 <span class="macro">cfg_if! </span>{
-    <span class="kw">if </span><span class="attr">#[cfg(not(target_env = <span class="string">&quot;uclibc&quot;</span>))] </span>{
-        <span class="kw">extern </span><span class="string">&quot;C&quot; </span>{
+    <span class="kw">if </span><span class="attr">#[cfg(not(target_env = <span class="string">"uclibc"</span>))] </span>{
+        <span class="kw">extern </span><span class="string">"C" </span>{
             <span class="kw">pub fn </span>pwritev(
                 fd: ::c_int,
                 iov: <span class="kw-2">*const </span>::iovec,
@@ -10599,8 +10600,8 @@
 
 <span class="comment">// These functions are not available on OpenHarmony
 </span><span class="macro">cfg_if! </span>{
-    <span class="kw">if </span><span class="attr">#[cfg(not(target_env = <span class="string">&quot;ohos&quot;</span>))] </span>{
-        <span class="kw">extern </span><span class="string">&quot;C&quot; </span>{
+    <span class="kw">if </span><span class="attr">#[cfg(not(target_env = <span class="string">"ohos"</span>))] </span>{
+        <span class="kw">extern </span><span class="string">"C" </span>{
             <span class="comment">// Only `getspnam_r` is implemented for musl, out of all of the reenterant
             // functions from `shadow.h`.
             // https://git.musl-libc.org/cgit/musl/tree/include/shadow.h
@@ -10665,10 +10666,10 @@
     }
 }
 
-<span class="kw">extern </span><span class="string">&quot;C&quot; </span>{
+<span class="kw">extern </span><span class="string">"C" </span>{
     <span class="attr">#[cfg_attr(
-        not(any(target_env = <span class="string">&quot;musl&quot;</span>, target_env = <span class="string">&quot;ohos&quot;</span>)),
-        link_name = <span class="string">&quot;__xpg_strerror_r&quot;
+        not(any(target_env = <span class="string">"musl"</span>, target_env = <span class="string">"ohos"</span>)),
+        link_name = <span class="string">"__xpg_strerror_r"
     </span>)]
     </span><span class="kw">pub fn </span>strerror_r(errnum: ::c_int, buf: <span class="kw-2">*mut </span>c_char, buflen: ::size_t) -&gt; ::c_int;
 
@@ -10851,7 +10852,7 @@
     <span class="kw">pub fn </span>glob(
         pattern: <span class="kw-2">*const </span>c_char,
         flags: ::c_int,
-        errfunc: ::Option&lt;<span class="kw">extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>(epath: <span class="kw-2">*const </span>c_char, errno: ::c_int) -&gt; ::c_int&gt;,
+        errfunc: ::Option&lt;<span class="kw">extern </span><span class="string">"C" </span><span class="kw">fn</span>(epath: <span class="kw-2">*const </span>c_char, errno: ::c_int) -&gt; ::c_int&gt;,
         pglob: <span class="kw-2">*mut </span>::glob_t,
     ) -&gt; ::c_int;
     <span class="kw">pub fn </span>globfree(pglob: <span class="kw-2">*mut </span>::glob_t);
@@ -10992,7 +10993,7 @@
     <span class="kw">pub fn </span>pthread_spin_trylock(lock: <span class="kw-2">*mut </span>::pthread_spinlock_t) -&gt; ::c_int;
     <span class="kw">pub fn </span>pthread_spin_unlock(lock: <span class="kw-2">*mut </span>::pthread_spinlock_t) -&gt; ::c_int;
     <span class="kw">pub fn </span>clone(
-        cb: <span class="kw">extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>(<span class="kw-2">*mut </span>::c_void) -&gt; ::c_int,
+        cb: <span class="kw">extern </span><span class="string">"C" </span><span class="kw">fn</span>(<span class="kw-2">*mut </span>::c_void) -&gt; ::c_int,
         child_stack: <span class="kw-2">*mut </span>::c_void,
         flags: ::c_int,
         arg: <span class="kw-2">*mut </span>::c_void,
@@ -11097,9 +11098,9 @@
     ) -&gt; ::c_int;
     <span class="kw">pub fn </span>sigwait(set: <span class="kw-2">*const </span>sigset_t, sig: <span class="kw-2">*mut </span>::c_int) -&gt; ::c_int;
     <span class="kw">pub fn </span>pthread_atfork(
-        prepare: ::Option&lt;<span class="kw">unsafe extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>()&gt;,
-        parent: ::Option&lt;<span class="kw">unsafe extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>()&gt;,
-        child: ::Option&lt;<span class="kw">unsafe extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>()&gt;,
+        prepare: ::Option&lt;<span class="kw">unsafe extern </span><span class="string">"C" </span><span class="kw">fn</span>()&gt;,
+        parent: ::Option&lt;<span class="kw">unsafe extern </span><span class="string">"C" </span><span class="kw">fn</span>()&gt;,
+        child: ::Option&lt;<span class="kw">unsafe extern </span><span class="string">"C" </span><span class="kw">fn</span>()&gt;,
     ) -&gt; ::c_int;
     <span class="kw">pub fn </span>getgrgid(gid: ::gid_t) -&gt; <span class="kw-2">*mut </span>::group;
     <span class="kw">pub fn </span>getgrouplist(
@@ -11122,12 +11123,12 @@
     <span class="kw">pub fn </span>pthread_create(
         native: <span class="kw-2">*mut </span>::pthread_t,
         attr: <span class="kw-2">*const </span>::pthread_attr_t,
-        f: <span class="kw">extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>(<span class="kw-2">*mut </span>::c_void) -&gt; <span class="kw-2">*mut </span>::c_void,
+        f: <span class="kw">extern </span><span class="string">"C" </span><span class="kw">fn</span>(<span class="kw-2">*mut </span>::c_void) -&gt; <span class="kw-2">*mut </span>::c_void,
         value: <span class="kw-2">*mut </span>::c_void,
     ) -&gt; ::c_int;
     <span class="kw">pub fn </span>dl_iterate_phdr(
         callback: ::Option&lt;
-            <span class="kw">unsafe extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>(
+            <span class="kw">unsafe extern </span><span class="string">"C" </span><span class="kw">fn</span>(
                 info: <span class="kw-2">*mut </span>::dl_phdr_info,
                 size: ::size_t,
                 data: <span class="kw-2">*mut </span>::c_void,
@@ -11297,7 +11298,7 @@
         longindex: <span class="kw-2">*mut </span>::c_int,
     ) -&gt; ::c_int;
 
-    <span class="kw">pub fn </span>pthread_once(control: <span class="kw-2">*mut </span>pthread_once_t, routine: <span class="kw">extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>()) -&gt; ::c_int;
+    <span class="kw">pub fn </span>pthread_once(control: <span class="kw-2">*mut </span>pthread_once_t, routine: <span class="kw">extern </span><span class="string">"C" </span><span class="kw">fn</span>()) -&gt; ::c_int;
 
     <span class="kw">pub fn </span>copy_file_range(
         fd_in: ::c_int,
@@ -11313,8 +11314,8 @@
 //
 // * musl has 64-bit versions only so aliases the LFS64 symbols to the standard ones
 </span><span class="macro">cfg_if! </span>{
-    <span class="kw">if </span><span class="attr">#[cfg(not(target_env = <span class="string">&quot;musl&quot;</span>))] </span>{
-        <span class="kw">extern </span><span class="string">&quot;C&quot; </span>{
+    <span class="kw">if </span><span class="attr">#[cfg(not(target_env = <span class="string">"musl"</span>))] </span>{
+        <span class="kw">extern </span><span class="string">"C" </span>{
             <span class="kw">pub fn </span>fallocate64(
                 fd: ::c_int,
                 mode: ::c_int,
@@ -11344,13 +11345,13 @@
 }
 
 <span class="macro">cfg_if! </span>{
-    <span class="kw">if </span><span class="attr">#[cfg(target_env = <span class="string">&quot;uclibc&quot;</span>)] </span>{
+    <span class="kw">if </span><span class="attr">#[cfg(target_env = <span class="string">"uclibc"</span>)] </span>{
         <span class="kw">mod </span>uclibc;
         <span class="kw">pub use </span><span class="self">self</span>::uclibc::<span class="kw-2">*</span>;
-    } <span class="kw">else if </span><span class="attr">#[cfg(any(target_env = <span class="string">&quot;musl&quot;</span>, target_env = <span class="string">&quot;ohos&quot;</span>))] </span>{
+    } <span class="kw">else if </span><span class="attr">#[cfg(any(target_env = <span class="string">"musl"</span>, target_env = <span class="string">"ohos"</span>))] </span>{
         <span class="kw">mod </span>musl;
         <span class="kw">pub use </span><span class="self">self</span>::musl::<span class="kw-2">*</span>;
-    } <span class="kw">else if </span><span class="attr">#[cfg(target_env = <span class="string">&quot;gnu&quot;</span>)] </span>{
+    } <span class="kw">else if </span><span class="attr">#[cfg(target_env = <span class="string">"gnu"</span>)] </span>{
         <span class="kw">mod </span>gnu;
         <span class="kw">pub use </span><span class="self">self</span>::gnu::<span class="kw-2">*</span>;
     }

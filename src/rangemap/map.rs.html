@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rangemap-1.5.0/src/map.rs`."><title>map.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rangemap" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rangemap-1.5.0/src/map.rs`."><title>map.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rangemap" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1815,9 +1816,9 @@
 <span class="kw">use </span>core::ops::{Bound, Range};
 <span class="kw">use </span>core::prelude::v1::<span class="kw-2">*</span>;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;serde1&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"serde1"</span>)]
 </span><span class="kw">use </span>core::marker::PhantomData;
-<span class="attr">#[cfg(feature = <span class="string">&quot;serde1&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"serde1"</span>)]
 </span><span class="kw">use </span>serde::{
     de::{Deserialize, Deserializer, SeqAccess, Visitor},
     ser::{Serialize, Serializer},
@@ -1882,7 +1883,7 @@
 
 <span class="kw">impl</span>&lt;K, V&gt; RangeMap&lt;K, V&gt; {
     <span class="doccomment">/// Makes a new empty `RangeMap`.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;const_fn&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"const_fn"</span>)]
     </span><span class="kw">pub const fn </span>new() -&gt; <span class="self">Self </span>{
         RangeMap {
             btm: BTreeMap::new(),
@@ -1890,7 +1891,7 @@
     }
 
     <span class="doccomment">/// Makes a new empty `RangeMap`.
-    </span><span class="attr">#[cfg(not(feature = <span class="string">&quot;const_fn&quot;</span>))]
+    </span><span class="attr">#[cfg(not(feature = <span class="string">"const_fn"</span>))]
     </span><span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
         RangeMap {
             btm: BTreeMap::new(),
@@ -1900,8 +1901,8 @@
     <span class="doccomment">/// Gets an iterator over all pairs of key range and value,
     /// ordered by key range.
     ///
-    /// The iterator element type is `(&amp;&#39;a Range&lt;K&gt;, &amp;&#39;a V)`.
-    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Iter&lt;<span class="lifetime">&#39;_</span>, K, V&gt; {
+    /// The iterator element type is `(&amp;'a Range&lt;K&gt;, &amp;'a V)`.
+    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Iter&lt;<span class="lifetime">'_</span>, K, V&gt; {
         Iter {
             inner: <span class="self">self</span>.btm.iter(),
         }
@@ -1971,13 +1972,13 @@
     /// empty gap will be returned.
     ///
     /// The iterator element type is `Range&lt;K&gt;`.
-    </span><span class="kw">pub fn </span>gaps&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, outer_range: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Range&lt;K&gt;) -&gt; Gaps&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
+    </span><span class="kw">pub fn </span>gaps&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, outer_range: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Range&lt;K&gt;) -&gt; Gaps&lt;<span class="lifetime">'a</span>, K, V&gt; {
         Gaps {
             outer_range,
             keys: <span class="self">self</span>.btm.keys(),
-            <span class="comment">// We&#39;ll start the candidate range at the start of the outer range
-            // without checking what&#39;s there. Each time we yield an item,
-            // we&#39;ll skip any ranges we find before the next gap.
+            <span class="comment">// We'll start the candidate range at the start of the outer range
+            // without checking what's there. Each time we yield an item,
+            // we'll skip any ranges we find before the next gap.
             </span>candidate_start: <span class="kw-2">&amp;</span>outer_range.start,
         }
     }
@@ -2043,11 +2044,11 @@
     ///
     /// Panics if range `start &gt;= end`.
     </span><span class="kw">pub fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, range: Range&lt;K&gt;, value: V) {
-        <span class="comment">// We don&#39;t want to have to make empty ranges make sense;
-        // they don&#39;t represent anything meaningful in this structure.
+        <span class="comment">// We don't want to have to make empty ranges make sense;
+        // they don't represent anything meaningful in this structure.
         </span><span class="macro">assert!</span>(range.start &lt; range.end);
 
-        <span class="comment">// Wrap up the given range so that we can &quot;borrow&quot;
+        <span class="comment">// Wrap up the given range so that we can "borrow"
         // it as a wrapper reference to either its start or end.
         // See `range_wrapper.rs` for explanation of these hacks.
         </span><span class="kw">let </span><span class="kw-2">mut </span>new_start_wrapper: RangeStartWrapper&lt;K&gt; = RangeStartWrapper::new(range);
@@ -2094,12 +2095,12 @@
         <span class="comment">// Are there any stored ranges whose heads overlap or immediately
         // follow the range to insert?
         //
-        // If there are any such stored ranges (that weren&#39;t already caught above),
+        // If there are any such stored ranges (that weren't already caught above),
         // their starts will fall somewhere after the start of the range to insert,
         // and on or before its end.
         //
         // This time around, if the latter holds, it also implies
-        // the former so we don&#39;t need to check here if they touch.
+        // the former so we don't need to check here if they touch.
         //
         // REVISIT: Possible micro-optimisation: `impl Borrow&lt;T&gt; for RangeStartWrapper&lt;T&gt;`
         // and use that to search here, to avoid constructing another `RangeStartWrapper`.
@@ -2117,17 +2118,17 @@
         {
             <span class="comment">// One extra exception: if we have different values,
             // and the stored range starts at the end of the range to insert,
-            // then we don&#39;t want to keep looping forever trying to find more!
+            // then we don't want to keep looping forever trying to find more!
             </span><span class="attr">#[allow(clippy::suspicious_operation_groupings)]
             </span><span class="kw">if </span>stored_start_wrapper.end_wrapper.range.start
                 == new_start_wrapper.end_wrapper.range.end
                 &amp;&amp; <span class="kw-2">*</span>stored_value != new_value
             {
-                <span class="comment">// We&#39;re beyond the last stored range that could be relevant.
+                <span class="comment">// We're beyond the last stored range that could be relevant.
                 // Avoid wasting time on irrelevant ranges, or even worse, looping forever.
                 // (`adjust_touching_ranges_for_insert` below assumes that the given range
                 // is relevant, and behaves very poorly if it is handed a range that it
-                // shouldn&#39;t be touching.)
+                // shouldn't be touching.)
                 </span><span class="kw">break</span>;
             }
 
@@ -2142,7 +2143,7 @@
             );
         }
 
-        <span class="comment">// Insert the (possibly expanded) new range, and we&#39;re done!
+        <span class="comment">// Insert the (possibly expanded) new range, and we're done!
         </span><span class="self">self</span>.btm.insert(new_start_wrapper, new_value);
     }
 
@@ -2157,8 +2158,8 @@
     ///
     /// Panics if range `start &gt;= end`.
     </span><span class="kw">pub fn </span>remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, range: Range&lt;K&gt;) {
-        <span class="comment">// We don&#39;t want to have to make empty ranges make sense;
-        // they don&#39;t represent anything meaningful in this structure.
+        <span class="comment">// We don't want to have to make empty ranges make sense;
+        // they don't represent anything meaningful in this structure.
         </span><span class="macro">assert!</span>(range.start &lt; range.end);
 
         <span class="kw">let </span>start_wrapper: RangeStartWrapper&lt;K&gt; = RangeStartWrapper::new(range);
@@ -2194,7 +2195,7 @@
 
         <span class="comment">// Are there any stored ranges whose heads overlap the range to insert?
         //
-        // If there are any such stored ranges (that weren&#39;t already caught above),
+        // If there are any such stored ranges (that weren't already caught above),
         // their starts will fall somewhere after the start of the range to insert,
         // and before its end.
         //
@@ -2230,11 +2231,11 @@
         <span class="kw">use </span>core::cmp::{max, min};
 
         <span class="kw">if </span>stored_value == <span class="kw-2">*</span>new_value {
-            <span class="comment">// The ranges have the same value, so we can &quot;adopt&quot;
+            <span class="comment">// The ranges have the same value, so we can "adopt"
             // the stored range.
             //
             // This means that no matter how big or where the stored range is,
-            // we will expand the new range&#39;s bounds to subsume it,
+            // we will expand the new range's bounds to subsume it,
             // and then delete the stored range.
             </span>new_range.start = min(<span class="kw-2">&amp;</span>new_range.start, <span class="kw-2">&amp;</span>stored_start_wrapper.start).clone();
             new_range.end = max(<span class="kw-2">&amp;</span>new_range.end, <span class="kw-2">&amp;</span>stored_start_wrapper.end).clone();
@@ -2265,7 +2266,7 @@
                     );
                 }
             } <span class="kw">else </span>{
-                <span class="comment">// No-op; they&#39;re not overlapping,
+                <span class="comment">// No-op; they're not overlapping,
                 // so we can just keep both ranges as they are.
             </span>}
         }
@@ -2300,22 +2301,22 @@
 
 <span class="doccomment">/// An iterator over the entries of a `RangeMap`, ordered by key range.
 ///
-/// The iterator element type is `(&amp;&#39;a Range&lt;K&gt;, &amp;&#39;a V)`.
+/// The iterator element type is `(&amp;'a Range&lt;K&gt;, &amp;'a V)`.
 ///
 /// This `struct` is created by the [`iter`] method on [`RangeMap`]. See its
 /// documentation for more.
 ///
 /// [`iter`]: RangeMap::iter
-</span><span class="kw">pub struct </span>Iter&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
-    inner: alloc::collections::btree_map::Iter&lt;<span class="lifetime">&#39;a</span>, RangeStartWrapper&lt;K&gt;, V&gt;,
+</span><span class="kw">pub struct </span>Iter&lt;<span class="lifetime">'a</span>, K, V&gt; {
+    inner: alloc::collections::btree_map::Iter&lt;<span class="lifetime">'a</span>, RangeStartWrapper&lt;K&gt;, V&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K, V&gt; Iterator <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>, K, V&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K, V&gt; Iterator <span class="kw">for </span>Iter&lt;<span class="lifetime">'a</span>, K, V&gt;
 <span class="kw">where
-    </span>K: <span class="lifetime">&#39;a</span>,
-    V: <span class="lifetime">&#39;a</span>,
+    </span>K: <span class="lifetime">'a</span>,
+    V: <span class="lifetime">'a</span>,
 {
-    <span class="kw">type </span>Item = (<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Range&lt;K&gt;, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>V);
+    <span class="kw">type </span>Item = (<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Range&lt;K&gt;, <span class="kw-2">&amp;</span><span class="lifetime">'a </span>V);
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="self">self</span>.inner
@@ -2328,10 +2329,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K, V&gt; DoubleEndedIterator <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>, K, V&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K, V&gt; DoubleEndedIterator <span class="kw">for </span>Iter&lt;<span class="lifetime">'a</span>, K, V&gt;
 <span class="kw">where
-    </span>K: <span class="lifetime">&#39;a</span>,
-    V: <span class="lifetime">&#39;a</span>,
+    </span>K: <span class="lifetime">'a</span>,
+    V: <span class="lifetime">'a</span>,
 {
     <span class="kw">fn </span>next_back(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="self">self</span>.inner
@@ -2382,11 +2383,11 @@
     }
 }
 
-<span class="comment">// We can&#39;t just derive this automatically, because that would
+<span class="comment">// We can't just derive this automatically, because that would
 // expose irrelevant (and private) implementation details.
 // Instead implement it in the same way that the underlying BTreeMap does.
 </span><span class="kw">impl</span>&lt;K: Debug, V: Debug&gt; Debug <span class="kw">for </span>RangeMap&lt;K, V&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         f.debug_map().entries(<span class="self">self</span>.iter()).finish()
     }
 }
@@ -2415,7 +2416,7 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;serde1&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"serde1"</span>)]
 </span><span class="kw">impl</span>&lt;K, V&gt; Serialize <span class="kw">for </span>RangeMap&lt;K, V&gt;
 <span class="kw">where
     </span>K: Serialize,
@@ -2434,26 +2435,26 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;serde1&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, K, V&gt; Deserialize&lt;<span class="lifetime">&#39;de</span>&gt; <span class="kw">for </span>RangeMap&lt;K, V&gt;
+<span class="attr">#[cfg(feature = <span class="string">"serde1"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, K, V&gt; Deserialize&lt;<span class="lifetime">'de</span>&gt; <span class="kw">for </span>RangeMap&lt;K, V&gt;
 <span class="kw">where
-    </span>K: Ord + Clone + Deserialize&lt;<span class="lifetime">&#39;de</span>&gt;,
-    V: Eq + Clone + Deserialize&lt;<span class="lifetime">&#39;de</span>&gt;,
+    </span>K: Ord + Clone + Deserialize&lt;<span class="lifetime">'de</span>&gt;,
+    V: Eq + Clone + Deserialize&lt;<span class="lifetime">'de</span>&gt;,
 {
     <span class="kw">fn </span>deserialize&lt;D&gt;(deserializer: D) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, D::Error&gt;
     <span class="kw">where
-        </span>D: Deserializer&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>D: Deserializer&lt;<span class="lifetime">'de</span>&gt;,
     {
         deserializer.deserialize_seq(RangeMapVisitor::new())
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;serde1&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"serde1"</span>)]
 </span><span class="kw">struct </span>RangeMapVisitor&lt;K, V&gt; {
     marker: PhantomData&lt;<span class="kw">fn</span>() -&gt; RangeMap&lt;K, V&gt;&gt;,
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;serde1&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"serde1"</span>)]
 </span><span class="kw">impl</span>&lt;K, V&gt; RangeMapVisitor&lt;K, V&gt; {
     <span class="kw">fn </span>new() -&gt; <span class="self">Self </span>{
         RangeMapVisitor {
@@ -2462,21 +2463,21 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;serde1&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, K, V&gt; Visitor&lt;<span class="lifetime">&#39;de</span>&gt; <span class="kw">for </span>RangeMapVisitor&lt;K, V&gt;
+<span class="attr">#[cfg(feature = <span class="string">"serde1"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, K, V&gt; Visitor&lt;<span class="lifetime">'de</span>&gt; <span class="kw">for </span>RangeMapVisitor&lt;K, V&gt;
 <span class="kw">where
-    </span>K: Ord + Clone + Deserialize&lt;<span class="lifetime">&#39;de</span>&gt;,
-    V: Eq + Clone + Deserialize&lt;<span class="lifetime">&#39;de</span>&gt;,
+    </span>K: Ord + Clone + Deserialize&lt;<span class="lifetime">'de</span>&gt;,
+    V: Eq + Clone + Deserialize&lt;<span class="lifetime">'de</span>&gt;,
 {
     <span class="kw">type </span>Value = RangeMap&lt;K, V&gt;;
 
     <span class="kw">fn </span>expecting(<span class="kw-2">&amp;</span><span class="self">self</span>, formatter: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        formatter.write_str(<span class="string">&quot;RangeMap&quot;</span>)
+        formatter.write_str(<span class="string">"RangeMap"</span>)
     }
 
     <span class="kw">fn </span>visit_seq&lt;A&gt;(<span class="self">self</span>, <span class="kw-2">mut </span>access: A) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Value, A::Error&gt;
     <span class="kw">where
-        </span>A: SeqAccess&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>A: SeqAccess&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="kw">let </span><span class="kw-2">mut </span>range_map = RangeMap::new();
         <span class="kw">while let </span><span class="prelude-val">Some</span>(((start, end), value)) = access.next_element()<span class="question-mark">? </span>{
@@ -2494,16 +2495,16 @@
 /// documentation for more.
 ///
 /// [`gaps`]: RangeMap::gaps
-</span><span class="kw">pub struct </span>Gaps&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
-    outer_range: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Range&lt;K&gt;,
-    keys: alloc::collections::btree_map::Keys&lt;<span class="lifetime">&#39;a</span>, RangeStartWrapper&lt;K&gt;, V&gt;,
-    candidate_start: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>K,
+</span><span class="kw">pub struct </span>Gaps&lt;<span class="lifetime">'a</span>, K, V&gt; {
+    outer_range: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Range&lt;K&gt;,
+    keys: alloc::collections::btree_map::Keys&lt;<span class="lifetime">'a</span>, RangeStartWrapper&lt;K&gt;, V&gt;,
+    candidate_start: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>K,
 }
 
 <span class="comment">// `Gaps` is always fused. (See definition of `next` below.)
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K, V&gt; core::iter::FusedIterator <span class="kw">for </span>Gaps&lt;<span class="lifetime">&#39;a</span>, K, V&gt; <span class="kw">where </span>K: Ord + Clone {}
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K, V&gt; core::iter::FusedIterator <span class="kw">for </span>Gaps&lt;<span class="lifetime">'a</span>, K, V&gt; <span class="kw">where </span>K: Ord + Clone {}
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K, V&gt; Iterator <span class="kw">for </span>Gaps&lt;<span class="lifetime">&#39;a</span>, K, V&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K, V&gt; Iterator <span class="kw">for </span>Gaps&lt;<span class="lifetime">'a</span>, K, V&gt;
 <span class="kw">where
     </span>K: Ord + Clone,
 {
@@ -2513,9 +2514,9 @@
         <span class="kw">for </span>item <span class="kw">in </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.keys {
             <span class="kw">let </span>range = <span class="kw-2">&amp;</span>item.range;
             <span class="kw">if </span>range.end &lt;= <span class="kw-2">*</span><span class="self">self</span>.candidate_start {
-                <span class="comment">// We&#39;re already completely past it; ignore it.
+                <span class="comment">// We're already completely past it; ignore it.
             </span>} <span class="kw">else if </span>range.start &lt;= <span class="kw-2">*</span><span class="self">self</span>.candidate_start {
-                <span class="comment">// We&#39;re inside it; move past it.
+                <span class="comment">// We're inside it; move past it.
                 </span><span class="self">self</span>.candidate_start = <span class="kw-2">&amp;</span>range.end;
             } <span class="kw">else if </span>range.start &lt; <span class="self">self</span>.outer_range.end {
                 <span class="comment">// It starts before the end of the outer range,
@@ -2526,16 +2527,16 @@
             }
         }
 
-        <span class="comment">// Now that we&#39;ve run out of items, the only other possible
+        <span class="comment">// Now that we've run out of items, the only other possible
         // gap is at the end of the outer range.
         </span><span class="kw">if </span><span class="kw-2">*</span><span class="self">self</span>.candidate_start &lt; <span class="self">self</span>.outer_range.end {
-            <span class="comment">// There&#39;s a gap at the end!
+            <span class="comment">// There's a gap at the end!
             </span><span class="kw">let </span>gap = <span class="self">self</span>.candidate_start.clone()..<span class="self">self</span>.outer_range.end.clone();
-            <span class="comment">// We&#39;re done; skip to the end so we don&#39;t try to find any more.
+            <span class="comment">// We're done; skip to the end so we don't try to find any more.
             </span><span class="self">self</span>.candidate_start = <span class="kw-2">&amp;</span><span class="self">self</span>.outer_range.end;
             <span class="prelude-val">Some</span>(gap)
         } <span class="kw">else </span>{
-            <span class="comment">// We got to the end; there can&#39;t be any more gaps.
+            <span class="comment">// We got to the end; there can't be any more gaps.
             </span><span class="prelude-val">None
         </span>}
     }
@@ -2544,28 +2545,28 @@
 <span class="doccomment">/// An iterator over all stored ranges partially or completely
 /// overlapped by a given range.
 ///
-/// The iterator element type is `(&amp;&#39;a Range&lt;K&gt;, &amp;&#39;a V)`.
+/// The iterator element type is `(&amp;'a Range&lt;K&gt;, &amp;'a V)`.
 ///
 /// This `struct` is created by the [`overlapping`] method on [`RangeMap`]. See its
 /// documentation for more.
 ///
 /// [`overlapping`]: RangeMap::overlapping
-</span><span class="kw">pub struct </span>Overlapping&lt;<span class="lifetime">&#39;a</span>, K, V, R: Borrow&lt;Range&lt;K&gt;&gt; = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Range&lt;K&gt;&gt; {
+</span><span class="kw">pub struct </span>Overlapping&lt;<span class="lifetime">'a</span>, K, V, R: Borrow&lt;Range&lt;K&gt;&gt; = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Range&lt;K&gt;&gt; {
     query_range: R,
-    btm_range_iter: alloc::collections::btree_map::Range&lt;<span class="lifetime">&#39;a</span>, RangeStartWrapper&lt;K&gt;, V&gt;,
+    btm_range_iter: alloc::collections::btree_map::Range&lt;<span class="lifetime">'a</span>, RangeStartWrapper&lt;K&gt;, V&gt;,
 }
 
 <span class="comment">// `Overlapping` is always fused. (See definition of `next` below.)
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K, V, R: Borrow&lt;Range&lt;K&gt;&gt;&gt; core::iter::FusedIterator <span class="kw">for </span>Overlapping&lt;<span class="lifetime">&#39;a</span>, K, V, R&gt; <span class="kw">where
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K, V, R: Borrow&lt;Range&lt;K&gt;&gt;&gt; core::iter::FusedIterator <span class="kw">for </span>Overlapping&lt;<span class="lifetime">'a</span>, K, V, R&gt; <span class="kw">where
     </span>K: Ord
 {
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K, V, R: Borrow&lt;Range&lt;K&gt;&gt;&gt; Iterator <span class="kw">for </span>Overlapping&lt;<span class="lifetime">&#39;a</span>, K, V, R&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K, V, R: Borrow&lt;Range&lt;K&gt;&gt;&gt; Iterator <span class="kw">for </span>Overlapping&lt;<span class="lifetime">'a</span>, K, V, R&gt;
 <span class="kw">where
     </span>K: Ord,
 {
-    <span class="kw">type </span>Item = (<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Range&lt;K&gt;, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>V);
+    <span class="kw">type </span>Item = (<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Range&lt;K&gt;, <span class="kw-2">&amp;</span><span class="lifetime">'a </span>V);
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>((k, v)) = <span class="self">self</span>.btm_range_iter.next() {
@@ -2584,7 +2585,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K, V, R: Borrow&lt;Range&lt;K&gt;&gt;&gt; DoubleEndedIterator <span class="kw">for </span>Overlapping&lt;<span class="lifetime">&#39;a</span>, K, V, R&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K, V, R: Borrow&lt;Range&lt;K&gt;&gt;&gt; DoubleEndedIterator <span class="kw">for </span>Overlapping&lt;<span class="lifetime">'a</span>, K, V, R&gt;
 <span class="kw">where
     </span>K: Ord,
 {
@@ -2616,9 +2617,9 @@
 /// ```rust
 /// # use rangemap::range_map;
 /// let map = range_map!{
-///     0..100 =&gt; &quot;abc&quot;,
-///     100..200 =&gt; &quot;def&quot;,
-///     200..300 =&gt; &quot;ghi&quot;
+///     0..100 =&gt; "abc",
+///     100..200 =&gt; "def",
+///     200..300 =&gt; "ghi"
 /// };
 /// ```
 </span><span class="attr">#[macro_export]
@@ -2638,8 +2639,8 @@
 
     <span class="kw">impl</span>&lt;K, V&gt; Arbitrary <span class="kw">for </span>RangeMap&lt;K, V&gt;
     <span class="kw">where
-        </span>K: Ord + Clone + Debug + Arbitrary + <span class="lifetime">&#39;static</span>,
-        V: Clone + Eq + Arbitrary + <span class="lifetime">&#39;static</span>,
+        </span>K: Ord + Clone + Debug + Arbitrary + <span class="lifetime">'static</span>,
+        V: Clone + Eq + Arbitrary + <span class="lifetime">'static</span>,
     {
         <span class="kw">type </span>Parameters = ();
         <span class="kw">type </span>Strategy = BoxedStrategy&lt;<span class="self">Self</span>&gt;;
@@ -2741,7 +2742,7 @@
         <span class="kw">if </span>left == right {
             <span class="macro">assert!</span>(
                 hash(<span class="kw-2">&amp;</span>left) == hash(<span class="kw-2">&amp;</span>right),
-                <span class="string">&quot;if two values are equal, their hash must be equal&quot;
+                <span class="string">"if two values are equal, their hash must be equal"
             </span>);
         }
 
@@ -2749,7 +2750,7 @@
         </span><span class="kw">if </span>hash(<span class="kw-2">&amp;</span>left) != hash(<span class="kw-2">&amp;</span>right) {
             <span class="macro">assert!</span>(
                 left != right,
-                <span class="string">&quot;if two value&#39;s hashes are not equal, they must not be equal&quot;
+                <span class="string">"if two value's hashes are not equal, they must not be equal"
             </span>);
         }
     }
@@ -2759,23 +2760,23 @@
         <span class="macro">assert_eq!</span>(
             left == right,
             left.cmp(<span class="kw-2">&amp;</span>right).is_eq(),
-            <span class="string">&quot;ordering and equality must match&quot;
+            <span class="string">"ordering and equality must match"
         </span>);
         <span class="macro">assert_eq!</span>(
             left.cmp(<span class="kw-2">&amp;</span>right),
             left.partial_cmp(<span class="kw-2">&amp;</span>right).unwrap(),
-            <span class="string">&quot;ordering is total for ordered parameters&quot;
+            <span class="string">"ordering is total for ordered parameters"
         </span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_from_array() {
         <span class="kw">let </span><span class="kw-2">mut </span>map = RangeMap::new();
-        map.insert(<span class="number">0</span>..<span class="number">100</span>, <span class="string">&quot;hello&quot;</span>);
-        map.insert(<span class="number">200</span>..<span class="number">300</span>, <span class="string">&quot;world&quot;</span>);
+        map.insert(<span class="number">0</span>..<span class="number">100</span>, <span class="string">"hello"</span>);
+        map.insert(<span class="number">200</span>..<span class="number">300</span>, <span class="string">"world"</span>);
         <span class="macro">assert_eq!</span>(
             map,
-            RangeMap::from([(<span class="number">0</span>..<span class="number">100</span>, <span class="string">&quot;hello&quot;</span>), (<span class="number">200</span>..<span class="number">300</span>, <span class="string">&quot;world&quot;</span>)])
+            RangeMap::from([(<span class="number">0</span>..<span class="number">100</span>, <span class="string">"hello"</span>), (<span class="number">200</span>..<span class="number">300</span>, <span class="string">"world"</span>)])
         );
     }
 
@@ -2783,8 +2784,8 @@
     </span><span class="kw">fn </span>test_macro() {
         <span class="macro">assert_eq!</span>(<span class="macro">range_map!</span>[], RangeMap::&lt;i64, i64&gt;::default());
         <span class="macro">assert_eq!</span>(
-            <span class="macro">range_map!</span>(<span class="number">0</span>..<span class="number">100 </span>=&gt; <span class="string">&quot;abc&quot;</span>, <span class="number">100</span>..<span class="number">200 </span>=&gt; <span class="string">&quot;def&quot;</span>, <span class="number">200</span>..<span class="number">300 </span>=&gt; <span class="string">&quot;ghi&quot;</span>),
-            [(<span class="number">0</span>..<span class="number">100</span>, <span class="string">&quot;abc&quot;</span>), (<span class="number">100</span>..<span class="number">200</span>, <span class="string">&quot;def&quot;</span>), (<span class="number">200</span>..<span class="number">300</span>, <span class="string">&quot;ghi&quot;</span>)]
+            <span class="macro">range_map!</span>(<span class="number">0</span>..<span class="number">100 </span>=&gt; <span class="string">"abc"</span>, <span class="number">100</span>..<span class="number">200 </span>=&gt; <span class="string">"def"</span>, <span class="number">200</span>..<span class="number">300 </span>=&gt; <span class="string">"ghi"</span>),
+            [(<span class="number">0</span>..<span class="number">100</span>, <span class="string">"abc"</span>), (<span class="number">100</span>..<span class="number">200</span>, <span class="string">"def"</span>), (<span class="number">200</span>..<span class="number">300</span>, <span class="string">"ghi"</span>)]
                 .iter()
                 .cloned()
                 .collect(),
@@ -2987,8 +2988,8 @@
             <span class="kw">for </span>(k, v) <span class="kw">in </span>permutation {
                 <span class="comment">// Insert it into both maps.
                 </span>range_map.insert(k.clone(), v);
-                <span class="comment">// NOTE: Clippy&#39;s `range_minus_one` lint is a bit overzealous here,
-                // because we _can&#39;t_ pass an open-ended range to `insert`.
+                <span class="comment">// NOTE: Clippy's `range_minus_one` lint is a bit overzealous here,
+                // because we _can't_ pass an open-ended range to `insert`.
                 </span><span class="attr">#[allow(clippy::range_minus_one)]
                 </span>dense.insert(k.start..=(k.end - <span class="number">1</span>), v);
 
@@ -3352,7 +3353,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>no_empty_gaps() {
-        <span class="comment">// Make two ranges different values so they don&#39;t
+        <span class="comment">// Make two ranges different values so they don't
         // get coalesced.
         </span><span class="kw">let </span><span class="kw-2">mut </span>range_map: RangeMap&lt;u32, bool&gt; = RangeMap::new();
         <span class="comment">// 0 1 2 3 4 5 6 7 8 9
@@ -3495,23 +3496,23 @@
         <span class="kw">let </span><span class="kw-2">mut </span>map: RangeMap&lt;u32, ()&gt; = RangeMap::new();
 
         <span class="comment">// Empty
-        </span><span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, map), <span class="string">&quot;{}&quot;</span>);
+        </span><span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{:?}"</span>, map), <span class="string">"{}"</span>);
 
         <span class="comment">// One entry
         </span>map.insert(<span class="number">2</span>..<span class="number">5</span>, ());
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, map), <span class="string">&quot;{2..5: ()}&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{:?}"</span>, map), <span class="string">"{2..5: ()}"</span>);
 
         <span class="comment">// Many entries
         </span>map.insert(<span class="number">6</span>..<span class="number">7</span>, ());
         map.insert(<span class="number">8</span>..<span class="number">9</span>, ());
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, map), <span class="string">&quot;{2..5: (), 6..7: (), 8..9: ()}&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{:?}"</span>, map), <span class="string">"{2..5: (), 6..7: (), 8..9: ()}"</span>);
     }
 
     <span class="comment">// Iterator Tests
 
     </span><span class="attr">#[test]
     </span><span class="kw">fn </span>into_iter_matches_iter() {
-        <span class="comment">// Just use vec since that&#39;s the same implementation we&#39;d expect
+        <span class="comment">// Just use vec since that's the same implementation we'd expect
         </span><span class="kw">let </span><span class="kw-2">mut </span>range_map: RangeMap&lt;u32, bool&gt; = RangeMap::new();
         range_map.insert(<span class="number">1</span>..<span class="number">3</span>, <span class="bool-val">false</span>);
         range_map.insert(<span class="number">3</span>..<span class="number">5</span>, <span class="bool-val">true</span>);
@@ -3577,7 +3578,7 @@
 
     <span class="comment">// impl Serialize
 
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;serde1&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"serde1"</span>)]
     #[test]
     </span><span class="kw">fn </span>serialization() {
         <span class="kw">let </span><span class="kw-2">mut </span>range_map: RangeMap&lt;u32, bool&gt; = RangeMap::new();
@@ -3587,25 +3588,25 @@
         <span class="comment">// 0 1 2 3 4 5 6 7 8 9
         // ◌ ◌ ◌ ◌ ◌ ◆---◇ ◌ ◌
         </span>range_map.insert(<span class="number">5</span>..<span class="number">7</span>, <span class="bool-val">true</span>);
-        <span class="kw">let </span>output = serde_json::to_string(<span class="kw-2">&amp;</span>range_map).expect(<span class="string">&quot;Failed to serialize&quot;</span>);
-        <span class="macro">assert_eq!</span>(output, <span class="string">&quot;[[[1,3],false],[[5,7],true]]&quot;</span>);
+        <span class="kw">let </span>output = serde_json::to_string(<span class="kw-2">&amp;</span>range_map).expect(<span class="string">"Failed to serialize"</span>);
+        <span class="macro">assert_eq!</span>(output, <span class="string">"[[[1,3],false],[[5,7],true]]"</span>);
     }
 
     <span class="comment">// impl Deserialize
 
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;serde1&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"serde1"</span>)]
     #[test]
     </span><span class="kw">fn </span>deserialization() {
-        <span class="kw">let </span>input = <span class="string">&quot;[[[1,3],false],[[5,7],true]]&quot;</span>;
+        <span class="kw">let </span>input = <span class="string">"[[[1,3],false],[[5,7],true]]"</span>;
         <span class="kw">let </span>range_map: RangeMap&lt;u32, bool&gt; =
-            serde_json::from_str(input).expect(<span class="string">&quot;Failed to deserialize&quot;</span>);
-        <span class="kw">let </span>reserialized = serde_json::to_string(<span class="kw-2">&amp;</span>range_map).expect(<span class="string">&quot;Failed to re-serialize&quot;</span>);
+            serde_json::from_str(input).expect(<span class="string">"Failed to deserialize"</span>);
+        <span class="kw">let </span>reserialized = serde_json::to_string(<span class="kw-2">&amp;</span>range_map).expect(<span class="string">"Failed to re-serialize"</span>);
         <span class="macro">assert_eq!</span>(reserialized, input);
     }
 
     <span class="comment">// const fn
 
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;const_fn&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"const_fn"</span>)]
     </span><span class="kw">const </span>_MAP: RangeMap&lt;u32, bool&gt; = RangeMap::new();
 }
 </code></pre></div></section></main></body></html>

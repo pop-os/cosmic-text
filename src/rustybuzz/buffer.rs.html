@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustybuzz-0.12.1/src/buffer.rs`."><title>buffer.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustybuzz" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustybuzz-0.12.1/src/buffer.rs`."><title>buffer.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustybuzz" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1865,7 +1866,7 @@
     /// then both sides need to be re-shaped, as the
     /// result might be different.  On the flip side,
     /// it means that when this flag is not present,
-    /// then it&#39;s safe to break the glyph-run at the
+    /// then it's safe to break the glyph-run at the
     /// beginning of this cluster, and the two sides
     /// represent the exact same result one would get
     /// if breaking input text at the beginning of
@@ -1965,7 +1966,7 @@
     /// is part of, then both sides need to be re-shaped, as the result might be different.
     ///
     /// On the flip side, it means that when this flag is not present,
-    /// then it&#39;s safe to break the glyph-run at the beginning of this cluster,
+    /// then it's safe to break the glyph-run at the beginning of this cluster,
     /// and the two sides represent the exact same result one would get if breaking input text
     /// at the beginning of this cluster and shaping the two sides separately.
     /// This can be used to optimize paragraph layout, by avoiding re-shaping of each line
@@ -2395,7 +2396,7 @@
 
     <span class="comment">// Text before / after the main buffer contents.
     // Always in Unicode, and ordered outward.
-    // Index 0 is for &quot;pre-context&quot;, 1 for &quot;post-context&quot;.
+    // Index 0 is for "pre-context", 1 for "post-context".
     </span><span class="kw">pub </span>context: [[char; CONTEXT_LENGTH]; <span class="number">2</span>],
     <span class="kw">pub </span>context_len: [usize; <span class="number">2</span>],
 }
@@ -2434,8 +2435,8 @@
             have_separate_output: <span class="bool-val">false</span>,
             serial: <span class="number">0</span>,
             context: [
-                [<span class="string">&#39;\0&#39;</span>, <span class="string">&#39;\0&#39;</span>, <span class="string">&#39;\0&#39;</span>, <span class="string">&#39;\0&#39;</span>, <span class="string">&#39;\0&#39;</span>],
-                [<span class="string">&#39;\0&#39;</span>, <span class="string">&#39;\0&#39;</span>, <span class="string">&#39;\0&#39;</span>, <span class="string">&#39;\0&#39;</span>, <span class="string">&#39;\0&#39;</span>],
+                [<span class="string">'\0'</span>, <span class="string">'\0'</span>, <span class="string">'\0'</span>, <span class="string">'\0'</span>, <span class="string">'\0'</span>],
+                [<span class="string">'\0'</span>, <span class="string">'\0'</span>, <span class="string">'\0'</span>, <span class="string">'\0'</span>, <span class="string">'\0'</span>],
             ],
             context_len: [<span class="number">0</span>, <span class="number">0</span>],
         }
@@ -2523,8 +2524,8 @@
         <span class="self">self</span>.serial = <span class="number">0</span>;
 
         <span class="self">self</span>.context = [
-            [<span class="string">&#39;\0&#39;</span>, <span class="string">&#39;\0&#39;</span>, <span class="string">&#39;\0&#39;</span>, <span class="string">&#39;\0&#39;</span>, <span class="string">&#39;\0&#39;</span>],
-            [<span class="string">&#39;\0&#39;</span>, <span class="string">&#39;\0&#39;</span>, <span class="string">&#39;\0&#39;</span>, <span class="string">&#39;\0&#39;</span>, <span class="string">&#39;\0&#39;</span>],
+            [<span class="string">'\0'</span>, <span class="string">'\0'</span>, <span class="string">'\0'</span>, <span class="string">'\0'</span>, <span class="string">'\0'</span>],
+            [<span class="string">'\0'</span>, <span class="string">'\0'</span>, <span class="string">'\0'</span>, <span class="string">'\0'</span>, <span class="string">'\0'</span>],
         ];
         <span class="self">self</span>.context_len = [<span class="number">0</span>, <span class="number">0</span>];
     }
@@ -2742,7 +2743,7 @@
         <span class="self">self</span>.scratch_flags = flags;
     }
 
-    <span class="doccomment">/// Copies glyph at idx to output but doesn&#39;t advance idx.
+    <span class="doccomment">/// Copies glyph at idx to output but doesn't advance idx.
     </span><span class="kw">pub fn </span>copy_glyph(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">if </span>!<span class="self">self</span>.make_room_for(<span class="number">0</span>, <span class="number">1</span>) {
             <span class="kw">return</span>;
@@ -2754,7 +2755,7 @@
 
     <span class="doccomment">/// Copies glyph at idx to output and advance idx.
     ///
-    /// If there&#39;s no output, just advance idx.
+    /// If there's no output, just advance idx.
     </span><span class="kw">pub fn </span>next_glyph(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">if </span><span class="self">self</span>.have_output {
             <span class="kw">if </span><span class="self">self</span>.have_separate_output || <span class="self">self</span>.out_len != <span class="self">self</span>.idx {
@@ -2773,7 +2774,7 @@
 
     <span class="doccomment">/// Copies n glyphs at idx to output and advance idx.
     ///
-    /// If there&#39;s no output, just advance idx.
+    /// If there's no output, just advance idx.
     </span><span class="kw">pub fn </span>next_glyphs(<span class="kw-2">&amp;mut </span><span class="self">self</span>, n: usize) {
         <span class="kw">if </span><span class="self">self</span>.have_output {
             <span class="kw">if </span><span class="self">self</span>.have_separate_output || <span class="self">self</span>.out_len != <span class="self">self</span>.idx {
@@ -2952,7 +2953,7 @@
 
     <span class="kw">pub fn </span>delete_glyphs_inplace(<span class="kw-2">&amp;mut </span><span class="self">self</span>, filter: <span class="kw">impl </span>Fn(<span class="kw-2">&amp;</span>GlyphInfo) -&gt; bool) {
         <span class="comment">// Merge clusters and delete filtered glyphs.
-        // NOTE! We can&#39;t use out-buffer as we have positioning data.
+        // NOTE! We can't use out-buffer as we have positioning data.
         </span><span class="kw">let </span><span class="kw-2">mut </span>j = <span class="number">0</span>;
 
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.len {
@@ -3166,7 +3167,7 @@
                 <span class="kw">continue</span>;
             }
 
-            <span class="comment">// Move item i to occupy place for item j, shift what&#39;s in between.
+            <span class="comment">// Move item i to occupy place for item j, shift what's in between.
             </span><span class="self">self</span>.merge_clusters(j, i + <span class="number">1</span>);
 
             {
@@ -3401,7 +3402,7 @@
         <span class="kw">const </span>HAS_UNSAFE_TO_BREAK       = <span class="number">0x00000010</span>;
         <span class="kw">const </span>HAS_CGJ                   = <span class="number">0x00000020</span>;
 
-        <span class="comment">// Reserved for complex shapers&#39; internal use.
+        <span class="comment">// Reserved for complex shapers' internal use.
         </span><span class="kw">const </span>COMPLEX0                  = <span class="number">0x01000000</span>;
         <span class="kw">const </span>COMPLEX1                  = <span class="number">0x02000000</span>;
         <span class="kw">const </span>COMPLEX2                  = <span class="number">0x04000000</span>;
@@ -3479,13 +3480,13 @@
         <span class="self">self</span>.<span class="number">0</span>.context_len[<span class="number">1</span>] = <span class="number">0</span>;
     }
 
-    <span class="doccomment">/// Set the text direction of the `Buffer`&#39;s contents.
+    <span class="doccomment">/// Set the text direction of the `Buffer`'s contents.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>set_direction(<span class="kw-2">&amp;mut </span><span class="self">self</span>, direction: Direction) {
         <span class="self">self</span>.<span class="number">0</span>.direction = direction;
     }
 
-    <span class="doccomment">/// Returns the `Buffer`&#39;s text direction.
+    <span class="doccomment">/// Returns the `Buffer`'s text direction.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>direction(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Direction {
         <span class="self">self</span>.<span class="number">0</span>.direction
@@ -3559,12 +3560,12 @@
 }
 
 <span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>UnicodeBuffer {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; core::fmt::Result {
-        fmt.debug_struct(<span class="string">&quot;UnicodeBuffer&quot;</span>)
-            .field(<span class="string">&quot;direction&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.direction())
-            .field(<span class="string">&quot;language&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.language())
-            .field(<span class="string">&quot;script&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.script())
-            .field(<span class="string">&quot;cluster_level&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.cluster_level())
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; core::fmt::Result {
+        fmt.debug_struct(<span class="string">"UnicodeBuffer"</span>)
+            .field(<span class="string">"direction"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.direction())
+            .field(<span class="string">"language"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.language())
+            .field(<span class="string">"script"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.script())
+            .field(<span class="string">"cluster_level"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.cluster_level())
             .finish()
     }
 }
@@ -3637,32 +3638,32 @@
             <span class="kw">if </span>!flags.contains(SerializeFlags::NO_GLYPH_NAMES) {
                 <span class="kw">match </span>face.glyph_name(info.as_glyph()) {
                     <span class="prelude-val">Some</span>(name) =&gt; s.push_str(name),
-                    <span class="prelude-val">None </span>=&gt; <span class="macro">write!</span>(<span class="kw-2">&amp;mut </span>s, <span class="string">&quot;gid{}&quot;</span>, info.glyph_id)<span class="question-mark">?</span>,
+                    <span class="prelude-val">None </span>=&gt; <span class="macro">write!</span>(<span class="kw-2">&amp;mut </span>s, <span class="string">"gid{}"</span>, info.glyph_id)<span class="question-mark">?</span>,
                 }
             } <span class="kw">else </span>{
-                <span class="macro">write!</span>(<span class="kw-2">&amp;mut </span>s, <span class="string">&quot;{}&quot;</span>, info.glyph_id)<span class="question-mark">?</span>;
+                <span class="macro">write!</span>(<span class="kw-2">&amp;mut </span>s, <span class="string">"{}"</span>, info.glyph_id)<span class="question-mark">?</span>;
             }
 
             <span class="kw">if </span>!flags.contains(SerializeFlags::NO_CLUSTERS) {
-                <span class="macro">write!</span>(<span class="kw-2">&amp;mut </span>s, <span class="string">&quot;={}&quot;</span>, info.cluster)<span class="question-mark">?</span>;
+                <span class="macro">write!</span>(<span class="kw-2">&amp;mut </span>s, <span class="string">"={}"</span>, info.cluster)<span class="question-mark">?</span>;
             }
 
             <span class="kw">if </span>!flags.contains(SerializeFlags::NO_POSITIONS) {
                 <span class="kw">if </span>x + pos.x_offset != <span class="number">0 </span>|| y + pos.y_offset != <span class="number">0 </span>{
-                    <span class="macro">write!</span>(<span class="kw-2">&amp;mut </span>s, <span class="string">&quot;@{},{}&quot;</span>, x + pos.x_offset, y + pos.y_offset)<span class="question-mark">?</span>;
+                    <span class="macro">write!</span>(<span class="kw-2">&amp;mut </span>s, <span class="string">"@{},{}"</span>, x + pos.x_offset, y + pos.y_offset)<span class="question-mark">?</span>;
                 }
 
                 <span class="kw">if </span>!flags.contains(SerializeFlags::NO_ADVANCES) {
-                    <span class="macro">write!</span>(<span class="kw-2">&amp;mut </span>s, <span class="string">&quot;+{}&quot;</span>, pos.x_advance)<span class="question-mark">?</span>;
+                    <span class="macro">write!</span>(<span class="kw-2">&amp;mut </span>s, <span class="string">"+{}"</span>, pos.x_advance)<span class="question-mark">?</span>;
                     <span class="kw">if </span>pos.y_advance != <span class="number">0 </span>{
-                        <span class="macro">write!</span>(<span class="kw-2">&amp;mut </span>s, <span class="string">&quot;,{}&quot;</span>, pos.y_advance)<span class="question-mark">?</span>;
+                        <span class="macro">write!</span>(<span class="kw-2">&amp;mut </span>s, <span class="string">",{}"</span>, pos.y_advance)<span class="question-mark">?</span>;
                     }
                 }
             }
 
             <span class="kw">if </span>flags.contains(SerializeFlags::GLYPH_FLAGS) {
                 <span class="kw">if </span>info.mask &amp; glyph_flag::DEFINED != <span class="number">0 </span>{
-                    <span class="macro">write!</span>(<span class="kw-2">&amp;mut </span>s, <span class="string">&quot;#{:X}&quot;</span>, info.mask &amp; glyph_flag::DEFINED)<span class="question-mark">?</span>;
+                    <span class="macro">write!</span>(<span class="kw-2">&amp;mut </span>s, <span class="string">"#{:X}"</span>, info.mask &amp; glyph_flag::DEFINED)<span class="question-mark">?</span>;
                 }
             }
 
@@ -3670,7 +3671,7 @@
                 <span class="kw">let </span>extents = face.glyph_extents(info.as_glyph()).unwrap_or_default();
                 <span class="macro">write!</span>(
                     <span class="kw-2">&amp;mut </span>s,
-                    <span class="string">&quot;&lt;{},{},{},{}&gt;&quot;</span>,
+                    <span class="string">"&lt;{},{},{},{}&gt;"</span>,
                     extents.x_bearing, extents.y_bearing, extents.width, extents.height
                 )<span class="question-mark">?</span>;
             }
@@ -3680,7 +3681,7 @@
                 y += pos.y_advance;
             }
 
-            s.push(<span class="string">&#39;|&#39;</span>);
+            s.push(<span class="string">'|'</span>);
         }
 
         <span class="comment">// Remove last `|`.
@@ -3693,10 +3694,10 @@
 }
 
 <span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>GlyphBuffer {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; core::fmt::Result {
-        fmt.debug_struct(<span class="string">&quot;GlyphBuffer&quot;</span>)
-            .field(<span class="string">&quot;glyph_positions&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.glyph_positions())
-            .field(<span class="string">&quot;glyph_infos&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.glyph_infos())
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; core::fmt::Result {
+        fmt.debug_struct(<span class="string">"GlyphBuffer"</span>)
+            .field(<span class="string">"glyph_positions"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.glyph_positions())
+            .field(<span class="string">"glyph_infos"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.glyph_infos())
             .finish()
     }
 }

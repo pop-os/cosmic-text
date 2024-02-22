@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/memmap2-0.9.4/src/advice.rs`."><title>advice.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="memmap2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/memmap2-0.9.4/src/advice.rs`."><title>advice.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="memmap2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -420,14 +421,14 @@
     /// the parent writes to it after a fork(2).  (Such page
     /// relocations cause problems for hardware that DMAs into the
     /// page.)
-    </span><span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
+    </span><span class="attr">#[cfg(target_os = <span class="string">"linux"</span>)]
     </span>DontFork = libc::MADV_DONTFORK,
 
     <span class="doccomment">/// **MADV_DOFORK** - Linux only (since Linux 2.6.16)
     ///
     /// Undo the effect of MADV_DONTFORK, restoring the default
     /// behavior, whereby a mapping is inherited across fork(2).
-    </span><span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
+    </span><span class="attr">#[cfg(target_os = <span class="string">"linux"</span>)]
     </span>DoFork = libc::MADV_DOFORK,
 
     <span class="doccomment">/// **MADV_MERGEABLE** - Linux only (since Linux 2.6.32)
@@ -450,7 +451,7 @@
     /// The MADV_MERGEABLE and MADV_UNMERGEABLE operations are
     /// available only if the kernel was configured with
     /// CONFIG_KSM.
-    </span><span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
+    </span><span class="attr">#[cfg(target_os = <span class="string">"linux"</span>)]
     </span>Mergeable = libc::MADV_MERGEABLE,
 
     <span class="doccomment">/// **MADV_UNMERGEABLE** - Linux only (since Linux 2.6.32)
@@ -459,7 +460,7 @@
     /// the specified address range; KSM unmerges whatever pages
     /// it had merged in the address range specified by addr and
     /// length.
-    </span><span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
+    </span><span class="attr">#[cfg(target_os = <span class="string">"linux"</span>)]
     </span>Unmergeable = libc::MADV_UNMERGEABLE,
 
     <span class="doccomment">/// **MADV_HUGEPAGE** - Linux only (since Linux 2.6.38)
@@ -491,21 +492,21 @@
     /// this flag can be used in order to selectively enable THP.
     /// Whenever MADV_HUGEPAGE is used, it should always be in
     /// regions of memory with an access pattern that the
-    /// developer knows in advance won&#39;t risk to increase the
+    /// developer knows in advance won't risk to increase the
     /// memory footprint of the application when transparent
     /// hugepages are enabled.
     ///
     /// The MADV_HUGEPAGE and MADV_NOHUGEPAGE operations are
     /// available only if the kernel was configured with
     /// CONFIG_TRANSPARENT_HUGEPAGE.
-    </span><span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
+    </span><span class="attr">#[cfg(target_os = <span class="string">"linux"</span>)]
     </span>HugePage = libc::MADV_HUGEPAGE,
 
     <span class="doccomment">/// **MADV_NOHUGEPAGE** - Linux only (since Linux 2.6.38)
     ///
     /// Ensures that memory in the address range specified by addr
     /// and length will not be backed by transparent hugepages.
-    </span><span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
+    </span><span class="attr">#[cfg(target_os = <span class="string">"linux"</span>)]
     </span>NoHugePage = libc::MADV_NOHUGEPAGE,
 
     <span class="doccomment">/// **MADV_DONTDUMP** - Linux only (since Linux 3.4)
@@ -517,13 +518,13 @@
     /// **MADV_DONTDUMP** takes precedence over the bit mask that is
     /// set via the `/proc/[pid]/coredump_filter` file (see
     /// core(5)).
-    </span><span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
+    </span><span class="attr">#[cfg(target_os = <span class="string">"linux"</span>)]
     </span>DontDump = libc::MADV_DONTDUMP,
 
     <span class="doccomment">/// **MADV_DODUMP** - Linux only (since Linux 3.4)
     ///
     /// Undo the effect of an earlier MADV_DONTDUMP.
-    </span><span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
+    </span><span class="attr">#[cfg(target_os = <span class="string">"linux"</span>)]
     </span>DoDump = libc::MADV_DODUMP,
 
     <span class="doccomment">/// **MADV_HWPOISON** - Linux only (since Linux 2.6.32)
@@ -538,7 +539,7 @@
     /// This feature is intended for testing of memory error-
     /// handling code; it is available only if the kernel was
     /// configured with CONFIG_MEMORY_FAILURE.
-    </span><span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
+    </span><span class="attr">#[cfg(target_os = <span class="string">"linux"</span>)]
     </span>HwPoison = libc::MADV_HWPOISON,
 
     <span class="doccomment">/// **MADV_POPULATE_READ** - Linux only (since Linux 5.14)
@@ -552,8 +553,8 @@
     /// errors,  can  be  applied to (parts of) existing mappings and
     /// will always populate (prefault) page  tables  readable.   One
     /// example  use  case is prefaulting a file mapping, reading all
-    /// file content from disk; however, pages won&#39;t be  dirtied  and
-    /// consequently  won&#39;t  have  to  be  written  back to disk when
+    /// file content from disk; however, pages won't be  dirtied  and
+    /// consequently  won't  have  to  be  written  back to disk when
     /// evicting the pages from memory.
     ///
     /// Depending on the underlying mapping, map the shared zeropage,
@@ -573,7 +574,7 @@
     ///
     /// Note  that with MADV_POPULATE_READ, the process can be killed
     /// at any moment when the system runs out of memory.
-    </span><span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
+    </span><span class="attr">#[cfg(target_os = <span class="string">"linux"</span>)]
     </span>PopulateRead = libc::MADV_POPULATE_READ,
 
     <span class="doccomment">/// **MADV_POPULATE_WRITE** - Linux only (since Linux 5.14)
@@ -605,7 +606,7 @@
     ///
     /// Note that with MADV_POPULATE_WRITE, the process can be killed
     /// at any moment when the system runs out of memory.
-    </span><span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
+    </span><span class="attr">#[cfg(target_os = <span class="string">"linux"</span>)]
     </span>PopulateWrite = libc::MADV_POPULATE_WRITE,
 
     <span class="doccomment">/// **MADV_ZERO_WIRED_PAGES** - Darwin only
@@ -614,7 +615,7 @@
     /// zeroed out if the address range is deallocated without first unwiring the pages (i.e.
     /// a munmap(2) without a preceding munlock(2) or the application quits).  This is used
     /// with madvise() system call.
-    </span><span class="attr">#[cfg(any(target_os = <span class="string">&quot;macos&quot;</span>, target_os = <span class="string">&quot;ios&quot;</span>))]
+    </span><span class="attr">#[cfg(any(target_os = <span class="string">"macos"</span>, target_os = <span class="string">"ios"</span>))]
     </span>ZeroWiredPages = libc::MADV_ZERO_WIRED_PAGES,
 }
 
@@ -628,7 +629,7 @@
 /// Hence, these potentially unsafe flags must be used with the unsafe
 /// methods and the programmer has to justify that the code
 /// does not keep any borrows of the mapping active while the mapped pages
-/// are updated by the kernel&#39;s memory management subsystem.
+/// are updated by the kernel's memory management subsystem.
 ///
 /// [man_page]: https://man7.org/linux/man-pages/man2/madvise.2.html
 </span><span class="attr">#[repr(i32)]
@@ -703,7 +704,7 @@
     /// Using the returned value with conceptually write to the
     /// mapped pages, i.e. borrowing the mapping while the pages
     /// are still being freed results in undefined behaviour.
-    </span><span class="attr">#[cfg(any(target_os = <span class="string">&quot;linux&quot;</span>, target_os = <span class="string">&quot;macos&quot;</span>, target_os = <span class="string">&quot;ios&quot;</span>))]
+    </span><span class="attr">#[cfg(any(target_os = <span class="string">"linux"</span>, target_os = <span class="string">"macos"</span>, target_os = <span class="string">"ios"</span>))]
     </span>Free = libc::MADV_FREE,
 
     <span class="doccomment">/// **MADV_REMOVE** - Linux only (since Linux 2.6.16)
@@ -730,7 +731,7 @@
     /// Using the returned value with conceptually write to the
     /// mapped pages, i.e. borrowing the mapping when the pages
     /// are freed results in undefined behaviour.
-    </span><span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
+    </span><span class="attr">#[cfg(target_os = <span class="string">"linux"</span>)]
     </span>Remove = libc::MADV_REMOVE,
 
     <span class="doccomment">/// **MADV_FREE_REUSABLE** - Darwin only
@@ -742,7 +743,7 @@
     /// Using the returned value with conceptually write to the
     /// mapped pages, i.e. borrowing the mapping while the pages
     /// are still being freed results in undefined behaviour.
-    </span><span class="attr">#[cfg(any(target_os = <span class="string">&quot;macos&quot;</span>, target_os = <span class="string">&quot;ios&quot;</span>))]
+    </span><span class="attr">#[cfg(any(target_os = <span class="string">"macos"</span>, target_os = <span class="string">"ios"</span>))]
     </span>FreeReusable = libc::MADV_FREE_REUSABLE,
 
     <span class="doccomment">/// **MADV_FREE_REUSE** - Darwin only
@@ -756,7 +757,7 @@
     /// Using the returned value with conceptually write to the
     /// mapped pages, i.e. borrowing the mapping while the pages
     /// are still being freed results in undefined behaviour.
-    </span><span class="attr">#[cfg(any(target_os = <span class="string">&quot;macos&quot;</span>, target_os = <span class="string">&quot;ios&quot;</span>))]
+    </span><span class="attr">#[cfg(any(target_os = <span class="string">"macos"</span>, target_os = <span class="string">"ios"</span>))]
     </span>FreeReuse = libc::MADV_FREE_REUSE,
 }
 

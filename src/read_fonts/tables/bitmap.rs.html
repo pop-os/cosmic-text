@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.4/src/tables/bitmap.rs`."><title>bitmap.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.5/src/tables/bitmap.rs`."><title>bitmap.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -321,7 +322,7 @@
 <a href="#321" id="321">321</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Common bitmap (EBLC/EBDT/CBLC/CBDT) types.
 
-</span><span class="macro">include!</span>(<span class="string">&quot;../../generated/generated_bitmap.rs&quot;</span>);
+</span><span class="macro">include!</span>(<span class="string">"../../generated/generated_bitmap.rs"</span>);
 
 <span class="kw">impl </span>BitmapSize {
     <span class="doccomment">/// Returns the bitmap location information for the given glyph.
@@ -409,11 +410,11 @@
         <span class="prelude-val">Err</span>(ReadError::OutOfBounds)
     }
 
-    <span class="kw">fn </span>subtable&lt;<span class="lifetime">&#39;a</span>&gt;(
+    <span class="kw">fn </span>subtable&lt;<span class="lifetime">'a</span>&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        offset_data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;,
+        offset_data: FontData&lt;<span class="lifetime">'a</span>&gt;,
         index: u32,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;BitmapSizeSubtable&lt;<span class="lifetime">&#39;a</span>&gt;, ReadError&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;BitmapSizeSubtable&lt;<span class="lifetime">'a</span>&gt;, ReadError&gt; {
         <span class="kw">let </span>base_offset = <span class="self">self</span>.index_subtable_array_offset() <span class="kw">as </span>usize;
         <span class="kw">const </span>SUBTABLE_HEADER_SIZE: usize = <span class="number">8</span>;
         <span class="kw">let </span>header_offset = base_offset + index <span class="kw">as </span>usize * SUBTABLE_HEADER_SIZE;
@@ -434,10 +435,10 @@
     }
 }
 
-<span class="kw">struct </span>BitmapSizeSubtable&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">struct </span>BitmapSizeSubtable&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">pub </span>first_glyph_index: GlyphId,
     <span class="kw">pub </span>last_glyph_index: GlyphId,
-    <span class="kw">pub </span>kind: IndexSubtable&lt;<span class="lifetime">&#39;a</span>&gt;,
+    <span class="kw">pub </span>kind: IndexSubtable&lt;<span class="lifetime">'a</span>&gt;,
 }
 
 <span class="attr">#[derive(Clone, Default)]
@@ -471,22 +472,22 @@
 }
 
 <span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>BitmapData&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>BitmapData&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">pub </span>metrics: BitmapMetrics,
-    <span class="kw">pub </span>content: BitmapContent&lt;<span class="lifetime">&#39;a</span>&gt;,
+    <span class="kw">pub </span>content: BitmapContent&lt;<span class="lifetime">'a</span>&gt;,
 }
 
 <span class="attr">#[derive(Clone)]
-</span><span class="kw">pub enum </span>BitmapContent&lt;<span class="lifetime">&#39;a</span>&gt; {
-    Data(BitmapDataFormat, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]),
-    Composite(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[BdtComponent]),
+</span><span class="kw">pub enum </span>BitmapContent&lt;<span class="lifetime">'a</span>&gt; {
+    Data(BitmapDataFormat, <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]),
+    Composite(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[BdtComponent]),
 }
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>bitmap_data&lt;<span class="lifetime">&#39;a</span>&gt;(
-    offset_data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;,
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>bitmap_data&lt;<span class="lifetime">'a</span>&gt;(
+    offset_data: FontData&lt;<span class="lifetime">'a</span>&gt;,
     location: <span class="kw-2">&amp;</span>BitmapLocation,
     is_color: bool,
-) -&gt; <span class="prelude-ty">Result</span>&lt;BitmapData&lt;<span class="lifetime">&#39;a</span>&gt;, ReadError&gt; {
+) -&gt; <span class="prelude-ty">Result</span>&lt;BitmapData&lt;<span class="lifetime">'a</span>&gt;, ReadError&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>image_data = offset_data
         .slice(location.data_offset..)
         .ok_or(ReadError::OutOfBounds)<span class="question-mark">?
@@ -527,7 +528,7 @@
         // &lt;https://learn.microsoft.com/en-us/typography/opentype/spec/ebdt#format-5-metrics-in-eblc-bit-aligned-image-data-only&gt;
         </span><span class="number">5 </span>=&gt; {
             <span class="kw">let </span>metrics = location.metrics.clone().ok_or(ReadError::MalformedData(
-                <span class="string">&quot;expected metrics from location table&quot;</span>,
+                <span class="string">"expected metrics from location table"</span>,
             ))<span class="question-mark">?</span>;
             <span class="kw">let </span>width = metrics.width <span class="kw">as </span>usize * location.bit_depth <span class="kw">as </span>usize;
             <span class="kw">let </span>height = metrics.height <span class="kw">as </span>usize;
@@ -613,7 +614,7 @@
         // &lt;https://learn.microsoft.com/en-us/typography/opentype/spec/cbdt#format-19-metrics-in-cblc-table-png-image-data&gt;
         </span><span class="number">19 </span><span class="kw">if </span>is_color =&gt; {
             <span class="kw">let </span>metrics = location.metrics.clone().ok_or(ReadError::MalformedData(
-                <span class="string">&quot;expected metrics from location table&quot;</span>,
+                <span class="string">"expected metrics from location table"</span>,
             ))<span class="question-mark">?</span>;
             <span class="kw">let </span>data_len = image_data.read::&lt;u32&gt;()<span class="question-mark">? </span><span class="kw">as </span>usize;
             <span class="kw">let </span>data = image_data.read_array::&lt;u8&gt;(data_len)<span class="question-mark">?</span>;
@@ -622,7 +623,7 @@
                 content: BitmapContent::Data(BitmapDataFormat::Png, data),
             })
         }
-        <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(ReadError::MalformedData(<span class="string">&quot;unexpected bitmap data format&quot;</span>)),
+        <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(ReadError::MalformedData(<span class="string">"unexpected bitmap data format"</span>)),
     }
 }
 
@@ -634,9 +635,9 @@
     <span class="prelude-val">Ok</span>(cursor.read_array::&lt;BigGlyphMetrics&gt;(<span class="number">1</span>)<span class="question-mark">?</span>[<span class="number">0</span>].clone())
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
 </span><span class="kw">impl </span>SbitLineMetrics {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>traversal_type&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; FieldType&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>traversal_type&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; FieldType&lt;<span class="lifetime">'a</span>&gt; {
         FieldType::Record(<span class="self">self</span>.traverse(data))
     }
 }

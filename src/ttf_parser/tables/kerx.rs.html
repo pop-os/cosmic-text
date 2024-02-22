@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ttf-parser-0.20.0/src/tables/kerx.rs`."><title>kerx.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ttf_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ttf-parser-0.20.0/src/tables/kerx.rs`."><title>kerx.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ttf_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -487,7 +488,7 @@
 //! https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6kerx.html) implementation.
 
 </span><span class="comment">// TODO: find a way to test this table
-// This table is basically untested because it uses Apple&#39;s State Tables
+// This table is basically untested because it uses Apple's State Tables
 // and I have no idea how to generate them.
 
 </span><span class="kw">use </span>core::num::NonZeroU16;
@@ -504,14 +505,14 @@
 ///
 /// The same as in `kern`, but uses `LazyArray32` instead of `LazyArray16`.
 </span><span class="attr">#[derive(Clone, Copy, Debug)]
-</span><span class="kw">pub struct </span>Subtable0&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Subtable0&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// A list of kerning pairs.
-    </span><span class="kw">pub </span>pairs: LazyArray32&lt;<span class="lifetime">&#39;a</span>, KerningPair&gt;,
+    </span><span class="kw">pub </span>pairs: LazyArray32&lt;<span class="lifetime">'a</span>, KerningPair&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Subtable0&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Subtable0&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Parses a subtable from raw data.
-    </span><span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">let </span>number_of_pairs = s.read::&lt;u32&gt;()<span class="question-mark">?</span>;
         s.advance(<span class="number">12</span>); <span class="comment">// search_range (u32) + entry_selector (u32) + range_shift (u32)
@@ -552,21 +553,21 @@
 ///
 /// State Table for Contextual Kerning.
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>Subtable1&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Subtable1&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// A state table.
-    </span><span class="kw">pub </span>state_table: aat::ExtendedStateTable&lt;<span class="lifetime">&#39;a</span>, EntryData&gt;,
-    actions_data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    </span><span class="kw">pub </span>state_table: aat::ExtendedStateTable&lt;<span class="lifetime">'a</span>, EntryData&gt;,
+    actions_data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Subtable1&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(number_of_glyphs: NonZeroU16, data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Subtable1&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(number_of_glyphs: NonZeroU16, data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">let </span>state_table = aat::ExtendedStateTable::parse(number_of_glyphs, <span class="kw-2">&amp;mut </span>s)<span class="question-mark">?</span>;
 
         <span class="comment">// Actions offset is right after the state table.
         </span><span class="kw">let </span>actions_offset = s.read::&lt;Offset32&gt;()<span class="question-mark">?</span>;
         <span class="comment">// Actions offset is from the start of the state table and not from the start of subtable.
-        // And since we don&#39;t know the length of the actions data,
+        // And since we don't know the length of the actions data,
         // simply store all the data after the offset.
         </span><span class="kw">let </span>actions_data = data.get(actions_offset.to_usize()..)<span class="question-mark">?</span>;
 
@@ -583,17 +584,17 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; core::ops::Deref <span class="kw">for </span>Subtable1&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">type </span>Target = aat::ExtendedStateTable&lt;<span class="lifetime">&#39;a</span>, EntryData&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; core::ops::Deref <span class="kw">for </span>Subtable1&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">type </span>Target = aat::ExtendedStateTable&lt;<span class="lifetime">'a</span>, EntryData&gt;;
 
     <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
         <span class="kw-2">&amp;</span><span class="self">self</span>.state_table
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Subtable1&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Subtable1&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;Subtable1 {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"Subtable1 {{ ... }}"</span>)
     }
 }
 
@@ -603,9 +604,9 @@
 ///
 /// The same as in `kern`, but uses 32bit offsets instead of 16bit one.
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>Subtable2&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]); <span class="comment">// TODO: parse actual structure
+</span><span class="kw">pub struct </span>Subtable2&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]); <span class="comment">// TODO: parse actual structure
 
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Subtable2&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Subtable2&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Returns kerning for a pair of glyphs.
     </span><span class="kw">pub fn </span>glyphs_kerning(<span class="kw-2">&amp;</span><span class="self">self</span>, left: GlyphId, right: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;i16&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(<span class="self">self</span>.<span class="number">0</span>);
@@ -617,16 +618,16 @@
         <span class="kw">let </span>right_hand_table_offset = s.read::&lt;Offset32&gt;()<span class="question-mark">?</span>.to_usize().checked_sub(HEADER_SIZE)<span class="question-mark">?</span>;
         <span class="kw">let </span>array_offset = s.read::&lt;Offset32&gt;()<span class="question-mark">?</span>.to_usize().checked_sub(HEADER_SIZE)<span class="question-mark">?</span>;
 
-        <span class="comment">// &#39;The array can be indexed by completing the left-hand and right-hand class mappings,
+        <span class="comment">// 'The array can be indexed by completing the left-hand and right-hand class mappings,
         // adding the class values to the address of the subtable,
-        // and fetching the kerning value to which the new address points.&#39;
+        // and fetching the kerning value to which the new address points.'
 
         </span><span class="kw">let </span>left_class =
             <span class="kw">crate</span>::kern::get_format2_class(left.<span class="number">0</span>, left_hand_table_offset, <span class="self">self</span>.<span class="number">0</span>).unwrap_or(<span class="number">0</span>);
         <span class="kw">let </span>right_class =
             <span class="kw">crate</span>::kern::get_format2_class(right.<span class="number">0</span>, right_hand_table_offset, <span class="self">self</span>.<span class="number">0</span>).unwrap_or(<span class="number">0</span>);
 
-        <span class="comment">// &#39;Values within the left-hand offset table should not be less than the kerning array offset.&#39;
+        <span class="comment">// 'Values within the left-hand offset table should not be less than the kerning array offset.'
         </span><span class="kw">if </span>usize::from(left_class) &lt; array_offset {
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
@@ -638,17 +639,17 @@
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Subtable2&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Subtable2&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;Subtable2 {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"Subtable2 {{ ... }}"</span>)
     }
 }
 
 <span class="doccomment">/// A container of Anchor Points used by [`Subtable4`].
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>AnchorPoints&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]);
+</span><span class="kw">pub struct </span>AnchorPoints&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]);
 
-<span class="kw">impl </span>AnchorPoints&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>AnchorPoints&lt;<span class="lifetime">'_</span>&gt; {
     <span class="doccomment">/// Returns a mark and current anchor points at action index.
     </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, action_index: u16) -&gt; <span class="prelude-ty">Option</span>&lt;(u16, u16)&gt; {
         <span class="kw">let </span>offset = usize::from(action_index) * u16::SIZE;
@@ -657,9 +658,9 @@
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>AnchorPoints&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>AnchorPoints&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;AnchorPoints {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"AnchorPoints {{ ... }}"</span>)
     }
 }
 
@@ -667,19 +668,19 @@
 ///
 /// State Table for Control Point/Anchor Point Positioning.
 ///
-/// Note: I wasn&#39;t able to find any fonts that actually use
+/// Note: I wasn't able to find any fonts that actually use
 /// `ControlPointActions` and/or `ControlPointCoordinateActions`,
 /// therefore only `AnchorPointActions` is supported.
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>Subtable4&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Subtable4&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// A state table.
-    </span><span class="kw">pub </span>state_table: aat::ExtendedStateTable&lt;<span class="lifetime">&#39;a</span>, EntryData&gt;,
+    </span><span class="kw">pub </span>state_table: aat::ExtendedStateTable&lt;<span class="lifetime">'a</span>, EntryData&gt;,
     <span class="doccomment">/// Anchor points.
-    </span><span class="kw">pub </span>anchor_points: AnchorPoints&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub </span>anchor_points: AnchorPoints&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Subtable4&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(number_of_glyphs: NonZeroU16, data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Subtable4&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(number_of_glyphs: NonZeroU16, data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">let </span>state_table = aat::ExtendedStateTable::parse(number_of_glyphs, <span class="kw-2">&amp;mut </span>s)<span class="question-mark">?</span>;
         <span class="kw">let </span>flags = s.read::&lt;u32&gt;()<span class="question-mark">?</span>;
@@ -698,17 +699,17 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; core::ops::Deref <span class="kw">for </span>Subtable4&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">type </span>Target = aat::ExtendedStateTable&lt;<span class="lifetime">&#39;a</span>, EntryData&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; core::ops::Deref <span class="kw">for </span>Subtable4&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">type </span>Target = aat::ExtendedStateTable&lt;<span class="lifetime">'a</span>, EntryData&gt;;
 
     <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
         <span class="kw-2">&amp;</span><span class="self">self</span>.state_table
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Subtable4&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Subtable4&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;Subtable4 {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"Subtable4 {{ ... }}"</span>)
     }
 }
 
@@ -716,14 +717,14 @@
 ///
 /// Simple Index-based n x m Array of Kerning Values.
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>Subtable6&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+</span><span class="kw">pub struct </span>Subtable6&lt;<span class="lifetime">'a</span>&gt; {
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     number_of_glyphs: NonZeroU16,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Subtable6&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Subtable6&lt;<span class="lifetime">'a</span>&gt; {
     <span class="comment">// TODO: parse actual structure
-    </span><span class="kw">fn </span>parse(number_of_glyphs: NonZeroU16, data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">fn </span>parse(number_of_glyphs: NonZeroU16, data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="self">Self </span>{
         Subtable6 {
             number_of_glyphs,
             data,
@@ -781,26 +782,26 @@
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Subtable6&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Subtable6&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;Subtable6 {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"Subtable6 {{ ... }}"</span>)
     }
 }
 
 <span class="doccomment">/// An extended kerning subtable format.
 </span><span class="attr">#[allow(missing_docs)]
 #[derive(Clone, Debug)]
-</span><span class="kw">pub enum </span>Format&lt;<span class="lifetime">&#39;a</span>&gt; {
-    Format0(Subtable0&lt;<span class="lifetime">&#39;a</span>&gt;),
-    Format1(Subtable1&lt;<span class="lifetime">&#39;a</span>&gt;),
-    Format2(Subtable2&lt;<span class="lifetime">&#39;a</span>&gt;),
-    Format4(Subtable4&lt;<span class="lifetime">&#39;a</span>&gt;),
-    Format6(Subtable6&lt;<span class="lifetime">&#39;a</span>&gt;),
+</span><span class="kw">pub enum </span>Format&lt;<span class="lifetime">'a</span>&gt; {
+    Format0(Subtable0&lt;<span class="lifetime">'a</span>&gt;),
+    Format1(Subtable1&lt;<span class="lifetime">'a</span>&gt;),
+    Format2(Subtable2&lt;<span class="lifetime">'a</span>&gt;),
+    Format4(Subtable4&lt;<span class="lifetime">'a</span>&gt;),
+    Format6(Subtable6&lt;<span class="lifetime">'a</span>&gt;),
 }
 
 <span class="doccomment">/// A kerning subtable.
 </span><span class="attr">#[derive(Clone, Debug)]
-</span><span class="kw">pub struct </span>Subtable&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Subtable&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Indicates that subtable is for horizontal text.
     </span><span class="kw">pub </span>horizontal: bool,
     <span class="doccomment">/// Indicates that subtable is variable.
@@ -816,10 +817,10 @@
     /// This value is only used with variation fonts and should be 0 for all other fonts.
     </span><span class="kw">pub </span>tuple_count: u32,
     <span class="doccomment">/// Subtable format.
-    </span><span class="kw">pub </span>format: Format&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub </span>format: Format&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Subtable&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Subtable&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Returns kerning for a pair of glyphs.
     ///
     /// Returns `None` in case of state machine based subtable.
@@ -849,26 +850,26 @@
 <span class="doccomment">/// A list of extended kerning subtables.
 ///
 /// The internal data layout is not designed for random access,
-/// therefore we&#39;re not providing the `get()` method and only an iterator.
+/// therefore we're not providing the `get()` method and only an iterator.
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>Subtables&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Subtables&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// The number of glyphs from the `maxp` table.
     </span>number_of_glyphs: NonZeroU16,
     <span class="doccomment">/// The total number of tables.
     </span>number_of_tables: u32,
     <span class="doccomment">/// Actual data. Starts right after the `kerx` header.
-    </span>data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    </span>data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Subtables&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Subtables&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;Subtables {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"Subtables {{ ... }}"</span>)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IntoIterator <span class="kw">for </span>Subtables&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">type </span>Item = Subtable&lt;<span class="lifetime">&#39;a</span>&gt;;
-    <span class="kw">type </span>IntoIter = SubtablesIter&lt;<span class="lifetime">&#39;a</span>&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; IntoIterator <span class="kw">for </span>Subtables&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">type </span>Item = Subtable&lt;<span class="lifetime">'a</span>&gt;;
+    <span class="kw">type </span>IntoIter = SubtablesIter&lt;<span class="lifetime">'a</span>&gt;;
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
@@ -884,7 +885,7 @@
 <span class="doccomment">/// An iterator over extended kerning subtables.
 </span><span class="attr">#[allow(missing_debug_implementations)]
 #[derive(Clone)]
-</span><span class="kw">pub struct </span>SubtablesIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>SubtablesIter&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// The number of glyphs from the `maxp` table.
     </span>number_of_glyphs: NonZeroU16,
     <span class="doccomment">/// The current table index.
@@ -892,11 +893,11 @@
     <span class="doccomment">/// The total number of tables.
     </span>number_of_tables: u32,
     <span class="doccomment">/// Actual data. Starts right after the `kerx` header.
-    </span>stream: Stream&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span>stream: Stream&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>SubtablesIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">type </span>Item = Subtable&lt;<span class="lifetime">&#39;a</span>&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>SubtablesIter&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">type </span>Item = Subtable&lt;<span class="lifetime">'a</span>&gt;;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">if </span><span class="self">self</span>.table_index == <span class="self">self</span>.number_of_tables {
@@ -945,16 +946,16 @@
 <span class="doccomment">/// An [Extended Kerning Table](
 /// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6kerx.html).
 </span><span class="attr">#[derive(Clone, Copy, Debug)]
-</span><span class="kw">pub struct </span>Table&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Table&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// A list of subtables.
-    </span><span class="kw">pub </span>subtables: Subtables&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub </span>subtables: Subtables&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Table&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Table&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Parses a table from raw data.
     ///
     /// `number_of_glyphs` is from the `maxp` table.
-    </span><span class="kw">pub fn </span>parse(number_of_glyphs: NonZeroU16, data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">pub fn </span>parse(number_of_glyphs: NonZeroU16, data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         s.skip::&lt;u16&gt;(); <span class="comment">// version
         </span>s.skip::&lt;u16&gt;(); <span class="comment">// padding

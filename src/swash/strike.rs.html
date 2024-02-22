@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/strike.rs`."><title>strike.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/strike.rs`."><title>strike.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -857,29 +858,29 @@
 
 <span class="kw">impl </span>BitmapStrikesProxy {
     <span class="doccomment">/// Creates strike collection proxy from the specified font.
-    </span><span class="kw">pub fn </span>from_font&lt;<span class="lifetime">&#39;a</span>&gt;(font: <span class="kw-2">&amp;</span>FontRef&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>from_font&lt;<span class="lifetime">'a</span>&gt;(font: <span class="kw-2">&amp;</span>FontRef&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>upem = font.head().map(|h| h.units_per_em()).unwrap_or(<span class="number">1</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>bitmaps = (<span class="number">0</span>, <span class="number">0</span>);
-        <span class="kw">let </span>eblc = font.table_offset(raw_tag(<span class="string">b&quot;EBLC&quot;</span>));
+        <span class="kw">let </span>eblc = font.table_offset(raw_tag(<span class="string">b"EBLC"</span>));
         <span class="kw">if </span>eblc != <span class="number">0 </span>{
-            <span class="kw">let </span>ebdt = font.table_offset(raw_tag(<span class="string">b&quot;EBDT&quot;</span>));
+            <span class="kw">let </span>ebdt = font.table_offset(raw_tag(<span class="string">b"EBDT"</span>));
             <span class="kw">if </span>ebdt != <span class="number">0 </span>{
                 bitmaps = (eblc, ebdt);
             }
         }
         <span class="kw">let </span><span class="kw-2">mut </span>color_bitmaps = (<span class="number">0</span>, <span class="number">0</span>);
-        <span class="kw">let </span>sbix = font.table_offset(raw_tag(<span class="string">b&quot;sbix&quot;</span>));
+        <span class="kw">let </span>sbix = font.table_offset(raw_tag(<span class="string">b"sbix"</span>));
         <span class="kw">let </span><span class="kw-2">mut </span>is_apple = <span class="bool-val">false</span>;
         <span class="kw">if </span>sbix != <span class="number">0 </span>{
             color_bitmaps = (sbix, sbix);
             <span class="kw">use </span><span class="kw">super</span>::string::StringId::Family;
             <span class="kw">if let </span><span class="prelude-val">Some</span>(name) = font.localized_strings().find_by_id(Family, <span class="prelude-val">None</span>) {
-                is_apple = name.chars().eq(<span class="string">&quot;Apple Color Emoji&quot;</span>.chars());
+                is_apple = name.chars().eq(<span class="string">"Apple Color Emoji"</span>.chars());
             }
         } <span class="kw">else </span>{
-            <span class="kw">let </span>cblc = font.table_offset(raw_tag(<span class="string">b&quot;CBLC&quot;</span>));
+            <span class="kw">let </span>cblc = font.table_offset(raw_tag(<span class="string">b"CBLC"</span>));
             <span class="kw">if </span>cblc != <span class="number">0 </span>{
-                <span class="kw">let </span>cbdt = font.table_offset(raw_tag(<span class="string">b&quot;CBDT&quot;</span>));
+                <span class="kw">let </span>cbdt = font.table_offset(raw_tag(<span class="string">b"CBDT"</span>));
                 <span class="kw">if </span>cbdt != <span class="number">0 </span>{
                     color_bitmaps = (cblc, cbdt);
                 }
@@ -905,13 +906,13 @@
 
     <span class="doccomment">/// Materializes an alpha strike iterator for the specified font. This
     /// proxy must have been created from the same font.
-    </span><span class="kw">pub fn </span>materialize_alpha&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, font: <span class="kw-2">&amp;</span>FontRef&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; BitmapStrikes&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>materialize_alpha&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, font: <span class="kw-2">&amp;</span>FontRef&lt;<span class="lifetime">'a</span>&gt;) -&gt; BitmapStrikes&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.materialize_impl(font.data, <span class="self">self</span>.bitmaps.<span class="number">0</span>, <span class="self">self</span>.bitmaps.<span class="number">1</span>, <span class="self">self</span>.upem, <span class="bool-val">false</span>)
     }
 
     <span class="doccomment">/// Materializes a color strike iterator for the specified font. This
     /// proxy must have been created from the same font.
-    </span><span class="kw">pub fn </span>materialize_color&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, font: <span class="kw-2">&amp;</span>FontRef&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; BitmapStrikes&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>materialize_color&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, font: <span class="kw-2">&amp;</span>FontRef&lt;<span class="lifetime">'a</span>&gt;) -&gt; BitmapStrikes&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.materialize_impl(
             font.data,
             <span class="self">self</span>.color_bitmaps.<span class="number">0</span>,
@@ -921,14 +922,14 @@
         )
     }
 
-    <span class="kw">fn </span>materialize_impl&lt;<span class="lifetime">&#39;a</span>&gt;(
+    <span class="kw">fn </span>materialize_impl&lt;<span class="lifetime">'a</span>&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+        data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
         loc: u32,
         dat: u32,
         upem: u16,
         is_apple: bool,
-    ) -&gt; BitmapStrikes&lt;<span class="lifetime">&#39;a</span>&gt; {
+    ) -&gt; BitmapStrikes&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">if </span>loc == <span class="number">0 </span>{
             BitmapStrikes::new(<span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;</span>[], upem, <span class="bool-val">false</span>, <span class="bool-val">false</span>)
         } <span class="kw">else if </span>loc == dat {
@@ -944,9 +945,9 @@
 
 <span class="doccomment">/// Iterator over a collection of bitmap strikes.
 </span><span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">pub struct </span>BitmapStrikes&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
-    bitmap_data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+</span><span class="kw">pub struct </span>BitmapStrikes&lt;<span class="lifetime">'a</span>&gt; {
+    data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
+    bitmap_data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     is_sbix: bool,
     is_apple: bool,
     upem: u16,
@@ -954,10 +955,10 @@
     pos: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; BitmapStrikes&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; BitmapStrikes&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>new(
-        data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
-        bitmap_data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+        data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
+        bitmap_data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
         upem: u16,
         is_sbix: bool,
         is_apple: bool,
@@ -975,7 +976,7 @@
     }
 
     <span class="doccomment">/// Returns the bitmap strike at the specified index.
-    </span><span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, index: usize) -&gt; <span class="prelude-ty">Option</span>&lt;BitmapStrike&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, index: usize) -&gt; <span class="prelude-ty">Option</span>&lt;BitmapStrike&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">if </span>index &gt;= <span class="self">self</span>.len {
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
@@ -1001,7 +1002,7 @@
     /// ## Iteration behavior
     /// This function searches the entire strike collection without regard
     /// for the current state of the iterator.
-    </span><span class="kw">pub fn </span>find_by_nearest_ppem(<span class="kw-2">&amp;</span><span class="self">self</span>, ppem: u16, glyph_id: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;BitmapStrike&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>find_by_nearest_ppem(<span class="kw-2">&amp;</span><span class="self">self</span>, ppem: u16, glyph_id: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;BitmapStrike&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>best = <span class="prelude-val">None</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>best_size = <span class="number">0</span>;
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.len {
@@ -1031,7 +1032,7 @@
     /// ## Iteration behavior
     /// This function searches the entire strike collection without regard
     /// for the current state of the iterator.
-    </span><span class="kw">pub fn </span>find_by_exact_ppem(<span class="kw-2">&amp;</span><span class="self">self</span>, ppem: u16, glyph_id: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;BitmapStrike&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>find_by_exact_ppem(<span class="kw-2">&amp;</span><span class="self">self</span>, ppem: u16, glyph_id: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;BitmapStrike&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.len {
             <span class="kw">let </span>strike = <span class="kw">match </span><span class="self">self</span>.get(i) {
                 <span class="prelude-val">Some</span>(strike) =&gt; strike,
@@ -1053,7 +1054,7 @@
     /// ## Iteration behavior
     /// This function searches the entire strike collection without regard
     /// for the current state of the iterator.
-    </span><span class="kw">pub fn </span>find_by_largest_ppem(<span class="kw-2">&amp;</span><span class="self">self</span>, glyph_id: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;BitmapStrike&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>find_by_largest_ppem(<span class="kw-2">&amp;</span><span class="self">self</span>, glyph_id: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;BitmapStrike&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>largest = <span class="prelude-val">None</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>largest_ppem = <span class="number">0</span>;
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.len {
@@ -1079,16 +1080,16 @@
 <span class="doccomment">/// Collection of bitmaps of a specific size and format.
 </span><span class="attr">#[derive(Copy, Clone)]
 #[allow(dead_code)]
-</span><span class="kw">pub struct </span>BitmapStrike&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
-    bitmap_data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+</span><span class="kw">pub struct </span>BitmapStrike&lt;<span class="lifetime">'a</span>&gt; {
+    data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
+    bitmap_data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     offset: usize,
     upem: u16,
     is_sbix: bool,
     is_apple: bool,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; BitmapStrike&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; BitmapStrike&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Returns the device pixel density for which the strike was designed.
     </span><span class="kw">pub fn </span>ppi(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="kw">if </span><span class="self">self</span>.is_sbix {
@@ -1121,15 +1122,15 @@
     }
 
     <span class="doccomment">/// Returns the bitmap for the specified glyph, if available.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;scale&quot;</span>)]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, glyph_id: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;Bitmap&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="attr">#[cfg(feature = <span class="string">"scale"</span>)]
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, glyph_id: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;Bitmap&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">let </span>loc = get_location(<span class="kw-2">&amp;</span><span class="self">self</span>.data, <span class="self">self</span>.offset, <span class="self">self</span>.is_sbix, glyph_id)<span class="question-mark">?</span>;
         loc.get(<span class="self">self</span>.bitmap_data, <span class="self">self</span>.upem, <span class="self">self</span>.is_apple)
     }
 }
 
 <span class="doccomment">/// Format of a bitmap.
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;scale&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"scale"</span>)]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 </span><span class="kw">pub enum </span>BitmapFormat {
     <span class="doccomment">/// Alpha mask with the specified number of bits.
@@ -1142,7 +1143,7 @@
     </span>Png,
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;scale&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"scale"</span>)]
 </span><span class="kw">impl </span>BitmapFormat {
     <span class="doccomment">/// Returns the number of channels.
     </span><span class="kw">pub fn </span>channels(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
@@ -1160,9 +1161,9 @@
 }
 
 <span class="doccomment">/// Bitmap glyph.
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;scale&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"scale"</span>)]
 #[derive(Copy, Clone)]
-</span><span class="kw">pub struct </span>Bitmap&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Bitmap&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">pub </span>format: BitmapFormat,
     <span class="kw">pub </span>id: u16,
     <span class="kw">pub </span>ppem: u16,
@@ -1171,12 +1172,12 @@
     <span class="kw">pub </span>left: i32,
     <span class="kw">pub </span>top: i32,
     <span class="kw">pub </span>advance: u32,
-    <span class="kw">pub </span>data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    <span class="kw">pub </span>data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;scale&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Bitmap&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(data: <span class="kw-2">&amp;</span>BitmapData&lt;<span class="lifetime">&#39;a</span>&gt;, upem: u16, is_apple: bool) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"scale"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Bitmap&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>new(data: <span class="kw-2">&amp;</span>BitmapData&lt;<span class="lifetime">'a</span>&gt;, upem: u16, is_apple: bool) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>format = <span class="kw">if </span>data.is_packed {
             BitmapFormat::Packed(data.bit_depth)
         } <span class="kw">else if </span>data.is_png {
@@ -1329,7 +1330,7 @@
 }
 
 <span class="doccomment">/// The location of a bitmap in the bitmap data table.
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;scale&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"scale"</span>)]
 #[derive(Copy, Clone)]
 </span><span class="kw">struct </span>Location {
     format: u8,
@@ -1345,10 +1346,10 @@
     vertical_metrics: Metrics,
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;scale&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"scale"</span>)]
 </span><span class="kw">impl </span>Location {
     <span class="doccomment">/// Gets a bitmap from this location in the specified data source.
-    </span><span class="kw">pub fn </span>get&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], upem: u16, is_apple: bool) -&gt; <span class="prelude-ty">Option</span>&lt;Bitmap&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>get&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], upem: u16, is_apple: bool) -&gt; <span class="prelude-ty">Option</span>&lt;Bitmap&lt;<span class="lifetime">'a</span>&gt;&gt; {
         Bitmap::new(<span class="kw-2">&amp;</span>get_data(data, <span class="self">self</span>)<span class="question-mark">?</span>, upem, is_apple)
     }
 }
@@ -1378,7 +1379,7 @@
     <span class="prelude-val">None
 </span>}
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;scale&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"scale"</span>)]
 </span><span class="kw">fn </span>get_location(
     table: <span class="kw-2">&amp;</span>[u8],
     strike_base: usize,
@@ -1504,8 +1505,8 @@
     <span class="prelude-val">None
 </span>}
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;scale&quot;</span>)]
-</span><span class="kw">fn </span>get_data&lt;<span class="lifetime">&#39;a</span>&gt;(table: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], loc: <span class="kw-2">&amp;</span>Location) -&gt; <span class="prelude-ty">Option</span>&lt;BitmapData&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"scale"</span>)]
+</span><span class="kw">fn </span>get_data&lt;<span class="lifetime">'a</span>&gt;(table: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], loc: <span class="kw-2">&amp;</span>Location) -&gt; <span class="prelude-ty">Option</span>&lt;BitmapData&lt;<span class="lifetime">'a</span>&gt;&gt; {
     <span class="kw">let </span>depth = loc.bit_depth <span class="kw">as </span>usize;
     <span class="kw">let </span><span class="kw-2">mut </span>bitmap = BitmapData {
         data: <span class="kw-2">&amp;</span>[],
@@ -1592,8 +1593,8 @@
 }
 
 <span class="kw">fn </span>sbix_range(table: <span class="kw-2">&amp;</span>[u8], strike_base: usize, glyph_id: u16, recurse: i32) -&gt; <span class="prelude-ty">Option</span>&lt;(u32, u32)&gt; {
-    <span class="kw">const </span>DUPE: RawTag = raw_tag(<span class="string">b&quot;dupe&quot;</span>);
-    <span class="kw">const </span>PNG: RawTag = raw_tag(<span class="string">b&quot;png &quot;</span>);
+    <span class="kw">const </span>DUPE: RawTag = raw_tag(<span class="string">b"dupe"</span>);
+    <span class="kw">const </span>PNG: RawTag = raw_tag(<span class="string">b"png "</span>);
     <span class="kw">if </span>recurse &gt; <span class="number">1 </span>{
         <span class="kw">return </span><span class="prelude-val">None</span>;
     }
@@ -1619,8 +1620,8 @@
 }
 
 <span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">struct </span>BitmapData&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub </span>data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+</span><span class="kw">struct </span>BitmapData&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub </span>data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     <span class="kw">pub </span>id: u16,
     <span class="kw">pub </span>ppem: u16,
     <span class="kw">pub </span>flags: u8,
@@ -1634,8 +1635,8 @@
     <span class="kw">pub </span>is_sbix: bool,
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;scale&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; BitmapData&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"scale"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; BitmapData&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>read_metrics(<span class="kw-2">&amp;mut </span><span class="self">self</span>, d: <span class="kw-2">&amp;</span>Bytes, offset: usize, flags: u8, big: bool) -&gt; <span class="prelude-ty">Option</span>&lt;()&gt; {
         <span class="kw">let </span>(w, h) = get_metrics(
             d,
@@ -1658,7 +1659,7 @@
     <span class="kw">pub </span>advance: u8,
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;scale&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"scale"</span>)]
 </span><span class="kw">fn </span>get_metrics(
     d: <span class="kw-2">&amp;</span>Bytes,
     offset: usize,

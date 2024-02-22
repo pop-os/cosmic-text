@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.4/src/tables/cff.rs`."><title>cff.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.5/src/tables/cff.rs`."><title>cff.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -155,26 +156,26 @@
 <a href="#155" id="155">155</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! The [CFF](https://learn.microsoft.com/en-us/typography/opentype/spec/cff) table
 
-</span><span class="macro">include!</span>(<span class="string">&quot;../../generated/generated_cff.rs&quot;</span>);
+</span><span class="macro">include!</span>(<span class="string">"../../generated/generated_cff.rs"</span>);
 
 <span class="kw">use </span><span class="kw">super</span>::postscript::{Index1, Latin1String, StringId};
 
 <span class="doccomment">/// The [Compact Font Format](https://learn.microsoft.com/en-us/typography/opentype/spec/cff) table.
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>Cff&lt;<span class="lifetime">&#39;a</span>&gt; {
-    header: CffHeader&lt;<span class="lifetime">&#39;a</span>&gt;,
-    names: Index1&lt;<span class="lifetime">&#39;a</span>&gt;,
-    top_dicts: Index1&lt;<span class="lifetime">&#39;a</span>&gt;,
-    strings: Index1&lt;<span class="lifetime">&#39;a</span>&gt;,
-    global_subrs: Index1&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>Cff&lt;<span class="lifetime">'a</span>&gt; {
+    header: CffHeader&lt;<span class="lifetime">'a</span>&gt;,
+    names: Index1&lt;<span class="lifetime">'a</span>&gt;,
+    top_dicts: Index1&lt;<span class="lifetime">'a</span>&gt;,
+    strings: Index1&lt;<span class="lifetime">'a</span>&gt;,
+    global_subrs: Index1&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Cff&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub fn </span>offset_data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FontData&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Cff&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub fn </span>offset_data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FontData&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.header.offset_data()
     }
 
-    <span class="kw">pub fn </span>header(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CffHeader&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">pub fn </span>header(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CffHeader&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.header.clone()
     }
 
@@ -182,14 +183,14 @@
     ///
     /// This contains the PostScript names of all fonts in the font set.
     ///
-    /// See &quot;Name INDEX&quot; at &lt;https://adobe-type-tools.github.io/font-tech-notes/pdfs/5176.CFF.pdf#page=13&gt;
-    </span><span class="kw">pub fn </span>names(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Index1&lt;<span class="lifetime">&#39;a</span>&gt; {
+    /// See "Name INDEX" at &lt;https://adobe-type-tools.github.io/font-tech-notes/pdfs/5176.CFF.pdf#page=13&gt;
+    </span><span class="kw">pub fn </span>names(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Index1&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.names.clone()
     }
 
     <span class="doccomment">/// Returns the PostScript name for the font in the font set at the
     /// given index.
-    </span><span class="kw">pub fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>, index: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Latin1String&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>, index: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Latin1String&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="prelude-val">Some</span>(Latin1String::new(<span class="self">self</span>.names.get(index).ok()<span class="question-mark">?</span>))
     }
 
@@ -198,8 +199,8 @@
     /// This contains the top-level DICTs of all fonts in the font set. The
     /// objects here correspond to those in the name index.
     ///
-    /// See &quot;Top DICT INDEX&quot; at &lt;https://adobe-type-tools.github.io/font-tech-notes/pdfs/5176.CFF.pdf#page=14&gt;
-    </span><span class="kw">pub fn </span>top_dicts(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Index1&lt;<span class="lifetime">&#39;a</span>&gt; {
+    /// See "Top DICT INDEX" at &lt;https://adobe-type-tools.github.io/font-tech-notes/pdfs/5176.CFF.pdf#page=14&gt;
+    </span><span class="kw">pub fn </span>top_dicts(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Index1&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.top_dicts.clone()
     }
 
@@ -209,8 +210,8 @@
     /// They are referenced by string identifiers represented by the
     /// [`StringId`] type.
     ///
-    /// See &quot;String INDEX&quot; at &lt;https://adobe-type-tools.github.io/font-tech-notes/pdfs/5176.CFF.pdf#page=17&gt;
-    </span><span class="kw">pub fn </span>strings(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Index1&lt;<span class="lifetime">&#39;a</span>&gt; {
+    /// See "String INDEX" at &lt;https://adobe-type-tools.github.io/font-tech-notes/pdfs/5176.CFF.pdf#page=17&gt;
+    </span><span class="kw">pub fn </span>strings(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Index1&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.strings.clone()
     }
 
@@ -218,7 +219,7 @@
     ///
     /// If the identifier does not represent a standard string, the result is
     /// looked up in the string index.
-    </span><span class="kw">pub fn </span>string(<span class="kw-2">&amp;</span><span class="self">self</span>, id: StringId) -&gt; <span class="prelude-ty">Option</span>&lt;Latin1String&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>string(<span class="kw-2">&amp;</span><span class="self">self</span>, id: StringId) -&gt; <span class="prelude-ty">Option</span>&lt;Latin1String&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">match </span>id.standard_string() {
             <span class="prelude-val">Ok</span>(name) =&gt; <span class="prelude-val">Some</span>(name),
             <span class="prelude-val">Err</span>(ix) =&gt; <span class="self">self</span>.strings.get(ix).ok().map(Latin1String::new),
@@ -230,18 +231,18 @@
     /// This contains sub-programs that are referenced by one or more
     /// charstrings in the font set.
     ///
-    /// See &quot;Local/Global Subrs INDEXes&quot; at &lt;https://adobe-type-tools.github.io/font-tech-notes/pdfs/5176.CFF.pdf#page=25&gt;
-    </span><span class="kw">pub fn </span>global_subrs(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Index1&lt;<span class="lifetime">&#39;a</span>&gt; {
+    /// See "Local/Global Subrs INDEXes" at &lt;https://adobe-type-tools.github.io/font-tech-notes/pdfs/5176.CFF.pdf#page=25&gt;
+    </span><span class="kw">pub fn </span>global_subrs(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Index1&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.global_subrs.clone()
     }
 }
 
-<span class="kw">impl </span>TopLevelTable <span class="kw">for </span>Cff&lt;<span class="lifetime">&#39;_</span>&gt; {
-    <span class="kw">const </span>TAG: Tag = Tag::new(<span class="string">b&quot;CFF &quot;</span>);
+<span class="kw">impl </span>TopLevelTable <span class="kw">for </span>Cff&lt;<span class="lifetime">'_</span>&gt; {
+    <span class="kw">const </span>TAG: Tag = Tag::new(<span class="string">b"CFF "</span>);
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>Cff&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>Cff&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span>header = CffHeader::read(data)<span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>data = FontData::new(header.trailing_data());
         <span class="kw">let </span>names = Index1::read(data)<span class="question-mark">?</span>;
@@ -282,29 +283,29 @@
         <span class="macro">assert_eq!</span>(cff.names().count(), <span class="number">1</span>);
         <span class="macro">assert_eq!</span>(cff.global_subrs.count(), <span class="number">17</span>);
         <span class="kw">let </span>name = Latin1String::new(cff.names().get(<span class="number">0</span>).unwrap());
-        <span class="macro">assert_eq!</span>(name, <span class="string">&quot;NotoSerifDisplay-Regular&quot;</span>);
+        <span class="macro">assert_eq!</span>(name, <span class="string">"NotoSerifDisplay-Regular"</span>);
         <span class="macro">assert_eq!</span>(cff.strings().count(), <span class="number">5</span>);
         <span class="comment">// Version
-        </span><span class="macro">assert_eq!</span>(cff.string(StringId::new(<span class="number">391</span>)).unwrap(), <span class="string">&quot;2.9&quot;</span>);
+        </span><span class="macro">assert_eq!</span>(cff.string(StringId::new(<span class="number">391</span>)).unwrap(), <span class="string">"2.9"</span>);
         <span class="comment">// Notice
         </span><span class="macro">assert_eq!</span>(
             cff.string(StringId::new(<span class="number">392</span>)).unwrap(),
-            <span class="string">&quot;Noto is a trademark of Google LLC.&quot;
+            <span class="string">"Noto is a trademark of Google LLC."
         </span>);
         <span class="comment">// Copyright
         </span><span class="macro">assert_eq!</span>(
             cff.string(StringId::new(<span class="number">393</span>)).unwrap(),
-            <span class="string">&quot;Copyright 2022 The Noto Project Authors https:github.comnotofontslatin-greek-cyrillic&quot;
+            <span class="string">"Copyright 2022 The Noto Project Authors https:github.comnotofontslatin-greek-cyrillic"
         </span>);
         <span class="comment">// FullName
         </span><span class="macro">assert_eq!</span>(
             cff.string(StringId::new(<span class="number">394</span>)).unwrap(),
-            <span class="string">&quot;Noto Serif Display Regular&quot;
+            <span class="string">"Noto Serif Display Regular"
         </span>);
         <span class="comment">// FamilyName
         </span><span class="macro">assert_eq!</span>(
             cff.string(StringId::new(<span class="number">395</span>)).unwrap(),
-            <span class="string">&quot;Noto Serif Display&quot;
+            <span class="string">"Noto Serif Display"
         </span>);
     }
 }

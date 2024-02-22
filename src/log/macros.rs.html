@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/log-0.4.20/src/macros.rs`."><title>macros.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="log" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="icon" href="https://www.rust-lang.org/favicon.ico"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../log/index.html"><img src="https://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png" alt="log"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/log-0.4.20/src/macros.rs`."><title>macros.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="log" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="icon" href="https://www.rust-lang.org/favicon.ico"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><a class="sub-logo-container" href="../../log/index.html"><img src="https://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png" alt="log"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -259,17 +260,17 @@
 /// use log::{log, Level};
 ///
 /// # fn main() {
-/// let data = (42, &quot;Forty-two&quot;);
-/// let private_data = &quot;private&quot;;
+/// let data = (42, "Forty-two");
+/// let private_data = "private";
 ///
-/// log!(Level::Error, &quot;Received errors: {}, {}&quot;, data.0, data.1);
-/// log!(target: &quot;app_events&quot;, Level::Warn, &quot;App warning: {}, {}, {}&quot;,
+/// log!(Level::Error, "Received errors: {}, {}", data.0, data.1);
+/// log!(target: "app_events", Level::Warn, "App warning: {}, {}, {}",
 ///     data.0, data.1, private_data);
 /// # }
 /// ```
 </span><span class="attr">#[macro_export]
 </span><span class="macro">macro_rules! </span>log {
-    <span class="comment">// log!(target: &quot;my_target&quot;, Level::Info, key1 = 42, key2 = true; &quot;a {} event&quot;, &quot;log&quot;);
+    <span class="comment">// log!(target: "my_target", Level::Info, key1 = 42, key2 = true; "a {} event", "log");
     </span>(target: <span class="macro-nonterminal">$target</span>:expr, <span class="macro-nonterminal">$lvl</span>:expr, $(<span class="macro-nonterminal">$key</span>:tt = <span class="macro-nonterminal">$value</span>:expr),+; $(<span class="macro-nonterminal">$arg</span>:tt)+) =&gt; ({
         <span class="kw">let </span>lvl = <span class="macro-nonterminal">$lvl</span>;
         <span class="kw">if </span>lvl &lt;= <span class="macro-nonterminal">$crate::STATIC_MAX_LEVEL </span>&amp;&amp; lvl &lt;= <span class="macro-nonterminal">$crate::max_level</span>() {
@@ -283,7 +284,7 @@
         }
     });
 
-    <span class="comment">// log!(target: &quot;my_target&quot;, Level::Info, &quot;a {} event&quot;, &quot;log&quot;);
+    <span class="comment">// log!(target: "my_target", Level::Info, "a {} event", "log");
     </span>(target: <span class="macro-nonterminal">$target</span>:expr, <span class="macro-nonterminal">$lvl</span>:expr, $(<span class="macro-nonterminal">$arg</span>:tt)+) =&gt; ({
         <span class="kw">let </span>lvl = <span class="macro-nonterminal">$lvl</span>;
         <span class="kw">if </span>lvl &lt;= <span class="macro-nonterminal">$crate::STATIC_MAX_LEVEL </span>&amp;&amp; lvl &lt;= <span class="macro-nonterminal">$crate::max_level</span>() {
@@ -297,7 +298,7 @@
         }
     });
 
-    <span class="comment">// log!(Level::Info, &quot;a log event&quot;)
+    <span class="comment">// log!(Level::Info, "a log event")
     </span>(<span class="macro-nonterminal">$lvl</span>:expr, $(<span class="macro-nonterminal">$arg</span>:tt)+) =&gt; (<span class="macro-nonterminal">$</span><span class="macro">crate::log!</span>(<span class="macro-nonterminal">target</span>: <span class="macro-nonterminal">$</span><span class="macro">crate::__private_api::module_path!</span>(), <span class="macro-nonterminal">$lvl</span>, $(<span class="macro-nonterminal">$arg</span>)+));
 }
 
@@ -309,19 +310,19 @@
 /// use log::error;
 ///
 /// # fn main() {
-/// let (err_info, port) = (&quot;No connection&quot;, 22);
+/// let (err_info, port) = ("No connection", 22);
 ///
-/// error!(&quot;Error: {} on port {}&quot;, err_info, port);
-/// error!(target: &quot;app_events&quot;, &quot;App Error: {}, Port: {}&quot;, err_info, 22);
+/// error!("Error: {} on port {}", err_info, port);
+/// error!(target: "app_events", "App Error: {}, Port: {}", err_info, 22);
 /// # }
 /// ```
 </span><span class="attr">#[macro_export]
 </span><span class="macro">macro_rules! </span>error {
-    <span class="comment">// error!(target: &quot;my_target&quot;, key1 = 42, key2 = true; &quot;a {} event&quot;, &quot;log&quot;)
-    // error!(target: &quot;my_target&quot;, &quot;a {} event&quot;, &quot;log&quot;)
+    <span class="comment">// error!(target: "my_target", key1 = 42, key2 = true; "a {} event", "log")
+    // error!(target: "my_target", "a {} event", "log")
     </span>(target: <span class="macro-nonterminal">$target</span>:expr, $(<span class="macro-nonterminal">$arg</span>:tt)+) =&gt; (<span class="macro-nonterminal">$</span><span class="macro">crate::log!</span>(<span class="macro-nonterminal">target</span>: <span class="macro-nonterminal">$target</span>, <span class="macro-nonterminal">$crate::Level::Error</span>, $(<span class="macro-nonterminal">$arg</span>)+));
 
-    <span class="comment">// error!(&quot;a {} event&quot;, &quot;log&quot;)
+    <span class="comment">// error!("a {} event", "log")
     </span>($(<span class="macro-nonterminal">$arg</span>:tt)+) =&gt; (<span class="macro-nonterminal">$</span><span class="macro">crate::log!</span>(<span class="macro-nonterminal">$crate::Level::Error</span>, $(<span class="macro-nonterminal">$arg</span>)+))
 }
 
@@ -333,19 +334,19 @@
 /// use log::warn;
 ///
 /// # fn main() {
-/// let warn_description = &quot;Invalid Input&quot;;
+/// let warn_description = "Invalid Input";
 ///
-/// warn!(&quot;Warning! {}!&quot;, warn_description);
-/// warn!(target: &quot;input_events&quot;, &quot;App received warning: {}&quot;, warn_description);
+/// warn!("Warning! {}!", warn_description);
+/// warn!(target: "input_events", "App received warning: {}", warn_description);
 /// # }
 /// ```
 </span><span class="attr">#[macro_export]
 </span><span class="macro">macro_rules! </span>warn {
-    <span class="comment">// warn!(target: &quot;my_target&quot;, key1 = 42, key2 = true; &quot;a {} event&quot;, &quot;log&quot;)
-    // warn!(target: &quot;my_target&quot;, &quot;a {} event&quot;, &quot;log&quot;)
+    <span class="comment">// warn!(target: "my_target", key1 = 42, key2 = true; "a {} event", "log")
+    // warn!(target: "my_target", "a {} event", "log")
     </span>(target: <span class="macro-nonterminal">$target</span>:expr, $(<span class="macro-nonterminal">$arg</span>:tt)+) =&gt; (<span class="macro-nonterminal">$</span><span class="macro">crate::log!</span>(<span class="macro-nonterminal">target</span>: <span class="macro-nonterminal">$target</span>, <span class="macro-nonterminal">$crate::Level::Warn</span>, $(<span class="macro-nonterminal">$arg</span>)+));
 
-    <span class="comment">// warn!(&quot;a {} event&quot;, &quot;log&quot;)
+    <span class="comment">// warn!("a {} event", "log")
     </span>($(<span class="macro-nonterminal">$arg</span>:tt)+) =&gt; (<span class="macro-nonterminal">$</span><span class="macro">crate::log!</span>(<span class="macro-nonterminal">$crate::Level::Warn</span>, $(<span class="macro-nonterminal">$arg</span>)+))
 }
 
@@ -360,18 +361,18 @@
 /// # struct Connection { port: u32, speed: f32 }
 /// let conn_info = Connection { port: 40, speed: 3.20 };
 ///
-/// info!(&quot;Connected to port {} at {} Mb/s&quot;, conn_info.port, conn_info.speed);
-/// info!(target: &quot;connection_events&quot;, &quot;Successful connection, port: {}, speed: {}&quot;,
+/// info!("Connected to port {} at {} Mb/s", conn_info.port, conn_info.speed);
+/// info!(target: "connection_events", "Successful connection, port: {}, speed: {}",
 ///       conn_info.port, conn_info.speed);
 /// # }
 /// ```
 </span><span class="attr">#[macro_export]
 </span><span class="macro">macro_rules! </span>info {
-    <span class="comment">// info!(target: &quot;my_target&quot;, key1 = 42, key2 = true; &quot;a {} event&quot;, &quot;log&quot;)
-    // info!(target: &quot;my_target&quot;, &quot;a {} event&quot;, &quot;log&quot;)
+    <span class="comment">// info!(target: "my_target", key1 = 42, key2 = true; "a {} event", "log")
+    // info!(target: "my_target", "a {} event", "log")
     </span>(target: <span class="macro-nonterminal">$target</span>:expr, $(<span class="macro-nonterminal">$arg</span>:tt)+) =&gt; (<span class="macro-nonterminal">$</span><span class="macro">crate::log!</span>(<span class="macro-nonterminal">target</span>: <span class="macro-nonterminal">$target</span>, <span class="macro-nonterminal">$crate::Level::Info</span>, $(<span class="macro-nonterminal">$arg</span>)+));
 
-    <span class="comment">// info!(&quot;a {} event&quot;, &quot;log&quot;)
+    <span class="comment">// info!("a {} event", "log")
     </span>($(<span class="macro-nonterminal">$arg</span>:tt)+) =&gt; (<span class="macro-nonterminal">$</span><span class="macro">crate::log!</span>(<span class="macro-nonterminal">$crate::Level::Info</span>, $(<span class="macro-nonterminal">$arg</span>)+))
 }
 
@@ -386,17 +387,17 @@
 /// # struct Position { x: f32, y: f32 }
 /// let pos = Position { x: 3.234, y: -1.223 };
 ///
-/// debug!(&quot;New position: x: {}, y: {}&quot;, pos.x, pos.y);
-/// debug!(target: &quot;app_events&quot;, &quot;New position: x: {}, y: {}&quot;, pos.x, pos.y);
+/// debug!("New position: x: {}, y: {}", pos.x, pos.y);
+/// debug!(target: "app_events", "New position: x: {}, y: {}", pos.x, pos.y);
 /// # }
 /// ```
 </span><span class="attr">#[macro_export]
 </span><span class="macro">macro_rules! </span>debug {
-    <span class="comment">// debug!(target: &quot;my_target&quot;, key1 = 42, key2 = true; &quot;a {} event&quot;, &quot;log&quot;)
-    // debug!(target: &quot;my_target&quot;, &quot;a {} event&quot;, &quot;log&quot;)
+    <span class="comment">// debug!(target: "my_target", key1 = 42, key2 = true; "a {} event", "log")
+    // debug!(target: "my_target", "a {} event", "log")
     </span>(target: <span class="macro-nonterminal">$target</span>:expr, $(<span class="macro-nonterminal">$arg</span>:tt)+) =&gt; (<span class="macro-nonterminal">$</span><span class="macro">crate::log!</span>(<span class="macro-nonterminal">target</span>: <span class="macro-nonterminal">$target</span>, <span class="macro-nonterminal">$crate::Level::Debug</span>, $(<span class="macro-nonterminal">$arg</span>)+));
 
-    <span class="comment">// debug!(&quot;a {} event&quot;, &quot;log&quot;)
+    <span class="comment">// debug!("a {} event", "log")
     </span>($(<span class="macro-nonterminal">$arg</span>:tt)+) =&gt; (<span class="macro-nonterminal">$</span><span class="macro">crate::log!</span>(<span class="macro-nonterminal">$crate::Level::Debug</span>, $(<span class="macro-nonterminal">$arg</span>)+))
 }
 
@@ -411,19 +412,19 @@
 /// # struct Position { x: f32, y: f32 }
 /// let pos = Position { x: 3.234, y: -1.223 };
 ///
-/// trace!(&quot;Position is: x: {}, y: {}&quot;, pos.x, pos.y);
-/// trace!(target: &quot;app_events&quot;, &quot;x is {} and y is {}&quot;,
-///        if pos.x &gt;= 0.0 { &quot;positive&quot; } else { &quot;negative&quot; },
-///        if pos.y &gt;= 0.0 { &quot;positive&quot; } else { &quot;negative&quot; });
+/// trace!("Position is: x: {}, y: {}", pos.x, pos.y);
+/// trace!(target: "app_events", "x is {} and y is {}",
+///        if pos.x &gt;= 0.0 { "positive" } else { "negative" },
+///        if pos.y &gt;= 0.0 { "positive" } else { "negative" });
 /// # }
 /// ```
 </span><span class="attr">#[macro_export]
 </span><span class="macro">macro_rules! </span>trace {
-    <span class="comment">// trace!(target: &quot;my_target&quot;, key1 = 42, key2 = true; &quot;a {} event&quot;, &quot;log&quot;)
-    // trace!(target: &quot;my_target&quot;, &quot;a {} event&quot;, &quot;log&quot;)
+    <span class="comment">// trace!(target: "my_target", key1 = 42, key2 = true; "a {} event", "log")
+    // trace!(target: "my_target", "a {} event", "log")
     </span>(target: <span class="macro-nonterminal">$target</span>:expr, $(<span class="macro-nonterminal">$arg</span>:tt)+) =&gt; (<span class="macro-nonterminal">$</span><span class="macro">crate::log!</span>(<span class="macro-nonterminal">target</span>: <span class="macro-nonterminal">$target</span>, <span class="macro-nonterminal">$crate::Level::Trace</span>, $(<span class="macro-nonterminal">$arg</span>)+));
 
-    <span class="comment">// trace!(&quot;a {} event&quot;, &quot;log&quot;)
+    <span class="comment">// trace!("a {} event", "log")
     </span>($(<span class="macro-nonterminal">$arg</span>:tt)+) =&gt; (<span class="macro-nonterminal">$</span><span class="macro">crate::log!</span>(<span class="macro-nonterminal">$crate::Level::Trace</span>, $(<span class="macro-nonterminal">$arg</span>)+))
 }
 
@@ -442,11 +443,11 @@
 /// # fn foo() {
 /// if log_enabled!(Debug) {
 ///     let data = expensive_call();
-///     debug!(&quot;expensive debug data: {} {}&quot;, data.x, data.y);
+///     debug!("expensive debug data: {} {}", data.x, data.y);
 /// }
-/// if log_enabled!(target: &quot;Global&quot;, Debug) {
+/// if log_enabled!(target: "Global", Debug) {
 ///    let data = expensive_call();
-///    debug!(target: &quot;Global&quot;, &quot;expensive debug data: {} {}&quot;, data.x, data.y);
+///    debug!(target: "Global", "expensive debug data: {} {}", data.x, data.y);
 /// }
 /// # }
 /// # struct Data { x: u32, y: u32 }
@@ -473,7 +474,7 @@
     </span>($(<span class="macro-nonterminal">$args</span>:ident)<span class="kw-2">*</span>) =&gt; {
         <span class="macro-nonterminal">$</span><span class="macro">crate::__private_api::stringify!</span>($(<span class="macro-nonterminal">$args</span>)<span class="kw-2">*</span>)
     };
-    <span class="comment">// &quot;key1&quot; = 42
+    <span class="comment">// "key1" = 42
     </span>($(<span class="macro-nonterminal">$args</span>:expr)<span class="kw-2">*</span>) =&gt; {
         $(<span class="macro-nonterminal">$args</span>)*
     };

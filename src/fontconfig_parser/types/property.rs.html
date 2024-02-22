@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fontconfig-parser-0.5.6/src/types/property.rs`."><title>property.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="fontconfig_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fontconfig-parser-0.5.6/src/types/property.rs`."><title>property.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="fontconfig_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -184,7 +185,7 @@
         )+
     ) =&gt; {
         <span class="attr">#[derive(Clone, Debug, PartialEq)]
-        #[cfg_attr(feature = <span class="string">&quot;serde&quot;</span>, derive(serde::Serialize, serde::Deserialize))]
+        #[cfg_attr(feature = <span class="string">"serde"</span>, derive(serde::Serialize, serde::Deserialize))]
         </span><span class="kw">pub enum </span>Property {
             $(
                 $(<span class="attr">#[<span class="macro-nonterminal">$attr</span>]</span>)*
@@ -205,7 +206,7 @@
         }
 
         <span class="attr">#[derive(Clone, Debug, PartialEq, Eq)]
-        #[cfg_attr(feature = <span class="string">&quot;serde&quot;</span>, derive(serde::Serialize, serde::Deserialize))]
+        #[cfg_attr(feature = <span class="string">"serde"</span>, derive(serde::Serialize, serde::Deserialize))]
         </span><span class="kw">pub enum </span>PropertyKind {
             $(
                 $(<span class="attr">#[<span class="macro-nonterminal">$attr</span>]</span>)*
@@ -237,106 +238,106 @@
 
 <span class="macro">define_property! </span>{
     <span class="doccomment">/// Font family names
-    </span>Family(String, <span class="string">&quot;family&quot;</span>),
+    </span>Family(String, <span class="string">"family"</span>),
     <span class="doccomment">/// Languages corresponding to each family
-    </span>FamilyLang(String, <span class="string">&quot;familylang&quot;</span>),
+    </span>FamilyLang(String, <span class="string">"familylang"</span>),
     <span class="doccomment">/// Font style. Overrides weight and slant
-    </span>Style(String, <span class="string">&quot;style&quot;</span>),
+    </span>Style(String, <span class="string">"style"</span>),
     <span class="doccomment">/// Languages corresponding to each style
-    </span>StyleLang(String, <span class="string">&quot;stylelang&quot;</span>),
+    </span>StyleLang(String, <span class="string">"stylelang"</span>),
     <span class="doccomment">/// Font full names (often includes style)
-    </span>FullName(String, <span class="string">&quot;fullname&quot;</span>),
+    </span>FullName(String, <span class="string">"fullname"</span>),
     <span class="doccomment">/// Languages corresponding to each fullname
-    </span>FullNameLang(String, <span class="string">&quot;fullnamelang&quot;</span>),
+    </span>FullNameLang(String, <span class="string">"fullnamelang"</span>),
 
     <span class="doccomment">/// Italic, oblique or roman
-    </span>Slant(Int, <span class="string">&quot;slant&quot;</span>),
+    </span>Slant(Int, <span class="string">"slant"</span>),
     <span class="doccomment">/// Light, medium, demibold, bold or black
-    </span>Weight(Int, <span class="string">&quot;weight&quot;</span>),
+    </span>Weight(Int, <span class="string">"weight"</span>),
     <span class="doccomment">/// Point size
-    </span>Size(Double, <span class="string">&quot;size&quot;</span>),
+    </span>Size(Double, <span class="string">"size"</span>),
     <span class="doccomment">/// Condensed, normal or expanded
-    </span>Width(Int, <span class="string">&quot;width&quot;</span>),
+    </span>Width(Int, <span class="string">"width"</span>),
     <span class="doccomment">/// Stretches glyphs horizontally before hinting
-    </span>Aspect(Double, <span class="string">&quot;aspect&quot;</span>),
+    </span>Aspect(Double, <span class="string">"aspect"</span>),
     <span class="doccomment">/// Pixel size
-    </span>PixelSize(Double, <span class="string">&quot;pixelsize&quot;</span>),
+    </span>PixelSize(Double, <span class="string">"pixelsize"</span>),
     <span class="doccomment">/// Proportional, dual-width, monospace or charcell
-    </span>Spacing(Int, <span class="string">&quot;spacing&quot;</span>),
+    </span>Spacing(Int, <span class="string">"spacing"</span>),
     <span class="doccomment">/// Font foundry name
-    </span>Foundry(String, <span class="string">&quot;foundry&quot;</span>),
+    </span>Foundry(String, <span class="string">"foundry"</span>),
     <span class="doccomment">/// Whether glyphs can be antialiased
-    </span>Antialias(Bool, <span class="string">&quot;antialias&quot;</span>),
+    </span>Antialias(Bool, <span class="string">"antialias"</span>),
     <span class="doccomment">/// Whether the rasterizer should use hinting
-    </span>Hinting(Bool, <span class="string">&quot;hinting&quot;</span>),
+    </span>Hinting(Bool, <span class="string">"hinting"</span>),
     <span class="doccomment">/// Automatic hinting style
-    </span>HintStyle(Int, <span class="string">&quot;hintstyle&quot;</span>),
+    </span>HintStyle(Int, <span class="string">"hintstyle"</span>),
     <span class="doccomment">/// Automatic hinting style
-    </span>VerticalLayout(Bool, <span class="string">&quot;verticallayout&quot;</span>),
+    </span>VerticalLayout(Bool, <span class="string">"verticallayout"</span>),
     <span class="doccomment">/// Use autohinter instead of normal hinter
-    </span>AutoHint(Bool, <span class="string">&quot;autohint&quot;</span>),
+    </span>AutoHint(Bool, <span class="string">"autohint"</span>),
     <span class="doccomment">/// Use font global advance data (deprecated)
-    </span>GlobalAdvance(Bool, <span class="string">&quot;globaladvance&quot;</span>),
+    </span>GlobalAdvance(Bool, <span class="string">"globaladvance"</span>),
 
     <span class="doccomment">/// The filename holding the font
-    </span>File(String, <span class="string">&quot;file&quot;</span>),
+    </span>File(String, <span class="string">"file"</span>),
     <span class="doccomment">/// The index of the font within the file
-    </span>Index(Int, <span class="string">&quot;index&quot;</span>),
+    </span>Index(Int, <span class="string">"index"</span>),
     <span class="comment">// TODO:
     // /// Use the specified FreeType face object
     // Ftface(FT_Face),
     </span><span class="doccomment">/// Which rasterizer is in use (deprecated)
-    </span>Rasterizer(String, <span class="string">&quot;rasterizer&quot;</span>),
+    </span>Rasterizer(String, <span class="string">"rasterizer"</span>),
     <span class="doccomment">/// Whether the glyphs are outlines
-    </span>Outline(Bool, <span class="string">&quot;outline&quot;</span>),
+    </span>Outline(Bool, <span class="string">"outline"</span>),
     <span class="doccomment">/// Whether glyphs can be scaled
-    </span>Scalable(Bool, <span class="string">&quot;scalable&quot;</span>),
+    </span>Scalable(Bool, <span class="string">"scalable"</span>),
     <span class="doccomment">/// Whether any glyphs have color
-    </span>Color(Bool, <span class="string">&quot;color&quot;</span>),
+    </span>Color(Bool, <span class="string">"color"</span>),
     <span class="doccomment">/// Scale factor for point-&gt;pixel conversions (deprecated)
-    </span>Scale(Double, <span class="string">&quot;scale&quot;</span>),
+    </span>Scale(Double, <span class="string">"scale"</span>),
     <span class="doccomment">/// Target dots per inch
-    </span>Dpi(Double, <span class="string">&quot;dpi&quot;</span>),
+    </span>Dpi(Double, <span class="string">"dpi"</span>),
     <span class="doccomment">/// unknown, rgb, bgr, vrgb, vbgr, none - subpixel geometry
-    </span>Rgba(Int, <span class="string">&quot;rgba&quot;</span>),
+    </span>Rgba(Int, <span class="string">"rgba"</span>),
     <span class="doccomment">/// Type of LCD filter
-    </span>Lcdfilter(Int, <span class="string">&quot;lcdfilter&quot;</span>),
+    </span>Lcdfilter(Int, <span class="string">"lcdfilter"</span>),
     <span class="doccomment">/// Eliminate leading from line spacing
-    </span>Minspace(Bool, <span class="string">&quot;minspace&quot;</span>),
+    </span>Minspace(Bool, <span class="string">"minspace"</span>),
     <span class="doccomment">/// Unicode chars encoded by the font
-    </span>Charset(CharSet, <span class="string">&quot;charset&quot;</span>),
+    </span>Charset(CharSet, <span class="string">"charset"</span>),
     <span class="doccomment">/// List of RFC-3066-style languages this font supports
-    </span>Lang(String, <span class="string">&quot;lang&quot;</span>),
+    </span>Lang(String, <span class="string">"lang"</span>),
     <span class="doccomment">/// Version number of the font
-    </span>Fontversion(Int, <span class="string">&quot;fontversion&quot;</span>),
+    </span>Fontversion(Int, <span class="string">"fontversion"</span>),
     <span class="doccomment">/// List of layout capabilities in the font
-    </span>Capability(String, <span class="string">&quot;capability&quot;</span>),
+    </span>Capability(String, <span class="string">"capability"</span>),
     <span class="doccomment">/// String name of the font format
-    </span>Fontformat(String, <span class="string">&quot;fontformat&quot;</span>),
+    </span>Fontformat(String, <span class="string">"fontformat"</span>),
     <span class="doccomment">/// Rasterizer should synthetically embolden the font
-    </span>Embolden(Bool, <span class="string">&quot;embolden&quot;</span>),
+    </span>Embolden(Bool, <span class="string">"embolden"</span>),
     <span class="doccomment">/// Use the embedded bitmap instead of the outline
-    </span>Embeddedbitmap(Bool, <span class="string">&quot;embeddedbitmap&quot;</span>),
+    </span>Embeddedbitmap(Bool, <span class="string">"embeddedbitmap"</span>),
     <span class="doccomment">/// Whether the style is a decorative variant
-    </span>Decorative(Bool, <span class="string">&quot;decorative&quot;</span>),
+    </span>Decorative(Bool, <span class="string">"decorative"</span>),
     <span class="doccomment">/// List of the feature tags in OpenType to be enabled
-    </span>Fontfeatures(String, <span class="string">&quot;fontfeatures&quot;</span>),
+    </span>Fontfeatures(String, <span class="string">"fontfeatures"</span>),
     <span class="doccomment">/// Language name to be used for the default value of familylang, stylelang, and fullnamelang
-    </span>Namelang(String, <span class="string">&quot;namelang&quot;</span>),
+    </span>Namelang(String, <span class="string">"namelang"</span>),
     <span class="doccomment">/// String  Name of the running program
-    </span>Prgname(String, <span class="string">&quot;prgname&quot;</span>),
+    </span>Prgname(String, <span class="string">"prgname"</span>),
     <span class="doccomment">/// Font family name in PostScript
-    </span>Postscriptname(String, <span class="string">&quot;postscriptname&quot;</span>),
+    </span>Postscriptname(String, <span class="string">"postscriptname"</span>),
     <span class="doccomment">/// Whether the font has hinting
-    </span>Fonthashint(Bool, <span class="string">&quot;fonthashint&quot;</span>),
+    </span>Fonthashint(Bool, <span class="string">"fonthashint"</span>),
     <span class="doccomment">/// Order number of the font
-    </span>Order(Int, <span class="string">&quot;order&quot;</span>),
+    </span>Order(Int, <span class="string">"order"</span>),
 
     <span class="comment">// custom
 
-    </span>Matrix(Matrix, <span class="string">&quot;matrix&quot;</span>),
-    PixelSizeFixupFactor(Double, <span class="string">&quot;pixelsizefixupfactor&quot;</span>),
-    ScalingNotNeeded(Bool, <span class="string">&quot;scalingnotneeded&quot;</span>),
+    </span>Matrix(Matrix, <span class="string">"matrix"</span>),
+    PixelSizeFixupFactor(Double, <span class="string">"pixelsizefixupfactor"</span>),
+    ScalingNotNeeded(Bool, <span class="string">"scalingnotneeded"</span>),
 }
 
 <span class="kw">impl </span>Default <span class="kw">for </span>Property {

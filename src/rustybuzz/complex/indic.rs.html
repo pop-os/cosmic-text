@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustybuzz-0.12.1/src/complex/indic.rs`."><title>indic.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustybuzz" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustybuzz-0.12.1/src/complex/indic.rs`."><title>indic.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustybuzz" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -2624,16 +2625,16 @@
             &amp;&amp; plan
                 .ot_map
                 .chosen_script(TableIndex::GSUB)
-                .map_or(<span class="bool-val">true</span>, |tag| tag.to_bytes()[<span class="number">3</span>] != <span class="string">b&#39;2&#39;</span>);
+                .map_or(<span class="bool-val">true</span>, |tag| tag.to_bytes()[<span class="number">3</span>] != <span class="string">b'2'</span>);
 
         <span class="comment">// Use zero-context would_substitute() matching for new-spec of the main
         // Indic scripts, and scripts with one spec only, but not for old-specs.
         // The new-spec for all dual-spec scripts says zero-context matching happens.
         //
         // However, testing with Malayalam shows that old and new spec both allow
-        // context.  Testing with Bengali new-spec however shows that it doesn&#39;t.
+        // context.  Testing with Bengali new-spec however shows that it doesn't.
         // So, the heuristic here is the way it is.  It should *only* be changed,
-        // as we discover more cases of what Windows does.  DON&#39;T TOUCH OTHERWISE.
+        // as we discover more cases of what Windows does.  DON'T TOUCH OTHERWISE.
         </span><span class="kw">let </span>zero_context = is_old_spec &amp;&amp; script != <span class="prelude-val">Some</span>(script::MALAYALAM);
 
         <span class="kw">let </span><span class="kw-2">mut </span>mask_array = [<span class="number">0</span>; INDIC_FEATURES.len()];
@@ -2801,7 +2802,7 @@
         .ot_map
         .enable_feature(feature::LOCALIZED_FORMS, FeatureFlags::empty(), <span class="number">1</span>);
     <span class="comment">// The Indic specs do not require ccmp, but we apply it here since if
-    // there is a use of it, it&#39;s typically at the beginning.
+    // there is a use of it, it's typically at the beginning.
     </span>planner.ot_map.enable_feature(
         feature::GLYPH_COMPOSITION_DECOMPOSITION,
         FeatureFlags::empty(),
@@ -2842,33 +2843,33 @@
 }
 
 <span class="kw">fn </span>decompose(ctx: <span class="kw-2">&amp;</span>ShapeNormalizeContext, ab: char) -&gt; <span class="prelude-ty">Option</span>&lt;(char, char)&gt; {
-    <span class="comment">// Don&#39;t decompose these.
+    <span class="comment">// Don't decompose these.
     </span><span class="kw">match </span>ab {
-        <span class="string">&#39;\u{0931}&#39; </span>|               <span class="comment">// DEVANAGARI LETTER RRA
+        <span class="string">'\u{0931}' </span>|               <span class="comment">// DEVANAGARI LETTER RRA
         // https://github.com/harfbuzz/harfbuzz/issues/779
-        </span><span class="string">&#39;\u{09DC}&#39; </span>|               <span class="comment">// BENGALI LETTER RRA
-        </span><span class="string">&#39;\u{09DD}&#39; </span>|               <span class="comment">// BENGALI LETTER RHA
-        </span><span class="string">&#39;\u{0B94}&#39; </span>=&gt; <span class="kw">return </span><span class="prelude-val">None</span>, <span class="comment">// TAMIL LETTER AU
+        </span><span class="string">'\u{09DC}' </span>|               <span class="comment">// BENGALI LETTER RRA
+        </span><span class="string">'\u{09DD}' </span>|               <span class="comment">// BENGALI LETTER RHA
+        </span><span class="string">'\u{0B94}' </span>=&gt; <span class="kw">return </span><span class="prelude-val">None</span>, <span class="comment">// TAMIL LETTER AU
         </span><span class="kw">_ </span>=&gt; {}
     }
 
-    <span class="kw">if </span>ab == <span class="string">&#39;\u{0DDA}&#39; </span>|| (<span class="string">&#39;\u{0DDC}&#39;</span>..=<span class="string">&#39;\u{0DDE}&#39;</span>).contains(<span class="kw-2">&amp;</span>ab) {
+    <span class="kw">if </span>ab == <span class="string">'\u{0DDA}' </span>|| (<span class="string">'\u{0DDC}'</span>..=<span class="string">'\u{0DDE}'</span>).contains(<span class="kw-2">&amp;</span>ab) {
         <span class="comment">// Sinhala split matras...  Let the fun begin.
         //
         // These four characters have Unicode decompositions.  However, Uniscribe
-        // decomposes them &quot;Khmer-style&quot;, that is, it uses the character itself to
+        // decomposes them "Khmer-style", that is, it uses the character itself to
         // get the second half.  The first half of all four decompositions is always
         // U+0DD9.
         //
         // Now, there are buggy fonts, namely, the widely used lklug.ttf, that are
         // broken with Uniscribe.  But we need to support them.  As such, we only
         // do the Uniscribe-style decomposition if the character is transformed into
-        // its &quot;sec.half&quot; form by the &#39;pstf&#39; feature.  Otherwise, we fall back to
+        // its "sec.half" form by the 'pstf' feature.  Otherwise, we fall back to
         // Unicode decomposition.
         //
-        // Note that we can&#39;t unconditionally use Unicode decomposition.  That would
+        // Note that we can't unconditionally use Unicode decomposition.  That would
         // break some other fonts, that are designed to work with Uniscribe, and
-        // don&#39;t have positioning features for the Unicode-style decomposition.
+        // don't have positioning features for the Unicode-style decomposition.
         //
         // Argh...
         //
@@ -2887,7 +2888,7 @@
 
         <span class="kw">if </span>ok {
             <span class="comment">// Ok, safe to use Uniscribe-style decomposition.
-            </span><span class="kw">return </span><span class="prelude-val">Some</span>((<span class="string">&#39;\u{0DD9}&#39;</span>, ab));
+            </span><span class="kw">return </span><span class="prelude-val">Some</span>((<span class="string">'\u{0DD9}'</span>, ab));
         }
     }
 
@@ -2901,8 +2902,8 @@
     }
 
     <span class="comment">// Composition-exclusion exceptions that we want to recompose.
-    </span><span class="kw">if </span>a == <span class="string">&#39;\u{09AF}&#39; </span>&amp;&amp; b == <span class="string">&#39;\u{09BC}&#39; </span>{
-        <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="string">&#39;\u{09DF}&#39;</span>);
+    </span><span class="kw">if </span>a == <span class="string">'\u{09AF}' </span>&amp;&amp; b == <span class="string">'\u{09BC}' </span>{
+        <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="string">'\u{09DF}'</span>);
     }
 
     <span class="kw">crate</span>::unicode::compose(a, b)
@@ -2987,13 +2988,13 @@
     virama: GlyphId,
 ) -&gt; u8 {
     <span class="comment">// For old-spec, the order of glyphs is Consonant,Virama,
-    // whereas for new-spec, it&#39;s Virama,Consonant.  However,
+    // whereas for new-spec, it's Virama,Consonant.  However,
     // some broken fonts (like Free Sans) simply copied lookups
     // from old-spec to new-spec without modification.
     // And oddly enough, Uniscribe seems to respect those lookups.
     // Eg. in the sequence U+0924,U+094D,U+0930, Uniscribe finds
     // base at 0.  The font however, only has lookups matching
-    // 930,94D in &#39;blwf&#39;, not the expected 94D,930 (with new-spec
+    // 930,94D in 'blwf', not the expected 94D,930 (with new-spec
     // table).  As such, we simply match both sequences.  Seems
     // to work.
     //
@@ -3060,7 +3061,7 @@
     };
 
     <span class="kw">match </span>syllable_type {
-        <span class="comment">// We made the vowels look like consonants.  So let&#39;s call the consonant logic!
+        <span class="comment">// We made the vowels look like consonants.  So let's call the consonant logic!
         </span>SyllableType::VowelSyllable | SyllableType::ConsonantSyllable =&gt; {
             initial_reordering_consonant_syllable(plan, indic_plan, face, start, end, buffer);
         }
@@ -3123,7 +3124,7 @@
                 || (indic_plan.config.reph_mode == RephMode::Explicit
                     &amp;&amp; buffer.info[start + <span class="number">2</span>].indic_category() == category::ZWJ))
         {
-            <span class="comment">// See if it matches the &#39;rphf&#39; feature.
+            <span class="comment">// See if it matches the 'rphf' feature.
             </span><span class="kw">let </span>glyphs = <span class="kw-2">&amp;</span>[
                 buffer.info[start].as_glyph(),
                 buffer.info[start + <span class="number">1</span>].as_glyph(),
@@ -3182,7 +3183,7 @@
                         //
                         // IMPLEMENTATION NOTES:
                         //
-                        // Our pre-base-reordering Ra&#39;s are marked position::PostC, so will be skipped
+                        // Our pre-base-reordering Ra's are marked position::PostC, so will be skipped
                         // by the logic above already.
 
                         // -&gt; or arrive at the first consonant. The consonant stopped at will
@@ -3210,7 +3211,7 @@
             BasePosition::LastSinhala =&gt; {
                 <span class="comment">// Sinhala base positioning is slightly different from main Indic, in that:
                 // 1. Its ZWJ behavior is different,
-                // 2. We don&#39;t need to look into the font for consonant positions.
+                // 2. We don't need to look into the font for consonant positions.
 
                 </span><span class="kw">if </span>!has_reph {
                     base = limit;
@@ -3264,7 +3265,7 @@
     //
     // IMPLEMENTATION NOTES:
     //
-    // The normalize() routine has already decomposed matras for us, so we don&#39;t
+    // The normalize() routine has already decomposed matras for us, so we don't
     // need to worry about that.
 
     // 3.  Reorder marks to canonical order:
@@ -3274,7 +3275,7 @@
     //
     // IMPLEMENTATION NOTES:
     //
-    // We don&#39;t need to do this: the normalize() routine already did this for us.
+    // We don't need to do this: the normalize() routine already did this for us.
 
     // Reorder characters
 
@@ -3313,7 +3314,7 @@
     // Reports suggest that in some scripts Uniscribe does this only if there
     // is *not* a Halant after last consonant already.  We know that is the
     // case for Kannada, while it reorders unconditionally in other scripts,
-    // eg. Malayalam, Bengali, and Devanagari.  We don&#39;t currently know about
+    // eg. Malayalam, Bengali, and Devanagari.  We don't currently know about
     // other scripts, so we block Kannada.
     //
     // Kannada test case:
@@ -3382,12 +3383,12 @@
                 <span class="kw">if </span>buffer.info[i].indic_category() == category::H
                     &amp;&amp; buffer.info[i].indic_position() == position::PRE_M
                 {
-                    <span class="comment">// Uniscribe doesn&#39;t move the Halant with Left Matra.
+                    <span class="comment">// Uniscribe doesn't move the Halant with Left Matra.
                     // TEST: U+092B,U+093F,U+094DE
                     // We follow.  This is important for the Sinhala
                     // U+0DDA split matra since it decomposes to U+0DD9,U+0DCA
                     // where U+0DD9 is a left matra and U+0DCA is the virama.
-                    // We don&#39;t want to move the virama with the left matra.
+                    // We don't want to move the virama with the left matra.
                     // TEST: U+0D9A,U+0DDA
                     </span><span class="kw">for </span>j <span class="kw">in </span>(start + <span class="number">1</span>..=i).rev() {
                         <span class="kw">if </span>buffer.info[j - <span class="number">1</span>].indic_position() != position::PRE_M {
@@ -3447,10 +3448,10 @@
         //
         // We could use buffer-&gt;sort() for this, if there was no special
         // reordering of pre-base stuff happening later...
-        // We don&#39;t want to merge_clusters all of that, which buffer-&gt;sort()
-        // would.  Here&#39;s a concrete example:
+        // We don't want to merge_clusters all of that, which buffer-&gt;sort()
+        // would.  Here's a concrete example:
         //
-        // Assume there&#39;s a pre-base consonant and explicit Halant before base,
+        // Assume there's a pre-base consonant and explicit Halant before base,
         // followed by a prebase-reordering (left) Matra:
         //
         //   C,H,ZWNJ,B,M
@@ -3463,7 +3464,7 @@
         //
         //   C,H,ZWNJ,M,B
         //
-        // That&#39;s why we don&#39;t want to merge-clusters anything before the Base
+        // That's why we don't want to merge-clusters anything before the Base
         // at this point.  But if something moved from after Base to before it,
         // we should merge clusters from base to them.  In final-reordering, we
         // only move things around before base, and merge-clusters up to base.
@@ -3483,7 +3484,7 @@
                         min = cmp::min(min, j);
                         max = cmp::max(max, j);
                         <span class="kw">let </span>next = start + buffer.info[j].syllable() <span class="kw">as </span>usize;
-                        buffer.info[j].set_syllable(<span class="number">255</span>); <span class="comment">// So we don&#39;t process j later again.
+                        buffer.info[j].set_syllable(<span class="number">255</span>); <span class="comment">// So we don't process j later again.
                         </span>j = next;
                     }
 
@@ -3539,17 +3540,17 @@
         <span class="comment">// Old-spec eye-lash Ra needs special handling.  From the
         // spec:
         //
-        // &quot;The feature &#39;below-base form&#39; is applied to consonants
+        // "The feature 'below-base form' is applied to consonants
         // having below-base forms and following the base consonant.
         // The exception is vattu, which may appear below half forms
-        // as well as below the base glyph. The feature &#39;below-base
-        // form&#39; will be applied to all such occurrences of Ra as well.&quot;
+        // as well as below the base glyph. The feature 'below-base
+        // form' will be applied to all such occurrences of Ra as well."
         //
         // Test case: U+0924,U+094D,U+0930,U+094d,U+0915
         // with Sanskrit 2003 font.
         //
         // However, note that Ra,Halant,ZWJ is the correct way to
-        // request eyelash form of Ra, so we wouldbn&#39;t inhibit it
+        // request eyelash form of Ra, so we wouldbn't inhibit it
         // in that sequence.
         //
         // Test case: U+0924,U+094D,U+0930,U+094d,U+200D,U+0915
@@ -3587,7 +3588,7 @@
                 j -= <span class="number">1</span>;
 
                 <span class="comment">// ZWJ/ZWNJ should disable CJCT.  They do that by simply
-                // being there, since we don&#39;t skip them for the CJCT
+                // being there, since we don't skip them for the CJCT
                 // feature (ie. F_MANUAL_ZWJ)
 
                 // A ZWNJ disables HALF.
@@ -3649,10 +3650,10 @@
     <span class="comment">// This function relies heavily on halant glyphs.  Lots of ligation
     // and possibly multiple substitutions happened prior to this
     // phase, and that might have messed up our properties.  Recover
-    // from a particular case of that where we&#39;re fairly sure that a
+    // from a particular case of that where we're fairly sure that a
     // class of OT_H is desired but has been lost.
     //
-    // We don&#39;t call load_virama_glyph(), since we know it&#39;s already loaded.
+    // We don't call load_virama_glyph(), since we know it's already loaded.
     </span><span class="kw">if let </span><span class="prelude-val">Some</span>(virama_glyph) = virama_glyph {
         <span class="kw">for </span>info <span class="kw">in </span><span class="kw-2">&amp;mut </span>buffer.info[start..end] {
             <span class="kw">if </span>info.glyph_id == virama_glyph &amp;&amp; info.is_ligated() &amp;&amp; info.is_multiplied() {
@@ -3681,7 +3682,7 @@
                         <span class="kw">if </span>!(buffer.info[i].is_substituted()
                             &amp;&amp; buffer.info[i].is_ligated_and_didnt_multiply())
                         {
-                            <span class="comment">// Ok, this was a &#39;pref&#39; candidate but didn&#39;t form any.
+                            <span class="comment">// Ok, this was a 'pref' candidate but didn't form any.
                             // Base is around here...
                             </span>base = i;
                             <span class="kw">while </span>base &lt; end &amp;&amp; buffer.info[base].is_halant() {
@@ -3765,8 +3766,8 @@
     // It looks like the last sentence is wrong.  Testing, with Windows 7 Uniscribe
     // and Devanagari shows that the behavior is best described as:
     //
-    // &quot;If ZWJ follows this halant, matra is NOT repositioned after this halant.
-    //  If ZWNJ follows this halant, position is moved after it.&quot;
+    // "If ZWJ follows this halant, matra is NOT repositioned after this halant.
+    //  If ZWNJ follows this halant, position is moved after it."
     //
     // Test case, with Adobe Devanagari or Nirmala UI:
     //
@@ -3778,13 +3779,13 @@
     //
     // https://github.com/harfbuzz/harfbuzz/issues/1070
 
-    // Otherwise there can&#39;t be any pre-base matra characters.
+    // Otherwise there can't be any pre-base matra characters.
     </span><span class="kw">if </span>start + <span class="number">1 </span>&lt; end &amp;&amp; start &lt; base {
         <span class="comment">// If we lost track of base, alas, position before last thingy.
         </span><span class="kw">let </span><span class="kw-2">mut </span>new_pos = <span class="kw">if </span>base == end { base - <span class="number">2 </span>} <span class="kw">else </span>{ base - <span class="number">1 </span>};
 
-        <span class="comment">// Malayalam / Tamil do not have &quot;half&quot; forms or explicit virama forms.
-        // The glyphs formed by &#39;half&#39; are Chillus or ligated explicit viramas.
+        <span class="comment">// Malayalam / Tamil do not have "half" forms or explicit virama forms.
+        // The glyphs formed by 'half' are Chillus or ligated explicit viramas.
         // We want to position matra after them.
         </span><span class="kw">if </span>buffer.script != <span class="prelude-val">Some</span>(script::MALAYALAM) &amp;&amp; buffer.script != <span class="prelude-val">Some</span>(script::TAMIL) {
             <span class="kw">loop </span>{
@@ -3828,11 +3829,11 @@
         }
 
         <span class="kw">if </span>start &lt; new_pos &amp;&amp; buffer.info[new_pos].indic_position() != position::PRE_M {
-            <span class="comment">// Now go see if there&#39;s actually any matras...
+            <span class="comment">// Now go see if there's actually any matras...
             </span><span class="kw">for </span>i <span class="kw">in </span>(start + <span class="number">1</span>..=new_pos).rev() {
                 <span class="kw">if </span>buffer.info[i - <span class="number">1</span>].indic_position() == position::PRE_M {
                     <span class="kw">let </span>old_pos = i - <span class="number">1</span>;
-                    <span class="comment">// Shouldn&#39;t actually happen.
+                    <span class="comment">// Shouldn't actually happen.
                     </span><span class="kw">if </span>old_pos &lt; base &amp;&amp; base &lt;= new_pos {
                         base -= <span class="number">1</span>;
                     }
@@ -3874,7 +3875,7 @@
     //   we should only move it if the sequence ligated to the repha form.
     //
     // - If repha is encoded separately and in the logical position, we should only
-    //   move it if it did NOT ligate.  If it ligated, it&#39;s probably the font trying
+    //   move it if it did NOT ligate.  If it ligated, it's probably the font trying
     //   to make it work without the reordering.
 
     </span><span class="kw">if </span>start + <span class="number">1 </span>&lt; end
@@ -3990,8 +3991,8 @@
 
                 <span class="comment">// If the Reph is to be ending up after a Matra,Halant sequence,
                 // position it before that Halant so it can interact with the Matra.
-                // However, if it&#39;s a plain Consonant,Halant we shouldn&#39;t do that.
-                // Uniscribe doesn&#39;t do this.
+                // However, if it's a plain Consonant,Halant we shouldn't do that.
+                // Uniscribe doesn't do this.
                 // TEST: U+0930,U+094D,U+0915,U+094B,U+094D
                 </span><span class="kw">if </span>buffer.info[new_reph_pos].is_halant() {
                     <span class="kw">for </span>info <span class="kw">in </span><span class="kw-2">&amp;</span>buffer.info[base + <span class="number">1</span>..new_reph_pos] {
@@ -4025,7 +4026,7 @@
     //   If a pre-base-reordering consonant is found, reorder it according to
     //   the following rules:
 
-    // Otherwise there can&#39;t be any pre-base-reordering Ra.
+    // Otherwise there can't be any pre-base-reordering Ra.
     </span><span class="kw">if </span>try_pref &amp;&amp; base + <span class="number">1 </span>&lt; end {
         <span class="kw">for </span>i <span class="kw">in </span>base + <span class="number">1</span>..end {
             <span class="kw">if </span>(buffer.info[i].mask &amp; plan.mask_array[indic_feature::PREF]) != <span class="number">0 </span>{
@@ -4033,7 +4034,7 @@
                 //    of the &lt;pref&gt; feature. (Note that a font may shape a Ra consonant with
                 //    the feature generally but block it in certain contexts.)
                 //
-                // Note: We just check that something got substituted.  We don&#39;t check that
+                // Note: We just check that something got substituted.  We don't check that
                 // the &lt;pref&gt; feature actually did it...
                 //
                 // Reorder pref only if it ligated.
@@ -4044,8 +4045,8 @@
                     // 3. If position is not found, reorder immediately before main consonant.
 
                     </span><span class="kw">let </span><span class="kw-2">mut </span>new_pos = base;
-                    <span class="comment">// Malayalam / Tamil do not have &quot;half&quot; forms or explicit virama forms.
-                    // The glyphs formed by &#39;half&#39; are Chillus or ligated explicit viramas.
+                    <span class="comment">// Malayalam / Tamil do not have "half" forms or explicit virama forms.
+                    // The glyphs formed by 'half' are Chillus or ligated explicit viramas.
                     // We want to position matra after them.
                     </span><span class="kw">if </span>buffer.script != <span class="prelude-val">Some</span>(script::MALAYALAM)
                         &amp;&amp; buffer.script != <span class="prelude-val">Some</span>(script::TAMIL)
@@ -4091,7 +4092,7 @@
         }
     }
 
-    <span class="comment">// Apply &#39;init&#39; to the Left Matra if it&#39;s a word start.
+    <span class="comment">// Apply 'init' to the Left Matra if it's a word start.
     </span><span class="kw">if </span>buffer.info[start].indic_position() == position::PRE_M {
         <span class="kw">if </span>start == <span class="number">0
             </span>|| (rb_flag_unsafe(buffer.info[start - <span class="number">1</span>].general_category().to_rb())
@@ -4127,7 +4128,7 @@
         SyllabicCategory::Other =&gt; category::X,
         SyllabicCategory::Avagraha =&gt; category::SYMBOL,
         SyllabicCategory::Bindu =&gt; category::SM,
-        SyllabicCategory::BrahmiJoiningNumber =&gt; category::PLACEHOLDER, <span class="comment">// Don&#39;t care.
+        SyllabicCategory::BrahmiJoiningNumber =&gt; category::PLACEHOLDER, <span class="comment">// Don't care.
         </span>SyllabicCategory::CantillationMark =&gt; category::A,
         SyllabicCategory::Consonant =&gt; category::C,
         SyllabicCategory::ConsonantDead =&gt; category::C,
@@ -4149,7 +4150,7 @@
         SyllabicCategory::NonJoiner =&gt; category::ZWNJ,
         SyllabicCategory::Nukta =&gt; category::N,
         SyllabicCategory::Number =&gt; category::PLACEHOLDER,
-        SyllabicCategory::NumberJoiner =&gt; category::PLACEHOLDER, <span class="comment">// Don&#39;t care.
+        SyllabicCategory::NumberJoiner =&gt; category::PLACEHOLDER, <span class="comment">// Don't care.
         </span>SyllabicCategory::PureKiller =&gt; category::M,
         SyllabicCategory::RegisterShifter =&gt; category::RS,
         SyllabicCategory::SyllableModifier =&gt; category::SM,
@@ -4232,7 +4233,7 @@
         }
     }
 
-    <span class="comment">// BENG and MLYM don&#39;t have top matras.
+    <span class="comment">// BENG and MLYM don't have top matras.
     </span><span class="attr">#[inline]
     </span><span class="kw">fn </span>matra_pos_top(u: u32) -&gt; Position {
         <span class="kw">if </span>is_deva(u) {

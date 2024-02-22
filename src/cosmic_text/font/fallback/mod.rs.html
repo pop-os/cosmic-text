@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/font/fallback/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="cosmic_text" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/font/fallback/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="cosmic_text" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -277,25 +278,25 @@
 
 <span class="kw">use </span><span class="self">self</span>::platform::<span class="kw-2">*</span>;
 
-<span class="attr">#[cfg(not(any(target_os = <span class="string">&quot;linux&quot;</span>, target_os = <span class="string">&quot;macos&quot;</span>, target_os = <span class="string">&quot;windows&quot;</span>,)))]
-#[path = <span class="string">&quot;other.rs&quot;</span>]
+<span class="attr">#[cfg(not(any(target_os = <span class="string">"linux"</span>, target_os = <span class="string">"macos"</span>, target_os = <span class="string">"windows"</span>,)))]
+#[path = <span class="string">"other.rs"</span>]
 </span><span class="kw">mod </span>platform;
 
-<span class="attr">#[cfg(target_os = <span class="string">&quot;macos&quot;</span>)]
-#[path = <span class="string">&quot;macos.rs&quot;</span>]
+<span class="attr">#[cfg(target_os = <span class="string">"macos"</span>)]
+#[path = <span class="string">"macos.rs"</span>]
 </span><span class="kw">mod </span>platform;
 
-<span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
-#[path = <span class="string">&quot;unix.rs&quot;</span>]
+<span class="attr">#[cfg(target_os = <span class="string">"linux"</span>)]
+#[path = <span class="string">"unix.rs"</span>]
 </span><span class="kw">mod </span>platform;
 
-<span class="attr">#[cfg(target_os = <span class="string">&quot;windows&quot;</span>)]
-#[path = <span class="string">&quot;windows.rs&quot;</span>]
+<span class="attr">#[cfg(target_os = <span class="string">"windows"</span>)]
+#[path = <span class="string">"windows.rs"</span>]
 </span><span class="kw">mod </span>platform;
 
-<span class="attr">#[cfg(not(feature = <span class="string">&quot;warn_on_missing_glyphs&quot;</span>))]
+<span class="attr">#[cfg(not(feature = <span class="string">"warn_on_missing_glyphs"</span>))]
 </span><span class="kw">use </span>log::debug <span class="kw">as </span>missing_warn;
-<span class="attr">#[cfg(feature = <span class="string">&quot;warn_on_missing_glyphs&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"warn_on_missing_glyphs"</span>)]
 </span><span class="kw">use </span>log::warn <span class="kw">as </span>missing_warn;
 
 <span class="comment">// Match on lowest font_weight_diff, then script_non_matches, then font_weight
@@ -309,27 +310,27 @@
     id: fontdb::ID,
 }
 
-<span class="kw">pub struct </span>FontFallbackIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    font_system: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>FontSystem,
-    font_match_keys: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[FontMatchKey],
-    default_families: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Family&lt;<span class="lifetime">&#39;a</span>&gt;],
+<span class="kw">pub struct </span>FontFallbackIter&lt;<span class="lifetime">'a</span>&gt; {
+    font_system: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>FontSystem,
+    font_match_keys: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[FontMatchKey],
+    default_families: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Family&lt;<span class="lifetime">'a</span>&gt;],
     monospace_fallbacks: BTreeSet&lt;MonospaceFallbackInfo&gt;,
     default_i: usize,
-    scripts: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[Script],
-    word: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str,
+    scripts: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[Script],
+    word: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str,
     script_i: (usize, usize),
     common_i: usize,
     other_i: usize,
     end: bool,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontFallbackIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontFallbackIter&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">pub fn </span>new(
-        font_system: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>FontSystem,
-        font_match_keys: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[FontMatchKey],
-        default_families: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Family&lt;<span class="lifetime">&#39;a</span>&gt;],
-        scripts: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[Script],
-        word: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str,
+        font_system: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>FontSystem,
+        font_match_keys: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[FontMatchKey],
+        default_families: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Family&lt;<span class="lifetime">'a</span>&gt;],
+        scripts: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[Script],
+        word: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             font_system,
@@ -349,14 +350,14 @@
     <span class="kw">pub fn </span>check_missing(<span class="kw-2">&amp;mut </span><span class="self">self</span>, word: <span class="kw-2">&amp;</span>str) {
         <span class="kw">if </span><span class="self">self</span>.end {
             <span class="macro">missing_warn!</span>(
-                <span class="string">&quot;Failed to find any fallback for {:?} locale &#39;{}&#39;: &#39;{}&#39;&quot;</span>,
+                <span class="string">"Failed to find any fallback for {:?} locale '{}': '{}'"</span>,
                 <span class="self">self</span>.scripts,
                 <span class="self">self</span>.font_system.locale(),
                 word
             );
         } <span class="kw">else if </span><span class="self">self</span>.other_i &gt; <span class="number">0 </span>{
             <span class="macro">missing_warn!</span>(
-                <span class="string">&quot;Failed to find preset fallback for {:?} locale &#39;{}&#39;, used &#39;{}&#39;: &#39;{}&#39;&quot;</span>,
+                <span class="string">"Failed to find preset fallback for {:?} locale '{}', used '{}': '{}'"</span>,
                 <span class="self">self</span>.scripts,
                 <span class="self">self</span>.font_system.locale(),
                 <span class="self">self</span>.face_name(<span class="self">self</span>.font_match_keys[<span class="self">self</span>.other_i - <span class="number">1</span>].id),
@@ -365,7 +366,7 @@
         } <span class="kw">else if </span>!<span class="self">self</span>.scripts.is_empty() &amp;&amp; <span class="self">self</span>.common_i &gt; <span class="number">0 </span>{
             <span class="kw">let </span>family = common_fallback()[<span class="self">self</span>.common_i - <span class="number">1</span>];
             <span class="macro">missing_warn!</span>(
-                <span class="string">&quot;Failed to find script fallback for {:?} locale &#39;{}&#39;, used &#39;{}&#39;: &#39;{}&#39;&quot;</span>,
+                <span class="string">"Failed to find script fallback for {:?} locale '{}', used '{}': '{}'"</span>,
                 <span class="self">self</span>.scripts,
                 <span class="self">self</span>.font_system.locale(),
                 family,
@@ -382,7 +383,7 @@
                 <span class="kw-2">&amp;</span>face.post_script_name
             }
         } <span class="kw">else </span>{
-            <span class="string">&quot;invalid font id&quot;
+            <span class="string">"invalid font id"
         </span>}
     }
 
@@ -399,7 +400,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>FontFallbackIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>FontFallbackIter&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">type </span>Item = Arc&lt;Font&gt;;
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(fallback_info) = <span class="self">self</span>.monospace_fallbacks.pop_first() {
@@ -442,8 +443,8 @@
                 <span class="comment">// Set a monospace fallback if Monospace family is not found
                 </span><span class="kw">if </span>is_mono {
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(face_info) = <span class="self">self</span>.font_system.db().face(m_key.id) {
-                        <span class="comment">// Don&#39;t use emoji fonts as Monospace
-                        </span><span class="kw">if </span>face_info.monospaced &amp;&amp; !face_info.post_script_name.contains(<span class="string">&quot;Emoji&quot;</span>) {
+                        <span class="comment">// Don't use emoji fonts as Monospace
+                        </span><span class="kw">if </span>face_info.monospaced &amp;&amp; !face_info.post_script_name.contains(<span class="string">"Emoji"</span>) {
                             <span class="kw">if let </span><span class="prelude-val">Some</span>(font) = <span class="self">self</span>.font_system.get_font(m_key.id) {
                                 <span class="kw">let </span>codepoint_non_matches = <span class="self">self</span>.word.chars().count()
                                     - <span class="self">self
@@ -489,7 +490,7 @@
                     }
                 }
                 <span class="macro">log::debug!</span>(
-                    <span class="string">&quot;failed to find family &#39;{}&#39; for script {:?} and locale &#39;{}&#39;&quot;</span>,
+                    <span class="string">"failed to find family '{}' for script {:?} and locale '{}'"</span>,
                     script_family,
                     script,
                     <span class="self">self</span>.font_system.locale(),
@@ -511,7 +512,7 @@
                     }
                 }
             }
-            <span class="macro">log::debug!</span>(<span class="string">&quot;failed to find family &#39;{}&#39;&quot;</span>, common_family);
+            <span class="macro">log::debug!</span>(<span class="string">"failed to find family '{}'"</span>, common_family);
         }
 
         <span class="comment">//TODO: do we need to do this?

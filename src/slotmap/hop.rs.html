@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/slotmap-1.0.7/src/hop.rs`."><title>hop.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="slotmap" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/slotmap-1.0.7/src/hop.rs`."><title>hop.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="slotmap" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1690,7 +1691,7 @@
 //!
 //! This data structure is essentially the same as a regular [`SlotMap`], but
 //! maintains extra information when inserting/removing elements that allows it
-//! to &#39;hop over&#39; vacant slots during iteration, making it potentially much
+//! to 'hop over' vacant slots during iteration, making it potentially much
 //! faster for iteration.
 //!
 //! The trade-off is that compared to a regular [`SlotMap`] insertion/removal is
@@ -1698,7 +1699,7 @@
 //!
 //! [`SlotMap`]: crate::SlotMap
 
-</span><span class="attr">#[cfg(all(nightly, any(doc, feature = <span class="string">&quot;unstable&quot;</span>)))]
+</span><span class="attr">#[cfg(all(nightly, any(doc, feature = <span class="string">"unstable"</span>)))]
 </span><span class="kw">use </span>alloc::collections::TryReserveError;
 <span class="kw">use </span>alloc::vec::Vec;
 <span class="kw">use </span>core::fmt;
@@ -1734,14 +1735,14 @@
 </span>}
 
 <span class="comment">// Safe API to read a slot.
-</span><span class="kw">enum </span>SlotContent&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>&gt; {
-    Occupied(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T),
-    Vacant(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>FreeListEntry),
+</span><span class="kw">enum </span>SlotContent&lt;<span class="lifetime">'a</span>, T: <span class="lifetime">'a</span>&gt; {
+    Occupied(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>T),
+    Vacant(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>FreeListEntry),
 }
 
-<span class="kw">enum </span>SlotContentMut&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>&gt; {
-    OccupiedMut(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T),
-    VacantMut(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>FreeListEntry),
+<span class="kw">enum </span>SlotContentMut&lt;<span class="lifetime">'a</span>, T: <span class="lifetime">'a</span>&gt; {
+    OccupiedMut(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T),
+    VacantMut(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>FreeListEntry),
 }
 
 <span class="kw">use </span><span class="self">self</span>::SlotContent::{Occupied, Vacant};
@@ -1778,7 +1779,7 @@
 <span class="kw">impl</span>&lt;T&gt; Drop <span class="kw">for </span>Slot&lt;T&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">if </span>core::mem::needs_drop::&lt;T&gt;() &amp;&amp; <span class="self">self</span>.occupied() {
-            <span class="comment">// This is safe because we checked that we&#39;re occupied.
+            <span class="comment">// This is safe because we checked that we're occupied.
             </span><span class="kw">unsafe </span>{
                 ManuallyDrop::drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>.u.value);
             }
@@ -1816,11 +1817,11 @@
 
 <span class="kw">impl</span>&lt;T: fmt::Debug&gt; fmt::Debug <span class="kw">for </span>Slot&lt;T&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = fmt.debug_struct(<span class="string">&quot;Slot&quot;</span>);
-        builder.field(<span class="string">&quot;version&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.version);
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = fmt.debug_struct(<span class="string">"Slot"</span>);
+        builder.field(<span class="string">"version"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.version);
         <span class="kw">match </span><span class="self">self</span>.get() {
-            Occupied(value) =&gt; builder.field(<span class="string">&quot;value&quot;</span>, value).finish(),
-            Vacant(free) =&gt; builder.field(<span class="string">&quot;free&quot;</span>, free).finish(),
+            Occupied(value) =&gt; builder.field(<span class="string">"value"</span>, value).finish(),
+            Vacant(free) =&gt; builder.field(<span class="string">"free"</span>, free).finish(),
         }
     }
 }
@@ -1894,9 +1895,9 @@
     ///     struct MessageKey;
     /// }
     /// let mut messages = HopSlotMap::with_capacity_and_key(3);
-    /// let welcome: MessageKey = messages.insert(&quot;Welcome&quot;);
-    /// let good_day = messages.insert(&quot;Good day&quot;);
-    /// let hello = messages.insert(&quot;Hello&quot;);
+    /// let welcome: MessageKey = messages.insert("Welcome");
+    /// let good_day = messages.insert("Good day");
+    /// let hello = messages.insert("Hello");
     /// ```
     </span><span class="kw">pub fn </span>with_capacity_and_key(capacity: usize) -&gt; <span class="self">Self </span>{
         <span class="comment">// Create slots with sentinel at index 0.
@@ -1926,8 +1927,8 @@
     /// ```
     /// # use slotmap::*;
     /// let mut sm = HopSlotMap::with_capacity(10);
-    /// sm.insert(&quot;len() counts actual elements, not capacity&quot;);
-    /// let key = sm.insert(&quot;removed elements don&#39;t count either&quot;);
+    /// sm.insert("len() counts actual elements, not capacity");
+    /// let key = sm.insert("removed elements don't count either");
     /// sm.remove(key);
     /// assert_eq!(sm.len(), 1);
     /// ```
@@ -1942,7 +1943,7 @@
     /// ```
     /// # use slotmap::*;
     /// let mut sm = HopSlotMap::new();
-    /// let key = sm.insert(&quot;dummy&quot;);
+    /// let key = sm.insert("dummy");
     /// assert_eq!(sm.is_empty(), false);
     /// sm.remove(key);
     /// assert_eq!(sm.is_empty(), true);
@@ -1979,7 +1980,7 @@
     /// ```
     /// # use slotmap::*;
     /// let mut sm = HopSlotMap::new();
-    /// sm.insert(&quot;foo&quot;);
+    /// sm.insert("foo");
     /// sm.reserve(32);
     /// assert!(sm.capacity() &gt;= 33);
     /// ```
@@ -1998,12 +1999,12 @@
     /// ```
     /// # use slotmap::*;
     /// let mut sm = HopSlotMap::new();
-    /// sm.insert(&quot;foo&quot;);
+    /// sm.insert("foo");
     /// sm.try_reserve(32).unwrap();
     /// assert!(sm.capacity() &gt;= 33);
     /// ```
-    </span><span class="attr">#[cfg(all(nightly, any(doc, feature = <span class="string">&quot;unstable&quot;</span>)))]
-    #[cfg_attr(all(nightly, doc), doc(cfg(feature = <span class="string">&quot;unstable&quot;</span>)))]
+    </span><span class="attr">#[cfg(all(nightly, any(doc, feature = <span class="string">"unstable"</span>)))]
+    #[cfg_attr(all(nightly, doc), doc(cfg(feature = <span class="string">"unstable"</span>)))]
     </span><span class="kw">pub fn </span>try_reserve(<span class="kw-2">&amp;mut </span><span class="self">self</span>, additional: usize) -&gt; <span class="prelude-ty">Result</span>&lt;(), TryReserveError&gt; {
         <span class="comment">// One slot is reserved for the freelist sentinel.
         </span><span class="kw">let </span>needed = (<span class="self">self</span>.len() + additional).saturating_sub(<span class="self">self</span>.slots.len() - <span class="number">1</span>);
@@ -2107,10 +2108,10 @@
     <span class="kw">where
         </span>F: FnOnce(K) -&gt; <span class="prelude-ty">Result</span>&lt;V, E&gt;,
     {
-        <span class="comment">// In case f panics, we don&#39;t make any changes until we have the value.
+        <span class="comment">// In case f panics, we don't make any changes until we have the value.
         </span><span class="kw">let </span>new_num_elems = <span class="self">self</span>.num_elems + <span class="number">1</span>;
         <span class="kw">if </span>new_num_elems == core::u32::MAX {
-            <span class="macro">panic!</span>(<span class="string">&quot;HopSlotMap number of elements overflow&quot;</span>);
+            <span class="macro">panic!</span>(<span class="string">"HopSlotMap number of elements overflow"</span>);
         }
 
         <span class="comment">// All unsafe accesses here are safe due to the invariants of the slot
@@ -2175,7 +2176,7 @@
         slot.version = slot.version.wrapping_add(<span class="number">1</span>);
         <span class="kw">let </span>value = ManuallyDrop::take(<span class="kw-2">&amp;mut </span>slot.u.value);
 
-        <span class="comment">// This is safe and can&#39;t underflow because of the sentinel element at
+        <span class="comment">// This is safe and can't underflow because of the sentinel element at
         // the start.
         </span><span class="kw">let </span>left_vacant = !<span class="self">self</span>.slots.get_unchecked(idx - <span class="number">1</span>).occupied();
         <span class="kw">let </span>right_vacant = <span class="self">self</span>.slots.get(idx + <span class="number">1</span>).map_or(<span class="bool-val">false</span>, |s| !s.occupied());
@@ -2360,8 +2361,8 @@
     /// ```
     /// # use slotmap::*;
     /// let mut sm = HopSlotMap::new();
-    /// let key = sm.insert(&quot;bar&quot;);
-    /// assert_eq!(sm.get(key), Some(&amp;&quot;bar&quot;));
+    /// let key = sm.insert("bar");
+    /// assert_eq!(sm.get(key), Some(&amp;"bar"));
     /// sm.remove(key);
     /// assert_eq!(sm.get(key), None);
     /// ```
@@ -2388,8 +2389,8 @@
     /// ```
     /// # use slotmap::*;
     /// let mut sm = HopSlotMap::new();
-    /// let key = sm.insert(&quot;bar&quot;);
-    /// assert_eq!(unsafe { sm.get_unchecked(key) }, &amp;&quot;bar&quot;);
+    /// let key = sm.insert("bar");
+    /// assert_eq!(unsafe { sm.get_unchecked(key) }, &amp;"bar");
     /// sm.remove(key);
     /// // sm.get_unchecked(key) is now dangerous!
     /// ```
@@ -2434,9 +2435,9 @@
     /// ```
     /// # use slotmap::*;
     /// let mut sm = HopSlotMap::new();
-    /// let key = sm.insert(&quot;foo&quot;);
-    /// unsafe { *sm.get_unchecked_mut(key) = &quot;bar&quot; };
-    /// assert_eq!(sm[key], &quot;bar&quot;);
+    /// let key = sm.insert("foo");
+    /// unsafe { *sm.get_unchecked_mut(key) = "bar" };
+    /// assert_eq!(sm[key], "bar");
     /// sm.remove(key);
     /// // sm.get_unchecked_mut(key) is now dangerous!
     /// ```
@@ -2456,16 +2457,16 @@
     /// ```
     /// # use slotmap::*;
     /// let mut sm = HopSlotMap::new();
-    /// let ka = sm.insert(&quot;butter&quot;);
-    /// let kb = sm.insert(&quot;apples&quot;);
-    /// let kc = sm.insert(&quot;charlie&quot;);
+    /// let ka = sm.insert("butter");
+    /// let kb = sm.insert("apples");
+    /// let kc = sm.insert("charlie");
     /// sm.remove(kc); // Make key c invalid.
     /// assert_eq!(sm.get_disjoint_mut([ka, kb, kc]), None); // Has invalid key.
     /// assert_eq!(sm.get_disjoint_mut([ka, ka]), None); // Not disjoint.
     /// let [a, b] = sm.get_disjoint_mut([ka, kb]).unwrap();
     /// std::mem::swap(a, b);
-    /// assert_eq!(sm[ka], &quot;apples&quot;);
-    /// assert_eq!(sm[kb], &quot;butter&quot;);
+    /// assert_eq!(sm[ka], "apples");
+    /// assert_eq!(sm[kb], "butter");
     /// ```
     </span><span class="attr">#[cfg(has_min_const_generics)]
     </span><span class="kw">pub fn </span>get_disjoint_mut&lt;<span class="kw">const </span>N: usize&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, keys: [K; N]) -&gt; <span class="prelude-ty">Option</span>&lt;[<span class="kw-2">&amp;mut </span>V; N]&gt; {
@@ -2524,12 +2525,12 @@
     /// ```
     /// # use slotmap::*;
     /// let mut sm = HopSlotMap::new();
-    /// let ka = sm.insert(&quot;butter&quot;);
-    /// let kb = sm.insert(&quot;apples&quot;);
+    /// let ka = sm.insert("butter");
+    /// let kb = sm.insert("apples");
     /// let [a, b] = unsafe { sm.get_disjoint_unchecked_mut([ka, kb]) };
     /// std::mem::swap(a, b);
-    /// assert_eq!(sm[ka], &quot;apples&quot;);
-    /// assert_eq!(sm[kb], &quot;butter&quot;);
+    /// assert_eq!(sm[ka], "apples");
+    /// assert_eq!(sm[kb], "butter");
     /// ```
     </span><span class="attr">#[cfg(has_min_const_generics)]
     </span><span class="kw">pub unsafe fn </span>get_disjoint_unchecked_mut&lt;<span class="kw">const </span>N: usize&gt;(
@@ -2545,7 +2546,7 @@
     }
 
     <span class="doccomment">/// An iterator visiting all key-value pairs in arbitrary order. The
-    /// iterator element type is `(K, &amp;&#39;a V)`.
+    /// iterator element type is `(K, &amp;'a V)`.
     ///
     /// # Examples
     ///
@@ -2557,7 +2558,7 @@
     /// let k2 = sm.insert(2);
     ///
     /// for (k, v) in sm.iter() {
-    ///     println!(&quot;key: {:?}, val: {}&quot;, k, v);
+    ///     println!("key: {:?}, val: {}", k, v);
     /// }
     /// ```
     </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Iter&lt;K, V&gt; {
@@ -2571,7 +2572,7 @@
 
     <span class="doccomment">/// An iterator visiting all key-value pairs in arbitrary order, with
     /// mutable references to the values. The iterator element type is
-    /// `(K, &amp;&#39;a mut V)`.
+    /// `(K, &amp;'a mut V)`.
     ///
     /// # Examples
     ///
@@ -2622,7 +2623,7 @@
     }
 
     <span class="doccomment">/// An iterator visiting all values in arbitrary order. The iterator element
-    /// type is `&amp;&#39;a V`.
+    /// type is `&amp;'a V`.
     ///
     /// # Examples
     ///
@@ -2642,7 +2643,7 @@
     }
 
     <span class="doccomment">/// An iterator visiting all values mutably in arbitrary order. The iterator
-    /// element type is `&amp;&#39;a mut V`.
+    /// element type is `&amp;'a mut V`.
     ///
     /// # Examples
     ///
@@ -2694,7 +2695,7 @@
     <span class="kw">fn </span>index(<span class="kw-2">&amp;</span><span class="self">self</span>, key: K) -&gt; <span class="kw-2">&amp;</span>V {
         <span class="kw">match </span><span class="self">self</span>.get(key) {
             <span class="prelude-val">Some</span>(r) =&gt; r,
-            <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;invalid HopSlotMap key used&quot;</span>),
+            <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(<span class="string">"invalid HopSlotMap key used"</span>),
         }
     }
 }
@@ -2703,7 +2704,7 @@
     <span class="kw">fn </span>index_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K) -&gt; <span class="kw-2">&amp;mut </span>V {
         <span class="kw">match </span><span class="self">self</span>.get_mut(key) {
             <span class="prelude-val">Some</span>(r) =&gt; r,
-            <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;invalid HopSlotMap key used&quot;</span>),
+            <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(<span class="string">"invalid HopSlotMap key used"</span>),
         }
     }
 }
@@ -2713,9 +2714,9 @@
 ///
 /// This iterator is created by [`HopSlotMap::drain`].
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>Drain&lt;<span class="lifetime">&#39;a</span>, K: Key + <span class="lifetime">&#39;a</span>, V: <span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Drain&lt;<span class="lifetime">'a</span>, K: Key + <span class="lifetime">'a</span>, V: <span class="lifetime">'a</span>&gt; {
     cur: usize,
-    sm: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>HopSlotMap&lt;K, V&gt;,
+    sm: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>HopSlotMap&lt;K, V&gt;,
 }
 
 <span class="doccomment">/// An iterator that moves key-value pairs out of a [`HopSlotMap`].
@@ -2734,14 +2735,14 @@
 ///
 /// This iterator is created by [`HopSlotMap::iter`].
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>Iter&lt;<span class="lifetime">&#39;a</span>, K: Key + <span class="lifetime">&#39;a</span>, V: <span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Iter&lt;<span class="lifetime">'a</span>, K: Key + <span class="lifetime">'a</span>, V: <span class="lifetime">'a</span>&gt; {
     cur: usize,
     num_left: usize,
-    slots: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[Slot&lt;V&gt;],
+    slots: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[Slot&lt;V&gt;],
     _k: PhantomData&lt;<span class="kw">fn</span>(K) -&gt; K&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: <span class="lifetime">&#39;a </span>+ Key, V: <span class="lifetime">&#39;a</span>&gt; Clone <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: <span class="lifetime">'a </span>+ Key, V: <span class="lifetime">'a</span>&gt; Clone <span class="kw">for </span>Iter&lt;<span class="lifetime">'a</span>, K, V&gt; {
     <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         Iter {
             cur: <span class="self">self</span>.cur,
@@ -2756,10 +2757,10 @@
 ///
 /// This iterator is created by [`HopSlotMap::iter_mut`].
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>IterMut&lt;<span class="lifetime">&#39;a</span>, K: Key + <span class="lifetime">&#39;a</span>, V: <span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>IterMut&lt;<span class="lifetime">'a</span>, K: Key + <span class="lifetime">'a</span>, V: <span class="lifetime">'a</span>&gt; {
     cur: usize,
     num_left: usize,
-    slots: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[Slot&lt;V&gt;],
+    slots: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[Slot&lt;V&gt;],
     _k: PhantomData&lt;<span class="kw">fn</span>(K) -&gt; K&gt;,
 }
 
@@ -2767,11 +2768,11 @@
 ///
 /// This iterator is created by [`HopSlotMap::keys`].
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>Keys&lt;<span class="lifetime">&#39;a</span>, K: Key + <span class="lifetime">&#39;a</span>, V: <span class="lifetime">&#39;a</span>&gt; {
-    inner: Iter&lt;<span class="lifetime">&#39;a</span>, K, V&gt;,
+</span><span class="kw">pub struct </span>Keys&lt;<span class="lifetime">'a</span>, K: Key + <span class="lifetime">'a</span>, V: <span class="lifetime">'a</span>&gt; {
+    inner: Iter&lt;<span class="lifetime">'a</span>, K, V&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: <span class="lifetime">&#39;a </span>+ Key, V: <span class="lifetime">&#39;a</span>&gt; Clone <span class="kw">for </span>Keys&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: <span class="lifetime">'a </span>+ Key, V: <span class="lifetime">'a</span>&gt; Clone <span class="kw">for </span>Keys&lt;<span class="lifetime">'a</span>, K, V&gt; {
     <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         Keys {
             inner: <span class="self">self</span>.inner.clone(),
@@ -2783,11 +2784,11 @@
 ///
 /// This iterator is created by [`HopSlotMap::values`].
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>Values&lt;<span class="lifetime">&#39;a</span>, K: Key + <span class="lifetime">&#39;a</span>, V: <span class="lifetime">&#39;a</span>&gt; {
-    inner: Iter&lt;<span class="lifetime">&#39;a</span>, K, V&gt;,
+</span><span class="kw">pub struct </span>Values&lt;<span class="lifetime">'a</span>, K: Key + <span class="lifetime">'a</span>, V: <span class="lifetime">'a</span>&gt; {
+    inner: Iter&lt;<span class="lifetime">'a</span>, K, V&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: <span class="lifetime">&#39;a </span>+ Key, V: <span class="lifetime">&#39;a</span>&gt; Clone <span class="kw">for </span>Values&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: <span class="lifetime">'a </span>+ Key, V: <span class="lifetime">'a</span>&gt; Clone <span class="kw">for </span>Values&lt;<span class="lifetime">'a</span>, K, V&gt; {
     <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         Values {
             inner: <span class="self">self</span>.inner.clone(),
@@ -2799,11 +2800,11 @@
 ///
 /// This iterator is created by [`HopSlotMap::values_mut`].
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>ValuesMut&lt;<span class="lifetime">&#39;a</span>, K: Key + <span class="lifetime">&#39;a</span>, V: <span class="lifetime">&#39;a</span>&gt; {
-    inner: IterMut&lt;<span class="lifetime">&#39;a</span>, K, V&gt;,
+</span><span class="kw">pub struct </span>ValuesMut&lt;<span class="lifetime">'a</span>, K: Key + <span class="lifetime">'a</span>, V: <span class="lifetime">'a</span>&gt; {
+    inner: IterMut&lt;<span class="lifetime">'a</span>, K, V&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; Iterator <span class="kw">for </span>Drain&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; Iterator <span class="kw">for </span>Drain&lt;<span class="lifetime">'a</span>, K, V&gt; {
     <span class="kw">type </span>Item = (K, V);
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;(K, V)&gt; {
@@ -2830,7 +2831,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; Drop <span class="kw">for </span>Drain&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; Drop <span class="kw">for </span>Drain&lt;<span class="lifetime">'a</span>, K, V&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.for_each(|_drop| {});
     }
@@ -2869,10 +2870,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; Iterator <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
-    <span class="kw">type </span>Item = (K, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>V);
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; Iterator <span class="kw">for </span>Iter&lt;<span class="lifetime">'a</span>, K, V&gt; {
+    <span class="kw">type </span>Item = (K, <span class="kw-2">&amp;</span><span class="lifetime">'a </span>V);
 
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;(K, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>V)&gt; {
+    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;(K, <span class="kw-2">&amp;</span><span class="lifetime">'a </span>V)&gt; {
         <span class="comment">// All unchecked indices are safe due to the invariants of the freelist
         // and that num_left guarantees there is another element.
         </span><span class="kw">if </span><span class="self">self</span>.num_left == <span class="number">0 </span>{
@@ -2896,10 +2897,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; Iterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
-    <span class="kw">type </span>Item = (K, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>V);
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; Iterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">'a</span>, K, V&gt; {
+    <span class="kw">type </span>Item = (K, <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>V);
 
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;(K, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>V)&gt; {
+    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;(K, <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>V)&gt; {
         <span class="kw">if </span><span class="self">self</span>.cur &gt;= <span class="self">self</span>.slots.len() {
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
@@ -2919,7 +2920,7 @@
         <span class="self">self</span>.cur = idx + <span class="number">1</span>;
         <span class="self">self</span>.num_left -= <span class="number">1</span>;
 
-        <span class="comment">// Unsafe necessary because Rust can&#39;t deduce that we won&#39;t
+        <span class="comment">// Unsafe necessary because Rust can't deduce that we won't
         // return multiple references to the same value.
         </span><span class="kw">let </span>slot = <span class="kw-2">&amp;mut </span><span class="self">self</span>.slots[idx];
         <span class="kw">let </span>version = slot.version;
@@ -2935,7 +2936,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; Iterator <span class="kw">for </span>Keys&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; Iterator <span class="kw">for </span>Keys&lt;<span class="lifetime">'a</span>, K, V&gt; {
     <span class="kw">type </span>Item = K;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;K&gt; {
@@ -2947,10 +2948,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; Iterator <span class="kw">for </span>Values&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
-    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>V;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; Iterator <span class="kw">for </span>Values&lt;<span class="lifetime">'a</span>, K, V&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>V;
 
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>V&gt; {
+    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>V&gt; {
         <span class="self">self</span>.inner.next().map(|(<span class="kw">_</span>, value)| value)
     }
 
@@ -2959,10 +2960,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; Iterator <span class="kw">for </span>ValuesMut&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
-    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>V;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; Iterator <span class="kw">for </span>ValuesMut&lt;<span class="lifetime">'a</span>, K, V&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>V;
 
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>V&gt; {
+    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>V&gt; {
         <span class="self">self</span>.inner.next().map(|(<span class="kw">_</span>, value)| value)
     }
 
@@ -2971,18 +2972,18 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HopSlotMap&lt;K, V&gt; {
-    <span class="kw">type </span>Item = (K, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>V);
-    <span class="kw">type </span>IntoIter = Iter&lt;<span class="lifetime">&#39;a</span>, K, V&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>HopSlotMap&lt;K, V&gt; {
+    <span class="kw">type </span>Item = (K, <span class="kw-2">&amp;</span><span class="lifetime">'a </span>V);
+    <span class="kw">type </span>IntoIter = Iter&lt;<span class="lifetime">'a</span>, K, V&gt;;
 
     <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
         <span class="self">self</span>.iter()
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>HopSlotMap&lt;K, V&gt; {
-    <span class="kw">type </span>Item = (K, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>V);
-    <span class="kw">type </span>IntoIter = IterMut&lt;<span class="lifetime">&#39;a</span>, K, V&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>HopSlotMap&lt;K, V&gt; {
+    <span class="kw">type </span>Item = (K, <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>V);
+    <span class="kw">type </span>IntoIter = IterMut&lt;<span class="lifetime">'a</span>, K, V&gt;;
 
     <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
         <span class="self">self</span>.iter_mut()
@@ -3003,24 +3004,24 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; FusedIterator <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {}
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; FusedIterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {}
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; FusedIterator <span class="kw">for </span>Keys&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {}
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; FusedIterator <span class="kw">for </span>Values&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {}
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; FusedIterator <span class="kw">for </span>ValuesMut&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {}
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; FusedIterator <span class="kw">for </span>Drain&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; FusedIterator <span class="kw">for </span>Iter&lt;<span class="lifetime">'a</span>, K, V&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; FusedIterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">'a</span>, K, V&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; FusedIterator <span class="kw">for </span>Keys&lt;<span class="lifetime">'a</span>, K, V&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; FusedIterator <span class="kw">for </span>Values&lt;<span class="lifetime">'a</span>, K, V&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; FusedIterator <span class="kw">for </span>ValuesMut&lt;<span class="lifetime">'a</span>, K, V&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; FusedIterator <span class="kw">for </span>Drain&lt;<span class="lifetime">'a</span>, K, V&gt; {}
 <span class="kw">impl</span>&lt;K: Key, V&gt; FusedIterator <span class="kw">for </span>IntoIter&lt;K, V&gt; {}
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {}
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {}
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>Keys&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {}
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>Values&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {}
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>ValuesMut&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {}
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>Drain&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>Iter&lt;<span class="lifetime">'a</span>, K, V&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">'a</span>, K, V&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>Keys&lt;<span class="lifetime">'a</span>, K, V&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>Values&lt;<span class="lifetime">'a</span>, K, V&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>ValuesMut&lt;<span class="lifetime">'a</span>, K, V&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>Drain&lt;<span class="lifetime">'a</span>, K, V&gt; {}
 <span class="kw">impl</span>&lt;K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>IntoIter&lt;K, V&gt; {}
 
 <span class="comment">// Serialization with serde.
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;serde&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"serde"</span>)]
 </span><span class="kw">mod </span>serialize {
     <span class="kw">use </span>serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 
@@ -3048,18 +3049,18 @@
         }
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, T&gt; Deserialize&lt;<span class="lifetime">&#39;de</span>&gt; <span class="kw">for </span>Slot&lt;T&gt;
+    <span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, T&gt; Deserialize&lt;<span class="lifetime">'de</span>&gt; <span class="kw">for </span>Slot&lt;T&gt;
     <span class="kw">where
-        </span>T: Deserialize&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>T: Deserialize&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="kw">fn </span>deserialize&lt;D&gt;(deserializer: D) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, D::Error&gt;
         <span class="kw">where
-            </span>D: Deserializer&lt;<span class="lifetime">&#39;de</span>&gt;,
+            </span>D: Deserializer&lt;<span class="lifetime">'de</span>&gt;,
         {
             <span class="kw">let </span>serde_slot: SerdeSlot&lt;T&gt; = Deserialize::deserialize(deserializer)<span class="question-mark">?</span>;
             <span class="kw">let </span>occupied = serde_slot.version % <span class="number">2 </span>== <span class="number">1</span>;
             <span class="kw">if </span>occupied ^ serde_slot.value.is_some() {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(de::Error::custom(<span class="kw-2">&amp;</span><span class="string">&quot;inconsistent occupation in Slot&quot;</span>));
+                <span class="kw">return </span><span class="prelude-val">Err</span>(de::Error::custom(<span class="kw-2">&amp;</span><span class="string">"inconsistent occupation in Slot"</span>));
             }
 
             <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
@@ -3089,19 +3090,19 @@
         }
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, K: Key, V: Deserialize&lt;<span class="lifetime">&#39;de</span>&gt;&gt; Deserialize&lt;<span class="lifetime">&#39;de</span>&gt; <span class="kw">for </span>HopSlotMap&lt;K, V&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, K: Key, V: Deserialize&lt;<span class="lifetime">'de</span>&gt;&gt; Deserialize&lt;<span class="lifetime">'de</span>&gt; <span class="kw">for </span>HopSlotMap&lt;K, V&gt; {
         <span class="kw">fn </span>deserialize&lt;D&gt;(deserializer: D) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, D::Error&gt;
         <span class="kw">where
-            </span>D: Deserializer&lt;<span class="lifetime">&#39;de</span>&gt;,
+            </span>D: Deserializer&lt;<span class="lifetime">'de</span>&gt;,
         {
             <span class="kw">let </span><span class="kw-2">mut </span>slots: Vec&lt;Slot&lt;V&gt;&gt; = Deserialize::deserialize(deserializer)<span class="question-mark">?</span>;
             <span class="kw">if </span>slots.len() &gt;= u32::max_value() <span class="kw">as </span>usize {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(de::Error::custom(<span class="kw-2">&amp;</span><span class="string">&quot;too many slots&quot;</span>));
+                <span class="kw">return </span><span class="prelude-val">Err</span>(de::Error::custom(<span class="kw-2">&amp;</span><span class="string">"too many slots"</span>));
             }
 
             <span class="comment">// Ensure the first slot exists and is empty for the sentinel.
             </span><span class="kw">if </span>slots.get(<span class="number">0</span>).map_or(<span class="bool-val">true</span>, |slot| slot.version % <span class="number">2 </span>== <span class="number">1</span>) {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(de::Error::custom(<span class="kw-2">&amp;</span><span class="string">&quot;first slot not empty&quot;</span>));
+                <span class="kw">return </span><span class="prelude-val">Err</span>(de::Error::custom(<span class="kw-2">&amp;</span><span class="string">"first slot not empty"</span>));
             }
 
             slots[<span class="number">0</span>].u.free = FreeListEntry {
@@ -3160,15 +3161,15 @@
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
     <span class="attr">#[derive(Clone)]
-    </span><span class="kw">struct </span>CountDrop&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>std::cell::RefCell&lt;usize&gt;);
+    </span><span class="kw">struct </span>CountDrop&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>std::cell::RefCell&lt;usize&gt;);
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Drop <span class="kw">for </span>CountDrop&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Drop <span class="kw">for </span>CountDrop&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
             <span class="kw-2">*</span><span class="self">self</span>.<span class="number">0</span>.borrow_mut() += <span class="number">1</span>;
         }
     }
 
-    <span class="attr">#[cfg(all(nightly, feature = <span class="string">&quot;unstable&quot;</span>))]
+    <span class="attr">#[cfg(all(nightly, feature = <span class="string">"unstable"</span>))]
     #[test]
     </span><span class="kw">fn </span>check_drops() {
         <span class="kw">let </span>drops = std::cell::RefCell::new(<span class="number">0usize</span>);
@@ -3190,7 +3191,7 @@
                 <span class="comment">// Should only have dropped 500 so far.
                 </span><span class="macro">assert_eq!</span>(<span class="kw-2">*</span>drops.borrow(), <span class="number">500</span>);
 
-                <span class="comment">// Let&#39;s clone ourselves and then die.
+                <span class="comment">// Let's clone ourselves and then die.
                 </span>sm.clone()
             };
 
@@ -3207,7 +3208,7 @@
         </span><span class="macro">assert_eq!</span>(<span class="kw-2">*</span>drops.borrow(), <span class="number">1750</span>);
     }
 
-    <span class="attr">#[cfg(all(nightly, feature = <span class="string">&quot;unstable&quot;</span>))]
+    <span class="attr">#[cfg(all(nightly, feature = <span class="string">"unstable"</span>))]
     #[test]
     </span><span class="kw">fn </span>disjoint() {
         <span class="comment">// Intended to be run with miri to find any potential UB.
@@ -3257,9 +3258,9 @@
             <span class="kw">let </span><span class="kw-2">mut </span>sm = HopSlotMap::new();
             <span class="kw">let </span><span class="kw-2">mut </span>sm_keys = Vec::new();
 
-            <span class="attr">#[cfg(not(feature = <span class="string">&quot;serde&quot;</span>))]
+            <span class="attr">#[cfg(not(feature = <span class="string">"serde"</span>))]
             </span><span class="kw">let </span>num_ops = <span class="number">3</span>;
-            <span class="attr">#[cfg(feature = <span class="string">&quot;serde&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"serde"</span>)]
             </span><span class="kw">let </span>num_ops = <span class="number">4</span>;
 
             <span class="kw">for </span>(op, val) <span class="kw">in </span>operations {
@@ -3304,7 +3305,7 @@
                     }
 
                     <span class="comment">// Serde round-trip.
-                    </span><span class="attr">#[cfg(feature = <span class="string">&quot;serde&quot;</span>)]
+                    </span><span class="attr">#[cfg(feature = <span class="string">"serde"</span>)]
                     </span><span class="number">3 </span>=&gt; {
                         <span class="kw">let </span>ser = serde_json::to_string(<span class="kw-2">&amp;</span>sm).unwrap();
                         sm = serde_json::from_str(<span class="kw-2">&amp;</span>ser).unwrap();
@@ -3322,7 +3323,7 @@
         }
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;serde&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"serde"</span>)]
     #[test]
     </span><span class="kw">fn </span>slotmap_serde() {
         <span class="kw">let </span><span class="kw-2">mut </span>sm = HopSlotMap::new();
@@ -3350,7 +3351,7 @@
         <span class="macro">assert_eq!</span>(smkv, dekv);
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;serde&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"serde"</span>)]
     #[test]
     </span><span class="kw">fn </span>slotmap_serde_freelist() {
         <span class="kw">let </span><span class="kw-2">mut </span>sm = HopSlotMap::new();

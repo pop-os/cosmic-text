@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/zeno-0.2.3/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="zeno" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/zeno-0.2.3/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="zeno" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -344,7 +345,7 @@ use zeno::{Mask, PathData};
 let mut mask = [0u8; 64 * 64];
 
 // Create a new mask with some path data
-Mask::new(&quot;M 8,56 32,8 56,56 Z&quot;)
+Mask::new("M 8,56 32,8 56,56 Z")
     // Choose an explicit size for the target
     .size(64, 64)
     // Finally, render the path into the target
@@ -357,7 +358,7 @@ default along with support for custom implementations. See the
 [PathData](trait.PathData.html) trait for more detail.
 
 The previous example did not provide a style, so a non-zero
-[Fill](enum.Fill.html) was chosen by default. Let&#39;s render the same path with
+[Fill](enum.Fill.html) was chosen by default. Let's render the same path with
 a 4 pixel wide stroke and a round line join:
 
 ```rust
@@ -365,7 +366,7 @@ use zeno::{Join, Mask, PathData, Stroke};
 
 let mut mask = [0u8; 64 * 64];
 
-Mask::new(&quot;M 8,56 32,8 56,56 Z&quot;)
+Mask::new("M 8,56 32,8 56,56 Z")
     .size(64, 64)
     .style(Stroke::new(4.0).join(Join::Round))
     .render_into(&amp;mut mask, None);
@@ -378,7 +379,7 @@ use zeno::{Cap, Join, Mask, PathData, Stroke};
 
 let mut mask = [0u8; 64 * 64];
 
-Mask::new(&quot;M 8,56 32,8 56,56 Z&quot;)
+Mask::new("M 8,56 32,8 56,56 Z")
     .style(
         Stroke::new(4.0)
             .join(Join::Round)
@@ -392,7 +393,7 @@ Mask::new(&quot;M 8,56 32,8 56,56 Z&quot;)
 
 See the [Stroke](struct.Stroke.html) builder struct for all available options.
 
-So far, we&#39;ve generated our masks into fixed buffers with explicit sizes. It is
+So far, we've generated our masks into fixed buffers with explicit sizes. It is
 often the case that it is preferred to ignore all empty space and render a path
 into a tightly bound mask of dynamic size. This can be done by eliding the call
 for the size method:
@@ -403,7 +404,7 @@ use zeno::{Mask, PathData};
 // Dynamic buffer that will contain the mask
 let mut mask = Vec::new();
 
-let placement = Mask::new(&quot;M 8,56 32,8 56,56 Z&quot;)
+let placement = Mask::new("M 8,56 32,8 56,56 Z")
     // Insert an inspect call here to access the computed dimensions
     .inspect(|format, width, height| {
         // Make sure our buffer is the correct size
@@ -426,7 +427,7 @@ rasterizer will allocate and return a new `Vec&lt;u8&gt;` containing the mask:
 use zeno::{Mask, PathData};
 
 // mask is a Vec&lt;u8&gt;
-let (mask, placement) = Mask::new(&quot;M 8,56 32,8 56,56 Z&quot;)
+let (mask, placement) = Mask::new("M 8,56 32,8 56,56 Z")
     // Calling render() instead of render_into() will allocate a buffer
     // for you that is returned along with the placement
     .render();
@@ -440,7 +441,7 @@ their respective documentation for more detail.
 # Hit testing
 
 Hit testing is the process of determining if a point is within the region that
-would be painted by the path. A typical use case is to determine if a user&#39;s
+would be painted by the path. A typical use case is to determine if a user's
 cursor is hovering over a particular path. The process generally follows the
 same form as rendering:
 
@@ -448,20 +449,20 @@ same form as rendering:
 use zeno::{HitTest, PathData};
 
 // A 20x10 region with the right half covered by the path
-let hit_test = HitTest::new(&quot;M10,0 10,10 20,10 20,0 Z&quot;);
+let hit_test = HitTest::new("M10,0 10,10 20,10 20,0 Z");
 
 assert_eq!(hit_test.test([15, 5]), true);
 assert_eq!(hit_test.test([5, 5]), false);
 ```
 
 Due to the fact that paths are anti-aliased, the hit test builder offers a
-threshold option that determines how much &quot;coverage&quot; is required for a hit test
+threshold option that determines how much "coverage" is required for a hit test
 to pass at a particular point.
 
 ```rust
 use zeno::{HitTest, PathData};
 
-let mut hit_test = HitTest::new(&quot;M2.5,0 2.5,2 5,2 5,0 Z&quot;);
+let mut hit_test = HitTest::new("M2.5,0 2.5,2 5,2 5,0 Z");
 
 // Require full coverage for a successful hit test
 hit_test.threshold(255);
@@ -489,7 +490,7 @@ let mut path: Vec&lt;Command&gt; = Vec::new();
 path.move_to([8, 56]).line_to([32, 8]).line_to([56, 56]).close();
 
 // Ensure it is equal to the equivalent SVG path
-assert!((&amp;path).commands().eq(&quot;M 8,56 32,8 56,56 Z&quot;.commands()));
+assert!((&amp;path).commands().eq("M 8,56 32,8 56,56 Z".commands()));
 
 // &amp;Vec&lt;Command&gt; is also valid path data
 Mask::new(&amp;path).render(); // ...
@@ -517,11 +518,11 @@ path.move_to([1, 2]).rel_arc_to(
     [10, 4],
 );
 
-assert!((&amp;path).commands().eq(&quot;M1,2 a8,4,30,0,1,10,4&quot;.commands()));
+assert!((&amp;path).commands().eq("M1,2 a8,4,30,0,1,10,4".commands()));
 ```
 
 Along with incremental building of paths, path builder can also be used as a
-&quot;sink&quot; for capturing the result of the application of a style and transform
+"sink" for capturing the result of the application of a style and transform
 to some path data. For example, it is possible to store the output of a stroke
 style to avoid the cost of stroke evaluation for future rendering or hit test
 operations with the use of the [apply](fn.apply.html) function:
@@ -531,7 +532,7 @@ use zeno::{apply, Cap, Command, PathBuilder, PathData, Stroke};
 
 let mut stroke: Vec&lt;Command&gt; = Vec::new();
 
-apply(&quot;L10,0&quot;, Stroke::new(4.0).cap(Cap::Round), None, &amp;mut stroke);
+apply("L10,0", Stroke::new(4.0).cap(Cap::Round), None, &amp;mut stroke);
 ```
 
 [PathBuilder](struct.PathBuilder.html) is only implemented for `Vec&lt;Command&gt;`
@@ -573,39 +574,39 @@ redirect all transient allocations to the reusable storage.
 
 </span><span class="kw">mod </span>command;
 <span class="kw">mod </span>geometry;
-<span class="attr">#[cfg(feature = <span class="string">&quot;eval&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"eval"</span>)]
 </span><span class="kw">mod </span>hit_test;
-<span class="attr">#[cfg(feature = <span class="string">&quot;eval&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"eval"</span>)]
 </span><span class="kw">mod </span>mask;
 <span class="kw">mod </span>path_builder;
 <span class="kw">mod </span>path_data;
-<span class="attr">#[cfg(feature = <span class="string">&quot;eval&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"eval"</span>)]
 </span><span class="kw">mod </span>raster;
-<span class="attr">#[cfg(feature = <span class="string">&quot;eval&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"eval"</span>)]
 </span><span class="kw">mod </span>scratch;
 <span class="kw">mod </span>segment;
-<span class="attr">#[cfg(feature = <span class="string">&quot;eval&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"eval"</span>)]
 </span><span class="kw">mod </span>stroke;
 <span class="kw">mod </span>style;
 <span class="kw">mod </span>svg_parser;
-<span class="attr">#[cfg(feature = <span class="string">&quot;eval&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"eval"</span>)]
 </span><span class="kw">mod </span>traversal;
 
 <span class="kw">pub use </span>command::{Command, Verb};
 <span class="kw">pub use </span>geometry::{Angle, Bounds, Origin, Placement, Point, Transform, Vector};
-<span class="attr">#[cfg(feature = <span class="string">&quot;eval&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"eval"</span>)]
 </span><span class="kw">pub use </span>hit_test::HitTest;
-<span class="attr">#[cfg(feature = <span class="string">&quot;eval&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"eval"</span>)]
 </span><span class="kw">pub use </span>mask::{Format, Mask};
 <span class="kw">pub use </span>path_builder::{ArcSize, ArcSweep, PathBuilder};
-<span class="attr">#[cfg(feature = <span class="string">&quot;eval&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"eval"</span>)]
 </span><span class="kw">pub use </span>path_data::{apply, bounds};
 <span class="kw">pub use </span>path_data::{length, PathData};
-<span class="attr">#[cfg(feature = <span class="string">&quot;eval&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"eval"</span>)]
 </span><span class="kw">pub use </span>scratch::Scratch;
 <span class="kw">pub use </span>style::<span class="kw-2">*</span>;
 <span class="kw">pub use </span>svg_parser::validate_svg;
-<span class="attr">#[cfg(feature = <span class="string">&quot;eval&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"eval"</span>)]
 </span><span class="kw">pub use </span>traversal::{Vertex, Vertices, Walk};
 
 <span class="comment">// Prep for no_std support when core supports FP intrinsics.

@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ttf-parser-0.20.0/src/tables/glyf.rs`."><title>glyf.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ttf_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ttf-parser-0.20.0/src/tables/glyf.rs`."><title>glyf.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ttf_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -613,11 +614,11 @@
 <span class="kw">use </span><span class="kw">crate</span>::parser::{LazyArray16, NumFrom, Stream, F2DOT14};
 <span class="kw">use crate</span>::{loca, BBox, GlyphId, OutlineBuilder, Rect, Transform};
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Builder&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub </span>builder: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="kw">dyn </span>OutlineBuilder,
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Builder&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub </span>builder: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="kw">dyn </span>OutlineBuilder,
     <span class="kw">pub </span>transform: Transform,
     is_default_ts: bool, <span class="comment">// `bool` is faster than `Option` or `is_default`.
-    // We have to always calculate the bbox, because `gvar` doesn&#39;t store one
+    // We have to always calculate the bbox, because `gvar` doesn't store one
     // and in case of a malformed bbox in `glyf`.
     </span><span class="kw">pub </span>bbox: BBox,
     first_on_curve: <span class="prelude-ty">Option</span>&lt;Point&gt;,
@@ -625,9 +626,9 @@
     last_off_curve: <span class="prelude-ty">Option</span>&lt;Point&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Builder&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Builder&lt;<span class="lifetime">'a</span>&gt; {
     <span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>new(transform: Transform, bbox: BBox, builder: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="kw">dyn </span>OutlineBuilder) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(transform: Transform, bbox: BBox, builder: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="kw">dyn </span>OutlineBuilder) -&gt; <span class="self">Self </span>{
         Builder {
             builder,
             transform,
@@ -753,20 +754,20 @@
 }
 
 <span class="attr">#[derive(Clone)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>CompositeGlyphIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    stream: Stream&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>CompositeGlyphIter&lt;<span class="lifetime">'a</span>&gt; {
+    stream: Stream&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; CompositeGlyphIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; CompositeGlyphIter&lt;<span class="lifetime">'a</span>&gt; {
     <span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>new(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="self">Self </span>{
         CompositeGlyphIter {
             stream: Stream::new(data),
         }
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>CompositeGlyphIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>CompositeGlyphIter&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">type </span>Item = CompositeGlyphInfo;
 
     <span class="attr">#[inline]
@@ -814,7 +815,7 @@
 
 <span class="comment">// Due to some optimization magic, using f32 instead of i16
 // makes the code ~10% slower. At least on my machine.
-// I guess it&#39;s due to the fact that with i16 the struct
+// I guess it's due to the fact that with i16 the struct
 // fits into the machine word.
 </span><span class="attr">#[derive(Clone, Copy, Debug)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>GlyphPoint {
@@ -827,23 +828,23 @@
 }
 
 <span class="attr">#[derive(Clone, Default)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>GlyphPointsIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    endpoints: EndpointsIter&lt;<span class="lifetime">&#39;a</span>&gt;,
-    flags: FlagsIter&lt;<span class="lifetime">&#39;a</span>&gt;,
-    x_coords: CoordsIter&lt;<span class="lifetime">&#39;a</span>&gt;,
-    y_coords: CoordsIter&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>GlyphPointsIter&lt;<span class="lifetime">'a</span>&gt; {
+    endpoints: EndpointsIter&lt;<span class="lifetime">'a</span>&gt;,
+    flags: FlagsIter&lt;<span class="lifetime">'a</span>&gt;,
+    x_coords: CoordsIter&lt;<span class="lifetime">'a</span>&gt;,
+    y_coords: CoordsIter&lt;<span class="lifetime">'a</span>&gt;,
     <span class="kw">pub </span>points_left: u16, <span class="comment">// Number of points left in the glyph.
 </span>}
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
-</span><span class="kw">impl </span>GlyphPointsIter&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
+</span><span class="kw">impl </span>GlyphPointsIter&lt;<span class="lifetime">'_</span>&gt; {
     <span class="attr">#[inline]
     </span><span class="kw">pub fn </span>current_contour(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="self">self</span>.endpoints.index - <span class="number">1
     </span>}
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>GlyphPointsIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>GlyphPointsIter&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">type </span>Item = GlyphPoint;
 
     <span class="attr">#[inline]
@@ -867,20 +868,20 @@
     }
 }
 
-<span class="doccomment">/// A simple flattening iterator for glyph&#39;s endpoints.
+<span class="doccomment">/// A simple flattening iterator for glyph's endpoints.
 ///
 /// Translates endpoints like: 2 4 7
 /// into flags: 0 0 1 0 1 0 0 1
 </span><span class="attr">#[derive(Clone, Copy, Default)]
-</span><span class="kw">struct </span>EndpointsIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    endpoints: LazyArray16&lt;<span class="lifetime">&#39;a</span>, u16&gt;, <span class="comment">// Each endpoint indicates a contour end.
+</span><span class="kw">struct </span>EndpointsIter&lt;<span class="lifetime">'a</span>&gt; {
+    endpoints: LazyArray16&lt;<span class="lifetime">'a</span>, u16&gt;, <span class="comment">// Each endpoint indicates a contour end.
     </span>index: u16,
     left: u16,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; EndpointsIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; EndpointsIter&lt;<span class="lifetime">'a</span>&gt; {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>new(endpoints: LazyArray16&lt;<span class="lifetime">&#39;a</span>, u16&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">fn </span>new(endpoints: LazyArray16&lt;<span class="lifetime">'a</span>, u16&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="prelude-val">Some</span>(EndpointsIter {
             endpoints,
             index: <span class="number">1</span>,
@@ -913,17 +914,17 @@
 }
 
 <span class="attr">#[derive(Clone, Default)]
-</span><span class="kw">struct </span>FlagsIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    stream: Stream&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">struct </span>FlagsIter&lt;<span class="lifetime">'a</span>&gt; {
+    stream: Stream&lt;<span class="lifetime">'a</span>&gt;,
     <span class="comment">// Number of times the `flags` should be used
     // before reading the next one from `stream`.
     </span>repeats: u8,
     flags: SimpleGlyphFlags,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FlagsIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FlagsIter&lt;<span class="lifetime">'a</span>&gt; {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>new(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">fn </span>new(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="self">Self </span>{
         FlagsIter {
             stream: Stream::new(data),
             repeats: <span class="number">0</span>,
@@ -932,7 +933,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>FlagsIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>FlagsIter&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">type </span>Item = SimpleGlyphFlags;
 
     <span class="attr">#[inline]
@@ -951,14 +952,14 @@
 }
 
 <span class="attr">#[derive(Clone, Default)]
-</span><span class="kw">struct </span>CoordsIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    stream: Stream&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">struct </span>CoordsIter&lt;<span class="lifetime">'a</span>&gt; {
+    stream: Stream&lt;<span class="lifetime">'a</span>&gt;,
     prev: i16, <span class="comment">// Points are stored as deltas, so we have to keep the previous one.
 </span>}
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; CoordsIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; CoordsIter&lt;<span class="lifetime">'a</span>&gt; {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>new(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">fn </span>new(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="self">Self </span>{
         CoordsIter {
             stream: Stream::new(data),
             prev: <span class="number">0</span>,
@@ -970,7 +971,7 @@
         <span class="comment">// See https://docs.microsoft.com/en-us/typography/opentype/spec/glyf#simple-glyph-description
         // for details about Simple Glyph Flags processing.
 
-        // We&#39;ve already checked the coords data, so it&#39;s safe to fallback to 0.
+        // We've already checked the coords data, so it's safe to fallback to 0.
 
         </span><span class="kw">let </span><span class="kw-2">mut </span>n = <span class="number">0</span>;
         <span class="kw">if </span>is_short {
@@ -1031,7 +1032,7 @@
     <span class="attr">#[inline] </span><span class="kw">pub fn </span>we_have_a_two_by_two(<span class="self">self</span>) -&gt; bool { <span class="self">self</span>.<span class="number">0 </span>&amp; <span class="number">0x0080 </span>!= <span class="number">0 </span>}
 }
 
-<span class="comment">// It&#39;s not defined in the spec, so we are using our own value.
+<span class="comment">// It's not defined in the spec, so we are using our own value.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>MAX_COMPONENTS: u8 = <span class="number">32</span>;
 
 <span class="attr">#[allow(clippy::comparison_chain)]
@@ -1098,7 +1099,7 @@
     <span class="kw">let </span>points_total = endpoints.last()<span class="question-mark">?</span>.checked_add(<span class="number">1</span>)<span class="question-mark">?</span>;
 
     <span class="comment">// Contours with a single point should be ignored.
-    // But this is not an error, so we should return an &quot;empty&quot; iterator.
+    // But this is not an error, so we should return an "empty" iterator.
     </span><span class="kw">if </span>points_total == <span class="number">1 </span>{
         <span class="kw">return </span><span class="prelude-val">Some</span>(GlyphPointsIter::default());
     }
@@ -1180,21 +1181,21 @@
 <span class="doccomment">/// A [Glyph Data Table](
 /// https://docs.microsoft.com/en-us/typography/opentype/spec/glyf).
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>Table&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
-    loca_table: loca::Table&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>Table&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
+    loca_table: loca::Table&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Table&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Table&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;Table {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"Table {{ ... }}"</span>)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Table&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Table&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Parses a table from raw data.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>parse(loca_table: loca::Table&lt;<span class="lifetime">&#39;a</span>&gt;, data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">pub fn </span>parse(loca_table: loca::Table&lt;<span class="lifetime">'a</span>&gt;, data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="prelude-val">Some</span>(Table { loca_table, data })
     }
 
@@ -1207,7 +1208,7 @@
     </span>}
 
     <span class="attr">#[inline]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, glyph_id: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, glyph_id: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt; {
         <span class="kw">let </span>range = <span class="self">self</span>.loca_table.glyph_range(glyph_id)<span class="question-mark">?</span>;
         <span class="self">self</span>.data.get(range)
     }

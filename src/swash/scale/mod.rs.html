@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/scale/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/scale/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1122,7 +1123,7 @@ GPU rendering.
 
 All scaling in this crate takes place within the purview of a
 [`ScaleContext`]. This opaque struct manages internal LRU caches and scratch
-buffers that are necessary for the scaling process. Generally, you&#39;ll
+buffers that are necessary for the scaling process. Generally, you'll
 want to keep an instance with your glyph cache, or if doing multithreaded
 glyph rasterization, one instance per thread.
 
@@ -1131,7 +1132,7 @@ which takes a type that can be converted into a [`FontRef`] as an argument
 and produces a [`ScalerBuilder`] that provides options for configuring and
 building a [`Scaler`].
 
-Here, we&#39;ll create a context and build a scaler for a size of 14px with
+Here, we'll create a context and build a scaler for a size of 14px with
 hinting enabled:
 ```
 # use swash::{FontRef, CacheKey, scale::*};
@@ -1156,7 +1157,7 @@ let mut context = ScaleContext::new();
 let mut scaler = context.builder(font)
     .size(14.)
     .hint(true)
-    .variations(&amp;[(&quot;wght&quot;, 520.5)])
+    .variations(&amp;[("wght", 520.5)])
     .build();
 ```
 
@@ -1179,14 +1180,14 @@ See [`ScalerBuilder`] for available options and default values.
 The [`Scaler`] struct essentially provides direct access to the outlines and embedded
 bitmaps that are available in the font. In the case of outlines, it can produce the
 raw outline in font units or an optionally hinted, scaled outline. For example, to
-extract the raw outline for the letter &#39;Q&#39;:
+extract the raw outline for the letter 'Q':
 ```
 # use swash::{FontRef, CacheKey, scale::*};
 # let font: FontRef = FontRef { data: &amp;[], offset: 0, key: CacheKey::new() };
 // let font = ...;
 let mut context = ScaleContext::new();
 let mut scaler = context.builder(font).build();
-let glyph_id = font.charmap().map(&#39;Q&#39;);
+let glyph_id = font.charmap().map('Q');
 let outline = scaler.scale_outline(glyph_id);
 ```
 
@@ -1200,7 +1201,7 @@ let mut scaler = context.builder(font)
     .hint(true)
     .size(12.)
     .build();
-let glyph_id = font.charmap().map(&#39;Q&#39;);
+let glyph_id = font.charmap().map('Q');
 let outline = scaler.scale_outline(glyph_id);
 ```
 The [`scale_outline`](Scaler::scale_outline) method returns an [`Outline`] wrapped
@@ -1228,7 +1229,7 @@ For example, if we want the largest available unscaled image for the fire emoji:
 // let font = ...;
 let mut context = ScaleContext::new();
 let mut scaler = context.builder(font).build();
-let glyph_id = font.charmap().map(&#39;🔥&#39;);
+let glyph_id = font.charmap().map('🔥');
 let image = scaler.scale_color_bitmap(glyph_id, StrikeWith::LargestSize);
 ```
 
@@ -1241,26 +1242,26 @@ let mut context = ScaleContext::new();
 let mut scaler = context.builder(font)
     .size(18.)
     .build();
-let glyph_id = font.charmap().map(&#39;🔥&#39;);
+let glyph_id = font.charmap().map('🔥');
 let image = scaler.scale_color_bitmap(glyph_id, StrikeWith::BestFit);
 ```
 This will select the best strike for the requested size and return
 a bitmap that is scaled appropriately for an 18px run of text.
 
-Alpha bitmaps should generally be avoided unless you&#39;re rendering small East
+Alpha bitmaps should generally be avoided unless you're rendering small East
 Asian text where these are sometimes still preferred over scalable outlines. In
 this case, you should only use [`StrikeWith::ExactSize`] to select the strike,
 falling back to an outline if a bitmap is unavailable.
 
 # Rendering
 
-In the general case of text rendering, you&#39;ll likely not care about the specific
+In the general case of text rendering, you'll likely not care about the specific
 details of outlines or bitmaps and will simply want an appropriately sized
-image that represents your glyph. For this purpose, you&#39;ll want to use the
+image that represents your glyph. For this purpose, you'll want to use the
 [`Render`] struct which is a builder that provides options for rendering an image.
 This struct is constructed with a slice of [`Source`]s in priority order and
 will iterate through them until it finds one that satisfies the request. Typically,
-you&#39;ll want to use the following order:
+you'll want to use the following order:
 ```
 # use swash::scale::*;
 Render::new(&amp;[
@@ -1280,7 +1281,7 @@ struct documentation for detail.
 
 After selecting your options, call the [`render`](Render::render) method, passing your
 configured [`Scaler`] and the requested glyph identifier to produce an [`Image`].
-Let&#39;s put it all together by writing a simple function that will render subpixel glyphs
+Let's put it all together by writing a simple function that will render subpixel glyphs
 with fractional positioning:
 ```
 # use swash::{scale::{*, image::Image}, FontRef, GlyphId};
@@ -1296,7 +1297,7 @@ fn render_glyph(
     use zeno::{Format, Vector};
     // Build the scaler
     let mut scaler = context.builder(*font).size(size).hint(hint).build();
-    // Compute the fractional offset-- you&#39;ll likely want to quantize this
+    // Compute the fractional offset-- you'll likely want to quantize this
     // in a real renderer
     let offset = Vector::new(x.fract(), y.fract());
     // Select our source order
@@ -1339,7 +1340,7 @@ more detail.
 <span class="kw">use super</span>::{cache::FontCache, setting::Setting, FontRef, GlyphId, NormalizedCoord};
 <span class="kw">use </span>core::borrow::Borrow;
 <span class="kw">use </span>proxy::<span class="kw-2">*</span>;
-<span class="attr">#[cfg(feature = <span class="string">&quot;render&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"render"</span>)]
 </span><span class="kw">use </span>zeno::{Format, Mask, Origin, Scratch, Style, Transform, Vector};
 <span class="kw">use </span>zeno::{Placement, Point};
 
@@ -1398,7 +1399,7 @@ more detail.
     scratch0: Vec&lt;u8&gt;,
     scratch1: Vec&lt;u8&gt;,
     outline: Outline,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;render&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"render"</span>)]
     </span>rcx: Scratch,
 }
 
@@ -1420,7 +1421,7 @@ more detail.
                 scratch0: Vec::new(),
                 scratch1: Vec::new(),
                 outline: Outline::new(),
-                <span class="attr">#[cfg(feature = <span class="string">&quot;render&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"render"</span>)]
                 </span>rcx: Scratch::new(),
             },
             coords: Vec::new(),
@@ -1429,7 +1430,7 @@ more detail.
 
     <span class="doccomment">/// Creates a new builder for constructing a scaler with this context
     /// and the specified font.
-    </span><span class="kw">pub fn </span>builder&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>, font: <span class="kw">impl </span>Into&lt;FontRef&lt;<span class="lifetime">&#39;a</span>&gt;&gt;) -&gt; ScalerBuilder&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>builder&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">self</span>, font: <span class="kw">impl </span>Into&lt;FontRef&lt;<span class="lifetime">'a</span>&gt;&gt;) -&gt; ScalerBuilder&lt;<span class="lifetime">'a</span>&gt; {
         ScalerBuilder::new(<span class="self">self</span>, font)
     }
 }
@@ -1441,18 +1442,18 @@ more detail.
 }
 
 <span class="doccomment">/// Builder for configuring a scaler.
-</span><span class="kw">pub struct </span>ScalerBuilder&lt;<span class="lifetime">&#39;a</span>&gt; {
-    state: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>State,
-    font: FontRef&lt;<span class="lifetime">&#39;a</span>&gt;,
-    proxy: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ScalerProxy,
+</span><span class="kw">pub struct </span>ScalerBuilder&lt;<span class="lifetime">'a</span>&gt; {
+    state: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>State,
+    font: FontRef&lt;<span class="lifetime">'a</span>&gt;,
+    proxy: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>ScalerProxy,
     id: u64,
-    coords: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Vec&lt;i16&gt;,
+    coords: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Vec&lt;i16&gt;,
     size: f32,
     hint: bool,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ScalerBuilder&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(context: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>ScaleContext, font: <span class="kw">impl </span>Into&lt;FontRef&lt;<span class="lifetime">&#39;a</span>&gt;&gt;) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ScalerBuilder&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>new(context: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>ScaleContext, font: <span class="kw">impl </span>Into&lt;FontRef&lt;<span class="lifetime">'a</span>&gt;&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>font = font.into();
         <span class="kw">let </span>(id, proxy) = context
             .fonts
@@ -1518,7 +1519,7 @@ more detail.
     </span>}
 
     <span class="doccomment">/// Builds a scaler for the current configuration.
-    </span><span class="kw">pub fn </span>build(<span class="self">self</span>) -&gt; Scaler&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>build(<span class="self">self</span>) -&gt; Scaler&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">let </span>upem = <span class="self">self</span>.proxy.metrics.units_per_em();
         <span class="kw">let </span>scale = <span class="kw">if </span><span class="self">self</span>.size != <span class="number">0. </span>&amp;&amp; upem != <span class="number">0 </span>{
             <span class="self">self</span>.size / upem <span class="kw">as </span>f32
@@ -1562,20 +1563,20 @@ more detail.
 <span class="doccomment">/// Scales outline and bitmap glyphs.
 ///
 /// See the module level [documentation](index.html#outlines-and-bitmaps) for detail.
-</span><span class="kw">pub struct </span>Scaler&lt;<span class="lifetime">&#39;a</span>&gt; {
-    state: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>State,
-    font: FontRef&lt;<span class="lifetime">&#39;a</span>&gt;,
-    proxy: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ScalerProxy,
-    cff: <span class="prelude-ty">Option</span>&lt;cff::Outlines&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+</span><span class="kw">pub struct </span>Scaler&lt;<span class="lifetime">'a</span>&gt; {
+    state: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>State,
+    font: FontRef&lt;<span class="lifetime">'a</span>&gt;,
+    proxy: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>ScalerProxy,
+    cff: <span class="prelude-ty">Option</span>&lt;cff::Outlines&lt;<span class="lifetime">'a</span>&gt;&gt;,
     id: u64,
-    coords: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[i16],
+    coords: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[i16],
     size: f32,
     scale: f32,
     hint: bool,
-    glyf_state: <span class="prelude-ty">Option</span>&lt;glyf::ScalerState&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    glyf_state: <span class="prelude-ty">Option</span>&lt;glyf::ScalerState&lt;<span class="lifetime">'a</span>&gt;&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Scaler&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Scaler&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Returns true if scalable glyph outlines are available.
     </span><span class="kw">pub fn </span>has_outlines(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         !<span class="macro">matches!</span>(<span class="self">self</span>.proxy.outlines, OutlinesProxy::None)
@@ -1887,22 +1888,22 @@ more detail.
 <span class="doccomment">/// Builder type for rendering a glyph into an image.
 ///
 /// See the module level [documentation](index.html#rendering) for detail.
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;render&quot;</span>)]
-</span><span class="kw">pub struct </span>Render&lt;<span class="lifetime">&#39;a</span>&gt; {
-    sources: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[Source],
+</span><span class="attr">#[cfg(feature = <span class="string">"render"</span>)]
+</span><span class="kw">pub struct </span>Render&lt;<span class="lifetime">'a</span>&gt; {
+    sources: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[Source],
     format: Format,
     offset: Point,
     transform: <span class="prelude-ty">Option</span>&lt;Transform&gt;,
     embolden: f32,
     foreground: [u8; <span class="number">4</span>],
-    style: Style&lt;<span class="lifetime">&#39;a</span>&gt;,
+    style: Style&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;render&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Render&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"render"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Render&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Creates a new builder for configuring rendering using the specified
     /// prioritized list of sources.
-    </span><span class="kw">pub fn </span>new(sources: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[Source]) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(sources: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[Source]) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             sources,
             format: Format::Alpha,
@@ -1923,7 +1924,7 @@ more detail.
 
     <span class="doccomment">/// Specifies the path style to use when rasterizing an outline. Default is
     /// [`Fill::NonZero`](zeno::Fill::NonZero).
-    </span><span class="kw">pub fn </span>style(<span class="kw-2">&amp;mut </span><span class="self">self</span>, style: <span class="kw">impl </span>Into&lt;Style&lt;<span class="lifetime">&#39;a</span>&gt;&gt;) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>style(<span class="kw-2">&amp;mut </span><span class="self">self</span>, style: <span class="kw">impl </span>Into&lt;Style&lt;<span class="lifetime">'a</span>&gt;&gt;) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="self">self</span>.style = style.into();
         <span class="self">self
     </span>}

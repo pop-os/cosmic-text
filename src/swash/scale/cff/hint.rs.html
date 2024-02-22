@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/scale/cff/hint.rs`."><title>hint.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/scale/cff/hint.rs`."><title>hint.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1484,7 +1485,7 @@
     types::Fixed,
 };
 
-<span class="comment">// &quot;Default values for OS/2 typoAscender/Descender..&quot;
+<span class="comment">// "Default values for OS/2 typoAscender/Descender.."
 // See &lt;https://gitlab.freedesktop.org/freetype/freetype/-/blob/80a507a6b8e3d2906ad2c8ba69329bd2fb2a85ef/src/psaux/psblues.h#L98&gt;
 </span><span class="kw">const </span>ICF_TOP: Fixed = Fixed::from_i32(<span class="number">880</span>);
 <span class="kw">const </span>ICF_BOTTOM: Fixed = Fixed::from_i32(-<span class="number">120</span>);
@@ -1605,7 +1606,7 @@
                     &amp;&amp; blues[<span class="number">1</span>].<span class="number">0 </span>&gt; ICF_TOP
                     &amp;&amp; blues[<span class="number">1</span>].<span class="number">1 </span>&gt; ICF_TOP
                 {
-                    <span class="comment">// FreeType generates synthetic hints here. We&#39;ll do it
+                    <span class="comment">// FreeType generates synthetic hints here. We'll do it
                     // later when building the hint map.
                     </span><span class="self">self</span>.do_em_box_hints = <span class="bool-val">true</span>;
                     <span class="kw">return</span>;
@@ -1661,7 +1662,7 @@
             }
             max_zone_height = max_zone_height.max(zone_height);
             <span class="kw">let </span>zone = <span class="kw-2">&amp;mut </span>zones[zone_ix];
-            <span class="comment">// All &quot;other&quot; blues are bottom zone
+            <span class="comment">// All "other" blues are bottom zone
             </span>zone.is_bottom = <span class="bool-val">true</span>;
             zone.cs_bottom_edge = bottom;
             zone.cs_top_edge = top;
@@ -1794,7 +1795,7 @@
             }
         }
         <span class="kw">if </span>captured {
-            <span class="comment">// Move both edges and mark them as &quot;locked&quot;
+            <span class="comment">// Move both edges and mark them as "locked"
             </span><span class="kw">if </span>bottom_edge.is_valid() {
                 bottom_edge.ds_coord += adjustment;
                 bottom_edge.lock();
@@ -1885,7 +1886,7 @@
         darken_y: Fixed,
         is_bottom: bool,
     ) {
-        <span class="comment">// &quot;Ghost hints&quot; are used to align a single edge rather than a
+        <span class="comment">// "Ghost hints" are used to align a single edge rather than a
         // stem-- think the top and bottom edges of an uppercase
         // sans-serif I.
         // These are encoded internally with stem hints of width -21
@@ -2022,7 +2023,7 @@
         }
         <span class="kw">let </span>edge_count = <span class="kw">if </span>is_pair { <span class="number">2 </span>} <span class="kw">else </span>{ <span class="number">1 </span>};
         <span class="kw">if </span><span class="self">self</span>.len + edge_count &gt; MAX_HINTS {
-            <span class="comment">// Won&#39;t fit. Again, ignore.
+            <span class="comment">// Won't fit. Again, ignore.
             </span><span class="kw">return</span>;
         }
         <span class="comment">// Find insertion index that keeps the edge list sorted
@@ -2075,7 +2076,7 @@
             <span class="comment">// Inserting before an existing edge
             </span><span class="kw">return</span>;
         }
-        <span class="comment">// If we&#39;re inserting in the middle, make room in the edge array
+        <span class="comment">// If we're inserting in the middle, make room in the edge array
         </span><span class="kw">if </span>insert_ix != <span class="self">self</span>.len {
             <span class="kw">let </span><span class="kw-2">mut </span>src_index = <span class="self">self</span>.len - <span class="number">1</span>;
             <span class="kw">let </span><span class="kw-2">mut </span>dst_index = <span class="self">self</span>.len + edge_count - <span class="number">1</span>;
@@ -2103,11 +2104,11 @@
         <span class="kw">let </span><span class="kw-2">mut </span>saved_count = <span class="number">0usize</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>i = <span class="number">0</span>;
         <span class="comment">// From FT with adjustments for variable names:
-        // &quot;First pass is bottom-up (font hint order) without look-ahead.
+        // "First pass is bottom-up (font hint order) without look-ahead.
         // Locked edges are already adjusted.
-        // Unlocked edges begin with ds_coord from `initial_map&#39;.
-        // Save edges that are not optimally adjusted in `saved&#39; array,
-        // and process them in second pass.&quot;
+        // Unlocked edges begin with ds_coord from `initial_map'.
+        // Save edges that are not optimally adjusted in `saved' array,
+        // and process them in second pass."
         </span><span class="kw">let </span>limit = <span class="self">self</span>.len;
         <span class="kw">while </span>i &lt; limit {
             <span class="kw">let </span>is_pair = <span class="self">self</span>.edges[i].is_pair();
@@ -2137,7 +2138,7 @@
                 <span class="kw">let </span><span class="kw-2">mut </span>save_edge = <span class="bool-val">false</span>;
                 <span class="kw">let </span>adjustment;
                 <span class="comment">// Check for room to move up:
-                // 1. We&#39;re at the top of the array, or
+                // 1. We're at the top of the array, or
                 // 2. The next edge is at or above the proposed move up
                 </span><span class="kw">if </span>j &gt;= <span class="self">self</span>.len - <span class="number">1
                     </span>|| <span class="self">self</span>.edges[j + <span class="number">1</span>].ds_coord
@@ -2166,7 +2167,7 @@
                     <span class="comment">// True if the move is not optimum
                     </span>save_edge = move_up &lt; -move_down;
                 } <span class="kw">else </span>{
-                    <span class="comment">// We can&#39;t move either way without overlapping
+                    <span class="comment">// We can't move either way without overlapping
                     </span>adjustment = Fixed::ZERO;
                     save_edge = <span class="bool-val">true</span>;
                 }
@@ -2289,7 +2290,7 @@
             }
         }
         <span class="kw">if </span>is_initial {
-            <span class="comment">// Heuristic: insert a point at (0, 0) if it&#39;s not covered by a
+            <span class="comment">// Heuristic: insert a point at (0, 0) if it's not covered by a
             // mapping. Ensures a lock at baseline for glyphs missing a
             // baseline hint.
             </span><span class="kw">if </span><span class="self">self</span>.len == <span class="number">0
@@ -2341,10 +2342,10 @@
 
 <span class="doccomment">/// Bitmask that specifies which hints are currently active.
 ///
-/// &quot;Each bit of the mask, starting with the most-significant bit of
+/// "Each bit of the mask, starting with the most-significant bit of
 /// the first byte, represents the corresponding hint zone in the
 /// order in which the hints were declared at the beginning of
-/// the charstring.&quot;
+/// the charstring."
 ///
 /// See &lt;https://adobe-type-tools.github.io/font-tech-notes/pdfs/5177.Type2.pdf#page=24&gt;
 /// Also &lt;https://gitlab.freedesktop.org/freetype/freetype/-/blob/80a507a6b8e3d2906ad2c8ba69329bd2fb2a85ef/src/psaux/pshints.h#L70&gt;
@@ -2388,9 +2389,9 @@
     <span class="number">1 </span>&lt;&lt; (<span class="number">7 </span>- (bit &amp; <span class="number">0x7</span>))
 }
 
-<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct </span>HintingSink&lt;<span class="lifetime">&#39;a</span>, S&gt; {
-    state: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HintState,
-    sink: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>S,
+<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct </span>HintingSink&lt;<span class="lifetime">'a</span>, S&gt; {
+    state: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>HintState,
+    sink: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>S,
     stem_hints: [StemHint; MAX_HINTS],
     stem_count: u8,
     mask: HintMask,
@@ -2403,8 +2404,8 @@
     </span>pending_line: <span class="prelude-ty">Option</span>&lt;[Fixed; <span class="number">4</span>]&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, S: CommandSink&gt; HintingSink&lt;<span class="lifetime">&#39;a</span>, S&gt; {
-    <span class="kw">pub fn </span>new(state: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HintState, sink: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>S) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, S: CommandSink&gt; HintingSink&lt;<span class="lifetime">'a</span>, S&gt; {
+    <span class="kw">pub fn </span>new(state: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>HintState, sink: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>S) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>scale = state.scale;
         <span class="self">Self </span>{
             state,
@@ -2431,13 +2432,13 @@
         // subpath. This is done by stashing a copy of the hint map that is
         // active when a new subpath is started. Unlike FreeType, we make use
         // of close elements, so we can cheat a bit here and avoid the
-        // extra hintmap. If we&#39;re closing an open subpath and have a pending
+        // extra hintmap. If we're closing an open subpath and have a pending
         // line and the line is not equal to the start point in character
         // space, then we emit the saved device space coordinates for the
         // line. If the coordinates do match in character space, we omit
         // that line. The unconditional close command ensures that the
         // start and end points coincide.
-        // Note: this doesn&#39;t apply to subpaths that end in cubics.
+        // Note: this doesn't apply to subpaths that end in cubics.
         </span><span class="kw">match </span>(<span class="self">self</span>.start_point.take(), <span class="self">self</span>.pending_line.take()) {
             (<span class="prelude-val">Some</span>(start), <span class="prelude-val">Some</span>([cs_x, cs_y, ds_x, ds_y])) =&gt; {
                 <span class="kw">if </span>start != [cs_x, cs_y] {
@@ -2493,7 +2494,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, S: CommandSink&gt; CommandSink <span class="kw">for </span>HintingSink&lt;<span class="lifetime">&#39;a</span>, S&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, S: CommandSink&gt; CommandSink <span class="kw">for </span>HintingSink&lt;<span class="lifetime">'a</span>, S&gt; {
     <span class="kw">fn </span>hstem(<span class="kw-2">&amp;mut </span><span class="self">self</span>, min: Fixed, max: Fixed) {
         <span class="self">self</span>.add_stem(min, max);
     }
@@ -2509,9 +2510,9 @@
     }
 
     <span class="kw">fn </span>counter_mask(<span class="kw-2">&amp;mut </span><span class="self">self</span>, mask: <span class="kw-2">&amp;</span>[u8]) {
-        <span class="comment">// For counter masks, we build a temporary hint map &quot;just to
+        <span class="comment">// For counter masks, we build a temporary hint map "just to
         // place and lock those stems participating in the counter
-        // mask.&quot; Building the map modifies the stem hint array as a
+        // mask." Building the map modifies the stem hint array as a
         // side effect.
         // See &lt;https://gitlab.freedesktop.org/freetype/freetype/-/blob/80a507a6b8e3d2906ad2c8ba69329bd2fb2a85ef/src/psaux/psintrp.c#L2617&gt;
         </span><span class="kw">let </span>mask = HintMask::new(mask).unwrap_or_else(HintMask::all);
@@ -2586,11 +2587,11 @@
         <span class="kw">fn </span>make_blues(values: <span class="kw-2">&amp;</span>[f64]) -&gt; Blues {
             Blues::new(values.iter().copied().map(Fixed::from_f64))
         }
-        <span class="comment">// &lt;BlueValues value=&quot;-15 0 536 547 571 582 714 726 760 772&quot;/&gt;
-        // &lt;OtherBlues value=&quot;-255 -240&quot;/&gt;
-        // &lt;BlueScale value=&quot;0.05&quot;/&gt;
-        // &lt;BlueShift value=&quot;7&quot;/&gt;
-        // &lt;BlueFuzz value=&quot;0&quot;/&gt;
+        <span class="comment">// &lt;BlueValues value="-15 0 536 547 571 582 714 726 760 772"/&gt;
+        // &lt;OtherBlues value="-255 -240"/&gt;
+        // &lt;BlueScale value="0.05"/&gt;
+        // &lt;BlueShift value="7"/&gt;
+        // &lt;BlueFuzz value="0"/&gt;
         </span><span class="kw">let </span>params = HintParams {
             blues: make_blues(<span class="kw-2">&amp;</span>[
                 -<span class="number">15.0</span>, <span class="number">0.0</span>, <span class="number">536.0</span>, <span class="number">547.0</span>, <span class="number">571.0</span>, <span class="number">582.0</span>, <span class="number">714.0</span>, <span class="number">726.0</span>, <span class="number">760.0</span>, <span class="number">772.0</span>,
@@ -2617,7 +2618,7 @@
             // csTopEdge	0	int
             // csFlatEdge	0	int
             // dsFlatEdge	0	int
-            // bottomZone	1 &#39;\x1&#39;	unsigned char
+            // bottomZone	1 '\x1'	unsigned char
             </span>BlueZone {
                 cs_bottom_edge: Fixed::from_bits(-<span class="number">983040</span>),
                 is_bottom: <span class="bool-val">true</span>,
@@ -2627,7 +2628,7 @@
             // csTopEdge	35848192	int
             // csFlatEdge	35127296	int
             // dsFlatEdge	589824	int
-            // bottomZone	0 &#39;\0&#39;	unsigned char
+            // bottomZone	0 '\0'	unsigned char
             </span>BlueZone {
                 cs_bottom_edge: Fixed::from_bits(<span class="number">35127296</span>),
                 cs_top_edge: Fixed::from_bits(<span class="number">35848192</span>),
@@ -2639,7 +2640,7 @@
             // csTopEdge	38141952	int
             // csFlatEdge	37421056	int
             // dsFlatEdge	589824	int
-            // bottomZone	0 &#39;\0&#39;	unsigned char
+            // bottomZone	0 '\0'	unsigned char
             </span>BlueZone {
                 cs_bottom_edge: Fixed::from_bits(<span class="number">37421056</span>),
                 cs_top_edge: Fixed::from_bits(<span class="number">38141952</span>),
@@ -2651,7 +2652,7 @@
             // csTopEdge	47579136	int
             // csFlatEdge	46792704	int
             // dsFlatEdge	786432	int
-            // bottomZone	0 &#39;\0&#39;	unsigned char
+            // bottomZone	0 '\0'	unsigned char
             </span>BlueZone {
                 cs_bottom_edge: Fixed::from_bits(<span class="number">46792704</span>),
                 cs_top_edge: Fixed::from_bits(<span class="number">47579136</span>),
@@ -2663,7 +2664,7 @@
             // csTopEdge	50593792	int
             // csFlatEdge	49807360	int
             // dsFlatEdge	786432	int
-            // bottomZone	0 &#39;\0&#39;	unsigned char
+            // bottomZone	0 '\0'	unsigned char
             </span>BlueZone {
                 cs_bottom_edge: Fixed::from_bits(<span class="number">49807360</span>),
                 cs_top_edge: Fixed::from_bits(<span class="number">50593792</span>),
@@ -2675,7 +2676,7 @@
             // csTopEdge	-15728640	int
             // csFlatEdge	-15728640	int
             // dsFlatEdge	-262144	int
-            // bottomZone	1 &#39;\x1&#39;	unsigned char
+            // bottomZone	1 '\x1'	unsigned char
             </span>BlueZone {
                 cs_bottom_edge: Fixed::from_bits(-<span class="number">16711680</span>),
                 cs_top_edge: Fixed::from_bits(-<span class="number">15728640</span>),
@@ -2697,7 +2698,7 @@
         };
         <span class="kw">let </span>top_edge = Hint {
             flags: PAIR_TOP,
-            <span class="comment">// This value chosen to fit within the first &quot;top&quot; blue zone
+            <span class="comment">// This value chosen to fit within the first "top" blue zone
             </span>cs_coord: Fixed::from_bits(<span class="number">35127297</span>),
             ds_coord: Fixed::from_f64(<span class="number">2.3</span>),
             ..Default::default()

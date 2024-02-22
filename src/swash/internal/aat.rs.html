@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/internal/aat.rs`."><title>aat.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/internal/aat.rs`."><title>aat.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1832,11 +1833,11 @@
 
 </span><span class="kw">use super</span>::{raw_tag, Array, Bytes, FromBeData, RawTag};
 
-<span class="kw">pub const </span>MORX: RawTag = raw_tag(<span class="string">b&quot;morx&quot;</span>);
-<span class="kw">pub const </span>LTAG: RawTag = raw_tag(<span class="string">b&quot;ltag&quot;</span>);
-<span class="kw">pub const </span>KERX: RawTag = raw_tag(<span class="string">b&quot;kerx&quot;</span>);
-<span class="kw">pub const </span>ANKR: RawTag = raw_tag(<span class="string">b&quot;ankr&quot;</span>);
-<span class="kw">pub const </span>KERN: RawTag = raw_tag(<span class="string">b&quot;kern&quot;</span>);
+<span class="kw">pub const </span>MORX: RawTag = raw_tag(<span class="string">b"morx"</span>);
+<span class="kw">pub const </span>LTAG: RawTag = raw_tag(<span class="string">b"ltag"</span>);
+<span class="kw">pub const </span>KERX: RawTag = raw_tag(<span class="string">b"kerx"</span>);
+<span class="kw">pub const </span>ANKR: RawTag = raw_tag(<span class="string">b"ankr"</span>);
+<span class="kw">pub const </span>KERN: RawTag = raw_tag(<span class="string">b"kern"</span>);
 
 <span class="doccomment">/// Maximum number of times we allow consecutive DONT_ADVANCE states.
 </span><span class="kw">const </span>MAX_CYCLES: u16 = <span class="number">16</span>;
@@ -1944,17 +1945,17 @@
 ///
 /// &lt;https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6Tables.html&gt;
 </span><span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">pub struct </span>ExtendedStateTable&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>ExtendedStateTable&lt;<span class="lifetime">'a</span>&gt; {
+    data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
     classes: u32,
     class_table: u32,
     state_array: u32,
     entry_table: u32,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ExtendedStateTable&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ExtendedStateTable&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Creates a new extended state table for the specified data.
-    </span><span class="kw">pub fn </span>new(data: <span class="kw-2">&amp;</span>Bytes&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">pub fn </span>new(data: <span class="kw-2">&amp;</span>Bytes&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="prelude-val">Some</span>(<span class="self">Self </span>{
             data: <span class="kw-2">*</span>data,
             classes: data.read::&lt;u32&gt;(<span class="number">0</span>)<span class="question-mark">?</span>,
@@ -1984,19 +1985,19 @@
 }
 
 <span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">pub struct </span>StateTable&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>StateTable&lt;<span class="lifetime">'a</span>&gt; {
+    data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
     class_count: u16,
     state_array: u32,
-    states: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    states: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     entry_table: u32,
     first_glyph: u16,
-    classes: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    classes: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; StateTable&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; StateTable&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Creates a new extended state table for the specified data.
-    </span><span class="kw">pub fn </span>new(data: <span class="kw-2">&amp;</span>Bytes&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">pub fn </span>new(data: <span class="kw-2">&amp;</span>Bytes&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>class_count = data.read_u16(<span class="number">0</span>)<span class="question-mark">?</span>;
         <span class="kw">let </span>class_offset = data.read_u16(<span class="number">2</span>)<span class="question-mark">? </span><span class="kw">as </span>usize;
         <span class="kw">let </span>state_array = data.read_u16(<span class="number">4</span>)<span class="question-mark">? </span><span class="kw">as </span>u32;
@@ -2072,7 +2073,7 @@
 
     <span class="doccomment">/// Returns an iterator over the chains in a `morx` table at the
     /// specified offset.
-    </span><span class="kw">pub fn </span>chains&lt;<span class="lifetime">&#39;a</span>&gt;(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], offset: u32) -&gt; Chains&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>chains&lt;<span class="lifetime">'a</span>&gt;(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], offset: u32) -&gt; Chains&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">let </span>data = Bytes::with_offset(data, offset <span class="kw">as </span>usize).unwrap_or_else(|| Bytes::new(<span class="kw-2">&amp;</span>[]));
         <span class="kw">let </span>len = data.read_u32(<span class="number">4</span>).unwrap_or(<span class="number">0</span>);
         Chains {
@@ -2085,15 +2086,15 @@
 
     <span class="doccomment">/// Iterator over the chains in a metamophosis table.
     </span><span class="attr">#[derive(Copy, Clone)]
-    </span><span class="kw">pub struct </span>Chains&lt;<span class="lifetime">&#39;a</span>&gt; {
-        data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub struct </span>Chains&lt;<span class="lifetime">'a</span>&gt; {
+        data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
         offset: usize,
         len: u32,
         cur: u32,
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>Chains&lt;<span class="lifetime">&#39;a</span>&gt; {
-        <span class="kw">type </span>Item = Chain&lt;<span class="lifetime">&#39;a</span>&gt;;
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>Chains&lt;<span class="lifetime">'a</span>&gt; {
+        <span class="kw">type </span>Item = Chain&lt;<span class="lifetime">'a</span>&gt;;
 
         <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
             <span class="kw">if </span><span class="self">self</span>.cur &gt;= <span class="self">self</span>.len {
@@ -2118,22 +2119,22 @@
 
     <span class="doccomment">/// Chain of subtables in a metamorphosis table.
     </span><span class="attr">#[derive(Copy, Clone)]
-    </span><span class="kw">pub struct </span>Chain&lt;<span class="lifetime">&#39;a</span>&gt; {
-        data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub struct </span>Chain&lt;<span class="lifetime">'a</span>&gt; {
+        data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
         offset: usize,
         default_flags: u32,
         feature_count: u32,
         subtable_count: u32,
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Chain&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Chain&lt;<span class="lifetime">'a</span>&gt; {
         <span class="doccomment">/// Returns the default flags bitmask for the chain.
         </span><span class="kw">pub fn </span>default_flags(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
             <span class="self">self</span>.default_flags
         }
 
         <span class="doccomment">/// Returns an iterator over the features in the chain.
-        </span><span class="kw">pub fn </span>features(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Features&lt;<span class="lifetime">&#39;a</span>&gt; {
+        </span><span class="kw">pub fn </span>features(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Features&lt;<span class="lifetime">'a</span>&gt; {
             Features {
                 inner: <span class="kw-2">*</span><span class="self">self</span>,
                 cur: <span class="number">0</span>,
@@ -2141,7 +2142,7 @@
         }
 
         <span class="doccomment">/// Returns an iterator over the subtables in the chain.
-        </span><span class="kw">pub fn </span>subtables(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Subtables&lt;<span class="lifetime">&#39;a</span>&gt; {
+        </span><span class="kw">pub fn </span>subtables(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Subtables&lt;<span class="lifetime">'a</span>&gt; {
             <span class="kw">let </span>offset = <span class="self">self</span>.offset + <span class="number">16 </span>+ <span class="number">12 </span>* <span class="self">self</span>.feature_count <span class="kw">as </span>usize;
             Subtables {
                 inner: <span class="kw-2">*</span><span class="self">self</span>,
@@ -2154,12 +2155,12 @@
 
     <span class="doccomment">/// Iterator over the features in a chain.
     </span><span class="attr">#[derive(Copy, Clone)]
-    </span><span class="kw">pub struct </span>Features&lt;<span class="lifetime">&#39;a</span>&gt; {
-        inner: Chain&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub struct </span>Features&lt;<span class="lifetime">'a</span>&gt; {
+        inner: Chain&lt;<span class="lifetime">'a</span>&gt;,
         cur: u32,
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>Features&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>Features&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">type </span>Item = Feature;
 
         <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -2194,15 +2195,15 @@
 
     <span class="doccomment">/// Iterator over the subtables in a chain.
     </span><span class="attr">#[derive(Copy, Clone)]
-    </span><span class="kw">pub struct </span>Subtables&lt;<span class="lifetime">&#39;a</span>&gt; {
-        inner: Chain&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub struct </span>Subtables&lt;<span class="lifetime">'a</span>&gt; {
+        inner: Chain&lt;<span class="lifetime">'a</span>&gt;,
         offset: usize,
         len: u32,
         cur: u32,
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>Subtables&lt;<span class="lifetime">&#39;a</span>&gt; {
-        <span class="kw">type </span>Item = Subtable&lt;<span class="lifetime">&#39;a</span>&gt;;
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>Subtables&lt;<span class="lifetime">'a</span>&gt; {
+        <span class="kw">type </span>Item = Subtable&lt;<span class="lifetime">'a</span>&gt;;
 
         <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
             <span class="kw">if </span><span class="self">self</span>.cur &gt;= <span class="self">self</span>.len {
@@ -2236,15 +2237,15 @@
 
     <span class="doccomment">/// Subtable in a chain.
     </span><span class="attr">#[derive(Copy, Clone)]
-    </span><span class="kw">pub struct </span>Subtable&lt;<span class="lifetime">&#39;a</span>&gt; {
-        data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub struct </span>Subtable&lt;<span class="lifetime">'a</span>&gt; {
+        data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
         offset: usize,
         kind: u32,
         coverage: u32,
         flags: u32,
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Subtable&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Subtable&lt;<span class="lifetime">'a</span>&gt; {
         <span class="doccomment">/// Returns the raw coverage of the subtable.
         </span><span class="kw">pub fn </span>coverage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
             <span class="self">self</span>.coverage
@@ -2282,7 +2283,7 @@
         }
 
         <span class="doccomment">/// Returns the kind of the subtable.
-        </span><span class="kw">pub fn </span>kind(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;SubtableKind&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+        </span><span class="kw">pub fn </span>kind(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;SubtableKind&lt;<span class="lifetime">'a</span>&gt;&gt; {
             <span class="kw">let </span>data = Bytes::with_offset(<span class="self">self</span>.data.data(), <span class="self">self</span>.offset + <span class="number">12</span>)<span class="question-mark">?</span>;
             <span class="prelude-val">Some</span>(<span class="kw">match </span><span class="self">self</span>.kind {
                 <span class="number">0 </span>=&gt; SubtableKind::Rearrangement(Rearrangement::new(data)<span class="question-mark">?</span>),
@@ -2297,22 +2298,22 @@
 
     <span class="doccomment">/// Typed subtable in a chain.
     </span><span class="attr">#[derive(Copy, Clone)]
-    </span><span class="kw">pub enum </span>SubtableKind&lt;<span class="lifetime">&#39;a</span>&gt; {
-        Rearrangement(Rearrangement&lt;<span class="lifetime">&#39;a</span>&gt;),
-        Contextual(Contextual&lt;<span class="lifetime">&#39;a</span>&gt;),
-        Ligature(Ligature&lt;<span class="lifetime">&#39;a</span>&gt;),
-        NonContextual(NonContextual&lt;<span class="lifetime">&#39;a</span>&gt;),
-        Insertion(Insertion&lt;<span class="lifetime">&#39;a</span>&gt;),
+    </span><span class="kw">pub enum </span>SubtableKind&lt;<span class="lifetime">'a</span>&gt; {
+        Rearrangement(Rearrangement&lt;<span class="lifetime">'a</span>&gt;),
+        Contextual(Contextual&lt;<span class="lifetime">'a</span>&gt;),
+        Ligature(Ligature&lt;<span class="lifetime">'a</span>&gt;),
+        NonContextual(NonContextual&lt;<span class="lifetime">'a</span>&gt;),
+        Insertion(Insertion&lt;<span class="lifetime">'a</span>&gt;),
     }
 
     <span class="doccomment">/// Rearrangement subtable.
     </span><span class="attr">#[derive(Copy, Clone)]
-    </span><span class="kw">pub struct </span>Rearrangement&lt;<span class="lifetime">&#39;a</span>&gt; {
-        state_table: ExtendedStateTable&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub struct </span>Rearrangement&lt;<span class="lifetime">'a</span>&gt; {
+        state_table: ExtendedStateTable&lt;<span class="lifetime">'a</span>&gt;,
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Rearrangement&lt;<span class="lifetime">&#39;a</span>&gt; {
-        <span class="kw">fn </span>new(data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Rearrangement&lt;<span class="lifetime">'a</span>&gt; {
+        <span class="kw">fn </span>new(data: Bytes&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
             <span class="prelude-val">Some</span>(<span class="self">Self </span>{
                 state_table: ExtendedStateTable::new(<span class="kw-2">&amp;</span>data)<span class="question-mark">?</span>,
             })
@@ -2452,14 +2453,14 @@
 
     <span class="doccomment">/// Contextual subtable.
     </span><span class="attr">#[derive(Copy, Clone)]
-    </span><span class="kw">pub struct </span>Contextual&lt;<span class="lifetime">&#39;a</span>&gt; {
-        data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
-        state_table: ExtendedStateTable&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub struct </span>Contextual&lt;<span class="lifetime">'a</span>&gt; {
+        data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
+        state_table: ExtendedStateTable&lt;<span class="lifetime">'a</span>&gt;,
         table: u32,
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Contextual&lt;<span class="lifetime">&#39;a</span>&gt; {
-        <span class="kw">fn </span>new(data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Contextual&lt;<span class="lifetime">'a</span>&gt; {
+        <span class="kw">fn </span>new(data: Bytes&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
             <span class="kw">let </span>table = data.read_u32(<span class="number">16</span>)<span class="question-mark">?</span>;
             <span class="prelude-val">Some</span>(<span class="self">Self </span>{
                 data,
@@ -2574,16 +2575,16 @@
 
     <span class="doccomment">/// Ligature subtable.
     </span><span class="attr">#[derive(Copy, Clone)]
-    </span><span class="kw">pub struct </span>Ligature&lt;<span class="lifetime">&#39;a</span>&gt; {
-        data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
-        state_table: ExtendedStateTable&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub struct </span>Ligature&lt;<span class="lifetime">'a</span>&gt; {
+        data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
+        state_table: ExtendedStateTable&lt;<span class="lifetime">'a</span>&gt;,
         action: u32,
         component: u32,
         ligature: u32,
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Ligature&lt;<span class="lifetime">&#39;a</span>&gt; {
-        <span class="kw">fn </span>new(data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Ligature&lt;<span class="lifetime">'a</span>&gt; {
+        <span class="kw">fn </span>new(data: Bytes&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
             <span class="kw">let </span>state_table = ExtendedStateTable::new(<span class="kw-2">&amp;</span>data)<span class="question-mark">?</span>;
             <span class="kw">let </span>action = data.read::&lt;u32&gt;(<span class="number">16</span>)<span class="question-mark">?</span>;
             <span class="kw">let </span>component = data.read::&lt;u32&gt;(<span class="number">20</span>)<span class="question-mark">?</span>;
@@ -2708,12 +2709,12 @@
 
     <span class="doccomment">/// Non-contextual subtable.
     </span><span class="attr">#[derive(Copy, Clone)]
-    </span><span class="kw">pub struct </span>NonContextual&lt;<span class="lifetime">&#39;a</span>&gt; {
-        data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub struct </span>NonContextual&lt;<span class="lifetime">'a</span>&gt; {
+        data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; NonContextual&lt;<span class="lifetime">&#39;a</span>&gt; {
-        <span class="kw">fn </span>new(data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; NonContextual&lt;<span class="lifetime">'a</span>&gt; {
+        <span class="kw">fn </span>new(data: Bytes&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="self">Self </span>{
             <span class="self">Self </span>{ data }
         }
 
@@ -2725,14 +2726,14 @@
 
     <span class="doccomment">/// Insertion subtable.
     </span><span class="attr">#[derive(Copy, Clone)]
-    </span><span class="kw">pub struct </span>Insertion&lt;<span class="lifetime">&#39;a</span>&gt; {
-        data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
-        state_table: ExtendedStateTable&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub struct </span>Insertion&lt;<span class="lifetime">'a</span>&gt; {
+        data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
+        state_table: ExtendedStateTable&lt;<span class="lifetime">'a</span>&gt;,
         action: usize,
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Insertion&lt;<span class="lifetime">&#39;a</span>&gt; {
-        <span class="kw">fn </span>new(data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Insertion&lt;<span class="lifetime">'a</span>&gt; {
+        <span class="kw">fn </span>new(data: Bytes&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
             <span class="kw">let </span>state_table = ExtendedStateTable::new(<span class="kw-2">&amp;</span>data)<span class="question-mark">?</span>;
             <span class="kw">let </span>action = data.read_u32(<span class="number">16</span>)<span class="question-mark">? </span><span class="kw">as </span>usize;
             <span class="prelude-val">Some</span>(<span class="self">Self </span>{
@@ -2750,7 +2751,7 @@
             index: usize,
             glyph_id: u16,
             end_of_text: bool,
-            <span class="kw-2">mut </span>f: <span class="kw">impl </span>FnMut(usize, Array&lt;<span class="lifetime">&#39;a</span>, u16&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;()&gt;,
+            <span class="kw-2">mut </span>f: <span class="kw">impl </span>FnMut(usize, Array&lt;<span class="lifetime">'a</span>, u16&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;()&gt;,
         ) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
             <span class="kw">const </span>SET_MARK: u16 = <span class="number">0x8000</span>;
             <span class="kw">const </span>DONT_ADVANCE: u16 = <span class="number">0x4000</span>;
@@ -2808,14 +2809,14 @@
             }
         }
 
-        <span class="kw">fn </span>marked_glyphs(<span class="kw-2">&amp;</span><span class="self">self</span>, flags: u16, index: u16) -&gt; <span class="prelude-ty">Option</span>&lt;Array&lt;<span class="lifetime">&#39;a</span>, u16&gt;&gt; {
+        <span class="kw">fn </span>marked_glyphs(<span class="kw-2">&amp;</span><span class="self">self</span>, flags: u16, index: u16) -&gt; <span class="prelude-ty">Option</span>&lt;Array&lt;<span class="lifetime">'a</span>, u16&gt;&gt; {
             <span class="kw">const </span>MARKED_INSERT_COUNT: u16 = <span class="number">0x1F</span>;
             <span class="kw">let </span>len = (flags &amp; MARKED_INSERT_COUNT) <span class="kw">as </span>usize;
             <span class="kw">let </span>offset = <span class="self">self</span>.action + index <span class="kw">as </span>usize * <span class="number">2</span>;
             <span class="self">self</span>.data.read_array::&lt;u16&gt;(offset, len)
         }
 
-        <span class="kw">fn </span>current_glyphs(<span class="kw-2">&amp;</span><span class="self">self</span>, flags: u16, index: u16) -&gt; <span class="prelude-ty">Option</span>&lt;Array&lt;<span class="lifetime">&#39;a</span>, u16&gt;&gt; {
+        <span class="kw">fn </span>current_glyphs(<span class="kw-2">&amp;</span><span class="self">self</span>, flags: u16, index: u16) -&gt; <span class="prelude-ty">Option</span>&lt;Array&lt;<span class="lifetime">'a</span>, u16&gt;&gt; {
             <span class="kw">const </span>CURRENT_INSERT_COUNT: u16 = <span class="number">0x3E0</span>;
             <span class="kw">let </span>len = (flags &amp; CURRENT_INSERT_COUNT) <span class="kw">as </span>usize &gt;&gt; <span class="number">5</span>;
             <span class="kw">let </span>offset = <span class="self">self</span>.action + index <span class="kw">as </span>usize * <span class="number">2</span>;
@@ -2885,83 +2886,83 @@
     }
 
     <span class="kw">const </span>AT_TO_AAT: [(u32, u8, u8, u8); <span class="number">77</span>] = [
-        (raw_tag(<span class="string">b&quot;afrc&quot;</span>), <span class="number">11</span>, <span class="number">1</span>, <span class="number">0</span>),
-        (raw_tag(<span class="string">b&quot;c2pc&quot;</span>), <span class="number">38</span>, <span class="number">2</span>, <span class="number">0</span>),
-        (raw_tag(<span class="string">b&quot;c2sc&quot;</span>), <span class="number">38</span>, <span class="number">1</span>, <span class="number">0</span>),
-        (raw_tag(<span class="string">b&quot;calt&quot;</span>), <span class="number">36</span>, <span class="number">0</span>, <span class="number">1</span>),
-        (raw_tag(<span class="string">b&quot;case&quot;</span>), <span class="number">33</span>, <span class="number">0</span>, <span class="number">1</span>),
-        (raw_tag(<span class="string">b&quot;clig&quot;</span>), <span class="number">1</span>, <span class="number">18</span>, <span class="number">19</span>),
-        (raw_tag(<span class="string">b&quot;cpsp&quot;</span>), <span class="number">33</span>, <span class="number">2</span>, <span class="number">3</span>),
-        (raw_tag(<span class="string">b&quot;cswh&quot;</span>), <span class="number">36</span>, <span class="number">4</span>, <span class="number">5</span>),
-        (raw_tag(<span class="string">b&quot;dlig&quot;</span>), <span class="number">1</span>, <span class="number">4</span>, <span class="number">5</span>),
-        (raw_tag(<span class="string">b&quot;expt&quot;</span>), <span class="number">20</span>, <span class="number">10</span>, <span class="number">16</span>),
-        (raw_tag(<span class="string">b&quot;frac&quot;</span>), <span class="number">11</span>, <span class="number">2</span>, <span class="number">0</span>),
-        (raw_tag(<span class="string">b&quot;fwid&quot;</span>), <span class="number">22</span>, <span class="number">1</span>, <span class="number">7</span>),
-        (raw_tag(<span class="string">b&quot;halt&quot;</span>), <span class="number">22</span>, <span class="number">6</span>, <span class="number">7</span>),
-        (raw_tag(<span class="string">b&quot;hist&quot;</span>), <span class="number">1</span>, <span class="number">20</span>, <span class="number">21</span>),
-        (raw_tag(<span class="string">b&quot;hkna&quot;</span>), <span class="number">34</span>, <span class="number">0</span>, <span class="number">1</span>),
-        (raw_tag(<span class="string">b&quot;hlig&quot;</span>), <span class="number">1</span>, <span class="number">20</span>, <span class="number">21</span>),
-        (raw_tag(<span class="string">b&quot;hngl&quot;</span>), <span class="number">23</span>, <span class="number">1</span>, <span class="number">0</span>),
-        (raw_tag(<span class="string">b&quot;hojo&quot;</span>), <span class="number">20</span>, <span class="number">12</span>, <span class="number">16</span>),
-        (raw_tag(<span class="string">b&quot;hwid&quot;</span>), <span class="number">22</span>, <span class="number">2</span>, <span class="number">7</span>),
-        (raw_tag(<span class="string">b&quot;ital&quot;</span>), <span class="number">32</span>, <span class="number">2</span>, <span class="number">3</span>),
-        (raw_tag(<span class="string">b&quot;jp04&quot;</span>), <span class="number">20</span>, <span class="number">11</span>, <span class="number">16</span>),
-        (raw_tag(<span class="string">b&quot;jp78&quot;</span>), <span class="number">20</span>, <span class="number">2</span>, <span class="number">16</span>),
-        (raw_tag(<span class="string">b&quot;jp83&quot;</span>), <span class="number">20</span>, <span class="number">3</span>, <span class="number">16</span>),
-        (raw_tag(<span class="string">b&quot;jp90&quot;</span>), <span class="number">20</span>, <span class="number">4</span>, <span class="number">16</span>),
-        (raw_tag(<span class="string">b&quot;liga&quot;</span>), <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>),
-        (raw_tag(<span class="string">b&quot;lnum&quot;</span>), <span class="number">21</span>, <span class="number">1</span>, <span class="number">2</span>),
-        (raw_tag(<span class="string">b&quot;mgrk&quot;</span>), <span class="number">15</span>, <span class="number">10</span>, <span class="number">11</span>),
-        (raw_tag(<span class="string">b&quot;nlck&quot;</span>), <span class="number">20</span>, <span class="number">13</span>, <span class="number">16</span>),
-        (raw_tag(<span class="string">b&quot;onum&quot;</span>), <span class="number">21</span>, <span class="number">0</span>, <span class="number">2</span>),
-        (raw_tag(<span class="string">b&quot;ordn&quot;</span>), <span class="number">10</span>, <span class="number">3</span>, <span class="number">0</span>),
-        (raw_tag(<span class="string">b&quot;palt&quot;</span>), <span class="number">22</span>, <span class="number">5</span>, <span class="number">7</span>),
-        (raw_tag(<span class="string">b&quot;pcap&quot;</span>), <span class="number">37</span>, <span class="number">2</span>, <span class="number">0</span>),
-        (raw_tag(<span class="string">b&quot;pkna&quot;</span>), <span class="number">22</span>, <span class="number">0</span>, <span class="number">7</span>),
-        (raw_tag(<span class="string">b&quot;pnum&quot;</span>), <span class="number">6</span>, <span class="number">1</span>, <span class="number">4</span>),
-        (raw_tag(<span class="string">b&quot;pwid&quot;</span>), <span class="number">22</span>, <span class="number">0</span>, <span class="number">7</span>),
-        (raw_tag(<span class="string">b&quot;qwid&quot;</span>), <span class="number">22</span>, <span class="number">4</span>, <span class="number">7</span>),
-        (raw_tag(<span class="string">b&quot;rlig&quot;</span>), <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>),
-        (raw_tag(<span class="string">b&quot;ruby&quot;</span>), <span class="number">28</span>, <span class="number">2</span>, <span class="number">3</span>),
-        (raw_tag(<span class="string">b&quot;sinf&quot;</span>), <span class="number">10</span>, <span class="number">4</span>, <span class="number">0</span>),
-        (raw_tag(<span class="string">b&quot;smcp&quot;</span>), <span class="number">37</span>, <span class="number">1</span>, <span class="number">0</span>),
-        (raw_tag(<span class="string">b&quot;smpl&quot;</span>), <span class="number">20</span>, <span class="number">1</span>, <span class="number">16</span>),
-        (raw_tag(<span class="string">b&quot;ss01&quot;</span>), <span class="number">35</span>, <span class="number">2</span>, <span class="number">3</span>),
-        (raw_tag(<span class="string">b&quot;ss02&quot;</span>), <span class="number">35</span>, <span class="number">4</span>, <span class="number">5</span>),
-        (raw_tag(<span class="string">b&quot;ss03&quot;</span>), <span class="number">35</span>, <span class="number">6</span>, <span class="number">7</span>),
-        (raw_tag(<span class="string">b&quot;ss04&quot;</span>), <span class="number">35</span>, <span class="number">8</span>, <span class="number">9</span>),
-        (raw_tag(<span class="string">b&quot;ss05&quot;</span>), <span class="number">35</span>, <span class="number">10</span>, <span class="number">11</span>),
-        (raw_tag(<span class="string">b&quot;ss06&quot;</span>), <span class="number">35</span>, <span class="number">12</span>, <span class="number">13</span>),
-        (raw_tag(<span class="string">b&quot;ss07&quot;</span>), <span class="number">35</span>, <span class="number">14</span>, <span class="number">15</span>),
-        (raw_tag(<span class="string">b&quot;ss08&quot;</span>), <span class="number">35</span>, <span class="number">16</span>, <span class="number">17</span>),
-        (raw_tag(<span class="string">b&quot;ss09&quot;</span>), <span class="number">35</span>, <span class="number">18</span>, <span class="number">19</span>),
-        (raw_tag(<span class="string">b&quot;ss10&quot;</span>), <span class="number">35</span>, <span class="number">20</span>, <span class="number">21</span>),
-        (raw_tag(<span class="string">b&quot;ss11&quot;</span>), <span class="number">35</span>, <span class="number">22</span>, <span class="number">23</span>),
-        (raw_tag(<span class="string">b&quot;ss12&quot;</span>), <span class="number">35</span>, <span class="number">24</span>, <span class="number">25</span>),
-        (raw_tag(<span class="string">b&quot;ss13&quot;</span>), <span class="number">35</span>, <span class="number">26</span>, <span class="number">27</span>),
-        (raw_tag(<span class="string">b&quot;ss14&quot;</span>), <span class="number">35</span>, <span class="number">28</span>, <span class="number">29</span>),
-        (raw_tag(<span class="string">b&quot;ss15&quot;</span>), <span class="number">35</span>, <span class="number">30</span>, <span class="number">31</span>),
-        (raw_tag(<span class="string">b&quot;ss16&quot;</span>), <span class="number">35</span>, <span class="number">32</span>, <span class="number">33</span>),
-        (raw_tag(<span class="string">b&quot;ss17&quot;</span>), <span class="number">35</span>, <span class="number">34</span>, <span class="number">35</span>),
-        (raw_tag(<span class="string">b&quot;ss18&quot;</span>), <span class="number">35</span>, <span class="number">36</span>, <span class="number">37</span>),
-        (raw_tag(<span class="string">b&quot;ss19&quot;</span>), <span class="number">35</span>, <span class="number">38</span>, <span class="number">39</span>),
-        (raw_tag(<span class="string">b&quot;ss20&quot;</span>), <span class="number">35</span>, <span class="number">40</span>, <span class="number">41</span>),
-        (raw_tag(<span class="string">b&quot;subs&quot;</span>), <span class="number">10</span>, <span class="number">2</span>, <span class="number">0</span>),
-        (raw_tag(<span class="string">b&quot;sups&quot;</span>), <span class="number">10</span>, <span class="number">1</span>, <span class="number">0</span>),
-        (raw_tag(<span class="string">b&quot;swsh&quot;</span>), <span class="number">36</span>, <span class="number">2</span>, <span class="number">3</span>),
-        (raw_tag(<span class="string">b&quot;titl&quot;</span>), <span class="number">19</span>, <span class="number">4</span>, <span class="number">0</span>),
-        (raw_tag(<span class="string">b&quot;tnam&quot;</span>), <span class="number">20</span>, <span class="number">14</span>, <span class="number">16</span>),
-        (raw_tag(<span class="string">b&quot;tnum&quot;</span>), <span class="number">6</span>, <span class="number">0</span>, <span class="number">4</span>),
-        (raw_tag(<span class="string">b&quot;trad&quot;</span>), <span class="number">20</span>, <span class="number">0</span>, <span class="number">16</span>),
-        (raw_tag(<span class="string">b&quot;twid&quot;</span>), <span class="number">22</span>, <span class="number">3</span>, <span class="number">7</span>),
-        (raw_tag(<span class="string">b&quot;unic&quot;</span>), <span class="number">3</span>, <span class="number">14</span>, <span class="number">15</span>),
-        (raw_tag(<span class="string">b&quot;valt&quot;</span>), <span class="number">22</span>, <span class="number">5</span>, <span class="number">7</span>),
-        (raw_tag(<span class="string">b&quot;vert&quot;</span>), <span class="number">4</span>, <span class="number">0</span>, <span class="number">1</span>),
-        (raw_tag(<span class="string">b&quot;vhal&quot;</span>), <span class="number">22</span>, <span class="number">6</span>, <span class="number">7</span>),
-        (raw_tag(<span class="string">b&quot;vkna&quot;</span>), <span class="number">34</span>, <span class="number">2</span>, <span class="number">3</span>),
-        (raw_tag(<span class="string">b&quot;vpal&quot;</span>), <span class="number">22</span>, <span class="number">5</span>, <span class="number">7</span>),
-        (raw_tag(<span class="string">b&quot;vrt2&quot;</span>), <span class="number">4</span>, <span class="number">0</span>, <span class="number">1</span>),
-        (raw_tag(<span class="string">b&quot;zero&quot;</span>), <span class="number">14</span>, <span class="number">4</span>, <span class="number">5</span>),
+        (raw_tag(<span class="string">b"afrc"</span>), <span class="number">11</span>, <span class="number">1</span>, <span class="number">0</span>),
+        (raw_tag(<span class="string">b"c2pc"</span>), <span class="number">38</span>, <span class="number">2</span>, <span class="number">0</span>),
+        (raw_tag(<span class="string">b"c2sc"</span>), <span class="number">38</span>, <span class="number">1</span>, <span class="number">0</span>),
+        (raw_tag(<span class="string">b"calt"</span>), <span class="number">36</span>, <span class="number">0</span>, <span class="number">1</span>),
+        (raw_tag(<span class="string">b"case"</span>), <span class="number">33</span>, <span class="number">0</span>, <span class="number">1</span>),
+        (raw_tag(<span class="string">b"clig"</span>), <span class="number">1</span>, <span class="number">18</span>, <span class="number">19</span>),
+        (raw_tag(<span class="string">b"cpsp"</span>), <span class="number">33</span>, <span class="number">2</span>, <span class="number">3</span>),
+        (raw_tag(<span class="string">b"cswh"</span>), <span class="number">36</span>, <span class="number">4</span>, <span class="number">5</span>),
+        (raw_tag(<span class="string">b"dlig"</span>), <span class="number">1</span>, <span class="number">4</span>, <span class="number">5</span>),
+        (raw_tag(<span class="string">b"expt"</span>), <span class="number">20</span>, <span class="number">10</span>, <span class="number">16</span>),
+        (raw_tag(<span class="string">b"frac"</span>), <span class="number">11</span>, <span class="number">2</span>, <span class="number">0</span>),
+        (raw_tag(<span class="string">b"fwid"</span>), <span class="number">22</span>, <span class="number">1</span>, <span class="number">7</span>),
+        (raw_tag(<span class="string">b"halt"</span>), <span class="number">22</span>, <span class="number">6</span>, <span class="number">7</span>),
+        (raw_tag(<span class="string">b"hist"</span>), <span class="number">1</span>, <span class="number">20</span>, <span class="number">21</span>),
+        (raw_tag(<span class="string">b"hkna"</span>), <span class="number">34</span>, <span class="number">0</span>, <span class="number">1</span>),
+        (raw_tag(<span class="string">b"hlig"</span>), <span class="number">1</span>, <span class="number">20</span>, <span class="number">21</span>),
+        (raw_tag(<span class="string">b"hngl"</span>), <span class="number">23</span>, <span class="number">1</span>, <span class="number">0</span>),
+        (raw_tag(<span class="string">b"hojo"</span>), <span class="number">20</span>, <span class="number">12</span>, <span class="number">16</span>),
+        (raw_tag(<span class="string">b"hwid"</span>), <span class="number">22</span>, <span class="number">2</span>, <span class="number">7</span>),
+        (raw_tag(<span class="string">b"ital"</span>), <span class="number">32</span>, <span class="number">2</span>, <span class="number">3</span>),
+        (raw_tag(<span class="string">b"jp04"</span>), <span class="number">20</span>, <span class="number">11</span>, <span class="number">16</span>),
+        (raw_tag(<span class="string">b"jp78"</span>), <span class="number">20</span>, <span class="number">2</span>, <span class="number">16</span>),
+        (raw_tag(<span class="string">b"jp83"</span>), <span class="number">20</span>, <span class="number">3</span>, <span class="number">16</span>),
+        (raw_tag(<span class="string">b"jp90"</span>), <span class="number">20</span>, <span class="number">4</span>, <span class="number">16</span>),
+        (raw_tag(<span class="string">b"liga"</span>), <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>),
+        (raw_tag(<span class="string">b"lnum"</span>), <span class="number">21</span>, <span class="number">1</span>, <span class="number">2</span>),
+        (raw_tag(<span class="string">b"mgrk"</span>), <span class="number">15</span>, <span class="number">10</span>, <span class="number">11</span>),
+        (raw_tag(<span class="string">b"nlck"</span>), <span class="number">20</span>, <span class="number">13</span>, <span class="number">16</span>),
+        (raw_tag(<span class="string">b"onum"</span>), <span class="number">21</span>, <span class="number">0</span>, <span class="number">2</span>),
+        (raw_tag(<span class="string">b"ordn"</span>), <span class="number">10</span>, <span class="number">3</span>, <span class="number">0</span>),
+        (raw_tag(<span class="string">b"palt"</span>), <span class="number">22</span>, <span class="number">5</span>, <span class="number">7</span>),
+        (raw_tag(<span class="string">b"pcap"</span>), <span class="number">37</span>, <span class="number">2</span>, <span class="number">0</span>),
+        (raw_tag(<span class="string">b"pkna"</span>), <span class="number">22</span>, <span class="number">0</span>, <span class="number">7</span>),
+        (raw_tag(<span class="string">b"pnum"</span>), <span class="number">6</span>, <span class="number">1</span>, <span class="number">4</span>),
+        (raw_tag(<span class="string">b"pwid"</span>), <span class="number">22</span>, <span class="number">0</span>, <span class="number">7</span>),
+        (raw_tag(<span class="string">b"qwid"</span>), <span class="number">22</span>, <span class="number">4</span>, <span class="number">7</span>),
+        (raw_tag(<span class="string">b"rlig"</span>), <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>),
+        (raw_tag(<span class="string">b"ruby"</span>), <span class="number">28</span>, <span class="number">2</span>, <span class="number">3</span>),
+        (raw_tag(<span class="string">b"sinf"</span>), <span class="number">10</span>, <span class="number">4</span>, <span class="number">0</span>),
+        (raw_tag(<span class="string">b"smcp"</span>), <span class="number">37</span>, <span class="number">1</span>, <span class="number">0</span>),
+        (raw_tag(<span class="string">b"smpl"</span>), <span class="number">20</span>, <span class="number">1</span>, <span class="number">16</span>),
+        (raw_tag(<span class="string">b"ss01"</span>), <span class="number">35</span>, <span class="number">2</span>, <span class="number">3</span>),
+        (raw_tag(<span class="string">b"ss02"</span>), <span class="number">35</span>, <span class="number">4</span>, <span class="number">5</span>),
+        (raw_tag(<span class="string">b"ss03"</span>), <span class="number">35</span>, <span class="number">6</span>, <span class="number">7</span>),
+        (raw_tag(<span class="string">b"ss04"</span>), <span class="number">35</span>, <span class="number">8</span>, <span class="number">9</span>),
+        (raw_tag(<span class="string">b"ss05"</span>), <span class="number">35</span>, <span class="number">10</span>, <span class="number">11</span>),
+        (raw_tag(<span class="string">b"ss06"</span>), <span class="number">35</span>, <span class="number">12</span>, <span class="number">13</span>),
+        (raw_tag(<span class="string">b"ss07"</span>), <span class="number">35</span>, <span class="number">14</span>, <span class="number">15</span>),
+        (raw_tag(<span class="string">b"ss08"</span>), <span class="number">35</span>, <span class="number">16</span>, <span class="number">17</span>),
+        (raw_tag(<span class="string">b"ss09"</span>), <span class="number">35</span>, <span class="number">18</span>, <span class="number">19</span>),
+        (raw_tag(<span class="string">b"ss10"</span>), <span class="number">35</span>, <span class="number">20</span>, <span class="number">21</span>),
+        (raw_tag(<span class="string">b"ss11"</span>), <span class="number">35</span>, <span class="number">22</span>, <span class="number">23</span>),
+        (raw_tag(<span class="string">b"ss12"</span>), <span class="number">35</span>, <span class="number">24</span>, <span class="number">25</span>),
+        (raw_tag(<span class="string">b"ss13"</span>), <span class="number">35</span>, <span class="number">26</span>, <span class="number">27</span>),
+        (raw_tag(<span class="string">b"ss14"</span>), <span class="number">35</span>, <span class="number">28</span>, <span class="number">29</span>),
+        (raw_tag(<span class="string">b"ss15"</span>), <span class="number">35</span>, <span class="number">30</span>, <span class="number">31</span>),
+        (raw_tag(<span class="string">b"ss16"</span>), <span class="number">35</span>, <span class="number">32</span>, <span class="number">33</span>),
+        (raw_tag(<span class="string">b"ss17"</span>), <span class="number">35</span>, <span class="number">34</span>, <span class="number">35</span>),
+        (raw_tag(<span class="string">b"ss18"</span>), <span class="number">35</span>, <span class="number">36</span>, <span class="number">37</span>),
+        (raw_tag(<span class="string">b"ss19"</span>), <span class="number">35</span>, <span class="number">38</span>, <span class="number">39</span>),
+        (raw_tag(<span class="string">b"ss20"</span>), <span class="number">35</span>, <span class="number">40</span>, <span class="number">41</span>),
+        (raw_tag(<span class="string">b"subs"</span>), <span class="number">10</span>, <span class="number">2</span>, <span class="number">0</span>),
+        (raw_tag(<span class="string">b"sups"</span>), <span class="number">10</span>, <span class="number">1</span>, <span class="number">0</span>),
+        (raw_tag(<span class="string">b"swsh"</span>), <span class="number">36</span>, <span class="number">2</span>, <span class="number">3</span>),
+        (raw_tag(<span class="string">b"titl"</span>), <span class="number">19</span>, <span class="number">4</span>, <span class="number">0</span>),
+        (raw_tag(<span class="string">b"tnam"</span>), <span class="number">20</span>, <span class="number">14</span>, <span class="number">16</span>),
+        (raw_tag(<span class="string">b"tnum"</span>), <span class="number">6</span>, <span class="number">0</span>, <span class="number">4</span>),
+        (raw_tag(<span class="string">b"trad"</span>), <span class="number">20</span>, <span class="number">0</span>, <span class="number">16</span>),
+        (raw_tag(<span class="string">b"twid"</span>), <span class="number">22</span>, <span class="number">3</span>, <span class="number">7</span>),
+        (raw_tag(<span class="string">b"unic"</span>), <span class="number">3</span>, <span class="number">14</span>, <span class="number">15</span>),
+        (raw_tag(<span class="string">b"valt"</span>), <span class="number">22</span>, <span class="number">5</span>, <span class="number">7</span>),
+        (raw_tag(<span class="string">b"vert"</span>), <span class="number">4</span>, <span class="number">0</span>, <span class="number">1</span>),
+        (raw_tag(<span class="string">b"vhal"</span>), <span class="number">22</span>, <span class="number">6</span>, <span class="number">7</span>),
+        (raw_tag(<span class="string">b"vkna"</span>), <span class="number">34</span>, <span class="number">2</span>, <span class="number">3</span>),
+        (raw_tag(<span class="string">b"vpal"</span>), <span class="number">22</span>, <span class="number">5</span>, <span class="number">7</span>),
+        (raw_tag(<span class="string">b"vrt2"</span>), <span class="number">4</span>, <span class="number">0</span>, <span class="number">1</span>),
+        (raw_tag(<span class="string">b"zero"</span>), <span class="number">14</span>, <span class="number">4</span>, <span class="number">5</span>),
     ];
 }
 
@@ -2971,7 +2972,7 @@
 
     <span class="doccomment">/// Returns an iterator over the subtables for the extended kerning
     /// table.
-    </span><span class="kw">pub fn </span>subtables&lt;<span class="lifetime">&#39;a</span>&gt;(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], kerx: u32, ankr: u32) -&gt; Subtables&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>subtables&lt;<span class="lifetime">'a</span>&gt;(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], kerx: u32, ankr: u32) -&gt; Subtables&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">let </span>b = <span class="kw">if </span>kerx == <span class="number">0 </span>{
             Bytes::new(<span class="kw-2">&amp;</span>[])
         } <span class="kw">else </span>{
@@ -2996,17 +2997,17 @@
 
     <span class="doccomment">/// Iterator over the subtables of an extended kerning table.
     </span><span class="attr">#[derive(Copy, Clone)]
-    </span><span class="kw">pub struct </span>Subtables&lt;<span class="lifetime">&#39;a</span>&gt; {
-        data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub struct </span>Subtables&lt;<span class="lifetime">'a</span>&gt; {
+        data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
         version: u16,
         offset: usize,
         len: u32,
         cur: u32,
-        ankr: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+        ankr: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>Subtables&lt;<span class="lifetime">&#39;a</span>&gt; {
-        <span class="kw">type </span>Item = Subtable&lt;<span class="lifetime">&#39;a</span>&gt;;
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>Subtables&lt;<span class="lifetime">'a</span>&gt; {
+        <span class="kw">type </span>Item = Subtable&lt;<span class="lifetime">'a</span>&gt;;
 
         <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
             <span class="kw">if </span><span class="self">self</span>.cur &gt;= <span class="self">self</span>.len {
@@ -3023,17 +3024,17 @@
     <span class="doccomment">/// Extended kerning subtable.
     </span><span class="attr">#[derive(Copy, Clone)]
     #[allow(dead_code)]
-    </span><span class="kw">pub struct </span>Subtable&lt;<span class="lifetime">&#39;a</span>&gt; {
-        data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub struct </span>Subtable&lt;<span class="lifetime">'a</span>&gt; {
+        data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
         version: u16,
         size: u32,
         coverage: u32,
         tuple_count: u32,
-        ankr: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+        ankr: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Subtable&lt;<span class="lifetime">&#39;a</span>&gt; {
-        <span class="kw">fn </span>new(data: <span class="kw-2">&amp;</span>Bytes&lt;<span class="lifetime">&#39;a</span>&gt;, offset: usize, version: u16, ankr: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Subtable&lt;<span class="lifetime">'a</span>&gt; {
+        <span class="kw">fn </span>new(data: <span class="kw-2">&amp;</span>Bytes&lt;<span class="lifetime">'a</span>&gt;, offset: usize, version: u16, ankr: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
             <span class="kw">let </span>data = Bytes::with_offset(data.data(), offset)<span class="question-mark">?</span>;
             <span class="kw">let </span>size = data.read_u32(<span class="number">0</span>)<span class="question-mark">?</span>;
             <span class="kw">let </span>coverage = data.read_u32(<span class="number">4</span>)<span class="question-mark">?</span>;
@@ -3068,7 +3069,7 @@
             }
         }
 
-        <span class="kw">pub fn </span>kind(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;SubtableKind&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+        <span class="kw">pub fn </span>kind(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;SubtableKind&lt;<span class="lifetime">'a</span>&gt;&gt; {
             <span class="kw">let </span>format = <span class="self">self</span>.coverage &amp; <span class="number">0xFF</span>;
             <span class="prelude-val">Some</span>(<span class="kw">match </span>format {
                 <span class="number">0 </span>=&gt; SubtableKind::Format0(Format0::new(<span class="self">self</span>.data)<span class="question-mark">?</span>),
@@ -3082,22 +3083,22 @@
 
     <span class="doccomment">/// Kind of an extended kerning subtable.
     </span><span class="attr">#[derive(Copy, Clone)]
-    </span><span class="kw">pub enum </span>SubtableKind&lt;<span class="lifetime">&#39;a</span>&gt; {
-        Format0(Format0&lt;<span class="lifetime">&#39;a</span>&gt;),
-        Format1(Format1&lt;<span class="lifetime">&#39;a</span>&gt;),
-        Format2(Format2&lt;<span class="lifetime">&#39;a</span>&gt;),
-        Format4(Format4&lt;<span class="lifetime">&#39;a</span>&gt;),
+    </span><span class="kw">pub enum </span>SubtableKind&lt;<span class="lifetime">'a</span>&gt; {
+        Format0(Format0&lt;<span class="lifetime">'a</span>&gt;),
+        Format1(Format1&lt;<span class="lifetime">'a</span>&gt;),
+        Format2(Format2&lt;<span class="lifetime">'a</span>&gt;),
+        Format4(Format4&lt;<span class="lifetime">'a</span>&gt;),
     }
 
     <span class="doccomment">/// Order pair kerning subtable.
     </span><span class="attr">#[derive(Copy, Clone)]
-    </span><span class="kw">pub struct </span>Format0&lt;<span class="lifetime">&#39;a</span>&gt; {
-        data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub struct </span>Format0&lt;<span class="lifetime">'a</span>&gt; {
+        data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
         count: usize,
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Format0&lt;<span class="lifetime">&#39;a</span>&gt; {
-        <span class="kw">fn </span>new(data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Format0&lt;<span class="lifetime">'a</span>&gt; {
+        <span class="kw">fn </span>new(data: Bytes&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
             <span class="kw">let </span>count = data.read_u32(<span class="number">12</span>)<span class="question-mark">? </span><span class="kw">as </span>usize;
             <span class="prelude-val">Some</span>(<span class="self">Self </span>{ data, count })
         }
@@ -3127,16 +3128,16 @@
     <span class="doccomment">/// Contextual kerning subtable.
     </span><span class="attr">#[derive(Copy, Clone)]
     #[allow(dead_code)]
-    </span><span class="kw">pub struct </span>Format1&lt;<span class="lifetime">&#39;a</span>&gt; {
-        data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
-        state_table: ExtendedStateTable&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub struct </span>Format1&lt;<span class="lifetime">'a</span>&gt; {
+        data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
+        state_table: ExtendedStateTable&lt;<span class="lifetime">'a</span>&gt;,
         value: usize,
         tuple_count: u32,
         tuple_size: usize,
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Format1&lt;<span class="lifetime">&#39;a</span>&gt; {
-        <span class="kw">fn </span>new(data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;, tuple_count: u32) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Format1&lt;<span class="lifetime">'a</span>&gt; {
+        <span class="kw">fn </span>new(data: Bytes&lt;<span class="lifetime">'a</span>&gt;, tuple_count: u32) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
             <span class="kw">let </span>data = Bytes::with_offset(data.data(), <span class="number">12</span>)<span class="question-mark">?</span>;
             <span class="kw">let </span>state_table = ExtendedStateTable::new(<span class="kw-2">&amp;</span>data)<span class="question-mark">?</span>;
             <span class="kw">let </span>value = data.read_u32(<span class="number">16</span>)<span class="question-mark">? </span><span class="kw">as </span>usize;
@@ -3224,15 +3225,15 @@
 
     <span class="doccomment">/// Two dimensional array kerning subtable.
     </span><span class="attr">#[derive(Copy, Clone)]
-    </span><span class="kw">pub struct </span>Format2&lt;<span class="lifetime">&#39;a</span>&gt; {
-        data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub struct </span>Format2&lt;<span class="lifetime">'a</span>&gt; {
+        data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
         l_table: usize,
         r_table: usize,
         array: usize,
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Format2&lt;<span class="lifetime">&#39;a</span>&gt; {
-        <span class="kw">fn </span>new(data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Format2&lt;<span class="lifetime">'a</span>&gt; {
+        <span class="kw">fn </span>new(data: Bytes&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
             <span class="kw">let </span>l_table = data.read_u32(<span class="number">16</span>)<span class="question-mark">? </span><span class="kw">as </span>usize;
             <span class="kw">let </span>r_table = data.read_u32(<span class="number">20</span>)<span class="question-mark">? </span><span class="kw">as </span>usize;
             <span class="kw">let </span>array = data.read_u32(<span class="number">24</span>)<span class="question-mark">? </span><span class="kw">as </span>usize;
@@ -3256,16 +3257,16 @@
     <span class="doccomment">/// Control/anchor point subtable.
     </span><span class="attr">#[derive(Copy, Clone)]
     #[allow(dead_code)]
-    </span><span class="kw">pub struct </span>Format4&lt;<span class="lifetime">&#39;a</span>&gt; {
-        data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
-        state_table: ExtendedStateTable&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub struct </span>Format4&lt;<span class="lifetime">'a</span>&gt; {
+        data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
+        state_table: ExtendedStateTable&lt;<span class="lifetime">'a</span>&gt;,
         action_type: u32,
         control_table: usize,
-        ankr: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+        ankr: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Format4&lt;<span class="lifetime">&#39;a</span>&gt; {
-        <span class="kw">fn </span>new(data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;, ankr: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Format4&lt;<span class="lifetime">'a</span>&gt; {
+        <span class="kw">fn </span>new(data: Bytes&lt;<span class="lifetime">'a</span>&gt;, ankr: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
             <span class="kw">let </span>data = Bytes::with_offset(data.data(), <span class="number">12</span>)<span class="question-mark">?</span>;
             <span class="kw">let </span>state_table = ExtendedStateTable::new(<span class="kw-2">&amp;</span>data)<span class="question-mark">?</span>;
             <span class="kw">let </span>flags = data.read_u32(<span class="number">16</span>)<span class="question-mark">?</span>;
@@ -3360,7 +3361,7 @@
     }
 
     <span class="doccomment">/// Returns the set of anchor points for the specified glyph.
-    </span><span class="kw">pub fn </span>anchor_points&lt;<span class="lifetime">&#39;a</span>&gt;(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], glyph_id: u16) -&gt; <span class="prelude-ty">Option</span>&lt;AnchorPoints&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>anchor_points&lt;<span class="lifetime">'a</span>&gt;(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], glyph_id: u16) -&gt; <span class="prelude-ty">Option</span>&lt;AnchorPoints&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">if </span>data.is_empty() {
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
@@ -3377,13 +3378,13 @@
 
     <span class="doccomment">/// Set of anchor points for a glyph.
     </span><span class="attr">#[derive(Copy, Clone)]
-    </span><span class="kw">pub struct </span>AnchorPoints&lt;<span class="lifetime">&#39;a</span>&gt; {
-        data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub struct </span>AnchorPoints&lt;<span class="lifetime">'a</span>&gt; {
+        data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
         offset: usize,
         len: u32,
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; AnchorPoints&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; AnchorPoints&lt;<span class="lifetime">'a</span>&gt; {
         <span class="doccomment">/// Returns the number of anchor points.
         </span><span class="kw">pub fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
             <span class="self">self</span>.len
@@ -3403,7 +3404,7 @@
 </span><span class="kw">pub mod </span>kern {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
-    <span class="kw">pub fn </span>subtables&lt;<span class="lifetime">&#39;a</span>&gt;(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], kern: u32) -&gt; Subtables&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">pub fn </span>subtables&lt;<span class="lifetime">'a</span>&gt;(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], kern: u32) -&gt; Subtables&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">let </span>b = <span class="kw">if </span>kern == <span class="number">0 </span>{
             Bytes::new(<span class="kw-2">&amp;</span>[])
         } <span class="kw">else </span>{
@@ -3432,16 +3433,16 @@
     }
 
     <span class="attr">#[derive(Copy, Clone)]
-    </span><span class="kw">pub struct </span>Subtables&lt;<span class="lifetime">&#39;a</span>&gt; {
-        data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub struct </span>Subtables&lt;<span class="lifetime">'a</span>&gt; {
+        data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
         offset: usize,
         len: u32,
         cur: u32,
         is_aat: bool,
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>Subtables&lt;<span class="lifetime">&#39;a</span>&gt; {
-        <span class="kw">type </span>Item = Subtable&lt;<span class="lifetime">&#39;a</span>&gt;;
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>Subtables&lt;<span class="lifetime">'a</span>&gt; {
+        <span class="kw">type </span>Item = Subtable&lt;<span class="lifetime">'a</span>&gt;;
 
         <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
             <span class="kw">if </span><span class="self">self</span>.cur &gt;= <span class="self">self</span>.len {
@@ -3457,8 +3458,8 @@
 
     <span class="doccomment">/// Extended kerning subtable.
     </span><span class="attr">#[derive(Copy, Clone)]
-    </span><span class="kw">pub struct </span>Subtable&lt;<span class="lifetime">&#39;a</span>&gt; {
-        data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub struct </span>Subtable&lt;<span class="lifetime">'a</span>&gt; {
+        data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
         offset: usize,
         size: u32,
         coverage: u16,
@@ -3468,8 +3469,8 @@
         format: u8,
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Subtable&lt;<span class="lifetime">&#39;a</span>&gt; {
-        <span class="kw">fn </span>new(data: <span class="kw-2">&amp;</span>Bytes&lt;<span class="lifetime">&#39;a</span>&gt;, <span class="kw-2">mut </span>offset: usize, is_aat: bool) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Subtable&lt;<span class="lifetime">'a</span>&gt; {
+        <span class="kw">fn </span>new(data: <span class="kw-2">&amp;</span>Bytes&lt;<span class="lifetime">'a</span>&gt;, <span class="kw-2">mut </span>offset: usize, is_aat: bool) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
             <span class="kw">let </span>data = Bytes::with_offset(data.data(), offset)<span class="question-mark">?</span>;
             <span class="kw">let </span>size = <span class="kw">if </span>is_aat {
                 offset = <span class="number">8</span>;
@@ -3511,7 +3512,7 @@
             <span class="self">self</span>.cross_stream
         }
 
-        <span class="kw">pub fn </span>kind(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;SubtableKind&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+        <span class="kw">pub fn </span>kind(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;SubtableKind&lt;<span class="lifetime">'a</span>&gt;&gt; {
             <span class="prelude-val">Some</span>(<span class="kw">match </span><span class="self">self</span>.format {
                 <span class="number">0 </span>=&gt; SubtableKind::Format0(Format0::new(<span class="self">self</span>)<span class="question-mark">?</span>),
                 <span class="number">1 </span>=&gt; SubtableKind::Format1(Format1::new(<span class="self">self</span>)<span class="question-mark">?</span>),
@@ -3521,20 +3522,20 @@
     }
 
     <span class="attr">#[derive(Copy, Clone)]
-    </span><span class="kw">pub enum </span>SubtableKind&lt;<span class="lifetime">&#39;a</span>&gt; {
-        Format0(Format0&lt;<span class="lifetime">&#39;a</span>&gt;),
-        Format1(Format1&lt;<span class="lifetime">&#39;a</span>&gt;),
+    </span><span class="kw">pub enum </span>SubtableKind&lt;<span class="lifetime">'a</span>&gt; {
+        Format0(Format0&lt;<span class="lifetime">'a</span>&gt;),
+        Format1(Format1&lt;<span class="lifetime">'a</span>&gt;),
     }
 
     <span class="attr">#[derive(Copy, Clone)]
-    </span><span class="kw">pub struct </span>Format0&lt;<span class="lifetime">&#39;a</span>&gt; {
-        data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub struct </span>Format0&lt;<span class="lifetime">'a</span>&gt; {
+        data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
         offset: usize,
         count: usize,
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Format0&lt;<span class="lifetime">&#39;a</span>&gt; {
-        <span class="kw">fn </span>new(subtable: <span class="kw-2">&amp;</span>Subtable&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Format0&lt;<span class="lifetime">'a</span>&gt; {
+        <span class="kw">fn </span>new(subtable: <span class="kw-2">&amp;</span>Subtable&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
             <span class="kw">let </span>count = subtable.data.read_u16(subtable.offset)<span class="question-mark">? </span><span class="kw">as </span>usize;
             <span class="prelude-val">Some</span>(<span class="self">Self </span>{
                 data: subtable.data,
@@ -3568,14 +3569,14 @@
     <span class="doccomment">/// Contextual kerning subtable.
     </span><span class="attr">#[derive(Copy, Clone)]
     #[allow(dead_code)]
-    </span><span class="kw">pub struct </span>Format1&lt;<span class="lifetime">&#39;a</span>&gt; {
-        data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
-        state_table: StateTable&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub struct </span>Format1&lt;<span class="lifetime">'a</span>&gt; {
+        data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
+        state_table: StateTable&lt;<span class="lifetime">'a</span>&gt;,
         cross_stream: bool,
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Format1&lt;<span class="lifetime">&#39;a</span>&gt; {
-        <span class="kw">fn </span>new(subtable: <span class="kw-2">&amp;</span>Subtable&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Format1&lt;<span class="lifetime">'a</span>&gt; {
+        <span class="kw">fn </span>new(subtable: <span class="kw-2">&amp;</span>Subtable&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
             <span class="kw">let </span>data = Bytes::with_offset(subtable.data.data(), subtable.offset)<span class="question-mark">?</span>;
             <span class="kw">let </span>state_table = StateTable::new(<span class="kw-2">&amp;</span>data)<span class="question-mark">?</span>;
             <span class="prelude-val">Some</span>(<span class="self">Self </span>{

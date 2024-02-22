@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fontdb-0.16.1/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="fontdb" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fontdb-0.16.2/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="fontdb" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1288,6 +1289,11 @@
 <a href="#1288" id="1288">1288</a>
 <a href="#1289" id="1289">1289</a>
 <a href="#1290" id="1290">1290</a>
+<a href="#1291" id="1291">1291</a>
+<a href="#1292" id="1292">1292</a>
+<a href="#1293" id="1293">1293</a>
+<a href="#1294" id="1294">1294</a>
+<a href="#1295" id="1295">1295</a>
 </pre></div><pre class="rust"><code><span class="doccomment">/*!
 `fontdb` is a simple, in-memory font database with CSS-like queries.
 
@@ -1307,10 +1313,10 @@
   For font properties querying you can use [ttf-parser].
 
 - A font fallback mechanism.&lt;br&gt;
-  This library can be used to implement a font fallback mechanism, but it doesn&#39;t implement one.
+  This library can be used to implement a font fallback mechanism, but it doesn't implement one.
 
-- Application&#39;s global database.&lt;br&gt;
-  The database doesn&#39;t use `static`, therefore it&#39;s up to the caller where it should be stored.
+- Application's global database.&lt;br&gt;
+  The database doesn't use `static`, therefore it's up to the caller where it should be stored.
 
 - Font types support other than TrueType.
 
@@ -1346,14 +1352,14 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
 [ttf-parser]: https://github.com/RazrFalcon/ttf-parser
 */
 
-</span><span class="attr">#![cfg_attr(not(feature = <span class="string">&quot;std&quot;</span>), no_std)]
+</span><span class="attr">#![cfg_attr(not(feature = <span class="string">"std"</span>), no_std)]
 #![warn(missing_docs)]
 #![warn(missing_debug_implementations)]
 #![warn(missing_copy_implementations)]
 
 </span><span class="kw">extern crate </span>alloc;
 
-<span class="attr">#[cfg(not(feature = <span class="string">&quot;std&quot;</span>))]
+<span class="attr">#[cfg(not(feature = <span class="string">"std"</span>))]
 </span><span class="kw">use </span>alloc::{
     string::{String, ToString},
     vec::Vec,
@@ -1370,7 +1376,7 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
 /// Since `Database` is not global/unique, we cannot guarantee that a specific ID
 /// is actually from the same db instance. This is up to the caller.
 ///
-/// ID overflow will cause a panic, but it&#39;s highly unlikely that someone would
+/// ID overflow will cause a panic, but it's highly unlikely that someone would
 /// load more than 4 billion font faces.
 ///
 /// Because the internal representation of ID is private, The `Display` trait
@@ -1398,8 +1404,8 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
 }
 
 <span class="kw">impl </span>core::fmt::Display <span class="kw">for </span>ID {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, (<span class="self">self</span>.<span class="number">0</span>).<span class="number">0</span>.as_ffi())
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; core::fmt::Result {
+        <span class="macro">write!</span>(f, <span class="string">"{}"</span>, (<span class="self">self</span>.<span class="number">0</span>).<span class="number">0</span>.as_ffi())
     }
 }
 
@@ -1409,16 +1415,16 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
     <span class="doccomment">/// A malformed font.
     ///
     /// Typically means that [ttf-parser](https://github.com/RazrFalcon/ttf-parser)
-    /// wasn&#39;t able to parse it.
+    /// wasn't able to parse it.
     </span>MalformedFont,
     <span class="doccomment">/// A valid TrueType font without a valid *Family Name*.
     </span>UnnamedFont,
     <span class="doccomment">/// A file IO related error.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
     </span>IoError(std::io::Error),
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">impl </span>From&lt;std::io::Error&gt; <span class="kw">for </span>LoadError {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>from(e: std::io::Error) -&gt; <span class="self">Self </span>{
@@ -1427,12 +1433,12 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
 }
 
 <span class="kw">impl </span>core::fmt::Display <span class="kw">for </span>LoadError {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; core::fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; core::fmt::Result {
         <span class="kw">match </span><span class="self">self </span>{
-            LoadError::MalformedFont =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;malformed font&quot;</span>),
-            LoadError::UnnamedFont =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;font doesn&#39;t have a family name&quot;</span>),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-            </span>LoadError::IoError(<span class="kw-2">ref </span>e) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, e),
+            LoadError::MalformedFont =&gt; <span class="macro">write!</span>(f, <span class="string">"malformed font"</span>),
+            LoadError::UnnamedFont =&gt; <span class="macro">write!</span>(f, <span class="string">"font doesn't have a family name"</span>),
+            <span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
+            </span>LoadError::IoError(<span class="kw-2">ref </span>e) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, e),
         }
     }
 }
@@ -1468,14 +1474,14 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
     </span><span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
         Database {
             faces: SlotMap::with_key(),
-            family_serif: <span class="string">&quot;Times New Roman&quot;</span>.to_string(),
-            family_sans_serif: <span class="string">&quot;Arial&quot;</span>.to_string(),
-            family_cursive: <span class="string">&quot;Comic Sans MS&quot;</span>.to_string(),
-            <span class="attr">#[cfg(not(target_os = <span class="string">&quot;macos&quot;</span>))]
-            </span>family_fantasy: <span class="string">&quot;Impact&quot;</span>.to_string(),
-            <span class="attr">#[cfg(target_os = <span class="string">&quot;macos&quot;</span>)]
-            </span>family_fantasy: <span class="string">&quot;Papyrus&quot;</span>.to_string(),
-            family_monospace: <span class="string">&quot;Courier New&quot;</span>.to_string(),
+            family_serif: <span class="string">"Times New Roman"</span>.to_string(),
+            family_sans_serif: <span class="string">"Arial"</span>.to_string(),
+            family_cursive: <span class="string">"Comic Sans MS"</span>.to_string(),
+            <span class="attr">#[cfg(not(target_os = <span class="string">"macos"</span>))]
+            </span>family_fantasy: <span class="string">"Impact"</span>.to_string(),
+            <span class="attr">#[cfg(target_os = <span class="string">"macos"</span>)]
+            </span>family_fantasy: <span class="string">"Papyrus"</span>.to_string(),
+            family_monospace: <span class="string">"Courier New"</span>.to_string(),
         }
     }
 
@@ -1505,7 +1511,7 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
                         ids.push(ID(id));
                     }
                     <span class="prelude-val">Err</span>(e) =&gt; <span class="macro">log::warn!</span>(
-                        <span class="string">&quot;Failed to load a font face {} from source cause {}.&quot;</span>,
+                        <span class="string">"Failed to load a font face {} from source cause {}."</span>,
                         index,
                         e
                     ),
@@ -1519,7 +1525,7 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
     }
 
     <span class="doccomment">/// Backend function used by load_font_file to load font files.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;fs&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"fs"</span>)]
     </span><span class="kw">fn </span>load_fonts_from_file(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>std::path::Path, data: <span class="kw-2">&amp;</span>[u8]) {
         <span class="kw">let </span>source = Source::File(path.into());
 
@@ -1529,7 +1535,7 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
                 <span class="prelude-val">Ok</span>(info) =&gt; <span class="self">self</span>.push_face_info(info),
                 <span class="prelude-val">Err</span>(e) =&gt; {
                     <span class="macro">log::warn!</span>(
-                        <span class="string">&quot;Failed to load a font face {} from &#39;{}&#39; cause {}.&quot;</span>,
+                        <span class="string">"Failed to load a font face {} from '{}' cause {}."</span>,
                         index,
                         path.display(),
                         e
@@ -1542,7 +1548,7 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
     <span class="doccomment">/// Loads a font file into the `Database`.
     ///
     /// Will load all font faces in case of a font collection.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;fs&quot;</span>, feature = <span class="string">&quot;memmap&quot;</span>))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"fs"</span>, feature = <span class="string">"memmap"</span>))]
     </span><span class="kw">pub fn </span>load_font_file&lt;P: AsRef&lt;std::path::Path&gt;&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         path: P,
@@ -1551,7 +1557,7 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
     }
 
     <span class="comment">// A non-generic version.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;fs&quot;</span>, feature = <span class="string">&quot;memmap&quot;</span>))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"fs"</span>, feature = <span class="string">"memmap"</span>))]
     </span><span class="kw">fn </span>load_font_file_impl(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>std::path::Path) -&gt; <span class="prelude-ty">Result</span>&lt;(), std::io::Error&gt; {
         <span class="kw">let </span>file = std::fs::File::open(path)<span class="question-mark">?</span>;
         <span class="kw">let </span>data: <span class="kw-2">&amp;</span>[u8] = <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span>memmap2::MmapOptions::new().map(<span class="kw-2">&amp;</span>file)<span class="question-mark">? </span>};
@@ -1563,7 +1569,7 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
     <span class="doccomment">/// Loads a font file into the `Database`.
     ///
     /// Will load all font faces in case of a font collection.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;fs&quot;</span>, not(feature = <span class="string">&quot;memmap&quot;</span>)))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"fs"</span>, not(feature = <span class="string">"memmap"</span>)))]
     </span><span class="kw">pub fn </span>load_font_file&lt;P: AsRef&lt;std::path::Path&gt;&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         path: P,
@@ -1572,7 +1578,7 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
     }
 
     <span class="comment">// A non-generic version.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;fs&quot;</span>, not(feature = <span class="string">&quot;memmap&quot;</span>)))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"fs"</span>, not(feature = <span class="string">"memmap"</span>)))]
     </span><span class="kw">fn </span>load_font_file_impl(<span class="kw-2">&amp;mut </span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>std::path::Path) -&gt; <span class="prelude-ty">Result</span>&lt;(), std::io::Error&gt; {
         <span class="kw">let </span>data = std::fs::read(path)<span class="question-mark">?</span>;
 
@@ -1586,16 +1592,16 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
     ///
     /// Will load `ttf`, `otf`, `ttc` and `otc` fonts.
     ///
-    /// Unlike other `load_*` methods, this one doesn&#39;t return an error.
+    /// Unlike other `load_*` methods, this one doesn't return an error.
     /// It will simply skip malformed fonts and will print a warning into the log for each of them.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;fs&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"fs"</span>)]
     </span><span class="kw">pub fn </span>load_fonts_dir&lt;P: AsRef&lt;std::path::Path&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, dir: P) {
         <span class="self">self</span>.load_fonts_dir_impl(dir.as_ref())
     }
 
     <span class="comment">// A non-generic version.
     </span><span class="attr">#[rustfmt::skip] </span><span class="comment">// keep extensions match as is
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;fs&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"fs"</span>)]
     </span><span class="kw">fn </span>load_fonts_dir_impl(<span class="kw-2">&amp;mut </span><span class="self">self</span>, dir: <span class="kw-2">&amp;</span>std::path::Path) {
         <span class="kw">let </span>fonts_dir = <span class="kw">match </span>std::fs::read_dir(dir) {
             <span class="prelude-val">Ok</span>(dir) =&gt; dir,
@@ -1606,10 +1612,10 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
             <span class="kw">let </span>path = entry.path();
             <span class="kw">if </span>path.is_file() {
                 <span class="kw">match </span>path.extension().and_then(|e| e.to_str()) {
-                    <span class="prelude-val">Some</span>(<span class="string">&quot;ttf&quot;</span>) | <span class="prelude-val">Some</span>(<span class="string">&quot;ttc&quot;</span>) | <span class="prelude-val">Some</span>(<span class="string">&quot;TTF&quot;</span>) | <span class="prelude-val">Some</span>(<span class="string">&quot;TTC&quot;</span>) |
-                    <span class="prelude-val">Some</span>(<span class="string">&quot;otf&quot;</span>) | <span class="prelude-val">Some</span>(<span class="string">&quot;otc&quot;</span>) | <span class="prelude-val">Some</span>(<span class="string">&quot;OTF&quot;</span>) | <span class="prelude-val">Some</span>(<span class="string">&quot;OTC&quot;</span>) =&gt; {
+                    <span class="prelude-val">Some</span>(<span class="string">"ttf"</span>) | <span class="prelude-val">Some</span>(<span class="string">"ttc"</span>) | <span class="prelude-val">Some</span>(<span class="string">"TTF"</span>) | <span class="prelude-val">Some</span>(<span class="string">"TTC"</span>) |
+                    <span class="prelude-val">Some</span>(<span class="string">"otf"</span>) | <span class="prelude-val">Some</span>(<span class="string">"otc"</span>) | <span class="prelude-val">Some</span>(<span class="string">"OTF"</span>) | <span class="prelude-val">Some</span>(<span class="string">"OTC"</span>) =&gt; {
                         <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = <span class="self">self</span>.load_font_file(<span class="kw-2">&amp;</span>path) {
-                            <span class="macro">log::warn!</span>(<span class="string">&quot;Failed to load &#39;{}&#39; cause {}.&quot;</span>, path.display(), e);
+                            <span class="macro">log::warn!</span>(<span class="string">"Failed to load '{}' cause {}."</span>, path.display(), e);
                         }
                     }
                     <span class="kw">_ </span>=&gt; {}
@@ -1631,25 +1637,30 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
     /// will simply scan some predefined directories.
     /// Which means that fonts that are not in those directories must
     /// be added manually.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;fs&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"fs"</span>)]
     </span><span class="kw">pub fn </span>load_system_fonts(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="attr">#[cfg(target_os = <span class="string">&quot;windows&quot;</span>)]
+        <span class="attr">#[cfg(target_os = <span class="string">"windows"</span>)]
         </span>{
-            <span class="self">self</span>.load_fonts_dir(<span class="string">&quot;C:\\Windows\\Fonts\\&quot;</span>);
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>system_root) = std::env::var_os(<span class="string">"SYSTEMROOT"</span>) {
+                <span class="kw">let </span>system_root_path = std::path::Path::new(system_root);
+                <span class="self">self</span>.load_fonts_dir(system_root_path.join(<span class="string">"Fonts"</span>));
+            } <span class="kw">else </span>{
+                <span class="self">self</span>.load_fonts_dir(<span class="string">"C:\\Windows\\Fonts\\"</span>);
+            }
 
-            <span class="kw">if let </span><span class="prelude-val">Ok</span>(<span class="kw-2">ref </span>home) = std::env::var(<span class="string">&quot;USERPROFILE&quot;</span>) {
+            <span class="kw">if let </span><span class="prelude-val">Ok</span>(<span class="kw-2">ref </span>home) = std::env::var(<span class="string">"USERPROFILE"</span>) {
                 <span class="kw">let </span>home_path = std::path::Path::new(home);
-                <span class="self">self</span>.load_fonts_dir(home_path.join(<span class="string">&quot;AppData\\Local\\Microsoft\\Windows\\Fonts&quot;</span>));
-                <span class="self">self</span>.load_fonts_dir(home_path.join(<span class="string">&quot;AppData\\Roaming\\Microsoft\\Windows\\Fonts&quot;</span>));
+                <span class="self">self</span>.load_fonts_dir(home_path.join(<span class="string">"AppData\\Local\\Microsoft\\Windows\\Fonts"</span>));
+                <span class="self">self</span>.load_fonts_dir(home_path.join(<span class="string">"AppData\\Roaming\\Microsoft\\Windows\\Fonts"</span>));
             }
         }
 
-        <span class="attr">#[cfg(target_os = <span class="string">&quot;macos&quot;</span>)]
+        <span class="attr">#[cfg(target_os = <span class="string">"macos"</span>)]
         </span>{
-            <span class="self">self</span>.load_fonts_dir(<span class="string">&quot;/Library/Fonts&quot;</span>);
-            <span class="self">self</span>.load_fonts_dir(<span class="string">&quot;/System/Library/Fonts&quot;</span>);
+            <span class="self">self</span>.load_fonts_dir(<span class="string">"/Library/Fonts"</span>);
+            <span class="self">self</span>.load_fonts_dir(<span class="string">"/System/Library/Fonts"</span>);
             <span class="comment">// Downloadable fonts, location varies on major macOS releases
-            </span><span class="kw">if let </span><span class="prelude-val">Ok</span>(dir) = std::fs::read_dir(<span class="string">&quot;/System/Library/AssetsV2&quot;</span>) {
+            </span><span class="kw">if let </span><span class="prelude-val">Ok</span>(dir) = std::fs::read_dir(<span class="string">"/System/Library/AssetsV2"</span>) {
                 <span class="kw">for </span>entry <span class="kw">in </span>dir {
                     <span class="kw">let </span>entry = <span class="kw">match </span>entry {
                         <span class="prelude-val">Ok</span>(entry) =&gt; entry,
@@ -1658,43 +1669,43 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
                     <span class="kw">if </span>entry
                         .file_name()
                         .to_string_lossy()
-                        .starts_with(<span class="string">&quot;com_apple_MobileAsset_Font&quot;</span>)
+                        .starts_with(<span class="string">"com_apple_MobileAsset_Font"</span>)
                     {
                         <span class="self">self</span>.load_fonts_dir(entry.path());
                     }
                 }
             }
-            <span class="self">self</span>.load_fonts_dir(<span class="string">&quot;/Network/Library/Fonts&quot;</span>);
+            <span class="self">self</span>.load_fonts_dir(<span class="string">"/Network/Library/Fonts"</span>);
 
-            <span class="kw">if let </span><span class="prelude-val">Ok</span>(<span class="kw-2">ref </span>home) = std::env::var(<span class="string">&quot;HOME&quot;</span>) {
+            <span class="kw">if let </span><span class="prelude-val">Ok</span>(<span class="kw-2">ref </span>home) = std::env::var(<span class="string">"HOME"</span>) {
                 <span class="kw">let </span>home_path = std::path::Path::new(home);
-                <span class="self">self</span>.load_fonts_dir(home_path.join(<span class="string">&quot;Library/Fonts&quot;</span>));
+                <span class="self">self</span>.load_fonts_dir(home_path.join(<span class="string">"Library/Fonts"</span>));
             }
         }
 
         <span class="comment">// Redox OS.
-        </span><span class="attr">#[cfg(target_os = <span class="string">&quot;redox&quot;</span>)]
+        </span><span class="attr">#[cfg(target_os = <span class="string">"redox"</span>)]
         </span>{
-            <span class="self">self</span>.load_fonts_dir(<span class="string">&quot;/ui/fonts&quot;</span>);
+            <span class="self">self</span>.load_fonts_dir(<span class="string">"/ui/fonts"</span>);
         }
 
         <span class="comment">// Linux.
-        </span><span class="attr">#[cfg(all(unix, not(any(target_os = <span class="string">&quot;macos&quot;</span>, target_os = <span class="string">&quot;android&quot;</span>))))]
+        </span><span class="attr">#[cfg(all(unix, not(any(target_os = <span class="string">"macos"</span>, target_os = <span class="string">"android"</span>))))]
         </span>{
-            <span class="attr">#[cfg(feature = <span class="string">&quot;fontconfig&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"fontconfig"</span>)]
             </span>{
                 <span class="self">self</span>.load_fontconfig();
             }
 
-            <span class="attr">#[cfg(not(feature = <span class="string">&quot;fontconfig&quot;</span>))]
+            <span class="attr">#[cfg(not(feature = <span class="string">"fontconfig"</span>))]
             </span>{
-                <span class="self">self</span>.load_fonts_dir(<span class="string">&quot;/usr/share/fonts/&quot;</span>);
-                <span class="self">self</span>.load_fonts_dir(<span class="string">&quot;/usr/local/share/fonts/&quot;</span>);
+                <span class="self">self</span>.load_fonts_dir(<span class="string">"/usr/share/fonts/"</span>);
+                <span class="self">self</span>.load_fonts_dir(<span class="string">"/usr/local/share/fonts/"</span>);
 
-                <span class="kw">if let </span><span class="prelude-val">Ok</span>(<span class="kw-2">ref </span>home) = std::env::var(<span class="string">&quot;HOME&quot;</span>) {
+                <span class="kw">if let </span><span class="prelude-val">Ok</span>(<span class="kw-2">ref </span>home) = std::env::var(<span class="string">"HOME"</span>) {
                     <span class="kw">let </span>home_path = std::path::Path::new(home);
-                    <span class="self">self</span>.load_fonts_dir(home_path.join(<span class="string">&quot;.fonts&quot;</span>));
-                    <span class="self">self</span>.load_fonts_dir(home_path.join(<span class="string">&quot;.local/share/fonts&quot;</span>));
+                    <span class="self">self</span>.load_fonts_dir(home_path.join(<span class="string">".fonts"</span>));
+                    <span class="self">self</span>.load_fonts_dir(home_path.join(<span class="string">".local/share/fonts"</span>));
                 }
             }
         }
@@ -1703,39 +1714,39 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
     <span class="comment">// Linux.
     </span><span class="attr">#[cfg(all(
         unix,
-        feature = <span class="string">&quot;fontconfig&quot;</span>,
-        not(any(target_os = <span class="string">&quot;macos&quot;</span>, target_os = <span class="string">&quot;android&quot;</span>))
+        feature = <span class="string">"fontconfig"</span>,
+        not(any(target_os = <span class="string">"macos"</span>, target_os = <span class="string">"android"</span>))
     ))]
     </span><span class="kw">fn </span>load_fontconfig(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">use </span>std::path::Path;
 
         <span class="kw">let </span><span class="kw-2">mut </span>fontconfig = fontconfig_parser::FontConfig::default();
-        <span class="kw">let </span>home = std::env::var(<span class="string">&quot;HOME&quot;</span>);
+        <span class="kw">let </span>home = std::env::var(<span class="string">"HOME"</span>);
 
-        <span class="kw">if let </span><span class="prelude-val">Ok</span>(<span class="kw-2">ref </span>config_file) = std::env::var(<span class="string">&quot;FONTCONFIG_FILE&quot;</span>) {
+        <span class="kw">if let </span><span class="prelude-val">Ok</span>(<span class="kw-2">ref </span>config_file) = std::env::var(<span class="string">"FONTCONFIG_FILE"</span>) {
             <span class="kw">let _ </span>= fontconfig.merge_config(Path::new(config_file));
         } <span class="kw">else </span>{
-            <span class="kw">let </span>xdg_config_home = <span class="kw">if let </span><span class="prelude-val">Ok</span>(val) = std::env::var(<span class="string">&quot;XDG_CONFIG_HOME&quot;</span>) {
+            <span class="kw">let </span>xdg_config_home = <span class="kw">if let </span><span class="prelude-val">Ok</span>(val) = std::env::var(<span class="string">"XDG_CONFIG_HOME"</span>) {
                 <span class="prelude-val">Some</span>(val.into())
             } <span class="kw">else if let </span><span class="prelude-val">Ok</span>(<span class="kw-2">ref </span>home) = home {
                 <span class="comment">// according to https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
                 // $XDG_CONFIG_HOME should default to $HOME/.config if not set
-                </span><span class="prelude-val">Some</span>(Path::new(home).join(<span class="string">&quot;.config&quot;</span>))
+                </span><span class="prelude-val">Some</span>(Path::new(home).join(<span class="string">".config"</span>))
             } <span class="kw">else </span>{
                 <span class="prelude-val">None
             </span>};
 
             <span class="kw">let </span>read_global = <span class="kw">match </span>xdg_config_home {
                 <span class="prelude-val">Some</span>(p) =&gt; fontconfig
-                    .merge_config(<span class="kw-2">&amp;</span>p.join(<span class="string">&quot;fontconfig/fonts.conf&quot;</span>))
+                    .merge_config(<span class="kw-2">&amp;</span>p.join(<span class="string">"fontconfig/fonts.conf"</span>))
                     .is_err(),
                 <span class="prelude-val">None </span>=&gt; <span class="bool-val">true</span>,
             };
 
             <span class="kw">if </span>read_global {
-                <span class="kw">let _ </span>= fontconfig.merge_config(Path::new(<span class="string">&quot;/etc/fonts/local.conf&quot;</span>));
+                <span class="kw">let _ </span>= fontconfig.merge_config(Path::new(<span class="string">"/etc/fonts/local.conf"</span>));
             }
-            <span class="kw">let _ </span>= fontconfig.merge_config(Path::new(<span class="string">&quot;/etc/fonts/fonts.conf&quot;</span>));
+            <span class="kw">let _ </span>= fontconfig.merge_config(Path::new(<span class="string">"/etc/fonts/fonts.conf"</span>));
         }
 
         <span class="kw">for </span>fontconfig_parser::Alias {
@@ -1752,21 +1763,21 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
 
             <span class="kw">if let </span><span class="prelude-val">Some</span>(name) = name {
                 <span class="kw">match </span>alias.to_lowercase().as_str() {
-                    <span class="string">&quot;serif&quot; </span>=&gt; <span class="self">self</span>.set_serif_family(name),
-                    <span class="string">&quot;sans-serif&quot; </span>=&gt; <span class="self">self</span>.set_sans_serif_family(name),
-                    <span class="string">&quot;sans serif&quot; </span>=&gt; <span class="self">self</span>.set_sans_serif_family(name),
-                    <span class="string">&quot;monospace&quot; </span>=&gt; <span class="self">self</span>.set_monospace_family(name),
-                    <span class="string">&quot;cursive&quot; </span>=&gt; <span class="self">self</span>.set_cursive_family(name),
-                    <span class="string">&quot;fantasy&quot; </span>=&gt; <span class="self">self</span>.set_fantasy_family(name),
+                    <span class="string">"serif" </span>=&gt; <span class="self">self</span>.set_serif_family(name),
+                    <span class="string">"sans-serif" </span>=&gt; <span class="self">self</span>.set_sans_serif_family(name),
+                    <span class="string">"sans serif" </span>=&gt; <span class="self">self</span>.set_sans_serif_family(name),
+                    <span class="string">"monospace" </span>=&gt; <span class="self">self</span>.set_monospace_family(name),
+                    <span class="string">"cursive" </span>=&gt; <span class="self">self</span>.set_cursive_family(name),
+                    <span class="string">"fantasy" </span>=&gt; <span class="self">self</span>.set_fantasy_family(name),
                     <span class="kw">_ </span>=&gt; {}
                 }
             }
         }
 
         <span class="kw">for </span>dir <span class="kw">in </span>fontconfig.dirs {
-            <span class="kw">let </span>path = <span class="kw">if </span>dir.path.starts_with(<span class="string">&quot;~&quot;</span>) {
+            <span class="kw">let </span>path = <span class="kw">if </span>dir.path.starts_with(<span class="string">"~"</span>) {
                 <span class="kw">if let </span><span class="prelude-val">Ok</span>(<span class="kw-2">ref </span>home) = home {
-                    Path::new(home).join(dir.path.strip_prefix(<span class="string">&quot;~&quot;</span>).unwrap())
+                    Path::new(home).join(dir.path.strip_prefix(<span class="string">"~"</span>).unwrap())
                 } <span class="kw">else </span>{
                     <span class="kw">continue</span>;
                 }
@@ -1779,8 +1790,8 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
 
     <span class="doccomment">/// Pushes a user-provided `FaceInfo` to the database.
     ///
-    /// In some cases, a caller might want to ignore the font&#39;s metadata and provide their own.
-    /// This method doesn&#39;t parse the `source` font.
+    /// In some cases, a caller might want to ignore the font's metadata and provide their own.
+    /// This method doesn't parse the `source` font.
     ///
     /// The `id` field should be set to [`ID::dummy()`] and will be then overwritten by this method.
     </span><span class="kw">pub fn </span>push_face_info(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>info: FaceInfo) {
@@ -1845,7 +1856,7 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
     <span class="doccomment">/// Returns the generic family name or the `Family::Name` itself.
     ///
     /// Generic family names should be set via `Database::set_*_family` methods.
-    </span><span class="kw">pub fn </span>family_name&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, family: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Family) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str {
+    </span><span class="kw">pub fn </span>family_name&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, family: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Family) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str {
         <span class="kw">match </span>family {
             Family::Name(name) =&gt; name,
             Family::Serif =&gt; <span class="self">self</span>.family_serif.as_str(),
@@ -1881,7 +1892,7 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
     ///
     /// This can be used for manual font matching.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>faces(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span>FaceInfo&gt; + <span class="lifetime">&#39;_ </span>{
+    </span><span class="kw">pub fn </span>faces(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span>FaceInfo&gt; + <span class="lifetime">'_ </span>{
         <span class="self">self</span>.faces.iter().map(|(<span class="kw">_</span>, info)| info)
     }
 
@@ -1898,10 +1909,10 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
         <span class="self">self</span>.face(id).map(|info| (info.source.clone(), info.index))
     }
 
-    <span class="doccomment">/// Executes a closure with a font&#39;s data.
+    <span class="doccomment">/// Executes a closure with a font's data.
     ///
-    /// We can&#39;t return a reference to a font binary data because of lifetimes.
-    /// So instead, you can use this method to process font&#39;s data.
+    /// We can't return a reference to a font binary data because of lifetimes.
+    /// So instead, you can use this method to process font's data.
     ///
     /// The closure accepts raw font data and font face index.
     ///
@@ -1931,13 +1942,13 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
     /// # Safety
     ///
     /// If the face originates from a file from disk, then the file is mapped from disk. This is unsafe as
-    /// another process may make changes to the file on disk, which may become visible in this process&#39;
+    /// another process may make changes to the file on disk, which may become visible in this process'
     /// mapping and possibly cause crashes.
     ///
     /// If the underlying font provides multiple faces, then all faces are updated to participate in
     /// the data sharing. If the face was previously marked for data sharing, then this function will
     /// return a clone of the existing reference.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;fs&quot;</span>, feature = <span class="string">&quot;memmap&quot;</span>))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"fs"</span>, feature = <span class="string">"memmap"</span>))]
     </span><span class="kw">pub unsafe fn </span>make_shared_face_data(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         id: ID,
@@ -1976,7 +1987,7 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
     <span class="doccomment">/// Transfers ownership of shared font data back to the font database. This is the reverse operation
     /// of [`Self::make_shared_face_data`]. If the font data belonging to the specified face is mapped
     /// from a file on disk, then that mapping is closed and the data becomes private to the process again.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;fs&quot;</span>, feature = <span class="string">&quot;memmap&quot;</span>))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"fs"</span>, feature = <span class="string">"memmap"</span>))]
     </span><span class="kw">pub fn </span>make_face_data_unshared(<span class="kw-2">&amp;mut </span><span class="self">self</span>, id: ID) {
         <span class="kw">let </span>face_info = <span class="kw">match </span><span class="self">self</span>.faces.get(id.<span class="number">0</span>) {
             <span class="prelude-val">Some</span>(face_info) =&gt; face_info,
@@ -1986,7 +1997,7 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
         <span class="kw">let </span>old_source = face_info.source.clone();
 
         <span class="kw">let </span>shared_path = <span class="kw">match </span>old_source {
-            <span class="attr">#[cfg(all(feature = <span class="string">&quot;fs&quot;</span>, feature = <span class="string">&quot;memmap&quot;</span>))]
+            <span class="attr">#[cfg(all(feature = <span class="string">"fs"</span>, feature = <span class="string">"memmap"</span>))]
             </span>Source::SharedFile(path, <span class="kw">_</span>) =&gt; path,
             <span class="kw">_ </span>=&gt; <span class="kw">return</span>,
         };
@@ -2014,7 +2025,7 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
     <span class="doccomment">/// A font source.
     ///
     /// Note that multiple `FaceInfo` objects can reference the same data in case of
-    /// font collections, which means that they&#39;ll use the same Source.
+    /// font collections, which means that they'll use the same Source.
     </span><span class="kw">pub </span>source: Source,
 
     <span class="doccomment">/// A face index in the `source`.
@@ -2023,7 +2034,7 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
     <span class="doccomment">/// A list of family names.
     ///
     /// Contains pairs of Name + Language. Where the first family is always English US,
-    /// unless it&#39;s missing from the font.
+    /// unless it's missing from the font.
     ///
     /// Corresponds to a *Typographic Family* (ID 16) or a *Font Family* (ID 1) [name ID]
     /// in a TrueType font.
@@ -2061,15 +2072,15 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
 /// Stores the whole font and not just a single face.
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub enum </span>Source {
-    <span class="doccomment">/// A font&#39;s raw data, typically backed by a Vec&lt;u8&gt;.
+    <span class="doccomment">/// A font's raw data, typically backed by a Vec&lt;u8&gt;.
     </span>Binary(alloc::sync::Arc&lt;<span class="kw">dyn </span>AsRef&lt;[u8]&gt; + Sync + Send&gt;),
 
-    <span class="doccomment">/// A font&#39;s path.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;fs&quot;</span>)]
+    <span class="doccomment">/// A font's path.
+    </span><span class="attr">#[cfg(feature = <span class="string">"fs"</span>)]
     </span>File(std::path::PathBuf),
 
-    <span class="doccomment">/// A font&#39;s raw data originating from a shared file mapping.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;fs&quot;</span>, feature = <span class="string">&quot;memmap&quot;</span>))]
+    <span class="doccomment">/// A font's raw data originating from a shared file mapping.
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"fs"</span>, feature = <span class="string">"memmap"</span>))]
     </span>SharedFile(
         std::path::PathBuf,
         std::sync::Arc&lt;<span class="kw">dyn </span>AsRef&lt;[u8]&gt; + Sync + Send&gt;,
@@ -2077,17 +2088,17 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
 }
 
 <span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Source {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; core::fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; core::fmt::Result {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::Binary(arg0) =&gt; f
-                .debug_tuple(<span class="string">&quot;SharedBinary&quot;</span>)
+                .debug_tuple(<span class="string">"SharedBinary"</span>)
                 .field(<span class="kw-2">&amp;</span>arg0.as_ref().as_ref())
                 .finish(),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;fs&quot;</span>)]
-            </span><span class="self">Self</span>::File(arg0) =&gt; f.debug_tuple(<span class="string">&quot;File&quot;</span>).field(arg0).finish(),
-            <span class="attr">#[cfg(all(feature = <span class="string">&quot;fs&quot;</span>, feature = <span class="string">&quot;memmap&quot;</span>))]
+            <span class="attr">#[cfg(feature = <span class="string">"fs"</span>)]
+            </span><span class="self">Self</span>::File(arg0) =&gt; f.debug_tuple(<span class="string">"File"</span>).field(arg0).finish(),
+            <span class="attr">#[cfg(all(feature = <span class="string">"fs"</span>, feature = <span class="string">"memmap"</span>))]
             </span><span class="self">Self</span>::SharedFile(arg0, arg1) =&gt; f
-                .debug_tuple(<span class="string">&quot;SharedFile&quot;</span>)
+                .debug_tuple(<span class="string">"SharedFile"</span>)
                 .field(arg0)
                 .field(<span class="kw-2">&amp;</span>arg1.as_ref().as_ref())
                 .finish(),
@@ -2101,13 +2112,13 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
         </span>P: FnOnce(<span class="kw-2">&amp;</span>[u8]) -&gt; T,
     {
         <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self </span>{
-            <span class="attr">#[cfg(all(feature = <span class="string">&quot;fs&quot;</span>, not(feature = <span class="string">&quot;memmap&quot;</span>)))]
+            <span class="attr">#[cfg(all(feature = <span class="string">"fs"</span>, not(feature = <span class="string">"memmap"</span>)))]
             </span>Source::File(<span class="kw-2">ref </span>path) =&gt; {
                 <span class="kw">let </span>data = std::fs::read(path).ok()<span class="question-mark">?</span>;
 
                 <span class="prelude-val">Some</span>(p(<span class="kw-2">&amp;</span>data))
             }
-            <span class="attr">#[cfg(all(feature = <span class="string">&quot;fs&quot;</span>, feature = <span class="string">&quot;memmap&quot;</span>))]
+            <span class="attr">#[cfg(all(feature = <span class="string">"fs"</span>, feature = <span class="string">"memmap"</span>))]
             </span>Source::File(<span class="kw-2">ref </span>path) =&gt; {
                 <span class="kw">let </span>file = std::fs::File::open(path).ok()<span class="question-mark">?</span>;
                 <span class="kw">let </span>data = <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span>memmap2::MmapOptions::new().map(<span class="kw-2">&amp;</span>file).ok()<span class="question-mark">? </span>};
@@ -2115,7 +2126,7 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
                 <span class="prelude-val">Some</span>(p(data))
             }
             Source::Binary(<span class="kw-2">ref </span>data) =&gt; <span class="prelude-val">Some</span>(p(data.as_ref().as_ref())),
-            <span class="attr">#[cfg(all(feature = <span class="string">&quot;fs&quot;</span>, feature = <span class="string">&quot;memmap&quot;</span>))]
+            <span class="attr">#[cfg(all(feature = <span class="string">"fs"</span>, feature = <span class="string">"memmap"</span>))]
             </span>Source::SharedFile(<span class="kw">_</span>, <span class="kw-2">ref </span>data) =&gt; <span class="prelude-val">Some</span>(p(data.as_ref().as_ref())),
         }
     }
@@ -2125,11 +2136,11 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
 ///
 /// Mainly used by `Database::query()`.
 </span><span class="attr">#[derive(Clone, Copy, Default, Debug, Eq, PartialEq, Hash)]
-</span><span class="kw">pub struct </span>Query&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Query&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// A prioritized list of font family names or generic family names.
     ///
     /// [font-family](https://www.w3.org/TR/2018/REC-css-fonts-3-20180920/#propdef-font-family) in CSS.
-    </span><span class="kw">pub </span>families: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[Family&lt;<span class="lifetime">&#39;a</span>&gt;],
+    </span><span class="kw">pub </span>families: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[Family&lt;<span class="lifetime">'a</span>&gt;],
 
     <span class="doccomment">/// Specifies the weight of glyphs in the font, their degree of blackness or stroke thickness.
     ///
@@ -2150,7 +2161,7 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
 <span class="comment">// Enum value descriptions are from the CSS spec.
 </span><span class="doccomment">/// A [font family](https://www.w3.org/TR/2018/REC-css-fonts-3-20180920/#propdef-font-family).
 </span><span class="attr">#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-</span><span class="kw">pub enum </span>Family&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub enum </span>Family&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// The name of a font family of choice.
     ///
     /// This must be a *Typographic Family* (ID 16) or a *Family Name* (ID 1) in terms of TrueType.
@@ -2158,7 +2169,7 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
     /// _Regular_, etc.
     ///
     /// Localized names are allowed.
-    </span>Name(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str),
+    </span>Name(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str),
 
     <span class="doccomment">/// Serif fonts represent the formal text style for a script.
     </span>Serif,
@@ -2254,7 +2265,7 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
 }
 
 <span class="kw">fn </span>parse_names(raw_face: <span class="kw-2">&amp;</span>ttf_parser::RawFace) -&gt; <span class="prelude-ty">Option</span>&lt;(Vec&lt;(String, Language)&gt;, String)&gt; {
-    <span class="kw">const </span>NAME_TAG: ttf_parser::Tag = ttf_parser::Tag::from_bytes(<span class="string">b&quot;name&quot;</span>);
+    <span class="kw">const </span>NAME_TAG: ttf_parser::Tag = ttf_parser::Tag::from_bytes(<span class="string">b"name"</span>);
     <span class="kw">let </span>name_data = raw_face.table(NAME_TAG)<span class="question-mark">?</span>;
     <span class="kw">let </span>name_table = ttf_parser::name::Table::parse(name_data)<span class="question-mark">?</span>;
 
@@ -2342,7 +2353,7 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
 }
 
 <span class="kw">fn </span>parse_os2(raw_face: <span class="kw-2">&amp;</span>ttf_parser::RawFace) -&gt; (Style, Weight, Stretch) {
-    <span class="kw">const </span>OS2_TAG: ttf_parser::Tag = ttf_parser::Tag::from_bytes(<span class="string">b&quot;OS/2&quot;</span>);
+    <span class="kw">const </span>OS2_TAG: ttf_parser::Tag = ttf_parser::Tag::from_bytes(<span class="string">b"OS/2"</span>);
     <span class="kw">let </span>table = <span class="kw">match </span>raw_face
         .table(OS2_TAG)
         .and_then(ttf_parser::os2::Table::parse)
@@ -2367,7 +2378,7 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
     <span class="comment">// We need just a single value from the `post` table, while ttf-parser will parse all.
     // Therefore we have a custom parser.
 
-    </span><span class="kw">const </span>POST_TAG: ttf_parser::Tag = ttf_parser::Tag::from_bytes(<span class="string">b&quot;post&quot;</span>);
+    </span><span class="kw">const </span>POST_TAG: ttf_parser::Tag = ttf_parser::Tag::from_bytes(<span class="string">b"post"</span>);
     <span class="kw">let </span>data = <span class="kw">match </span>raw_face.table(POST_TAG) {
         <span class="prelude-val">Some</span>(v) =&gt; v,
         <span class="prelude-val">None </span>=&gt; <span class="kw">return </span>(<span class="bool-val">false</span>, <span class="bool-val">false</span>),
@@ -2387,7 +2398,7 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
     <span class="kw">fn </span>is_supported_encoding(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool;
 }
 
-<span class="kw">impl </span>NameExt <span class="kw">for </span>ttf_parser::name::Name&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>NameExt <span class="kw">for </span>ttf_parser::name::Name&lt;<span class="lifetime">'_</span>&gt; {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>is_mac_roman(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="kw">use </span>ttf_parser::PlatformId::Macintosh;
@@ -2476,7 +2487,7 @@ then you can use the unsafe [`Database::make_shared_face_data`] function.
 
     <span class="comment">// Step 4c (`font-weight`).
     //
-    // The spec doesn&#39;t say what to do if the weight is between 400 and 500 exclusive, so we
+    // The spec doesn't say what to do if the weight is between 400 and 500 exclusive, so we
     // just use 450 as the cutoff.
     </span><span class="kw">let </span>weight = query.weight.<span class="number">0</span>;
 

@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ttf-parser-0.20.0/src/tables/gvar.rs`."><title>gvar.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ttf_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ttf-parser-0.20.0/src/tables/gvar.rs`."><title>gvar.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ttf_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1927,17 +1928,17 @@
 <span class="kw">use </span><span class="kw">crate</span>::parser::{LazyArray16, Offset, Offset16, Offset32, Stream, F2DOT14};
 <span class="kw">use crate</span>::{BBox, GlyphId, NormalizedCoordinate, OutlineBuilder, Rect, Transform};
 
-<span class="doccomment">/// &#39;The TrueType rasterizer dynamically generates &#39;phantom&#39; points for each glyph
+<span class="doccomment">/// 'The TrueType rasterizer dynamically generates 'phantom' points for each glyph
 /// that represent horizontal and vertical advance widths and side bearings,
-/// and the variation data within the `gvar` table includes data for these phantom points.&#39;
+/// and the variation data within the `gvar` table includes data for these phantom points.'
 ///
-/// We don&#39;t actually use them, but they are required during deltas parsing.
+/// We don't actually use them, but they are required during deltas parsing.
 </span><span class="kw">const </span>PHANTOM_POINTS_LEN: usize = <span class="number">4</span>;
 
 <span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">enum </span>GlyphVariationDataOffsets&lt;<span class="lifetime">&#39;a</span>&gt; {
-    Short(LazyArray16&lt;<span class="lifetime">&#39;a</span>, Offset16&gt;),
-    Long(LazyArray16&lt;<span class="lifetime">&#39;a</span>, Offset32&gt;),
+</span><span class="kw">enum </span>GlyphVariationDataOffsets&lt;<span class="lifetime">'a</span>&gt; {
+    Short(LazyArray16&lt;<span class="lifetime">'a</span>, Offset16&gt;),
+    Long(LazyArray16&lt;<span class="lifetime">'a</span>, Offset32&gt;),
 }
 
 <span class="attr">#[derive(Clone, Copy, Default, Debug)]
@@ -1951,9 +1952,9 @@
 <span class="comment">// This structure will be used by the `VariationTuples` stack buffer,
 // so it has to be as small as possible.
 </span><span class="attr">#[derive(Clone, Copy, Default)]
-</span><span class="kw">struct </span>VariationTuple&lt;<span class="lifetime">&#39;a</span>&gt; {
-    set_points: <span class="prelude-ty">Option</span>&lt;SetPointsIter&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    deltas: PackedDeltasIter&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">struct </span>VariationTuple&lt;<span class="lifetime">'a</span>&gt; {
+    set_points: <span class="prelude-ty">Option</span>&lt;SetPointsIter&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    deltas: PackedDeltasIter&lt;<span class="lifetime">'a</span>&gt;,
     <span class="doccomment">/// The last parsed point with delta in the contour.
     /// Used during delta resolving.
     </span>prev_point: <span class="prelude-ty">Option</span>&lt;PointAndDelta&gt;,
@@ -1971,18 +1972,18 @@
 /// This is the only part of the `gvar` algorithm that actually allocates a data.
 /// This is probably unavoidable due to `gvar` structure,
 /// since we have to iterate all tuples in parallel.
-</span><span class="kw">enum </span>VariationTuples&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">enum </span>VariationTuples&lt;<span class="lifetime">'a</span>&gt; {
     Stack {
-        headers: [VariationTuple&lt;<span class="lifetime">&#39;a</span>&gt;; MAX_STACK_TUPLES_LEN <span class="kw">as </span>usize],
+        headers: [VariationTuple&lt;<span class="lifetime">'a</span>&gt;; MAX_STACK_TUPLES_LEN <span class="kw">as </span>usize],
         len: u16,
     },
-    <span class="attr">#[cfg(feature = <span class="string">&quot;gvar-alloc&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"gvar-alloc"</span>)]
     </span>Heap {
-        vec: std::vec::Vec&lt;VariationTuple&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+        vec: std::vec::Vec&lt;VariationTuple&lt;<span class="lifetime">'a</span>&gt;&gt;,
     },
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Default <span class="kw">for </span>VariationTuples&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Default <span class="kw">for </span>VariationTuples&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::Stack {
             headers: [VariationTuple::default(); MAX_STACK_TUPLES_LEN <span class="kw">as </span>usize],
@@ -1991,13 +1992,13 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; VariationTuples&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; VariationTuples&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Attempt to reserve up to `capacity` total slots for variation tuples.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;gvar-alloc&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"gvar-alloc"</span>)]
     </span><span class="kw">fn </span>reserve(<span class="kw-2">&amp;mut </span><span class="self">self</span>, capacity: u16) -&gt; bool {
         <span class="comment">// If the requested capacity exceeds the configured maximum stack tuple size ...
         </span><span class="kw">if </span>capacity &gt; MAX_STACK_TUPLES_LEN {
-            <span class="comment">// ... and we&#39;re currently on the stack, move to the heap.
+            <span class="comment">// ... and we're currently on the stack, move to the heap.
             </span><span class="kw">if let </span><span class="self">Self</span>::Stack { headers, len } = <span class="self">self </span>{
                 <span class="kw">let </span><span class="kw-2">mut </span>vec = std::vec::Vec::with_capacity(capacity <span class="kw">as </span>usize);
                 <span class="kw">for </span>header <span class="kw">in </span>headers.iter_mut().take(<span class="kw-2">*</span>len <span class="kw">as </span>usize) {
@@ -2017,31 +2018,31 @@
                 vec.reserve(capacity <span class="kw">as </span>usize - vec.len());
                 <span class="bool-val">true
             </span>}
-            <span class="comment">// ... or do nothing if the vec is already large enough or we&#39;re on the stack.
+            <span class="comment">// ... or do nothing if the vec is already large enough or we're on the stack.
             </span><span class="kw">_ </span>=&gt; <span class="bool-val">true</span>,
         }
     }
 
     <span class="doccomment">/// Attempt to reserve up to `capacity` total slots for variation tuples.
-    </span><span class="attr">#[cfg(not(feature = <span class="string">&quot;gvar-alloc&quot;</span>))]
+    </span><span class="attr">#[cfg(not(feature = <span class="string">"gvar-alloc"</span>))]
     </span><span class="kw">fn </span>reserve(<span class="kw-2">&amp;mut </span><span class="self">self</span>, capacity: u16) -&gt; bool {
         capacity &lt;= MAX_STACK_TUPLES_LEN
     }
 
     <span class="doccomment">/// Get the number of tuples stored in the structure.
-    </span><span class="attr">#[cfg_attr(not(feature = <span class="string">&quot;gvar-alloc&quot;</span>), allow(dead_code))]
+    </span><span class="attr">#[cfg_attr(not(feature = <span class="string">"gvar-alloc"</span>), allow(dead_code))]
     </span><span class="kw">fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::Stack { len, .. } =&gt; <span class="kw-2">*</span>len,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;gvar-alloc&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"gvar-alloc"</span>)]
             </span><span class="self">Self</span>::Heap { vec } =&gt; vec.len() <span class="kw">as </span>u16,
         }
     }
 
     <span class="doccomment">/// Append a new tuple header to the list.
-    /// This may panic if the list can&#39;t hold a new header.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;gvar-alloc&quot;</span>)]
-    </span><span class="kw">fn </span>push(<span class="kw-2">&amp;mut </span><span class="self">self</span>, header: VariationTuple&lt;<span class="lifetime">&#39;a</span>&gt;) {
+    /// This may panic if the list can't hold a new header.
+    </span><span class="attr">#[cfg(feature = <span class="string">"gvar-alloc"</span>)]
+    </span><span class="kw">fn </span>push(<span class="kw-2">&amp;mut </span><span class="self">self</span>, header: VariationTuple&lt;<span class="lifetime">'a</span>&gt;) {
         <span class="comment">// Reserve space for the new element.
         // This may fail and result in a later panic, but that matches pre-heap behavior.
         </span><span class="self">self</span>.reserve(<span class="self">self</span>.len() + <span class="number">1</span>);
@@ -2056,10 +2057,10 @@
     }
 
     <span class="doccomment">/// Append a new tuple header to the list.
-    /// This may panic if the list can&#39;t hold a new header.
-    </span><span class="attr">#[cfg(not(feature = <span class="string">&quot;gvar-alloc&quot;</span>))]
+    /// This may panic if the list can't hold a new header.
+    </span><span class="attr">#[cfg(not(feature = <span class="string">"gvar-alloc"</span>))]
     #[inline]
-    </span><span class="kw">fn </span>push(<span class="kw-2">&amp;mut </span><span class="self">self</span>, header: VariationTuple&lt;<span class="lifetime">&#39;a</span>&gt;) {
+    </span><span class="kw">fn </span>push(<span class="kw-2">&amp;mut </span><span class="self">self</span>, header: VariationTuple&lt;<span class="lifetime">'a</span>&gt;) {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::Stack { headers, len } =&gt; {
                 headers[usize::from(<span class="kw-2">*</span>len)] = header;
@@ -2072,16 +2073,16 @@
     </span><span class="kw">fn </span>clear(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::Stack { len, .. } =&gt; <span class="kw-2">*</span>len = <span class="number">0</span>,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;gvar-alloc&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"gvar-alloc"</span>)]
             </span><span class="self">Self</span>::Heap { vec } =&gt; vec.clear(),
         }
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>as_mut_slice(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>[VariationTuple&lt;<span class="lifetime">&#39;a</span>&gt;] {
+    </span><span class="kw">fn </span>as_mut_slice(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>[VariationTuple&lt;<span class="lifetime">'a</span>&gt;] {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::Stack { headers, len } =&gt; <span class="kw-2">&amp;mut </span>headers[<span class="number">0</span>..usize::from(<span class="kw-2">*</span>len)],
-            <span class="attr">#[cfg(feature = <span class="string">&quot;gvar-alloc&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"gvar-alloc"</span>)]
             </span><span class="self">Self</span>::Heap { vec } =&gt; vec.as_mut_slice(),
         }
     }
@@ -2182,15 +2183,15 @@
 }
 
 <span class="comment">// https://docs.microsoft.com/en-us/typography/opentype/spec/otvarcommonformats#tuplevariationheader
-</span><span class="kw">fn </span>parse_variation_tuples&lt;<span class="lifetime">&#39;a</span>&gt;(
+</span><span class="kw">fn </span>parse_variation_tuples&lt;<span class="lifetime">'a</span>&gt;(
     count: u16,
     coordinates: <span class="kw-2">&amp;</span>[NormalizedCoordinate],
     shared_tuple_records: <span class="kw-2">&amp;</span>LazyArray16&lt;F2DOT14&gt;,
-    shared_point_numbers: <span class="prelude-ty">Option</span>&lt;PackedPointsIter&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    shared_point_numbers: <span class="prelude-ty">Option</span>&lt;PackedPointsIter&lt;<span class="lifetime">'a</span>&gt;&gt;,
     points_len: u16,
-    <span class="kw-2">mut </span>main_s: Stream&lt;<span class="lifetime">&#39;a</span>&gt;,
-    <span class="kw-2">mut </span>serialized_s: Stream&lt;<span class="lifetime">&#39;a</span>&gt;,
-    tuples: <span class="kw-2">&amp;mut </span>VariationTuples&lt;<span class="lifetime">&#39;a</span>&gt;,
+    <span class="kw-2">mut </span>main_s: Stream&lt;<span class="lifetime">'a</span>&gt;,
+    <span class="kw-2">mut </span>serialized_s: Stream&lt;<span class="lifetime">'a</span>&gt;,
+    tuples: <span class="kw-2">&amp;mut </span>VariationTuples&lt;<span class="lifetime">'a</span>&gt;,
 ) -&gt; <span class="prelude-ty">Option</span>&lt;()&gt; {
     <span class="macro">debug_assert!</span>(core::mem::size_of::&lt;VariationTuple&gt;() &lt;= <span class="number">80</span>);
 
@@ -2324,8 +2325,8 @@
                 }
             }
         } <span class="kw">else if </span>v == <span class="number">0 </span>|| v &lt; cmp::min(<span class="number">0</span>, peak) || v &gt; cmp::max(<span class="number">0</span>, peak) {
-            <span class="comment">// &#39;If the instance coordinate is out of range for some axis, then the
-            // region and its associated deltas are not applicable.&#39;
+            <span class="comment">// 'If the instance coordinate is out of range for some axis, then the
+            // region and its associated deltas are not applicable.'
             </span><span class="kw">return </span><span class="prelude-val">Some</span>(header);
         } <span class="kw">else </span>{
             scalar <span class="kw-2">*</span>= f32::from(v) / f32::from(peak);
@@ -2351,7 +2352,7 @@
             <span class="self">self</span>.<span class="number">0 </span>&amp; <span class="self">Self</span>::POINTS_ARE_WORDS_FLAG != <span class="number">0
         </span>}
 
-        <span class="comment">// &#39;Mask for the low 7 bits to provide the number of point values in the run, minus one.&#39;
+        <span class="comment">// 'Mask for the low 7 bits to provide the number of point values in the run, minus one.'
         // So we have to add 1.
         // It will never overflow because of a mask.
         </span><span class="attr">#[inline]
@@ -2380,18 +2381,18 @@
     // so it has to be as small as possible.
     // Therefore we cannot use `Stream` and other abstractions.
     </span><span class="attr">#[derive(Clone, Copy)]
-    </span><span class="kw">pub struct </span>PackedPointsIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-        data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    </span><span class="kw">pub struct </span>PackedPointsIter&lt;<span class="lifetime">'a</span>&gt; {
+        data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
         <span class="comment">// u16 is enough, since the maximum number of points is 32767.
         </span>offset: u16,
         state: State,
         points_left: u8,
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; PackedPointsIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; PackedPointsIter&lt;<span class="lifetime">'a</span>&gt; {
         <span class="comment">// The first Option::None indicates a parsing error.
-        // The second Option::None indicates &quot;no points&quot;.
-        </span><span class="kw">pub fn </span>new&lt;<span class="lifetime">&#39;b</span>&gt;(s: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>Stream&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt;&gt; {
+        // The second Option::None indicates "no points".
+        </span><span class="kw">pub fn </span>new&lt;<span class="lifetime">'b</span>&gt;(s: <span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw-2">mut </span>Stream&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt;&gt; {
             <span class="comment">// The total amount of points can be set as one or two bytes
             // depending on the first bit.
             </span><span class="kw">let </span>b1 = s.read::&lt;u8&gt;()<span class="question-mark">?</span>;
@@ -2450,7 +2451,7 @@
         }
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>PackedPointsIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>PackedPointsIter&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">type </span>Item = u16;
 
         <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -2497,14 +2498,14 @@
     // false true false true false false false true
     // This way we can iterate glyph points and point numbers in parallel.
     </span><span class="attr">#[derive(Clone, Copy)]
-    </span><span class="kw">pub struct </span>SetPointsIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-        iter: PackedPointsIter&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub struct </span>SetPointsIter&lt;<span class="lifetime">'a</span>&gt; {
+        iter: PackedPointsIter&lt;<span class="lifetime">'a</span>&gt;,
         unref_count: u16,
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SetPointsIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SetPointsIter&lt;<span class="lifetime">'a</span>&gt; {
         <span class="attr">#[inline]
-        </span><span class="kw">pub fn </span>new(<span class="kw-2">mut </span>iter: PackedPointsIter&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="self">Self </span>{
+        </span><span class="kw">pub fn </span>new(<span class="kw-2">mut </span>iter: PackedPointsIter&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="self">Self </span>{
             <span class="kw">let </span>unref_count = iter.next().unwrap_or(<span class="number">0</span>);
             SetPointsIter { iter, unref_count }
         }
@@ -2521,7 +2522,7 @@
         }
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>SetPointsIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>SetPointsIter&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">type </span>Item = bool;
 
         <span class="attr">#[inline]
@@ -2538,7 +2539,7 @@
                 }
             }
 
-            <span class="comment">// Iterator will be returning `Some(true)` after &quot;finished&quot;.
+            <span class="comment">// Iterator will be returning `Some(true)` after "finished".
             // This is because this iterator will be zipped with the `glyf::GlyphPointsIter`
             // and the number of glyph points can be larger than the amount of set points.
             // Anyway, this is a non-issue in a well-formed font.
@@ -2556,7 +2557,7 @@
         }
 
         <span class="kw">fn </span>gen_control(control: NewControl) -&gt; u8 {
-            <span class="macro">assert!</span>(control.run_count &gt; <span class="number">0</span>, <span class="string">&quot;run count cannot be zero&quot;</span>);
+            <span class="macro">assert!</span>(control.run_count &gt; <span class="number">0</span>, <span class="string">"run count cannot be zero"</span>);
 
             <span class="kw">let </span><span class="kw-2">mut </span>n = <span class="number">0</span>;
             <span class="kw">if </span>control.deltas_are_words {
@@ -2828,7 +2829,7 @@
             <span class="self">self</span>.<span class="number">0 </span>&amp; <span class="self">Self</span>::DELTAS_ARE_WORDS_FLAG != <span class="number">0
         </span>}
 
-        <span class="comment">// &#39;Mask for the low 6 bits to provide the number of delta values in the run, minus one.&#39;
+        <span class="comment">// 'Mask for the low 6 bits to provide the number of delta values in the run, minus one.'
         // So we have to add 1.
         // It will never overflow because of a mask.
         </span><span class="attr">#[inline]
@@ -2905,8 +2906,8 @@
     // so it has to be as small as possible.
     // Therefore we cannot use `Stream` and other abstractions.
     </span><span class="attr">#[derive(Clone, Copy, Default)]
-    </span><span class="kw">pub struct </span>PackedDeltasIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-        data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    </span><span class="kw">pub struct </span>PackedDeltasIter&lt;<span class="lifetime">'a</span>&gt; {
+        data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
         x_run: RunState,
         y_run: RunState,
 
@@ -2918,9 +2919,9 @@
         scalar: f32,
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; PackedDeltasIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; PackedDeltasIter&lt;<span class="lifetime">'a</span>&gt; {
         <span class="doccomment">/// `count` indicates a number of delta pairs.
-        </span><span class="kw">pub fn </span>new(scalar: f32, count: u16, data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="self">Self </span>{
+        </span><span class="kw">pub fn </span>new(scalar: f32, count: u16, data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="self">Self </span>{
             <span class="macro">debug_assert!</span>(core::mem::size_of::&lt;PackedDeltasIter&gt;() &lt;= <span class="number">32</span>);
 
             <span class="kw">let </span><span class="kw-2">mut </span>iter = PackedDeltasIter {
@@ -2930,13 +2931,13 @@
                 ..PackedDeltasIter::default()
             };
 
-            <span class="comment">// &#39;The packed deltas are arranged with all of the deltas for X coordinates first,
-            // followed by the deltas for Y coordinates.&#39;
+            <span class="comment">// 'The packed deltas are arranged with all of the deltas for X coordinates first,
+            // followed by the deltas for Y coordinates.'
             // So we have to skip X deltas in the Y deltas iterator.
             //
-            // Note that Y deltas doesn&#39;t necessarily start with a Control byte
+            // Note that Y deltas doesn't necessarily start with a Control byte
             // and can actually start in the middle of the X run.
-            // So we can&#39;t simply split the input data in half
+            // So we can't simply split the input data in half
             // and process those chunks separately.
             </span><span class="kw">for _ in </span><span class="number">0</span>..count {
                 iter.y_run.next(data, scalar);
@@ -2969,7 +2970,7 @@
         }
 
         <span class="kw">fn </span>gen_control(control: NewControl) -&gt; u8 {
-            <span class="macro">assert!</span>(control.run_count &gt; <span class="number">0</span>, <span class="string">&quot;run count cannot be zero&quot;</span>);
+            <span class="macro">assert!</span>(control.run_count &gt; <span class="number">0</span>, <span class="string">"run count cannot be zero"</span>);
 
             <span class="kw">let </span><span class="kw-2">mut </span>n = <span class="number">0</span>;
             <span class="kw">if </span>control.deltas_are_zero {
@@ -3276,9 +3277,9 @@
             ];
 
             <span class="comment">// We have 3 pairs, not 4.
-            // We don&#39;t actually check this, since it will be very expensive.
+            // We don't actually check this, since it will be very expensive.
             // And it should not happen in a well-formed font anyway.
-            // So as long as it doesn&#39;t panic - we are fine.
+            // So as long as it doesn't panic - we are fine.
             </span><span class="kw">let </span><span class="kw-2">mut </span>iter = PackedDeltasIter::new(<span class="number">1.0</span>, <span class="number">4</span>, <span class="kw-2">&amp;</span>data);
             <span class="macro">assert_eq!</span>(iter.next().unwrap(), (<span class="number">2.0</span>, <span class="number">7.0</span>));
             <span class="macro">assert!</span>(iter.next().is_none());
@@ -3339,7 +3340,7 @@
         </span><span class="kw">fn </span>runs_overflow() {
             <span class="kw">let </span>data = <span class="macro">vec!</span>[<span class="number">0xFF</span>; <span class="number">0xFFFF</span>];
             <span class="kw">let </span><span class="kw-2">mut </span>iter = PackedDeltasIter::new(<span class="number">1.0</span>, <span class="number">0xFFFF</span>, <span class="kw-2">&amp;</span>data);
-            <span class="comment">// As long as it doesn&#39;t panic - we are fine.
+            <span class="comment">// As long as it doesn't panic - we are fine.
             </span><span class="macro">assert_eq!</span>(iter.next().unwrap(), (<span class="number">0.0</span>, <span class="number">0.0</span>));
         }
     }
@@ -3362,8 +3363,8 @@
 /// before the current one, we have to use the last one in the current contour.
 ///
 /// And in case of `ttf-parser` everything is becoming even more complex,
-/// since we don&#39;t actually have a list of points and deltas, only iterators.
-/// Because of `ttf-parser`&#39;s allocation free policy.
+/// since we don't actually have a list of points and deltas, only iterators.
+/// Because of `ttf-parser`'s allocation free policy.
 /// Which makes the code even more complicated.
 ///
 /// https://docs.microsoft.com/en-us/typography/opentype/spec/gvar#inferred-deltas-for-un-referenced-point-numbers
@@ -3446,7 +3447,7 @@
         //
         // This is probably the most expensive branch,
         // but nothing we can do about it since `glyf`/`gvar` data structure
-        // doesn&#39;t allow implementing a reverse iterator.
+        // doesn't allow implementing a reverse iterator.
         // So we have to parse everything once again.
 
         </span><span class="kw">let </span><span class="kw-2">mut </span>all_points = all_points.clone();
@@ -3534,10 +3535,10 @@
             next_delta
         }
     } <span class="kw">else </span>{
-        <span class="comment">// &#39;Target point coordinate is between adjacent point coordinates.&#39;
+        <span class="comment">// 'Target point coordinate is between adjacent point coordinates.'
         //
-        // &#39;Target point delta is derived from the adjacent point deltas
-        // using linear interpolation.&#39;
+        // 'Target point delta is derived from the adjacent point deltas
+        // using linear interpolation.'
         </span><span class="kw">let </span>d = f32::from(<span class="macro">try_opt_or!</span>(target_point.checked_sub(prev_point), <span class="number">0.0</span>))
             / f32::from(<span class="macro">try_opt_or!</span>(next_point.checked_sub(prev_point), <span class="number">0.0</span>));
         (<span class="number">1.0 </span>- d) * prev_delta + d * next_delta
@@ -3547,16 +3548,16 @@
 <span class="doccomment">/// A [Glyph Variations Table](
 /// https://docs.microsoft.com/en-us/typography/opentype/spec/gvar).
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>Table&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Table&lt;<span class="lifetime">'a</span>&gt; {
     axis_count: NonZeroU16,
-    shared_tuple_records: LazyArray16&lt;<span class="lifetime">&#39;a</span>, F2DOT14&gt;,
-    offsets: GlyphVariationDataOffsets&lt;<span class="lifetime">&#39;a</span>&gt;,
-    glyphs_variation_data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    shared_tuple_records: LazyArray16&lt;<span class="lifetime">'a</span>, F2DOT14&gt;,
+    offsets: GlyphVariationDataOffsets&lt;<span class="lifetime">'a</span>&gt;,
+    glyphs_variation_data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Table&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Table&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Parses a table from raw data.
-    </span><span class="kw">pub fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">pub fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">let </span>version = s.read::&lt;u32&gt;()<span class="question-mark">?</span>;
         <span class="kw">if </span>version != <span class="number">0x00010000 </span>{
@@ -3603,7 +3604,7 @@
         glyph_id: GlyphId,
         coordinates: <span class="kw-2">&amp;</span>[NormalizedCoordinate],
         points_len: u16,
-        tuples: <span class="kw-2">&amp;mut </span>VariationTuples&lt;<span class="lifetime">&#39;a</span>&gt;,
+        tuples: <span class="kw-2">&amp;mut </span>VariationTuples&lt;<span class="lifetime">'a</span>&gt;,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;()&gt; {
         tuples.clear();
 
@@ -3615,8 +3616,8 @@
 
         <span class="kw">let </span>(start, end) = <span class="kw">match </span><span class="self">self</span>.offsets {
             GlyphVariationDataOffsets::Short(<span class="kw-2">ref </span>array) =&gt; {
-                <span class="comment">// &#39;If the short format (Offset16) is used for offsets,
-                // the value stored is the offset divided by 2.&#39;
+                <span class="comment">// 'If the short format (Offset16) is used for offsets,
+                // the value stored is the offset divided by 2.'
                 </span>(
                     array.get(glyph_id.<span class="number">0</span>)<span class="question-mark">?</span>.to_usize() * <span class="number">2</span>,
                     array.get(next_glyph_id)<span class="question-mark">?</span>.to_usize() * <span class="number">2</span>,
@@ -3666,9 +3667,9 @@
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Table&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Table&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;Table {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"Table {{ ... }}"</span>)
     }
 }
 
@@ -3693,7 +3694,7 @@
     //
     // In case of a variable font, a bounding box defined in the `glyf` data
     // refers to the default variation values. Which is not what we want.
-    // Instead, we have to manually calculate outline&#39;s bbox.
+    // Instead, we have to manually calculate outline's bbox.
     </span>s.advance(<span class="number">8</span>);
 
     <span class="comment">// TODO: This is the most expensive part. Find a way to allocate it only once.
@@ -3767,12 +3768,12 @@
 }
 
 <span class="comment">// https://docs.microsoft.com/en-us/typography/opentype/spec/otvarcommonformats#tuple-variation-store-header
-</span><span class="kw">fn </span>parse_variation_data&lt;<span class="lifetime">&#39;a</span>&gt;(
+</span><span class="kw">fn </span>parse_variation_data&lt;<span class="lifetime">'a</span>&gt;(
     coordinates: <span class="kw-2">&amp;</span>[NormalizedCoordinate],
     shared_tuple_records: <span class="kw-2">&amp;</span>LazyArray16&lt;F2DOT14&gt;,
     points_len: u16,
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
-    tuples: <span class="kw-2">&amp;mut </span>VariationTuples&lt;<span class="lifetime">&#39;a</span>&gt;,
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
+    tuples: <span class="kw-2">&amp;mut </span>VariationTuples&lt;<span class="lifetime">'a</span>&gt;,
 ) -&gt; <span class="prelude-ty">Option</span>&lt;()&gt; {
     <span class="kw">const </span>SHARED_POINT_NUMBERS_FLAG: u16 = <span class="number">0x8000</span>;
     <span class="kw">const </span>COUNT_MASK: u16 = <span class="number">0x0FFF</span>;
@@ -3781,25 +3782,25 @@
     <span class="kw">let </span>tuple_variation_count = main_stream.read::&lt;u16&gt;()<span class="question-mark">?</span>;
     <span class="kw">let </span>data_offset = main_stream.read::&lt;Offset16&gt;()<span class="question-mark">?</span>;
 
-    <span class="comment">// &#39;The high 4 bits are flags, and the low 12 bits
-    // are the number of tuple variation tables for this glyph.&#39;
+    <span class="comment">// 'The high 4 bits are flags, and the low 12 bits
+    // are the number of tuple variation tables for this glyph.'
     </span><span class="kw">let </span>has_shared_point_numbers = tuple_variation_count &amp; SHARED_POINT_NUMBERS_FLAG != <span class="number">0</span>;
     <span class="kw">let </span>tuple_variation_count = tuple_variation_count &amp; COUNT_MASK;
 
-    <span class="comment">// &#39;The number of tuple variation tables can be any number between 1 and 4095.&#39;
+    <span class="comment">// 'The number of tuple variation tables can be any number between 1 and 4095.'
     // No need to check for 4095, because this is 0x0FFF that we masked before.
     </span><span class="kw">if </span>tuple_variation_count == <span class="number">0 </span>{
         <span class="kw">return </span><span class="prelude-val">None</span>;
     }
 
-    <span class="comment">// Attempt to reserve space for the tuples we&#39;re about to parse.
+    <span class="comment">// Attempt to reserve space for the tuples we're about to parse.
     // If it fails, bail out.
     </span><span class="kw">if </span>!tuples.reserve(tuple_variation_count) {
         <span class="kw">return </span><span class="prelude-val">None</span>;
     }
 
     <span class="comment">// A glyph variation data consists of three parts: header + variation tuples + serialized data.
-    // Each tuple has it&#39;s own chunk in the serialized data.
+    // Each tuple has it's own chunk in the serialized data.
     // Because of that, we are using two parsing streams: one for tuples and one for serialized data.
     // So we can parse them in parallel and avoid needless allocations.
     </span><span class="kw">let </span><span class="kw-2">mut </span>serialized_stream = Stream::new_at(data, data_offset.to_usize())<span class="question-mark">?</span>;

@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/buffer.rs`."><title>buffer.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cosmic_text" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/buffer.rs`."><title>buffer.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cosmic_text" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1330,7 +1331,7 @@
 <a href="#1330" id="1330">1330</a>
 </pre></div><pre class="rust"><code><span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0
 
-</span><span class="attr">#[cfg(not(feature = <span class="string">&quot;std&quot;</span>))]
+</span><span class="attr">#[cfg(not(feature = <span class="string">"std"</span>))]
 </span><span class="kw">use </span>alloc::{string::String, vec::Vec};
 <span class="kw">use </span>core::{cmp, fmt};
 <span class="kw">use </span>unicode_segmentation::UnicodeSegmentation;
@@ -1343,15 +1344,15 @@
 
 <span class="doccomment">/// A line of visible text for rendering
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>LayoutRun&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>LayoutRun&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// The index of the original text line
     </span><span class="kw">pub </span>line_i: usize,
     <span class="doccomment">/// The original text line
-    </span><span class="kw">pub </span>text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str,
+    </span><span class="kw">pub </span>text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str,
     <span class="doccomment">/// True if the original paragraph direction is RTL
     </span><span class="kw">pub </span>rtl: bool,
     <span class="doccomment">/// The array of layout glyphs to draw
-    </span><span class="kw">pub </span>glyphs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[LayoutGlyph],
+    </span><span class="kw">pub </span>glyphs: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[LayoutGlyph],
     <span class="doccomment">/// Y offset to baseline of line
     </span><span class="kw">pub </span>line_y: f32,
     <span class="doccomment">/// Y offset to top of line
@@ -1360,11 +1361,11 @@
     </span><span class="kw">pub </span>line_w: f32,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; LayoutRun&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; LayoutRun&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Return the pixel span `Some((x_left, x_width))` of the highlighted area between `cursor_start`
     /// and `cursor_end` within this run, or None if the cursor range does not intersect this run.
     /// This may return widths of zero if `cursor_start == cursor_end`, if the run is empty, or if the
-    /// region&#39;s left start boundary is the same as the cursor&#39;s end boundary or vice versa.
+    /// region's left start boundary is the same as the cursor's end boundary or vice versa.
     </span><span class="kw">pub fn </span>highlight(<span class="kw-2">&amp;</span><span class="self">self</span>, cursor_start: Cursor, cursor_end: Cursor) -&gt; <span class="prelude-ty">Option</span>&lt;(f32, f32)&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>x_start = <span class="prelude-val">None</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>x_end = <span class="prelude-val">None</span>;
@@ -1387,7 +1388,7 @@
             }
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(x_start) = x_start {
-            <span class="kw">let </span>x_end = x_end.expect(<span class="string">&quot;end of cursor not found&quot;</span>);
+            <span class="kw">let </span>x_end = x_end.expect(<span class="string">"end of cursor not found"</span>);
             <span class="kw">let </span>(x_start, x_end) = <span class="kw">if </span>x_start &lt; x_end {
                 (x_start, x_end)
             } <span class="kw">else </span>{
@@ -1418,16 +1419,16 @@
 
 <span class="doccomment">/// An iterator of visible text lines, see [`LayoutRun`]
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>LayoutRunIter&lt;<span class="lifetime">&#39;b</span>&gt; {
-    buffer: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>Buffer,
+</span><span class="kw">pub struct </span>LayoutRunIter&lt;<span class="lifetime">'b</span>&gt; {
+    buffer: <span class="kw-2">&amp;</span><span class="lifetime">'b </span>Buffer,
     line_i: usize,
     layout_i: usize,
     remaining_len: usize,
     total_layout: i32,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;b</span>&gt; LayoutRunIter&lt;<span class="lifetime">&#39;b</span>&gt; {
-    <span class="kw">pub fn </span>new(buffer: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>Buffer) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'b</span>&gt; LayoutRunIter&lt;<span class="lifetime">'b</span>&gt; {
+    <span class="kw">pub fn </span>new(buffer: <span class="kw-2">&amp;</span><span class="lifetime">'b </span>Buffer) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>total_layout_lines: usize = buffer
             .lines
             .iter()
@@ -1463,8 +1464,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;b</span>&gt; Iterator <span class="kw">for </span>LayoutRunIter&lt;<span class="lifetime">&#39;b</span>&gt; {
-    <span class="kw">type </span>Item = LayoutRun&lt;<span class="lifetime">&#39;b</span>&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'b</span>&gt; Iterator <span class="kw">for </span>LayoutRunIter&lt;<span class="lifetime">'b</span>&gt; {
+    <span class="kw">type </span>Item = LayoutRun&lt;<span class="lifetime">'b</span>&gt;;
 
     <span class="kw">fn </span>size_hint(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (usize, <span class="prelude-ty">Option</span>&lt;usize&gt;) {
         (<span class="self">self</span>.remaining_len, <span class="prelude-val">Some</span>(<span class="self">self</span>.remaining_len))
@@ -1517,7 +1518,7 @@
     </span>}
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;b</span>&gt; ExactSizeIterator <span class="kw">for </span>LayoutRunIter&lt;<span class="lifetime">&#39;b</span>&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'b</span>&gt; ExactSizeIterator <span class="kw">for </span>LayoutRunIter&lt;<span class="lifetime">'b</span>&gt; {}
 
 <span class="doccomment">/// Metrics of text
 </span><span class="attr">#[derive(Clone, Copy, Debug, Default, PartialEq)]
@@ -1546,7 +1547,7 @@
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>Metrics {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;{}px / {}px&quot;</span>, <span class="self">self</span>.font_size, <span class="self">self</span>.line_height)
+        <span class="macro">write!</span>(f, <span class="string">"{}px / {}px"</span>, <span class="self">self</span>.font_size, <span class="self">self</span>.line_height)
     }
 }
 
@@ -1597,7 +1598,7 @@
     ///
     /// Will panic if `metrics.line_height` is zero.
     </span><span class="kw">pub fn </span>new_empty(metrics: Metrics) -&gt; <span class="self">Self </span>{
-        <span class="macro">assert_ne!</span>(metrics.line_height, <span class="number">0.0</span>, <span class="string">&quot;line height cannot be 0&quot;</span>);
+        <span class="macro">assert_ne!</span>(metrics.line_height, <span class="number">0.0</span>, <span class="string">"line height cannot be 0"</span>);
         <span class="self">Self </span>{
             lines: Vec::new(),
             metrics,
@@ -1618,15 +1619,15 @@
     /// Will panic if `metrics.line_height` is zero.
     </span><span class="kw">pub fn </span>new(font_system: <span class="kw-2">&amp;mut </span>FontSystem, metrics: Metrics) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>buffer = <span class="self">Self</span>::new_empty(metrics);
-        buffer.set_text(font_system, <span class="string">&quot;&quot;</span>, Attrs::new(), Shaping::Advanced);
+        buffer.set_text(font_system, <span class="string">""</span>, Attrs::new(), Shaping::Advanced);
         buffer
     }
 
     <span class="doccomment">/// Mutably borrows the buffer together with an [`FontSystem`] for more convenient methods
-    </span><span class="kw">pub fn </span>borrow_with&lt;<span class="lifetime">&#39;a</span>&gt;(
-        <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>,
-        font_system: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>FontSystem,
-    ) -&gt; BorrowedWithFontSystem&lt;<span class="lifetime">&#39;a</span>, Buffer&gt; {
+    </span><span class="kw">pub fn </span>borrow_with&lt;<span class="lifetime">'a</span>&gt;(
+        <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">self</span>,
+        font_system: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>FontSystem,
+    ) -&gt; BorrowedWithFontSystem&lt;<span class="lifetime">'a</span>, Buffer&gt; {
         BorrowedWithFontSystem {
             inner: <span class="self">self</span>,
             font_system,
@@ -1634,7 +1635,7 @@
     }
 
     <span class="kw">fn </span>relayout(<span class="kw-2">&amp;mut </span><span class="self">self</span>, font_system: <span class="kw-2">&amp;mut </span>FontSystem) {
-        <span class="attr">#[cfg(all(feature = <span class="string">&quot;std&quot;</span>, not(target_arch = <span class="string">&quot;wasm32&quot;</span>)))]
+        <span class="attr">#[cfg(all(feature = <span class="string">"std"</span>, not(target_arch = <span class="string">"wasm32"</span>)))]
         </span><span class="kw">let </span>instant = std::time::Instant::now();
 
         <span class="kw">for </span>line <span class="kw">in </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.lines {
@@ -1653,8 +1654,8 @@
 
         <span class="self">self</span>.redraw = <span class="bool-val">true</span>;
 
-        <span class="attr">#[cfg(all(feature = <span class="string">&quot;std&quot;</span>, not(target_arch = <span class="string">&quot;wasm32&quot;</span>)))]
-        </span><span class="macro">log::debug!</span>(<span class="string">&quot;relayout: {:?}&quot;</span>, instant.elapsed());
+        <span class="attr">#[cfg(all(feature = <span class="string">"std"</span>, not(target_arch = <span class="string">"wasm32"</span>)))]
+        </span><span class="macro">log::debug!</span>(<span class="string">"relayout: {:?}"</span>, instant.elapsed());
     }
 
     <span class="doccomment">/// Shape lines until cursor, also scrolling to include cursor in view
@@ -1668,7 +1669,7 @@
 
         <span class="kw">let </span>layout_cursor = <span class="self">self
             </span>.layout_cursor(font_system, cursor)
-            .expect(<span class="string">&quot;shape_until_cursor invalid cursor&quot;</span>);
+            .expect(<span class="string">"shape_until_cursor invalid cursor"</span>);
 
         <span class="kw">if </span><span class="self">self</span>.scroll.line &gt; layout_cursor.line
             || (<span class="self">self</span>.scroll.line == layout_cursor.line
@@ -1686,7 +1687,7 @@
                 line_i -= <span class="number">1</span>;
                 <span class="kw">let </span>layout = <span class="self">self
                     </span>.line_layout(font_system, line_i)
-                    .expect(<span class="string">&quot;shape_until_cursor failed to scroll forwards&quot;</span>);
+                    .expect(<span class="string">"shape_until_cursor failed to scroll forwards"</span>);
                 <span class="kw">for </span>layout_i <span class="kw">in </span>(<span class="number">0</span>..layout.len()).rev() {
                     total_layout += <span class="number">1</span>;
                     <span class="kw">if </span>total_layout &gt;= visible_lines {
@@ -1746,7 +1747,7 @@
 
                 <span class="kw">let </span>layout = <span class="self">self
                     </span>.line_layout(font_system, line_i)
-                    .expect(<span class="string">&quot;shape_until_scroll invalid line&quot;</span>);
+                    .expect(<span class="string">"shape_until_scroll invalid line"</span>);
                 <span class="kw">for </span>layout_i <span class="kw">in </span><span class="number">0</span>..layout.len() {
                     <span class="kw">if </span>total_layout == scroll_start {
                         <span class="comment">// Adjust scroll.line and scroll.layout
@@ -1863,7 +1864,7 @@
         <span class="self">self</span>.monospace_width
     }
 
-    <span class="doccomment">/// Set monospace width monospace glyphs should be resized to match. `None` means don&#39;t resize
+    <span class="doccomment">/// Set monospace width monospace glyphs should be resized to match. `None` means don't resize
     </span><span class="kw">pub fn </span>set_monospace_width(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         font_system: <span class="kw-2">&amp;mut </span>FontSystem,
@@ -1902,7 +1903,7 @@
         <span class="kw">let </span>clamped_height = height.max(<span class="number">0.0</span>);
 
         <span class="kw">if </span>metrics != <span class="self">self</span>.metrics || clamped_width != <span class="self">self</span>.width || clamped_height != <span class="self">self</span>.height {
-            <span class="macro">assert_ne!</span>(metrics.font_size, <span class="number">0.0</span>, <span class="string">&quot;font size cannot be 0&quot;</span>);
+            <span class="macro">assert_ne!</span>(metrics.font_size, <span class="number">0.0</span>, <span class="string">"font size cannot be 0"</span>);
             <span class="self">self</span>.metrics = metrics;
             <span class="self">self</span>.width = clamped_width;
             <span class="self">self</span>.height = clamped_height;
@@ -1950,21 +1951,21 @@
     /// buffer.set_rich_text(
     ///     &amp;mut font_system,
     ///     [
-    ///         (&quot;hello, &quot;, attrs),
-    ///         (&quot;cosmic\ntext&quot;, attrs.family(Family::Monospace)),
+    ///         ("hello, ", attrs),
+    ///         ("cosmic\ntext", attrs.family(Family::Monospace)),
     ///     ],
     ///     attrs,
     ///     Shaping::Advanced,
     /// );
     /// ```
-    </span><span class="kw">pub fn </span>set_rich_text&lt;<span class="lifetime">&#39;r</span>, <span class="lifetime">&#39;s</span>, I&gt;(
+    </span><span class="kw">pub fn </span>set_rich_text&lt;<span class="lifetime">'r</span>, <span class="lifetime">'s</span>, I&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         font_system: <span class="kw-2">&amp;mut </span>FontSystem,
         spans: I,
         default_attrs: Attrs,
         shaping: Shaping,
     ) <span class="kw">where
-        </span>I: IntoIterator&lt;Item = (<span class="kw-2">&amp;</span><span class="lifetime">&#39;s </span>str, Attrs&lt;<span class="lifetime">&#39;r</span>&gt;)&gt;,
+        </span>I: IntoIterator&lt;Item = (<span class="kw-2">&amp;</span><span class="lifetime">'s </span>str, Attrs&lt;<span class="lifetime">'r</span>&gt;)&gt;,
     {
         <span class="self">self</span>.lines.clear();
 
@@ -2011,14 +2012,14 @@
                 <span class="kw">let </span>text_start = line_string.len();
                 line_string.push_str(text);
                 <span class="kw">let </span>text_end = line_string.len();
-                <span class="comment">// Only add attrs if they don&#39;t match the defaults
+                <span class="comment">// Only add attrs if they don't match the defaults
                 </span><span class="kw">if </span><span class="kw-2">*</span>attrs != attrs_list.defaults() {
                     attrs_list.add_span(text_start..text_end, <span class="kw-2">*</span>attrs);
                 }
             }
 
             <span class="comment">// we know that at the end of a line,
-            // span text&#39;s end index is always &gt;= line text&#39;s end index
+            // span text's end index is always &gt;= line text's end index
             // so if this span ends before this line ends,
             // there is another span in this line.
             // otherwise, we move on to the next line.
@@ -2064,7 +2065,7 @@
 
     <span class="doccomment">/// Convert x, y position to Cursor (hit detection)
     </span><span class="kw">pub fn </span>hit(<span class="kw-2">&amp;</span><span class="self">self</span>, x: f32, y: f32) -&gt; <span class="prelude-ty">Option</span>&lt;Cursor&gt; {
-        <span class="attr">#[cfg(all(feature = <span class="string">&quot;std&quot;</span>, not(target_arch = <span class="string">&quot;wasm32&quot;</span>)))]
+        <span class="attr">#[cfg(all(feature = <span class="string">"std"</span>, not(target_arch = <span class="string">"wasm32"</span>)))]
         </span><span class="kw">let </span>instant = std::time::Instant::now();
 
         <span class="kw">let </span>font_size = <span class="self">self</span>.metrics.font_size;
@@ -2088,7 +2089,7 @@
 
                 <span class="kw">let </span><span class="kw-2">mut </span>first_glyph = <span class="bool-val">true</span>;
 
-                <span class="lifetime">&#39;hit</span>: <span class="kw">for </span>(glyph_i, glyph) <span class="kw">in </span>run.glyphs.iter().enumerate() {
+                <span class="lifetime">'hit</span>: <span class="kw">for </span>(glyph_i, glyph) <span class="kw">in </span>run.glyphs.iter().enumerate() {
                     <span class="kw">if </span>first_glyph {
                         first_glyph = <span class="bool-val">false</span>;
                         <span class="kw">if </span>(run.rtl &amp;&amp; x &gt; glyph.x) || (!run.rtl &amp;&amp; x &lt; <span class="number">0.0</span>) {
@@ -2113,7 +2114,7 @@
                                     </span>new_cursor_char += egc.len();
                                     new_cursor_affinity = Affinity::Before;
                                 }
-                                <span class="kw">break </span><span class="lifetime">&#39;hit</span>;
+                                <span class="kw">break </span><span class="lifetime">'hit</span>;
                             }
                             egc_x += egc_w;
                         }
@@ -2124,7 +2125,7 @@
                             </span>new_cursor_char = cluster.len();
                             new_cursor_affinity = Affinity::Before;
                         }
-                        <span class="kw">break </span><span class="lifetime">&#39;hit</span>;
+                        <span class="kw">break </span><span class="lifetime">'hit</span>;
                     }
                 }
 
@@ -2157,8 +2158,8 @@
             }
         }
 
-        <span class="attr">#[cfg(all(feature = <span class="string">&quot;std&quot;</span>, not(target_arch = <span class="string">&quot;wasm32&quot;</span>)))]
-        </span><span class="macro">log::trace!</span>(<span class="string">&quot;click({}, {}): {:?}&quot;</span>, x, y, instant.elapsed());
+        <span class="attr">#[cfg(all(feature = <span class="string">"std"</span>, not(target_arch = <span class="string">"wasm32"</span>)))]
+        </span><span class="macro">log::trace!</span>(<span class="string">"click({}, {}): {:?}"</span>, x, y, instant.elapsed());
 
         new_cursor_opt
     }
@@ -2519,7 +2520,7 @@
     }
 
     <span class="doccomment">/// Draw the buffer
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;swash&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"swash"</span>)]
     </span><span class="kw">pub fn </span>draw&lt;F&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         font_system: <span class="kw-2">&amp;mut </span>FontSystem,
@@ -2557,7 +2558,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; BorrowedWithFontSystem&lt;<span class="lifetime">&#39;a</span>, Buffer&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; BorrowedWithFontSystem&lt;<span class="lifetime">'a</span>, Buffer&gt; {
     <span class="doccomment">/// Shape lines until cursor, also scrolling to include cursor in view
     </span><span class="kw">pub fn </span>shape_until_cursor(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cursor: Cursor, prune: bool) {
         <span class="self">self</span>.inner
@@ -2623,16 +2624,16 @@
     /// let attrs = Attrs::new().family(Family::Serif);
     /// buffer.set_rich_text(
     ///     [
-    ///         (&quot;hello, &quot;, attrs),
-    ///         (&quot;cosmic\ntext&quot;, attrs.family(Family::Monospace)),
+    ///         ("hello, ", attrs),
+    ///         ("cosmic\ntext", attrs.family(Family::Monospace)),
     ///     ],
     ///     attrs,
     ///     Shaping::Advanced,
     /// );
     /// ```
-    </span><span class="kw">pub fn </span>set_rich_text&lt;<span class="lifetime">&#39;r</span>, <span class="lifetime">&#39;s</span>, I&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, spans: I, default_attrs: Attrs, shaping: Shaping)
+    </span><span class="kw">pub fn </span>set_rich_text&lt;<span class="lifetime">'r</span>, <span class="lifetime">'s</span>, I&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, spans: I, default_attrs: Attrs, shaping: Shaping)
     <span class="kw">where
-        </span>I: IntoIterator&lt;Item = (<span class="kw-2">&amp;</span><span class="lifetime">&#39;s </span>str, Attrs&lt;<span class="lifetime">&#39;r</span>&gt;)&gt;,
+        </span>I: IntoIterator&lt;Item = (<span class="kw-2">&amp;</span><span class="lifetime">'s </span>str, Attrs&lt;<span class="lifetime">'r</span>&gt;)&gt;,
     {
         <span class="self">self</span>.inner
             .set_rich_text(<span class="self">self</span>.font_system, spans, default_attrs, shaping);
@@ -2650,7 +2651,7 @@
     }
 
     <span class="doccomment">/// Draw the buffer
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;swash&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"swash"</span>)]
     </span><span class="kw">pub fn </span>draw&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cache: <span class="kw-2">&amp;mut </span><span class="kw">crate</span>::SwashCache, color: Color, f: F)
     <span class="kw">where
         </span>F: FnMut(i32, i32, u32, u32, Color),

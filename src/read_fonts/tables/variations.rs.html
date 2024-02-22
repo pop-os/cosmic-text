@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.4/src/tables/variations.rs`."><title>variations.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.5/src/tables/variations.rs`."><title>variations.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -985,7 +986,7 @@
 <a href="#985" id="985">985</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! OpenType font variations common tables.
 
-</span><span class="macro">include!</span>(<span class="string">&quot;../../generated/generated_variations.rs&quot;</span>);
+</span><span class="macro">include!</span>(<span class="string">"../../generated/generated_variations.rs"</span>);
 
 <span class="doccomment">/// Outer and inner indices for reading from an [ItemVariationStore].
 </span><span class="attr">#[derive(Copy, Clone, Debug)]
@@ -997,7 +998,7 @@
 }
 
 <span class="attr">#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = <span class="string">&quot;serde&quot;</span>, derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = <span class="string">"serde"</span>, derive(serde::Serialize, serde::Deserialize))]
 </span><span class="kw">pub struct </span>TupleIndex(u16);
 
 <span class="kw">impl </span>TupleIndex {
@@ -1006,7 +1007,7 @@
     ///
     /// If set, the low 12 bits of the tupleIndex value are ignored.
     ///
-    /// Note that this must always be set within the &#39;cvar&#39; table.
+    /// Note that this must always be set within the 'cvar' table.
     </span><span class="kw">pub const </span>EMBEDDED_PEAK_TUPLE: u16 = <span class="number">0x8000</span>;
 
     <span class="doccomment">/// Flag indicating that this tuple variation table applies to an
@@ -1020,7 +1021,7 @@
     ///
     /// If set, this tuple variation table uses that number data; if clear,
     /// this tuple variation table uses shared number data found at the start
-    /// of the serialized data for this glyph variation data or &#39;cvar&#39; table.
+    /// of the serialized data for this glyph variation data or 'cvar' table.
     </span><span class="kw">pub const </span>PRIVATE_POINT_NUMBERS: u16 = <span class="number">0x2000</span>;
     <span class="comment">//0x1000	Reserved	Reserved for future use — set to 0.
     //
@@ -1031,7 +1032,7 @@
         <span class="kw">match </span>flag {
             <span class="number">0 </span>=&gt; <span class="self">self</span>.embedded_peak_tuple(),
             <span class="number">1 </span>=&gt; <span class="self">self</span>.intermediate_region(),
-            <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;only 0 or 1 allowed here&quot;</span>),
+            <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">"only 0 or 1 allowed here"</span>),
         }
         .then_some(axis_count <span class="kw">as </span>usize)
         .unwrap_or_default()
@@ -1076,14 +1077,14 @@
     }
 }
 
-<span class="doccomment">/// The &#39;tupleVariationCount&#39; field of the [Tuple Variation Store Header][header]
+<span class="doccomment">/// The 'tupleVariationCount' field of the [Tuple Variation Store Header][header]
 ///
 /// The high 4 bits are flags, and the low 12 bits are the number of tuple
 /// variation tables for this glyph. The count can be any number between 1 and 4095.
 ///
 /// [header]: https://learn.microsoft.com/en-us/typography/opentype/spec/otvarcommonformats#tuple-variation-store-header
 </span><span class="attr">#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = <span class="string">&quot;serde&quot;</span>, derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = <span class="string">"serde"</span>, derive(serde::Serialize, serde::Deserialize))]
 </span><span class="kw">pub struct </span>TupleVariationCount(u16);
 
 <span class="kw">impl </span>TupleVariationCount {
@@ -1126,16 +1127,16 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TupleVariationHeader&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-    </span><span class="kw">fn </span>traverse_tuple_index(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; traversal::FieldType&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TupleVariationHeader&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+    </span><span class="kw">fn </span>traverse_tuple_index(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; traversal::FieldType&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.tuple_index().<span class="number">0</span>.into()
     }
 
     <span class="doccomment">/// Peak tuple record for this tuple variation table — optional,
     /// determined by flags in the tupleIndex value.  Note that this
-    /// must always be included in the &#39;cvar&#39; table.
-    </span><span class="kw">pub fn </span>peak_tuple(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Tuple&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    /// must always be included in the 'cvar' table.
+    </span><span class="kw">pub fn </span>peak_tuple(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Tuple&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="self">self</span>.tuple_index().embedded_peak_tuple().then(|| {
             <span class="kw">let </span>range = <span class="self">self</span>.shape.peak_tuple_byte_range();
             Tuple {
@@ -1146,7 +1147,7 @@
 
     <span class="doccomment">/// Intermediate start tuple record for this tuple variation table
     /// — optional, determined by flags in the tupleIndex value.
-    </span><span class="kw">pub fn </span>intermediate_start_tuple(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Tuple&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>intermediate_start_tuple(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Tuple&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="self">self</span>.tuple_index().intermediate_region().then(|| {
             <span class="kw">let </span>range = <span class="self">self</span>.shape.intermediate_start_tuple_byte_range();
             Tuple {
@@ -1157,7 +1158,7 @@
 
     <span class="doccomment">/// Intermediate end tuple record for this tuple variation table
     /// — optional, determined by flags in the tupleIndex value.
-    </span><span class="kw">pub fn </span>intermediate_end_tuple(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Tuple&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>intermediate_end_tuple(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Tuple&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="self">self</span>.tuple_index().intermediate_region().then(|| {
             <span class="kw">let </span>range = <span class="self">self</span>.shape.intermediate_end_tuple_byte_range();
             Tuple {
@@ -1183,7 +1184,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Tuple&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Tuple&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">pub fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="self">self</span>.values().len()
     }
@@ -1199,7 +1200,7 @@
 
 <span class="comment">//FIXME: add an #[extra_traits(..)] attribute!
 </span><span class="attr">#[allow(clippy::derivable_impls)]
-</span><span class="kw">impl </span>Default <span class="kw">for </span>Tuple&lt;<span class="lifetime">&#39;_</span>&gt; {
+</span><span class="kw">impl </span>Default <span class="kw">for </span>Tuple&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             values: Default::default(),
@@ -1207,15 +1208,15 @@
     }
 }
 
-<span class="doccomment">/// [Packed &quot;Point&quot; Numbers](https://learn.microsoft.com/en-us/typography/opentype/spec/otvarcommonformats#packed-point-numbers)
+<span class="doccomment">/// [Packed "Point" Numbers](https://learn.microsoft.com/en-us/typography/opentype/spec/otvarcommonformats#packed-point-numbers)
 </span><span class="attr">#[derive(Clone, Debug)]
-</span><span class="kw">pub struct </span>PackedPointNumbers&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>PackedPointNumbers&lt;<span class="lifetime">'a</span>&gt; {
+    data: FontData&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; PackedPointNumbers&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; PackedPointNumbers&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// read point numbers off the front of this data, returning the remaining data
-    </span><span class="kw">pub fn </span>split_off_front(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; (<span class="self">Self</span>, FontData&lt;<span class="lifetime">&#39;a</span>&gt;) {
+    </span><span class="kw">pub fn </span>split_off_front(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; (<span class="self">Self</span>, FontData&lt;<span class="lifetime">'a</span>&gt;) {
         <span class="kw">let </span>this = PackedPointNumbers { data };
         <span class="kw">let </span>total_len = this.total_len();
         <span class="kw">let </span>remainder = data.split_off(total_len).unwrap_or_default();
@@ -1233,12 +1234,12 @@
             <span class="number">0 </span>=&gt; (<span class="number">0</span>, <span class="number">1</span>),
             count @ <span class="number">1</span>..=<span class="number">127 </span>=&gt; (count <span class="kw">as </span>u16, <span class="number">1</span>),
             <span class="kw">_ </span>=&gt; {
-                <span class="comment">// &quot;If the high bit of the first byte is set, then a second byte is used.
+                <span class="comment">// "If the high bit of the first byte is set, then a second byte is used.
                 // The count is read from interpreting the two bytes as a big-endian
-                // uint16 value with the high-order bit masked out.&quot;
+                // uint16 value with the high-order bit masked out."
 
                 </span><span class="kw">let </span>count = <span class="self">self</span>.data.read_at::&lt;u16&gt;(<span class="number">0</span>).unwrap_or_default() &amp; <span class="number">0x7FFF</span>;
-                <span class="comment">// a weird case where I&#39;m following fonttools: if the &#39;use words&#39; bit
+                <span class="comment">// a weird case where I'm following fonttools: if the 'use words' bit
                 // is set, but the total count is still 0, treat it like 0 first byte
                 </span><span class="kw">if </span>count == <span class="number">0 </span>{
                     (<span class="number">0</span>, <span class="number">2</span>)
@@ -1274,7 +1275,7 @@
     }
 
     <span class="doccomment">/// Iterate over the packed points
-    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; PackedPointNumbersIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; PackedPointNumbersIter&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">let </span>(count, n_bytes) = <span class="self">self</span>.count_and_count_bytes();
         <span class="kw">let </span><span class="kw-2">mut </span>cursor = <span class="self">self</span>.data.cursor();
         cursor.advance_by(n_bytes);
@@ -1284,15 +1285,15 @@
 
 <span class="doccomment">/// An iterator over the packed point numbers data.
 </span><span class="attr">#[derive(Clone, Debug)]
-</span><span class="kw">pub struct </span>PackedPointNumbersIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>PackedPointNumbersIter&lt;<span class="lifetime">'a</span>&gt; {
     count: u16,
     seen: u16,
     last_val: u16,
-    current_run: PointRunIter&lt;<span class="lifetime">&#39;a</span>&gt;,
+    current_run: PointRunIter&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; PackedPointNumbersIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(count: u16, cursor: Cursor&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; PackedPointNumbersIter&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>new(count: u16, cursor: Cursor&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="self">Self </span>{
         PackedPointNumbersIter {
             count,
             seen: <span class="number">0</span>,
@@ -1308,13 +1309,13 @@
 
 <span class="doccomment">/// Implements the logic for iterating over the individual runs
 </span><span class="attr">#[derive(Clone, Debug)]
-</span><span class="kw">struct </span>PointRunIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">struct </span>PointRunIter&lt;<span class="lifetime">'a</span>&gt; {
     remaining: u8,
     two_bytes: bool,
-    cursor: Cursor&lt;<span class="lifetime">&#39;a</span>&gt;,
+    cursor: Cursor&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl </span>Iterator <span class="kw">for </span>PointRunIter&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Iterator <span class="kw">for </span>PointRunIter&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">type </span>Item = u16;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -1332,7 +1333,7 @@
     }
 }
 
-<span class="doccomment">/// returns the count and the &#39;uses_two_bytes&#39; flag from the control byte
+<span class="doccomment">/// returns the count and the 'uses_two_bytes' flag from the control byte
 </span><span class="kw">fn </span>read_control_byte(cursor: <span class="kw-2">&amp;mut </span>Cursor) -&gt; <span class="prelude-ty">Option</span>&lt;(u8, bool)&gt; {
     <span class="kw">let </span>control: u8 = cursor.read().ok()<span class="question-mark">?</span>;
     <span class="kw">let </span>two_bytes = (control &amp; <span class="number">0x80</span>) != <span class="number">0</span>;
@@ -1340,7 +1341,7 @@
     <span class="prelude-val">Some</span>((count, two_bytes))
 }
 
-<span class="kw">impl </span>Iterator <span class="kw">for </span>PackedPointNumbersIter&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Iterator <span class="kw">for </span>PackedPointNumbersIter&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">type </span>Item = u16;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -1365,19 +1366,19 @@
 }
 
 <span class="comment">// completely unnecessary?
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ExactSizeIterator <span class="kw">for </span>PackedPointNumbersIter&lt;<span class="lifetime">&#39;a</span>&gt; {}
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ExactSizeIterator <span class="kw">for </span>PackedPointNumbersIter&lt;<span class="lifetime">'a</span>&gt; {}
 
 <span class="doccomment">/// [Packed Deltas](https://learn.microsoft.com/en-us/typography/opentype/spec/otvarcommonformats#packed-deltas)
 </span><span class="attr">#[derive(Clone, Debug)]
-</span><span class="kw">pub struct </span>PackedDeltas&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>PackedDeltas&lt;<span class="lifetime">'a</span>&gt; {
+    data: FontData&lt;<span class="lifetime">'a</span>&gt;,
     count: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; PackedDeltas&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; PackedDeltas&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// NOTE: this is unbounded, and assumes all of data is deltas.
     </span><span class="attr">#[doc(hidden)] </span><span class="comment">// used by tests in write-fonts
-    </span><span class="kw">pub fn </span>new(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>count = DeltaRunIter::new(data.cursor()).count();
         <span class="self">Self </span>{ data, count }
     }
@@ -1387,22 +1388,22 @@
     }
 
     <span class="attr">#[doc(hidden)] </span><span class="comment">// used by tests in write-fonts
-    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; DeltaRunIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; DeltaRunIter&lt;<span class="lifetime">'a</span>&gt; {
         DeltaRunIter::new(<span class="self">self</span>.data.cursor())
     }
 }
 
 <span class="doccomment">/// Implements the logic for iterating over the individual runs
 </span><span class="attr">#[derive(Clone, Debug)]
-</span><span class="kw">pub struct </span>DeltaRunIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>DeltaRunIter&lt;<span class="lifetime">'a</span>&gt; {
     remaining: u8,
     two_bytes: bool,
     are_zero: bool,
-    cursor: Cursor&lt;<span class="lifetime">&#39;a</span>&gt;,
+    cursor: Cursor&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; DeltaRunIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(cursor: Cursor&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; DeltaRunIter&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>new(cursor: Cursor&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="self">Self </span>{
         DeltaRunIter {
             remaining: <span class="number">0</span>,
             two_bytes: <span class="bool-val">false</span>,
@@ -1412,7 +1413,7 @@
     }
 }
 
-<span class="kw">impl </span>Iterator <span class="kw">for </span>DeltaRunIter&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Iterator <span class="kw">for </span>DeltaRunIter&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">type </span>Item = i16;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -1447,15 +1448,15 @@
 }
 
 <span class="doccomment">/// A helper type for iterating over [`TupleVariationHeader`]s.
-</span><span class="kw">pub struct </span>TupleVariationHeaderIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>TupleVariationHeaderIter&lt;<span class="lifetime">'a</span>&gt; {
+    data: FontData&lt;<span class="lifetime">'a</span>&gt;,
     n_headers: usize,
     current: usize,
     axis_count: u16,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TupleVariationHeaderIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;, n_headers: usize, axis_count: u16) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TupleVariationHeaderIter&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(data: FontData&lt;<span class="lifetime">'a</span>&gt;, n_headers: usize, axis_count: u16) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             data,
             n_headers,
@@ -1465,8 +1466,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>TupleVariationHeaderIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">type </span>Item = <span class="prelude-ty">Result</span>&lt;TupleVariationHeader&lt;<span class="lifetime">&#39;a</span>&gt;, ReadError&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>TupleVariationHeaderIter&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">type </span>Item = <span class="prelude-ty">Result</span>&lt;TupleVariationHeader&lt;<span class="lifetime">'a</span>&gt;, ReadError&gt;;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">if </span><span class="self">self</span>.current == <span class="self">self</span>.n_headers {
@@ -1498,7 +1499,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; DeltaSetIndexMap&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; DeltaSetIndexMap&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Returns the delta set index for the specified value.
     </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, index: u32) -&gt; <span class="prelude-ty">Result</span>&lt;DeltaSetIndex, ReadError&gt; {
         <span class="kw">let </span>(entry_format, map_count, data) = <span class="kw">match </span><span class="self">self </span>{
@@ -1507,8 +1508,8 @@
         };
         <span class="kw">let </span>entry_size = entry_format.entry_size();
         <span class="kw">let </span>data = FontData::new(data);
-        <span class="comment">// &quot;if an index into the mapping array is used that is greater than or equal to
-        // mapCount, then the last logical entry of the mapping array is used.&quot;
+        <span class="comment">// "if an index into the mapping array is used that is greater than or equal to
+        // mapCount, then the last logical entry of the mapping array is used."
         // https://learn.microsoft.com/en-us/typography/opentype/spec/otvarcommonformats
         // #associating-target-items-to-variation-data
         </span><span class="kw">let </span>index = index.min(map_count.saturating_sub(<span class="number">1</span>));
@@ -1520,7 +1521,7 @@
             <span class="number">4 </span>=&gt; data.read_at::&lt;u32&gt;(offset)<span class="question-mark">?</span>,
             <span class="kw">_ </span>=&gt; {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(ReadError::MalformedData(
-                    <span class="string">&quot;invalid entry size in DeltaSetIndexMap&quot;</span>,
+                    <span class="string">"invalid entry size in DeltaSetIndexMap"</span>,
                 ))
             }
         };
@@ -1532,7 +1533,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ItemVariationStore&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ItemVariationStore&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Computes the delta value for the specified index and set of normalized
     /// variation coordinates.
     </span><span class="kw">pub fn </span>compute_delta(
@@ -1553,7 +1554,7 @@
             <span class="kw">let </span>region_index = region_indices
                 .get(i)
                 .ok_or(ReadError::MalformedData(
-                    <span class="string">&quot;invalid delta sets in ItemVariationStore&quot;</span>,
+                    <span class="string">"invalid delta sets in ItemVariationStore"</span>,
                 ))<span class="question-mark">?
                 </span>.get() <span class="kw">as </span>usize;
             <span class="kw">let </span>region = regions.get(region_index)<span class="question-mark">?</span>;
@@ -1582,7 +1583,7 @@
             <span class="kw">let </span>region_index = region_indices
                 .get(i)
                 .ok_or(ReadError::MalformedData(
-                    <span class="string">&quot;invalid delta sets in ItemVariationStore&quot;</span>,
+                    <span class="string">"invalid delta sets in ItemVariationStore"</span>,
                 ))<span class="question-mark">?
                 </span>.get() <span class="kw">as </span>usize;
             <span class="kw">let </span>region = regions.get(region_index)<span class="question-mark">?</span>;
@@ -1634,7 +1635,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; VariationRegion&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; VariationRegion&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Computes a scalar value for this region and the specified
     /// normalized variation coordinates.
     </span><span class="kw">pub fn </span>compute_scalar(<span class="kw-2">&amp;</span><span class="self">self</span>, coords: <span class="kw-2">&amp;</span>[F2Dot14]) -&gt; Fixed {
@@ -1685,10 +1686,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ItemVariationData&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ItemVariationData&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Returns an iterator over the per-region delta values for the specified
     /// inner index.
-    </span><span class="kw">pub fn </span>delta_set(<span class="kw-2">&amp;</span><span class="self">self</span>, inner_index: u16) -&gt; <span class="kw">impl </span>Iterator&lt;Item = i32&gt; + <span class="lifetime">&#39;a </span>+ Clone {
+    </span><span class="kw">pub fn </span>delta_set(<span class="kw-2">&amp;</span><span class="self">self</span>, inner_index: u16) -&gt; <span class="kw">impl </span>Iterator&lt;Item = i32&gt; + <span class="lifetime">'a </span>+ Clone {
         <span class="kw">let </span>word_delta_count = <span class="self">self</span>.word_delta_count();
         <span class="kw">let </span>long_words = word_delta_count &amp; <span class="number">0x8000 </span>!= <span class="number">0</span>;
         <span class="kw">let </span>(word_size, small_size) = <span class="kw">if </span>long_words { (<span class="number">4</span>, <span class="number">2</span>) } <span class="kw">else </span>{ (<span class="number">2</span>, <span class="number">1</span>) };
@@ -1711,15 +1712,15 @@
 }
 
 <span class="attr">#[derive(Clone)]
-</span><span class="kw">struct </span>ItemDeltas&lt;<span class="lifetime">&#39;a</span>&gt; {
-    cursor: Cursor&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">struct </span>ItemDeltas&lt;<span class="lifetime">'a</span>&gt; {
+    cursor: Cursor&lt;<span class="lifetime">'a</span>&gt;,
     word_delta_count: u16,
     long_words: bool,
     len: u16,
     pos: u16,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>ItemDeltas&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>ItemDeltas&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">type </span>Item = i32;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -1776,11 +1777,11 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>ivs_regions() {
         <span class="kw">let </span>font = FontRef::new(font_test_data::VAZIRMATN_VAR).unwrap();
-        <span class="kw">let </span>hvar = font.hvar().expect(<span class="string">&quot;missing HVAR table&quot;</span>);
+        <span class="kw">let </span>hvar = font.hvar().expect(<span class="string">"missing HVAR table"</span>);
         <span class="kw">let </span>ivs = hvar
             .item_variation_store()
-            .expect(<span class="string">&quot;missing item variation store in HVAR&quot;</span>);
-        <span class="kw">let </span>region_list = ivs.variation_region_list().expect(<span class="string">&quot;missing region list!&quot;</span>);
+            .expect(<span class="string">"missing item variation store in HVAR"</span>);
+        <span class="kw">let </span>region_list = ivs.variation_region_list().expect(<span class="string">"missing region list!"</span>);
         <span class="kw">let </span>regions = region_list.variation_regions();
         <span class="kw">let </span>expected = <span class="kw-2">&amp;</span>[
             <span class="comment">// start_coord, peak_coord, end_coord
@@ -1864,7 +1865,7 @@
         ];
 
         <span class="kw">for </span>case <span class="kw">in </span>CASES {
-            <span class="macro">assert_eq!</span>(count_bytes(case), case.len(), <span class="string">&quot;{case:?}&quot;</span>);
+            <span class="macro">assert_eq!</span>(count_bytes(case), case.len(), <span class="string">"{case:?}"</span>);
         }
     }
 
@@ -1914,14 +1915,14 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>packed_points_dont_panic() {
-        <span class="comment">// a single &#39;0&#39; byte means that there are deltas for all points
+        <span class="comment">// a single '0' byte means that there are deltas for all points
         </span><span class="kw">static </span>ALL_POINTS: FontData = FontData::new(<span class="kw-2">&amp;</span>[<span class="number">0</span>]);
         <span class="kw">let </span>(all_points, <span class="kw">_</span>) = PackedPointNumbers::split_off_front(ALL_POINTS);
         <span class="comment">// in which case the iterator just keeps incrementing until u16::MAX
         </span><span class="macro">assert_eq!</span>(all_points.iter().count(), u16::MAX <span class="kw">as _</span>);
     }
 
-    <span class="doccomment">/// We don&#39;t have a reference for our float delta computation, so this is
+    <span class="doccomment">/// We don't have a reference for our float delta computation, so this is
     /// a sanity test to ensure that floating point deltas are within a
     /// reasonable margin of the same in fixed point.
     </span><span class="attr">#[test]

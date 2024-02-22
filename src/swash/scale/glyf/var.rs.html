@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/scale/glyf/var.rs`."><title>var.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/scale/glyf/var.rs`."><title>var.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -611,12 +612,12 @@
 <a href="#611" id="611">611</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::internal::{fixed::Fixed, Array, Bytes};
 
-<span class="kw">pub fn </span>cvar_tuples&lt;<span class="lifetime">&#39;a</span>&gt;(
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+<span class="kw">pub fn </span>cvar_tuples&lt;<span class="lifetime">'a</span>&gt;(
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     cvar: u32,
-    coords: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[i16],
+    coords: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[i16],
     axis_count: u16,
-) -&gt; <span class="prelude-ty">Option</span>&lt;Tuples&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+) -&gt; <span class="prelude-ty">Option</span>&lt;Tuples&lt;<span class="lifetime">'a</span>&gt;&gt; {
     <span class="kw">if </span>cvar == <span class="number">0 </span>{
         <span class="kw">return </span><span class="prelude-val">None</span>;
     }
@@ -624,12 +625,12 @@
     <span class="prelude-val">Some</span>(TupleStore::from_cvar(b, axis_count).tuples(coords))
 }
 
-<span class="kw">pub fn </span>gvar_tuples&lt;<span class="lifetime">&#39;a</span>&gt;(
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+<span class="kw">pub fn </span>gvar_tuples&lt;<span class="lifetime">'a</span>&gt;(
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     gvar: u32,
-    coords: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[i16],
+    coords: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[i16],
     glyph_id: u16,
-) -&gt; <span class="prelude-ty">Option</span>&lt;Tuples&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+) -&gt; <span class="prelude-ty">Option</span>&lt;Tuples&lt;<span class="lifetime">'a</span>&gt;&gt; {
     <span class="kw">if </span>gvar == <span class="number">0 </span>{
         <span class="kw">return </span><span class="prelude-val">None</span>;
     }
@@ -639,18 +640,18 @@
 
 <span class="doccomment">/// Tuple variation store.
 </span><span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">pub struct </span>TupleStore&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
-    shared_coords: SharedCoords&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>TupleStore&lt;<span class="lifetime">'a</span>&gt; {
+    data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
+    shared_coords: SharedCoords&lt;<span class="lifetime">'a</span>&gt;,
     tuple_count: usize,
-    shared_point_numbers: <span class="prelude-ty">Option</span>&lt;PointNumbers&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    shared_point_numbers: <span class="prelude-ty">Option</span>&lt;PointNumbers&lt;<span class="lifetime">'a</span>&gt;&gt;,
     data_offset: usize,
     is_cvar: bool,
     offset: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TupleStore&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>from_cvar(b: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;, axis_count: u16) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TupleStore&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>from_cvar(b: Bytes&lt;<span class="lifetime">'a</span>&gt;, axis_count: u16) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>tuple_count = b.read_or_default::&lt;u16&gt;(<span class="number">4</span>) <span class="kw">as </span>usize;
         <span class="kw">let </span><span class="kw-2">mut </span>data_offset = b.read_or_default::&lt;u16&gt;(<span class="number">6</span>) <span class="kw">as </span>usize;
         <span class="kw">let </span>shared_point_numbers = <span class="kw">if </span>tuple_count &amp; <span class="number">0x8000 </span>!= <span class="number">0 </span>{
@@ -681,7 +682,7 @@
         )
     }
 
-    <span class="kw">fn </span>from_gvar(b: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;, glyph_id: u16) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    <span class="kw">fn </span>from_gvar(b: Bytes&lt;<span class="lifetime">'a</span>&gt;, glyph_id: u16) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>axis_count = b.read::&lt;u16&gt;(<span class="number">4</span>)<span class="question-mark">? </span><span class="kw">as </span>usize;
         <span class="kw">let </span>shared_coord_count = b.read::&lt;u16&gt;(<span class="number">6</span>)<span class="question-mark">? </span><span class="kw">as </span>usize;
         <span class="kw">let </span>offset_to_coord = b.read::&lt;u32&gt;(<span class="number">8</span>)<span class="question-mark">? </span><span class="kw">as </span>usize;
@@ -735,10 +736,10 @@
     }
 
     <span class="kw">fn </span>new(
-        data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
-        shared_coords: SharedCoords&lt;<span class="lifetime">&#39;a</span>&gt;,
+        data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
+        shared_coords: SharedCoords&lt;<span class="lifetime">'a</span>&gt;,
         tuple_count: usize,
-        shared_point_numbers: <span class="prelude-ty">Option</span>&lt;PointNumbers&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+        shared_point_numbers: <span class="prelude-ty">Option</span>&lt;PointNumbers&lt;<span class="lifetime">'a</span>&gt;&gt;,
         data_offset: usize,
         is_cvar: bool,
         offset: usize,
@@ -756,7 +757,7 @@
 
     <span class="doccomment">/// Returns an iterator over the tuples in this store for the specified
     /// normalized variation coordinates.
-    </span><span class="kw">pub fn </span>tuples(<span class="kw-2">&amp;</span><span class="self">self</span>, coords: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[i16]) -&gt; Tuples&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>tuples(<span class="kw-2">&amp;</span><span class="self">self</span>, coords: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[i16]) -&gt; Tuples&lt;<span class="lifetime">'a</span>&gt; {
         Tuples {
             data: <span class="self">self</span>.data,
             shared_coords: <span class="self">self</span>.shared_coords,
@@ -773,20 +774,20 @@
 
 <span class="doccomment">/// Iterator over the tuples in a tuple variation store.
 </span><span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">pub struct </span>Tuples&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
-    shared_coords: SharedCoords&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>Tuples&lt;<span class="lifetime">'a</span>&gt; {
+    data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
+    shared_coords: SharedCoords&lt;<span class="lifetime">'a</span>&gt;,
     tuple_count: usize,
-    shared_point_numbers: <span class="prelude-ty">Option</span>&lt;PointNumbers&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    shared_point_numbers: <span class="prelude-ty">Option</span>&lt;PointNumbers&lt;<span class="lifetime">'a</span>&gt;&gt;,
     data_offset: usize,
     is_cvar: bool,
     offset: usize,
-    coords: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[i16],
+    coords: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[i16],
     cur: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Tuples&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>next_tuple(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Tuple&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Tuples&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>next_tuple(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Tuple&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">let </span>d = <span class="kw-2">&amp;</span><span class="self">self</span>.data;
         <span class="kw">let </span>size = d.read::&lt;u16&gt;(<span class="self">self</span>.offset)<span class="question-mark">? </span><span class="kw">as </span>usize;
         <span class="kw">let </span>index = d.read::&lt;u16&gt;(<span class="self">self</span>.offset + <span class="number">2</span>)<span class="question-mark">?</span>;
@@ -831,8 +832,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>Tuples&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">type </span>Item = Deltas&lt;<span class="lifetime">&#39;a</span>&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>Tuples&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">type </span>Item = Deltas&lt;<span class="lifetime">'a</span>&gt;;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">loop </span>{
@@ -856,17 +857,17 @@
 
 <span class="doccomment">/// Represents a single region of applicability within a font variation space.
 </span><span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">struct </span>Tuple&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
-    point_numbers: PointNumbers&lt;<span class="lifetime">&#39;a</span>&gt;,
-    peak: Array&lt;<span class="lifetime">&#39;a</span>, i16&gt;,
-    intermediate: (Array&lt;<span class="lifetime">&#39;a</span>, i16&gt;, Array&lt;<span class="lifetime">&#39;a</span>, i16&gt;),
+</span><span class="kw">struct </span>Tuple&lt;<span class="lifetime">'a</span>&gt; {
+    data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
+    point_numbers: PointNumbers&lt;<span class="lifetime">'a</span>&gt;,
+    peak: Array&lt;<span class="lifetime">'a</span>, i16&gt;,
+    intermediate: (Array&lt;<span class="lifetime">'a</span>, i16&gt;, Array&lt;<span class="lifetime">'a</span>, i16&gt;),
     offset: usize,
     end: usize,
     is_cvar: bool,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Tuple&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Tuple&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Returns a scaling factor based on the specified variation coordinates
     /// for the deltas associated with this region.
     </span><span class="attr">#[allow(clippy::needless_range_loop)]
@@ -912,7 +913,7 @@
     }
 
     <span class="doccomment">/// Returns an iterator over the deltas for this region.
-    </span><span class="kw">fn </span>deltas(<span class="kw-2">&amp;</span><span class="self">self</span>, scalar: Fixed) -&gt; Deltas&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">fn </span>deltas(<span class="kw-2">&amp;</span><span class="self">self</span>, scalar: Fixed) -&gt; Deltas&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(deltas) = Deltas::new(<span class="self">self</span>, scalar) {
             deltas
         } <span class="kw">else </span>{
@@ -933,9 +934,9 @@
 
 <span class="doccomment">/// Iterator over the delta values of a particular region.
 </span><span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">pub struct </span>Deltas&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
-    pts: PointNumbersIter&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>Deltas&lt;<span class="lifetime">'a</span>&gt; {
+    data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
+    pts: PointNumbersIter&lt;<span class="lifetime">'a</span>&gt;,
     len: usize,
     cur: usize,
     xs: usize,
@@ -945,8 +946,8 @@
     scalar: Fixed,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Deltas&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(parent: <span class="kw-2">&amp;</span>Tuple&lt;<span class="lifetime">&#39;a</span>&gt;, scalar: Fixed) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Deltas&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>new(parent: <span class="kw-2">&amp;</span>Tuple&lt;<span class="lifetime">'a</span>&gt;, scalar: Fixed) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>d = <span class="kw-2">&amp;</span>parent.data;
         <span class="kw">let </span>len = <span class="kw">if </span>parent.point_numbers.all {
             <span class="kw">let </span>len = <span class="self">Self</span>::count_deltas(d, parent.offset, parent.end)<span class="question-mark">?</span>;
@@ -1078,7 +1079,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>Deltas&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>Deltas&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">type </span>Item = (usize, Fixed, Fixed);
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -1091,16 +1092,16 @@
 }
 
 <span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">struct </span>PointNumbers&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">struct </span>PointNumbers&lt;<span class="lifetime">'a</span>&gt; {
+    data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
     offset: usize,
     len: u16,
     all: bool,
     data_size: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; PointNumbers&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;, offset: usize) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; PointNumbers&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>new(data: Bytes&lt;<span class="lifetime">'a</span>&gt;, offset: usize) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>base = offset;
         <span class="kw">let </span><span class="kw-2">mut </span>offset = offset;
         <span class="kw">let </span>control = data.read::&lt;u8&gt;(offset)<span class="question-mark">? </span><span class="kw">as </span>usize;
@@ -1148,7 +1149,7 @@
         <span class="self">self</span>.data_size
     }
 
-    <span class="kw">fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; PointNumbersIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; PointNumbersIter&lt;<span class="lifetime">'a</span>&gt; {
         PointNumbersIter {
             parent: <span class="kw-2">*</span><span class="self">self</span>,
             cur: <span class="number">0</span>,
@@ -1162,8 +1163,8 @@
 }
 
 <span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">struct </span>PointNumbersIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    parent: PointNumbers&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">struct </span>PointNumbersIter&lt;<span class="lifetime">'a</span>&gt; {
+    parent: PointNumbers&lt;<span class="lifetime">'a</span>&gt;,
     cur: u16,
     offset: usize,
     num: u16,
@@ -1172,7 +1173,7 @@
     run_words: bool,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>PointNumbersIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>PointNumbersIter&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">type </span>Item = u16;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -1207,15 +1208,15 @@
 }
 
 <span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">struct </span>SharedCoords&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub </span>data: Bytes&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">struct </span>SharedCoords&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub </span>data: Bytes&lt;<span class="lifetime">'a</span>&gt;,
     <span class="kw">pub </span>offset: usize,
     <span class="kw">pub </span>count: usize,
     <span class="kw">pub </span>axis_count: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SharedCoords&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, index: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Array&lt;<span class="lifetime">&#39;a</span>, i16&gt;&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SharedCoords&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, index: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Array&lt;<span class="lifetime">'a</span>, i16&gt;&gt; {
         <span class="self">self</span>.data
             .read_array(<span class="self">self</span>.offset + (<span class="self">self</span>.axis_count * index * <span class="number">2</span>), <span class="self">self</span>.axis_count)
     }

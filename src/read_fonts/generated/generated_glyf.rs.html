@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.4/src/tables/../../generated/generated_glyf.rs`."><title>generated_glyf.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.5/src/tables/../../generated/generated_glyf.rs`."><title>generated_glyf.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1207,42 +1208,42 @@
 
 <span class="kw">impl </span>GlyfMarker {}
 
-<span class="kw">impl </span>TopLevelTable <span class="kw">for </span>Glyf&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>TopLevelTable <span class="kw">for </span>Glyf&lt;<span class="lifetime">'_</span>&gt; {
     <span class="doccomment">/// `glyf`
-    </span><span class="kw">const </span>TAG: Tag = Tag::new(<span class="string">b&quot;glyf&quot;</span>);
+    </span><span class="kw">const </span>TAG: Tag = Tag::new(<span class="string">b"glyf"</span>);
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>Glyf&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>Glyf&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span>cursor = data.cursor();
         cursor.finish(GlyfMarker {})
     }
 }
 
 <span class="doccomment">/// The [glyf (Glyph Data)](https://docs.microsoft.com/en-us/typography/opentype/spec/glyf) table
-</span><span class="kw">pub type </span>Glyf&lt;<span class="lifetime">&#39;a</span>&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, GlyfMarker&gt;;
+</span><span class="kw">pub type </span>Glyf&lt;<span class="lifetime">'a</span>&gt; = TableRef&lt;<span class="lifetime">'a</span>, GlyfMarker&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Glyf&lt;<span class="lifetime">&#39;a</span>&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Glyf&lt;<span class="lifetime">'a</span>&gt; {}
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>Glyf&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>Glyf&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;Glyf&quot;
+        <span class="string">"Glyf"
     </span>}
 
     <span class="attr">#[allow(unused_variables)]
     #[allow(clippy::match_single_binding)]
-    </span><span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">match </span>idx {
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         }
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>Glyf&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt;).fmt(f)
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>Glyf&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt;).fmt(f)
     }
 }
 
@@ -1294,8 +1295,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>SimpleGlyph&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>SimpleGlyph&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>cursor = data.cursor();
         <span class="kw">let </span>number_of_contours: i16 = cursor.read()<span class="question-mark">?</span>;
         cursor.advance::&lt;i16&gt;();
@@ -1318,9 +1319,9 @@
 }
 
 <span class="doccomment">/// The [Glyph Header](https://docs.microsoft.com/en-us/typography/opentype/spec/glyf#glyph-headers)
-</span><span class="kw">pub type </span>SimpleGlyph&lt;<span class="lifetime">&#39;a</span>&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, SimpleGlyphMarker&gt;;
+</span><span class="kw">pub type </span>SimpleGlyph&lt;<span class="lifetime">'a</span>&gt; = TableRef&lt;<span class="lifetime">'a</span>, SimpleGlyphMarker&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SimpleGlyph&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SimpleGlyph&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// If the number of contours is greater than or equal to zero,
     /// this is a simple glyph. If negative, this is a composite glyph
     /// — the value -1 should be used for composite glyphs.
@@ -1355,7 +1356,7 @@
 
     <span class="doccomment">/// Array of point indices for the last point of each contour,
     /// in increasing numeric order
-    </span><span class="kw">pub fn </span>end_pts_of_contours(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[BigEndian&lt;u16&gt;] {
+    </span><span class="kw">pub fn </span>end_pts_of_contours(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[BigEndian&lt;u16&gt;] {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.end_pts_of_contours_byte_range();
         <span class="self">self</span>.data.read_array(range).unwrap()
     }
@@ -1369,52 +1370,52 @@
     }
 
     <span class="doccomment">/// Array of instruction byte code for the glyph.
-    </span><span class="kw">pub fn </span>instructions(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8] {
+    </span><span class="kw">pub fn </span>instructions(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8] {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.instructions_byte_range();
         <span class="self">self</span>.data.read_array(range).unwrap()
     }
 
     <span class="doccomment">/// the raw data for flags &amp; x/y coordinates
-    </span><span class="kw">pub fn </span>glyph_data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8] {
+    </span><span class="kw">pub fn </span>glyph_data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8] {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.glyph_data_byte_range();
         <span class="self">self</span>.data.read_array(range).unwrap()
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>SimpleGlyph&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>SimpleGlyph&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;SimpleGlyph&quot;
+        <span class="string">"SimpleGlyph"
     </span>}
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">match </span>idx {
-            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;number_of_contours&quot;</span>, <span class="self">self</span>.number_of_contours())),
-            <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;x_min&quot;</span>, <span class="self">self</span>.x_min())),
-            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;y_min&quot;</span>, <span class="self">self</span>.y_min())),
-            <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;x_max&quot;</span>, <span class="self">self</span>.x_max())),
-            <span class="number">4usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;y_max&quot;</span>, <span class="self">self</span>.y_max())),
+            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"number_of_contours"</span>, <span class="self">self</span>.number_of_contours())),
+            <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"x_min"</span>, <span class="self">self</span>.x_min())),
+            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"y_min"</span>, <span class="self">self</span>.y_min())),
+            <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"x_max"</span>, <span class="self">self</span>.x_max())),
+            <span class="number">4usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"y_max"</span>, <span class="self">self</span>.y_max())),
             <span class="number">5usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                <span class="string">&quot;end_pts_of_contours&quot;</span>,
+                <span class="string">"end_pts_of_contours"</span>,
                 <span class="self">self</span>.end_pts_of_contours(),
             )),
-            <span class="number">6usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;instruction_length&quot;</span>, <span class="self">self</span>.instruction_length())),
-            <span class="number">7usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;instructions&quot;</span>, <span class="self">self</span>.instructions())),
-            <span class="number">8usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;glyph_data&quot;</span>, <span class="self">self</span>.glyph_data())),
+            <span class="number">6usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"instruction_length"</span>, <span class="self">self</span>.instruction_length())),
+            <span class="number">7usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"instructions"</span>, <span class="self">self</span>.instructions())),
+            <span class="number">8usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"glyph_data"</span>, <span class="self">self</span>.glyph_data())),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         }
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>SimpleGlyph&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt;).fmt(f)
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>SimpleGlyph&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt;).fmt(f)
     }
 }
 
 <span class="doccomment">/// Flags used in [SimpleGlyph]
 </span><span class="attr">#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = <span class="string">&quot;serde&quot;</span>, derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = <span class="string">"serde"</span>, derive(serde::Serialize, serde::Deserialize))]
 </span><span class="kw">pub struct </span>SimpleGlyphFlags {
     bits: u8,
 }
@@ -1619,7 +1620,7 @@
     /// Specifically, the returned set contains all flags present in
     /// `self`, except for the ones present in `other`.
     ///
-    /// It is also conceptually equivalent to the &quot;bit-clear&quot; operation:
+    /// It is also conceptually equivalent to the "bit-clear" operation:
     /// `flags &amp; !other` (and this syntax is also supported).
     ///
     /// This is equivalent to using the `-` operator (e.g.
@@ -1728,32 +1729,32 @@
 <span class="kw">impl </span>std::fmt::Debug <span class="kw">for </span>SimpleGlyphFlags {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter) -&gt; std::fmt::Result {
         <span class="kw">let </span>members: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span>str, <span class="self">Self</span>)] = <span class="kw-2">&amp;</span>[
-            (<span class="string">&quot;ON_CURVE_POINT&quot;</span>, <span class="self">Self</span>::ON_CURVE_POINT),
-            (<span class="string">&quot;X_SHORT_VECTOR&quot;</span>, <span class="self">Self</span>::X_SHORT_VECTOR),
-            (<span class="string">&quot;Y_SHORT_VECTOR&quot;</span>, <span class="self">Self</span>::Y_SHORT_VECTOR),
-            (<span class="string">&quot;REPEAT_FLAG&quot;</span>, <span class="self">Self</span>::REPEAT_FLAG),
+            (<span class="string">"ON_CURVE_POINT"</span>, <span class="self">Self</span>::ON_CURVE_POINT),
+            (<span class="string">"X_SHORT_VECTOR"</span>, <span class="self">Self</span>::X_SHORT_VECTOR),
+            (<span class="string">"Y_SHORT_VECTOR"</span>, <span class="self">Self</span>::Y_SHORT_VECTOR),
+            (<span class="string">"REPEAT_FLAG"</span>, <span class="self">Self</span>::REPEAT_FLAG),
             (
-                <span class="string">&quot;X_IS_SAME_OR_POSITIVE_X_SHORT_VECTOR&quot;</span>,
+                <span class="string">"X_IS_SAME_OR_POSITIVE_X_SHORT_VECTOR"</span>,
                 <span class="self">Self</span>::X_IS_SAME_OR_POSITIVE_X_SHORT_VECTOR,
             ),
             (
-                <span class="string">&quot;Y_IS_SAME_OR_POSITIVE_Y_SHORT_VECTOR&quot;</span>,
+                <span class="string">"Y_IS_SAME_OR_POSITIVE_Y_SHORT_VECTOR"</span>,
                 <span class="self">Self</span>::Y_IS_SAME_OR_POSITIVE_Y_SHORT_VECTOR,
             ),
-            (<span class="string">&quot;OVERLAP_SIMPLE&quot;</span>, <span class="self">Self</span>::OVERLAP_SIMPLE),
+            (<span class="string">"OVERLAP_SIMPLE"</span>, <span class="self">Self</span>::OVERLAP_SIMPLE),
         ];
         <span class="kw">let </span><span class="kw-2">mut </span>first = <span class="bool-val">true</span>;
         <span class="kw">for </span>(name, value) <span class="kw">in </span>members {
             <span class="kw">if </span><span class="self">self</span>.contains(<span class="kw-2">*</span>value) {
                 <span class="kw">if </span>!first {
-                    f.write_str(<span class="string">&quot; | &quot;</span>)<span class="question-mark">?</span>;
+                    f.write_str(<span class="string">" | "</span>)<span class="question-mark">?</span>;
                 }
                 first = <span class="bool-val">false</span>;
                 f.write_str(name)<span class="question-mark">?</span>;
             }
         }
         <span class="kw">if </span>first {
-            f.write_str(<span class="string">&quot;(empty)&quot;</span>)<span class="question-mark">?</span>;
+            f.write_str(<span class="string">"(empty)"</span>)<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
     }
@@ -1794,9 +1795,9 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;SimpleGlyphFlags&gt; <span class="kw">for </span>FieldType&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>from(src: SimpleGlyphFlags) -&gt; FieldType&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; From&lt;SimpleGlyphFlags&gt; <span class="kw">for </span>FieldType&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>from(src: SimpleGlyphFlags) -&gt; FieldType&lt;<span class="lifetime">'a</span>&gt; {
         src.bits().into()
     }
 }
@@ -1835,8 +1836,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>CompositeGlyph&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>CompositeGlyph&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>cursor = data.cursor();
         cursor.advance::&lt;i16&gt;();
         cursor.advance::&lt;i16&gt;();
@@ -1852,9 +1853,9 @@
 }
 
 <span class="doccomment">/// [CompositeGlyph](https://docs.microsoft.com/en-us/typography/opentype/spec/glyf#glyph-headers)
-</span><span class="kw">pub type </span>CompositeGlyph&lt;<span class="lifetime">&#39;a</span>&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, CompositeGlyphMarker&gt;;
+</span><span class="kw">pub type </span>CompositeGlyph&lt;<span class="lifetime">'a</span>&gt; = TableRef&lt;<span class="lifetime">'a</span>, CompositeGlyphMarker&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; CompositeGlyph&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; CompositeGlyph&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// If the number of contours is greater than or equal to zero,
     /// this is a simple glyph. If negative, this is a composite glyph
     /// — the value -1 should be used for composite glyphs.
@@ -1889,40 +1890,40 @@
 
     <span class="doccomment">/// component flag
     /// glyph index of component
-    </span><span class="kw">pub fn </span>component_data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8] {
+    </span><span class="kw">pub fn </span>component_data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8] {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.component_data_byte_range();
         <span class="self">self</span>.data.read_array(range).unwrap()
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>CompositeGlyph&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>CompositeGlyph&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;CompositeGlyph&quot;
+        <span class="string">"CompositeGlyph"
     </span>}
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">match </span>idx {
-            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;number_of_contours&quot;</span>, <span class="self">self</span>.number_of_contours())),
-            <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;x_min&quot;</span>, <span class="self">self</span>.x_min())),
-            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;y_min&quot;</span>, <span class="self">self</span>.y_min())),
-            <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;x_max&quot;</span>, <span class="self">self</span>.x_max())),
-            <span class="number">4usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;y_max&quot;</span>, <span class="self">self</span>.y_max())),
-            <span class="number">5usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;component_data&quot;</span>, <span class="self">self</span>.component_data())),
+            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"number_of_contours"</span>, <span class="self">self</span>.number_of_contours())),
+            <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"x_min"</span>, <span class="self">self</span>.x_min())),
+            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"y_min"</span>, <span class="self">self</span>.y_min())),
+            <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"x_max"</span>, <span class="self">self</span>.x_max())),
+            <span class="number">4usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"y_max"</span>, <span class="self">self</span>.y_max())),
+            <span class="number">5usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"component_data"</span>, <span class="self">self</span>.component_data())),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         }
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>CompositeGlyph&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt;).fmt(f)
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>CompositeGlyph&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt;).fmt(f)
     }
 }
 
 <span class="doccomment">/// Flags used in [CompositeGlyph]
 </span><span class="attr">#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = <span class="string">&quot;serde&quot;</span>, derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = <span class="string">"serde"</span>, derive(serde::Serialize, serde::Deserialize))]
 </span><span class="kw">pub struct </span>CompositeGlyphFlags {
     bits: u16,
 }
@@ -2117,7 +2118,7 @@
     /// Specifically, the returned set contains all flags present in
     /// `self`, except for the ones present in `other`.
     ///
-    /// It is also conceptually equivalent to the &quot;bit-clear&quot; operation:
+    /// It is also conceptually equivalent to the "bit-clear" operation:
     /// `flags &amp; !other` (and this syntax is also supported).
     ///
     /// This is equivalent to using the `-` operator (e.g.
@@ -2226,31 +2227,31 @@
 <span class="kw">impl </span>std::fmt::Debug <span class="kw">for </span>CompositeGlyphFlags {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter) -&gt; std::fmt::Result {
         <span class="kw">let </span>members: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span>str, <span class="self">Self</span>)] = <span class="kw-2">&amp;</span>[
-            (<span class="string">&quot;ARG_1_AND_2_ARE_WORDS&quot;</span>, <span class="self">Self</span>::ARG_1_AND_2_ARE_WORDS),
-            (<span class="string">&quot;ARGS_ARE_XY_VALUES&quot;</span>, <span class="self">Self</span>::ARGS_ARE_XY_VALUES),
-            (<span class="string">&quot;ROUND_XY_TO_GRID&quot;</span>, <span class="self">Self</span>::ROUND_XY_TO_GRID),
-            (<span class="string">&quot;WE_HAVE_A_SCALE&quot;</span>, <span class="self">Self</span>::WE_HAVE_A_SCALE),
-            (<span class="string">&quot;MORE_COMPONENTS&quot;</span>, <span class="self">Self</span>::MORE_COMPONENTS),
-            (<span class="string">&quot;WE_HAVE_AN_X_AND_Y_SCALE&quot;</span>, <span class="self">Self</span>::WE_HAVE_AN_X_AND_Y_SCALE),
-            (<span class="string">&quot;WE_HAVE_A_TWO_BY_TWO&quot;</span>, <span class="self">Self</span>::WE_HAVE_A_TWO_BY_TWO),
-            (<span class="string">&quot;WE_HAVE_INSTRUCTIONS&quot;</span>, <span class="self">Self</span>::WE_HAVE_INSTRUCTIONS),
-            (<span class="string">&quot;USE_MY_METRICS&quot;</span>, <span class="self">Self</span>::USE_MY_METRICS),
-            (<span class="string">&quot;OVERLAP_COMPOUND&quot;</span>, <span class="self">Self</span>::OVERLAP_COMPOUND),
-            (<span class="string">&quot;SCALED_COMPONENT_OFFSET&quot;</span>, <span class="self">Self</span>::SCALED_COMPONENT_OFFSET),
-            (<span class="string">&quot;UNSCALED_COMPONENT_OFFSET&quot;</span>, <span class="self">Self</span>::UNSCALED_COMPONENT_OFFSET),
+            (<span class="string">"ARG_1_AND_2_ARE_WORDS"</span>, <span class="self">Self</span>::ARG_1_AND_2_ARE_WORDS),
+            (<span class="string">"ARGS_ARE_XY_VALUES"</span>, <span class="self">Self</span>::ARGS_ARE_XY_VALUES),
+            (<span class="string">"ROUND_XY_TO_GRID"</span>, <span class="self">Self</span>::ROUND_XY_TO_GRID),
+            (<span class="string">"WE_HAVE_A_SCALE"</span>, <span class="self">Self</span>::WE_HAVE_A_SCALE),
+            (<span class="string">"MORE_COMPONENTS"</span>, <span class="self">Self</span>::MORE_COMPONENTS),
+            (<span class="string">"WE_HAVE_AN_X_AND_Y_SCALE"</span>, <span class="self">Self</span>::WE_HAVE_AN_X_AND_Y_SCALE),
+            (<span class="string">"WE_HAVE_A_TWO_BY_TWO"</span>, <span class="self">Self</span>::WE_HAVE_A_TWO_BY_TWO),
+            (<span class="string">"WE_HAVE_INSTRUCTIONS"</span>, <span class="self">Self</span>::WE_HAVE_INSTRUCTIONS),
+            (<span class="string">"USE_MY_METRICS"</span>, <span class="self">Self</span>::USE_MY_METRICS),
+            (<span class="string">"OVERLAP_COMPOUND"</span>, <span class="self">Self</span>::OVERLAP_COMPOUND),
+            (<span class="string">"SCALED_COMPONENT_OFFSET"</span>, <span class="self">Self</span>::SCALED_COMPONENT_OFFSET),
+            (<span class="string">"UNSCALED_COMPONENT_OFFSET"</span>, <span class="self">Self</span>::UNSCALED_COMPONENT_OFFSET),
         ];
         <span class="kw">let </span><span class="kw-2">mut </span>first = <span class="bool-val">true</span>;
         <span class="kw">for </span>(name, value) <span class="kw">in </span>members {
             <span class="kw">if </span><span class="self">self</span>.contains(<span class="kw-2">*</span>value) {
                 <span class="kw">if </span>!first {
-                    f.write_str(<span class="string">&quot; | &quot;</span>)<span class="question-mark">?</span>;
+                    f.write_str(<span class="string">" | "</span>)<span class="question-mark">?</span>;
                 }
                 first = <span class="bool-val">false</span>;
                 f.write_str(name)<span class="question-mark">?</span>;
             }
         }
         <span class="kw">if </span>first {
-            f.write_str(<span class="string">&quot;(empty)&quot;</span>)<span class="question-mark">?</span>;
+            f.write_str(<span class="string">"(empty)"</span>)<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
     }
@@ -2291,21 +2292,21 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;CompositeGlyphFlags&gt; <span class="kw">for </span>FieldType&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>from(src: CompositeGlyphFlags) -&gt; FieldType&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; From&lt;CompositeGlyphFlags&gt; <span class="kw">for </span>FieldType&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>from(src: CompositeGlyphFlags) -&gt; FieldType&lt;<span class="lifetime">'a</span>&gt; {
         src.bits().into()
     }
 }
 
 <span class="doccomment">/// Simple or composite glyph.
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub enum </span>Glyph&lt;<span class="lifetime">&#39;a</span>&gt; {
-    Simple(SimpleGlyph&lt;<span class="lifetime">&#39;a</span>&gt;),
-    Composite(CompositeGlyph&lt;<span class="lifetime">&#39;a</span>&gt;),
+</span><span class="kw">pub enum </span>Glyph&lt;<span class="lifetime">'a</span>&gt; {
+    Simple(SimpleGlyph&lt;<span class="lifetime">'a</span>&gt;),
+    Composite(CompositeGlyph&lt;<span class="lifetime">'a</span>&gt;),
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Glyph&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Glyph&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// If the number of contours is greater than or equal to zero,
     /// this is a simple glyph. If negative, this is a composite glyph
     /// — the value -1 should be used for composite glyphs.
@@ -2349,8 +2350,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>Glyph&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>Glyph&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span>format: i16 = data.read_at(<span class="number">0usize</span>)<span class="question-mark">?</span>;
 
         <span class="attr">#[allow(clippy::redundant_guards)]
@@ -2362,9 +2363,9 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Glyph&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>dyn_inner&lt;<span class="lifetime">&#39;b</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Glyph&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>dyn_inner&lt;<span class="lifetime">'b</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::Simple(table) =&gt; table,
             <span class="self">Self</span>::Composite(table) =&gt; table,
@@ -2372,19 +2373,19 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>Glyph&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>Glyph&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
         <span class="self">self</span>.dyn_inner().fmt(f)
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>Glyph&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>Glyph&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
         <span class="self">self</span>.dyn_inner().type_name()
     }
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="self">self</span>.dyn_inner().get_field(idx)
     }
 }

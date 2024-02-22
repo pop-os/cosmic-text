@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/font/fallback/unix.rs`."><title>unix.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="cosmic_text" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/font/fallback/unix.rs`."><title>unix.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="cosmic_text" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -104,99 +105,99 @@
 </span><span class="kw">use </span>unicode_script::Script;
 
 <span class="comment">// Fallbacks to use after any script specific fallbacks
-</span><span class="kw">pub fn </span>common_fallback() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str] {
+</span><span class="kw">pub fn </span>common_fallback() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str] {
     <span class="comment">//TODO: abstract style (sans/serif/monospaced)
     </span><span class="kw-2">&amp;</span>[
         <span class="comment">/* Sans-serif fallbacks */
-        </span><span class="string">&quot;Noto Sans&quot;</span>,
+        </span><span class="string">"Noto Sans"</span>,
         <span class="comment">/* More sans-serif fallbacks */
-        </span><span class="string">&quot;DejaVu Sans&quot;</span>,
-        <span class="string">&quot;FreeSans&quot;</span>,
+        </span><span class="string">"DejaVu Sans"</span>,
+        <span class="string">"FreeSans"</span>,
         <span class="comment">/* Mono fallbacks */
-        </span><span class="string">&quot;Noto Sans Mono&quot;</span>,
-        <span class="string">&quot;DejaVu Sans Mono&quot;</span>,
-        <span class="string">&quot;FreeMono&quot;</span>,
+        </span><span class="string">"Noto Sans Mono"</span>,
+        <span class="string">"DejaVu Sans Mono"</span>,
+        <span class="string">"FreeMono"</span>,
         <span class="comment">/* Symbols fallbacks */
-        </span><span class="string">&quot;Noto Sans Symbols&quot;</span>,
-        <span class="string">&quot;Noto Sans Symbols2&quot;</span>,
+        </span><span class="string">"Noto Sans Symbols"</span>,
+        <span class="string">"Noto Sans Symbols2"</span>,
         <span class="comment">/* Emoji fallbacks*/
-        </span><span class="string">&quot;Noto Color Emoji&quot;</span>,
+        </span><span class="string">"Noto Color Emoji"</span>,
         <span class="comment">//TODO: Add CJK script here for doublewides?
     </span>]
 }
 
 <span class="comment">// Fallbacks to never use
-</span><span class="kw">pub fn </span>forbidden_fallback() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str] {
+</span><span class="kw">pub fn </span>forbidden_fallback() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str] {
     <span class="kw-2">&amp;</span>[]
 }
 
-<span class="kw">fn </span>han_unification(locale: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str] {
+<span class="kw">fn </span>han_unification(locale: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str] {
     <span class="kw">match </span>locale {
         <span class="comment">// Japan
-        </span><span class="string">&quot;ja&quot; </span>=&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans CJK JA&quot;</span>],
+        </span><span class="string">"ja" </span>=&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans CJK JA"</span>],
         <span class="comment">// Korea
-        </span><span class="string">&quot;ko&quot; </span>=&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans CJK KR&quot;</span>],
+        </span><span class="string">"ko" </span>=&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans CJK KR"</span>],
         <span class="comment">// Hong Kong
-        </span><span class="string">&quot;zh-HK&quot; </span>=&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans CJK HK&quot;</span>],
+        </span><span class="string">"zh-HK" </span>=&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans CJK HK"</span>],
         <span class="comment">// Taiwan
-        </span><span class="string">&quot;zh-TW&quot; </span>=&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans CJK TC&quot;</span>],
-        <span class="comment">// Simplified Chinese is the default (also catches &quot;zh-CN&quot; for China)
-        </span><span class="kw">_ </span>=&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans CJK SC&quot;</span>],
+        </span><span class="string">"zh-TW" </span>=&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans CJK TC"</span>],
+        <span class="comment">// Simplified Chinese is the default (also catches "zh-CN" for China)
+        </span><span class="kw">_ </span>=&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans CJK SC"</span>],
     }
 }
 
 <span class="comment">// Fallbacks to use per script
-</span><span class="kw">pub fn </span>script_fallback(script: Script, locale: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str] {
+</span><span class="kw">pub fn </span>script_fallback(script: Script, locale: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str] {
     <span class="comment">//TODO: abstract style (sans/serif/monospaced)
     </span><span class="kw">match </span>script {
-        Script::Adlam =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Adlam&quot;</span>, <span class="string">&quot;Noto Sans Adlam Unjoined&quot;</span>],
-        Script::Arabic =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Arabic&quot;</span>],
-        Script::Armenian =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Armenian&quot;</span>],
-        Script::Bengali =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Bengali&quot;</span>],
+        Script::Adlam =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Adlam"</span>, <span class="string">"Noto Sans Adlam Unjoined"</span>],
+        Script::Arabic =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Arabic"</span>],
+        Script::Armenian =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Armenian"</span>],
+        Script::Bengali =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Bengali"</span>],
         Script::Bopomofo =&gt; han_unification(locale),
-        Script::Buhid =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Buhid&quot;</span>],
-        Script::Chakma =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Chakma&quot;</span>],
-        Script::Cherokee =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Cherokee&quot;</span>],
-        Script::Deseret =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Deseret&quot;</span>],
-        Script::Devanagari =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Devanagari&quot;</span>],
-        Script::Ethiopic =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Ethiopic&quot;</span>],
-        Script::Georgian =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Georgian&quot;</span>],
-        Script::Gothic =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Gothic&quot;</span>],
-        Script::Grantha =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Grantha&quot;</span>],
-        Script::Gujarati =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Gujarati&quot;</span>],
-        Script::Gurmukhi =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Gurmukhi&quot;</span>],
+        Script::Buhid =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Buhid"</span>],
+        Script::Chakma =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Chakma"</span>],
+        Script::Cherokee =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Cherokee"</span>],
+        Script::Deseret =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Deseret"</span>],
+        Script::Devanagari =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Devanagari"</span>],
+        Script::Ethiopic =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Ethiopic"</span>],
+        Script::Georgian =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Georgian"</span>],
+        Script::Gothic =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Gothic"</span>],
+        Script::Grantha =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Grantha"</span>],
+        Script::Gujarati =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Gujarati"</span>],
+        Script::Gurmukhi =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Gurmukhi"</span>],
         Script::Han =&gt; han_unification(locale),
-        Script::Hangul =&gt; han_unification(<span class="string">&quot;ko&quot;</span>),
-        Script::Hanunoo =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Hanunoo&quot;</span>],
-        Script::Hebrew =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Hebrew&quot;</span>],
-        Script::Hiragana =&gt; han_unification(<span class="string">&quot;ja&quot;</span>),
-        Script::Javanese =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Javanese&quot;</span>],
-        Script::Kannada =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Kannada&quot;</span>],
-        Script::Katakana =&gt; han_unification(<span class="string">&quot;ja&quot;</span>),
-        Script::Khmer =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Khmer&quot;</span>],
-        Script::Lao =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Lao&quot;</span>],
-        Script::Malayalam =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Malayalam&quot;</span>],
-        Script::Mongolian =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Mongolian&quot;</span>],
-        Script::Myanmar =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Myanmar&quot;</span>],
-        Script::Oriya =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Oriya&quot;</span>],
-        Script::Runic =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Runic&quot;</span>],
-        Script::Sinhala =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Sinhala&quot;</span>],
-        Script::Syriac =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Syriac&quot;</span>],
-        Script::Tagalog =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Tagalog&quot;</span>],
-        Script::Tagbanwa =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Tagbanwa&quot;</span>],
-        Script::Tai_Le =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Tai Le&quot;</span>],
-        Script::Tai_Tham =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Tai Tham&quot;</span>],
-        Script::Tai_Viet =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Tai Viet&quot;</span>],
-        Script::Tamil =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Tamil&quot;</span>],
-        Script::Telugu =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Telugu&quot;</span>],
-        Script::Thaana =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Thaana&quot;</span>],
-        Script::Thai =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Thai&quot;</span>],
+        Script::Hangul =&gt; han_unification(<span class="string">"ko"</span>),
+        Script::Hanunoo =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Hanunoo"</span>],
+        Script::Hebrew =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Hebrew"</span>],
+        Script::Hiragana =&gt; han_unification(<span class="string">"ja"</span>),
+        Script::Javanese =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Javanese"</span>],
+        Script::Kannada =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Kannada"</span>],
+        Script::Katakana =&gt; han_unification(<span class="string">"ja"</span>),
+        Script::Khmer =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Khmer"</span>],
+        Script::Lao =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Lao"</span>],
+        Script::Malayalam =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Malayalam"</span>],
+        Script::Mongolian =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Mongolian"</span>],
+        Script::Myanmar =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Myanmar"</span>],
+        Script::Oriya =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Oriya"</span>],
+        Script::Runic =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Runic"</span>],
+        Script::Sinhala =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Sinhala"</span>],
+        Script::Syriac =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Syriac"</span>],
+        Script::Tagalog =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Tagalog"</span>],
+        Script::Tagbanwa =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Tagbanwa"</span>],
+        Script::Tai_Le =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Tai Le"</span>],
+        Script::Tai_Tham =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Tai Tham"</span>],
+        Script::Tai_Viet =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Tai Viet"</span>],
+        Script::Tamil =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Tamil"</span>],
+        Script::Telugu =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Telugu"</span>],
+        Script::Thaana =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Thaana"</span>],
+        Script::Thai =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Thai"</span>],
         <span class="comment">//TODO: no sans script?
-        </span>Script::Tibetan =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Serif Tibetan&quot;</span>],
-        Script::Tifinagh =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Tifinagh&quot;</span>],
-        Script::Vai =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Vai&quot;</span>],
+        </span>Script::Tibetan =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Serif Tibetan"</span>],
+        Script::Tifinagh =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Tifinagh"</span>],
+        Script::Vai =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Vai"</span>],
         <span class="comment">//TODO: Use han_unification?
-        </span>Script::Yi =&gt; <span class="kw-2">&amp;</span>[<span class="string">&quot;Noto Sans Yi&quot;</span>, <span class="string">&quot;Noto Sans CJK SC&quot;</span>],
+        </span>Script::Yi =&gt; <span class="kw-2">&amp;</span>[<span class="string">"Noto Sans Yi"</span>, <span class="string">"Noto Sans CJK SC"</span>],
         <span class="kw">_ </span>=&gt; <span class="kw-2">&amp;</span>[],
     }
 }

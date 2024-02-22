@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/font/system.rs`."><title>system.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="cosmic_text" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/font/system.rs`."><title>system.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="cosmic_text" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -274,15 +275,15 @@
     </span>shape_plan_cache: ShapePlanCache,
 
     <span class="doccomment">/// Cache for shaped runs
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;shape-run-cache&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"shape-run-cache"</span>)]
     </span><span class="kw">pub </span>shape_run_cache: <span class="kw">crate</span>::ShapeRunCache,
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>FontSystem {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;FontSystem&quot;</span>)
-            .field(<span class="string">&quot;locale&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.locale)
-            .field(<span class="string">&quot;db&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.db)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"FontSystem"</span>)
+            .field(<span class="string">"locale"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.locale)
+            .field(<span class="string">"db"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.db)
             .finish()
     }
 }
@@ -303,14 +304,14 @@
     <span class="doccomment">/// Create a new [`FontSystem`] with a pre-specified set of fonts.
     </span><span class="kw">pub fn </span>new_with_fonts(fonts: <span class="kw">impl </span>IntoIterator&lt;Item = fontdb::Source&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>locale = <span class="self">Self</span>::get_locale();
-        <span class="macro">log::debug!</span>(<span class="string">&quot;Locale: {}&quot;</span>, locale);
+        <span class="macro">log::debug!</span>(<span class="string">"Locale: {}"</span>, locale);
 
         <span class="kw">let </span><span class="kw-2">mut </span>db = fontdb::Database::new();
 
         <span class="comment">//TODO: configurable default fonts
-        </span>db.set_monospace_family(<span class="string">&quot;Fira Mono&quot;</span>);
-        db.set_sans_serif_family(<span class="string">&quot;Fira Sans&quot;</span>);
-        db.set_serif_family(<span class="string">&quot;DejaVu Serif&quot;</span>);
+        </span>db.set_monospace_family(<span class="string">"Fira Mono"</span>);
+        db.set_sans_serif_family(<span class="string">"Fira Sans"</span>);
+        db.set_serif_family(<span class="string">"DejaVu Serif"</span>);
 
         <span class="self">Self</span>::load_fonts(<span class="kw-2">&amp;mut </span>db, fonts.into_iter());
 
@@ -325,7 +326,7 @@
             font_cache: Default::default(),
             font_matches_cache: Default::default(),
             shape_plan_cache: ShapePlanCache::default(),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;shape-run-cache&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"shape-run-cache"</span>)]
             </span>shape_run_cache: <span class="kw">crate</span>::ShapeRunCache::default(),
         }
     }
@@ -361,7 +362,7 @@
         <span class="self">self</span>.font_cache
             .entry(id)
             .or_insert_with(|| {
-                <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
                 </span><span class="kw">unsafe </span>{
                     <span class="self">self</span>.db.make_shared_face_data(id);
                 }
@@ -369,7 +370,7 @@
                     <span class="prelude-val">Some</span>(font) =&gt; <span class="prelude-val">Some</span>(Arc::new(font)),
                     <span class="prelude-val">None </span>=&gt; {
                         <span class="macro">log::warn!</span>(
-                            <span class="string">&quot;failed to load font &#39;{}&#39;&quot;</span>,
+                            <span class="string">"failed to load font '{}'"</span>,
                             <span class="self">self</span>.db.face(id)<span class="question-mark">?</span>.post_script_name
                         );
                         <span class="prelude-val">None
@@ -379,10 +380,10 @@
             .clone()
     }
 
-    <span class="kw">pub fn </span>get_font_matches(<span class="kw-2">&amp;mut </span><span class="self">self</span>, attrs: Attrs&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Arc&lt;Vec&lt;FontMatchKey&gt;&gt; {
+    <span class="kw">pub fn </span>get_font_matches(<span class="kw-2">&amp;mut </span><span class="self">self</span>, attrs: Attrs&lt;<span class="lifetime">'_</span>&gt;) -&gt; Arc&lt;Vec&lt;FontMatchKey&gt;&gt; {
         <span class="comment">// Clear the cache first if it reached the size limit
         </span><span class="kw">if </span><span class="self">self</span>.font_matches_cache.len() &gt;= <span class="self">Self</span>::FONT_MATCHES_CACHE_SIZE_LIMIT {
-            <span class="macro">log::trace!</span>(<span class="string">&quot;clear font mache cache&quot;</span>);
+            <span class="macro">log::trace!</span>(<span class="string">"clear font mache cache"</span>);
             <span class="self">self</span>.font_matches_cache.clear();
         }
 
@@ -390,7 +391,7 @@
             <span class="comment">//TODO: do not create AttrsOwned unless entry does not already exist
             </span>.entry(attrs.into())
             .or_insert_with(|| {
-                <span class="attr">#[cfg(all(feature = <span class="string">&quot;std&quot;</span>, not(target_arch = <span class="string">&quot;wasm32&quot;</span>)))]
+                <span class="attr">#[cfg(all(feature = <span class="string">"std"</span>, not(target_arch = <span class="string">"wasm32"</span>)))]
                 </span><span class="kw">let </span>now = std::time::Instant::now();
 
                 <span class="kw">let </span><span class="kw-2">mut </span>font_match_keys = <span class="self">self
@@ -407,10 +408,10 @@
                 <span class="comment">// Sort so we get the keys with weight_offset=0 first
                 </span>font_match_keys.sort();
 
-                <span class="attr">#[cfg(all(feature = <span class="string">&quot;std&quot;</span>, not(target_arch = <span class="string">&quot;wasm32&quot;</span>)))]
+                <span class="attr">#[cfg(all(feature = <span class="string">"std"</span>, not(target_arch = <span class="string">"wasm32"</span>)))]
                 </span>{
                     <span class="kw">let </span>elapsed = now.elapsed();
-                    <span class="macro">log::debug!</span>(<span class="string">&quot;font matches for {:?} in {:?}&quot;</span>, attrs, elapsed);
+                    <span class="macro">log::debug!</span>(<span class="string">"font matches for {:?} in {:?}"</span>, attrs, elapsed);
                 }
 
                 Arc::new(font_match_keys)
@@ -418,22 +419,22 @@
             .clone()
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
     </span><span class="kw">fn </span>get_locale() -&gt; String {
         sys_locale::get_locale().unwrap_or_else(|| {
-            <span class="macro">log::warn!</span>(<span class="string">&quot;failed to get system locale, falling back to en-US&quot;</span>);
-            String::from(<span class="string">&quot;en-US&quot;</span>)
+            <span class="macro">log::warn!</span>(<span class="string">"failed to get system locale, falling back to en-US"</span>);
+            String::from(<span class="string">"en-US"</span>)
         })
     }
 
-    <span class="attr">#[cfg(not(feature = <span class="string">&quot;std&quot;</span>))]
+    <span class="attr">#[cfg(not(feature = <span class="string">"std"</span>))]
     </span><span class="kw">fn </span>get_locale() -&gt; String {
-        String::from(<span class="string">&quot;en-US&quot;</span>)
+        String::from(<span class="string">"en-US"</span>)
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
     </span><span class="kw">fn </span>load_fonts(db: <span class="kw-2">&amp;mut </span>fontdb::Database, fonts: <span class="kw">impl </span>Iterator&lt;Item = fontdb::Source&gt;) {
-        <span class="attr">#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
+        <span class="attr">#[cfg(not(target_arch = <span class="string">"wasm32"</span>))]
         </span><span class="kw">let </span>now = std::time::Instant::now();
 
         db.load_system_fonts();
@@ -442,15 +443,15 @@
             db.load_font_source(source);
         }
 
-        <span class="attr">#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
+        <span class="attr">#[cfg(not(target_arch = <span class="string">"wasm32"</span>))]
         </span><span class="macro">log::debug!</span>(
-            <span class="string">&quot;Parsed {} font faces in {}ms.&quot;</span>,
+            <span class="string">"Parsed {} font faces in {}ms."</span>,
             db.len(),
             now.elapsed().as_millis()
         );
     }
 
-    <span class="attr">#[cfg(not(feature = <span class="string">&quot;std&quot;</span>))]
+    <span class="attr">#[cfg(not(feature = <span class="string">"std"</span>))]
     </span><span class="kw">fn </span>load_fonts(db: <span class="kw-2">&amp;mut </span>fontdb::Database, fonts: <span class="kw">impl </span>Iterator&lt;Item = fontdb::Source&gt;) {
         <span class="kw">for </span>source <span class="kw">in </span>fonts {
             db.load_font_source(source);
@@ -460,12 +461,12 @@
 
 <span class="doccomment">/// A value borrowed together with an [`FontSystem`]
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>BorrowedWithFontSystem&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) inner: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) font_system: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>FontSystem,
+</span><span class="kw">pub struct </span>BorrowedWithFontSystem&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) inner: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) font_system: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>FontSystem,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Deref <span class="kw">for </span>BorrowedWithFontSystem&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; Deref <span class="kw">for </span>BorrowedWithFontSystem&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">type </span>Target = T;
 
     <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
@@ -473,7 +474,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; DerefMut <span class="kw">for </span>BorrowedWithFontSystem&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; DerefMut <span class="kw">for </span>BorrowedWithFontSystem&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">fn </span>deref_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Target {
         <span class="self">self</span>.inner
     }

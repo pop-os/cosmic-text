@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sys-locale-0.3.1/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="sys_locale" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sys-locale-0.3.1/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="sys_locale" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -137,39 +138,39 @@
 </span><span class="attr">#![cfg_attr(
     any(
         not(unix),
-        target_os = <span class="string">&quot;macos&quot;</span>,
-        target_os = <span class="string">&quot;ios&quot;</span>,
-        target_os = <span class="string">&quot;android&quot;
+        target_os = <span class="string">"macos"</span>,
+        target_os = <span class="string">"ios"</span>,
+        target_os = <span class="string">"android"
     </span>),
     no_std
 )]
 </span><span class="kw">extern crate </span>alloc;
 <span class="kw">use </span>alloc::string::String;
 
-<span class="attr">#[cfg(target_os = <span class="string">&quot;android&quot;</span>)]
+<span class="attr">#[cfg(target_os = <span class="string">"android"</span>)]
 </span><span class="kw">mod </span>android;
-<span class="attr">#[cfg(target_os = <span class="string">&quot;android&quot;</span>)]
+<span class="attr">#[cfg(target_os = <span class="string">"android"</span>)]
 </span><span class="kw">use </span>android <span class="kw">as </span>provider;
 
-<span class="attr">#[cfg(any(target_os = <span class="string">&quot;macos&quot;</span>, target_os = <span class="string">&quot;ios&quot;</span>))]
+<span class="attr">#[cfg(any(target_os = <span class="string">"macos"</span>, target_os = <span class="string">"ios"</span>))]
 </span><span class="kw">mod </span>apple;
-<span class="attr">#[cfg(any(target_os = <span class="string">&quot;macos&quot;</span>, target_os = <span class="string">&quot;ios&quot;</span>))]
+<span class="attr">#[cfg(any(target_os = <span class="string">"macos"</span>, target_os = <span class="string">"ios"</span>))]
 </span><span class="kw">use </span>apple <span class="kw">as </span>provider;
 
 <span class="attr">#[cfg(all(
     unix,
-    not(any(target_os = <span class="string">&quot;macos&quot;</span>, target_os = <span class="string">&quot;ios&quot;</span>, target_os = <span class="string">&quot;android&quot;</span>))
+    not(any(target_os = <span class="string">"macos"</span>, target_os = <span class="string">"ios"</span>, target_os = <span class="string">"android"</span>))
 ))]
 </span><span class="kw">mod </span>unix;
 <span class="attr">#[cfg(all(
     unix,
-    not(any(target_os = <span class="string">&quot;macos&quot;</span>, target_os = <span class="string">&quot;ios&quot;</span>, target_os = <span class="string">&quot;android&quot;</span>))
+    not(any(target_os = <span class="string">"macos"</span>, target_os = <span class="string">"ios"</span>, target_os = <span class="string">"android"</span>))
 ))]
 </span><span class="kw">use </span>unix <span class="kw">as </span>provider;
 
-<span class="attr">#[cfg(all(target_family = <span class="string">&quot;wasm&quot;</span>, feature = <span class="string">&quot;js&quot;</span>, not(unix)))]
+<span class="attr">#[cfg(all(target_family = <span class="string">"wasm"</span>, feature = <span class="string">"js"</span>, not(unix)))]
 </span><span class="kw">mod </span>wasm;
-<span class="attr">#[cfg(all(target_family = <span class="string">&quot;wasm&quot;</span>, feature = <span class="string">&quot;js&quot;</span>, not(unix)))]
+<span class="attr">#[cfg(all(target_family = <span class="string">"wasm"</span>, feature = <span class="string">"js"</span>, not(unix)))]
 </span><span class="kw">use </span>wasm <span class="kw">as </span>provider;
 
 <span class="attr">#[cfg(windows)]
@@ -177,7 +178,7 @@
 <span class="attr">#[cfg(windows)]
 </span><span class="kw">use </span>windows <span class="kw">as </span>provider;
 
-<span class="attr">#[cfg(not(any(unix, all(target_family = <span class="string">&quot;wasm&quot;</span>, feature = <span class="string">&quot;js&quot;</span>, not(unix)), windows)))]
+<span class="attr">#[cfg(not(any(unix, all(target_family = <span class="string">"wasm"</span>, feature = <span class="string">"js"</span>, not(unix)), windows)))]
 </span><span class="kw">mod </span>provider {
     <span class="kw">pub fn </span>get() -&gt; <span class="kw">impl </span>Iterator&lt;Item = alloc::string::String&gt; {
         core::iter::empty()
@@ -192,16 +193,16 @@
 /// # Returns
 ///
 /// Returns `Some(String)` with a BCP-47 language tag inside. If the locale
-/// couldn&#39;t be obtained, `None` is returned instead.
+/// couldn't be obtained, `None` is returned instead.
 ///
 /// # Example
 ///
 /// ```no_run
 /// use sys_locale::get_locale;
 ///
-/// let current_locale = get_locale().unwrap_or_else(|| String::from(&quot;en-US&quot;));
+/// let current_locale = get_locale().unwrap_or_else(|| String::from("en-US"));
 ///
-/// println!(&quot;The locale is {}&quot;, current_locale);
+/// println!("The locale is {}", current_locale);
 /// ```
 </span><span class="kw">pub fn </span>get_locale() -&gt; <span class="prelude-ty">Option</span>&lt;String&gt; {
     get_locales().next()
@@ -221,8 +222,8 @@
 ///
 /// let mut  locales = get_locales();
 ///
-/// println!(&quot;The most preferred locale is {}&quot;, locales.next().unwrap_or(&quot;en-US&quot;.to_string()));
-/// println!(&quot;The least preferred locale is {}&quot;, locales.last().unwrap_or(&quot;en-US&quot;.to_string()));
+/// println!("The most preferred locale is {}", locales.next().unwrap_or("en-US".to_string()));
+/// println!("The least preferred locale is {}", locales.last().unwrap_or("en-US".to_string()));
 /// ```
 </span><span class="kw">pub fn </span>get_locales() -&gt; <span class="kw">impl </span>Iterator&lt;Item = String&gt; {
     provider::get()
@@ -233,20 +234,20 @@
     <span class="kw">use super</span>::{get_locale, get_locales};
     <span class="kw">extern crate </span>std;
 
-    <span class="attr">#[cfg(all(target_family = <span class="string">&quot;wasm&quot;</span>, feature = <span class="string">&quot;js&quot;</span>, not(unix)))]
+    <span class="attr">#[cfg(all(target_family = <span class="string">"wasm"</span>, feature = <span class="string">"js"</span>, not(unix)))]
     </span><span class="kw">use </span>wasm_bindgen_test::wasm_bindgen_test <span class="kw">as </span>test;
-    <span class="attr">#[cfg(all(target_family = <span class="string">&quot;wasm&quot;</span>, feature = <span class="string">&quot;js&quot;</span>, not(unix)))]
+    <span class="attr">#[cfg(all(target_family = <span class="string">"wasm"</span>, feature = <span class="string">"js"</span>, not(unix)))]
     </span><span class="macro">wasm_bindgen_test::wasm_bindgen_test_configure!</span>(run_in_browser);
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>can_obtain_locale() {
-        <span class="macro">assert!</span>(get_locale().is_some(), <span class="string">&quot;no locales were returned&quot;</span>);
+        <span class="macro">assert!</span>(get_locale().is_some(), <span class="string">"no locales were returned"</span>);
         <span class="kw">let </span>locales = get_locales();
         <span class="kw">for </span>(i, locale) <span class="kw">in </span>locales.enumerate() {
-            <span class="macro">assert!</span>(!locale.is_empty(), <span class="string">&quot;locale string {} was empty&quot;</span>, i);
+            <span class="macro">assert!</span>(!locale.is_empty(), <span class="string">"locale string {} was empty"</span>, i);
             <span class="macro">assert!</span>(
-                !locale.ends_with(<span class="string">&#39;\0&#39;</span>),
-                <span class="string">&quot;locale {} contained trailing NUL&quot;</span>,
+                !locale.ends_with(<span class="string">'\0'</span>),
+                <span class="string">"locale {} contained trailing NUL"</span>,
                 i
             );
         }

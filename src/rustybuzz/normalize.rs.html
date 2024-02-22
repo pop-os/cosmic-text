@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustybuzz-0.12.1/src/normalize.rs`."><title>normalize.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustybuzz" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustybuzz-0.12.1/src/normalize.rs`."><title>normalize.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustybuzz" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -439,26 +440,26 @@
 // This file exports one main function: normalize().
 //
 // This function closely reflects the Unicode Normalization Algorithm,
-// yet it&#39;s different.
+// yet it's different.
 //
 // Each shaper specifies whether it prefers decomposed (NFD) or composed (NFC).
 // The logic however tries to use whatever the font can support.
 //
 // In general what happens is that: each grapheme is decomposed in a chain
 // of 1:2 decompositions, marks reordered, and then recomposed if desired,
-// so far it&#39;s like Unicode Normalization.  However, the decomposition and
+// so far it's like Unicode Normalization.  However, the decomposition and
 // recomposition only happens if the font supports the resulting characters.
 //
 // The goals are:
 //
 //   - Try to render all canonically equivalent strings similarly.  To really
 //     achieve this we have to always do the full decomposition and then
-//     selectively recompose from there.  It&#39;s kinda too expensive though, so
+//     selectively recompose from there.  It's kinda too expensive though, so
 //     we skip some cases.  For example, if composed is desired, we simply
-//     don&#39;t touch 1-character clusters that are supported by the font, even
+//     don't touch 1-character clusters that are supported by the font, even
 //     though their NFC may be different.
 //
-//   - When a font has a precomposed character for a sequence but the &#39;ccmp&#39;
+//   - When a font has a precomposed character for a sequence but the 'ccmp'
 //     feature in the font is not adequate, use the precomposed character
 //     which typically has better mark positioning.
 //
@@ -473,10 +474,10 @@
 //     offload some of their requirements to the normalizer.  For example, the
 //     Indic shaper may want to disallow recomposing of two matras.
 
-</span><span class="kw">pub struct </span>ShapeNormalizeContext&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub </span>plan: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ShapePlan,
-    <span class="kw">pub </span>buffer: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Buffer,
-    <span class="kw">pub </span>face: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Face&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>ShapeNormalizeContext&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub </span>plan: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>ShapePlan,
+    <span class="kw">pub </span>buffer: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Buffer,
+    <span class="kw">pub </span>face: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Face&lt;<span class="lifetime">'a</span>&gt;,
     <span class="kw">pub </span>decompose: <span class="kw">fn</span>(<span class="kw-2">&amp;</span>ShapeNormalizeContext, char) -&gt; <span class="prelude-ty">Option</span>&lt;(char, char)&gt;,
     <span class="kw">pub </span>compose: <span class="kw">fn</span>(<span class="kw-2">&amp;</span>ShapeNormalizeContext, char, char) -&gt; <span class="prelude-ty">Option</span>&lt;char&gt;,
 }
@@ -540,7 +541,7 @@
     <span class="comment">// We do a fairly straightforward yet custom normalization process in three
     // separate rounds: decompose, reorder, recompose (if desired).  Currently
     // this makes two buffer swaps.  We can make it faster by moving the last
-    // two rounds into the inner loop for the first round, but it&#39;s more readable
+    // two rounds into the inner loop for the first round, but it's more readable
     // this way.
 
     // First round, decompose
@@ -659,7 +660,7 @@
                 | <span class="prelude-val">Some</span>(ShapeNormalizationMode::ComposedDiacriticsNoShortCircuit)
         )
     {
-        <span class="comment">// As noted in the comment earlier, we don&#39;t try to combine
+        <span class="comment">// As noted in the comment earlier, we don't try to combine
         // ccc=0 chars with their previous Starter.
 
         </span><span class="kw">let </span>count = buffer.len;
@@ -667,14 +668,14 @@
         buffer.clear_output();
         buffer.next_glyph();
         <span class="kw">while </span>buffer.idx &lt; count &amp;&amp; buffer.successful {
-            <span class="comment">// We don&#39;t try to compose a non-mark character with it&#39;s preceding starter.
+            <span class="comment">// We don't try to compose a non-mark character with it's preceding starter.
             // This is both an optimization to avoid trying to compose every two neighboring
             // glyphs in most scripts AND a desired feature for Hangul.  Apparently Hangul
             // fonts are not designed to mix-and-match pre-composed syllables and Jamo.
             </span><span class="kw">let </span>cur = buffer.cur(<span class="number">0</span>);
             <span class="kw">if </span>cur.is_unicode_mark() &amp;&amp;
-                <span class="comment">// If there&#39;s anything between the starter and this char, they should have CCC
-                // smaller than this character&#39;s.
+                <span class="comment">// If there's anything between the starter and this char, they should have CCC
+                // smaller than this character's.
                 </span>(starter == buffer.out_len - <span class="number">1
                     </span>|| buffer.prev().modified_combining_class() &lt; cur.modified_combining_class())
             {
@@ -706,7 +707,7 @@
                 }
             }
 
-            <span class="comment">// Blocked, or doesn&#39;t compose.
+            <span class="comment">// Blocked, or doesn't compose.
             </span>buffer = <span class="kw-2">&amp;mut </span>ctx.buffer;
             buffer.next_glyph();
 
@@ -742,7 +743,7 @@
         }
     };
 
-    <span class="comment">// TODO: Currently if there&#39;s a variation-selector we give-up, it&#39;s just too hard.
+    <span class="comment">// TODO: Currently if there's a variation-selector we give-up, it's just too hard.
     </span><span class="kw">let </span>buffer = <span class="kw-2">&amp;mut </span>ctx.buffer;
     <span class="kw">while </span>buffer.idx &lt; end - <span class="number">1 </span>&amp;&amp; buffer.successful {
         <span class="kw">if </span>buffer.cur(<span class="number">1</span>).as_char().is_variation_selector() {
@@ -796,7 +797,7 @@
     <span class="comment">// Handle space characters.
     </span><span class="kw">if </span>ctx.buffer.cur(<span class="number">0</span>).general_category() == GeneralCategory::SpaceSeparator {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(space_type) = u.space_fallback() {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(space_glyph) = ctx.face.glyph_index(u32::from(<span class="string">&#39; &#39;</span>)) {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(space_glyph) = ctx.face.glyph_index(u32::from(<span class="string">' '</span>)) {
                 ctx.buffer.cur_mut(<span class="number">0</span>).set_space_fallback(space_type);
                 ctx.buffer.next_char(u32::from(space_glyph.<span class="number">0</span>));
                 ctx.buffer.scratch_flags |= BufferScratchFlags::HAS_SPACE_FALLBACK;
@@ -807,7 +808,7 @@
 
     <span class="comment">// U+2011 is the only sensible character that is a no-break version of another character
     // and not a space.  The space ones are handled already.  Handle this lone one.
-    </span><span class="kw">if </span>u == <span class="string">&#39;\u{2011}&#39; </span>{
+    </span><span class="kw">if </span>u == <span class="string">'\u{2011}' </span>{
         <span class="kw">if let </span><span class="prelude-val">Some</span>(other_glyph) = ctx.face.glyph_index(<span class="number">0x2010</span>) {
             ctx.buffer.next_char(u32::from(other_glyph.<span class="number">0</span>));
             <span class="kw">return</span>;
@@ -818,7 +819,7 @@
     </span>ctx.buffer.next_char(<span class="number">0</span>);
 }
 
-<span class="doccomment">/// Returns 0 if didn&#39;t decompose, number of resulting characters otherwise.
+<span class="doccomment">/// Returns 0 if didn't decompose, number of resulting characters otherwise.
 </span><span class="kw">fn </span>decompose(ctx: <span class="kw-2">&amp;mut </span>ShapeNormalizeContext, shortest: bool, ab: char) -&gt; u32 {
     <span class="kw">let </span>(a, b) = <span class="kw">match </span>(ctx.decompose)(ctx, ab) {
         <span class="prelude-val">Some</span>(decomposed) =&gt; decomposed,
@@ -826,7 +827,7 @@
     };
 
     <span class="kw">let </span>a_glyph = ctx.face.glyph_index(u32::from(a));
-    <span class="kw">let </span>b_glyph = <span class="kw">if </span>b != <span class="string">&#39;\0&#39; </span>{
+    <span class="kw">let </span>b_glyph = <span class="kw">if </span>b != <span class="string">'\0' </span>{
         <span class="kw">match </span>ctx.face.glyph_index(u32::from(b)) {
             <span class="prelude-val">Some</span>(glyph_id) =&gt; <span class="prelude-val">Some</span>(glyph_id),
             <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="number">0</span>,

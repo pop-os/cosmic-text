@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ttf-parser-0.20.0/src/tables/gpos.rs`."><title>gpos.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ttf_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ttf-parser-0.20.0/src/tables/gpos.rs`."><title>gpos.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ttf_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1021,14 +1022,14 @@
 /// https://docs.microsoft.com/en-us/typography/opentype/spec/chapter2#devVarIdxTbls)
 /// hinting values.
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>HintingDevice&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>HintingDevice&lt;<span class="lifetime">'a</span>&gt; {
     start_size: u16,
     end_size: u16,
     delta_format: u16,
-    delta_values: LazyArray16&lt;<span class="lifetime">&#39;a</span>, u16&gt;,
+    delta_values: LazyArray16&lt;<span class="lifetime">'a</span>, u16&gt;,
 }
 
-<span class="kw">impl </span>HintingDevice&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>HintingDevice&lt;<span class="lifetime">'_</span>&gt; {
     <span class="doccomment">/// Returns X-axis delta.
     </span><span class="kw">pub fn </span>x_delta(<span class="kw-2">&amp;</span><span class="self">self</span>, units_per_em: u16, pixels_per_em: <span class="prelude-ty">Option</span>&lt;(u16, u16)&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;i32&gt; {
         <span class="kw">let </span>ppem = pixels_per_em.map(|(x, <span class="kw">_</span>)| x)<span class="question-mark">?</span>;
@@ -1063,9 +1064,9 @@
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>HintingDevice&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>HintingDevice&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;HintingDevice {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"HintingDevice {{ ... }}"</span>)
     }
 }
 
@@ -1083,13 +1084,13 @@
 /// https://docs.microsoft.com/en-us/typography/opentype/spec/chapter2#devVarIdxTbls).
 </span><span class="attr">#[allow(missing_docs)]
 #[derive(Clone, Copy, Debug)]
-</span><span class="kw">pub enum </span>Device&lt;<span class="lifetime">&#39;a</span>&gt; {
-    Hinting(HintingDevice&lt;<span class="lifetime">&#39;a</span>&gt;),
+</span><span class="kw">pub enum </span>Device&lt;<span class="lifetime">'a</span>&gt; {
+    Hinting(HintingDevice&lt;<span class="lifetime">'a</span>&gt;),
     Variation(VariationDevice),
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Device&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Device&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">let </span>first = s.read::&lt;u16&gt;()<span class="question-mark">?</span>;
         <span class="kw">let </span>second = s.read::&lt;u16&gt;()<span class="question-mark">?</span>;
@@ -1150,7 +1151,7 @@
 
 <span class="doccomment">/// A [Value Record](https://docs.microsoft.com/en-us/typography/opentype/spec/gpos#value-record).
 </span><span class="attr">#[derive(Clone, Copy, Default, Debug)]
-</span><span class="kw">pub struct </span>ValueRecord&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>ValueRecord&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Horizontal adjustment for placement, in design units.
     </span><span class="kw">pub </span>x_placement: i16,
     <span class="doccomment">/// Vertical adjustment for placement, in design units.
@@ -1161,22 +1162,22 @@
     </span><span class="kw">pub </span>y_advance: i16,
 
     <span class="doccomment">/// A [`Device`] table with horizontal adjustment for placement.
-    </span><span class="kw">pub </span>x_placement_device: <span class="prelude-ty">Option</span>&lt;Device&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    </span><span class="kw">pub </span>x_placement_device: <span class="prelude-ty">Option</span>&lt;Device&lt;<span class="lifetime">'a</span>&gt;&gt;,
     <span class="doccomment">/// A [`Device`] table with vertical adjustment for placement.
-    </span><span class="kw">pub </span>y_placement_device: <span class="prelude-ty">Option</span>&lt;Device&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    </span><span class="kw">pub </span>y_placement_device: <span class="prelude-ty">Option</span>&lt;Device&lt;<span class="lifetime">'a</span>&gt;&gt;,
     <span class="doccomment">/// A [`Device`] table with horizontal adjustment for advance.
-    </span><span class="kw">pub </span>x_advance_device: <span class="prelude-ty">Option</span>&lt;Device&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    </span><span class="kw">pub </span>x_advance_device: <span class="prelude-ty">Option</span>&lt;Device&lt;<span class="lifetime">'a</span>&gt;&gt;,
     <span class="doccomment">/// A [`Device`] table with vertical adjustment for advance.
-    </span><span class="kw">pub </span>y_advance_device: <span class="prelude-ty">Option</span>&lt;Device&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    </span><span class="kw">pub </span>y_advance_device: <span class="prelude-ty">Option</span>&lt;Device&lt;<span class="lifetime">'a</span>&gt;&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ValueRecord&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ValueRecord&lt;<span class="lifetime">'a</span>&gt; {
     <span class="comment">// Returns `None` only on parsing error.
     </span><span class="kw">fn </span>parse(
-        table_data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+        table_data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
         s: <span class="kw-2">&amp;mut </span>Stream,
         flags: ValueFormatFlags,
-    ) -&gt; <span class="prelude-ty">Option</span>&lt;ValueRecord&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;ValueRecord&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>record = ValueRecord::default();
 
         <span class="kw">if </span>flags.x_placement() {
@@ -1230,12 +1231,12 @@
 <span class="doccomment">/// An array of
 /// [Value Records](https://docs.microsoft.com/en-us/typography/opentype/spec/gpos#value-record).
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>ValueRecordsArray&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>ValueRecordsArray&lt;<span class="lifetime">'a</span>&gt; {
     <span class="comment">// We have to store the original table data because ValueRecords can have
     // a offset to Device tables and offset is from the beginning of the table.
-    </span>table_data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    </span>table_data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     <span class="comment">// A slice that contains all ValueRecords.
-    </span>data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    </span>data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     <span class="comment">// Number of records.
     </span>len: u16,
     <span class="comment">// Size of the single record.
@@ -1244,12 +1245,12 @@
     </span>flags: ValueFormatFlags,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ValueRecordsArray&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ValueRecordsArray&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>parse(
-        table_data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+        table_data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
         count: u16,
         flags: ValueFormatFlags,
-        s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">&#39;a</span>&gt;,
+        s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">'a</span>&gt;,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="prelude-val">Some</span>(<span class="self">Self </span>{
             table_data,
@@ -1260,7 +1261,7 @@
         })
     }
 
-    <span class="doccomment">/// Returns array&#39;s length.
+    <span class="doccomment">/// Returns array's length.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="self">self</span>.len
@@ -1272,7 +1273,7 @@
     </span>}
 
     <span class="doccomment">/// Returns a [`ValueRecord`] at index.
-    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, index: u16) -&gt; <span class="prelude-ty">Option</span>&lt;ValueRecord&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, index: u16) -&gt; <span class="prelude-ty">Option</span>&lt;ValueRecord&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">let </span>start = usize::from(index) * <span class="self">self</span>.value_len;
         <span class="kw">let </span>end = start + <span class="self">self</span>.value_len;
         <span class="kw">let </span>data = <span class="self">self</span>.data.get(start..end)<span class="question-mark">?</span>;
@@ -1281,9 +1282,9 @@
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>ValueRecordsArray&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>ValueRecordsArray&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;ValueRecordsArray {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"ValueRecordsArray {{ ... }}"</span>)
     }
 }
 
@@ -1291,19 +1292,19 @@
 /// https://docs.microsoft.com/en-us/typography/opentype/spec/gpos#SP).
 </span><span class="attr">#[allow(missing_docs)]
 #[derive(Clone, Copy, Debug)]
-</span><span class="kw">pub enum </span>SingleAdjustment&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub enum </span>SingleAdjustment&lt;<span class="lifetime">'a</span>&gt; {
     Format1 {
-        coverage: Coverage&lt;<span class="lifetime">&#39;a</span>&gt;,
-        value: ValueRecord&lt;<span class="lifetime">&#39;a</span>&gt;,
+        coverage: Coverage&lt;<span class="lifetime">'a</span>&gt;,
+        value: ValueRecord&lt;<span class="lifetime">'a</span>&gt;,
     },
     Format2 {
-        coverage: Coverage&lt;<span class="lifetime">&#39;a</span>&gt;,
-        values: ValueRecordsArray&lt;<span class="lifetime">&#39;a</span>&gt;,
+        coverage: Coverage&lt;<span class="lifetime">'a</span>&gt;,
+        values: ValueRecordsArray&lt;<span class="lifetime">'a</span>&gt;,
     },
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SingleAdjustment&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SingleAdjustment&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">match </span>s.read::&lt;u16&gt;()<span class="question-mark">? </span>{
             <span class="number">1 </span>=&gt; {
@@ -1325,7 +1326,7 @@
 
     <span class="doccomment">/// Returns the subtable coverage.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>coverage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Coverage&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>coverage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Coverage&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::Format1 { coverage, .. } =&gt; <span class="kw-2">*</span>coverage,
             <span class="self">Self</span>::Format2 { coverage, .. } =&gt; <span class="kw-2">*</span>coverage,
@@ -1335,14 +1336,14 @@
 
 <span class="doccomment">/// A [`ValueRecord`] pairs set used by [`PairAdjustment`].
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>PairSet&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+</span><span class="kw">pub struct </span>PairSet&lt;<span class="lifetime">'a</span>&gt; {
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     flags: (ValueFormatFlags, ValueFormatFlags),
     record_len: u8,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; PairSet&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], flags: (ValueFormatFlags, ValueFormatFlags)) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; PairSet&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], flags: (ValueFormatFlags, ValueFormatFlags)) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">let </span>count = s.read::&lt;u16&gt;()<span class="question-mark">?</span>;
         <span class="comment">// Max len is 34, so u8 is just enough.
@@ -1356,7 +1357,7 @@
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>binary_search(<span class="kw-2">&amp;</span><span class="self">self</span>, second: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt; {
+    </span><span class="kw">fn </span>binary_search(<span class="kw-2">&amp;</span><span class="self">self</span>, second: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt; {
         <span class="comment">// Based on Rust std implementation.
 
         </span><span class="kw">let </span><span class="kw-2">mut </span>size = <span class="self">self</span>.data.len() / usize::from(<span class="self">self</span>.record_len);
@@ -1398,7 +1399,7 @@
     }
 
     <span class="doccomment">/// Returns a [`ValueRecord`] pair using the second glyph.
-    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, second: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;(ValueRecord&lt;<span class="lifetime">&#39;a</span>&gt;, ValueRecord&lt;<span class="lifetime">&#39;a</span>&gt;)&gt; {
+    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, second: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;(ValueRecord&lt;<span class="lifetime">'a</span>&gt;, ValueRecord&lt;<span class="lifetime">'a</span>&gt;)&gt; {
         <span class="kw">let </span>record_data = <span class="self">self</span>.binary_search(second)<span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(record_data);
         s.skip::&lt;GlyphId&gt;();
@@ -1409,9 +1410,9 @@
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>PairSet&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>PairSet&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;PairSet {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"PairSet {{ ... }}"</span>)
     }
 }
 
@@ -1419,17 +1420,17 @@
 
 </span><span class="doccomment">/// A list of [`PairSet`]s.
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>PairSets&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
-    <span class="comment">// Zero offsets must be ignored, therefore we&#39;re using `Option&lt;Offset16&gt;`.
-    </span>offsets: LazyArray16&lt;<span class="lifetime">&#39;a</span>, <span class="prelude-ty">Option</span>&lt;Offset16&gt;&gt;,
+</span><span class="kw">pub struct </span>PairSets&lt;<span class="lifetime">'a</span>&gt; {
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
+    <span class="comment">// Zero offsets must be ignored, therefore we're using `Option&lt;Offset16&gt;`.
+    </span>offsets: LazyArray16&lt;<span class="lifetime">'a</span>, <span class="prelude-ty">Option</span>&lt;Offset16&gt;&gt;,
     flags: (ValueFormatFlags, ValueFormatFlags),
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; PairSets&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; PairSets&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>new(
-        data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
-        offsets: LazyArray16&lt;<span class="lifetime">&#39;a</span>, <span class="prelude-ty">Option</span>&lt;Offset16&gt;&gt;,
+        data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
+        offsets: LazyArray16&lt;<span class="lifetime">'a</span>, <span class="prelude-ty">Option</span>&lt;Offset16&gt;&gt;,
         flags: (ValueFormatFlags, ValueFormatFlags),
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
@@ -1441,14 +1442,14 @@
 
     <span class="doccomment">/// Returns a value at `index`.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, index: u16) -&gt; <span class="prelude-ty">Option</span>&lt;PairSet&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, index: u16) -&gt; <span class="prelude-ty">Option</span>&lt;PairSet&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">let </span>offset = <span class="self">self</span>.offsets.get(index)<span class="question-mark">??</span>.to_usize();
         <span class="self">self</span>.data
             .get(offset..)
             .and_then(|data| PairSet::parse(data, <span class="self">self</span>.flags))
     }
 
-    <span class="doccomment">/// Returns array&#39;s length.
+    <span class="doccomment">/// Returns array's length.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="self">self</span>.offsets.len()
@@ -1460,30 +1461,30 @@
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>PairSets&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>PairSets&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;PairSets {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"PairSets {{ ... }}"</span>)
     }
 }
 
 <span class="doccomment">/// A [`ValueRecord`] pairs matrix used by [`PairAdjustment`].
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>ClassMatrix&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="comment">// We have to store table&#39;s original slice,
+</span><span class="kw">pub struct </span>ClassMatrix&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="comment">// We have to store table's original slice,
     // because offsets in ValueRecords are from the begging of the table.
-    </span>table_data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
-    matrix: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    </span>table_data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
+    matrix: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     counts: (u16, u16),
     flags: (ValueFormatFlags, ValueFormatFlags),
     record_len: u8,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ClassMatrix&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ClassMatrix&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>parse(
-        table_data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+        table_data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
         counts: (u16, u16),
         flags: (ValueFormatFlags, ValueFormatFlags),
-        s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">&#39;a</span>&gt;,
+        s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">'a</span>&gt;,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>count = usize::num_from(u32::from(counts.<span class="number">0</span>) * u32::from(counts.<span class="number">1</span>));
         <span class="comment">// Max len is 32, so u8 is just enough.
@@ -1499,7 +1500,7 @@
     }
 
     <span class="doccomment">/// Returns a [`ValueRecord`] pair using specified classes.
-    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, classes: (u16, u16)) -&gt; <span class="prelude-ty">Option</span>&lt;(ValueRecord&lt;<span class="lifetime">&#39;a</span>&gt;, ValueRecord&lt;<span class="lifetime">&#39;a</span>&gt;)&gt; {
+    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, classes: (u16, u16)) -&gt; <span class="prelude-ty">Option</span>&lt;(ValueRecord&lt;<span class="lifetime">'a</span>&gt;, ValueRecord&lt;<span class="lifetime">'a</span>&gt;)&gt; {
         <span class="kw">if </span>classes.<span class="number">0 </span>&gt;= <span class="self">self</span>.counts.<span class="number">0 </span>|| classes.<span class="number">1 </span>&gt;= <span class="self">self</span>.counts.<span class="number">1 </span>{
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
@@ -1515,9 +1516,9 @@
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>ClassMatrix&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>ClassMatrix&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;ClassMatrix {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"ClassMatrix {{ ... }}"</span>)
     }
 }
 
@@ -1525,20 +1526,20 @@
 /// https://docs.microsoft.com/en-us/typography/opentype/spec/gpos#PP).
 </span><span class="attr">#[allow(missing_docs)]
 #[derive(Clone, Copy, Debug)]
-</span><span class="kw">pub enum </span>PairAdjustment&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub enum </span>PairAdjustment&lt;<span class="lifetime">'a</span>&gt; {
     Format1 {
-        coverage: Coverage&lt;<span class="lifetime">&#39;a</span>&gt;,
-        sets: PairSets&lt;<span class="lifetime">&#39;a</span>&gt;,
+        coverage: Coverage&lt;<span class="lifetime">'a</span>&gt;,
+        sets: PairSets&lt;<span class="lifetime">'a</span>&gt;,
     },
     Format2 {
-        coverage: Coverage&lt;<span class="lifetime">&#39;a</span>&gt;,
-        classes: (ClassDefinition&lt;<span class="lifetime">&#39;a</span>&gt;, ClassDefinition&lt;<span class="lifetime">&#39;a</span>&gt;),
-        matrix: ClassMatrix&lt;<span class="lifetime">&#39;a</span>&gt;,
+        coverage: Coverage&lt;<span class="lifetime">'a</span>&gt;,
+        classes: (ClassDefinition&lt;<span class="lifetime">'a</span>&gt;, ClassDefinition&lt;<span class="lifetime">'a</span>&gt;),
+        matrix: ClassMatrix&lt;<span class="lifetime">'a</span>&gt;,
     },
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; PairAdjustment&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; PairAdjustment&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">match </span>s.read::&lt;u16&gt;()<span class="question-mark">? </span>{
             <span class="number">1 </span>=&gt; {
@@ -1571,7 +1572,7 @@
 
     <span class="doccomment">/// Returns the subtable coverage.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>coverage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Coverage&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>coverage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Coverage&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::Format1 { coverage, .. } =&gt; <span class="kw-2">*</span>coverage,
             <span class="self">Self</span>::Format2 { coverage, .. } =&gt; <span class="kw-2">*</span>coverage,
@@ -1600,20 +1601,20 @@
 
 <span class="doccomment">/// A list of entry and exit [`Anchor`] pairs.
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>CursiveAnchorSet&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
-    records: LazyArray16&lt;<span class="lifetime">&#39;a</span>, EntryExitRecord&gt;,
+</span><span class="kw">pub struct </span>CursiveAnchorSet&lt;<span class="lifetime">'a</span>&gt; {
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
+    records: LazyArray16&lt;<span class="lifetime">'a</span>, EntryExitRecord&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; CursiveAnchorSet&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; CursiveAnchorSet&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Returns an entry [`Anchor`] at index.
-    </span><span class="kw">pub fn </span>entry(<span class="kw-2">&amp;</span><span class="self">self</span>, index: u16) -&gt; <span class="prelude-ty">Option</span>&lt;Anchor&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>entry(<span class="kw-2">&amp;</span><span class="self">self</span>, index: u16) -&gt; <span class="prelude-ty">Option</span>&lt;Anchor&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">let </span>offset = <span class="self">self</span>.records.get(index)<span class="question-mark">?</span>.entry_anchor_offset<span class="question-mark">?</span>.to_usize();
         <span class="self">self</span>.data.get(offset..).and_then(Anchor::parse)
     }
 
     <span class="doccomment">/// Returns an exit [`Anchor`] at index.
-    </span><span class="kw">pub fn </span>exit(<span class="kw-2">&amp;</span><span class="self">self</span>, index: u16) -&gt; <span class="prelude-ty">Option</span>&lt;Anchor&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>exit(<span class="kw-2">&amp;</span><span class="self">self</span>, index: u16) -&gt; <span class="prelude-ty">Option</span>&lt;Anchor&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">let </span>offset = <span class="self">self</span>.records.get(index)<span class="question-mark">?</span>.exit_anchor_offset<span class="question-mark">?</span>.to_usize();
         <span class="self">self</span>.data.get(offset..).and_then(Anchor::parse)
     }
@@ -1629,9 +1630,9 @@
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>CursiveAnchorSet&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>CursiveAnchorSet&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;CursiveAnchorSet {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"CursiveAnchorSet {{ ... }}"</span>)
     }
 }
 
@@ -1639,13 +1640,13 @@
 /// https://docs.microsoft.com/en-us/typography/opentype/spec/gpos#CAP).
 </span><span class="attr">#[allow(missing_docs)]
 #[derive(Clone, Copy, Debug)]
-</span><span class="kw">pub struct </span>CursiveAdjustment&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub </span>coverage: Coverage&lt;<span class="lifetime">&#39;a</span>&gt;,
-    <span class="kw">pub </span>sets: CursiveAnchorSet&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>CursiveAdjustment&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub </span>coverage: Coverage&lt;<span class="lifetime">'a</span>&gt;,
+    <span class="kw">pub </span>sets: CursiveAnchorSet&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; CursiveAdjustment&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; CursiveAdjustment&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">match </span>s.read::&lt;u16&gt;()<span class="question-mark">? </span>{
             <span class="number">1 </span>=&gt; {
@@ -1665,19 +1666,19 @@
 <span class="doccomment">/// A [Mark-to-Base Attachment Positioning Subtable](
 /// https://docs.microsoft.com/en-us/typography/opentype/spec/gpos#MBP).
 </span><span class="attr">#[derive(Clone, Copy, Debug)]
-</span><span class="kw">pub struct </span>MarkToBaseAdjustment&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>MarkToBaseAdjustment&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// A mark coverage.
-    </span><span class="kw">pub </span>mark_coverage: Coverage&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub </span>mark_coverage: Coverage&lt;<span class="lifetime">'a</span>&gt;,
     <span class="doccomment">/// A base coverage.
-    </span><span class="kw">pub </span>base_coverage: Coverage&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub </span>base_coverage: Coverage&lt;<span class="lifetime">'a</span>&gt;,
     <span class="doccomment">/// A list of mark anchors.
-    </span><span class="kw">pub </span>marks: MarkArray&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub </span>marks: MarkArray&lt;<span class="lifetime">'a</span>&gt;,
     <span class="doccomment">/// An anchors matrix.
-    </span><span class="kw">pub </span>anchors: AnchorMatrix&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub </span>anchors: AnchorMatrix&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; MarkToBaseAdjustment&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; MarkToBaseAdjustment&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">match </span>s.read::&lt;u16&gt;()<span class="question-mark">? </span>{
             <span class="number">1 </span>=&gt; {
@@ -1702,15 +1703,15 @@
 /// https://docs.microsoft.com/en-us/typography/opentype/spec/gpos#MLP).
 </span><span class="attr">#[allow(missing_docs)]
 #[derive(Clone, Copy, Debug)]
-</span><span class="kw">pub struct </span>MarkToLigatureAdjustment&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub </span>mark_coverage: Coverage&lt;<span class="lifetime">&#39;a</span>&gt;,
-    <span class="kw">pub </span>ligature_coverage: Coverage&lt;<span class="lifetime">&#39;a</span>&gt;,
-    <span class="kw">pub </span>marks: MarkArray&lt;<span class="lifetime">&#39;a</span>&gt;,
-    <span class="kw">pub </span>ligature_array: LigatureArray&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>MarkToLigatureAdjustment&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub </span>mark_coverage: Coverage&lt;<span class="lifetime">'a</span>&gt;,
+    <span class="kw">pub </span>ligature_coverage: Coverage&lt;<span class="lifetime">'a</span>&gt;,
+    <span class="kw">pub </span>marks: MarkArray&lt;<span class="lifetime">'a</span>&gt;,
+    <span class="kw">pub </span>ligature_array: LigatureArray&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; MarkToLigatureAdjustment&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; MarkToLigatureAdjustment&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">match </span>s.read::&lt;u16&gt;()<span class="question-mark">? </span>{
             <span class="number">1 </span>=&gt; {
@@ -1733,14 +1734,14 @@
 
 <span class="doccomment">/// An array or ligature anchor matrices.
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>LigatureArray&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+</span><span class="kw">pub struct </span>LigatureArray&lt;<span class="lifetime">'a</span>&gt; {
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     class_count: u16,
-    offsets: LazyArray16&lt;<span class="lifetime">&#39;a</span>, Offset16&gt;,
+    offsets: LazyArray16&lt;<span class="lifetime">'a</span>, Offset16&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; LigatureArray&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], class_count: u16) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; LigatureArray&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], class_count: u16) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">let </span>count = s.read::&lt;u16&gt;()<span class="question-mark">?</span>;
         <span class="kw">let </span>offsets = s.read_array16(count)<span class="question-mark">?</span>;
@@ -1752,7 +1753,7 @@
     }
 
     <span class="doccomment">/// Returns an [`AnchorMatrix`] at index.
-    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, index: u16) -&gt; <span class="prelude-ty">Option</span>&lt;AnchorMatrix&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, index: u16) -&gt; <span class="prelude-ty">Option</span>&lt;AnchorMatrix&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">let </span>offset = <span class="self">self</span>.offsets.get(index)<span class="question-mark">?</span>.to_usize();
         <span class="kw">let </span>data = <span class="self">self</span>.data.get(offset..)<span class="question-mark">?</span>;
         AnchorMatrix::parse(data, <span class="self">self</span>.class_count)
@@ -1769,9 +1770,9 @@
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>LigatureArray&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>LigatureArray&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;LigatureArray {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"LigatureArray {{ ... }}"</span>)
     }
 }
 
@@ -1796,13 +1797,13 @@
 
 <span class="doccomment">/// A [Mark Array](https://docs.microsoft.com/en-us/typography/opentype/spec/gpos#mark-array-table).
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>MarkArray&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
-    array: LazyArray16&lt;<span class="lifetime">&#39;a</span>, MarkRecord&gt;,
+</span><span class="kw">pub struct </span>MarkArray&lt;<span class="lifetime">'a</span>&gt; {
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
+    array: LazyArray16&lt;<span class="lifetime">'a</span>, MarkRecord&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; MarkArray&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; MarkArray&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">let </span>count = s.read::&lt;u16&gt;()<span class="question-mark">?</span>;
         <span class="kw">let </span>array = s.read_array16(count)<span class="question-mark">?</span>;
@@ -1810,7 +1811,7 @@
     }
 
     <span class="doccomment">/// Returns contained data at index.
-    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, index: u16) -&gt; <span class="prelude-ty">Option</span>&lt;(Class, Anchor&lt;<span class="lifetime">&#39;a</span>&gt;)&gt; {
+    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, index: u16) -&gt; <span class="prelude-ty">Option</span>&lt;(Class, Anchor&lt;<span class="lifetime">'a</span>&gt;)&gt; {
         <span class="kw">let </span>record = <span class="self">self</span>.array.get(index)<span class="question-mark">?</span>;
         <span class="kw">let </span>anchor = <span class="self">self
             </span>.data
@@ -1830,9 +1831,9 @@
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>MarkArray&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>MarkArray&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;MarkArray {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"MarkArray {{ ... }}"</span>)
     }
 }
 
@@ -1840,19 +1841,19 @@
 ///
 /// The *Anchor Table Format 2: Design Units Plus Contour Point* is not supported.
 </span><span class="attr">#[derive(Clone, Copy, Debug)]
-</span><span class="kw">pub struct </span>Anchor&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Anchor&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Horizontal value, in design units.
     </span><span class="kw">pub </span>x: i16,
     <span class="doccomment">/// Vertical value, in design units.
     </span><span class="kw">pub </span>y: i16,
     <span class="doccomment">/// A [`Device`] table with horizontal value.
-    </span><span class="kw">pub </span>x_device: <span class="prelude-ty">Option</span>&lt;Device&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    </span><span class="kw">pub </span>x_device: <span class="prelude-ty">Option</span>&lt;Device&lt;<span class="lifetime">'a</span>&gt;&gt;,
     <span class="doccomment">/// A [`Device`] table with vertical value.
-    </span><span class="kw">pub </span>y_device: <span class="prelude-ty">Option</span>&lt;Device&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    </span><span class="kw">pub </span>y_device: <span class="prelude-ty">Option</span>&lt;Device&lt;<span class="lifetime">'a</span>&gt;&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Anchor&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Anchor&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">let </span>format = s.read::&lt;u16&gt;()<span class="question-mark">?</span>;
         <span class="kw">if </span>!<span class="macro">matches!</span>(format, <span class="number">1</span>..=<span class="number">3</span>) {
@@ -1887,17 +1888,17 @@
 
 <span class="doccomment">/// An [`Anchor`] parsing helper.
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>AnchorMatrix&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+</span><span class="kw">pub struct </span>AnchorMatrix&lt;<span class="lifetime">'a</span>&gt; {
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     <span class="doccomment">/// Number of rows in the matrix.
     </span><span class="kw">pub </span>rows: u16,
     <span class="doccomment">/// Number of columns in the matrix.
     </span><span class="kw">pub </span>cols: u16,
-    matrix: LazyArray32&lt;<span class="lifetime">&#39;a</span>, Offset16&gt;,
+    matrix: LazyArray32&lt;<span class="lifetime">'a</span>, Offset16&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; AnchorMatrix&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], cols: u16) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; AnchorMatrix&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], cols: u16) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">let </span>rows = s.read::&lt;u16&gt;()<span class="question-mark">?</span>;
         <span class="kw">let </span>count = u32::from(rows) * u32::from(cols);
@@ -1918,9 +1919,9 @@
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>AnchorMatrix&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>AnchorMatrix&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;AnchorMatrix {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"AnchorMatrix {{ ... }}"</span>)
     }
 }
 
@@ -1928,15 +1929,15 @@
 /// https://docs.microsoft.com/en-us/typography/opentype/spec/gpos#MMP).
 </span><span class="attr">#[allow(missing_docs)]
 #[derive(Clone, Copy, Debug)]
-</span><span class="kw">pub struct </span>MarkToMarkAdjustment&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub </span>mark1_coverage: Coverage&lt;<span class="lifetime">&#39;a</span>&gt;,
-    <span class="kw">pub </span>mark2_coverage: Coverage&lt;<span class="lifetime">&#39;a</span>&gt;,
-    <span class="kw">pub </span>marks: MarkArray&lt;<span class="lifetime">&#39;a</span>&gt;,
-    <span class="kw">pub </span>mark2_matrix: AnchorMatrix&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>MarkToMarkAdjustment&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub </span>mark1_coverage: Coverage&lt;<span class="lifetime">'a</span>&gt;,
+    <span class="kw">pub </span>mark2_coverage: Coverage&lt;<span class="lifetime">'a</span>&gt;,
+    <span class="kw">pub </span>marks: MarkArray&lt;<span class="lifetime">'a</span>&gt;,
+    <span class="kw">pub </span>mark2_matrix: AnchorMatrix&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; MarkToMarkAdjustment&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; MarkToMarkAdjustment&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">match </span>s.read::&lt;u16&gt;()<span class="question-mark">? </span>{
             <span class="number">1 </span>=&gt; {
@@ -1962,19 +1963,19 @@
 /// enumeration.
 </span><span class="attr">#[allow(missing_docs)]
 #[derive(Clone, Copy, Debug)]
-</span><span class="kw">pub enum </span>PositioningSubtable&lt;<span class="lifetime">&#39;a</span>&gt; {
-    Single(SingleAdjustment&lt;<span class="lifetime">&#39;a</span>&gt;),
-    Pair(PairAdjustment&lt;<span class="lifetime">&#39;a</span>&gt;),
-    Cursive(CursiveAdjustment&lt;<span class="lifetime">&#39;a</span>&gt;),
-    MarkToBase(MarkToBaseAdjustment&lt;<span class="lifetime">&#39;a</span>&gt;),
-    MarkToLigature(MarkToLigatureAdjustment&lt;<span class="lifetime">&#39;a</span>&gt;),
-    MarkToMark(MarkToMarkAdjustment&lt;<span class="lifetime">&#39;a</span>&gt;),
-    Context(ContextLookup&lt;<span class="lifetime">&#39;a</span>&gt;),
-    ChainContext(ChainedContextLookup&lt;<span class="lifetime">&#39;a</span>&gt;),
+</span><span class="kw">pub enum </span>PositioningSubtable&lt;<span class="lifetime">'a</span>&gt; {
+    Single(SingleAdjustment&lt;<span class="lifetime">'a</span>&gt;),
+    Pair(PairAdjustment&lt;<span class="lifetime">'a</span>&gt;),
+    Cursive(CursiveAdjustment&lt;<span class="lifetime">'a</span>&gt;),
+    MarkToBase(MarkToBaseAdjustment&lt;<span class="lifetime">'a</span>&gt;),
+    MarkToLigature(MarkToLigatureAdjustment&lt;<span class="lifetime">'a</span>&gt;),
+    MarkToMark(MarkToMarkAdjustment&lt;<span class="lifetime">'a</span>&gt;),
+    Context(ContextLookup&lt;<span class="lifetime">'a</span>&gt;),
+    ChainContext(ChainedContextLookup&lt;<span class="lifetime">'a</span>&gt;),
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; LookupSubtable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>PositioningSubtable&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], kind: u16) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; LookupSubtable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>PositioningSubtable&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], kind: u16) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">match </span>kind {
             <span class="number">1 </span>=&gt; SingleAdjustment::parse(data).map(<span class="self">Self</span>::Single),
             <span class="number">2 </span>=&gt; PairAdjustment::parse(data).map(<span class="self">Self</span>::Pair),
@@ -1990,10 +1991,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; PositioningSubtable&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; PositioningSubtable&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Returns the subtable coverage.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>coverage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Coverage&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>coverage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Coverage&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::Single(t) =&gt; t.coverage(),
             <span class="self">Self</span>::Pair(t) =&gt; t.coverage(),

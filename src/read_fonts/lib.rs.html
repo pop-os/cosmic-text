@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.4/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.5/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -357,15 +358,15 @@
 //! # Example
 //!
 //! ```no_run
-//! # let path_to_my_font_file = std::path::Path::new(&quot;&quot;);
+//! # let path_to_my_font_file = std::path::Path::new("");
 //! use read_fonts::{FontRef, TableProvider};
 //! let font_bytes = std::fs::read(path_to_my_font_file).unwrap();
 //! // Single fonts only. for font collections (.ttc) use FontRef::from_index
-//! let font = FontRef::new(&amp;font_bytes).expect(&quot;failed to read font data&quot;);
-//! let head = font.head().expect(&quot;missing &#39;head&#39; table&quot;);
-//! let maxp = font.maxp().expect(&quot;missing &#39;maxp&#39; table&quot;);
+//! let font = FontRef::new(&amp;font_bytes).expect("failed to read font data");
+//! let head = font.head().expect("missing 'head' table");
+//! let maxp = font.maxp().expect("missing 'maxp' table");
 //!
-//! println!(&quot;font version {} containing {} glyphs&quot;, head.font_revision(), maxp.num_glyphs());
+//! println!("font version {} containing {} glyphs", head.font_revision(), maxp.num_glyphs());
 //! ```
 //!
 //!
@@ -380,13 +381,13 @@
 //! [table-directory]: https://learn.microsoft.com/en-us/typography/opentype/spec/otff#table-directory
 
 </span><span class="attr">#![deny(rustdoc::broken_intra_doc_links)]
-#![cfg_attr(not(feature = <span class="string">&quot;std&quot;</span>), no_std)]
+#![cfg_attr(not(feature = <span class="string">"std"</span>), no_std)]
 
-#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, test))]
+#[cfg(any(feature = <span class="string">"std"</span>, test))]
 #[macro_use]
 </span><span class="kw">extern crate </span>std;
 
-<span class="attr">#[cfg(all(not(feature = <span class="string">&quot;std&quot;</span>), not(test)))]
+<span class="attr">#[cfg(all(not(feature = <span class="string">"std"</span>), not(test)))]
 #[macro_use]
 </span><span class="kw">extern crate </span>core <span class="kw">as </span>std;
 
@@ -398,17 +399,17 @@
 <span class="kw">mod </span>table_provider;
 <span class="kw">mod </span>table_ref;
 <span class="kw">pub mod </span>tables;
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
 </span><span class="kw">pub mod </span>traversal;
 
-<span class="attr">#[cfg(any(test, feature = <span class="string">&quot;codegen_test&quot;</span>))]
+<span class="attr">#[cfg(any(test, feature = <span class="string">"codegen_test"</span>))]
 </span><span class="kw">pub mod </span>codegen_test;
 
 <span class="attr">#[cfg(test)]
-#[path = <span class="string">&quot;tests/test_helpers.rs&quot;</span>]
+#[path = <span class="string">"tests/test_helpers.rs"</span>]
 </span><span class="kw">mod </span>test_helpers;
 
-<span class="attr">#[cfg(any(test, feature = <span class="string">&quot;scaler_test&quot;</span>))]
+<span class="attr">#[cfg(any(test, feature = <span class="string">"scaler_test"</span>))]
 </span><span class="kw">pub mod </span>scaler_test;
 
 <span class="kw">pub use </span>font_data::FontData;
@@ -438,20 +439,20 @@
 
     <span class="kw">pub use </span>types::<span class="kw-2">*</span>;
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
     </span><span class="kw">pub use </span><span class="kw">crate</span>::traversal::{<span class="self">self</span>, Field, FieldType, RecordResolver, SomeRecord, SomeTable};
 
     <span class="comment">// used in generated traversal code to get type names of offset fields, which
     // may include generics
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>better_type_name&lt;T&gt;() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
+    </span><span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>better_type_name&lt;T&gt;() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str {
         <span class="kw">let </span>raw_name = std::any::type_name::&lt;T&gt;();
-        <span class="kw">let </span>last = raw_name.rsplit(<span class="string">&quot;::&quot;</span>).next().unwrap_or(raw_name);
-        <span class="comment">// this happens if we end up getting a type name like TableRef&lt;&#39;a, module::SomeMarker&gt;
-        </span>last.trim_end_matches(<span class="string">&quot;Marker&gt;&quot;</span>)
+        <span class="kw">let </span>last = raw_name.rsplit(<span class="string">"::"</span>).next().unwrap_or(raw_name);
+        <span class="comment">// this happens if we end up getting a type name like TableRef&lt;'a, module::SomeMarker&gt;
+        </span>last.trim_end_matches(<span class="string">"Marker&gt;"</span>)
     }
 
-    <span class="doccomment">/// named transforms used in &#39;count&#39;, e.g
+    <span class="doccomment">/// named transforms used in 'count', e.g
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>transforms {
         <span class="kw">pub fn </span>subtract&lt;T: TryInto&lt;usize&gt;, U: TryInto&lt;usize&gt;&gt;(lhs: T, rhs: U) -&gt; usize {
             lhs.try_into()
@@ -482,20 +483,20 @@
     }
 }
 
-<span class="macro">include!</span>(<span class="string">&quot;../generated/font.rs&quot;</span>);
+<span class="macro">include!</span>(<span class="string">"../generated/font.rs"</span>);
 
 <span class="attr">#[derive(Clone)]
 </span><span class="doccomment">/// Reference to the content of a font or font collection file.
-</span><span class="kw">pub enum </span>FileRef&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub enum </span>FileRef&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// A single font.
-    </span>Font(FontRef&lt;<span class="lifetime">&#39;a</span>&gt;),
+    </span>Font(FontRef&lt;<span class="lifetime">'a</span>&gt;),
     <span class="doccomment">/// A collection of fonts.
-    </span>Collection(CollectionRef&lt;<span class="lifetime">&#39;a</span>&gt;),
+    </span>Collection(CollectionRef&lt;<span class="lifetime">'a</span>&gt;),
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FileRef&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FileRef&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Creates a new reference to a file representing a font or font collection.
-    </span><span class="kw">pub fn </span>new(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+    </span><span class="kw">pub fn </span>new(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="prelude-val">Ok</span>(<span class="kw">if let </span><span class="prelude-val">Ok</span>(collection) = CollectionRef::new(data) {
             <span class="self">Self</span>::Collection(collection)
         } <span class="kw">else </span>{
@@ -504,7 +505,7 @@
     }
 
     <span class="doccomment">/// Returns an iterator over the fonts contained in the file.
-    </span><span class="kw">pub fn </span>fonts(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="prelude-ty">Result</span>&lt;FontRef&lt;<span class="lifetime">&#39;a</span>&gt;, ReadError&gt;&gt; + <span class="lifetime">&#39;a </span>+ Clone {
+    </span><span class="kw">pub fn </span>fonts(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="prelude-ty">Result</span>&lt;FontRef&lt;<span class="lifetime">'a</span>&gt;, ReadError&gt;&gt; + <span class="lifetime">'a </span>+ Clone {
         <span class="kw">let </span>(iter_one, iter_two) = <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::Font(font) =&gt; (<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(font.clone())), <span class="prelude-val">None</span>),
             <span class="self">Self</span>::Collection(collection) =&gt; (<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(collection.iter())),
@@ -515,14 +516,14 @@
 
 <span class="doccomment">/// Reference to the content of a font collection file.
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>CollectionRef&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;,
-    header: TTCHeader&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>CollectionRef&lt;<span class="lifetime">'a</span>&gt; {
+    data: FontData&lt;<span class="lifetime">'a</span>&gt;,
+    header: TTCHeader&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; CollectionRef&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; CollectionRef&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Creates a new reference to a font collection.
-    </span><span class="kw">pub fn </span>new(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+    </span><span class="kw">pub fn </span>new(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span>data = FontData::new(data);
         <span class="kw">let </span>header = TTCHeader::read(data)<span class="question-mark">?</span>;
         <span class="kw">if </span>header.ttc_tag() != TTC_HEADER_TAG {
@@ -543,7 +544,7 @@
     </span>}
 
     <span class="doccomment">/// Returns the font in the collection at the specified index.
-    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, index: u32) -&gt; <span class="prelude-ty">Result</span>&lt;FontRef&lt;<span class="lifetime">&#39;a</span>&gt;, ReadError&gt; {
+    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, index: u32) -&gt; <span class="prelude-ty">Result</span>&lt;FontRef&lt;<span class="lifetime">'a</span>&gt;, ReadError&gt; {
         <span class="kw">let </span>offset = <span class="self">self
             </span>.header
             .table_directory_offsets()
@@ -555,7 +556,7 @@
     }
 
     <span class="doccomment">/// Returns an iterator over the fonts in the collection.
-    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="prelude-ty">Result</span>&lt;FontRef&lt;<span class="lifetime">&#39;a</span>&gt;, ReadError&gt;&gt; + <span class="lifetime">&#39;a </span>+ Clone {
+    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="prelude-ty">Result</span>&lt;FontRef&lt;<span class="lifetime">'a</span>&gt;, ReadError&gt;&gt; + <span class="lifetime">'a </span>+ Clone {
         <span class="kw">let </span>copy = <span class="self">self</span>.clone();
         (<span class="number">0</span>..<span class="self">self</span>.len()).map(<span class="kw">move </span>|ix| copy.get(ix))
     }
@@ -566,12 +567,12 @@
 /// This is a simple implementation of the [`TableProvider`] trait backed
 /// by a borrowed slice containing font data.
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>FontRef&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;,
-    <span class="kw">pub </span>table_directory: TableDirectory&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>FontRef&lt;<span class="lifetime">'a</span>&gt; {
+    data: FontData&lt;<span class="lifetime">'a</span>&gt;,
+    <span class="kw">pub </span>table_directory: TableDirectory&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRef&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRef&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Creates a new reference to an in-memory font backed by the given data.
     ///
     /// The data must be a single font (not a font collection) and must begin with a
@@ -580,7 +581,7 @@
     /// To load a font from a font collection, use [`FontRef::from_index`] instead.
     ///
     /// [table directory]: https://github.com/googlefonts/fontations/pull/549
-    </span><span class="kw">pub fn </span>new(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+    </span><span class="kw">pub fn </span>new(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span>data = FontData::new(data);
         <span class="self">Self</span>::with_table_directory(data, TableDirectory::read(data)<span class="question-mark">?</span>)
     }
@@ -596,7 +597,7 @@
     /// In other words, this accepts either font collection (ttc) or single
     /// font (ttf/otf) files. If a single font file is provided, the index
     /// parameter must be 0.
-    </span><span class="kw">pub fn </span>from_index(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], index: u32) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+    </span><span class="kw">pub fn </span>from_index(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], index: u32) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span>file = FileRef::new(data)<span class="question-mark">?</span>;
         <span class="kw">match </span>file {
             FileRef::Font(font) =&gt; {
@@ -611,7 +612,7 @@
     }
 
     <span class="doccomment">/// Returns the data for the table with the specified tag, if present.
-    </span><span class="kw">pub fn </span>table_data(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: Tag) -&gt; <span class="prelude-ty">Option</span>&lt;FontData&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>table_data(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: Tag) -&gt; <span class="prelude-ty">Option</span>&lt;FontData&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="self">self</span>.table_directory
             .table_records()
             .binary_search_by(|rec| rec.tag.get().cmp(<span class="kw-2">&amp;</span>tag))
@@ -625,8 +626,8 @@
     }
 
     <span class="kw">fn </span>with_table_directory(
-        data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;,
-        table_directory: TableDirectory&lt;<span class="lifetime">&#39;a</span>&gt;,
+        data: FontData&lt;<span class="lifetime">'a</span>&gt;,
+        table_directory: TableDirectory&lt;<span class="lifetime">'a</span>&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">if </span>[TT_SFNT_VERSION, CFF_SFTN_VERSION].contains(<span class="kw-2">&amp;</span>table_directory.sfnt_version()) {
             <span class="prelude-val">Ok</span>(FontRef {
@@ -639,8 +640,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TableProvider&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>FontRef&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>data_for_tag(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: Tag) -&gt; <span class="prelude-ty">Option</span>&lt;FontData&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TableProvider&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>FontRef&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>data_for_tag(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: Tag) -&gt; <span class="prelude-ty">Option</span>&lt;FontData&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="self">self</span>.table_data(tag)
     }
 }

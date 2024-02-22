@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustybuzz-0.12.1/src/common.rs`."><title>common.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustybuzz" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustybuzz-0.12.1/src/common.rs`."><title>common.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustybuzz" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -879,20 +880,20 @@
 }
 
 <span class="kw">impl </span>core::str::FromStr <span class="kw">for </span>Direction {
-    <span class="kw">type </span><span class="prelude-val">Err </span>= <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str;
+    <span class="kw">type </span><span class="prelude-val">Err </span>= <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str;
 
     <span class="kw">fn </span>from_str(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
         <span class="kw">if </span>s.is_empty() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">&quot;invalid direction&quot;</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">"invalid direction"</span>);
         }
 
         <span class="comment">// harfbuzz also matches only the first letter.
         </span><span class="kw">match </span>s.as_bytes()[<span class="number">0</span>].to_ascii_lowercase() {
-            <span class="string">b&#39;l&#39; </span>=&gt; <span class="prelude-val">Ok</span>(Direction::LeftToRight),
-            <span class="string">b&#39;r&#39; </span>=&gt; <span class="prelude-val">Ok</span>(Direction::RightToLeft),
-            <span class="string">b&#39;t&#39; </span>=&gt; <span class="prelude-val">Ok</span>(Direction::TopToBottom),
-            <span class="string">b&#39;b&#39; </span>=&gt; <span class="prelude-val">Ok</span>(Direction::BottomToTop),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(<span class="string">&quot;invalid direction&quot;</span>),
+            <span class="string">b'l' </span>=&gt; <span class="prelude-val">Ok</span>(Direction::LeftToRight),
+            <span class="string">b'r' </span>=&gt; <span class="prelude-val">Ok</span>(Direction::RightToLeft),
+            <span class="string">b't' </span>=&gt; <span class="prelude-val">Ok</span>(Direction::TopToBottom),
+            <span class="string">b'b' </span>=&gt; <span class="prelude-val">Ok</span>(Direction::BottomToTop),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(<span class="string">"invalid direction"</span>),
         }
     }
 }
@@ -910,19 +911,19 @@
 }
 
 <span class="kw">impl </span>core::str::FromStr <span class="kw">for </span>Language {
-    <span class="kw">type </span><span class="prelude-val">Err </span>= <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str;
+    <span class="kw">type </span><span class="prelude-val">Err </span>= <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str;
 
     <span class="kw">fn </span>from_str(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
         <span class="kw">if </span>!s.is_empty() {
             <span class="prelude-val">Ok</span>(Language(s.to_ascii_lowercase()))
         } <span class="kw">else </span>{
-            <span class="prelude-val">Err</span>(<span class="string">&quot;invalid language&quot;</span>)
+            <span class="prelude-val">Err</span>(<span class="string">"invalid language"</span>)
         }
     }
 }
 
 <span class="comment">// In harfbuzz, despite having `hb_script_t`, script can actually have any tag.
-// So we&#39;re doing the same.
+// So we're doing the same.
 // The only difference is that `Script` cannot be set to `HB_SCRIPT_INVALID`.
 </span><span class="doccomment">/// A text script.
 </span><span class="attr">#[allow(missing_docs)]
@@ -945,20 +946,20 @@
         </span><span class="kw">let </span>tag = Tag((tag.as_u32() &amp; <span class="number">0xDFDFDFDF</span>) | <span class="number">0x00202020</span>);
 
         <span class="kw">match </span><span class="kw-2">&amp;</span>tag.to_bytes() {
-            <span class="comment">// These graduated from the &#39;Q&#39; private-area codes, but
+            <span class="comment">// These graduated from the 'Q' private-area codes, but
             // the old code is still aliased by Unicode, and the Qaai
             // one in use by ICU.
-            </span><span class="string">b&quot;Qaai&quot; </span>=&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(script::INHERITED),
-            <span class="string">b&quot;Qaac&quot; </span>=&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(script::COPTIC),
+            </span><span class="string">b"Qaai" </span>=&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(script::INHERITED),
+            <span class="string">b"Qaac" </span>=&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(script::COPTIC),
 
             <span class="comment">// Script variants from https://unicode.org/iso15924/
-            </span><span class="string">b&quot;Aran&quot; </span>=&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(script::ARABIC),
-            <span class="string">b&quot;Cyrs&quot; </span>=&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(script::CYRILLIC),
-            <span class="string">b&quot;Geok&quot; </span>=&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(script::GEORGIAN),
-            <span class="string">b&quot;Hans&quot; </span>| <span class="string">b&quot;Hant&quot; </span>=&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(script::HAN),
-            <span class="string">b&quot;Jamo&quot; </span>=&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(script::HANGUL),
-            <span class="string">b&quot;Latf&quot; </span>| <span class="string">b&quot;Latg&quot; </span>=&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(script::LATIN),
-            <span class="string">b&quot;Syre&quot; </span>| <span class="string">b&quot;Syrj&quot; </span>| <span class="string">b&quot;Syrn&quot; </span>=&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(script::SYRIAC),
+            </span><span class="string">b"Aran" </span>=&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(script::ARABIC),
+            <span class="string">b"Cyrs" </span>=&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(script::CYRILLIC),
+            <span class="string">b"Geok" </span>=&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(script::GEORGIAN),
+            <span class="string">b"Hans" </span>| <span class="string">b"Hant" </span>=&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(script::HAN),
+            <span class="string">b"Jamo" </span>=&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(script::HANGUL),
+            <span class="string">b"Latf" </span>| <span class="string">b"Latg" </span>=&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(script::LATIN),
+            <span class="string">b"Syre" </span>| <span class="string">b"Syrj" </span>| <span class="string">b"Syrn" </span>=&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(script::SYRIAC),
 
             <span class="kw">_ </span>=&gt; {}
         }
@@ -970,7 +971,7 @@
         }
     }
 
-    <span class="doccomment">/// Returns script&#39;s tag.
+    <span class="doccomment">/// Returns script's tag.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>tag(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Tag {
         <span class="self">self</span>.<span class="number">0
@@ -978,11 +979,11 @@
 }
 
 <span class="kw">impl </span>core::str::FromStr <span class="kw">for </span>Script {
-    <span class="kw">type </span><span class="prelude-val">Err </span>= <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str;
+    <span class="kw">type </span><span class="prelude-val">Err </span>= <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str;
 
     <span class="kw">fn </span>from_str(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
         <span class="kw">let </span>tag = Tag::from_bytes_lossy(s.as_bytes());
-        Script::from_iso15924_tag(tag).ok_or(<span class="string">&quot;invalid script&quot;</span>)
+        Script::from_iso15924_tag(tag).ok_or(<span class="string">"invalid script"</span>)
     }
 }
 
@@ -993,184 +994,184 @@
     </span><span class="kw">use </span><span class="kw">crate</span>::Script;
 
     <span class="comment">// Since 1.1
-    </span><span class="kw">pub const </span>COMMON: Script = Script::from_bytes(<span class="string">b&quot;Zyyy&quot;</span>);
-    <span class="kw">pub const </span>INHERITED: Script = Script::from_bytes(<span class="string">b&quot;Zinh&quot;</span>);
-    <span class="kw">pub const </span>ARABIC: Script = Script::from_bytes(<span class="string">b&quot;Arab&quot;</span>);
-    <span class="kw">pub const </span>ARMENIAN: Script = Script::from_bytes(<span class="string">b&quot;Armn&quot;</span>);
-    <span class="kw">pub const </span>BENGALI: Script = Script::from_bytes(<span class="string">b&quot;Beng&quot;</span>);
-    <span class="kw">pub const </span>CYRILLIC: Script = Script::from_bytes(<span class="string">b&quot;Cyrl&quot;</span>);
-    <span class="kw">pub const </span>DEVANAGARI: Script = Script::from_bytes(<span class="string">b&quot;Deva&quot;</span>);
-    <span class="kw">pub const </span>GEORGIAN: Script = Script::from_bytes(<span class="string">b&quot;Geor&quot;</span>);
-    <span class="kw">pub const </span>GREEK: Script = Script::from_bytes(<span class="string">b&quot;Grek&quot;</span>);
-    <span class="kw">pub const </span>GUJARATI: Script = Script::from_bytes(<span class="string">b&quot;Gujr&quot;</span>);
-    <span class="kw">pub const </span>GURMUKHI: Script = Script::from_bytes(<span class="string">b&quot;Guru&quot;</span>);
-    <span class="kw">pub const </span>HANGUL: Script = Script::from_bytes(<span class="string">b&quot;Hang&quot;</span>);
-    <span class="kw">pub const </span>HAN: Script = Script::from_bytes(<span class="string">b&quot;Hani&quot;</span>);
-    <span class="kw">pub const </span>HEBREW: Script = Script::from_bytes(<span class="string">b&quot;Hebr&quot;</span>);
-    <span class="kw">pub const </span>HIRAGANA: Script = Script::from_bytes(<span class="string">b&quot;Hira&quot;</span>);
-    <span class="kw">pub const </span>KANNADA: Script = Script::from_bytes(<span class="string">b&quot;Knda&quot;</span>);
-    <span class="kw">pub const </span>KATAKANA: Script = Script::from_bytes(<span class="string">b&quot;Kana&quot;</span>);
-    <span class="kw">pub const </span>LAO: Script = Script::from_bytes(<span class="string">b&quot;Laoo&quot;</span>);
-    <span class="kw">pub const </span>LATIN: Script = Script::from_bytes(<span class="string">b&quot;Latn&quot;</span>);
-    <span class="kw">pub const </span>MALAYALAM: Script = Script::from_bytes(<span class="string">b&quot;Mlym&quot;</span>);
-    <span class="kw">pub const </span>ORIYA: Script = Script::from_bytes(<span class="string">b&quot;Orya&quot;</span>);
-    <span class="kw">pub const </span>TAMIL: Script = Script::from_bytes(<span class="string">b&quot;Taml&quot;</span>);
-    <span class="kw">pub const </span>TELUGU: Script = Script::from_bytes(<span class="string">b&quot;Telu&quot;</span>);
-    <span class="kw">pub const </span>THAI: Script = Script::from_bytes(<span class="string">b&quot;Thai&quot;</span>);
+    </span><span class="kw">pub const </span>COMMON: Script = Script::from_bytes(<span class="string">b"Zyyy"</span>);
+    <span class="kw">pub const </span>INHERITED: Script = Script::from_bytes(<span class="string">b"Zinh"</span>);
+    <span class="kw">pub const </span>ARABIC: Script = Script::from_bytes(<span class="string">b"Arab"</span>);
+    <span class="kw">pub const </span>ARMENIAN: Script = Script::from_bytes(<span class="string">b"Armn"</span>);
+    <span class="kw">pub const </span>BENGALI: Script = Script::from_bytes(<span class="string">b"Beng"</span>);
+    <span class="kw">pub const </span>CYRILLIC: Script = Script::from_bytes(<span class="string">b"Cyrl"</span>);
+    <span class="kw">pub const </span>DEVANAGARI: Script = Script::from_bytes(<span class="string">b"Deva"</span>);
+    <span class="kw">pub const </span>GEORGIAN: Script = Script::from_bytes(<span class="string">b"Geor"</span>);
+    <span class="kw">pub const </span>GREEK: Script = Script::from_bytes(<span class="string">b"Grek"</span>);
+    <span class="kw">pub const </span>GUJARATI: Script = Script::from_bytes(<span class="string">b"Gujr"</span>);
+    <span class="kw">pub const </span>GURMUKHI: Script = Script::from_bytes(<span class="string">b"Guru"</span>);
+    <span class="kw">pub const </span>HANGUL: Script = Script::from_bytes(<span class="string">b"Hang"</span>);
+    <span class="kw">pub const </span>HAN: Script = Script::from_bytes(<span class="string">b"Hani"</span>);
+    <span class="kw">pub const </span>HEBREW: Script = Script::from_bytes(<span class="string">b"Hebr"</span>);
+    <span class="kw">pub const </span>HIRAGANA: Script = Script::from_bytes(<span class="string">b"Hira"</span>);
+    <span class="kw">pub const </span>KANNADA: Script = Script::from_bytes(<span class="string">b"Knda"</span>);
+    <span class="kw">pub const </span>KATAKANA: Script = Script::from_bytes(<span class="string">b"Kana"</span>);
+    <span class="kw">pub const </span>LAO: Script = Script::from_bytes(<span class="string">b"Laoo"</span>);
+    <span class="kw">pub const </span>LATIN: Script = Script::from_bytes(<span class="string">b"Latn"</span>);
+    <span class="kw">pub const </span>MALAYALAM: Script = Script::from_bytes(<span class="string">b"Mlym"</span>);
+    <span class="kw">pub const </span>ORIYA: Script = Script::from_bytes(<span class="string">b"Orya"</span>);
+    <span class="kw">pub const </span>TAMIL: Script = Script::from_bytes(<span class="string">b"Taml"</span>);
+    <span class="kw">pub const </span>TELUGU: Script = Script::from_bytes(<span class="string">b"Telu"</span>);
+    <span class="kw">pub const </span>THAI: Script = Script::from_bytes(<span class="string">b"Thai"</span>);
     <span class="comment">// Since 2.0
-    </span><span class="kw">pub const </span>TIBETAN: Script = Script::from_bytes(<span class="string">b&quot;Tibt&quot;</span>);
+    </span><span class="kw">pub const </span>TIBETAN: Script = Script::from_bytes(<span class="string">b"Tibt"</span>);
     <span class="comment">// Since 3.0
-    </span><span class="kw">pub const </span>BOPOMOFO: Script = Script::from_bytes(<span class="string">b&quot;Bopo&quot;</span>);
-    <span class="kw">pub const </span>BRAILLE: Script = Script::from_bytes(<span class="string">b&quot;Brai&quot;</span>);
-    <span class="kw">pub const </span>CANADIAN_SYLLABICS: Script = Script::from_bytes(<span class="string">b&quot;Cans&quot;</span>);
-    <span class="kw">pub const </span>CHEROKEE: Script = Script::from_bytes(<span class="string">b&quot;Cher&quot;</span>);
-    <span class="kw">pub const </span>ETHIOPIC: Script = Script::from_bytes(<span class="string">b&quot;Ethi&quot;</span>);
-    <span class="kw">pub const </span>KHMER: Script = Script::from_bytes(<span class="string">b&quot;Khmr&quot;</span>);
-    <span class="kw">pub const </span>MONGOLIAN: Script = Script::from_bytes(<span class="string">b&quot;Mong&quot;</span>);
-    <span class="kw">pub const </span>MYANMAR: Script = Script::from_bytes(<span class="string">b&quot;Mymr&quot;</span>);
-    <span class="kw">pub const </span>OGHAM: Script = Script::from_bytes(<span class="string">b&quot;Ogam&quot;</span>);
-    <span class="kw">pub const </span>RUNIC: Script = Script::from_bytes(<span class="string">b&quot;Runr&quot;</span>);
-    <span class="kw">pub const </span>SINHALA: Script = Script::from_bytes(<span class="string">b&quot;Sinh&quot;</span>);
-    <span class="kw">pub const </span>SYRIAC: Script = Script::from_bytes(<span class="string">b&quot;Syrc&quot;</span>);
-    <span class="kw">pub const </span>THAANA: Script = Script::from_bytes(<span class="string">b&quot;Thaa&quot;</span>);
-    <span class="kw">pub const </span>YI: Script = Script::from_bytes(<span class="string">b&quot;Yiii&quot;</span>);
+    </span><span class="kw">pub const </span>BOPOMOFO: Script = Script::from_bytes(<span class="string">b"Bopo"</span>);
+    <span class="kw">pub const </span>BRAILLE: Script = Script::from_bytes(<span class="string">b"Brai"</span>);
+    <span class="kw">pub const </span>CANADIAN_SYLLABICS: Script = Script::from_bytes(<span class="string">b"Cans"</span>);
+    <span class="kw">pub const </span>CHEROKEE: Script = Script::from_bytes(<span class="string">b"Cher"</span>);
+    <span class="kw">pub const </span>ETHIOPIC: Script = Script::from_bytes(<span class="string">b"Ethi"</span>);
+    <span class="kw">pub const </span>KHMER: Script = Script::from_bytes(<span class="string">b"Khmr"</span>);
+    <span class="kw">pub const </span>MONGOLIAN: Script = Script::from_bytes(<span class="string">b"Mong"</span>);
+    <span class="kw">pub const </span>MYANMAR: Script = Script::from_bytes(<span class="string">b"Mymr"</span>);
+    <span class="kw">pub const </span>OGHAM: Script = Script::from_bytes(<span class="string">b"Ogam"</span>);
+    <span class="kw">pub const </span>RUNIC: Script = Script::from_bytes(<span class="string">b"Runr"</span>);
+    <span class="kw">pub const </span>SINHALA: Script = Script::from_bytes(<span class="string">b"Sinh"</span>);
+    <span class="kw">pub const </span>SYRIAC: Script = Script::from_bytes(<span class="string">b"Syrc"</span>);
+    <span class="kw">pub const </span>THAANA: Script = Script::from_bytes(<span class="string">b"Thaa"</span>);
+    <span class="kw">pub const </span>YI: Script = Script::from_bytes(<span class="string">b"Yiii"</span>);
     <span class="comment">// Since 3.1
-    </span><span class="kw">pub const </span>DESERET: Script = Script::from_bytes(<span class="string">b&quot;Dsrt&quot;</span>);
-    <span class="kw">pub const </span>GOTHIC: Script = Script::from_bytes(<span class="string">b&quot;Goth&quot;</span>);
-    <span class="kw">pub const </span>OLD_ITALIC: Script = Script::from_bytes(<span class="string">b&quot;Ital&quot;</span>);
+    </span><span class="kw">pub const </span>DESERET: Script = Script::from_bytes(<span class="string">b"Dsrt"</span>);
+    <span class="kw">pub const </span>GOTHIC: Script = Script::from_bytes(<span class="string">b"Goth"</span>);
+    <span class="kw">pub const </span>OLD_ITALIC: Script = Script::from_bytes(<span class="string">b"Ital"</span>);
     <span class="comment">// Since 3.2
-    </span><span class="kw">pub const </span>BUHID: Script = Script::from_bytes(<span class="string">b&quot;Buhd&quot;</span>);
-    <span class="kw">pub const </span>HANUNOO: Script = Script::from_bytes(<span class="string">b&quot;Hano&quot;</span>);
-    <span class="kw">pub const </span>TAGALOG: Script = Script::from_bytes(<span class="string">b&quot;Tglg&quot;</span>);
-    <span class="kw">pub const </span>TAGBANWA: Script = Script::from_bytes(<span class="string">b&quot;Tagb&quot;</span>);
+    </span><span class="kw">pub const </span>BUHID: Script = Script::from_bytes(<span class="string">b"Buhd"</span>);
+    <span class="kw">pub const </span>HANUNOO: Script = Script::from_bytes(<span class="string">b"Hano"</span>);
+    <span class="kw">pub const </span>TAGALOG: Script = Script::from_bytes(<span class="string">b"Tglg"</span>);
+    <span class="kw">pub const </span>TAGBANWA: Script = Script::from_bytes(<span class="string">b"Tagb"</span>);
     <span class="comment">// Since 4.0
-    </span><span class="kw">pub const </span>CYPRIOT: Script = Script::from_bytes(<span class="string">b&quot;Cprt&quot;</span>);
-    <span class="kw">pub const </span>LIMBU: Script = Script::from_bytes(<span class="string">b&quot;Limb&quot;</span>);
-    <span class="kw">pub const </span>LINEAR_B: Script = Script::from_bytes(<span class="string">b&quot;Linb&quot;</span>);
-    <span class="kw">pub const </span>OSMANYA: Script = Script::from_bytes(<span class="string">b&quot;Osma&quot;</span>);
-    <span class="kw">pub const </span>SHAVIAN: Script = Script::from_bytes(<span class="string">b&quot;Shaw&quot;</span>);
-    <span class="kw">pub const </span>TAI_LE: Script = Script::from_bytes(<span class="string">b&quot;Tale&quot;</span>);
-    <span class="kw">pub const </span>UGARITIC: Script = Script::from_bytes(<span class="string">b&quot;Ugar&quot;</span>);
+    </span><span class="kw">pub const </span>CYPRIOT: Script = Script::from_bytes(<span class="string">b"Cprt"</span>);
+    <span class="kw">pub const </span>LIMBU: Script = Script::from_bytes(<span class="string">b"Limb"</span>);
+    <span class="kw">pub const </span>LINEAR_B: Script = Script::from_bytes(<span class="string">b"Linb"</span>);
+    <span class="kw">pub const </span>OSMANYA: Script = Script::from_bytes(<span class="string">b"Osma"</span>);
+    <span class="kw">pub const </span>SHAVIAN: Script = Script::from_bytes(<span class="string">b"Shaw"</span>);
+    <span class="kw">pub const </span>TAI_LE: Script = Script::from_bytes(<span class="string">b"Tale"</span>);
+    <span class="kw">pub const </span>UGARITIC: Script = Script::from_bytes(<span class="string">b"Ugar"</span>);
     <span class="comment">// Since 4.1
-    </span><span class="kw">pub const </span>BUGINESE: Script = Script::from_bytes(<span class="string">b&quot;Bugi&quot;</span>);
-    <span class="kw">pub const </span>COPTIC: Script = Script::from_bytes(<span class="string">b&quot;Copt&quot;</span>);
-    <span class="kw">pub const </span>GLAGOLITIC: Script = Script::from_bytes(<span class="string">b&quot;Glag&quot;</span>);
-    <span class="kw">pub const </span>KHAROSHTHI: Script = Script::from_bytes(<span class="string">b&quot;Khar&quot;</span>);
-    <span class="kw">pub const </span>NEW_TAI_LUE: Script = Script::from_bytes(<span class="string">b&quot;Talu&quot;</span>);
-    <span class="kw">pub const </span>OLD_PERSIAN: Script = Script::from_bytes(<span class="string">b&quot;Xpeo&quot;</span>);
-    <span class="kw">pub const </span>SYLOTI_NAGRI: Script = Script::from_bytes(<span class="string">b&quot;Sylo&quot;</span>);
-    <span class="kw">pub const </span>TIFINAGH: Script = Script::from_bytes(<span class="string">b&quot;Tfng&quot;</span>);
+    </span><span class="kw">pub const </span>BUGINESE: Script = Script::from_bytes(<span class="string">b"Bugi"</span>);
+    <span class="kw">pub const </span>COPTIC: Script = Script::from_bytes(<span class="string">b"Copt"</span>);
+    <span class="kw">pub const </span>GLAGOLITIC: Script = Script::from_bytes(<span class="string">b"Glag"</span>);
+    <span class="kw">pub const </span>KHAROSHTHI: Script = Script::from_bytes(<span class="string">b"Khar"</span>);
+    <span class="kw">pub const </span>NEW_TAI_LUE: Script = Script::from_bytes(<span class="string">b"Talu"</span>);
+    <span class="kw">pub const </span>OLD_PERSIAN: Script = Script::from_bytes(<span class="string">b"Xpeo"</span>);
+    <span class="kw">pub const </span>SYLOTI_NAGRI: Script = Script::from_bytes(<span class="string">b"Sylo"</span>);
+    <span class="kw">pub const </span>TIFINAGH: Script = Script::from_bytes(<span class="string">b"Tfng"</span>);
     <span class="comment">// Since 5.0
-    </span><span class="kw">pub const </span>UNKNOWN: Script = Script::from_bytes(<span class="string">b&quot;Zzzz&quot;</span>); <span class="comment">// Script can be Unknown, but not Invalid.
-    </span><span class="kw">pub const </span>BALINESE: Script = Script::from_bytes(<span class="string">b&quot;Bali&quot;</span>);
-    <span class="kw">pub const </span>CUNEIFORM: Script = Script::from_bytes(<span class="string">b&quot;Xsux&quot;</span>);
-    <span class="kw">pub const </span>NKO: Script = Script::from_bytes(<span class="string">b&quot;Nkoo&quot;</span>);
-    <span class="kw">pub const </span>PHAGS_PA: Script = Script::from_bytes(<span class="string">b&quot;Phag&quot;</span>);
-    <span class="kw">pub const </span>PHOENICIAN: Script = Script::from_bytes(<span class="string">b&quot;Phnx&quot;</span>);
+    </span><span class="kw">pub const </span>UNKNOWN: Script = Script::from_bytes(<span class="string">b"Zzzz"</span>); <span class="comment">// Script can be Unknown, but not Invalid.
+    </span><span class="kw">pub const </span>BALINESE: Script = Script::from_bytes(<span class="string">b"Bali"</span>);
+    <span class="kw">pub const </span>CUNEIFORM: Script = Script::from_bytes(<span class="string">b"Xsux"</span>);
+    <span class="kw">pub const </span>NKO: Script = Script::from_bytes(<span class="string">b"Nkoo"</span>);
+    <span class="kw">pub const </span>PHAGS_PA: Script = Script::from_bytes(<span class="string">b"Phag"</span>);
+    <span class="kw">pub const </span>PHOENICIAN: Script = Script::from_bytes(<span class="string">b"Phnx"</span>);
     <span class="comment">// Since 5.1
-    </span><span class="kw">pub const </span>CARIAN: Script = Script::from_bytes(<span class="string">b&quot;Cari&quot;</span>);
-    <span class="kw">pub const </span>CHAM: Script = Script::from_bytes(<span class="string">b&quot;Cham&quot;</span>);
-    <span class="kw">pub const </span>KAYAH_LI: Script = Script::from_bytes(<span class="string">b&quot;Kali&quot;</span>);
-    <span class="kw">pub const </span>LEPCHA: Script = Script::from_bytes(<span class="string">b&quot;Lepc&quot;</span>);
-    <span class="kw">pub const </span>LYCIAN: Script = Script::from_bytes(<span class="string">b&quot;Lyci&quot;</span>);
-    <span class="kw">pub const </span>LYDIAN: Script = Script::from_bytes(<span class="string">b&quot;Lydi&quot;</span>);
-    <span class="kw">pub const </span>OL_CHIKI: Script = Script::from_bytes(<span class="string">b&quot;Olck&quot;</span>);
-    <span class="kw">pub const </span>REJANG: Script = Script::from_bytes(<span class="string">b&quot;Rjng&quot;</span>);
-    <span class="kw">pub const </span>SAURASHTRA: Script = Script::from_bytes(<span class="string">b&quot;Saur&quot;</span>);
-    <span class="kw">pub const </span>SUNDANESE: Script = Script::from_bytes(<span class="string">b&quot;Sund&quot;</span>);
-    <span class="kw">pub const </span>VAI: Script = Script::from_bytes(<span class="string">b&quot;Vaii&quot;</span>);
+    </span><span class="kw">pub const </span>CARIAN: Script = Script::from_bytes(<span class="string">b"Cari"</span>);
+    <span class="kw">pub const </span>CHAM: Script = Script::from_bytes(<span class="string">b"Cham"</span>);
+    <span class="kw">pub const </span>KAYAH_LI: Script = Script::from_bytes(<span class="string">b"Kali"</span>);
+    <span class="kw">pub const </span>LEPCHA: Script = Script::from_bytes(<span class="string">b"Lepc"</span>);
+    <span class="kw">pub const </span>LYCIAN: Script = Script::from_bytes(<span class="string">b"Lyci"</span>);
+    <span class="kw">pub const </span>LYDIAN: Script = Script::from_bytes(<span class="string">b"Lydi"</span>);
+    <span class="kw">pub const </span>OL_CHIKI: Script = Script::from_bytes(<span class="string">b"Olck"</span>);
+    <span class="kw">pub const </span>REJANG: Script = Script::from_bytes(<span class="string">b"Rjng"</span>);
+    <span class="kw">pub const </span>SAURASHTRA: Script = Script::from_bytes(<span class="string">b"Saur"</span>);
+    <span class="kw">pub const </span>SUNDANESE: Script = Script::from_bytes(<span class="string">b"Sund"</span>);
+    <span class="kw">pub const </span>VAI: Script = Script::from_bytes(<span class="string">b"Vaii"</span>);
     <span class="comment">// Since 5.2
-    </span><span class="kw">pub const </span>AVESTAN: Script = Script::from_bytes(<span class="string">b&quot;Avst&quot;</span>);
-    <span class="kw">pub const </span>BAMUM: Script = Script::from_bytes(<span class="string">b&quot;Bamu&quot;</span>);
-    <span class="kw">pub const </span>EGYPTIAN_HIEROGLYPHS: Script = Script::from_bytes(<span class="string">b&quot;Egyp&quot;</span>);
-    <span class="kw">pub const </span>IMPERIAL_ARAMAIC: Script = Script::from_bytes(<span class="string">b&quot;Armi&quot;</span>);
-    <span class="kw">pub const </span>INSCRIPTIONAL_PAHLAVI: Script = Script::from_bytes(<span class="string">b&quot;Phli&quot;</span>);
-    <span class="kw">pub const </span>INSCRIPTIONAL_PARTHIAN: Script = Script::from_bytes(<span class="string">b&quot;Prti&quot;</span>);
-    <span class="kw">pub const </span>JAVANESE: Script = Script::from_bytes(<span class="string">b&quot;Java&quot;</span>);
-    <span class="kw">pub const </span>KAITHI: Script = Script::from_bytes(<span class="string">b&quot;Kthi&quot;</span>);
-    <span class="kw">pub const </span>LISU: Script = Script::from_bytes(<span class="string">b&quot;Lisu&quot;</span>);
-    <span class="kw">pub const </span>MEETEI_MAYEK: Script = Script::from_bytes(<span class="string">b&quot;Mtei&quot;</span>);
-    <span class="kw">pub const </span>OLD_SOUTH_ARABIAN: Script = Script::from_bytes(<span class="string">b&quot;Sarb&quot;</span>);
-    <span class="kw">pub const </span>OLD_TURKIC: Script = Script::from_bytes(<span class="string">b&quot;Orkh&quot;</span>);
-    <span class="kw">pub const </span>SAMARITAN: Script = Script::from_bytes(<span class="string">b&quot;Samr&quot;</span>);
-    <span class="kw">pub const </span>TAI_THAM: Script = Script::from_bytes(<span class="string">b&quot;Lana&quot;</span>);
-    <span class="kw">pub const </span>TAI_VIET: Script = Script::from_bytes(<span class="string">b&quot;Tavt&quot;</span>);
+    </span><span class="kw">pub const </span>AVESTAN: Script = Script::from_bytes(<span class="string">b"Avst"</span>);
+    <span class="kw">pub const </span>BAMUM: Script = Script::from_bytes(<span class="string">b"Bamu"</span>);
+    <span class="kw">pub const </span>EGYPTIAN_HIEROGLYPHS: Script = Script::from_bytes(<span class="string">b"Egyp"</span>);
+    <span class="kw">pub const </span>IMPERIAL_ARAMAIC: Script = Script::from_bytes(<span class="string">b"Armi"</span>);
+    <span class="kw">pub const </span>INSCRIPTIONAL_PAHLAVI: Script = Script::from_bytes(<span class="string">b"Phli"</span>);
+    <span class="kw">pub const </span>INSCRIPTIONAL_PARTHIAN: Script = Script::from_bytes(<span class="string">b"Prti"</span>);
+    <span class="kw">pub const </span>JAVANESE: Script = Script::from_bytes(<span class="string">b"Java"</span>);
+    <span class="kw">pub const </span>KAITHI: Script = Script::from_bytes(<span class="string">b"Kthi"</span>);
+    <span class="kw">pub const </span>LISU: Script = Script::from_bytes(<span class="string">b"Lisu"</span>);
+    <span class="kw">pub const </span>MEETEI_MAYEK: Script = Script::from_bytes(<span class="string">b"Mtei"</span>);
+    <span class="kw">pub const </span>OLD_SOUTH_ARABIAN: Script = Script::from_bytes(<span class="string">b"Sarb"</span>);
+    <span class="kw">pub const </span>OLD_TURKIC: Script = Script::from_bytes(<span class="string">b"Orkh"</span>);
+    <span class="kw">pub const </span>SAMARITAN: Script = Script::from_bytes(<span class="string">b"Samr"</span>);
+    <span class="kw">pub const </span>TAI_THAM: Script = Script::from_bytes(<span class="string">b"Lana"</span>);
+    <span class="kw">pub const </span>TAI_VIET: Script = Script::from_bytes(<span class="string">b"Tavt"</span>);
     <span class="comment">// Since 6.0
-    </span><span class="kw">pub const </span>BATAK: Script = Script::from_bytes(<span class="string">b&quot;Batk&quot;</span>);
-    <span class="kw">pub const </span>BRAHMI: Script = Script::from_bytes(<span class="string">b&quot;Brah&quot;</span>);
-    <span class="kw">pub const </span>MANDAIC: Script = Script::from_bytes(<span class="string">b&quot;Mand&quot;</span>);
+    </span><span class="kw">pub const </span>BATAK: Script = Script::from_bytes(<span class="string">b"Batk"</span>);
+    <span class="kw">pub const </span>BRAHMI: Script = Script::from_bytes(<span class="string">b"Brah"</span>);
+    <span class="kw">pub const </span>MANDAIC: Script = Script::from_bytes(<span class="string">b"Mand"</span>);
     <span class="comment">// Since 6.1
-    </span><span class="kw">pub const </span>CHAKMA: Script = Script::from_bytes(<span class="string">b&quot;Cakm&quot;</span>);
-    <span class="kw">pub const </span>MEROITIC_CURSIVE: Script = Script::from_bytes(<span class="string">b&quot;Merc&quot;</span>);
-    <span class="kw">pub const </span>MEROITIC_HIEROGLYPHS: Script = Script::from_bytes(<span class="string">b&quot;Mero&quot;</span>);
-    <span class="kw">pub const </span>MIAO: Script = Script::from_bytes(<span class="string">b&quot;Plrd&quot;</span>);
-    <span class="kw">pub const </span>SHARADA: Script = Script::from_bytes(<span class="string">b&quot;Shrd&quot;</span>);
-    <span class="kw">pub const </span>SORA_SOMPENG: Script = Script::from_bytes(<span class="string">b&quot;Sora&quot;</span>);
-    <span class="kw">pub const </span>TAKRI: Script = Script::from_bytes(<span class="string">b&quot;Takr&quot;</span>);
+    </span><span class="kw">pub const </span>CHAKMA: Script = Script::from_bytes(<span class="string">b"Cakm"</span>);
+    <span class="kw">pub const </span>MEROITIC_CURSIVE: Script = Script::from_bytes(<span class="string">b"Merc"</span>);
+    <span class="kw">pub const </span>MEROITIC_HIEROGLYPHS: Script = Script::from_bytes(<span class="string">b"Mero"</span>);
+    <span class="kw">pub const </span>MIAO: Script = Script::from_bytes(<span class="string">b"Plrd"</span>);
+    <span class="kw">pub const </span>SHARADA: Script = Script::from_bytes(<span class="string">b"Shrd"</span>);
+    <span class="kw">pub const </span>SORA_SOMPENG: Script = Script::from_bytes(<span class="string">b"Sora"</span>);
+    <span class="kw">pub const </span>TAKRI: Script = Script::from_bytes(<span class="string">b"Takr"</span>);
     <span class="comment">// Since 7.0
-    </span><span class="kw">pub const </span>BASSA_VAH: Script = Script::from_bytes(<span class="string">b&quot;Bass&quot;</span>);
-    <span class="kw">pub const </span>CAUCASIAN_ALBANIAN: Script = Script::from_bytes(<span class="string">b&quot;Aghb&quot;</span>);
-    <span class="kw">pub const </span>DUPLOYAN: Script = Script::from_bytes(<span class="string">b&quot;Dupl&quot;</span>);
-    <span class="kw">pub const </span>ELBASAN: Script = Script::from_bytes(<span class="string">b&quot;Elba&quot;</span>);
-    <span class="kw">pub const </span>GRANTHA: Script = Script::from_bytes(<span class="string">b&quot;Gran&quot;</span>);
-    <span class="kw">pub const </span>KHOJKI: Script = Script::from_bytes(<span class="string">b&quot;Khoj&quot;</span>);
-    <span class="kw">pub const </span>KHUDAWADI: Script = Script::from_bytes(<span class="string">b&quot;Sind&quot;</span>);
-    <span class="kw">pub const </span>LINEAR_A: Script = Script::from_bytes(<span class="string">b&quot;Lina&quot;</span>);
-    <span class="kw">pub const </span>MAHAJANI: Script = Script::from_bytes(<span class="string">b&quot;Mahj&quot;</span>);
-    <span class="kw">pub const </span>MANICHAEAN: Script = Script::from_bytes(<span class="string">b&quot;Mani&quot;</span>);
-    <span class="kw">pub const </span>MENDE_KIKAKUI: Script = Script::from_bytes(<span class="string">b&quot;Mend&quot;</span>);
-    <span class="kw">pub const </span>MODI: Script = Script::from_bytes(<span class="string">b&quot;Modi&quot;</span>);
-    <span class="kw">pub const </span>MRO: Script = Script::from_bytes(<span class="string">b&quot;Mroo&quot;</span>);
-    <span class="kw">pub const </span>NABATAEAN: Script = Script::from_bytes(<span class="string">b&quot;Nbat&quot;</span>);
-    <span class="kw">pub const </span>OLD_NORTH_ARABIAN: Script = Script::from_bytes(<span class="string">b&quot;Narb&quot;</span>);
-    <span class="kw">pub const </span>OLD_PERMIC: Script = Script::from_bytes(<span class="string">b&quot;Perm&quot;</span>);
-    <span class="kw">pub const </span>PAHAWH_HMONG: Script = Script::from_bytes(<span class="string">b&quot;Hmng&quot;</span>);
-    <span class="kw">pub const </span>PALMYRENE: Script = Script::from_bytes(<span class="string">b&quot;Palm&quot;</span>);
-    <span class="kw">pub const </span>PAU_CIN_HAU: Script = Script::from_bytes(<span class="string">b&quot;Pauc&quot;</span>);
-    <span class="kw">pub const </span>PSALTER_PAHLAVI: Script = Script::from_bytes(<span class="string">b&quot;Phlp&quot;</span>);
-    <span class="kw">pub const </span>SIDDHAM: Script = Script::from_bytes(<span class="string">b&quot;Sidd&quot;</span>);
-    <span class="kw">pub const </span>TIRHUTA: Script = Script::from_bytes(<span class="string">b&quot;Tirh&quot;</span>);
-    <span class="kw">pub const </span>WARANG_CITI: Script = Script::from_bytes(<span class="string">b&quot;Wara&quot;</span>);
+    </span><span class="kw">pub const </span>BASSA_VAH: Script = Script::from_bytes(<span class="string">b"Bass"</span>);
+    <span class="kw">pub const </span>CAUCASIAN_ALBANIAN: Script = Script::from_bytes(<span class="string">b"Aghb"</span>);
+    <span class="kw">pub const </span>DUPLOYAN: Script = Script::from_bytes(<span class="string">b"Dupl"</span>);
+    <span class="kw">pub const </span>ELBASAN: Script = Script::from_bytes(<span class="string">b"Elba"</span>);
+    <span class="kw">pub const </span>GRANTHA: Script = Script::from_bytes(<span class="string">b"Gran"</span>);
+    <span class="kw">pub const </span>KHOJKI: Script = Script::from_bytes(<span class="string">b"Khoj"</span>);
+    <span class="kw">pub const </span>KHUDAWADI: Script = Script::from_bytes(<span class="string">b"Sind"</span>);
+    <span class="kw">pub const </span>LINEAR_A: Script = Script::from_bytes(<span class="string">b"Lina"</span>);
+    <span class="kw">pub const </span>MAHAJANI: Script = Script::from_bytes(<span class="string">b"Mahj"</span>);
+    <span class="kw">pub const </span>MANICHAEAN: Script = Script::from_bytes(<span class="string">b"Mani"</span>);
+    <span class="kw">pub const </span>MENDE_KIKAKUI: Script = Script::from_bytes(<span class="string">b"Mend"</span>);
+    <span class="kw">pub const </span>MODI: Script = Script::from_bytes(<span class="string">b"Modi"</span>);
+    <span class="kw">pub const </span>MRO: Script = Script::from_bytes(<span class="string">b"Mroo"</span>);
+    <span class="kw">pub const </span>NABATAEAN: Script = Script::from_bytes(<span class="string">b"Nbat"</span>);
+    <span class="kw">pub const </span>OLD_NORTH_ARABIAN: Script = Script::from_bytes(<span class="string">b"Narb"</span>);
+    <span class="kw">pub const </span>OLD_PERMIC: Script = Script::from_bytes(<span class="string">b"Perm"</span>);
+    <span class="kw">pub const </span>PAHAWH_HMONG: Script = Script::from_bytes(<span class="string">b"Hmng"</span>);
+    <span class="kw">pub const </span>PALMYRENE: Script = Script::from_bytes(<span class="string">b"Palm"</span>);
+    <span class="kw">pub const </span>PAU_CIN_HAU: Script = Script::from_bytes(<span class="string">b"Pauc"</span>);
+    <span class="kw">pub const </span>PSALTER_PAHLAVI: Script = Script::from_bytes(<span class="string">b"Phlp"</span>);
+    <span class="kw">pub const </span>SIDDHAM: Script = Script::from_bytes(<span class="string">b"Sidd"</span>);
+    <span class="kw">pub const </span>TIRHUTA: Script = Script::from_bytes(<span class="string">b"Tirh"</span>);
+    <span class="kw">pub const </span>WARANG_CITI: Script = Script::from_bytes(<span class="string">b"Wara"</span>);
     <span class="comment">// Since 8.0
-    </span><span class="kw">pub const </span>AHOM: Script = Script::from_bytes(<span class="string">b&quot;Ahom&quot;</span>);
-    <span class="kw">pub const </span>ANATOLIAN_HIEROGLYPHS: Script = Script::from_bytes(<span class="string">b&quot;Hluw&quot;</span>);
-    <span class="kw">pub const </span>HATRAN: Script = Script::from_bytes(<span class="string">b&quot;Hatr&quot;</span>);
-    <span class="kw">pub const </span>MULTANI: Script = Script::from_bytes(<span class="string">b&quot;Mult&quot;</span>);
-    <span class="kw">pub const </span>OLD_HUNGARIAN: Script = Script::from_bytes(<span class="string">b&quot;Hung&quot;</span>);
-    <span class="kw">pub const </span>SIGNWRITING: Script = Script::from_bytes(<span class="string">b&quot;Sgnw&quot;</span>);
+    </span><span class="kw">pub const </span>AHOM: Script = Script::from_bytes(<span class="string">b"Ahom"</span>);
+    <span class="kw">pub const </span>ANATOLIAN_HIEROGLYPHS: Script = Script::from_bytes(<span class="string">b"Hluw"</span>);
+    <span class="kw">pub const </span>HATRAN: Script = Script::from_bytes(<span class="string">b"Hatr"</span>);
+    <span class="kw">pub const </span>MULTANI: Script = Script::from_bytes(<span class="string">b"Mult"</span>);
+    <span class="kw">pub const </span>OLD_HUNGARIAN: Script = Script::from_bytes(<span class="string">b"Hung"</span>);
+    <span class="kw">pub const </span>SIGNWRITING: Script = Script::from_bytes(<span class="string">b"Sgnw"</span>);
     <span class="comment">// Since 9.0
-    </span><span class="kw">pub const </span>ADLAM: Script = Script::from_bytes(<span class="string">b&quot;Adlm&quot;</span>);
-    <span class="kw">pub const </span>BHAIKSUKI: Script = Script::from_bytes(<span class="string">b&quot;Bhks&quot;</span>);
-    <span class="kw">pub const </span>MARCHEN: Script = Script::from_bytes(<span class="string">b&quot;Marc&quot;</span>);
-    <span class="kw">pub const </span>OSAGE: Script = Script::from_bytes(<span class="string">b&quot;Osge&quot;</span>);
-    <span class="kw">pub const </span>TANGUT: Script = Script::from_bytes(<span class="string">b&quot;Tang&quot;</span>);
-    <span class="kw">pub const </span>NEWA: Script = Script::from_bytes(<span class="string">b&quot;Newa&quot;</span>);
+    </span><span class="kw">pub const </span>ADLAM: Script = Script::from_bytes(<span class="string">b"Adlm"</span>);
+    <span class="kw">pub const </span>BHAIKSUKI: Script = Script::from_bytes(<span class="string">b"Bhks"</span>);
+    <span class="kw">pub const </span>MARCHEN: Script = Script::from_bytes(<span class="string">b"Marc"</span>);
+    <span class="kw">pub const </span>OSAGE: Script = Script::from_bytes(<span class="string">b"Osge"</span>);
+    <span class="kw">pub const </span>TANGUT: Script = Script::from_bytes(<span class="string">b"Tang"</span>);
+    <span class="kw">pub const </span>NEWA: Script = Script::from_bytes(<span class="string">b"Newa"</span>);
     <span class="comment">// Since 10.0
-    </span><span class="kw">pub const </span>MASARAM_GONDI: Script = Script::from_bytes(<span class="string">b&quot;Gonm&quot;</span>);
-    <span class="kw">pub const </span>NUSHU: Script = Script::from_bytes(<span class="string">b&quot;Nshu&quot;</span>);
-    <span class="kw">pub const </span>SOYOMBO: Script = Script::from_bytes(<span class="string">b&quot;Soyo&quot;</span>);
-    <span class="kw">pub const </span>ZANABAZAR_SQUARE: Script = Script::from_bytes(<span class="string">b&quot;Zanb&quot;</span>);
+    </span><span class="kw">pub const </span>MASARAM_GONDI: Script = Script::from_bytes(<span class="string">b"Gonm"</span>);
+    <span class="kw">pub const </span>NUSHU: Script = Script::from_bytes(<span class="string">b"Nshu"</span>);
+    <span class="kw">pub const </span>SOYOMBO: Script = Script::from_bytes(<span class="string">b"Soyo"</span>);
+    <span class="kw">pub const </span>ZANABAZAR_SQUARE: Script = Script::from_bytes(<span class="string">b"Zanb"</span>);
     <span class="comment">// Since 11.0
-    </span><span class="kw">pub const </span>DOGRA: Script = Script::from_bytes(<span class="string">b&quot;Dogr&quot;</span>);
-    <span class="kw">pub const </span>GUNJALA_GONDI: Script = Script::from_bytes(<span class="string">b&quot;Gong&quot;</span>);
-    <span class="kw">pub const </span>HANIFI_ROHINGYA: Script = Script::from_bytes(<span class="string">b&quot;Rohg&quot;</span>);
-    <span class="kw">pub const </span>MAKASAR: Script = Script::from_bytes(<span class="string">b&quot;Maka&quot;</span>);
-    <span class="kw">pub const </span>MEDEFAIDRIN: Script = Script::from_bytes(<span class="string">b&quot;Medf&quot;</span>);
-    <span class="kw">pub const </span>OLD_SOGDIAN: Script = Script::from_bytes(<span class="string">b&quot;Sogo&quot;</span>);
-    <span class="kw">pub const </span>SOGDIAN: Script = Script::from_bytes(<span class="string">b&quot;Sogd&quot;</span>);
+    </span><span class="kw">pub const </span>DOGRA: Script = Script::from_bytes(<span class="string">b"Dogr"</span>);
+    <span class="kw">pub const </span>GUNJALA_GONDI: Script = Script::from_bytes(<span class="string">b"Gong"</span>);
+    <span class="kw">pub const </span>HANIFI_ROHINGYA: Script = Script::from_bytes(<span class="string">b"Rohg"</span>);
+    <span class="kw">pub const </span>MAKASAR: Script = Script::from_bytes(<span class="string">b"Maka"</span>);
+    <span class="kw">pub const </span>MEDEFAIDRIN: Script = Script::from_bytes(<span class="string">b"Medf"</span>);
+    <span class="kw">pub const </span>OLD_SOGDIAN: Script = Script::from_bytes(<span class="string">b"Sogo"</span>);
+    <span class="kw">pub const </span>SOGDIAN: Script = Script::from_bytes(<span class="string">b"Sogd"</span>);
     <span class="comment">// Since 12.0
-    </span><span class="kw">pub const </span>ELYMAIC: Script = Script::from_bytes(<span class="string">b&quot;Elym&quot;</span>);
-    <span class="kw">pub const </span>NANDINAGARI: Script = Script::from_bytes(<span class="string">b&quot;Nand&quot;</span>);
-    <span class="kw">pub const </span>NYIAKENG_PUACHUE_HMONG: Script = Script::from_bytes(<span class="string">b&quot;Hmnp&quot;</span>);
-    <span class="kw">pub const </span>WANCHO: Script = Script::from_bytes(<span class="string">b&quot;Wcho&quot;</span>);
+    </span><span class="kw">pub const </span>ELYMAIC: Script = Script::from_bytes(<span class="string">b"Elym"</span>);
+    <span class="kw">pub const </span>NANDINAGARI: Script = Script::from_bytes(<span class="string">b"Nand"</span>);
+    <span class="kw">pub const </span>NYIAKENG_PUACHUE_HMONG: Script = Script::from_bytes(<span class="string">b"Hmnp"</span>);
+    <span class="kw">pub const </span>WANCHO: Script = Script::from_bytes(<span class="string">b"Wcho"</span>);
     <span class="comment">// Since 13.0
-    </span><span class="kw">pub const </span>CHORASMIAN: Script = Script::from_bytes(<span class="string">b&quot;Chrs&quot;</span>);
-    <span class="kw">pub const </span>DIVES_AKURU: Script = Script::from_bytes(<span class="string">b&quot;Diak&quot;</span>);
-    <span class="kw">pub const </span>KHITAN_SMALL_SCRIPT: Script = Script::from_bytes(<span class="string">b&quot;Kits&quot;</span>);
-    <span class="kw">pub const </span>YEZIDI: Script = Script::from_bytes(<span class="string">b&quot;Yezi&quot;</span>);
+    </span><span class="kw">pub const </span>CHORASMIAN: Script = Script::from_bytes(<span class="string">b"Chrs"</span>);
+    <span class="kw">pub const </span>DIVES_AKURU: Script = Script::from_bytes(<span class="string">b"Diak"</span>);
+    <span class="kw">pub const </span>KHITAN_SMALL_SCRIPT: Script = Script::from_bytes(<span class="string">b"Kits"</span>);
+    <span class="kw">pub const </span>YEZIDI: Script = Script::from_bytes(<span class="string">b"Yezi"</span>);
 
     <span class="comment">// https://github.com/harfbuzz/harfbuzz/issues/1162
-    </span><span class="kw">pub const </span>MYANMAR_ZAWGYI: Script = Script::from_bytes(<span class="string">b&quot;Qaag&quot;</span>);
+    </span><span class="kw">pub const </span>MYANMAR_ZAWGYI: Script = Script::from_bytes(<span class="string">b"Qaag"</span>);
 }
 
 <span class="doccomment">/// A feature tag with an accompanying range specifying on which subslice of
@@ -1214,7 +1215,7 @@
 }
 
 <span class="kw">impl </span>core::str::FromStr <span class="kw">for </span>Feature {
-    <span class="kw">type </span><span class="prelude-val">Err </span>= <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str;
+    <span class="kw">type </span><span class="prelude-val">Err </span>= <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str;
 
     <span class="doccomment">/// Parses a `Feature` form a string.
     ///
@@ -1244,11 +1245,11 @@
             <span class="comment">// Parse prefix.
             </span><span class="kw">let </span><span class="kw-2">mut </span>value = <span class="number">1</span>;
             <span class="kw">match </span>p.curr_byte()<span class="question-mark">? </span>{
-                <span class="string">b&#39;-&#39; </span>=&gt; {
+                <span class="string">b'-' </span>=&gt; {
                     value = <span class="number">0</span>;
                     p.advance(<span class="number">1</span>);
                 }
-                <span class="string">b&#39;+&#39; </span>=&gt; {
+                <span class="string">b'+' </span>=&gt; {
                     value = <span class="number">1</span>;
                     p.advance(<span class="number">1</span>);
                 }
@@ -1269,11 +1270,11 @@
             <span class="comment">// Parse indices.
             </span>p.skip_spaces();
 
-            <span class="kw">let </span>(start, end) = <span class="kw">if </span>p.consume_byte(<span class="string">b&#39;[&#39;</span>).is_some() {
+            <span class="kw">let </span>(start, end) = <span class="kw">if </span>p.consume_byte(<span class="string">b'['</span>).is_some() {
                 <span class="kw">let </span>start_opt = p.consume_i32();
                 <span class="kw">let </span>start = start_opt.unwrap_or(<span class="number">0</span>) <span class="kw">as </span>u32; <span class="comment">// negative value overflow is ok
 
-                </span><span class="kw">let </span>end = <span class="kw">if </span><span class="macro">matches!</span>(p.curr_byte(), <span class="prelude-val">Some</span>(<span class="string">b&#39;:&#39;</span>) | <span class="prelude-val">Some</span>(<span class="string">b&#39;;&#39;</span>)) {
+                </span><span class="kw">let </span>end = <span class="kw">if </span><span class="macro">matches!</span>(p.curr_byte(), <span class="prelude-val">Some</span>(<span class="string">b':'</span>) | <span class="prelude-val">Some</span>(<span class="string">b';'</span>)) {
                     p.advance(<span class="number">1</span>);
                     p.consume_i32().unwrap_or(-<span class="number">1</span>) <span class="kw">as </span>u32 <span class="comment">// negative value overflow is ok
                 </span>} <span class="kw">else </span>{
@@ -1284,7 +1285,7 @@
                     }
                 };
 
-                p.consume_byte(<span class="string">b&#39;]&#39;</span>)<span class="question-mark">?</span>;
+                p.consume_byte(<span class="string">b']'</span>)<span class="question-mark">?</span>;
 
                 (start, end)
             } <span class="kw">else </span>{
@@ -1292,7 +1293,7 @@
             };
 
             <span class="comment">// Parse postfix.
-            </span><span class="kw">let </span>had_equal = p.consume_byte(<span class="string">b&#39;=&#39;</span>).is_some();
+            </span><span class="kw">let </span>had_equal = p.consume_byte(<span class="string">b'='</span>).is_some();
             <span class="kw">let </span>value1 = p
                 .consume_i32()
                 .or_else(|| p.consume_bool().map(|b| b <span class="kw">as </span>i32));
@@ -1319,7 +1320,7 @@
             })
         }
 
-        parse(s).ok_or(<span class="string">&quot;invalid feature&quot;</span>)
+        parse(s).ok_or(<span class="string">"invalid feature"</span>)
     }
 }
 
@@ -1340,26 +1341,26 @@
         };
     }
 
-    <span class="macro">test!</span>(parse_01, <span class="string">&quot;kern&quot;</span>, <span class="string">b&quot;kern&quot;</span>, <span class="number">1</span>, ..);
-    <span class="macro">test!</span>(parse_02, <span class="string">&quot;+kern&quot;</span>, <span class="string">b&quot;kern&quot;</span>, <span class="number">1</span>, ..);
-    <span class="macro">test!</span>(parse_03, <span class="string">&quot;-kern&quot;</span>, <span class="string">b&quot;kern&quot;</span>, <span class="number">0</span>, ..);
-    <span class="macro">test!</span>(parse_04, <span class="string">&quot;kern=0&quot;</span>, <span class="string">b&quot;kern&quot;</span>, <span class="number">0</span>, ..);
-    <span class="macro">test!</span>(parse_05, <span class="string">&quot;kern=1&quot;</span>, <span class="string">b&quot;kern&quot;</span>, <span class="number">1</span>, ..);
-    <span class="macro">test!</span>(parse_06, <span class="string">&quot;kern=2&quot;</span>, <span class="string">b&quot;kern&quot;</span>, <span class="number">2</span>, ..);
-    <span class="macro">test!</span>(parse_07, <span class="string">&quot;kern[]&quot;</span>, <span class="string">b&quot;kern&quot;</span>, <span class="number">1</span>, ..);
-    <span class="macro">test!</span>(parse_08, <span class="string">&quot;kern[:]&quot;</span>, <span class="string">b&quot;kern&quot;</span>, <span class="number">1</span>, ..);
-    <span class="macro">test!</span>(parse_09, <span class="string">&quot;kern[5:]&quot;</span>, <span class="string">b&quot;kern&quot;</span>, <span class="number">1</span>, <span class="number">5</span>..);
-    <span class="macro">test!</span>(parse_10, <span class="string">&quot;kern[:5]&quot;</span>, <span class="string">b&quot;kern&quot;</span>, <span class="number">1</span>, ..=<span class="number">5</span>);
-    <span class="macro">test!</span>(parse_11, <span class="string">&quot;kern[3:5]&quot;</span>, <span class="string">b&quot;kern&quot;</span>, <span class="number">1</span>, <span class="number">3</span>..=<span class="number">5</span>);
-    <span class="macro">test!</span>(parse_12, <span class="string">&quot;kern[3]&quot;</span>, <span class="string">b&quot;kern&quot;</span>, <span class="number">1</span>, <span class="number">3</span>..=<span class="number">4</span>);
-    <span class="macro">test!</span>(parse_13, <span class="string">&quot;kern[3:5]=2&quot;</span>, <span class="string">b&quot;kern&quot;</span>, <span class="number">2</span>, <span class="number">3</span>..=<span class="number">5</span>);
-    <span class="macro">test!</span>(parse_14, <span class="string">&quot;kern[3;5]=2&quot;</span>, <span class="string">b&quot;kern&quot;</span>, <span class="number">2</span>, <span class="number">3</span>..=<span class="number">5</span>);
-    <span class="macro">test!</span>(parse_15, <span class="string">&quot;kern[:-1]&quot;</span>, <span class="string">b&quot;kern&quot;</span>, <span class="number">1</span>, ..);
-    <span class="macro">test!</span>(parse_16, <span class="string">&quot;kern[-1]&quot;</span>, <span class="string">b&quot;kern&quot;</span>, <span class="number">1</span>, core::u32::MAX <span class="kw">as </span>usize..);
-    <span class="macro">test!</span>(parse_17, <span class="string">&quot;kern=on&quot;</span>, <span class="string">b&quot;kern&quot;</span>, <span class="number">1</span>, ..);
-    <span class="macro">test!</span>(parse_18, <span class="string">&quot;kern=off&quot;</span>, <span class="string">b&quot;kern&quot;</span>, <span class="number">0</span>, ..);
-    <span class="macro">test!</span>(parse_19, <span class="string">&quot;kern=oN&quot;</span>, <span class="string">b&quot;kern&quot;</span>, <span class="number">1</span>, ..);
-    <span class="macro">test!</span>(parse_20, <span class="string">&quot;kern=oFf&quot;</span>, <span class="string">b&quot;kern&quot;</span>, <span class="number">0</span>, ..);
+    <span class="macro">test!</span>(parse_01, <span class="string">"kern"</span>, <span class="string">b"kern"</span>, <span class="number">1</span>, ..);
+    <span class="macro">test!</span>(parse_02, <span class="string">"+kern"</span>, <span class="string">b"kern"</span>, <span class="number">1</span>, ..);
+    <span class="macro">test!</span>(parse_03, <span class="string">"-kern"</span>, <span class="string">b"kern"</span>, <span class="number">0</span>, ..);
+    <span class="macro">test!</span>(parse_04, <span class="string">"kern=0"</span>, <span class="string">b"kern"</span>, <span class="number">0</span>, ..);
+    <span class="macro">test!</span>(parse_05, <span class="string">"kern=1"</span>, <span class="string">b"kern"</span>, <span class="number">1</span>, ..);
+    <span class="macro">test!</span>(parse_06, <span class="string">"kern=2"</span>, <span class="string">b"kern"</span>, <span class="number">2</span>, ..);
+    <span class="macro">test!</span>(parse_07, <span class="string">"kern[]"</span>, <span class="string">b"kern"</span>, <span class="number">1</span>, ..);
+    <span class="macro">test!</span>(parse_08, <span class="string">"kern[:]"</span>, <span class="string">b"kern"</span>, <span class="number">1</span>, ..);
+    <span class="macro">test!</span>(parse_09, <span class="string">"kern[5:]"</span>, <span class="string">b"kern"</span>, <span class="number">1</span>, <span class="number">5</span>..);
+    <span class="macro">test!</span>(parse_10, <span class="string">"kern[:5]"</span>, <span class="string">b"kern"</span>, <span class="number">1</span>, ..=<span class="number">5</span>);
+    <span class="macro">test!</span>(parse_11, <span class="string">"kern[3:5]"</span>, <span class="string">b"kern"</span>, <span class="number">1</span>, <span class="number">3</span>..=<span class="number">5</span>);
+    <span class="macro">test!</span>(parse_12, <span class="string">"kern[3]"</span>, <span class="string">b"kern"</span>, <span class="number">1</span>, <span class="number">3</span>..=<span class="number">4</span>);
+    <span class="macro">test!</span>(parse_13, <span class="string">"kern[3:5]=2"</span>, <span class="string">b"kern"</span>, <span class="number">2</span>, <span class="number">3</span>..=<span class="number">5</span>);
+    <span class="macro">test!</span>(parse_14, <span class="string">"kern[3;5]=2"</span>, <span class="string">b"kern"</span>, <span class="number">2</span>, <span class="number">3</span>..=<span class="number">5</span>);
+    <span class="macro">test!</span>(parse_15, <span class="string">"kern[:-1]"</span>, <span class="string">b"kern"</span>, <span class="number">1</span>, ..);
+    <span class="macro">test!</span>(parse_16, <span class="string">"kern[-1]"</span>, <span class="string">b"kern"</span>, <span class="number">1</span>, core::u32::MAX <span class="kw">as </span>usize..);
+    <span class="macro">test!</span>(parse_17, <span class="string">"kern=on"</span>, <span class="string">b"kern"</span>, <span class="number">1</span>, ..);
+    <span class="macro">test!</span>(parse_18, <span class="string">"kern=off"</span>, <span class="string">b"kern"</span>, <span class="number">0</span>, ..);
+    <span class="macro">test!</span>(parse_19, <span class="string">"kern=oN"</span>, <span class="string">b"kern"</span>, <span class="number">1</span>, ..);
+    <span class="macro">test!</span>(parse_20, <span class="string">"kern=oFf"</span>, <span class="string">b"kern"</span>, <span class="number">0</span>, ..);
 }
 
 <span class="doccomment">/// A font variation.
@@ -1372,7 +1373,7 @@
 }
 
 <span class="kw">impl </span>core::str::FromStr <span class="kw">for </span>Variation {
-    <span class="kw">type </span><span class="prelude-val">Err </span>= <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str;
+    <span class="kw">type </span><span class="prelude-val">Err </span>= <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str;
 
     <span class="kw">fn </span>from_str(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
         <span class="kw">fn </span>parse(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;Variation&gt; {
@@ -1393,7 +1394,7 @@
                 p.consume_byte(quote)<span class="question-mark">?</span>;
             }
 
-            <span class="kw">let _ </span>= p.consume_byte(<span class="string">b&#39;=&#39;</span>);
+            <span class="kw">let _ </span>= p.consume_byte(<span class="string">b'='</span>);
             <span class="kw">let </span>value = p.consume_f32()<span class="question-mark">?</span>;
             p.skip_spaces();
 
@@ -1404,7 +1405,7 @@
             <span class="prelude-val">Some</span>(Variation { tag, value })
         }
 
-        parse(s).ok_or(<span class="string">&quot;invalid variation&quot;</span>)
+        parse(s).ok_or(<span class="string">"invalid variation"</span>)
     }
 }
 
@@ -1418,12 +1419,12 @@
 <span class="kw">impl </span>TagExt <span class="kw">for </span>Tag {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>default_script() -&gt; <span class="self">Self </span>{
-        Tag::from_bytes(<span class="string">b&quot;DFLT&quot;</span>)
+        Tag::from_bytes(<span class="string">b"DFLT"</span>)
     }
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>default_language() -&gt; <span class="self">Self </span>{
-        Tag::from_bytes(<span class="string">b&quot;dflt&quot;</span>)
+        Tag::from_bytes(<span class="string">b"dflt"</span>)
     }
 
     <span class="doccomment">/// Converts tag to lowercase.

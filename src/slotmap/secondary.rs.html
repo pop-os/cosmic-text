@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/slotmap-1.0.7/src/secondary.rs`."><title>secondary.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="slotmap" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/slotmap-1.0.7/src/secondary.rs`."><title>secondary.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="slotmap" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1767,7 +1768,7 @@
 <a href="#1767" id="1767">1767</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Contains the secondary map implementation.
 
-</span><span class="attr">#[cfg(all(nightly, any(doc, feature = <span class="string">&quot;unstable&quot;</span>)))]
+</span><span class="attr">#[cfg(all(nightly, any(doc, feature = <span class="string">"unstable"</span>)))]
 </span><span class="kw">use </span>alloc::collections::TryReserveError;
 <span class="kw">use </span>alloc::vec::Vec;
 <span class="kw">use </span>core::hint::unreachable_unchecked;
@@ -1782,7 +1783,7 @@
 <span class="kw">use super</span>::{Key, KeyData};
 <span class="kw">use </span><span class="kw">crate</span>::util::is_older_version;
 
-<span class="comment">// This representation works because we don&#39;t have to store the versions
+<span class="comment">// This representation works because we don't have to store the versions
 // of removed elements.
 </span><span class="attr">#[derive(Debug, Clone)]
 </span><span class="kw">enum </span>Slot&lt;T&gt; {
@@ -1854,7 +1855,7 @@
 ///
 /// A [`SecondaryMap`] does not leak memory even if you never remove elements.
 /// In return, when you remove a key from the primary slot map, after any insert
-/// the space associated with the removed element may be reclaimed. Don&#39;t expect
+/// the space associated with the removed element may be reclaimed. Don't expect
 /// the values associated with a removed key to stick around after an insertion
 /// has happened!
 ///
@@ -1873,8 +1874,8 @@
 /// let mut health = SecondaryMap::new();
 /// let mut ammo = SecondaryMap::new();
 ///
-/// let alice = players.insert(&quot;alice&quot;);
-/// let bob = players.insert(&quot;bob&quot;);
+/// let alice = players.insert("alice");
+/// let bob = players.insert("bob");
 ///
 /// for p in players.keys() {
 ///     health.insert(p, 100);
@@ -1909,7 +1910,7 @@
     ///
     /// The secondary map will not reallocate until it holds at least `capacity`
     /// slots. Even inserting a single key-value pair might require as many
-    /// slots as the slot map the key comes from, so it&#39;s recommended to match
+    /// slots as the slot map the key comes from, so it's recommended to match
     /// the capacity of a secondary map to its corresponding slot map.
     ///
     /// # Examples
@@ -2019,8 +2020,8 @@
     /// sec.try_set_capacity(1000).unwrap();
     /// assert!(sec.capacity() &gt;= 1000);
     /// ```
-    </span><span class="attr">#[cfg(all(nightly, any(doc, feature = <span class="string">&quot;unstable&quot;</span>)))]
-    #[cfg_attr(all(nightly, doc), doc(cfg(feature = <span class="string">&quot;unstable&quot;</span>)))]
+    </span><span class="attr">#[cfg(all(nightly, any(doc, feature = <span class="string">"unstable"</span>)))]
+    #[cfg_attr(all(nightly, doc), doc(cfg(feature = <span class="string">"unstable"</span>)))]
     </span><span class="kw">pub fn </span>try_set_capacity(<span class="kw-2">&amp;mut </span><span class="self">self</span>, new_capacity: usize) -&gt; <span class="prelude-ty">Result</span>&lt;(), TryReserveError&gt; {
         <span class="kw">let </span>new_capacity = new_capacity + <span class="number">1</span>; <span class="comment">// Sentinel.
         </span><span class="kw">if </span>new_capacity &gt; <span class="self">self</span>.slots.capacity() {
@@ -2067,7 +2068,7 @@
     /// let mut squared = SecondaryMap::new();
     /// assert_eq!(squared.insert(k, 0), None);
     /// assert_eq!(squared.insert(k, 4), Some(0));
-    /// // You don&#39;t have to use insert if the key is already in the secondary map.
+    /// // You don't have to use insert if the key is already in the secondary map.
     /// squared[k] *= squared[k];
     /// assert_eq!(squared[k], 16);
     /// ```
@@ -2087,7 +2088,7 @@
         }
 
         <span class="kw">if </span>slot.occupied() {
-            <span class="comment">// Don&#39;t replace existing newer values.
+            <span class="comment">// Don't replace existing newer values.
             </span><span class="kw">if </span>is_older_version(kd.version.get(), slot.version()) {
                 <span class="kw">return </span><span class="prelude-val">None</span>;
             }
@@ -2115,7 +2116,7 @@
     /// squared.remove(k);
     /// assert!(!squared.contains_key(k));
     ///
-    /// // It&#39;s not necessary to remove keys deleted from the primary slot map, they
+    /// // It's not necessary to remove keys deleted from the primary slot map, they
     /// // get deleted automatically when their slots are reused on a subsequent insert.
     /// squared.insert(k, 16);
     /// sm.remove(k); // Remove k from the slot map, making an empty slot.
@@ -2235,10 +2236,10 @@
     /// ```
     /// # use slotmap::*;
     /// let mut sm = SlotMap::new();
-    /// let key = sm.insert(&quot;foo&quot;);
+    /// let key = sm.insert("foo");
     /// let mut sec = SecondaryMap::new();
-    /// sec.insert(key, &quot;bar&quot;);
-    /// assert_eq!(sec.get(key), Some(&amp;&quot;bar&quot;));
+    /// sec.insert(key, "bar");
+    /// assert_eq!(sec.get(key), Some(&amp;"bar"));
     /// sec.remove(key);
     /// assert_eq!(sec.get(key), None);
     /// ```
@@ -2263,10 +2264,10 @@
     /// ```
     /// # use slotmap::*;
     /// let mut sm = SlotMap::new();
-    /// let key = sm.insert(&quot;foo&quot;);
+    /// let key = sm.insert("foo");
     /// let mut sec = SecondaryMap::new();
-    /// sec.insert(key, &quot;bar&quot;);
-    /// assert_eq!(unsafe { sec.get_unchecked(key) }, &amp;&quot;bar&quot;);
+    /// sec.insert(key, "bar");
+    /// assert_eq!(unsafe { sec.get_unchecked(key) }, &amp;"bar");
     /// sec.remove(key);
     /// // sec.get_unchecked(key) is now dangerous!
     /// ```
@@ -2283,7 +2284,7 @@
     /// ```
     /// # use slotmap::*;
     /// let mut sm = SlotMap::new();
-    /// let key = sm.insert(&quot;test&quot;);
+    /// let key = sm.insert("test");
     /// let mut sec = SecondaryMap::new();
     /// sec.insert(key, 3.5);
     /// if let Some(x) = sec.get_mut(key) {
@@ -2312,11 +2313,11 @@
     /// ```
     /// # use slotmap::*;
     /// let mut sm = SlotMap::new();
-    /// let key = sm.insert(&quot;foo&quot;);
+    /// let key = sm.insert("foo");
     /// let mut sec = SecondaryMap::new();
-    /// sec.insert(key, &quot;bar&quot;);
-    /// unsafe { *sec.get_unchecked_mut(key) = &quot;baz&quot; };
-    /// assert_eq!(sec[key], &quot;baz&quot;);
+    /// sec.insert(key, "bar");
+    /// unsafe { *sec.get_unchecked_mut(key) = "baz" };
+    /// assert_eq!(sec[key], "baz");
     /// sec.remove(key);
     /// // sec.get_unchecked_mut(key) is now dangerous!
     /// ```
@@ -2337,16 +2338,16 @@
     /// # use slotmap::*;
     /// let mut sm = SlotMap::new();
     /// let mut sec = SecondaryMap::new();
-    /// let ka = sm.insert(()); sec.insert(ka, &quot;butter&quot;);
-    /// let kb = sm.insert(()); sec.insert(kb, &quot;apples&quot;);
-    /// let kc = sm.insert(()); sec.insert(kc, &quot;charlie&quot;);
+    /// let ka = sm.insert(()); sec.insert(ka, "butter");
+    /// let kb = sm.insert(()); sec.insert(kb, "apples");
+    /// let kc = sm.insert(()); sec.insert(kc, "charlie");
     /// sec.remove(kc); // Make key c invalid.
     /// assert_eq!(sec.get_disjoint_mut([ka, kb, kc]), None); // Has invalid key.
     /// assert_eq!(sec.get_disjoint_mut([ka, ka]), None); // Not disjoint.
     /// let [a, b] = sec.get_disjoint_mut([ka, kb]).unwrap();
     /// std::mem::swap(a, b);
-    /// assert_eq!(sec[ka], &quot;apples&quot;);
-    /// assert_eq!(sec[kb], &quot;butter&quot;);
+    /// assert_eq!(sec[ka], "apples");
+    /// assert_eq!(sec[kb], "butter");
     /// ```
     </span><span class="attr">#[cfg(has_min_const_generics)]
     </span><span class="kw">pub fn </span>get_disjoint_mut&lt;<span class="kw">const </span>N: usize&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, keys: [K; N]) -&gt; <span class="prelude-ty">Option</span>&lt;[<span class="kw-2">&amp;mut </span>V; N]&gt; {
@@ -2415,12 +2416,12 @@
     /// # use slotmap::*;
     /// let mut sm = SlotMap::new();
     /// let mut sec = SecondaryMap::new();
-    /// let ka = sm.insert(()); sec.insert(ka, &quot;butter&quot;);
-    /// let kb = sm.insert(()); sec.insert(kb, &quot;apples&quot;);
+    /// let ka = sm.insert(()); sec.insert(ka, "butter");
+    /// let kb = sm.insert(()); sec.insert(kb, "apples");
     /// let [a, b] = unsafe { sec.get_disjoint_unchecked_mut([ka, kb]) };
     /// std::mem::swap(a, b);
-    /// assert_eq!(sec[ka], &quot;apples&quot;);
-    /// assert_eq!(sec[kb], &quot;butter&quot;);
+    /// assert_eq!(sec[ka], "apples");
+    /// assert_eq!(sec[kb], "butter");
     /// ```
     </span><span class="attr">#[cfg(has_min_const_generics)]
     </span><span class="kw">pub unsafe fn </span>get_disjoint_unchecked_mut&lt;<span class="kw">const </span>N: usize&gt;(
@@ -2436,7 +2437,7 @@
     }
 
     <span class="doccomment">/// An iterator visiting all key-value pairs in arbitrary order. The
-    /// iterator element type is `(K, &amp;&#39;a V)`.
+    /// iterator element type is `(K, &amp;'a V)`.
     ///
     /// This function must iterate over all slots, empty or not. In the face of
     /// many deleted elements it can be inefficient.
@@ -2452,7 +2453,7 @@
     /// let k2 = sm.insert(2); sec.insert(k2, 12);
     ///
     /// for (k, v) in sm.iter() {
-    ///     println!(&quot;key: {:?}, val: {}&quot;, k, v);
+    ///     println!("key: {:?}, val: {}", k, v);
     /// }
     /// ```
     </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Iter&lt;K, V&gt; {
@@ -2465,7 +2466,7 @@
 
     <span class="doccomment">/// An iterator visiting all key-value pairs in arbitrary order, with
     /// mutable references to the values. The iterator element type is
-    /// `(K, &amp;&#39;a mut V)`.
+    /// `(K, &amp;'a mut V)`.
     ///
     /// This function must iterate over all slots, empty or not. In the face of
     /// many deleted elements it can be inefficient.
@@ -2523,7 +2524,7 @@
     }
 
     <span class="doccomment">/// An iterator visiting all values in arbitrary order. The iterator element
-    /// type is `&amp;&#39;a V`.
+    /// type is `&amp;'a V`.
     ///
     /// This function must iterate over all slots, empty or not. In the face of
     /// many deleted elements it can be inefficient.
@@ -2547,7 +2548,7 @@
     }
 
     <span class="doccomment">/// An iterator visiting all values mutably in arbitrary order. The iterator
-    /// element type is `&amp;&#39;a mut V`.
+    /// element type is `&amp;'a mut V`.
     ///
     /// This function must iterate over all slots, empty or not. In the face of
     /// many deleted elements it can be inefficient.
@@ -2573,7 +2574,7 @@
         }
     }
 
-    <span class="doccomment">/// Gets the given key&#39;s corresponding [`Entry`] in the map for in-place
+    <span class="doccomment">/// Gets the given key's corresponding [`Entry`] in the map for in-place
     /// manipulation. May return [`None`] if the key was removed from the
     /// originating slot map.
     ///
@@ -2630,7 +2631,7 @@
     <span class="kw">fn </span>index(<span class="kw-2">&amp;</span><span class="self">self</span>, key: K) -&gt; <span class="kw-2">&amp;</span>V {
         <span class="kw">match </span><span class="self">self</span>.get(key) {
             <span class="prelude-val">Some</span>(r) =&gt; r,
-            <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;invalid SecondaryMap key used&quot;</span>),
+            <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(<span class="string">"invalid SecondaryMap key used"</span>),
         }
     }
 }
@@ -2639,7 +2640,7 @@
     <span class="kw">fn </span>index_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K) -&gt; <span class="kw-2">&amp;mut </span>V {
         <span class="kw">match </span><span class="self">self</span>.get_mut(key) {
             <span class="prelude-val">Some</span>(r) =&gt; r,
-            <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;invalid SecondaryMap key used&quot;</span>),
+            <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(<span class="string">"invalid SecondaryMap key used"</span>),
         }
     }
 }
@@ -2674,8 +2675,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V: <span class="lifetime">&#39;a </span>+ Copy&gt; Extend&lt;(K, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>V)&gt; <span class="kw">for </span>SecondaryMap&lt;K, V&gt; {
-    <span class="kw">fn </span>extend&lt;I: IntoIterator&lt;Item = (K, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>V)&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, iter: I) {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V: <span class="lifetime">'a </span>+ Copy&gt; Extend&lt;(K, <span class="kw-2">&amp;</span><span class="lifetime">'a </span>V)&gt; <span class="kw">for </span>SecondaryMap&lt;K, V&gt; {
+    <span class="kw">fn </span>extend&lt;I: IntoIterator&lt;Item = (K, <span class="kw-2">&amp;</span><span class="lifetime">'a </span>V)&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, iter: I) {
         <span class="kw">let </span>iter = iter.into_iter();
         <span class="kw">for </span>(k, v) <span class="kw">in </span>iter {
             <span class="self">self</span>.insert(k, <span class="kw-2">*</span>v);
@@ -2686,8 +2687,8 @@
 <span class="doccomment">/// A view into a occupied entry in a [`SecondaryMap`]. It is part of the
 /// [`Entry`] enum.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>OccupiedEntry&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; {
-    map: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>SecondaryMap&lt;K, V&gt;,
+</span><span class="kw">pub struct </span>OccupiedEntry&lt;<span class="lifetime">'a</span>, K: Key, V&gt; {
+    map: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>SecondaryMap&lt;K, V&gt;,
     kd: KeyData,
     _k: PhantomData&lt;<span class="kw">fn</span>(K) -&gt; K&gt;,
 }
@@ -2695,8 +2696,8 @@
 <span class="doccomment">/// A view into a vacant entry in a [`SecondaryMap`]. It is part of the
 /// [`Entry`] enum.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>VacantEntry&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; {
-    map: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>SecondaryMap&lt;K, V&gt;,
+</span><span class="kw">pub struct </span>VacantEntry&lt;<span class="lifetime">'a</span>, K: Key, V&gt; {
+    map: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>SecondaryMap&lt;K, V&gt;,
     kd: KeyData,
     _k: PhantomData&lt;<span class="kw">fn</span>(K) -&gt; K&gt;,
 }
@@ -2706,15 +2707,15 @@
 ///
 /// This `enum` is constructed using [`SecondaryMap::entry`].
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub enum </span>Entry&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; {
+</span><span class="kw">pub enum </span>Entry&lt;<span class="lifetime">'a</span>, K: Key, V&gt; {
     <span class="doccomment">/// An occupied entry.
-    </span>Occupied(OccupiedEntry&lt;<span class="lifetime">&#39;a</span>, K, V&gt;),
+    </span>Occupied(OccupiedEntry&lt;<span class="lifetime">'a</span>, K, V&gt;),
 
     <span class="doccomment">/// A vacant entry.
-    </span>Vacant(VacantEntry&lt;<span class="lifetime">&#39;a</span>, K, V&gt;),
+    </span>Vacant(VacantEntry&lt;<span class="lifetime">'a</span>, K, V&gt;),
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; Entry&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; Entry&lt;<span class="lifetime">'a</span>, K, V&gt; {
     <span class="doccomment">/// Ensures a value is in the entry by inserting the default if empty, and
     /// returns a mutable reference to the value in the entry.
     ///
@@ -2725,13 +2726,13 @@
     /// let mut sm = SlotMap::new();
     /// let mut sec = SecondaryMap::new();
     ///
-    /// let k = sm.insert(&quot;poneyland&quot;);
+    /// let k = sm.insert("poneyland");
     /// let v = sec.entry(k).unwrap().or_insert(10);
     /// assert_eq!(*v, 10);
     /// *sec.entry(k).unwrap().or_insert(1) *= 2;
     /// assert_eq!(sec[k], 20);
     /// ```
-    </span><span class="kw">pub fn </span>or_insert(<span class="self">self</span>, default: V) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>V {
+    </span><span class="kw">pub fn </span>or_insert(<span class="self">self</span>, default: V) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>V {
         <span class="self">self</span>.or_insert_with(|| default)
     }
 
@@ -2747,17 +2748,17 @@
     /// let mut sec = SecondaryMap::new();
     ///
     /// let k = sm.insert(1);
-    /// let v = sec.entry(k).unwrap().or_insert_with(|| &quot;foobar&quot;.to_string());
-    /// assert_eq!(v, &amp;&quot;foobar&quot;);
+    /// let v = sec.entry(k).unwrap().or_insert_with(|| "foobar".to_string());
+    /// assert_eq!(v, &amp;"foobar");
     /// ```
-    </span><span class="kw">pub fn </span>or_insert_with&lt;F: FnOnce() -&gt; V&gt;(<span class="self">self</span>, default: F) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>V {
+    </span><span class="kw">pub fn </span>or_insert_with&lt;F: FnOnce() -&gt; V&gt;(<span class="self">self</span>, default: F) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>V {
         <span class="kw">match </span><span class="self">self </span>{
             Entry::Occupied(x) =&gt; x.into_mut(),
             Entry::Vacant(x) =&gt; x.insert(default()),
         }
     }
 
-    <span class="doccomment">/// Returns this entry&#39;s key.
+    <span class="doccomment">/// Returns this entry's key.
     ///
     /// # Examples
     ///
@@ -2807,7 +2808,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V: Default&gt; Entry&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V: Default&gt; Entry&lt;<span class="lifetime">'a</span>, K, V&gt; {
     <span class="doccomment">/// Ensures a value is in the entry by inserting the default value if empty,
     /// and returns a mutable reference to the value in the entry.
     ///
@@ -2822,13 +2823,13 @@
     /// sec.entry(k).unwrap().or_default();
     /// assert_eq!(sec[k], None)
     /// ```
-    </span><span class="kw">pub fn </span>or_default(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>V {
+    </span><span class="kw">pub fn </span>or_default(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>V {
         <span class="self">self</span>.or_insert_with(Default::default)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; OccupiedEntry&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
-    <span class="doccomment">/// Returns this entry&#39;s key.
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; OccupiedEntry&lt;<span class="lifetime">'a</span>, K, V&gt; {
+    <span class="doccomment">/// Returns this entry's key.
     ///
     /// # Examples
     ///
@@ -2855,11 +2856,11 @@
     /// let mut sm = SlotMap::new();
     /// let mut sec = SecondaryMap::new();
     ///
-    /// let foo = sm.insert(&quot;foo&quot;);
-    /// sec.entry(foo).unwrap().or_insert(&quot;bar&quot;);
+    /// let foo = sm.insert("foo");
+    /// sec.entry(foo).unwrap().or_insert("bar");
     ///
     /// if let Some(Entry::Occupied(o)) = sec.entry(foo) {
-    ///     assert_eq!(o.remove_entry(), (foo, &quot;bar&quot;));
+    ///     assert_eq!(o.remove_entry(), (foo, "bar"));
     /// }
     /// assert_eq!(sec.contains_key(foo), false);
     /// ```
@@ -2942,11 +2943,11 @@
     /// ```
     ///
     /// [`get_mut`]: Self::get_mut
-    </span><span class="kw">pub fn </span>into_mut(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>V {
+    </span><span class="kw">pub fn </span>into_mut(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>V {
         <span class="kw">unsafe </span>{ <span class="self">self</span>.map.get_unchecked_mut(<span class="self">self</span>.kd.into()) }
     }
 
-    <span class="doccomment">/// Sets the value of the entry, and returns the entry&#39;s old value.
+    <span class="doccomment">/// Sets the value of the entry, and returns the entry's old value.
     ///
     /// # Examples
     ///
@@ -2998,7 +2999,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; VacantEntry&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; VacantEntry&lt;<span class="lifetime">'a</span>, K, V&gt; {
     <span class="doccomment">/// Gets the key that would be used when inserting a value through the
     /// [`VacantEntry`].
     ///
@@ -3021,7 +3022,7 @@
         <span class="self">self</span>.kd.into()
     }
 
-    <span class="doccomment">/// Sets the value of the entry with the [`VacantEntry`]&#39;s key, and returns
+    <span class="doccomment">/// Sets the value of the entry with the [`VacantEntry`]'s key, and returns
     /// a mutable reference to it.
     ///
     /// # Examples
@@ -3040,7 +3041,7 @@
     ///     assert_eq!(new_val, &amp;mut 3);
     /// }
     /// ```
-    </span><span class="kw">pub fn </span>insert(<span class="self">self</span>, value: V) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>V {
+    </span><span class="kw">pub fn </span>insert(<span class="self">self</span>, value: V) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>V {
         <span class="kw">let </span>slot = <span class="kw">unsafe </span>{ <span class="self">self</span>.map.slots.get_unchecked_mut(<span class="self">self</span>.kd.idx <span class="kw">as </span>usize) };
         <span class="comment">// Despite the slot being considered Vacant for this entry, it might be occupied
         // with an outdated element.
@@ -3057,8 +3058,8 @@
 ///
 /// This iterator is created by [`SecondaryMap::drain`].
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>Drain&lt;<span class="lifetime">&#39;a</span>, K: Key + <span class="lifetime">&#39;a</span>, V: <span class="lifetime">&#39;a</span>&gt; {
-    sm: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>SecondaryMap&lt;K, V&gt;,
+</span><span class="kw">pub struct </span>Drain&lt;<span class="lifetime">'a</span>, K: Key + <span class="lifetime">'a</span>, V: <span class="lifetime">'a</span>&gt; {
+    sm: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>SecondaryMap&lt;K, V&gt;,
     cur: usize,
 }
 
@@ -3077,13 +3078,13 @@
 ///
 /// This iterator is created by [`SecondaryMap::iter`].
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>Iter&lt;<span class="lifetime">&#39;a</span>, K: Key + <span class="lifetime">&#39;a</span>, V: <span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Iter&lt;<span class="lifetime">'a</span>, K: Key + <span class="lifetime">'a</span>, V: <span class="lifetime">'a</span>&gt; {
     num_left: usize,
-    slots: Enumerate&lt;core::slice::Iter&lt;<span class="lifetime">&#39;a</span>, Slot&lt;V&gt;&gt;&gt;,
+    slots: Enumerate&lt;core::slice::Iter&lt;<span class="lifetime">'a</span>, Slot&lt;V&gt;&gt;&gt;,
     _k: PhantomData&lt;<span class="kw">fn</span>(K) -&gt; K&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: <span class="lifetime">&#39;a </span>+ Key, V: <span class="lifetime">&#39;a</span>&gt; Clone <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: <span class="lifetime">'a </span>+ Key, V: <span class="lifetime">'a</span>&gt; Clone <span class="kw">for </span>Iter&lt;<span class="lifetime">'a</span>, K, V&gt; {
     <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         Iter {
             num_left: <span class="self">self</span>.num_left,
@@ -3097,9 +3098,9 @@
 ///
 /// This iterator is created by [`SecondaryMap::iter_mut`].
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>IterMut&lt;<span class="lifetime">&#39;a</span>, K: Key + <span class="lifetime">&#39;a</span>, V: <span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>IterMut&lt;<span class="lifetime">'a</span>, K: Key + <span class="lifetime">'a</span>, V: <span class="lifetime">'a</span>&gt; {
     num_left: usize,
-    slots: Enumerate&lt;core::slice::IterMut&lt;<span class="lifetime">&#39;a</span>, Slot&lt;V&gt;&gt;&gt;,
+    slots: Enumerate&lt;core::slice::IterMut&lt;<span class="lifetime">'a</span>, Slot&lt;V&gt;&gt;&gt;,
     _k: PhantomData&lt;<span class="kw">fn</span>(K) -&gt; K&gt;,
 }
 
@@ -3107,11 +3108,11 @@
 ///
 /// This iterator is created by [`SecondaryMap::keys`].
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>Keys&lt;<span class="lifetime">&#39;a</span>, K: Key + <span class="lifetime">&#39;a</span>, V: <span class="lifetime">&#39;a</span>&gt; {
-    inner: Iter&lt;<span class="lifetime">&#39;a</span>, K, V&gt;,
+</span><span class="kw">pub struct </span>Keys&lt;<span class="lifetime">'a</span>, K: Key + <span class="lifetime">'a</span>, V: <span class="lifetime">'a</span>&gt; {
+    inner: Iter&lt;<span class="lifetime">'a</span>, K, V&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: <span class="lifetime">&#39;a </span>+ Key, V: <span class="lifetime">&#39;a</span>&gt; Clone <span class="kw">for </span>Keys&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: <span class="lifetime">'a </span>+ Key, V: <span class="lifetime">'a</span>&gt; Clone <span class="kw">for </span>Keys&lt;<span class="lifetime">'a</span>, K, V&gt; {
     <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         Keys {
             inner: <span class="self">self</span>.inner.clone(),
@@ -3123,11 +3124,11 @@
 ///
 /// This iterator is created by [`SecondaryMap::values`].
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>Values&lt;<span class="lifetime">&#39;a</span>, K: Key + <span class="lifetime">&#39;a</span>, V: <span class="lifetime">&#39;a</span>&gt; {
-    inner: Iter&lt;<span class="lifetime">&#39;a</span>, K, V&gt;,
+</span><span class="kw">pub struct </span>Values&lt;<span class="lifetime">'a</span>, K: Key + <span class="lifetime">'a</span>, V: <span class="lifetime">'a</span>&gt; {
+    inner: Iter&lt;<span class="lifetime">'a</span>, K, V&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: <span class="lifetime">&#39;a </span>+ Key, V: <span class="lifetime">&#39;a</span>&gt; Clone <span class="kw">for </span>Values&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: <span class="lifetime">'a </span>+ Key, V: <span class="lifetime">'a</span>&gt; Clone <span class="kw">for </span>Values&lt;<span class="lifetime">'a</span>, K, V&gt; {
     <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         Values {
             inner: <span class="self">self</span>.inner.clone(),
@@ -3139,11 +3140,11 @@
 ///
 /// This iterator is created by [`SecondaryMap::values_mut`].
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>ValuesMut&lt;<span class="lifetime">&#39;a</span>, K: Key + <span class="lifetime">&#39;a</span>, V: <span class="lifetime">&#39;a</span>&gt; {
-    inner: IterMut&lt;<span class="lifetime">&#39;a</span>, K, V&gt;,
+</span><span class="kw">pub struct </span>ValuesMut&lt;<span class="lifetime">'a</span>, K: Key + <span class="lifetime">'a</span>, V: <span class="lifetime">'a</span>&gt; {
+    inner: IterMut&lt;<span class="lifetime">'a</span>, K, V&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; Iterator <span class="kw">for </span>Drain&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; Iterator <span class="kw">for </span>Drain&lt;<span class="lifetime">'a</span>, K, V&gt; {
     <span class="kw">type </span>Item = (K, V);
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;(K, V)&gt; {
@@ -3165,7 +3166,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; Drop <span class="kw">for </span>Drain&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; Drop <span class="kw">for </span>Drain&lt;<span class="lifetime">'a</span>, K, V&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.for_each(|_drop| {});
     }
@@ -3191,10 +3192,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; Iterator <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
-    <span class="kw">type </span>Item = (K, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>V);
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; Iterator <span class="kw">for </span>Iter&lt;<span class="lifetime">'a</span>, K, V&gt; {
+    <span class="kw">type </span>Item = (K, <span class="kw-2">&amp;</span><span class="lifetime">'a </span>V);
 
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;(K, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>V)&gt; {
+    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;(K, <span class="kw-2">&amp;</span><span class="lifetime">'a </span>V)&gt; {
         <span class="kw">while let </span><span class="prelude-val">Some</span>((idx, slot)) = <span class="self">self</span>.slots.next() {
             <span class="kw">if let </span>Occupied { value, version } = slot {
                 <span class="self">self</span>.num_left -= <span class="number">1</span>;
@@ -3211,10 +3212,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; Iterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
-    <span class="kw">type </span>Item = (K, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>V);
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; Iterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">'a</span>, K, V&gt; {
+    <span class="kw">type </span>Item = (K, <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>V);
 
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;(K, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>V)&gt; {
+    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;(K, <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>V)&gt; {
         <span class="kw">while let </span><span class="prelude-val">Some</span>((idx, slot)) = <span class="self">self</span>.slots.next() {
             <span class="kw">if let </span>Occupied { value, version } = slot {
                 <span class="kw">let </span>key = KeyData::new(idx <span class="kw">as </span>u32, version.get()).into();
@@ -3231,7 +3232,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; Iterator <span class="kw">for </span>Keys&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; Iterator <span class="kw">for </span>Keys&lt;<span class="lifetime">'a</span>, K, V&gt; {
     <span class="kw">type </span>Item = K;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;K&gt; {
@@ -3243,10 +3244,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; Iterator <span class="kw">for </span>Values&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
-    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>V;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; Iterator <span class="kw">for </span>Values&lt;<span class="lifetime">'a</span>, K, V&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>V;
 
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>V&gt; {
+    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>V&gt; {
         <span class="self">self</span>.inner.next().map(|(<span class="kw">_</span>, value)| value)
     }
 
@@ -3255,10 +3256,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; Iterator <span class="kw">for </span>ValuesMut&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {
-    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>V;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; Iterator <span class="kw">for </span>ValuesMut&lt;<span class="lifetime">'a</span>, K, V&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>V;
 
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>V&gt; {
+    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>V&gt; {
         <span class="self">self</span>.inner.next().map(|(<span class="kw">_</span>, value)| value)
     }
 
@@ -3267,18 +3268,18 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>SecondaryMap&lt;K, V&gt; {
-    <span class="kw">type </span>Item = (K, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>V);
-    <span class="kw">type </span>IntoIter = Iter&lt;<span class="lifetime">&#39;a</span>, K, V&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>SecondaryMap&lt;K, V&gt; {
+    <span class="kw">type </span>Item = (K, <span class="kw-2">&amp;</span><span class="lifetime">'a </span>V);
+    <span class="kw">type </span>IntoIter = Iter&lt;<span class="lifetime">'a</span>, K, V&gt;;
 
     <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
         <span class="self">self</span>.iter()
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>SecondaryMap&lt;K, V&gt; {
-    <span class="kw">type </span>Item = (K, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>V);
-    <span class="kw">type </span>IntoIter = IterMut&lt;<span class="lifetime">&#39;a</span>, K, V&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>SecondaryMap&lt;K, V&gt; {
+    <span class="kw">type </span>Item = (K, <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>V);
+    <span class="kw">type </span>IntoIter = IterMut&lt;<span class="lifetime">'a</span>, K, V&gt;;
 
     <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
         <span class="self">self</span>.iter_mut()
@@ -3301,24 +3302,24 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; FusedIterator <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {}
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; FusedIterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {}
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; FusedIterator <span class="kw">for </span>Keys&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {}
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; FusedIterator <span class="kw">for </span>Values&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {}
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; FusedIterator <span class="kw">for </span>ValuesMut&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {}
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; FusedIterator <span class="kw">for </span>Drain&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; FusedIterator <span class="kw">for </span>Iter&lt;<span class="lifetime">'a</span>, K, V&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; FusedIterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">'a</span>, K, V&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; FusedIterator <span class="kw">for </span>Keys&lt;<span class="lifetime">'a</span>, K, V&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; FusedIterator <span class="kw">for </span>Values&lt;<span class="lifetime">'a</span>, K, V&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; FusedIterator <span class="kw">for </span>ValuesMut&lt;<span class="lifetime">'a</span>, K, V&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; FusedIterator <span class="kw">for </span>Drain&lt;<span class="lifetime">'a</span>, K, V&gt; {}
 <span class="kw">impl</span>&lt;K: Key, V&gt; FusedIterator <span class="kw">for </span>IntoIter&lt;K, V&gt; {}
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {}
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {}
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>Keys&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {}
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>Values&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {}
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>ValuesMut&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {}
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>Drain&lt;<span class="lifetime">&#39;a</span>, K, V&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>Iter&lt;<span class="lifetime">'a</span>, K, V&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">'a</span>, K, V&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>Keys&lt;<span class="lifetime">'a</span>, K, V&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>Values&lt;<span class="lifetime">'a</span>, K, V&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>ValuesMut&lt;<span class="lifetime">'a</span>, K, V&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>Drain&lt;<span class="lifetime">'a</span>, K, V&gt; {}
 <span class="kw">impl</span>&lt;K: Key, V&gt; ExactSizeIterator <span class="kw">for </span>IntoIter&lt;K, V&gt; {}
 
 <span class="comment">// Serialization with serde.
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;serde&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"serde"</span>)]
 </span><span class="kw">mod </span>serialize {
     <span class="kw">use </span>serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 
@@ -3346,18 +3347,18 @@
         }
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, T&gt; Deserialize&lt;<span class="lifetime">&#39;de</span>&gt; <span class="kw">for </span>Slot&lt;T&gt;
+    <span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, T&gt; Deserialize&lt;<span class="lifetime">'de</span>&gt; <span class="kw">for </span>Slot&lt;T&gt;
     <span class="kw">where
-        </span>T: Deserialize&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>T: Deserialize&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="kw">fn </span>deserialize&lt;D&gt;(deserializer: D) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, D::Error&gt;
         <span class="kw">where
-            </span>D: Deserializer&lt;<span class="lifetime">&#39;de</span>&gt;,
+            </span>D: Deserializer&lt;<span class="lifetime">'de</span>&gt;,
         {
             <span class="kw">let </span>serde_slot: SerdeSlot&lt;T&gt; = Deserialize::deserialize(deserializer)<span class="question-mark">?</span>;
             <span class="kw">let </span>occupied = serde_slot.version % <span class="number">2 </span>== <span class="number">1</span>;
             <span class="kw">if </span>occupied ^ serde_slot.value.is_some() {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(de::Error::custom(<span class="kw-2">&amp;</span><span class="string">&quot;inconsistent occupation in Slot&quot;</span>));
+                <span class="kw">return </span><span class="prelude-val">Err</span>(de::Error::custom(<span class="kw-2">&amp;</span><span class="string">"inconsistent occupation in Slot"</span>));
             }
 
             <span class="prelude-val">Ok</span>(<span class="kw">match </span>serde_slot.value {
@@ -3376,19 +3377,19 @@
         }
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>, K: Key, V: Deserialize&lt;<span class="lifetime">&#39;de</span>&gt;&gt; Deserialize&lt;<span class="lifetime">&#39;de</span>&gt; <span class="kw">for </span>SecondaryMap&lt;K, V&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'de</span>, K: Key, V: Deserialize&lt;<span class="lifetime">'de</span>&gt;&gt; Deserialize&lt;<span class="lifetime">'de</span>&gt; <span class="kw">for </span>SecondaryMap&lt;K, V&gt; {
         <span class="kw">fn </span>deserialize&lt;D&gt;(deserializer: D) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, D::Error&gt;
         <span class="kw">where
-            </span>D: Deserializer&lt;<span class="lifetime">&#39;de</span>&gt;,
+            </span>D: Deserializer&lt;<span class="lifetime">'de</span>&gt;,
         {
             <span class="kw">let </span><span class="kw-2">mut </span>slots: Vec&lt;Slot&lt;V&gt;&gt; = Deserialize::deserialize(deserializer)<span class="question-mark">?</span>;
             <span class="kw">if </span>slots.len() &gt;= (u32::max_value() - <span class="number">1</span>) <span class="kw">as </span>usize {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(de::Error::custom(<span class="kw-2">&amp;</span><span class="string">&quot;too many slots&quot;</span>));
+                <span class="kw">return </span><span class="prelude-val">Err</span>(de::Error::custom(<span class="kw-2">&amp;</span><span class="string">"too many slots"</span>));
             }
 
             <span class="comment">// Ensure the first slot exists and is empty for the sentinel.
             </span><span class="kw">if </span>slots.get(<span class="number">0</span>).map_or(<span class="bool-val">true</span>, |slot| slot.occupied()) {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(de::Error::custom(<span class="kw-2">&amp;</span><span class="string">&quot;first slot not empty&quot;</span>));
+                <span class="kw">return </span><span class="prelude-val">Err</span>(de::Error::custom(<span class="kw-2">&amp;</span><span class="string">"first slot not empty"</span>));
             }
 
             slots[<span class="number">0</span>] = Slot::new_vacant();
@@ -3411,7 +3412,7 @@
 
     <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
-    <span class="attr">#[cfg(all(nightly, feature = <span class="string">&quot;unstable&quot;</span>))]
+    <span class="attr">#[cfg(all(nightly, feature = <span class="string">"unstable"</span>))]
     #[test]
     </span><span class="kw">fn </span>disjoint() {
         <span class="comment">// Intended to be run with miri to find any potential UB.
@@ -3467,9 +3468,9 @@
             <span class="kw">let </span><span class="kw-2">mut </span>sec = SecondaryMap::new();
             <span class="kw">let </span><span class="kw-2">mut </span>sm_keys = Vec::new();
 
-            <span class="attr">#[cfg(not(feature = <span class="string">&quot;serde&quot;</span>))]
+            <span class="attr">#[cfg(not(feature = <span class="string">"serde"</span>))]
             </span><span class="kw">let </span>num_ops = <span class="number">4</span>;
-            <span class="attr">#[cfg(feature = <span class="string">&quot;serde&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"serde"</span>)]
             </span><span class="kw">let </span>num_ops = <span class="number">5</span>;
 
             <span class="kw">for </span>(op, val) <span class="kw">in </span>operations {
@@ -3514,7 +3515,7 @@
                     }
 
                     <span class="comment">// Serde round-trip.
-                    </span><span class="attr">#[cfg(feature = <span class="string">&quot;serde&quot;</span>)]
+                    </span><span class="attr">#[cfg(feature = <span class="string">"serde"</span>)]
                     </span><span class="number">4 </span>=&gt; {
                         <span class="kw">let </span>ser = serde_json::to_string(<span class="kw-2">&amp;</span>sec).unwrap();
                         sec = serde_json::from_str(<span class="kw-2">&amp;</span>ser).unwrap();

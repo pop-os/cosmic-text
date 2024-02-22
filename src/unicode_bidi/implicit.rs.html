@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/unicode-bidi-0.3.15/src/implicit.rs`."><title>implicit.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="unicode_bidi" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/unicode-bidi-0.3.15/src/implicit.rs`."><title>implicit.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="unicode_bidi" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -605,9 +606,9 @@
 <span class="doccomment">/// 3.3.4 Resolving Weak Types
 ///
 /// &lt;http://www.unicode.org/reports/tr9/#Resolving_Weak_Types&gt;
-</span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
-</span><span class="kw">pub fn </span>resolve_weak&lt;<span class="lifetime">&#39;a</span>, T: TextSource&lt;<span class="lifetime">&#39;a</span>&gt; + <span class="question-mark">?</span>Sized&gt;(
-    text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T,
+</span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
+</span><span class="kw">pub fn </span>resolve_weak&lt;<span class="lifetime">'a</span>, T: TextSource&lt;<span class="lifetime">'a</span>&gt; + <span class="question-mark">?</span>Sized&gt;(
+    text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T,
     sequence: <span class="kw-2">&amp;</span>IsolatingRunSequence,
     processing_classes: <span class="kw-2">&amp;mut </span>[BidiClass],
 ) {
@@ -633,13 +634,13 @@
                 <span class="comment">// &lt;https://www.unicode.org/reports/tr9/#Retaining_Explicit_Formatting_Characters&gt;
                 // Keeps track of bn runs for W5 in case we see an ET.
                 </span>bn_run_indices.push(i);
-                <span class="comment">// BNs aren&#39;t real, skip over them.
+                <span class="comment">// BNs aren't real, skip over them.
                 </span><span class="kw">continue</span>;
             }
 
             <span class="comment">// Store the processing class of all rules before W2/W1.
             // Used to keep track of the last strong character for W2. W3 is able to insert new strong
-            // characters, so we don&#39;t want to be misled by it.
+            // characters, so we don't want to be misled by it.
             </span><span class="kw">let </span><span class="kw-2">mut </span>w2_processing_class = processing_classes[i];
 
             <span class="comment">// &lt;http://www.unicode.org/reports/tr9/#W1&gt;
@@ -730,7 +731,7 @@
 
                         <span class="comment">// W6 + &lt;https://www.unicode.org/reports/tr9/#Retaining_Explicit_Formatting_Characters&gt;
                         // We have to do this before W5 gets its grubby hands on these characters and thinks
-                        // they&#39;re part of an ET run.
+                        // they're part of an ET run.
                         // We check for ON to ensure that we had hit the W6 branch above, since this `ES | CS` match
                         // arm handles both W4 and W6.
                         </span><span class="kw">if </span>processing_classes[i] == ON {
@@ -750,8 +751,8 @@
                             }
                         }
                     } <span class="kw">else </span>{
-                        <span class="comment">// We&#39;re in the middle of a character, copy over work done for previous bytes
-                        // since it&#39;s going to be the same answer.
+                        <span class="comment">// We're in the middle of a character, copy over work done for previous bytes
+                        // since it's going to be the same answer.
                         </span>processing_classes[i] = processing_classes[i - <span class="number">1</span>];
                     }
                 }
@@ -761,7 +762,7 @@
                         EN =&gt; processing_classes[i] = EN,
                         <span class="kw">_ </span>=&gt; {
                             <span class="comment">// &lt;https://www.unicode.org/reports/tr9/#Retaining_Explicit_Formatting_Characters&gt;
-                            // If there was a BN run before this, that&#39;s now a part of this ET run.
+                            // If there was a BN run before this, that's now a part of this ET run.
                             </span>et_run_indices.extend(<span class="kw-2">&amp;</span>bn_run_indices);
 
                             <span class="comment">// In case this is followed by an EN.
@@ -779,7 +780,7 @@
             // BN runs would have already continued the loop, clear them before we get to the next one.
             </span>bn_run_indices.clear();
 
-            <span class="comment">// W6 above only deals with separators, so it doesn&#39;t change anything W5 cares about,
+            <span class="comment">// W6 above only deals with separators, so it doesn't change anything W5 cares about,
             // so we still can update this after running that part of W6.
             </span>prev_class_before_w5 = processing_classes[i];
 
@@ -787,21 +788,21 @@
             // (see above for W6 separator code)
             //
             </span><span class="kw">if </span>prev_class_before_w5 != ET {
-                <span class="comment">// W6. If we didn&#39;t find an adjacent EN, turn any ETs into ON instead.
+                <span class="comment">// W6. If we didn't find an adjacent EN, turn any ETs into ON instead.
                 </span><span class="kw">for </span>j <span class="kw">in </span><span class="kw-2">&amp;</span>et_run_indices {
                     processing_classes[<span class="kw-2">*</span>j] = ON;
                 }
                 et_run_indices.clear();
             }
 
-            <span class="comment">// We stashed this before W4/5/6 could get their grubby hands on it, and it&#39;s not
+            <span class="comment">// We stashed this before W4/5/6 could get their grubby hands on it, and it's not
             // used in the W6 terminator code below so we can update it now.
             </span>prev_class_before_w4 = class_before_w456;
         }
     }
-    <span class="comment">// Rerun this check in case we ended with a sequence of BNs (i.e., we&#39;d never
+    <span class="comment">// Rerun this check in case we ended with a sequence of BNs (i.e., we'd never
     // hit the end of the for loop above).
-    // W6. If we didn&#39;t find an adjacent EN, turn any ETs into ON instead.
+    // W6. If we didn't find an adjacent EN, turn any ETs into ON instead.
     </span><span class="kw">for </span>j <span class="kw">in </span><span class="kw-2">&amp;</span>et_run_indices {
         processing_classes[<span class="kw-2">*</span>j] = ON;
     }
@@ -832,9 +833,9 @@
 <span class="doccomment">/// 3.3.5 Resolving Neutral Types
 ///
 /// &lt;http://www.unicode.org/reports/tr9/#Resolving_Neutral_Types&gt;
-</span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
-</span><span class="kw">pub fn </span>resolve_neutral&lt;<span class="lifetime">&#39;a</span>, D: BidiDataSource, T: TextSource&lt;<span class="lifetime">&#39;a</span>&gt; + <span class="question-mark">?</span>Sized&gt;(
-    text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T,
+</span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
+</span><span class="kw">pub fn </span>resolve_neutral&lt;<span class="lifetime">'a</span>, D: BidiDataSource, T: TextSource&lt;<span class="lifetime">'a</span>&gt; + <span class="question-mark">?</span>Sized&gt;(
+    text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T,
     data_source: <span class="kw-2">&amp;</span>D,
     sequence: <span class="kw-2">&amp;</span>IsolatingRunSequence,
     levels: <span class="kw-2">&amp;</span>[Level],
@@ -859,15 +860,15 @@
     // Note: Rust ranges are interpreted as [start..end), be careful using `pair` directly
     // for indexing as it will include the opening bracket pair but not the closing one.
     </span><span class="kw">for </span>pair <span class="kw">in </span>bracket_pairs {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
         </span><span class="macro">debug_assert!</span>(
             pair.start &lt; processing_classes.len(),
-            <span class="string">&quot;identify_bracket_pairs returned a range that is out of bounds!&quot;
+            <span class="string">"identify_bracket_pairs returned a range that is out of bounds!"
         </span>);
-        <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
         </span><span class="macro">debug_assert!</span>(
             pair.end &lt; processing_classes.len(),
-            <span class="string">&quot;identify_bracket_pairs returned a range that is out of bounds!&quot;
+            <span class="string">"identify_bracket_pairs returned a range that is out of bounds!"
         </span>);
         <span class="kw">let </span><span class="kw-2">mut </span>found_e = <span class="bool-val">false</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>found_not_e = <span class="bool-val">false</span>;
@@ -881,10 +882,10 @@
         //
         </span><span class="kw">for </span>enclosed_i <span class="kw">in </span>sequence.iter_forwards_from(pair.start + start_char_len, pair.start_run) {
             <span class="kw">if </span>enclosed_i &gt;= pair.end {
-                <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
                 </span><span class="macro">debug_assert!</span>(
                     enclosed_i == pair.end,
-                    <span class="string">&quot;If we skipped past this, the iterator is broken&quot;
+                    <span class="string">"If we skipped past this, the iterator is broken"
                 </span>);
                 <span class="kw">break</span>;
             }
@@ -967,7 +968,7 @@
             <span class="comment">// &gt; Any number of characters that had original bidirectional character type NSM prior to the application of
             // &gt; W1 that immediately follow a paired bracket which changed to L or R under N0 should change to match the type of their preceding bracket.
 
-            // This rule deals with sequences of NSMs, so we can just update them all at once, we don&#39;t need to worry
+            // This rule deals with sequences of NSMs, so we can just update them all at once, we don't need to worry
             // about character boundaries. We do need to be careful to skip the full set of bytes for the parentheses characters.
             </span><span class="kw">let </span>nsm_start = pair.start + start_char_len;
             <span class="kw">for </span>idx <span class="kw">in </span>sequence.iter_forwards_from(nsm_start, pair.start_run) {
@@ -1064,8 +1065,8 @@
 /// text source.
 ///
 /// &lt;https://www.unicode.org/reports/tr9/#BD16&gt;
-</span><span class="kw">fn </span>identify_bracket_pairs&lt;<span class="lifetime">&#39;a</span>, T: TextSource&lt;<span class="lifetime">&#39;a</span>&gt; + <span class="question-mark">?</span>Sized, D: BidiDataSource&gt;(
-    text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T,
+</span><span class="kw">fn </span>identify_bracket_pairs&lt;<span class="lifetime">'a</span>, T: TextSource&lt;<span class="lifetime">'a</span>&gt; + <span class="question-mark">?</span>Sized, D: BidiDataSource&gt;(
+    text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T,
     data_source: <span class="kw-2">&amp;</span>D,
     run_sequence: <span class="kw-2">&amp;</span>IsolatingRunSequence,
     original_classes: <span class="kw-2">&amp;</span>[BidiClass],
@@ -1139,15 +1140,15 @@
 /// Returns the maximum embedding level in the paragraph.
 ///
 /// &lt;http://www.unicode.org/reports/tr9/#Resolving_Implicit_Levels&gt;
-</span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
+</span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
 </span><span class="kw">pub fn </span>resolve_levels(original_classes: <span class="kw-2">&amp;</span>[BidiClass], levels: <span class="kw-2">&amp;mut </span>[Level]) -&gt; Level {
     <span class="kw">let </span><span class="kw-2">mut </span>max_level = Level::ltr();
     <span class="macro">assert_eq!</span>(original_classes.len(), levels.len());
     <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..levels.len() {
         <span class="kw">match </span>(levels[i].is_rtl(), original_classes[i]) {
-            (<span class="bool-val">false</span>, AN) | (<span class="bool-val">false</span>, EN) =&gt; levels[i].raise(<span class="number">2</span>).expect(<span class="string">&quot;Level number error&quot;</span>),
+            (<span class="bool-val">false</span>, AN) | (<span class="bool-val">false</span>, EN) =&gt; levels[i].raise(<span class="number">2</span>).expect(<span class="string">"Level number error"</span>),
             (<span class="bool-val">false</span>, R) | (<span class="bool-val">true</span>, L) | (<span class="bool-val">true</span>, EN) | (<span class="bool-val">true</span>, AN) =&gt; {
-                levels[i].raise(<span class="number">1</span>).expect(<span class="string">&quot;Level number error&quot;</span>)
+                levels[i].raise(<span class="number">1</span>).expect(<span class="string">"Level number error"</span>)
             }
             <span class="comment">// &lt;https://www.unicode.org/reports/tr9/#Retaining_Explicit_Formatting_Characters&gt; handled here
             </span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; {}

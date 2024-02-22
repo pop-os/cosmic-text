@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/attributes.rs`."><title>attributes.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/attributes.rs`."><title>attributes.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -669,10 +670,10 @@
 <span class="kw">use </span>core::hash::{Hash, Hasher};
 
 <span class="comment">// Variations that apply to attributes.
-</span><span class="kw">const </span>WDTH: Tag = tag_from_bytes(<span class="string">b&quot;wdth&quot;</span>);
-<span class="kw">const </span>WGHT: Tag = tag_from_bytes(<span class="string">b&quot;wght&quot;</span>);
-<span class="kw">const </span>SLNT: Tag = tag_from_bytes(<span class="string">b&quot;slnt&quot;</span>);
-<span class="kw">const </span>ITAL: Tag = tag_from_bytes(<span class="string">b&quot;ital&quot;</span>);
+</span><span class="kw">const </span>WDTH: Tag = tag_from_bytes(<span class="string">b"wdth"</span>);
+<span class="kw">const </span>WGHT: Tag = tag_from_bytes(<span class="string">b"wght"</span>);
+<span class="kw">const </span>SLNT: Tag = tag_from_bytes(<span class="string">b"slnt"</span>);
+<span class="kw">const </span>ITAL: Tag = tag_from_bytes(<span class="string">b"ital"</span>);
 
 <span class="doccomment">/// Primary attributes for font classification: stretch, weight and style.
 ///
@@ -691,7 +692,7 @@
     }
 
     <span class="doccomment">/// Extracts the attributes from the specified font.
-    </span><span class="kw">pub fn </span>from_font&lt;<span class="lifetime">&#39;a</span>&gt;(font: <span class="kw-2">&amp;</span>FontRef&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>from_font&lt;<span class="lifetime">'a</span>&gt;(font: <span class="kw-2">&amp;</span>FontRef&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>attrs = <span class="self">Self</span>::from_os2(font.os2().as_ref());
         <span class="kw">let </span><span class="kw-2">mut </span>var_bits = <span class="number">0</span>;
         <span class="kw">for </span>var <span class="kw">in </span>font.variations() {
@@ -880,21 +881,21 @@
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>Attributes {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        <span class="kw">let </span><span class="kw-2">mut </span>space = <span class="string">&quot;&quot;</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>space = <span class="string">""</span>;
         <span class="kw">let </span>(stretch, weight, style) = <span class="self">self</span>.parts();
         <span class="kw">if </span>style == Style::Normal &amp;&amp; weight == Weight::NORMAL &amp;&amp; stretch == Stretch::NORMAL {
-            <span class="kw">return </span><span class="macro">write!</span>(f, <span class="string">&quot;regular&quot;</span>);
+            <span class="kw">return </span><span class="macro">write!</span>(f, <span class="string">"regular"</span>);
         }
         <span class="kw">if </span>stretch != Stretch::NORMAL {
-            <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, stretch)<span class="question-mark">?</span>;
-            space = <span class="string">&quot; &quot;</span>;
+            <span class="macro">write!</span>(f, <span class="string">"{}"</span>, stretch)<span class="question-mark">?</span>;
+            space = <span class="string">" "</span>;
         }
         <span class="kw">if </span>style != Style::Normal {
-            <span class="macro">write!</span>(f, <span class="string">&quot;{}{}&quot;</span>, space, style)<span class="question-mark">?</span>;
-            space = <span class="string">&quot; &quot;</span>;
+            <span class="macro">write!</span>(f, <span class="string">"{}{}"</span>, space, style)<span class="question-mark">?</span>;
+            space = <span class="string">" "</span>;
         }
         <span class="kw">if </span>weight != Weight::NORMAL {
-            <span class="macro">write!</span>(f, <span class="string">&quot;{}{}&quot;</span>, space, weight)<span class="question-mark">?</span>;
+            <span class="macro">write!</span>(f, <span class="string">"{}{}"</span>, space, weight)<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
     }
@@ -902,18 +903,18 @@
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Attributes {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;{:?}&quot;</span>, <span class="self">self</span>.parts())<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(f, <span class="string">"{:?}"</span>, <span class="self">self</span>.parts())<span class="question-mark">?</span>;
         <span class="kw">if </span><span class="self">self</span>.has_stretch_variation() {
-            <span class="macro">write!</span>(f, <span class="string">&quot;+wdth&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">write!</span>(f, <span class="string">"+wdth"</span>)<span class="question-mark">?</span>;
         }
         <span class="kw">if </span><span class="self">self</span>.has_weight_variation() {
-            <span class="macro">write!</span>(f, <span class="string">&quot;+wght&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">write!</span>(f, <span class="string">"+wght"</span>)<span class="question-mark">?</span>;
         }
         <span class="kw">if </span><span class="self">self</span>.has_italic_variation() {
-            <span class="macro">write!</span>(f, <span class="string">&quot;+ital&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">write!</span>(f, <span class="string">"+ital"</span>)<span class="question-mark">?</span>;
         }
         <span class="kw">if </span><span class="self">self</span>.has_oblique_variation() {
-            <span class="macro">write!</span>(f, <span class="string">&quot;+slnt&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">write!</span>(f, <span class="string">"+slnt"</span>)<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
     }
@@ -988,7 +989,7 @@
     }
 }
 
-<span class="doccomment">/// Visual style or &#39;slope&#39; of a font.
+<span class="doccomment">/// Visual style or 'slope' of a font.
 </span><span class="attr">#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 </span><span class="kw">pub enum </span>Style {
     Normal,
@@ -1001,28 +1002,28 @@
     </span><span class="kw">pub fn </span>parse(<span class="kw-2">mut </span>s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         s = s.trim();
         <span class="prelude-val">Some</span>(<span class="kw">match </span>s {
-            <span class="string">&quot;normal&quot; </span>=&gt; <span class="self">Self</span>::Normal,
-            <span class="string">&quot;italic&quot; </span>=&gt; <span class="self">Self</span>::Italic,
-            <span class="string">&quot;oblique&quot; </span>=&gt; <span class="self">Self</span>::Oblique(ObliqueAngle::from_degrees(<span class="number">14.</span>)),
+            <span class="string">"normal" </span>=&gt; <span class="self">Self</span>::Normal,
+            <span class="string">"italic" </span>=&gt; <span class="self">Self</span>::Italic,
+            <span class="string">"oblique" </span>=&gt; <span class="self">Self</span>::Oblique(ObliqueAngle::from_degrees(<span class="number">14.</span>)),
             <span class="kw">_ </span>=&gt; {
-                <span class="kw">if </span>s.starts_with(<span class="string">&quot;oblique &quot;</span>) {
+                <span class="kw">if </span>s.starts_with(<span class="string">"oblique "</span>) {
                     s = s.get(<span class="number">8</span>..)<span class="question-mark">?</span>;
-                    <span class="kw">if </span>s.ends_with(<span class="string">&quot;deg&quot;</span>) {
+                    <span class="kw">if </span>s.ends_with(<span class="string">"deg"</span>) {
                         s = s.get(..s.len() - <span class="number">3</span>)<span class="question-mark">?</span>;
                         <span class="kw">if let </span><span class="prelude-val">Ok</span>(a) = s.trim().parse::&lt;f32&gt;() {
                             <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="self">Self</span>::Oblique(ObliqueAngle::from_degrees(a)));
                         }
-                    } <span class="kw">else if </span>s.ends_with(<span class="string">&quot;grad&quot;</span>) {
+                    } <span class="kw">else if </span>s.ends_with(<span class="string">"grad"</span>) {
                         s = s.get(..s.len() - <span class="number">4</span>)<span class="question-mark">?</span>;
                         <span class="kw">if let </span><span class="prelude-val">Ok</span>(a) = s.trim().parse::&lt;f32&gt;() {
                             <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="self">Self</span>::Oblique(ObliqueAngle::from_gradians(a)));
                         }
-                    } <span class="kw">else if </span>s.ends_with(<span class="string">&quot;rad&quot;</span>) {
+                    } <span class="kw">else if </span>s.ends_with(<span class="string">"rad"</span>) {
                         s = s.get(..s.len() - <span class="number">3</span>)<span class="question-mark">?</span>;
                         <span class="kw">if let </span><span class="prelude-val">Ok</span>(a) = s.trim().parse::&lt;f32&gt;() {
                             <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="self">Self</span>::Oblique(ObliqueAngle::from_radians(a)));
                         }
-                    } <span class="kw">else if </span>s.ends_with(<span class="string">&quot;turn&quot;</span>) {
+                    } <span class="kw">else if </span>s.ends_with(<span class="string">"turn"</span>) {
                         s = s.get(..s.len() - <span class="number">4</span>)<span class="question-mark">?</span>;
                         <span class="kw">if let </span><span class="prelude-val">Ok</span>(a) = s.trim().parse::&lt;f32&gt;() {
                             <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="self">Self</span>::Oblique(ObliqueAngle::from_turns(a)));
@@ -1073,16 +1074,16 @@
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
         <span class="macro">write!</span>(
             f,
-            <span class="string">&quot;{}&quot;</span>,
+            <span class="string">"{}"</span>,
             <span class="kw">match </span><span class="self">self </span>{
-                <span class="self">Self</span>::Normal =&gt; <span class="string">&quot;normal&quot;</span>,
-                <span class="self">Self</span>::Italic =&gt; <span class="string">&quot;italic&quot;</span>,
+                <span class="self">Self</span>::Normal =&gt; <span class="string">"normal"</span>,
+                <span class="self">Self</span>::Italic =&gt; <span class="string">"italic"</span>,
                 <span class="self">Self</span>::Oblique(angle) =&gt; {
                     <span class="kw">let </span>degrees = angle.to_degrees();
                     <span class="kw">if </span>degrees == <span class="number">14. </span>{
-                        <span class="string">&quot;oblique&quot;
+                        <span class="string">"oblique"
                     </span>} <span class="kw">else </span>{
-                        <span class="kw">return </span><span class="macro">write!</span>(f, <span class="string">&quot;oblique({}deg)&quot;</span>, degrees);
+                        <span class="kw">return </span><span class="macro">write!</span>(f, <span class="string">"oblique({}deg)"</span>, degrees);
                     }
                 }
             }
@@ -1115,8 +1116,8 @@
     </span><span class="kw">pub fn </span>parse(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>s = s.trim();
         <span class="prelude-val">Some</span>(<span class="kw">match </span>s {
-            <span class="string">&quot;normal&quot; </span>=&gt; <span class="self">Self</span>::NORMAL,
-            <span class="string">&quot;bold&quot; </span>=&gt; <span class="self">Self</span>::BOLD,
+            <span class="string">"normal" </span>=&gt; <span class="self">Self</span>::NORMAL,
+            <span class="string">"bold" </span>=&gt; <span class="self">Self</span>::BOLD,
             <span class="kw">_ </span>=&gt; <span class="self">Self</span>(s.parse::&lt;u32&gt;().ok()<span class="question-mark">?</span>.min(<span class="number">1000</span>).max(<span class="number">1</span>) <span class="kw">as </span>u16),
         })
     }
@@ -1125,21 +1126,21 @@
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>Weight {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
         <span class="kw">let </span>s = <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
-            <span class="self">Self</span>::THIN =&gt; <span class="string">&quot;thin&quot;</span>,
-            <span class="self">Self</span>::EXTRA_LIGHT =&gt; <span class="string">&quot;extra-light&quot;</span>,
-            <span class="self">Self</span>::LIGHT =&gt; <span class="string">&quot;light&quot;</span>,
-            <span class="self">Self</span>::NORMAL =&gt; <span class="string">&quot;normal&quot;</span>,
-            <span class="self">Self</span>::MEDIUM =&gt; <span class="string">&quot;medium&quot;</span>,
-            <span class="self">Self</span>::SEMI_BOLD =&gt; <span class="string">&quot;semi-bold&quot;</span>,
-            <span class="self">Self</span>::BOLD =&gt; <span class="string">&quot;bold&quot;</span>,
-            <span class="self">Self</span>::EXTRA_BOLD =&gt; <span class="string">&quot;extra-bold&quot;</span>,
-            <span class="self">Self</span>::BLACK =&gt; <span class="string">&quot;black&quot;</span>,
-            <span class="kw">_ </span>=&gt; <span class="string">&quot;&quot;</span>,
+            <span class="self">Self</span>::THIN =&gt; <span class="string">"thin"</span>,
+            <span class="self">Self</span>::EXTRA_LIGHT =&gt; <span class="string">"extra-light"</span>,
+            <span class="self">Self</span>::LIGHT =&gt; <span class="string">"light"</span>,
+            <span class="self">Self</span>::NORMAL =&gt; <span class="string">"normal"</span>,
+            <span class="self">Self</span>::MEDIUM =&gt; <span class="string">"medium"</span>,
+            <span class="self">Self</span>::SEMI_BOLD =&gt; <span class="string">"semi-bold"</span>,
+            <span class="self">Self</span>::BOLD =&gt; <span class="string">"bold"</span>,
+            <span class="self">Self</span>::EXTRA_BOLD =&gt; <span class="string">"extra-bold"</span>,
+            <span class="self">Self</span>::BLACK =&gt; <span class="string">"black"</span>,
+            <span class="kw">_ </span>=&gt; <span class="string">""</span>,
         };
         <span class="kw">if </span>s.is_empty() {
-            <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.<span class="number">0</span>)
+            <span class="macro">write!</span>(f, <span class="string">"{}"</span>, <span class="self">self</span>.<span class="number">0</span>)
         } <span class="kw">else </span>{
-            <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, s)
+            <span class="macro">write!</span>(f, <span class="string">"{}"</span>, s)
         }
     }
 }
@@ -1198,16 +1199,16 @@
     </span><span class="kw">pub fn </span>parse(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>s = s.trim();
         <span class="prelude-val">Some</span>(<span class="kw">match </span>s {
-            <span class="string">&quot;ultra-condensed&quot; </span>=&gt; <span class="self">Self</span>::ULTRA_CONDENSED,
-            <span class="string">&quot;extra-condensed&quot; </span>=&gt; <span class="self">Self</span>::EXTRA_CONDENSED,
-            <span class="string">&quot;condensed&quot; </span>=&gt; <span class="self">Self</span>::CONDENSED,
-            <span class="string">&quot;semi-condensed&quot; </span>=&gt; <span class="self">Self</span>::SEMI_CONDENSED,
-            <span class="string">&quot;normal&quot; </span>=&gt; <span class="self">Self</span>::NORMAL,
-            <span class="string">&quot;semi-expanded&quot; </span>=&gt; <span class="self">Self</span>::SEMI_EXPANDED,
-            <span class="string">&quot;extra-expanded&quot; </span>=&gt; <span class="self">Self</span>::EXTRA_EXPANDED,
-            <span class="string">&quot;ultra-expanded&quot; </span>=&gt; <span class="self">Self</span>::ULTRA_EXPANDED,
+            <span class="string">"ultra-condensed" </span>=&gt; <span class="self">Self</span>::ULTRA_CONDENSED,
+            <span class="string">"extra-condensed" </span>=&gt; <span class="self">Self</span>::EXTRA_CONDENSED,
+            <span class="string">"condensed" </span>=&gt; <span class="self">Self</span>::CONDENSED,
+            <span class="string">"semi-condensed" </span>=&gt; <span class="self">Self</span>::SEMI_CONDENSED,
+            <span class="string">"normal" </span>=&gt; <span class="self">Self</span>::NORMAL,
+            <span class="string">"semi-expanded" </span>=&gt; <span class="self">Self</span>::SEMI_EXPANDED,
+            <span class="string">"extra-expanded" </span>=&gt; <span class="self">Self</span>::EXTRA_EXPANDED,
+            <span class="string">"ultra-expanded" </span>=&gt; <span class="self">Self</span>::ULTRA_EXPANDED,
             <span class="kw">_ </span>=&gt; {
-                <span class="kw">if </span>s.ends_with(<span class="string">&#39;%&#39;</span>) {
+                <span class="kw">if </span>s.ends_with(<span class="string">'%'</span>) {
                     <span class="kw">let </span>p = s.get(..s.len() - <span class="number">1</span>)<span class="question-mark">?</span>.parse::&lt;f32&gt;().ok()<span class="question-mark">?</span>;
                     <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="self">Self</span>::from_percentage(p));
                 }
@@ -1241,19 +1242,19 @@
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
         <span class="macro">write!</span>(
             f,
-            <span class="string">&quot;{}&quot;</span>,
+            <span class="string">"{}"</span>,
             <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
-                <span class="self">Self</span>::ULTRA_CONDENSED =&gt; <span class="string">&quot;ultra-condensed&quot;</span>,
-                <span class="self">Self</span>::EXTRA_CONDENSED =&gt; <span class="string">&quot;extra-condensed&quot;</span>,
-                <span class="self">Self</span>::CONDENSED =&gt; <span class="string">&quot;condensed&quot;</span>,
-                <span class="self">Self</span>::SEMI_CONDENSED =&gt; <span class="string">&quot;semi-condensed&quot;</span>,
-                <span class="self">Self</span>::NORMAL =&gt; <span class="string">&quot;normal&quot;</span>,
-                <span class="self">Self</span>::SEMI_EXPANDED =&gt; <span class="string">&quot;semi-expanded&quot;</span>,
-                <span class="self">Self</span>::EXPANDED =&gt; <span class="string">&quot;expanded&quot;</span>,
-                <span class="self">Self</span>::EXTRA_EXPANDED =&gt; <span class="string">&quot;extra-expanded&quot;</span>,
-                <span class="self">Self</span>::ULTRA_EXPANDED =&gt; <span class="string">&quot;ultra-expanded&quot;</span>,
+                <span class="self">Self</span>::ULTRA_CONDENSED =&gt; <span class="string">"ultra-condensed"</span>,
+                <span class="self">Self</span>::EXTRA_CONDENSED =&gt; <span class="string">"extra-condensed"</span>,
+                <span class="self">Self</span>::CONDENSED =&gt; <span class="string">"condensed"</span>,
+                <span class="self">Self</span>::SEMI_CONDENSED =&gt; <span class="string">"semi-condensed"</span>,
+                <span class="self">Self</span>::NORMAL =&gt; <span class="string">"normal"</span>,
+                <span class="self">Self</span>::SEMI_EXPANDED =&gt; <span class="string">"semi-expanded"</span>,
+                <span class="self">Self</span>::EXPANDED =&gt; <span class="string">"expanded"</span>,
+                <span class="self">Self</span>::EXTRA_EXPANDED =&gt; <span class="string">"extra-expanded"</span>,
+                <span class="self">Self</span>::ULTRA_EXPANDED =&gt; <span class="string">"ultra-expanded"</span>,
                 <span class="kw">_ </span>=&gt; {
-                    <span class="kw">return </span><span class="macro">write!</span>(f, <span class="string">&quot;{}%&quot;</span>, <span class="self">self</span>.to_percentage());
+                    <span class="kw">return </span><span class="macro">write!</span>(f, <span class="string">"{}%"</span>, <span class="self">self</span>.to_percentage());
                 }
             }
         )
@@ -1262,7 +1263,7 @@
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Stretch {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;Stretch({})&quot;</span>, <span class="self">self</span>.to_percentage())
+        <span class="macro">write!</span>(f, <span class="string">"Stretch({})"</span>, <span class="self">self</span>.to_percentage())
     }
 }
 

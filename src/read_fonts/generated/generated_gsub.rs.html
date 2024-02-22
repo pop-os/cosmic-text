@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.4/src/tables/../../generated/generated_gsub.rs`."><title>generated_gsub.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.5/src/tables/../../generated/generated_gsub.rs`."><title>generated_gsub.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1666,13 +1667,13 @@
     }
 }
 
-<span class="kw">impl </span>TopLevelTable <span class="kw">for </span>Gsub&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>TopLevelTable <span class="kw">for </span>Gsub&lt;<span class="lifetime">'_</span>&gt; {
     <span class="doccomment">/// `GSUB`
-    </span><span class="kw">const </span>TAG: Tag = Tag::new(<span class="string">b&quot;GSUB&quot;</span>);
+    </span><span class="kw">const </span>TAG: Tag = Tag::new(<span class="string">b"GSUB"</span>);
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>Gsub&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>Gsub&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>cursor = data.cursor();
         <span class="kw">let </span>version: MajorMinor = cursor.read()<span class="question-mark">?</span>;
         cursor.advance::&lt;Offset16&gt;();
@@ -1692,9 +1693,9 @@
 }
 
 <span class="doccomment">/// [GSUB](https://learn.microsoft.com/en-us/typography/opentype/spec/gsub#gsub-header)
-</span><span class="kw">pub type </span>Gsub&lt;<span class="lifetime">&#39;a</span>&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, GsubMarker&gt;;
+</span><span class="kw">pub type </span>Gsub&lt;<span class="lifetime">'a</span>&gt; = TableRef&lt;<span class="lifetime">'a</span>, GsubMarker&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Gsub&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Gsub&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// The major and minor version of the GSUB table, as a tuple (u16, u16)
     </span><span class="kw">pub fn </span>version(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MajorMinor {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.version_byte_range();
@@ -1708,7 +1709,7 @@
     }
 
     <span class="doccomment">/// Attempt to resolve [`script_list_offset`][Self::script_list_offset].
-    </span><span class="kw">pub fn </span>script_list(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;ScriptList&lt;<span class="lifetime">&#39;a</span>&gt;, ReadError&gt; {
+    </span><span class="kw">pub fn </span>script_list(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;ScriptList&lt;<span class="lifetime">'a</span>&gt;, ReadError&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data;
         <span class="self">self</span>.script_list_offset().resolve(data)
     }
@@ -1720,7 +1721,7 @@
     }
 
     <span class="doccomment">/// Attempt to resolve [`feature_list_offset`][Self::feature_list_offset].
-    </span><span class="kw">pub fn </span>feature_list(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;FeatureList&lt;<span class="lifetime">&#39;a</span>&gt;, ReadError&gt; {
+    </span><span class="kw">pub fn </span>feature_list(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;FeatureList&lt;<span class="lifetime">'a</span>&gt;, ReadError&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data;
         <span class="self">self</span>.feature_list_offset().resolve(data)
     }
@@ -1732,7 +1733,7 @@
     }
 
     <span class="doccomment">/// Attempt to resolve [`lookup_list_offset`][Self::lookup_list_offset].
-    </span><span class="kw">pub fn </span>lookup_list(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;SubstitutionLookupList&lt;<span class="lifetime">&#39;a</span>&gt;, ReadError&gt; {
+    </span><span class="kw">pub fn </span>lookup_list(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;SubstitutionLookupList&lt;<span class="lifetime">'a</span>&gt;, ReadError&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data;
         <span class="self">self</span>.lookup_list_offset().resolve(data)
     }
@@ -1745,35 +1746,35 @@
     }
 
     <span class="doccomment">/// Attempt to resolve [`feature_variations_offset`][Self::feature_variations_offset].
-    </span><span class="kw">pub fn </span>feature_variations(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;FeatureVariations&lt;<span class="lifetime">&#39;a</span>&gt;, ReadError&gt;&gt; {
+    </span><span class="kw">pub fn </span>feature_variations(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;FeatureVariations&lt;<span class="lifetime">'a</span>&gt;, ReadError&gt;&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data;
         <span class="self">self</span>.feature_variations_offset().map(|x| x.resolve(data))<span class="question-mark">?
     </span>}
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>Gsub&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>Gsub&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;Gsub&quot;
+        <span class="string">"Gsub"
     </span>}
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">let </span>version = <span class="self">self</span>.version();
         <span class="kw">match </span>idx {
-            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;version&quot;</span>, <span class="self">self</span>.version())),
+            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"version"</span>, <span class="self">self</span>.version())),
             <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                <span class="string">&quot;script_list_offset&quot;</span>,
+                <span class="string">"script_list_offset"</span>,
                 FieldType::offset(<span class="self">self</span>.script_list_offset(), <span class="self">self</span>.script_list()),
             )),
             <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                <span class="string">&quot;feature_list_offset&quot;</span>,
+                <span class="string">"feature_list_offset"</span>,
                 FieldType::offset(<span class="self">self</span>.feature_list_offset(), <span class="self">self</span>.feature_list()),
             )),
             <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                <span class="string">&quot;lookup_list_offset&quot;</span>,
+                <span class="string">"lookup_list_offset"</span>,
                 FieldType::offset(<span class="self">self</span>.lookup_list_offset(), <span class="self">self</span>.lookup_list()),
             )),
             <span class="number">4usize </span><span class="kw">if </span>version.compatible((<span class="number">1</span>, <span class="number">1</span>)) =&gt; <span class="prelude-val">Some</span>(Field::new(
-                <span class="string">&quot;feature_variations_offset&quot;</span>,
+                <span class="string">"feature_variations_offset"</span>,
                 FieldType::offset(
                     <span class="self">self</span>.feature_variations_offset().unwrap(),
                     <span class="self">self</span>.feature_variations().unwrap(),
@@ -1784,27 +1785,27 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>Gsub&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt;).fmt(f)
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>Gsub&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt;).fmt(f)
     }
 }
 
 <span class="doccomment">/// A [GSUB Lookup](https://learn.microsoft.com/en-us/typography/opentype/spec/gsub#gsubLookupTypeEnum) subtable.
-</span><span class="kw">pub enum </span>SubstitutionLookup&lt;<span class="lifetime">&#39;a</span>&gt; {
-    Single(Lookup&lt;<span class="lifetime">&#39;a</span>, SingleSubst&lt;<span class="lifetime">&#39;a</span>&gt;&gt;),
-    Multiple(Lookup&lt;<span class="lifetime">&#39;a</span>, MultipleSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt;&gt;),
-    Alternate(Lookup&lt;<span class="lifetime">&#39;a</span>, AlternateSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt;&gt;),
-    Ligature(Lookup&lt;<span class="lifetime">&#39;a</span>, LigatureSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt;&gt;),
-    Contextual(Lookup&lt;<span class="lifetime">&#39;a</span>, SubstitutionSequenceContext&lt;<span class="lifetime">&#39;a</span>&gt;&gt;),
-    ChainContextual(Lookup&lt;<span class="lifetime">&#39;a</span>, SubstitutionChainContext&lt;<span class="lifetime">&#39;a</span>&gt;&gt;),
-    Extension(Lookup&lt;<span class="lifetime">&#39;a</span>, ExtensionSubtable&lt;<span class="lifetime">&#39;a</span>&gt;&gt;),
-    Reverse(Lookup&lt;<span class="lifetime">&#39;a</span>, ReverseChainSingleSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt;&gt;),
+</span><span class="kw">pub enum </span>SubstitutionLookup&lt;<span class="lifetime">'a</span>&gt; {
+    Single(Lookup&lt;<span class="lifetime">'a</span>, SingleSubst&lt;<span class="lifetime">'a</span>&gt;&gt;),
+    Multiple(Lookup&lt;<span class="lifetime">'a</span>, MultipleSubstFormat1&lt;<span class="lifetime">'a</span>&gt;&gt;),
+    Alternate(Lookup&lt;<span class="lifetime">'a</span>, AlternateSubstFormat1&lt;<span class="lifetime">'a</span>&gt;&gt;),
+    Ligature(Lookup&lt;<span class="lifetime">'a</span>, LigatureSubstFormat1&lt;<span class="lifetime">'a</span>&gt;&gt;),
+    Contextual(Lookup&lt;<span class="lifetime">'a</span>, SubstitutionSequenceContext&lt;<span class="lifetime">'a</span>&gt;&gt;),
+    ChainContextual(Lookup&lt;<span class="lifetime">'a</span>, SubstitutionChainContext&lt;<span class="lifetime">'a</span>&gt;&gt;),
+    Extension(Lookup&lt;<span class="lifetime">'a</span>, ExtensionSubtable&lt;<span class="lifetime">'a</span>&gt;&gt;),
+    Reverse(Lookup&lt;<span class="lifetime">'a</span>, ReverseChainSingleSubstFormat1&lt;<span class="lifetime">'a</span>&gt;&gt;),
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>SubstitutionLookup&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(bytes: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>SubstitutionLookup&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(bytes: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span>untyped = Lookup::read(bytes)<span class="question-mark">?</span>;
         <span class="kw">match </span>untyped.lookup_type() {
             <span class="number">1 </span>=&gt; <span class="prelude-val">Ok</span>(SubstitutionLookup::Single(untyped.into_concrete())),
@@ -1820,12 +1821,12 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SubstitutionLookup&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SubstitutionLookup&lt;<span class="lifetime">'a</span>&gt; {
     <span class="attr">#[allow(dead_code)]
     </span><span class="doccomment">/// Return the inner table, removing the specific generics.
     ///
     /// This lets us return a single concrete type we can call methods on.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>of_unit_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Lookup&lt;<span class="lifetime">&#39;a</span>, ()&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>of_unit_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Lookup&lt;<span class="lifetime">'a</span>, ()&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             SubstitutionLookup::Single(inner) =&gt; inner.of_unit_type(),
             SubstitutionLookup::Multiple(inner) =&gt; inner.of_unit_type(),
@@ -1839,9 +1840,9 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SubstitutionLookup&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>dyn_inner(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>(<span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; + <span class="lifetime">&#39;a</span>) {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SubstitutionLookup&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>dyn_inner(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>(<span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt; + <span class="lifetime">'a</span>) {
         <span class="kw">match </span><span class="self">self </span>{
             SubstitutionLookup::Single(table) =&gt; table,
             SubstitutionLookup::Multiple(table) =&gt; table,
@@ -1855,9 +1856,9 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>SubstitutionLookup&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>SubstitutionLookup&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="self">self</span>.dyn_inner().get_field(idx)
     }
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
@@ -1865,21 +1866,21 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>SubstitutionLookup&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>SubstitutionLookup&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
         <span class="self">self</span>.dyn_inner().fmt(f)
     }
 }
 
 <span class="doccomment">/// LookupType 1: [Single Substitution](https://learn.microsoft.com/en-us/typography/opentype/spec/gsub#lookuptype-1-single-substitution-subtable) Subtable
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub enum </span>SingleSubst&lt;<span class="lifetime">&#39;a</span>&gt; {
-    Format1(SingleSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt;),
-    Format2(SingleSubstFormat2&lt;<span class="lifetime">&#39;a</span>&gt;),
+</span><span class="kw">pub enum </span>SingleSubst&lt;<span class="lifetime">'a</span>&gt; {
+    Format1(SingleSubstFormat1&lt;<span class="lifetime">'a</span>&gt;),
+    Format2(SingleSubstFormat2&lt;<span class="lifetime">'a</span>&gt;),
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SingleSubst&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SingleSubst&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Format identifier: format = 1
     </span><span class="kw">pub fn </span>subst_format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="kw">match </span><span class="self">self </span>{
@@ -1898,8 +1899,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>SingleSubst&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>SingleSubst&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span>format: u16 = data.read_at(<span class="number">0usize</span>)<span class="question-mark">?</span>;
         <span class="kw">match </span>format {
             SingleSubstFormat1Marker::FORMAT =&gt; <span class="prelude-val">Ok</span>(<span class="self">Self</span>::Format1(FontRead::read(data)<span class="question-mark">?</span>)),
@@ -1909,9 +1910,9 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SingleSubst&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>dyn_inner&lt;<span class="lifetime">&#39;b</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SingleSubst&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>dyn_inner&lt;<span class="lifetime">'b</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::Format1(table) =&gt; table,
             <span class="self">Self</span>::Format2(table) =&gt; table,
@@ -1919,19 +1920,19 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>SingleSubst&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>SingleSubst&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
         <span class="self">self</span>.dyn_inner().fmt(f)
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>SingleSubst&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>SingleSubst&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
         <span class="self">self</span>.dyn_inner().type_name()
     }
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="self">self</span>.dyn_inner().get_field(idx)
     }
 }
@@ -1960,8 +1961,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>SingleSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>SingleSubstFormat1&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>cursor = data.cursor();
         cursor.advance::&lt;u16&gt;();
         cursor.advance::&lt;Offset16&gt;();
@@ -1971,9 +1972,9 @@
 }
 
 <span class="doccomment">/// [Single Substitution Format 1](https://learn.microsoft.com/en-us/typography/opentype/spec/gsub#11-single-substitution-format-1)
-</span><span class="kw">pub type </span>SingleSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, SingleSubstFormat1Marker&gt;;
+</span><span class="kw">pub type </span>SingleSubstFormat1&lt;<span class="lifetime">'a</span>&gt; = TableRef&lt;<span class="lifetime">'a</span>, SingleSubstFormat1Marker&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SingleSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SingleSubstFormat1&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Format identifier: format = 1
     </span><span class="kw">pub fn </span>subst_format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.subst_format_byte_range();
@@ -1988,7 +1989,7 @@
     }
 
     <span class="doccomment">/// Attempt to resolve [`coverage_offset`][Self::coverage_offset].
-    </span><span class="kw">pub fn </span>coverage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;CoverageTable&lt;<span class="lifetime">&#39;a</span>&gt;, ReadError&gt; {
+    </span><span class="kw">pub fn </span>coverage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;CoverageTable&lt;<span class="lifetime">'a</span>&gt;, ReadError&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data;
         <span class="self">self</span>.coverage_offset().resolve(data)
     }
@@ -2000,28 +2001,28 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>SingleSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>SingleSubstFormat1&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;SingleSubstFormat1&quot;
+        <span class="string">"SingleSubstFormat1"
     </span>}
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">match </span>idx {
-            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;subst_format&quot;</span>, <span class="self">self</span>.subst_format())),
+            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"subst_format"</span>, <span class="self">self</span>.subst_format())),
             <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                <span class="string">&quot;coverage_offset&quot;</span>,
+                <span class="string">"coverage_offset"</span>,
                 FieldType::offset(<span class="self">self</span>.coverage_offset(), <span class="self">self</span>.coverage()),
             )),
-            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;delta_glyph_id&quot;</span>, <span class="self">self</span>.delta_glyph_id())),
+            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"delta_glyph_id"</span>, <span class="self">self</span>.delta_glyph_id())),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         }
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>SingleSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt;).fmt(f)
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>SingleSubstFormat1&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt;).fmt(f)
     }
 }
 
@@ -2055,8 +2056,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>SingleSubstFormat2&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>SingleSubstFormat2&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>cursor = data.cursor();
         cursor.advance::&lt;u16&gt;();
         cursor.advance::&lt;Offset16&gt;();
@@ -2070,9 +2071,9 @@
 }
 
 <span class="doccomment">/// [Single Substitution Format 2](https://learn.microsoft.com/en-us/typography/opentype/spec/gsub#12-single-substitution-format-2)
-</span><span class="kw">pub type </span>SingleSubstFormat2&lt;<span class="lifetime">&#39;a</span>&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, SingleSubstFormat2Marker&gt;;
+</span><span class="kw">pub type </span>SingleSubstFormat2&lt;<span class="lifetime">'a</span>&gt; = TableRef&lt;<span class="lifetime">'a</span>, SingleSubstFormat2Marker&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SingleSubstFormat2&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SingleSubstFormat2&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Format identifier: format = 2
     </span><span class="kw">pub fn </span>subst_format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.subst_format_byte_range();
@@ -2087,7 +2088,7 @@
     }
 
     <span class="doccomment">/// Attempt to resolve [`coverage_offset`][Self::coverage_offset].
-    </span><span class="kw">pub fn </span>coverage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;CoverageTable&lt;<span class="lifetime">&#39;a</span>&gt;, ReadError&gt; {
+    </span><span class="kw">pub fn </span>coverage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;CoverageTable&lt;<span class="lifetime">'a</span>&gt;, ReadError&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data;
         <span class="self">self</span>.coverage_offset().resolve(data)
     }
@@ -2099,27 +2100,27 @@
     }
 
     <span class="doccomment">/// Array of substitute glyph IDs — ordered by Coverage index
-    </span><span class="kw">pub fn </span>substitute_glyph_ids(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[BigEndian&lt;GlyphId&gt;] {
+    </span><span class="kw">pub fn </span>substitute_glyph_ids(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[BigEndian&lt;GlyphId&gt;] {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.substitute_glyph_ids_byte_range();
         <span class="self">self</span>.data.read_array(range).unwrap()
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>SingleSubstFormat2&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>SingleSubstFormat2&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;SingleSubstFormat2&quot;
+        <span class="string">"SingleSubstFormat2"
     </span>}
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">match </span>idx {
-            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;subst_format&quot;</span>, <span class="self">self</span>.subst_format())),
+            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"subst_format"</span>, <span class="self">self</span>.subst_format())),
             <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                <span class="string">&quot;coverage_offset&quot;</span>,
+                <span class="string">"coverage_offset"</span>,
                 FieldType::offset(<span class="self">self</span>.coverage_offset(), <span class="self">self</span>.coverage()),
             )),
-            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;glyph_count&quot;</span>, <span class="self">self</span>.glyph_count())),
+            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"glyph_count"</span>, <span class="self">self</span>.glyph_count())),
             <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                <span class="string">&quot;substitute_glyph_ids&quot;</span>,
+                <span class="string">"substitute_glyph_ids"</span>,
                 <span class="self">self</span>.substitute_glyph_ids(),
             )),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
@@ -2127,10 +2128,10 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>SingleSubstFormat2&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt;).fmt(f)
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>SingleSubstFormat2&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt;).fmt(f)
     }
 }
 
@@ -2164,8 +2165,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>MultipleSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>MultipleSubstFormat1&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>cursor = data.cursor();
         cursor.advance::&lt;u16&gt;();
         cursor.advance::&lt;Offset16&gt;();
@@ -2179,9 +2180,9 @@
 }
 
 <span class="doccomment">/// [Multiple Substitution Format 1](https://learn.microsoft.com/en-us/typography/opentype/spec/gsub#21-multiple-substitution-format-1)
-</span><span class="kw">pub type </span>MultipleSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, MultipleSubstFormat1Marker&gt;;
+</span><span class="kw">pub type </span>MultipleSubstFormat1&lt;<span class="lifetime">'a</span>&gt; = TableRef&lt;<span class="lifetime">'a</span>, MultipleSubstFormat1Marker&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; MultipleSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; MultipleSubstFormat1&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Format identifier: format = 1
     </span><span class="kw">pub fn </span>subst_format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.subst_format_byte_range();
@@ -2196,7 +2197,7 @@
     }
 
     <span class="doccomment">/// Attempt to resolve [`coverage_offset`][Self::coverage_offset].
-    </span><span class="kw">pub fn </span>coverage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;CoverageTable&lt;<span class="lifetime">&#39;a</span>&gt;, ReadError&gt; {
+    </span><span class="kw">pub fn </span>coverage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;CoverageTable&lt;<span class="lifetime">'a</span>&gt;, ReadError&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data;
         <span class="self">self</span>.coverage_offset().resolve(data)
     }
@@ -2209,36 +2210,36 @@
 
     <span class="doccomment">/// Array of offsets to Sequence tables. Offsets are from beginning
     /// of substitution subtable, ordered by Coverage index
-    </span><span class="kw">pub fn </span>sequence_offsets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[BigEndian&lt;Offset16&gt;] {
+    </span><span class="kw">pub fn </span>sequence_offsets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[BigEndian&lt;Offset16&gt;] {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.sequence_offsets_byte_range();
         <span class="self">self</span>.data.read_array(range).unwrap()
     }
 
     <span class="doccomment">/// A dynamically resolving wrapper for [`sequence_offsets`][Self::sequence_offsets].
-    </span><span class="kw">pub fn </span>sequences(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ArrayOfOffsets&lt;<span class="lifetime">&#39;a</span>, Sequence&lt;<span class="lifetime">&#39;a</span>&gt;, Offset16&gt; {
+    </span><span class="kw">pub fn </span>sequences(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ArrayOfOffsets&lt;<span class="lifetime">'a</span>, Sequence&lt;<span class="lifetime">'a</span>&gt;, Offset16&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data;
         <span class="kw">let </span>offsets = <span class="self">self</span>.sequence_offsets();
         ArrayOfOffsets::new(offsets, data, ())
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>MultipleSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>MultipleSubstFormat1&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;MultipleSubstFormat1&quot;
+        <span class="string">"MultipleSubstFormat1"
     </span>}
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">match </span>idx {
-            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;subst_format&quot;</span>, <span class="self">self</span>.subst_format())),
+            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"subst_format"</span>, <span class="self">self</span>.subst_format())),
             <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                <span class="string">&quot;coverage_offset&quot;</span>,
+                <span class="string">"coverage_offset"</span>,
                 FieldType::offset(<span class="self">self</span>.coverage_offset(), <span class="self">self</span>.coverage()),
             )),
-            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;sequence_count&quot;</span>, <span class="self">self</span>.sequence_count())),
+            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"sequence_count"</span>, <span class="self">self</span>.sequence_count())),
             <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>({
                 <span class="kw">let </span>data = <span class="self">self</span>.data;
                 Field::new(
-                    <span class="string">&quot;sequence_offsets&quot;</span>,
+                    <span class="string">"sequence_offsets"</span>,
                     FieldType::array_of_offsets(
                         better_type_name::&lt;Sequence&gt;(),
                         <span class="self">self</span>.sequence_offsets(),
@@ -2254,10 +2255,10 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>MultipleSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt;).fmt(f)
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>MultipleSubstFormat1&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt;).fmt(f)
     }
 }
 
@@ -2279,8 +2280,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>Sequence&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>Sequence&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>cursor = data.cursor();
         <span class="kw">let </span>glyph_count: u16 = cursor.read()<span class="question-mark">?</span>;
         <span class="kw">let </span>substitute_glyph_ids_byte_len = glyph_count <span class="kw">as </span>usize * GlyphId::RAW_BYTE_LEN;
@@ -2292,9 +2293,9 @@
 }
 
 <span class="doccomment">/// Part of [MultipleSubstFormat1]
-</span><span class="kw">pub type </span>Sequence&lt;<span class="lifetime">&#39;a</span>&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, SequenceMarker&gt;;
+</span><span class="kw">pub type </span>Sequence&lt;<span class="lifetime">'a</span>&gt; = TableRef&lt;<span class="lifetime">'a</span>, SequenceMarker&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Sequence&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Sequence&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Number of glyph IDs in the substituteGlyphIDs array. This must
     /// always be greater than 0.
     </span><span class="kw">pub fn </span>glyph_count(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
@@ -2303,22 +2304,22 @@
     }
 
     <span class="doccomment">/// String of glyph IDs to substitute
-    </span><span class="kw">pub fn </span>substitute_glyph_ids(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[BigEndian&lt;GlyphId&gt;] {
+    </span><span class="kw">pub fn </span>substitute_glyph_ids(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[BigEndian&lt;GlyphId&gt;] {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.substitute_glyph_ids_byte_range();
         <span class="self">self</span>.data.read_array(range).unwrap()
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>Sequence&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>Sequence&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;Sequence&quot;
+        <span class="string">"Sequence"
     </span>}
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">match </span>idx {
-            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;glyph_count&quot;</span>, <span class="self">self</span>.glyph_count())),
+            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"glyph_count"</span>, <span class="self">self</span>.glyph_count())),
             <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                <span class="string">&quot;substitute_glyph_ids&quot;</span>,
+                <span class="string">"substitute_glyph_ids"</span>,
                 <span class="self">self</span>.substitute_glyph_ids(),
             )),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
@@ -2326,10 +2327,10 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>Sequence&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt;).fmt(f)
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>Sequence&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt;).fmt(f)
     }
 }
 
@@ -2363,8 +2364,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>AlternateSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>AlternateSubstFormat1&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>cursor = data.cursor();
         cursor.advance::&lt;u16&gt;();
         cursor.advance::&lt;Offset16&gt;();
@@ -2378,9 +2379,9 @@
 }
 
 <span class="doccomment">/// [Alternate Substitution Format 1](https://learn.microsoft.com/en-us/typography/opentype/spec/gsub#31-alternate-substitution-format-1)
-</span><span class="kw">pub type </span>AlternateSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, AlternateSubstFormat1Marker&gt;;
+</span><span class="kw">pub type </span>AlternateSubstFormat1&lt;<span class="lifetime">'a</span>&gt; = TableRef&lt;<span class="lifetime">'a</span>, AlternateSubstFormat1Marker&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; AlternateSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; AlternateSubstFormat1&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Format identifier: format = 1
     </span><span class="kw">pub fn </span>subst_format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.subst_format_byte_range();
@@ -2395,7 +2396,7 @@
     }
 
     <span class="doccomment">/// Attempt to resolve [`coverage_offset`][Self::coverage_offset].
-    </span><span class="kw">pub fn </span>coverage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;CoverageTable&lt;<span class="lifetime">&#39;a</span>&gt;, ReadError&gt; {
+    </span><span class="kw">pub fn </span>coverage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;CoverageTable&lt;<span class="lifetime">'a</span>&gt;, ReadError&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data;
         <span class="self">self</span>.coverage_offset().resolve(data)
     }
@@ -2408,39 +2409,39 @@
 
     <span class="doccomment">/// Array of offsets to AlternateSet tables. Offsets are from
     /// beginning of substitution subtable, ordered by Coverage index
-    </span><span class="kw">pub fn </span>alternate_set_offsets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[BigEndian&lt;Offset16&gt;] {
+    </span><span class="kw">pub fn </span>alternate_set_offsets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[BigEndian&lt;Offset16&gt;] {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.alternate_set_offsets_byte_range();
         <span class="self">self</span>.data.read_array(range).unwrap()
     }
 
     <span class="doccomment">/// A dynamically resolving wrapper for [`alternate_set_offsets`][Self::alternate_set_offsets].
-    </span><span class="kw">pub fn </span>alternate_sets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ArrayOfOffsets&lt;<span class="lifetime">&#39;a</span>, AlternateSet&lt;<span class="lifetime">&#39;a</span>&gt;, Offset16&gt; {
+    </span><span class="kw">pub fn </span>alternate_sets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ArrayOfOffsets&lt;<span class="lifetime">'a</span>, AlternateSet&lt;<span class="lifetime">'a</span>&gt;, Offset16&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data;
         <span class="kw">let </span>offsets = <span class="self">self</span>.alternate_set_offsets();
         ArrayOfOffsets::new(offsets, data, ())
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>AlternateSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>AlternateSubstFormat1&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;AlternateSubstFormat1&quot;
+        <span class="string">"AlternateSubstFormat1"
     </span>}
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">match </span>idx {
-            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;subst_format&quot;</span>, <span class="self">self</span>.subst_format())),
+            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"subst_format"</span>, <span class="self">self</span>.subst_format())),
             <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                <span class="string">&quot;coverage_offset&quot;</span>,
+                <span class="string">"coverage_offset"</span>,
                 FieldType::offset(<span class="self">self</span>.coverage_offset(), <span class="self">self</span>.coverage()),
             )),
             <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                <span class="string">&quot;alternate_set_count&quot;</span>,
+                <span class="string">"alternate_set_count"</span>,
                 <span class="self">self</span>.alternate_set_count(),
             )),
             <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>({
                 <span class="kw">let </span>data = <span class="self">self</span>.data;
                 Field::new(
-                    <span class="string">&quot;alternate_set_offsets&quot;</span>,
+                    <span class="string">"alternate_set_offsets"</span>,
                     FieldType::array_of_offsets(
                         better_type_name::&lt;AlternateSet&gt;(),
                         <span class="self">self</span>.alternate_set_offsets(),
@@ -2456,10 +2457,10 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>AlternateSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt;).fmt(f)
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>AlternateSubstFormat1&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt;).fmt(f)
     }
 }
 
@@ -2481,8 +2482,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>AlternateSet&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>AlternateSet&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>cursor = data.cursor();
         <span class="kw">let </span>glyph_count: u16 = cursor.read()<span class="question-mark">?</span>;
         <span class="kw">let </span>alternate_glyph_ids_byte_len = glyph_count <span class="kw">as </span>usize * GlyphId::RAW_BYTE_LEN;
@@ -2494,9 +2495,9 @@
 }
 
 <span class="doccomment">/// Part of [AlternateSubstFormat1]
-</span><span class="kw">pub type </span>AlternateSet&lt;<span class="lifetime">&#39;a</span>&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, AlternateSetMarker&gt;;
+</span><span class="kw">pub type </span>AlternateSet&lt;<span class="lifetime">'a</span>&gt; = TableRef&lt;<span class="lifetime">'a</span>, AlternateSetMarker&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; AlternateSet&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; AlternateSet&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Number of glyph IDs in the alternateGlyphIDs array
     </span><span class="kw">pub fn </span>glyph_count(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.glyph_count_byte_range();
@@ -2504,22 +2505,22 @@
     }
 
     <span class="doccomment">/// Array of alternate glyph IDs, in arbitrary order
-    </span><span class="kw">pub fn </span>alternate_glyph_ids(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[BigEndian&lt;GlyphId&gt;] {
+    </span><span class="kw">pub fn </span>alternate_glyph_ids(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[BigEndian&lt;GlyphId&gt;] {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.alternate_glyph_ids_byte_range();
         <span class="self">self</span>.data.read_array(range).unwrap()
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>AlternateSet&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>AlternateSet&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;AlternateSet&quot;
+        <span class="string">"AlternateSet"
     </span>}
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">match </span>idx {
-            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;glyph_count&quot;</span>, <span class="self">self</span>.glyph_count())),
+            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"glyph_count"</span>, <span class="self">self</span>.glyph_count())),
             <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                <span class="string">&quot;alternate_glyph_ids&quot;</span>,
+                <span class="string">"alternate_glyph_ids"</span>,
                 <span class="self">self</span>.alternate_glyph_ids(),
             )),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
@@ -2527,10 +2528,10 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>AlternateSet&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt;).fmt(f)
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>AlternateSet&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt;).fmt(f)
     }
 }
 
@@ -2564,8 +2565,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>LigatureSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>LigatureSubstFormat1&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>cursor = data.cursor();
         cursor.advance::&lt;u16&gt;();
         cursor.advance::&lt;Offset16&gt;();
@@ -2579,9 +2580,9 @@
 }
 
 <span class="doccomment">/// [Ligature Substitution Format 1](https://learn.microsoft.com/en-us/typography/opentype/spec/gsub#41-ligature-substitution-format-1)
-</span><span class="kw">pub type </span>LigatureSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, LigatureSubstFormat1Marker&gt;;
+</span><span class="kw">pub type </span>LigatureSubstFormat1&lt;<span class="lifetime">'a</span>&gt; = TableRef&lt;<span class="lifetime">'a</span>, LigatureSubstFormat1Marker&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; LigatureSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; LigatureSubstFormat1&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Format identifier: format = 1
     </span><span class="kw">pub fn </span>subst_format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.subst_format_byte_range();
@@ -2596,7 +2597,7 @@
     }
 
     <span class="doccomment">/// Attempt to resolve [`coverage_offset`][Self::coverage_offset].
-    </span><span class="kw">pub fn </span>coverage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;CoverageTable&lt;<span class="lifetime">&#39;a</span>&gt;, ReadError&gt; {
+    </span><span class="kw">pub fn </span>coverage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;CoverageTable&lt;<span class="lifetime">'a</span>&gt;, ReadError&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data;
         <span class="self">self</span>.coverage_offset().resolve(data)
     }
@@ -2609,36 +2610,36 @@
 
     <span class="doccomment">/// Array of offsets to LigatureSet tables. Offsets are from
     /// beginning of substitution subtable, ordered by Coverage index
-    </span><span class="kw">pub fn </span>ligature_set_offsets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[BigEndian&lt;Offset16&gt;] {
+    </span><span class="kw">pub fn </span>ligature_set_offsets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[BigEndian&lt;Offset16&gt;] {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.ligature_set_offsets_byte_range();
         <span class="self">self</span>.data.read_array(range).unwrap()
     }
 
     <span class="doccomment">/// A dynamically resolving wrapper for [`ligature_set_offsets`][Self::ligature_set_offsets].
-    </span><span class="kw">pub fn </span>ligature_sets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ArrayOfOffsets&lt;<span class="lifetime">&#39;a</span>, LigatureSet&lt;<span class="lifetime">&#39;a</span>&gt;, Offset16&gt; {
+    </span><span class="kw">pub fn </span>ligature_sets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ArrayOfOffsets&lt;<span class="lifetime">'a</span>, LigatureSet&lt;<span class="lifetime">'a</span>&gt;, Offset16&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data;
         <span class="kw">let </span>offsets = <span class="self">self</span>.ligature_set_offsets();
         ArrayOfOffsets::new(offsets, data, ())
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>LigatureSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>LigatureSubstFormat1&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;LigatureSubstFormat1&quot;
+        <span class="string">"LigatureSubstFormat1"
     </span>}
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">match </span>idx {
-            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;subst_format&quot;</span>, <span class="self">self</span>.subst_format())),
+            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"subst_format"</span>, <span class="self">self</span>.subst_format())),
             <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                <span class="string">&quot;coverage_offset&quot;</span>,
+                <span class="string">"coverage_offset"</span>,
                 FieldType::offset(<span class="self">self</span>.coverage_offset(), <span class="self">self</span>.coverage()),
             )),
-            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;ligature_set_count&quot;</span>, <span class="self">self</span>.ligature_set_count())),
+            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"ligature_set_count"</span>, <span class="self">self</span>.ligature_set_count())),
             <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>({
                 <span class="kw">let </span>data = <span class="self">self</span>.data;
                 Field::new(
-                    <span class="string">&quot;ligature_set_offsets&quot;</span>,
+                    <span class="string">"ligature_set_offsets"</span>,
                     FieldType::array_of_offsets(
                         better_type_name::&lt;LigatureSet&gt;(),
                         <span class="self">self</span>.ligature_set_offsets(),
@@ -2654,10 +2655,10 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>LigatureSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt;).fmt(f)
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>LigatureSubstFormat1&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt;).fmt(f)
     }
 }
 
@@ -2679,8 +2680,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>LigatureSet&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>LigatureSet&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>cursor = data.cursor();
         <span class="kw">let </span>ligature_count: u16 = cursor.read()<span class="question-mark">?</span>;
         <span class="kw">let </span>ligature_offsets_byte_len = ligature_count <span class="kw">as </span>usize * Offset16::RAW_BYTE_LEN;
@@ -2692,9 +2693,9 @@
 }
 
 <span class="doccomment">/// Part of [LigatureSubstFormat1]
-</span><span class="kw">pub type </span>LigatureSet&lt;<span class="lifetime">&#39;a</span>&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, LigatureSetMarker&gt;;
+</span><span class="kw">pub type </span>LigatureSet&lt;<span class="lifetime">'a</span>&gt; = TableRef&lt;<span class="lifetime">'a</span>, LigatureSetMarker&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; LigatureSet&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; LigatureSet&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Number of Ligature tables
     </span><span class="kw">pub fn </span>ligature_count(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.ligature_count_byte_range();
@@ -2703,31 +2704,31 @@
 
     <span class="doccomment">/// Array of offsets to Ligature tables. Offsets are from beginning
     /// of LigatureSet table, ordered by preference.
-    </span><span class="kw">pub fn </span>ligature_offsets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[BigEndian&lt;Offset16&gt;] {
+    </span><span class="kw">pub fn </span>ligature_offsets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[BigEndian&lt;Offset16&gt;] {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.ligature_offsets_byte_range();
         <span class="self">self</span>.data.read_array(range).unwrap()
     }
 
     <span class="doccomment">/// A dynamically resolving wrapper for [`ligature_offsets`][Self::ligature_offsets].
-    </span><span class="kw">pub fn </span>ligatures(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ArrayOfOffsets&lt;<span class="lifetime">&#39;a</span>, Ligature&lt;<span class="lifetime">&#39;a</span>&gt;, Offset16&gt; {
+    </span><span class="kw">pub fn </span>ligatures(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ArrayOfOffsets&lt;<span class="lifetime">'a</span>, Ligature&lt;<span class="lifetime">'a</span>&gt;, Offset16&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data;
         <span class="kw">let </span>offsets = <span class="self">self</span>.ligature_offsets();
         ArrayOfOffsets::new(offsets, data, ())
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>LigatureSet&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>LigatureSet&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;LigatureSet&quot;
+        <span class="string">"LigatureSet"
     </span>}
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">match </span>idx {
-            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;ligature_count&quot;</span>, <span class="self">self</span>.ligature_count())),
+            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"ligature_count"</span>, <span class="self">self</span>.ligature_count())),
             <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>({
                 <span class="kw">let </span>data = <span class="self">self</span>.data;
                 Field::new(
-                    <span class="string">&quot;ligature_offsets&quot;</span>,
+                    <span class="string">"ligature_offsets"</span>,
                     FieldType::array_of_offsets(
                         better_type_name::&lt;Ligature&gt;(),
                         <span class="self">self</span>.ligature_offsets(),
@@ -2743,10 +2744,10 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>LigatureSet&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt;).fmt(f)
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>LigatureSet&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt;).fmt(f)
     }
 }
 
@@ -2772,8 +2773,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>Ligature&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>Ligature&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>cursor = data.cursor();
         cursor.advance::&lt;GlyphId&gt;();
         <span class="kw">let </span>component_count: u16 = cursor.read()<span class="question-mark">?</span>;
@@ -2787,9 +2788,9 @@
 }
 
 <span class="doccomment">/// Part of [LigatureSubstFormat1]
-</span><span class="kw">pub type </span>Ligature&lt;<span class="lifetime">&#39;a</span>&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, LigatureMarker&gt;;
+</span><span class="kw">pub type </span>Ligature&lt;<span class="lifetime">'a</span>&gt; = TableRef&lt;<span class="lifetime">'a</span>, LigatureMarker&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Ligature&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Ligature&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// glyph ID of ligature to substitute
     </span><span class="kw">pub fn </span>ligature_glyph(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; GlyphId {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.ligature_glyph_byte_range();
@@ -2804,23 +2805,23 @@
 
     <span class="doccomment">/// Array of component glyph IDs — start with the second
     /// component, ordered in writing direction
-    </span><span class="kw">pub fn </span>component_glyph_ids(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[BigEndian&lt;GlyphId&gt;] {
+    </span><span class="kw">pub fn </span>component_glyph_ids(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[BigEndian&lt;GlyphId&gt;] {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.component_glyph_ids_byte_range();
         <span class="self">self</span>.data.read_array(range).unwrap()
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>Ligature&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>Ligature&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;Ligature&quot;
+        <span class="string">"Ligature"
     </span>}
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">match </span>idx {
-            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;ligature_glyph&quot;</span>, <span class="self">self</span>.ligature_glyph())),
-            <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;component_count&quot;</span>, <span class="self">self</span>.component_count())),
+            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"ligature_glyph"</span>, <span class="self">self</span>.ligature_glyph())),
+            <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"component_count"</span>, <span class="self">self</span>.component_count())),
             <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                <span class="string">&quot;component_glyph_ids&quot;</span>,
+                <span class="string">"component_glyph_ids"</span>,
                 <span class="self">self</span>.component_glyph_ids(),
             )),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
@@ -2828,10 +2829,10 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>Ligature&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt;).fmt(f)
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>Ligature&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt;).fmt(f)
     }
 }
 
@@ -2869,8 +2870,8 @@
 
 <span class="kw">impl</span>&lt;T&gt; Copy <span class="kw">for </span>ExtensionSubstFormat1Marker&lt;T&gt; {}
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>ExtensionSubstFormat1&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>ExtensionSubstFormat1&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>cursor = data.cursor();
         cursor.advance::&lt;u16&gt;();
         cursor.advance::&lt;u16&gt;();
@@ -2881,9 +2882,9 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ExtensionSubstFormat1&lt;<span class="lifetime">&#39;a</span>, ()&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ExtensionSubstFormat1&lt;<span class="lifetime">'a</span>, ()&gt; {
     <span class="attr">#[allow(dead_code)]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>into_concrete&lt;T&gt;(<span class="self">self</span>) -&gt; ExtensionSubstFormat1&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>into_concrete&lt;T&gt;(<span class="self">self</span>) -&gt; ExtensionSubstFormat1&lt;<span class="lifetime">'a</span>, T&gt; {
         <span class="kw">let </span>TableRef { data, .. } = <span class="self">self</span>;
         TableRef {
             shape: ExtensionSubstFormat1Marker {
@@ -2894,10 +2895,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; ExtensionSubstFormat1&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; ExtensionSubstFormat1&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="attr">#[allow(dead_code)]
     </span><span class="doccomment">/// Replace the specific generic type on this implementation with `()`
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>of_unit_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ExtensionSubstFormat1&lt;<span class="lifetime">&#39;a</span>, ()&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>of_unit_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ExtensionSubstFormat1&lt;<span class="lifetime">'a</span>, ()&gt; {
         <span class="kw">let </span>TableRef { data, .. } = <span class="self">self</span>;
         TableRef {
             shape: ExtensionSubstFormat1Marker {
@@ -2909,9 +2910,9 @@
 }
 
 <span class="doccomment">/// [Extension Substitution Subtable Format 1](https://learn.microsoft.com/en-us/typography/opentype/spec/gsub#71-extension-substitution-subtable-format-1)
-</span><span class="kw">pub type </span>ExtensionSubstFormat1&lt;<span class="lifetime">&#39;a</span>, T&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, ExtensionSubstFormat1Marker&lt;T&gt;&gt;;
+</span><span class="kw">pub type </span>ExtensionSubstFormat1&lt;<span class="lifetime">'a</span>, T&gt; = TableRef&lt;<span class="lifetime">'a</span>, ExtensionSubstFormat1Marker&lt;T&gt;&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; ExtensionSubstFormat1&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; ExtensionSubstFormat1&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="doccomment">/// Format identifier. Set to 1.
     </span><span class="kw">pub fn </span>subst_format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.subst_format_byte_range();
@@ -2936,27 +2937,27 @@
     <span class="doccomment">/// Attempt to resolve [`extension_offset`][Self::extension_offset].
     </span><span class="kw">pub fn </span>extension(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;T, ReadError&gt;
     <span class="kw">where
-        </span>T: FontRead&lt;<span class="lifetime">&#39;a</span>&gt;,
+        </span>T: FontRead&lt;<span class="lifetime">'a</span>&gt;,
     {
         <span class="kw">let </span>data = <span class="self">self</span>.data;
         <span class="self">self</span>.extension_offset().resolve(data)
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: FontRead&lt;<span class="lifetime">&#39;a</span>&gt; + SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; + <span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>ExtensionSubstFormat1&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: FontRead&lt;<span class="lifetime">'a</span>&gt; + SomeTable&lt;<span class="lifetime">'a</span>&gt; + <span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>ExtensionSubstFormat1&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;ExtensionSubstFormat1&quot;
+        <span class="string">"ExtensionSubstFormat1"
     </span>}
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">match </span>idx {
-            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;subst_format&quot;</span>, <span class="self">self</span>.subst_format())),
+            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"subst_format"</span>, <span class="self">self</span>.subst_format())),
             <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                <span class="string">&quot;extension_lookup_type&quot;</span>,
+                <span class="string">"extension_lookup_type"</span>,
                 <span class="self">self</span>.extension_lookup_type(),
             )),
             <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                <span class="string">&quot;extension_offset&quot;</span>,
+                <span class="string">"extension_offset"</span>,
                 FieldType::offset(<span class="self">self</span>.extension_offset(), <span class="self">self</span>.extension()),
             )),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
@@ -2964,26 +2965,26 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: FontRead&lt;<span class="lifetime">&#39;a</span>&gt; + SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; + <span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>ExtensionSubstFormat1&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt;).fmt(f)
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: FontRead&lt;<span class="lifetime">'a</span>&gt; + SomeTable&lt;<span class="lifetime">'a</span>&gt; + <span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>ExtensionSubstFormat1&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt;).fmt(f)
     }
 }
 
 <span class="doccomment">/// A [GSUB Extension Substitution](https://learn.microsoft.com/en-us/typography/opentype/spec/gsub#ES) subtable
-</span><span class="kw">pub enum </span>ExtensionSubtable&lt;<span class="lifetime">&#39;a</span>&gt; {
-    Single(ExtensionSubstFormat1&lt;<span class="lifetime">&#39;a</span>, SingleSubst&lt;<span class="lifetime">&#39;a</span>&gt;&gt;),
-    Multiple(ExtensionSubstFormat1&lt;<span class="lifetime">&#39;a</span>, MultipleSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt;&gt;),
-    Alternate(ExtensionSubstFormat1&lt;<span class="lifetime">&#39;a</span>, AlternateSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt;&gt;),
-    Ligature(ExtensionSubstFormat1&lt;<span class="lifetime">&#39;a</span>, LigatureSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt;&gt;),
-    Contextual(ExtensionSubstFormat1&lt;<span class="lifetime">&#39;a</span>, SubstitutionSequenceContext&lt;<span class="lifetime">&#39;a</span>&gt;&gt;),
-    ChainContextual(ExtensionSubstFormat1&lt;<span class="lifetime">&#39;a</span>, SubstitutionChainContext&lt;<span class="lifetime">&#39;a</span>&gt;&gt;),
-    Reverse(ExtensionSubstFormat1&lt;<span class="lifetime">&#39;a</span>, ReverseChainSingleSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt;&gt;),
+</span><span class="kw">pub enum </span>ExtensionSubtable&lt;<span class="lifetime">'a</span>&gt; {
+    Single(ExtensionSubstFormat1&lt;<span class="lifetime">'a</span>, SingleSubst&lt;<span class="lifetime">'a</span>&gt;&gt;),
+    Multiple(ExtensionSubstFormat1&lt;<span class="lifetime">'a</span>, MultipleSubstFormat1&lt;<span class="lifetime">'a</span>&gt;&gt;),
+    Alternate(ExtensionSubstFormat1&lt;<span class="lifetime">'a</span>, AlternateSubstFormat1&lt;<span class="lifetime">'a</span>&gt;&gt;),
+    Ligature(ExtensionSubstFormat1&lt;<span class="lifetime">'a</span>, LigatureSubstFormat1&lt;<span class="lifetime">'a</span>&gt;&gt;),
+    Contextual(ExtensionSubstFormat1&lt;<span class="lifetime">'a</span>, SubstitutionSequenceContext&lt;<span class="lifetime">'a</span>&gt;&gt;),
+    ChainContextual(ExtensionSubstFormat1&lt;<span class="lifetime">'a</span>, SubstitutionChainContext&lt;<span class="lifetime">'a</span>&gt;&gt;),
+    Reverse(ExtensionSubstFormat1&lt;<span class="lifetime">'a</span>, ReverseChainSingleSubstFormat1&lt;<span class="lifetime">'a</span>&gt;&gt;),
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>ExtensionSubtable&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(bytes: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>ExtensionSubtable&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(bytes: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span>untyped = ExtensionSubstFormat1::read(bytes)<span class="question-mark">?</span>;
         <span class="kw">match </span>untyped.extension_lookup_type() {
             <span class="number">1 </span>=&gt; <span class="prelude-val">Ok</span>(ExtensionSubtable::Single(untyped.into_concrete())),
@@ -2998,12 +2999,12 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ExtensionSubtable&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ExtensionSubtable&lt;<span class="lifetime">'a</span>&gt; {
     <span class="attr">#[allow(dead_code)]
     </span><span class="doccomment">/// Return the inner table, removing the specific generics.
     ///
     /// This lets us return a single concrete type we can call methods on.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>of_unit_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ExtensionSubstFormat1&lt;<span class="lifetime">&#39;a</span>, ()&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>of_unit_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ExtensionSubstFormat1&lt;<span class="lifetime">'a</span>, ()&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             ExtensionSubtable::Single(inner) =&gt; inner.of_unit_type(),
             ExtensionSubtable::Multiple(inner) =&gt; inner.of_unit_type(),
@@ -3016,9 +3017,9 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ExtensionSubtable&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>dyn_inner(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>(<span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; + <span class="lifetime">&#39;a</span>) {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ExtensionSubtable&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>dyn_inner(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>(<span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt; + <span class="lifetime">'a</span>) {
         <span class="kw">match </span><span class="self">self </span>{
             ExtensionSubtable::Single(table) =&gt; table,
             ExtensionSubtable::Multiple(table) =&gt; table,
@@ -3031,9 +3032,9 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>ExtensionSubtable&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>ExtensionSubtable&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="self">self</span>.dyn_inner().get_field(idx)
     }
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
@@ -3041,9 +3042,9 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>ExtensionSubtable&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>ExtensionSubtable&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
         <span class="self">self</span>.dyn_inner().fmt(f)
     }
 }
@@ -3096,8 +3097,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>ReverseChainSingleSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>ReverseChainSingleSubstFormat1&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>cursor = data.cursor();
         cursor.advance::&lt;u16&gt;();
         cursor.advance::&lt;Offset16&gt;();
@@ -3121,9 +3122,9 @@
 }
 
 <span class="doccomment">/// [Reverse Chaining Contextual Single Substitution Format 1](https://learn.microsoft.com/en-us/typography/opentype/spec/gsub#81-reverse-chaining-contextual-single-substitution-format-1-coverage-based-glyph-contexts)
-</span><span class="kw">pub type </span>ReverseChainSingleSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, ReverseChainSingleSubstFormat1Marker&gt;;
+</span><span class="kw">pub type </span>ReverseChainSingleSubstFormat1&lt;<span class="lifetime">'a</span>&gt; = TableRef&lt;<span class="lifetime">'a</span>, ReverseChainSingleSubstFormat1Marker&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ReverseChainSingleSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ReverseChainSingleSubstFormat1&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Format identifier: format = 1
     </span><span class="kw">pub fn </span>subst_format(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.subst_format_byte_range();
@@ -3138,7 +3139,7 @@
     }
 
     <span class="doccomment">/// Attempt to resolve [`coverage_offset`][Self::coverage_offset].
-    </span><span class="kw">pub fn </span>coverage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;CoverageTable&lt;<span class="lifetime">&#39;a</span>&gt;, ReadError&gt; {
+    </span><span class="kw">pub fn </span>coverage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;CoverageTable&lt;<span class="lifetime">'a</span>&gt;, ReadError&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data;
         <span class="self">self</span>.coverage_offset().resolve(data)
     }
@@ -3151,13 +3152,13 @@
 
     <span class="doccomment">/// Array of offsets to coverage tables in backtrack sequence, in
     /// glyph sequence order.
-    </span><span class="kw">pub fn </span>backtrack_coverage_offsets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[BigEndian&lt;Offset16&gt;] {
+    </span><span class="kw">pub fn </span>backtrack_coverage_offsets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[BigEndian&lt;Offset16&gt;] {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.backtrack_coverage_offsets_byte_range();
         <span class="self">self</span>.data.read_array(range).unwrap()
     }
 
     <span class="doccomment">/// A dynamically resolving wrapper for [`backtrack_coverage_offsets`][Self::backtrack_coverage_offsets].
-    </span><span class="kw">pub fn </span>backtrack_coverages(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ArrayOfOffsets&lt;<span class="lifetime">&#39;a</span>, CoverageTable&lt;<span class="lifetime">&#39;a</span>&gt;, Offset16&gt; {
+    </span><span class="kw">pub fn </span>backtrack_coverages(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ArrayOfOffsets&lt;<span class="lifetime">'a</span>, CoverageTable&lt;<span class="lifetime">'a</span>&gt;, Offset16&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data;
         <span class="kw">let </span>offsets = <span class="self">self</span>.backtrack_coverage_offsets();
         ArrayOfOffsets::new(offsets, data, ())
@@ -3171,13 +3172,13 @@
 
     <span class="doccomment">/// Array of offsets to coverage tables in lookahead sequence, in
     /// glyph sequence order.
-    </span><span class="kw">pub fn </span>lookahead_coverage_offsets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[BigEndian&lt;Offset16&gt;] {
+    </span><span class="kw">pub fn </span>lookahead_coverage_offsets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[BigEndian&lt;Offset16&gt;] {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.lookahead_coverage_offsets_byte_range();
         <span class="self">self</span>.data.read_array(range).unwrap()
     }
 
     <span class="doccomment">/// A dynamically resolving wrapper for [`lookahead_coverage_offsets`][Self::lookahead_coverage_offsets].
-    </span><span class="kw">pub fn </span>lookahead_coverages(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ArrayOfOffsets&lt;<span class="lifetime">&#39;a</span>, CoverageTable&lt;<span class="lifetime">&#39;a</span>&gt;, Offset16&gt; {
+    </span><span class="kw">pub fn </span>lookahead_coverages(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ArrayOfOffsets&lt;<span class="lifetime">'a</span>, CoverageTable&lt;<span class="lifetime">'a</span>&gt;, Offset16&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data;
         <span class="kw">let </span>offsets = <span class="self">self</span>.lookahead_coverage_offsets();
         ArrayOfOffsets::new(offsets, data, ())
@@ -3190,32 +3191,32 @@
     }
 
     <span class="doccomment">/// Array of substitute glyph IDs — ordered by Coverage index.
-    </span><span class="kw">pub fn </span>substitute_glyph_ids(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[BigEndian&lt;GlyphId&gt;] {
+    </span><span class="kw">pub fn </span>substitute_glyph_ids(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[BigEndian&lt;GlyphId&gt;] {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.substitute_glyph_ids_byte_range();
         <span class="self">self</span>.data.read_array(range).unwrap()
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>ReverseChainSingleSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>ReverseChainSingleSubstFormat1&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;ReverseChainSingleSubstFormat1&quot;
+        <span class="string">"ReverseChainSingleSubstFormat1"
     </span>}
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">match </span>idx {
-            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;subst_format&quot;</span>, <span class="self">self</span>.subst_format())),
+            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"subst_format"</span>, <span class="self">self</span>.subst_format())),
             <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                <span class="string">&quot;coverage_offset&quot;</span>,
+                <span class="string">"coverage_offset"</span>,
                 FieldType::offset(<span class="self">self</span>.coverage_offset(), <span class="self">self</span>.coverage()),
             )),
             <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                <span class="string">&quot;backtrack_glyph_count&quot;</span>,
+                <span class="string">"backtrack_glyph_count"</span>,
                 <span class="self">self</span>.backtrack_glyph_count(),
             )),
             <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>({
                 <span class="kw">let </span>data = <span class="self">self</span>.data;
                 Field::new(
-                    <span class="string">&quot;backtrack_coverage_offsets&quot;</span>,
+                    <span class="string">"backtrack_coverage_offsets"</span>,
                     FieldType::array_of_offsets(
                         better_type_name::&lt;CoverageTable&gt;(),
                         <span class="self">self</span>.backtrack_coverage_offsets(),
@@ -3227,13 +3228,13 @@
                 )
             }),
             <span class="number">4usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                <span class="string">&quot;lookahead_glyph_count&quot;</span>,
+                <span class="string">"lookahead_glyph_count"</span>,
                 <span class="self">self</span>.lookahead_glyph_count(),
             )),
             <span class="number">5usize </span>=&gt; <span class="prelude-val">Some</span>({
                 <span class="kw">let </span>data = <span class="self">self</span>.data;
                 Field::new(
-                    <span class="string">&quot;lookahead_coverage_offsets&quot;</span>,
+                    <span class="string">"lookahead_coverage_offsets"</span>,
                     FieldType::array_of_offsets(
                         better_type_name::&lt;CoverageTable&gt;(),
                         <span class="self">self</span>.lookahead_coverage_offsets(),
@@ -3244,9 +3245,9 @@
                     ),
                 )
             }),
-            <span class="number">6usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;glyph_count&quot;</span>, <span class="self">self</span>.glyph_count())),
+            <span class="number">6usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"glyph_count"</span>, <span class="self">self</span>.glyph_count())),
             <span class="number">7usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(
-                <span class="string">&quot;substitute_glyph_ids&quot;</span>,
+                <span class="string">"substitute_glyph_ids"</span>,
                 <span class="self">self</span>.substitute_glyph_ids(),
             )),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
@@ -3254,10 +3255,10 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>ReverseChainSingleSubstFormat1&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt;).fmt(f)
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>ReverseChainSingleSubstFormat1&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt;).fmt(f)
     }
 }
 </code></pre></div></section></main></body></html>

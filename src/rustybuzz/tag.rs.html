@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustybuzz-0.12.1/src/tag.rs`."><title>tag.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustybuzz" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustybuzz-0.12.1/src/tag.rs`."><title>tag.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustybuzz" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -686,17 +687,17 @@
     <span class="kw">let </span><span class="kw-2">mut </span>languages = SmallVec::new();
 
     <span class="kw">let </span><span class="kw-2">mut </span>private_use_subtag = <span class="prelude-val">None</span>;
-    <span class="kw">let </span><span class="kw-2">mut </span>prefix = <span class="string">&quot;&quot;</span>;
+    <span class="kw">let </span><span class="kw-2">mut </span>prefix = <span class="string">""</span>;
     <span class="kw">if let </span><span class="prelude-val">Some</span>(language) = language {
         <span class="kw">let </span>language = language.as_str();
-        <span class="kw">if </span>language.starts_with(<span class="string">&quot;x-&quot;</span>) {
+        <span class="kw">if </span>language.starts_with(<span class="string">"x-"</span>) {
             private_use_subtag = <span class="prelude-val">Some</span>(language);
         } <span class="kw">else </span>{
             <span class="kw">let </span>bytes = language.as_bytes();
             <span class="kw">let </span><span class="kw-2">mut </span>i = <span class="number">1</span>;
             <span class="kw">while </span>i &lt; bytes.len() {
-                <span class="kw">if </span>bytes.get(i - <span class="number">1</span>) == <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="string">b&#39;-&#39;</span>) &amp;&amp; bytes.get(i + <span class="number">1</span>) == <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="string">b&#39;-&#39;</span>) {
-                    <span class="kw">if </span>bytes[i] == <span class="string">b&#39;x&#39; </span>{
+                <span class="kw">if </span>bytes.get(i - <span class="number">1</span>) == <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="string">b'-'</span>) &amp;&amp; bytes.get(i + <span class="number">1</span>) == <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="string">b'-'</span>) {
+                    <span class="kw">if </span>bytes[i] == <span class="string">b'x' </span>{
                         private_use_subtag = <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>language[i..]);
                         <span class="kw">if </span>prefix.is_empty() {
                             prefix = <span class="kw-2">&amp;</span>language[..i - <span class="number">1</span>];
@@ -718,14 +719,14 @@
 
         needs_script = !parse_private_use_subtag(
             private_use_subtag,
-            <span class="string">&quot;-hbsc&quot;</span>,
+            <span class="string">"-hbsc"</span>,
             u8::to_ascii_lowercase,
             <span class="kw-2">&amp;mut </span>scripts,
         );
 
         <span class="kw">let </span>needs_language = !parse_private_use_subtag(
             private_use_subtag,
-            <span class="string">&quot;-hbot&quot;</span>,
+            <span class="string">"-hbot"</span>,
             u8::to_ascii_uppercase,
             <span class="kw-2">&amp;mut </span>languages,
         );
@@ -786,8 +787,8 @@
 </span>}
 
 <span class="kw">fn </span>lang_cmp(s1: <span class="kw-2">&amp;</span>str, s2: <span class="kw-2">&amp;</span>str) -&gt; core::cmp::Ordering {
-    <span class="kw">let </span>da = s1.find(<span class="string">&#39;-&#39;</span>).unwrap_or(s1.len());
-    <span class="kw">let </span>db = s2.find(<span class="string">&#39;-&#39;</span>).unwrap_or(s2.len());
+    <span class="kw">let </span>da = s1.find(<span class="string">'-'</span>).unwrap_or(s1.len());
+    <span class="kw">let </span>db = s2.find(<span class="string">'-'</span>).unwrap_or(s2.len());
     <span class="kw">let </span>n = core::cmp::max(da, db);
     <span class="kw">let </span>ea = core::cmp::min(n, s1.len());
     <span class="kw">let </span>eb = core::cmp::min(n, s2.len());
@@ -805,10 +806,10 @@
     <span class="kw">let </span><span class="kw-2">mut </span>sublang = language;
 
     <span class="comment">// Find a language matching in the first component.
-    </span><span class="kw">if let </span><span class="prelude-val">Some</span>(i) = language.find(<span class="string">&#39;-&#39;</span>) {
+    </span><span class="kw">if let </span><span class="prelude-val">Some</span>(i) = language.find(<span class="string">'-'</span>) {
         <span class="comment">// If there is an extended language tag, use it.
         </span><span class="kw">if </span>language.len() &gt;= <span class="number">6 </span>{
-            <span class="kw">let </span>extlang = <span class="kw">match </span>language[i + <span class="number">1</span>..].find(<span class="string">&#39;-&#39;</span>) {
+            <span class="kw">let </span>extlang = <span class="kw">match </span>language[i + <span class="number">1</span>..].find(<span class="string">'-'</span>) {
                 <span class="prelude-val">Some</span>(idx) =&gt; idx == <span class="number">3</span>,
                 <span class="prelude-val">None </span>=&gt; language.len() - i - <span class="number">1 </span>== <span class="number">3</span>,
             };
@@ -854,10 +855,10 @@
 <span class="kw">fn </span>all_tags_from_script(script: <span class="prelude-ty">Option</span>&lt;Script&gt;, tags: <span class="kw-2">&amp;mut </span>ThreeTags) {
     <span class="kw">if let </span><span class="prelude-val">Some</span>(script) = script {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(tag) = new_tag_from_script(script) {
-            <span class="comment">// Script::Myanmar maps to &#39;mym2&#39;, but there is no &#39;mym3&#39;.
-            </span><span class="kw">if </span>tag != Tag::from_bytes(<span class="string">b&quot;mym2&quot;</span>) {
+            <span class="comment">// Script::Myanmar maps to 'mym2', but there is no 'mym3'.
+            </span><span class="kw">if </span>tag != Tag::from_bytes(<span class="string">b"mym2"</span>) {
                 <span class="kw">let </span><span class="kw-2">mut </span>tag3 = tag.to_bytes();
-                tag3[<span class="number">3</span>] = <span class="string">b&#39;3&#39;</span>;
+                tag3[<span class="number">3</span>] = <span class="string">b'3'</span>;
                 tags.push(Tag::from_bytes(<span class="kw-2">&amp;</span>tag3));
             }
 
@@ -874,16 +875,16 @@
 
 <span class="kw">fn </span>new_tag_from_script(script: Script) -&gt; <span class="prelude-ty">Option</span>&lt;Tag&gt; {
     <span class="kw">match </span>script {
-        script::BENGALI =&gt; <span class="prelude-val">Some</span>(Tag::from_bytes(<span class="string">b&quot;bng2&quot;</span>)),
-        script::DEVANAGARI =&gt; <span class="prelude-val">Some</span>(Tag::from_bytes(<span class="string">b&quot;dev2&quot;</span>)),
-        script::GUJARATI =&gt; <span class="prelude-val">Some</span>(Tag::from_bytes(<span class="string">b&quot;gjr2&quot;</span>)),
-        script::GURMUKHI =&gt; <span class="prelude-val">Some</span>(Tag::from_bytes(<span class="string">b&quot;gur2&quot;</span>)),
-        script::KANNADA =&gt; <span class="prelude-val">Some</span>(Tag::from_bytes(<span class="string">b&quot;knd2&quot;</span>)),
-        script::MALAYALAM =&gt; <span class="prelude-val">Some</span>(Tag::from_bytes(<span class="string">b&quot;mlm2&quot;</span>)),
-        script::ORIYA =&gt; <span class="prelude-val">Some</span>(Tag::from_bytes(<span class="string">b&quot;ory2&quot;</span>)),
-        script::TAMIL =&gt; <span class="prelude-val">Some</span>(Tag::from_bytes(<span class="string">b&quot;tml2&quot;</span>)),
-        script::TELUGU =&gt; <span class="prelude-val">Some</span>(Tag::from_bytes(<span class="string">b&quot;tel2&quot;</span>)),
-        script::MYANMAR =&gt; <span class="prelude-val">Some</span>(Tag::from_bytes(<span class="string">b&quot;mym2&quot;</span>)),
+        script::BENGALI =&gt; <span class="prelude-val">Some</span>(Tag::from_bytes(<span class="string">b"bng2"</span>)),
+        script::DEVANAGARI =&gt; <span class="prelude-val">Some</span>(Tag::from_bytes(<span class="string">b"dev2"</span>)),
+        script::GUJARATI =&gt; <span class="prelude-val">Some</span>(Tag::from_bytes(<span class="string">b"gjr2"</span>)),
+        script::GURMUKHI =&gt; <span class="prelude-val">Some</span>(Tag::from_bytes(<span class="string">b"gur2"</span>)),
+        script::KANNADA =&gt; <span class="prelude-val">Some</span>(Tag::from_bytes(<span class="string">b"knd2"</span>)),
+        script::MALAYALAM =&gt; <span class="prelude-val">Some</span>(Tag::from_bytes(<span class="string">b"mlm2"</span>)),
+        script::ORIYA =&gt; <span class="prelude-val">Some</span>(Tag::from_bytes(<span class="string">b"ory2"</span>)),
+        script::TAMIL =&gt; <span class="prelude-val">Some</span>(Tag::from_bytes(<span class="string">b"tml2"</span>)),
+        script::TELUGU =&gt; <span class="prelude-val">Some</span>(Tag::from_bytes(<span class="string">b"tel2"</span>)),
+        script::MYANMAR =&gt; <span class="prelude-val">Some</span>(Tag::from_bytes(<span class="string">b"mym2"</span>)),
         <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
     }
 }
@@ -891,16 +892,16 @@
 <span class="kw">fn </span>old_tag_from_script(script: Script) -&gt; Tag {
     <span class="comment">// This seems to be accurate as of end of 2012.
     </span><span class="kw">match </span>script {
-        <span class="comment">// Katakana and Hiragana both map to &#39;kana&#39;.
-        </span>script::HIRAGANA =&gt; Tag::from_bytes(<span class="string">b&quot;kana&quot;</span>),
+        <span class="comment">// Katakana and Hiragana both map to 'kana'.
+        </span>script::HIRAGANA =&gt; Tag::from_bytes(<span class="string">b"kana"</span>),
 
         <span class="comment">// Spaces at the end are preserved, unlike ISO 15924.
-        </span>script::LAO =&gt; Tag::from_bytes(<span class="string">b&quot;lao &quot;</span>),
-        script::YI =&gt; Tag::from_bytes(<span class="string">b&quot;yi  &quot;</span>),
+        </span>script::LAO =&gt; Tag::from_bytes(<span class="string">b"lao "</span>),
+        script::YI =&gt; Tag::from_bytes(<span class="string">b"yi  "</span>),
         <span class="comment">// Unicode-5.0 additions.
-        </span>script::NKO =&gt; Tag::from_bytes(<span class="string">b&quot;nko &quot;</span>),
+        </span>script::NKO =&gt; Tag::from_bytes(<span class="string">b"nko "</span>),
         <span class="comment">// Unicode-5.1 additions.
-        </span>script::VAI =&gt; Tag::from_bytes(<span class="string">b&quot;vai &quot;</span>),
+        </span>script::VAI =&gt; Tag::from_bytes(<span class="string">b"vai "</span>),
 
         <span class="comment">// Else, just change first char to lowercase and return.
         </span><span class="kw">_ </span>=&gt; Tag(script.tag().as_u32() | <span class="number">0x20000000</span>),
@@ -918,16 +919,16 @@
 
     <span class="kw">fn </span>new_tag_to_script(tag: Tag) -&gt; <span class="prelude-ty">Option</span>&lt;Script&gt; {
         <span class="kw">match </span><span class="kw-2">&amp;</span>tag.to_bytes() {
-            <span class="string">b&quot;bng2&quot; </span>=&gt; <span class="prelude-val">Some</span>(script::BENGALI),
-            <span class="string">b&quot;dev2&quot; </span>=&gt; <span class="prelude-val">Some</span>(script::DEVANAGARI),
-            <span class="string">b&quot;gjr2&quot; </span>=&gt; <span class="prelude-val">Some</span>(script::GUJARATI),
-            <span class="string">b&quot;gur2&quot; </span>=&gt; <span class="prelude-val">Some</span>(script::GURMUKHI),
-            <span class="string">b&quot;knd2&quot; </span>=&gt; <span class="prelude-val">Some</span>(script::KANNADA),
-            <span class="string">b&quot;mlm2&quot; </span>=&gt; <span class="prelude-val">Some</span>(script::MALAYALAM),
-            <span class="string">b&quot;ory2&quot; </span>=&gt; <span class="prelude-val">Some</span>(script::ORIYA),
-            <span class="string">b&quot;tml2&quot; </span>=&gt; <span class="prelude-val">Some</span>(script::TAMIL),
-            <span class="string">b&quot;tel2&quot; </span>=&gt; <span class="prelude-val">Some</span>(script::TELUGU),
-            <span class="string">b&quot;mym2&quot; </span>=&gt; <span class="prelude-val">Some</span>(script::MYANMAR),
+            <span class="string">b"bng2" </span>=&gt; <span class="prelude-val">Some</span>(script::BENGALI),
+            <span class="string">b"dev2" </span>=&gt; <span class="prelude-val">Some</span>(script::DEVANAGARI),
+            <span class="string">b"gjr2" </span>=&gt; <span class="prelude-val">Some</span>(script::GUJARATI),
+            <span class="string">b"gur2" </span>=&gt; <span class="prelude-val">Some</span>(script::GURMUKHI),
+            <span class="string">b"knd2" </span>=&gt; <span class="prelude-val">Some</span>(script::KANNADA),
+            <span class="string">b"mlm2" </span>=&gt; <span class="prelude-val">Some</span>(script::MALAYALAM),
+            <span class="string">b"ory2" </span>=&gt; <span class="prelude-val">Some</span>(script::ORIYA),
+            <span class="string">b"tml2" </span>=&gt; <span class="prelude-val">Some</span>(script::TAMIL),
+            <span class="string">b"tel2" </span>=&gt; <span class="prelude-val">Some</span>(script::TELUGU),
+            <span class="string">b"mym2" </span>=&gt; <span class="prelude-val">Some</span>(script::MYANMAR),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Some</span>(script::UNKNOWN),
         }
     }
@@ -942,11 +943,11 @@
         <span class="comment">// This side of the conversion is fully algorithmic.
 
         // Any spaces at the end of the tag are replaced by repeating the last
-        // letter.  Eg &#39;nko &#39; -&gt; &#39;Nkoo&#39;
-        </span><span class="kw">if </span>bytes[<span class="number">2</span>] == <span class="string">b&#39; &#39; </span>{
+        // letter.  Eg 'nko ' -&gt; 'Nkoo'
+        </span><span class="kw">if </span>bytes[<span class="number">2</span>] == <span class="string">b' ' </span>{
             bytes[<span class="number">2</span>] = bytes[<span class="number">1</span>];
         }
-        <span class="kw">if </span>bytes[<span class="number">3</span>] == <span class="string">b&#39; &#39; </span>{
+        <span class="kw">if </span>bytes[<span class="number">3</span>] == <span class="string">b' ' </span>{
             bytes[<span class="number">3</span>] = bytes[<span class="number">2</span>];
         }
 
@@ -958,9 +959,9 @@
 
     <span class="kw">fn </span>tag_to_script(tag: Tag) -&gt; <span class="prelude-ty">Option</span>&lt;Script&gt; {
         <span class="kw">let </span>bytes = tag.to_bytes();
-        <span class="kw">if </span>bytes[<span class="number">3</span>] == <span class="string">b&#39;2&#39; </span>|| bytes[<span class="number">3</span>] == <span class="string">b&#39;3&#39; </span>{
+        <span class="kw">if </span>bytes[<span class="number">3</span>] == <span class="string">b'2' </span>|| bytes[<span class="number">3</span>] == <span class="string">b'3' </span>{
             <span class="kw">let </span><span class="kw-2">mut </span>tag2 = bytes;
-            tag2[<span class="number">3</span>] = <span class="string">b&#39;2&#39;</span>;
+            tag2[<span class="number">3</span>] = <span class="string">b'2'</span>;
             <span class="kw">return </span>new_tag_to_script(Tag::from_bytes(<span class="kw-2">&amp;</span>tag2));
         }
 
@@ -982,61 +983,61 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>tag_to_uppercase() {
-        <span class="macro">assert_eq!</span>(Tag::from_bytes(<span class="string">b&quot;abcd&quot;</span>).to_uppercase(), Tag::from_bytes(<span class="string">b&quot;ABCD&quot;</span>));
-        <span class="macro">assert_eq!</span>(Tag::from_bytes(<span class="string">b&quot;abc &quot;</span>).to_uppercase(), Tag::from_bytes(<span class="string">b&quot;ABC &quot;</span>));
-        <span class="macro">assert_eq!</span>(Tag::from_bytes(<span class="string">b&quot;ABCD&quot;</span>).to_uppercase(), Tag::from_bytes(<span class="string">b&quot;ABCD&quot;</span>));
+        <span class="macro">assert_eq!</span>(Tag::from_bytes(<span class="string">b"abcd"</span>).to_uppercase(), Tag::from_bytes(<span class="string">b"ABCD"</span>));
+        <span class="macro">assert_eq!</span>(Tag::from_bytes(<span class="string">b"abc "</span>).to_uppercase(), Tag::from_bytes(<span class="string">b"ABC "</span>));
+        <span class="macro">assert_eq!</span>(Tag::from_bytes(<span class="string">b"ABCD"</span>).to_uppercase(), Tag::from_bytes(<span class="string">b"ABCD"</span>));
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>tag_to_lowercase() {
-        <span class="macro">assert_eq!</span>(Tag::from_bytes(<span class="string">b&quot;abcd&quot;</span>).to_lowercase(), Tag::from_bytes(<span class="string">b&quot;abcd&quot;</span>));
-        <span class="macro">assert_eq!</span>(Tag::from_bytes(<span class="string">b&quot;abc &quot;</span>).to_lowercase(), Tag::from_bytes(<span class="string">b&quot;abc &quot;</span>));
-        <span class="macro">assert_eq!</span>(Tag::from_bytes(<span class="string">b&quot;ABCD&quot;</span>).to_lowercase(), Tag::from_bytes(<span class="string">b&quot;abcd&quot;</span>));
+        <span class="macro">assert_eq!</span>(Tag::from_bytes(<span class="string">b"abcd"</span>).to_lowercase(), Tag::from_bytes(<span class="string">b"abcd"</span>));
+        <span class="macro">assert_eq!</span>(Tag::from_bytes(<span class="string">b"abc "</span>).to_lowercase(), Tag::from_bytes(<span class="string">b"abc "</span>));
+        <span class="macro">assert_eq!</span>(Tag::from_bytes(<span class="string">b"ABCD"</span>).to_lowercase(), Tag::from_bytes(<span class="string">b"abcd"</span>));
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>script_degenerate() {
-        <span class="macro">assert_eq!</span>(Tag::from_bytes(<span class="string">b&quot;DFLT&quot;</span>), Tag::default_script());
+        <span class="macro">assert_eq!</span>(Tag::from_bytes(<span class="string">b"DFLT"</span>), Tag::default_script());
 
-        <span class="comment">// Hiragana and Katakana both map to &#39;kana&#39;.
-        </span>test_simple_tags(<span class="string">&quot;kana&quot;</span>, script::KATAKANA);
+        <span class="comment">// Hiragana and Katakana both map to 'kana'.
+        </span>test_simple_tags(<span class="string">"kana"</span>, script::KATAKANA);
 
         <span class="kw">let </span>(scripts, <span class="kw">_</span>) = tags_from_script_and_language(<span class="prelude-val">Some</span>(script::HIRAGANA), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(scripts.as_slice(), <span class="kw-2">&amp;</span>[Tag::from_bytes(<span class="string">b&quot;kana&quot;</span>)]);
+        <span class="macro">assert_eq!</span>(scripts.as_slice(), <span class="kw-2">&amp;</span>[Tag::from_bytes(<span class="string">b"kana"</span>)]);
 
         <span class="comment">// Spaces are replaced
-        </span><span class="macro">assert_eq!</span>(tag_to_script(Tag::from_bytes(<span class="string">b&quot;be  &quot;</span>)), Script::from_iso15924_tag(Tag::from_bytes(<span class="string">b&quot;Beee&quot;</span>)));
+        </span><span class="macro">assert_eq!</span>(tag_to_script(Tag::from_bytes(<span class="string">b"be  "</span>)), Script::from_iso15924_tag(Tag::from_bytes(<span class="string">b"Beee"</span>)));
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>script_simple() {
         <span class="comment">// Arbitrary non-existent script.
-        </span>test_simple_tags(<span class="string">&quot;wwyz&quot;</span>, Script::from_iso15924_tag(Tag::from_bytes(<span class="string">b&quot;wWyZ&quot;</span>)).unwrap());
+        </span>test_simple_tags(<span class="string">"wwyz"</span>, Script::from_iso15924_tag(Tag::from_bytes(<span class="string">b"wWyZ"</span>)).unwrap());
 
-        <span class="comment">// These we don&#39;t really care about.
-        </span>test_simple_tags(<span class="string">&quot;zyyy&quot;</span>, script::COMMON);
-        test_simple_tags(<span class="string">&quot;zinh&quot;</span>, script::INHERITED);
-        test_simple_tags(<span class="string">&quot;zzzz&quot;</span>, script::UNKNOWN);
+        <span class="comment">// These we don't really care about.
+        </span>test_simple_tags(<span class="string">"zyyy"</span>, script::COMMON);
+        test_simple_tags(<span class="string">"zinh"</span>, script::INHERITED);
+        test_simple_tags(<span class="string">"zzzz"</span>, script::UNKNOWN);
 
-        test_simple_tags(<span class="string">&quot;arab&quot;</span>, script::ARABIC);
-        test_simple_tags(<span class="string">&quot;copt&quot;</span>, script::COPTIC);
-        test_simple_tags(<span class="string">&quot;kana&quot;</span>, script::KATAKANA);
-        test_simple_tags(<span class="string">&quot;latn&quot;</span>, script::LATIN);
+        test_simple_tags(<span class="string">"arab"</span>, script::ARABIC);
+        test_simple_tags(<span class="string">"copt"</span>, script::COPTIC);
+        test_simple_tags(<span class="string">"kana"</span>, script::KATAKANA);
+        test_simple_tags(<span class="string">"latn"</span>, script::LATIN);
 
         <span class="comment">// These are trickier since their OT script tags have space.
-        </span>test_simple_tags(<span class="string">&quot;lao &quot;</span>, script::LAO);
-        test_simple_tags(<span class="string">&quot;yi  &quot;</span>, script::YI);
+        </span>test_simple_tags(<span class="string">"lao "</span>, script::LAO);
+        test_simple_tags(<span class="string">"yi  "</span>, script::YI);
         <span class="comment">// Unicode-5.0 additions.
-        </span>test_simple_tags(<span class="string">&quot;nko &quot;</span>, script::NKO);
+        </span>test_simple_tags(<span class="string">"nko "</span>, script::NKO);
         <span class="comment">// Unicode-5.1 additions.
-        </span>test_simple_tags(<span class="string">&quot;vai &quot;</span>, script::VAI);
+        </span>test_simple_tags(<span class="string">"vai "</span>, script::VAI);
 
         <span class="comment">// https://docs.microsoft.com/en-us/typography/opentype/spec/scripttags
 
         // Unicode-5.2 additions.
-        </span>test_simple_tags(<span class="string">&quot;mtei&quot;</span>, script::MEETEI_MAYEK);
+        </span>test_simple_tags(<span class="string">"mtei"</span>, script::MEETEI_MAYEK);
         <span class="comment">// Unicode-6.0 additions.
-        </span>test_simple_tags(<span class="string">&quot;mand&quot;</span>, script::MANDAIC);
+        </span>test_simple_tags(<span class="string">"mand"</span>, script::MANDAIC);
     }
 
     <span class="macro">macro_rules! </span>test_script_from_language {
@@ -1054,23 +1055,23 @@
         };
     }
 
-    <span class="macro">test_script_from_language!</span>(script_from_language_01, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="prelude-val">None</span>);
-    <span class="macro">test_script_from_language!</span>(script_from_language_02, <span class="string">&quot;&quot;</span>, <span class="string">&quot;en&quot;</span>, <span class="prelude-val">None</span>);
-    <span class="macro">test_script_from_language!</span>(script_from_language_03, <span class="string">&quot;copt&quot;</span>, <span class="string">&quot;en&quot;</span>, <span class="prelude-val">Some</span>(script::COPTIC));
-    <span class="macro">test_script_from_language!</span>(script_from_language_04, <span class="string">&quot;&quot;</span>, <span class="string">&quot;x-hbsc&quot;</span>, <span class="prelude-val">None</span>);
-    <span class="macro">test_script_from_language!</span>(script_from_language_05, <span class="string">&quot;copt&quot;</span>, <span class="string">&quot;x-hbsc&quot;</span>, <span class="prelude-val">Some</span>(script::COPTIC));
-    <span class="macro">test_script_from_language!</span>(script_from_language_06, <span class="string">&quot;abc &quot;</span>, <span class="string">&quot;x-hbscabc&quot;</span>, <span class="prelude-val">None</span>);
-    <span class="macro">test_script_from_language!</span>(script_from_language_07, <span class="string">&quot;deva&quot;</span>, <span class="string">&quot;x-hbscdeva&quot;</span>, <span class="prelude-val">None</span>);
-    <span class="macro">test_script_from_language!</span>(script_from_language_08, <span class="string">&quot;dev2&quot;</span>, <span class="string">&quot;x-hbscdev2&quot;</span>, <span class="prelude-val">None</span>);
-    <span class="macro">test_script_from_language!</span>(script_from_language_09, <span class="string">&quot;dev3&quot;</span>, <span class="string">&quot;x-hbscdev3&quot;</span>, <span class="prelude-val">None</span>);
-    <span class="macro">test_script_from_language!</span>(script_from_language_10, <span class="string">&quot;copt&quot;</span>, <span class="string">&quot;x-hbotpap0-hbsccopt&quot;</span>, <span class="prelude-val">None</span>);
-    <span class="macro">test_script_from_language!</span>(script_from_language_11, <span class="string">&quot;&quot;</span>, <span class="string">&quot;en-x-hbsc&quot;</span>, <span class="prelude-val">None</span>);
-    <span class="macro">test_script_from_language!</span>(script_from_language_12, <span class="string">&quot;copt&quot;</span>, <span class="string">&quot;en-x-hbsc&quot;</span>, <span class="prelude-val">Some</span>(script::COPTIC));
-    <span class="macro">test_script_from_language!</span>(script_from_language_13, <span class="string">&quot;abc &quot;</span>, <span class="string">&quot;en-x-hbscabc&quot;</span>, <span class="prelude-val">None</span>);
-    <span class="macro">test_script_from_language!</span>(script_from_language_14, <span class="string">&quot;deva&quot;</span>, <span class="string">&quot;en-x-hbscdeva&quot;</span>, <span class="prelude-val">None</span>);
-    <span class="macro">test_script_from_language!</span>(script_from_language_15, <span class="string">&quot;dev2&quot;</span>, <span class="string">&quot;en-x-hbscdev2&quot;</span>, <span class="prelude-val">None</span>);
-    <span class="macro">test_script_from_language!</span>(script_from_language_16, <span class="string">&quot;dev3&quot;</span>, <span class="string">&quot;en-x-hbscdev3&quot;</span>, <span class="prelude-val">None</span>);
-    <span class="macro">test_script_from_language!</span>(script_from_language_17, <span class="string">&quot;copt&quot;</span>, <span class="string">&quot;en-x-hbotpap0-hbsccopt&quot;</span>, <span class="prelude-val">None</span>);
+    <span class="macro">test_script_from_language!</span>(script_from_language_01, <span class="string">""</span>, <span class="string">""</span>, <span class="prelude-val">None</span>);
+    <span class="macro">test_script_from_language!</span>(script_from_language_02, <span class="string">""</span>, <span class="string">"en"</span>, <span class="prelude-val">None</span>);
+    <span class="macro">test_script_from_language!</span>(script_from_language_03, <span class="string">"copt"</span>, <span class="string">"en"</span>, <span class="prelude-val">Some</span>(script::COPTIC));
+    <span class="macro">test_script_from_language!</span>(script_from_language_04, <span class="string">""</span>, <span class="string">"x-hbsc"</span>, <span class="prelude-val">None</span>);
+    <span class="macro">test_script_from_language!</span>(script_from_language_05, <span class="string">"copt"</span>, <span class="string">"x-hbsc"</span>, <span class="prelude-val">Some</span>(script::COPTIC));
+    <span class="macro">test_script_from_language!</span>(script_from_language_06, <span class="string">"abc "</span>, <span class="string">"x-hbscabc"</span>, <span class="prelude-val">None</span>);
+    <span class="macro">test_script_from_language!</span>(script_from_language_07, <span class="string">"deva"</span>, <span class="string">"x-hbscdeva"</span>, <span class="prelude-val">None</span>);
+    <span class="macro">test_script_from_language!</span>(script_from_language_08, <span class="string">"dev2"</span>, <span class="string">"x-hbscdev2"</span>, <span class="prelude-val">None</span>);
+    <span class="macro">test_script_from_language!</span>(script_from_language_09, <span class="string">"dev3"</span>, <span class="string">"x-hbscdev3"</span>, <span class="prelude-val">None</span>);
+    <span class="macro">test_script_from_language!</span>(script_from_language_10, <span class="string">"copt"</span>, <span class="string">"x-hbotpap0-hbsccopt"</span>, <span class="prelude-val">None</span>);
+    <span class="macro">test_script_from_language!</span>(script_from_language_11, <span class="string">""</span>, <span class="string">"en-x-hbsc"</span>, <span class="prelude-val">None</span>);
+    <span class="macro">test_script_from_language!</span>(script_from_language_12, <span class="string">"copt"</span>, <span class="string">"en-x-hbsc"</span>, <span class="prelude-val">Some</span>(script::COPTIC));
+    <span class="macro">test_script_from_language!</span>(script_from_language_13, <span class="string">"abc "</span>, <span class="string">"en-x-hbscabc"</span>, <span class="prelude-val">None</span>);
+    <span class="macro">test_script_from_language!</span>(script_from_language_14, <span class="string">"deva"</span>, <span class="string">"en-x-hbscdeva"</span>, <span class="prelude-val">None</span>);
+    <span class="macro">test_script_from_language!</span>(script_from_language_15, <span class="string">"dev2"</span>, <span class="string">"en-x-hbscdev2"</span>, <span class="prelude-val">None</span>);
+    <span class="macro">test_script_from_language!</span>(script_from_language_16, <span class="string">"dev3"</span>, <span class="string">"en-x-hbscdev3"</span>, <span class="prelude-val">None</span>);
+    <span class="macro">test_script_from_language!</span>(script_from_language_17, <span class="string">"copt"</span>, <span class="string">"en-x-hbotpap0-hbsccopt"</span>, <span class="prelude-val">None</span>);
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>script_indic() {
@@ -1086,15 +1087,15 @@
             <span class="macro">assert_eq!</span>(tag_to_script(tag3), <span class="prelude-val">Some</span>(script));
         }
 
-        check(<span class="string">&quot;bng3&quot;</span>, <span class="string">&quot;bng2&quot;</span>, <span class="string">&quot;beng&quot;</span>, script::BENGALI);
-        check(<span class="string">&quot;dev3&quot;</span>, <span class="string">&quot;dev2&quot;</span>, <span class="string">&quot;deva&quot;</span>, script::DEVANAGARI);
-        check(<span class="string">&quot;gjr3&quot;</span>, <span class="string">&quot;gjr2&quot;</span>, <span class="string">&quot;gujr&quot;</span>, script::GUJARATI);
-        check(<span class="string">&quot;gur3&quot;</span>, <span class="string">&quot;gur2&quot;</span>, <span class="string">&quot;guru&quot;</span>, script::GURMUKHI);
-        check(<span class="string">&quot;knd3&quot;</span>, <span class="string">&quot;knd2&quot;</span>, <span class="string">&quot;knda&quot;</span>, script::KANNADA);
-        check(<span class="string">&quot;mlm3&quot;</span>, <span class="string">&quot;mlm2&quot;</span>, <span class="string">&quot;mlym&quot;</span>, script::MALAYALAM);
-        check(<span class="string">&quot;ory3&quot;</span>, <span class="string">&quot;ory2&quot;</span>, <span class="string">&quot;orya&quot;</span>, script::ORIYA);
-        check(<span class="string">&quot;tml3&quot;</span>, <span class="string">&quot;tml2&quot;</span>, <span class="string">&quot;taml&quot;</span>, script::TAMIL);
-        check(<span class="string">&quot;tel3&quot;</span>, <span class="string">&quot;tel2&quot;</span>, <span class="string">&quot;telu&quot;</span>, script::TELUGU);
+        check(<span class="string">"bng3"</span>, <span class="string">"bng2"</span>, <span class="string">"beng"</span>, script::BENGALI);
+        check(<span class="string">"dev3"</span>, <span class="string">"dev2"</span>, <span class="string">"deva"</span>, script::DEVANAGARI);
+        check(<span class="string">"gjr3"</span>, <span class="string">"gjr2"</span>, <span class="string">"gujr"</span>, script::GUJARATI);
+        check(<span class="string">"gur3"</span>, <span class="string">"gur2"</span>, <span class="string">"guru"</span>, script::GURMUKHI);
+        check(<span class="string">"knd3"</span>, <span class="string">"knd2"</span>, <span class="string">"knda"</span>, script::KANNADA);
+        check(<span class="string">"mlm3"</span>, <span class="string">"mlm2"</span>, <span class="string">"mlym"</span>, script::MALAYALAM);
+        check(<span class="string">"ory3"</span>, <span class="string">"ory2"</span>, <span class="string">"orya"</span>, script::ORIYA);
+        check(<span class="string">"tml3"</span>, <span class="string">"tml2"</span>, <span class="string">"taml"</span>, script::TAMIL);
+        check(<span class="string">"tel3"</span>, <span class="string">"tel2"</span>, <span class="string">"telu"</span>, script::TELUGU);
     }
 
     <span class="comment">// TODO: swap tag and lang
@@ -1113,170 +1114,170 @@
         };
     }
 
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_dflt, <span class="string">&quot;dflt&quot;</span>, <span class="string">&quot;&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_ALT, <span class="string">&quot;ALT&quot;</span>, <span class="string">&quot;alt&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_ARA, <span class="string">&quot;ARA&quot;</span>, <span class="string">&quot;ar&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_AZE, <span class="string">&quot;AZE&quot;</span>, <span class="string">&quot;az&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_az_ir, <span class="string">&quot;AZE&quot;</span>, <span class="string">&quot;az-ir&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_az_az, <span class="string">&quot;AZE&quot;</span>, <span class="string">&quot;az-az&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_ENG, <span class="string">&quot;ENG&quot;</span>, <span class="string">&quot;en&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_en_US, <span class="string">&quot;ENG&quot;</span>, <span class="string">&quot;en_US&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_CJA, <span class="string">&quot;CJA&quot;</span>, <span class="string">&quot;cja&quot;</span>); <span class="comment">/* Western Cham */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_CJM, <span class="string">&quot;CJM&quot;</span>, <span class="string">&quot;cjm&quot;</span>); <span class="comment">/* Eastern Cham */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_ENV, <span class="string">&quot;EVN&quot;</span>, <span class="string">&quot;eve&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_HAL, <span class="string">&quot;HAL&quot;</span>, <span class="string">&quot;cfm&quot;</span>); <span class="comment">/* BCP47 and current ISO639-3 code for Halam/Falam Chin */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_flm, <span class="string">&quot;HAL&quot;</span>, <span class="string">&quot;flm&quot;</span>); <span class="comment">/* Retired ISO639-3 code for Halam/Falam Chin */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_hy, <span class="string">&quot;HYE0&quot;</span>, <span class="string">&quot;hy&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_hyw, <span class="string">&quot;HYE&quot;</span>, <span class="string">&quot;hyw&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_bgr, <span class="string">&quot;QIN&quot;</span>, <span class="string">&quot;bgr&quot;</span>); <span class="comment">/* Bawm Chin */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_cbl, <span class="string">&quot;QIN&quot;</span>, <span class="string">&quot;cbl&quot;</span>); <span class="comment">/* Bualkhaw Chin */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_cka, <span class="string">&quot;QIN&quot;</span>, <span class="string">&quot;cka&quot;</span>); <span class="comment">/* Khumi Awa Chin */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_cmr, <span class="string">&quot;QIN&quot;</span>, <span class="string">&quot;cmr&quot;</span>); <span class="comment">/* Mro-Khimi Chin */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_cnb, <span class="string">&quot;QIN&quot;</span>, <span class="string">&quot;cnb&quot;</span>); <span class="comment">/* Chinbon Chin */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_cnh, <span class="string">&quot;QIN&quot;</span>, <span class="string">&quot;cnh&quot;</span>); <span class="comment">/* Hakha Chin */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_cnk, <span class="string">&quot;QIN&quot;</span>, <span class="string">&quot;cnk&quot;</span>); <span class="comment">/* Khumi Chin */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_cnw, <span class="string">&quot;QIN&quot;</span>, <span class="string">&quot;cnw&quot;</span>); <span class="comment">/* Ngawn Chin */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_csh, <span class="string">&quot;QIN&quot;</span>, <span class="string">&quot;csh&quot;</span>); <span class="comment">/* Asho Chin */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_csy, <span class="string">&quot;QIN&quot;</span>, <span class="string">&quot;csy&quot;</span>); <span class="comment">/* Siyin Chin */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_ctd, <span class="string">&quot;QIN&quot;</span>, <span class="string">&quot;ctd&quot;</span>); <span class="comment">/* Tedim Chin */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_czt, <span class="string">&quot;QIN&quot;</span>, <span class="string">&quot;czt&quot;</span>); <span class="comment">/* Zotung Chin */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_dao, <span class="string">&quot;QIN&quot;</span>, <span class="string">&quot;dao&quot;</span>); <span class="comment">/* Daai Chin */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_htl, <span class="string">&quot;QIN&quot;</span>, <span class="string">&quot;hlt&quot;</span>); <span class="comment">/* Matu Chin */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_mrh, <span class="string">&quot;QIN&quot;</span>, <span class="string">&quot;mrh&quot;</span>); <span class="comment">/* Mara Chin */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_pck, <span class="string">&quot;QIN&quot;</span>, <span class="string">&quot;pck&quot;</span>); <span class="comment">/* Paite Chin */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_sez, <span class="string">&quot;QIN&quot;</span>, <span class="string">&quot;sez&quot;</span>); <span class="comment">/* Senthang Chin */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_tcp, <span class="string">&quot;QIN&quot;</span>, <span class="string">&quot;tcp&quot;</span>); <span class="comment">/* Tawr Chin */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_tcz, <span class="string">&quot;QIN&quot;</span>, <span class="string">&quot;tcz&quot;</span>); <span class="comment">/* Thado Chin */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_yos, <span class="string">&quot;QIN&quot;</span>, <span class="string">&quot;yos&quot;</span>); <span class="comment">/* Yos, deprecated by IANA in favor of Zou [zom] */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_zom, <span class="string">&quot;QIN&quot;</span>, <span class="string">&quot;zom&quot;</span>); <span class="comment">/* Zou */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_FAR, <span class="string">&quot;FAR&quot;</span>, <span class="string">&quot;fa&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_fa_IR, <span class="string">&quot;FAR&quot;</span>, <span class="string">&quot;fa_IR&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_man, <span class="string">&quot;MNK&quot;</span>, <span class="string">&quot;man&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_SWA, <span class="string">&quot;SWA&quot;</span>, <span class="string">&quot;aii&quot;</span>); <span class="comment">/* Swadaya Aramaic */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_SYR, <span class="string">&quot;SYR&quot;</span>, <span class="string">&quot;syr&quot;</span>); <span class="comment">/* Syriac [macrolanguage] */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_amw, <span class="string">&quot;SYR&quot;</span>, <span class="string">&quot;amw&quot;</span>); <span class="comment">/* Western Neo-Aramaic */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_cld, <span class="string">&quot;SYR&quot;</span>, <span class="string">&quot;cld&quot;</span>); <span class="comment">/* Chaldean Neo-Aramaic */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_syc, <span class="string">&quot;SYR&quot;</span>, <span class="string">&quot;syc&quot;</span>); <span class="comment">/* Classical Syriac */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_TUA, <span class="string">&quot;TUA&quot;</span>, <span class="string">&quot;tru&quot;</span>); <span class="comment">/* Turoyo Aramaic */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_zh, <span class="string">&quot;ZHS&quot;</span>, <span class="string">&quot;zh&quot;</span>); <span class="comment">/* Chinese */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_zh_cn, <span class="string">&quot;ZHS&quot;</span>, <span class="string">&quot;zh-cn&quot;</span>); <span class="comment">/* Chinese (China) */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_zh_sg, <span class="string">&quot;ZHS&quot;</span>, <span class="string">&quot;zh-sg&quot;</span>); <span class="comment">/* Chinese (Singapore) */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_zh_mo, <span class="string">&quot;ZHTM&quot;</span>, <span class="string">&quot;zh-mo&quot;</span>); <span class="comment">/* Chinese (Macao) */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_zh_hant_mo, <span class="string">&quot;ZHTM&quot;</span>, <span class="string">&quot;zh-hant-mo&quot;</span>); <span class="comment">/* Chinese (Macao) */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_zh_hans_mo, <span class="string">&quot;ZHS&quot;</span>, <span class="string">&quot;zh-hans-mo&quot;</span>); <span class="comment">/* Chinese (Simplified, Macao) */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_ZHH, <span class="string">&quot;ZHH&quot;</span>, <span class="string">&quot;zh-HK&quot;</span>); <span class="comment">/* Chinese (Hong Kong) */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_zh_HanT_hK, <span class="string">&quot;ZHH&quot;</span>, <span class="string">&quot;zH-HanT-hK&quot;</span>); <span class="comment">/* Chinese (Hong Kong) */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_zh_HanS_hK, <span class="string">&quot;ZHS&quot;</span>, <span class="string">&quot;zH-HanS-hK&quot;</span>); <span class="comment">/* Chinese (Simplified, Hong Kong) */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_zh_tw, <span class="string">&quot;ZHT&quot;</span>, <span class="string">&quot;zh-tw&quot;</span>); <span class="comment">/* Chinese (Taiwan) */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_ZHS, <span class="string">&quot;ZHS&quot;</span>, <span class="string">&quot;zh-Hans&quot;</span>); <span class="comment">/* Chinese (Simplified) */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_ZHT, <span class="string">&quot;ZHT&quot;</span>, <span class="string">&quot;zh-Hant&quot;</span>); <span class="comment">/* Chinese (Traditional) */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_zh_xx, <span class="string">&quot;ZHS&quot;</span>, <span class="string">&quot;zh-xx&quot;</span>); <span class="comment">/* Chinese (Other) */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_zh_Hans_TW, <span class="string">&quot;ZHS&quot;</span>, <span class="string">&quot;zh-Hans-TW&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_yue, <span class="string">&quot;ZHH&quot;</span>, <span class="string">&quot;yue&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_yue_Hant, <span class="string">&quot;ZHH&quot;</span>, <span class="string">&quot;yue-Hant&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_yue_Hans, <span class="string">&quot;ZHS&quot;</span>, <span class="string">&quot;yue-Hans&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_ABC, <span class="string">&quot;ABC&quot;</span>, <span class="string">&quot;abc&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_ABCD, <span class="string">&quot;ABCD&quot;</span>, <span class="string">&quot;x-hbotabcd&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_asdf_asdf_wer_x_hbotabc_zxc, <span class="string">&quot;ABC&quot;</span>, <span class="string">&quot;asdf-asdf-wer-x-hbotabc-zxc&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_asdf_asdf_wer_x_hbotabc, <span class="string">&quot;ABC&quot;</span>, <span class="string">&quot;asdf-asdf-wer-x-hbotabc&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_asdf_asdf_wer_x_hbotabcd, <span class="string">&quot;ABCD&quot;</span>, <span class="string">&quot;asdf-asdf-wer-x-hbotabcd&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_asdf_asdf_wer_x_hbot_zxc, <span class="string">&quot;dflt&quot;</span>, <span class="string">&quot;asdf-asdf-wer-x-hbot-zxc&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_xy, <span class="string">&quot;dflt&quot;</span>, <span class="string">&quot;xy&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_xyz, <span class="string">&quot;XYZ&quot;</span>, <span class="string">&quot;xyz&quot;</span>); <span class="comment">/* Unknown ISO 639-3 */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_xyz_qw, <span class="string">&quot;XYZ&quot;</span>, <span class="string">&quot;xyz-qw&quot;</span>); <span class="comment">/* Unknown ISO 639-3 */
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_dflt, <span class="string">"dflt"</span>, <span class="string">""</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_ALT, <span class="string">"ALT"</span>, <span class="string">"alt"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_ARA, <span class="string">"ARA"</span>, <span class="string">"ar"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_AZE, <span class="string">"AZE"</span>, <span class="string">"az"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_az_ir, <span class="string">"AZE"</span>, <span class="string">"az-ir"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_az_az, <span class="string">"AZE"</span>, <span class="string">"az-az"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_ENG, <span class="string">"ENG"</span>, <span class="string">"en"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_en_US, <span class="string">"ENG"</span>, <span class="string">"en_US"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_CJA, <span class="string">"CJA"</span>, <span class="string">"cja"</span>); <span class="comment">/* Western Cham */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_CJM, <span class="string">"CJM"</span>, <span class="string">"cjm"</span>); <span class="comment">/* Eastern Cham */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_ENV, <span class="string">"EVN"</span>, <span class="string">"eve"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_HAL, <span class="string">"HAL"</span>, <span class="string">"cfm"</span>); <span class="comment">/* BCP47 and current ISO639-3 code for Halam/Falam Chin */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_flm, <span class="string">"HAL"</span>, <span class="string">"flm"</span>); <span class="comment">/* Retired ISO639-3 code for Halam/Falam Chin */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_hy, <span class="string">"HYE0"</span>, <span class="string">"hy"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_hyw, <span class="string">"HYE"</span>, <span class="string">"hyw"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_bgr, <span class="string">"QIN"</span>, <span class="string">"bgr"</span>); <span class="comment">/* Bawm Chin */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_cbl, <span class="string">"QIN"</span>, <span class="string">"cbl"</span>); <span class="comment">/* Bualkhaw Chin */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_cka, <span class="string">"QIN"</span>, <span class="string">"cka"</span>); <span class="comment">/* Khumi Awa Chin */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_cmr, <span class="string">"QIN"</span>, <span class="string">"cmr"</span>); <span class="comment">/* Mro-Khimi Chin */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_cnb, <span class="string">"QIN"</span>, <span class="string">"cnb"</span>); <span class="comment">/* Chinbon Chin */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_cnh, <span class="string">"QIN"</span>, <span class="string">"cnh"</span>); <span class="comment">/* Hakha Chin */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_cnk, <span class="string">"QIN"</span>, <span class="string">"cnk"</span>); <span class="comment">/* Khumi Chin */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_cnw, <span class="string">"QIN"</span>, <span class="string">"cnw"</span>); <span class="comment">/* Ngawn Chin */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_csh, <span class="string">"QIN"</span>, <span class="string">"csh"</span>); <span class="comment">/* Asho Chin */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_csy, <span class="string">"QIN"</span>, <span class="string">"csy"</span>); <span class="comment">/* Siyin Chin */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_ctd, <span class="string">"QIN"</span>, <span class="string">"ctd"</span>); <span class="comment">/* Tedim Chin */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_czt, <span class="string">"QIN"</span>, <span class="string">"czt"</span>); <span class="comment">/* Zotung Chin */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_dao, <span class="string">"QIN"</span>, <span class="string">"dao"</span>); <span class="comment">/* Daai Chin */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_htl, <span class="string">"QIN"</span>, <span class="string">"hlt"</span>); <span class="comment">/* Matu Chin */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_mrh, <span class="string">"QIN"</span>, <span class="string">"mrh"</span>); <span class="comment">/* Mara Chin */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_pck, <span class="string">"QIN"</span>, <span class="string">"pck"</span>); <span class="comment">/* Paite Chin */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_sez, <span class="string">"QIN"</span>, <span class="string">"sez"</span>); <span class="comment">/* Senthang Chin */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_tcp, <span class="string">"QIN"</span>, <span class="string">"tcp"</span>); <span class="comment">/* Tawr Chin */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_tcz, <span class="string">"QIN"</span>, <span class="string">"tcz"</span>); <span class="comment">/* Thado Chin */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_yos, <span class="string">"QIN"</span>, <span class="string">"yos"</span>); <span class="comment">/* Yos, deprecated by IANA in favor of Zou [zom] */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_zom, <span class="string">"QIN"</span>, <span class="string">"zom"</span>); <span class="comment">/* Zou */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_FAR, <span class="string">"FAR"</span>, <span class="string">"fa"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_fa_IR, <span class="string">"FAR"</span>, <span class="string">"fa_IR"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_man, <span class="string">"MNK"</span>, <span class="string">"man"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_SWA, <span class="string">"SWA"</span>, <span class="string">"aii"</span>); <span class="comment">/* Swadaya Aramaic */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_SYR, <span class="string">"SYR"</span>, <span class="string">"syr"</span>); <span class="comment">/* Syriac [macrolanguage] */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_amw, <span class="string">"SYR"</span>, <span class="string">"amw"</span>); <span class="comment">/* Western Neo-Aramaic */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_cld, <span class="string">"SYR"</span>, <span class="string">"cld"</span>); <span class="comment">/* Chaldean Neo-Aramaic */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_syc, <span class="string">"SYR"</span>, <span class="string">"syc"</span>); <span class="comment">/* Classical Syriac */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_TUA, <span class="string">"TUA"</span>, <span class="string">"tru"</span>); <span class="comment">/* Turoyo Aramaic */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_zh, <span class="string">"ZHS"</span>, <span class="string">"zh"</span>); <span class="comment">/* Chinese */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_zh_cn, <span class="string">"ZHS"</span>, <span class="string">"zh-cn"</span>); <span class="comment">/* Chinese (China) */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_zh_sg, <span class="string">"ZHS"</span>, <span class="string">"zh-sg"</span>); <span class="comment">/* Chinese (Singapore) */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_zh_mo, <span class="string">"ZHTM"</span>, <span class="string">"zh-mo"</span>); <span class="comment">/* Chinese (Macao) */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_zh_hant_mo, <span class="string">"ZHTM"</span>, <span class="string">"zh-hant-mo"</span>); <span class="comment">/* Chinese (Macao) */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_zh_hans_mo, <span class="string">"ZHS"</span>, <span class="string">"zh-hans-mo"</span>); <span class="comment">/* Chinese (Simplified, Macao) */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_ZHH, <span class="string">"ZHH"</span>, <span class="string">"zh-HK"</span>); <span class="comment">/* Chinese (Hong Kong) */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_zh_HanT_hK, <span class="string">"ZHH"</span>, <span class="string">"zH-HanT-hK"</span>); <span class="comment">/* Chinese (Hong Kong) */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_zh_HanS_hK, <span class="string">"ZHS"</span>, <span class="string">"zH-HanS-hK"</span>); <span class="comment">/* Chinese (Simplified, Hong Kong) */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_zh_tw, <span class="string">"ZHT"</span>, <span class="string">"zh-tw"</span>); <span class="comment">/* Chinese (Taiwan) */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_ZHS, <span class="string">"ZHS"</span>, <span class="string">"zh-Hans"</span>); <span class="comment">/* Chinese (Simplified) */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_ZHT, <span class="string">"ZHT"</span>, <span class="string">"zh-Hant"</span>); <span class="comment">/* Chinese (Traditional) */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_zh_xx, <span class="string">"ZHS"</span>, <span class="string">"zh-xx"</span>); <span class="comment">/* Chinese (Other) */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_zh_Hans_TW, <span class="string">"ZHS"</span>, <span class="string">"zh-Hans-TW"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_yue, <span class="string">"ZHH"</span>, <span class="string">"yue"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_yue_Hant, <span class="string">"ZHH"</span>, <span class="string">"yue-Hant"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_yue_Hans, <span class="string">"ZHS"</span>, <span class="string">"yue-Hans"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_ABC, <span class="string">"ABC"</span>, <span class="string">"abc"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_ABCD, <span class="string">"ABCD"</span>, <span class="string">"x-hbotabcd"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_asdf_asdf_wer_x_hbotabc_zxc, <span class="string">"ABC"</span>, <span class="string">"asdf-asdf-wer-x-hbotabc-zxc"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_asdf_asdf_wer_x_hbotabc, <span class="string">"ABC"</span>, <span class="string">"asdf-asdf-wer-x-hbotabc"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_asdf_asdf_wer_x_hbotabcd, <span class="string">"ABCD"</span>, <span class="string">"asdf-asdf-wer-x-hbotabcd"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_asdf_asdf_wer_x_hbot_zxc, <span class="string">"dflt"</span>, <span class="string">"asdf-asdf-wer-x-hbot-zxc"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_xy, <span class="string">"dflt"</span>, <span class="string">"xy"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_xyz, <span class="string">"XYZ"</span>, <span class="string">"xyz"</span>); <span class="comment">/* Unknown ISO 639-3 */
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_xyz_qw, <span class="string">"XYZ"</span>, <span class="string">"xyz-qw"</span>); <span class="comment">/* Unknown ISO 639-3 */
 
     /*
      * Invalid input. The precise answer does not matter, as long as it
      * does not crash or get into an infinite loop.
      */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language__fonipa, <span class="string">&quot;IPPH&quot;</span>, <span class="string">&quot;-fonipa&quot;</span>);
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language__fonipa, <span class="string">"IPPH"</span>, <span class="string">"-fonipa"</span>);
 
     <span class="comment">/*
-     * Tags that contain &quot;-fonipa&quot; as a substring but which do not contain
-     * the subtag &quot;fonipa&quot;.
+     * Tags that contain "-fonipa" as a substring but which do not contain
+     * the subtag "fonipa".
      */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_en_fonipax, <span class="string">&quot;ENG&quot;</span>, <span class="string">&quot;en-fonipax&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_en_x_fonipa, <span class="string">&quot;ENG&quot;</span>, <span class="string">&quot;en-x-fonipa&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_en_a_fonipa, <span class="string">&quot;ENG&quot;</span>, <span class="string">&quot;en-a-fonipa&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_en_a_qwe_b_fonipa, <span class="string">&quot;ENG&quot;</span>, <span class="string">&quot;en-a-qwe-b-fonipa&quot;</span>);
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_en_fonipax, <span class="string">"ENG"</span>, <span class="string">"en-fonipax"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_en_x_fonipa, <span class="string">"ENG"</span>, <span class="string">"en-x-fonipa"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_en_a_fonipa, <span class="string">"ENG"</span>, <span class="string">"en-a-fonipa"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_en_a_qwe_b_fonipa, <span class="string">"ENG"</span>, <span class="string">"en-a-qwe-b-fonipa"</span>);
 
     <span class="comment">/* International Phonetic Alphabet */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_en_fonipa, <span class="string">&quot;IPPH&quot;</span>, <span class="string">&quot;en-fonipa&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_en_fonipax_fonipa, <span class="string">&quot;IPPH&quot;</span>, <span class="string">&quot;en-fonipax-fonipa&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_rm_ch_fonipa_sursilv_x_foobar, <span class="string">&quot;IPPH&quot;</span>, <span class="string">&quot;rm-CH-fonipa-sursilv-x-foobar&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_IPPH, <span class="string">&quot;IPPH&quot;</span>, <span class="string">&quot;und-fonipa&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_zh_fonipa, <span class="string">&quot;IPPH&quot;</span>, <span class="string">&quot;zh-fonipa&quot;</span>);
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_en_fonipa, <span class="string">"IPPH"</span>, <span class="string">"en-fonipa"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_en_fonipax_fonipa, <span class="string">"IPPH"</span>, <span class="string">"en-fonipax-fonipa"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_rm_ch_fonipa_sursilv_x_foobar, <span class="string">"IPPH"</span>, <span class="string">"rm-CH-fonipa-sursilv-x-foobar"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_IPPH, <span class="string">"IPPH"</span>, <span class="string">"und-fonipa"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_zh_fonipa, <span class="string">"IPPH"</span>, <span class="string">"zh-fonipa"</span>);
 
     <span class="comment">/* North American Phonetic Alphabet (Americanist Phonetic Notation) */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_en_fonnapa, <span class="string">&quot;APPH&quot;</span>, <span class="string">&quot;en-fonnapa&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_chr_fonnapa, <span class="string">&quot;APPH&quot;</span>, <span class="string">&quot;chr-fonnapa&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_APPH, <span class="string">&quot;APPH&quot;</span>, <span class="string">&quot;und-fonnapa&quot;</span>);
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_en_fonnapa, <span class="string">"APPH"</span>, <span class="string">"en-fonnapa"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_chr_fonnapa, <span class="string">"APPH"</span>, <span class="string">"chr-fonnapa"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_APPH, <span class="string">"APPH"</span>, <span class="string">"und-fonnapa"</span>);
 
     <span class="comment">/* Khutsuri Georgian */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_ka_geok, <span class="string">&quot;KGE&quot;</span>, <span class="string">&quot;ka-Geok&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_KGE, <span class="string">&quot;KGE&quot;</span>, <span class="string">&quot;und-Geok&quot;</span>);
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_ka_geok, <span class="string">"KGE"</span>, <span class="string">"ka-Geok"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_KGE, <span class="string">"KGE"</span>, <span class="string">"und-Geok"</span>);
 
     <span class="comment">/* Irish Traditional */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_IRT, <span class="string">&quot;IRT&quot;</span>, <span class="string">&quot;ga-Latg&quot;</span>);
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_IRT, <span class="string">"IRT"</span>, <span class="string">"ga-Latg"</span>);
 
     <span class="comment">/* Moldavian */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_MOL, <span class="string">&quot;MOL&quot;</span>, <span class="string">&quot;ro-MD&quot;</span>);
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_MOL, <span class="string">"MOL"</span>, <span class="string">"ro-MD"</span>);
 
     <span class="comment">/* Polytonic Greek */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_PGR, <span class="string">&quot;PGR&quot;</span>, <span class="string">&quot;el-polyton&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_el_CY_polyton, <span class="string">&quot;PGR&quot;</span>, <span class="string">&quot;el-CY-polyton&quot;</span>);
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_PGR, <span class="string">"PGR"</span>, <span class="string">"el-polyton"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_el_CY_polyton, <span class="string">"PGR"</span>, <span class="string">"el-CY-polyton"</span>);
 
     <span class="comment">/* Estrangela Syriac */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_aii_Syre, <span class="string">&quot;SYRE&quot;</span>, <span class="string">&quot;aii-Syre&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_de_Syre, <span class="string">&quot;SYRE&quot;</span>, <span class="string">&quot;de-Syre&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_syr_Syre, <span class="string">&quot;SYRE&quot;</span>, <span class="string">&quot;syr-Syre&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_und_Syre, <span class="string">&quot;SYRE&quot;</span>, <span class="string">&quot;und-Syre&quot;</span>);
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_aii_Syre, <span class="string">"SYRE"</span>, <span class="string">"aii-Syre"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_de_Syre, <span class="string">"SYRE"</span>, <span class="string">"de-Syre"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_syr_Syre, <span class="string">"SYRE"</span>, <span class="string">"syr-Syre"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_und_Syre, <span class="string">"SYRE"</span>, <span class="string">"und-Syre"</span>);
 
     <span class="comment">/* Western Syriac */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_aii_Syrj, <span class="string">&quot;SYRJ&quot;</span>, <span class="string">&quot;aii-Syrj&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_de_Syrj, <span class="string">&quot;SYRJ&quot;</span>, <span class="string">&quot;de-Syrj&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_syr_Syrj, <span class="string">&quot;SYRJ&quot;</span>, <span class="string">&quot;syr-Syrj&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_SYRJ, <span class="string">&quot;SYRJ&quot;</span>, <span class="string">&quot;und-Syrj&quot;</span>);
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_aii_Syrj, <span class="string">"SYRJ"</span>, <span class="string">"aii-Syrj"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_de_Syrj, <span class="string">"SYRJ"</span>, <span class="string">"de-Syrj"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_syr_Syrj, <span class="string">"SYRJ"</span>, <span class="string">"syr-Syrj"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_SYRJ, <span class="string">"SYRJ"</span>, <span class="string">"und-Syrj"</span>);
 
     <span class="comment">/* Eastern Syriac */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_aii_Syrn, <span class="string">&quot;SYRN&quot;</span>, <span class="string">&quot;aii-Syrn&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_de_Syrn, <span class="string">&quot;SYRN&quot;</span>, <span class="string">&quot;de-Syrn&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_syr_Syrn, <span class="string">&quot;SYRN&quot;</span>, <span class="string">&quot;syr-Syrn&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_SYRN, <span class="string">&quot;SYRN&quot;</span>, <span class="string">&quot;und-Syrn&quot;</span>);
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_aii_Syrn, <span class="string">"SYRN"</span>, <span class="string">"aii-Syrn"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_de_Syrn, <span class="string">"SYRN"</span>, <span class="string">"de-Syrn"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_syr_Syrn, <span class="string">"SYRN"</span>, <span class="string">"syr-Syrn"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_SYRN, <span class="string">"SYRN"</span>, <span class="string">"und-Syrn"</span>);
 
     <span class="comment">/* Test that x-hbot overrides the base language */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_fa_x_hbotabc_zxc, <span class="string">&quot;ABC&quot;</span>, <span class="string">&quot;fa-x-hbotabc-zxc&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_fa_ir_x_hbotabc_zxc, <span class="string">&quot;ABC&quot;</span>, <span class="string">&quot;fa-ir-x-hbotabc-zxc&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_zh_x_hbotabc_zxc, <span class="string">&quot;ABC&quot;</span>, <span class="string">&quot;zh-x-hbotabc-zxc&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_zh_cn_x_hbotabc_zxc, <span class="string">&quot;ABC&quot;</span>, <span class="string">&quot;zh-cn-x-hbotabc-zxc&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_zh_xy_x_hbotabc_zxc, <span class="string">&quot;ABC&quot;</span>, <span class="string">&quot;zh-xy-x-hbotabc-zxc&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_xyz_xy_x_hbotabc_zxc, <span class="string">&quot;ABC&quot;</span>, <span class="string">&quot;xyz-xy-x-hbotabc-zxc&quot;</span>);
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_fa_x_hbotabc_zxc, <span class="string">"ABC"</span>, <span class="string">"fa-x-hbotabc-zxc"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_fa_ir_x_hbotabc_zxc, <span class="string">"ABC"</span>, <span class="string">"fa-ir-x-hbotabc-zxc"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_zh_x_hbotabc_zxc, <span class="string">"ABC"</span>, <span class="string">"zh-x-hbotabc-zxc"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_zh_cn_x_hbotabc_zxc, <span class="string">"ABC"</span>, <span class="string">"zh-cn-x-hbotabc-zxc"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_zh_xy_x_hbotabc_zxc, <span class="string">"ABC"</span>, <span class="string">"zh-xy-x-hbotabc-zxc"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_xyz_xy_x_hbotabc_zxc, <span class="string">"ABC"</span>, <span class="string">"xyz-xy-x-hbotabc-zxc"</span>);
 
     <span class="comment">/* Unnormalized BCP 47 tags */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_ar_aao, <span class="string">&quot;ARA&quot;</span>, <span class="string">&quot;ar-aao&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_art_lojban, <span class="string">&quot;JBO&quot;</span>, <span class="string">&quot;art-lojban&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_kok_gom, <span class="string">&quot;KOK&quot;</span>, <span class="string">&quot;kok-gom&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_i_lux, <span class="string">&quot;LTZ&quot;</span>, <span class="string">&quot;i-lux&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_drh, <span class="string">&quot;MNG&quot;</span>, <span class="string">&quot;drh&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_ar_ary1, <span class="string">&quot;MOR&quot;</span>, <span class="string">&quot;ar-ary&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_ar_ary_DZ, <span class="string">&quot;MOR&quot;</span>, <span class="string">&quot;ar-ary-DZ&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_no_bok, <span class="string">&quot;NOR&quot;</span>, <span class="string">&quot;no-bok&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_no_nyn, <span class="string">&quot;NYN&quot;</span>, <span class="string">&quot;no-nyn&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_i_hak, <span class="string">&quot;ZHS&quot;</span>, <span class="string">&quot;i-hak&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_zh_guoyu, <span class="string">&quot;ZHS&quot;</span>, <span class="string">&quot;zh-guoyu&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_zh_min, <span class="string">&quot;ZHS&quot;</span>, <span class="string">&quot;zh-min&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_zh_min_nan, <span class="string">&quot;ZHS&quot;</span>, <span class="string">&quot;zh-min-nan&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_zh_xiang, <span class="string">&quot;ZHS&quot;</span>, <span class="string">&quot;zh-xiang&quot;</span>);
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_ar_aao, <span class="string">"ARA"</span>, <span class="string">"ar-aao"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_art_lojban, <span class="string">"JBO"</span>, <span class="string">"art-lojban"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_kok_gom, <span class="string">"KOK"</span>, <span class="string">"kok-gom"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_i_lux, <span class="string">"LTZ"</span>, <span class="string">"i-lux"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_drh, <span class="string">"MNG"</span>, <span class="string">"drh"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_ar_ary1, <span class="string">"MOR"</span>, <span class="string">"ar-ary"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_ar_ary_DZ, <span class="string">"MOR"</span>, <span class="string">"ar-ary-DZ"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_no_bok, <span class="string">"NOR"</span>, <span class="string">"no-bok"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_no_nyn, <span class="string">"NYN"</span>, <span class="string">"no-nyn"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_i_hak, <span class="string">"ZHS"</span>, <span class="string">"i-hak"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_zh_guoyu, <span class="string">"ZHS"</span>, <span class="string">"zh-guoyu"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_zh_min, <span class="string">"ZHS"</span>, <span class="string">"zh-min"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_zh_min_nan, <span class="string">"ZHS"</span>, <span class="string">"zh-min-nan"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_zh_xiang, <span class="string">"ZHS"</span>, <span class="string">"zh-xiang"</span>);
 
     <span class="comment">/* BCP 47 tags that look similar to unrelated language system tags */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_als, <span class="string">&quot;SQI&quot;</span>, <span class="string">&quot;als&quot;</span>);
-    <span class="macro">test_tag_from_language!</span>(tag_from_language_far, <span class="string">&quot;dflt&quot;</span>, <span class="string">&quot;far&quot;</span>);
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_als, <span class="string">"SQI"</span>, <span class="string">"als"</span>);
+    <span class="macro">test_tag_from_language!</span>(tag_from_language_far, <span class="string">"dflt"</span>, <span class="string">"far"</span>);
 
     <span class="comment">/* A UN M.49 region code, not an extended language subtag */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_ar_001, <span class="string">&quot;ARA&quot;</span>, <span class="string">&quot;ar-001&quot;</span>);
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_ar_001, <span class="string">"ARA"</span>, <span class="string">"ar-001"</span>);
 
     <span class="comment">/* An invalid tag */
-    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_invalid, <span class="string">&quot;TRK&quot;</span>, <span class="string">&quot;tr@foo=bar&quot;</span>);
+    </span><span class="macro">test_tag_from_language!</span>(tag_from_language_invalid, <span class="string">"TRK"</span>, <span class="string">"tr@foo=bar"</span>);
 
     <span class="macro">macro_rules! </span>test_tags {
         (<span class="macro-nonterminal">$name</span>:ident, <span class="macro-nonterminal">$script</span>:expr, <span class="macro-nonterminal">$lang</span>:expr, <span class="macro-nonterminal">$scripts</span>:expr, <span class="macro-nonterminal">$langs</span>:expr) =&gt; {
@@ -1295,15 +1296,15 @@
         };
     }
 
-    <span class="macro">test_tags!</span>(tag_full_en, <span class="prelude-val">None</span>, <span class="string">&quot;en&quot;</span>, <span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;</span>[<span class="string">b&quot;ENG&quot;</span>]);
-    <span class="macro">test_tags!</span>(tag_full_en_x_hbscdflt, <span class="prelude-val">None</span>, <span class="string">&quot;en-x-hbscdflt&quot;</span>, <span class="kw-2">&amp;</span>[<span class="string">b&quot;DFLT&quot;</span>], <span class="kw-2">&amp;</span>[<span class="string">b&quot;ENG&quot;</span>]);
-    <span class="macro">test_tags!</span>(tag_full_en_latin, <span class="prelude-val">Some</span>(script::LATIN), <span class="string">&quot;en&quot;</span>, <span class="kw-2">&amp;</span>[<span class="string">b&quot;latn&quot;</span>], <span class="kw-2">&amp;</span>[<span class="string">b&quot;ENG&quot;</span>]);
-    <span class="macro">test_tags!</span>(tag_full_und_fonnapa, <span class="prelude-val">None</span>, <span class="string">&quot;und-fonnapa&quot;</span>, <span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;</span>[<span class="string">b&quot;APPH&quot;</span>]);
-    <span class="macro">test_tags!</span>(tag_full_en_fonnapa, <span class="prelude-val">None</span>, <span class="string">&quot;en-fonnapa&quot;</span>, <span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;</span>[<span class="string">b&quot;APPH&quot;</span>]);
-    <span class="macro">test_tags!</span>(tag_full_x_hbot1234_hbsc5678, <span class="prelude-val">None</span>, <span class="string">&quot;x-hbot1234-hbsc5678&quot;</span>, <span class="kw-2">&amp;</span>[<span class="string">b&quot;5678&quot;</span>], <span class="kw-2">&amp;</span>[<span class="string">b&quot;1234&quot;</span>]);
-    <span class="macro">test_tags!</span>(tag_full_x_hbsc5678_hbot1234, <span class="prelude-val">None</span>, <span class="string">&quot;x-hbsc5678-hbot1234&quot;</span>, <span class="kw-2">&amp;</span>[<span class="string">b&quot;5678&quot;</span>], <span class="kw-2">&amp;</span>[<span class="string">b&quot;1234&quot;</span>]);
-    <span class="macro">test_tags!</span>(tag_full_ml, <span class="prelude-val">Some</span>(script::MALAYALAM), <span class="string">&quot;ml&quot;</span>, <span class="kw-2">&amp;</span>[<span class="string">b&quot;mlm3&quot;</span>, <span class="string">b&quot;mlm2&quot;</span>, <span class="string">b&quot;mlym&quot;</span>], <span class="kw-2">&amp;</span>[<span class="string">b&quot;MAL&quot;</span>, <span class="string">b&quot;MLR&quot;</span>]);
-    <span class="macro">test_tags!</span>(tag_full_xyz, <span class="prelude-val">None</span>, <span class="string">&quot;xyz&quot;</span>, <span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;</span>[<span class="string">b&quot;XYZ&quot;</span>]);
-    <span class="macro">test_tags!</span>(tag_full_xy, <span class="prelude-val">None</span>, <span class="string">&quot;xy&quot;</span>, <span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;</span>[]);
+    <span class="macro">test_tags!</span>(tag_full_en, <span class="prelude-val">None</span>, <span class="string">"en"</span>, <span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;</span>[<span class="string">b"ENG"</span>]);
+    <span class="macro">test_tags!</span>(tag_full_en_x_hbscdflt, <span class="prelude-val">None</span>, <span class="string">"en-x-hbscdflt"</span>, <span class="kw-2">&amp;</span>[<span class="string">b"DFLT"</span>], <span class="kw-2">&amp;</span>[<span class="string">b"ENG"</span>]);
+    <span class="macro">test_tags!</span>(tag_full_en_latin, <span class="prelude-val">Some</span>(script::LATIN), <span class="string">"en"</span>, <span class="kw-2">&amp;</span>[<span class="string">b"latn"</span>], <span class="kw-2">&amp;</span>[<span class="string">b"ENG"</span>]);
+    <span class="macro">test_tags!</span>(tag_full_und_fonnapa, <span class="prelude-val">None</span>, <span class="string">"und-fonnapa"</span>, <span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;</span>[<span class="string">b"APPH"</span>]);
+    <span class="macro">test_tags!</span>(tag_full_en_fonnapa, <span class="prelude-val">None</span>, <span class="string">"en-fonnapa"</span>, <span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;</span>[<span class="string">b"APPH"</span>]);
+    <span class="macro">test_tags!</span>(tag_full_x_hbot1234_hbsc5678, <span class="prelude-val">None</span>, <span class="string">"x-hbot1234-hbsc5678"</span>, <span class="kw-2">&amp;</span>[<span class="string">b"5678"</span>], <span class="kw-2">&amp;</span>[<span class="string">b"1234"</span>]);
+    <span class="macro">test_tags!</span>(tag_full_x_hbsc5678_hbot1234, <span class="prelude-val">None</span>, <span class="string">"x-hbsc5678-hbot1234"</span>, <span class="kw-2">&amp;</span>[<span class="string">b"5678"</span>], <span class="kw-2">&amp;</span>[<span class="string">b"1234"</span>]);
+    <span class="macro">test_tags!</span>(tag_full_ml, <span class="prelude-val">Some</span>(script::MALAYALAM), <span class="string">"ml"</span>, <span class="kw-2">&amp;</span>[<span class="string">b"mlm3"</span>, <span class="string">b"mlm2"</span>, <span class="string">b"mlym"</span>], <span class="kw-2">&amp;</span>[<span class="string">b"MAL"</span>, <span class="string">b"MLR"</span>]);
+    <span class="macro">test_tags!</span>(tag_full_xyz, <span class="prelude-val">None</span>, <span class="string">"xyz"</span>, <span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;</span>[<span class="string">b"XYZ"</span>]);
+    <span class="macro">test_tags!</span>(tag_full_xy, <span class="prelude-val">None</span>, <span class="string">"xy"</span>, <span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;</span>[]);
 }
 </code></pre></div></section></main></body></html>

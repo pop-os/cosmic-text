@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.4/src/tables/postscript/dict.rs`."><title>dict.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.5/src/tables/postscript/dict.rs`."><title>dict.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -702,8 +703,8 @@
 
 <span class="doccomment">/// PostScript DICT operator.
 ///
-/// See &quot;Table 9 Top DICT Operator Entries&quot; and &quot;Table 23 Private DICT
-/// Operators&quot; at &lt;https://adobe-type-tools.github.io/font-tech-notes/pdfs/5176.CFF.pdf&gt;
+/// See "Table 9 Top DICT Operator Entries" and "Table 23 Private DICT
+/// Operators" at &lt;https://adobe-type-tools.github.io/font-tech-notes/pdfs/5176.CFF.pdf&gt;
 </span><span class="attr">#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 </span><span class="kw">pub enum </span>Operator {
     Version,
@@ -866,7 +867,7 @@
 ///
 /// This does not perform any additional processing such as type conversion,
 /// delta decoding or blending.
-</span><span class="kw">pub fn </span>tokens(dict_data: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="prelude-ty">Result</span>&lt;Token, Error&gt;&gt; + <span class="lifetime">&#39;_ </span>+ Clone {
+</span><span class="kw">pub fn </span>tokens(dict_data: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="prelude-ty">Result</span>&lt;Token, Error&gt;&gt; + <span class="lifetime">'_ </span>+ Clone {
     <span class="kw">let </span><span class="kw-2">mut </span>cursor = <span class="kw">crate</span>::FontData::new(dict_data).cursor();
     std::iter::from_fn(<span class="kw">move </span>|| {
         <span class="kw">if </span>cursor.remaining_bytes() == <span class="number">0 </span>{
@@ -965,10 +966,10 @@
 ///
 /// If processing a Private DICT from a CFF2 table and an item variation
 /// store is present, then `blend_state` must be provided.
-</span><span class="kw">pub fn </span>entries&lt;<span class="lifetime">&#39;a</span>&gt;(
-    dict_data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
-    <span class="kw-2">mut </span>blend_state: <span class="prelude-ty">Option</span>&lt;BlendState&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="prelude-ty">Result</span>&lt;Entry, Error&gt;&gt; + <span class="lifetime">&#39;a </span>{
+</span><span class="kw">pub fn </span>entries&lt;<span class="lifetime">'a</span>&gt;(
+    dict_data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
+    <span class="kw-2">mut </span>blend_state: <span class="prelude-ty">Option</span>&lt;BlendState&lt;<span class="lifetime">'a</span>&gt;&gt;,
+) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="prelude-ty">Result</span>&lt;Entry, Error&gt;&gt; + <span class="lifetime">'a </span>{
     <span class="kw">let </span><span class="kw-2">mut </span>stack = Stack::new();
     <span class="kw">let </span><span class="kw-2">mut </span>token_iter = tokens(dict_data);
     std::iter::from_fn(<span class="kw">move </span>|| <span class="kw">loop </span>{
@@ -1145,7 +1146,7 @@
 }
 
 <span class="doccomment">/// Summary: older PostScript interpreters accept two values, but newer ones
-/// accept 12. We&#39;ll assume that as maximum.
+/// accept 12. We'll assume that as maximum.
 /// &lt;https://adobe-type-tools.github.io/font-tech-notes/pdfs/5049.StemSnap.pdf&gt;
 </span><span class="kw">const </span>MAX_STEM_SNAPS: usize = <span class="number">12</span>;
 
@@ -1197,8 +1198,8 @@
 <span class="doccomment">/// Parse a binary coded decimal number.
 </span><span class="kw">fn </span>parse_bcd(cursor: <span class="kw-2">&amp;mut </span>Cursor) -&gt; <span class="prelude-ty">Result</span>&lt;Fixed, Error&gt; {
     <span class="comment">// fonttools says:
-    // &quot;Note: 14 decimal digits seems to be the limitation for CFF real numbers
-    // in macOS. However, we use 8 here to match the implementation of AFDKO.&quot;
+    // "Note: 14 decimal digits seems to be the limitation for CFF real numbers
+    // in macOS. However, we use 8 here to match the implementation of AFDKO."
     // &lt;https://github.com/fonttools/fonttools/blob/84cebca6a1709085b920783400ceb1a147d51842/Lib/fontTools/misc/psCharStrings.py#L269&gt;
     // So, 32 should be big enough for anybody?
     </span><span class="kw">const </span>MAX_LEN: usize = <span class="number">32</span>;
@@ -1223,19 +1224,19 @@
     // e               - (minus)
     // f               end of number
     // &lt;https://learn.microsoft.com/en-us/typography/opentype/spec/cff2#table-5-nibble-definitions&gt;
-    </span><span class="lifetime">&#39;outer</span>: <span class="kw">loop </span>{
+    </span><span class="lifetime">'outer</span>: <span class="kw">loop </span>{
         <span class="kw">let </span>b = cursor.read::&lt;u8&gt;()<span class="question-mark">?</span>;
         <span class="kw">for </span>nibble <span class="kw">in </span>[(b &gt;&gt; <span class="number">4</span>) &amp; <span class="number">0xF</span>, b &amp; <span class="number">0xF</span>] {
             <span class="kw">match </span>nibble {
-                <span class="number">0x0</span>..=<span class="number">0x9 </span>=&gt; push(<span class="string">b&#39;0&#39; </span>+ nibble)<span class="question-mark">?</span>,
-                <span class="number">0xA </span>=&gt; push(<span class="string">b&#39;.&#39;</span>)<span class="question-mark">?</span>,
-                <span class="number">0xB </span>=&gt; push(<span class="string">b&#39;E&#39;</span>)<span class="question-mark">?</span>,
+                <span class="number">0x0</span>..=<span class="number">0x9 </span>=&gt; push(<span class="string">b'0' </span>+ nibble)<span class="question-mark">?</span>,
+                <span class="number">0xA </span>=&gt; push(<span class="string">b'.'</span>)<span class="question-mark">?</span>,
+                <span class="number">0xB </span>=&gt; push(<span class="string">b'E'</span>)<span class="question-mark">?</span>,
                 <span class="number">0xC </span>=&gt; {
-                    push(<span class="string">b&#39;E&#39;</span>)<span class="question-mark">?</span>;
-                    push(<span class="string">b&#39;-&#39;</span>)<span class="question-mark">?</span>;
+                    push(<span class="string">b'E'</span>)<span class="question-mark">?</span>;
+                    push(<span class="string">b'-'</span>)<span class="question-mark">?</span>;
                 }
-                <span class="number">0xE </span>=&gt; push(<span class="string">b&#39;-&#39;</span>)<span class="question-mark">?</span>,
-                <span class="number">0xF </span>=&gt; <span class="kw">break </span><span class="lifetime">&#39;outer</span>,
+                <span class="number">0xE </span>=&gt; push(<span class="string">b'-'</span>)<span class="question-mark">?</span>,
+                <span class="number">0xF </span>=&gt; <span class="kw">break </span><span class="lifetime">'outer</span>,
                 <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidNumber),
             }
         }
@@ -1275,9 +1276,9 @@
     </span><span class="kw">fn </span>binary_coded_decimal_operands() {
         <span class="comment">// From &lt;https://learn.microsoft.com/en-us/typography/opentype/spec/cff2#table-5-nibble-definitions&gt;:
         //
-        // &quot;A real number is terminated by one (or two) 0xf nibbles so that it is always padded
+        // "A real number is terminated by one (or two) 0xf nibbles so that it is always padded
         // to a full byte. Thus, the value -2.25 is encoded by the byte sequence (1e e2 a2 5f)
-        // and the value 0.140541E-3 by the sequence (1e 0a 14 05 41 c3 ff).&quot;
+        // and the value 0.140541E-3 by the sequence (1e 0a 14 05 41 c3 ff)."
         //
         // The initial 1e byte in the examples above is the dictionary operator to trigger
         // parsing of BCD so it is dropped in the tests here.

@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/unicode-script-0.5.5/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="unicode_script" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/unicode-script-0.5.6/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="unicode_script" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -562,7 +563,7 @@
 //! properties from [UAX #24](http://www.unicode.org/reports/tr24/)
 
 </span><span class="attr">#![cfg_attr(not(test), no_std)]
-#![cfg_attr(feature = <span class="string">&quot;bench&quot;</span>, feature(test))]
+#![cfg_attr(feature = <span class="string">"bench"</span>, feature(test))]
 
 </span><span class="kw">mod </span>tables;
 
@@ -575,7 +576,7 @@
 
 <span class="kw">impl </span>Script {
     <span class="doccomment">/// Get the full name of a script.
-    </span><span class="kw">pub fn </span>full_name(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
+    </span><span class="kw">pub fn </span>full_name(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str {
         <span class="self">self</span>.inner_full_name()
     }
 
@@ -587,7 +588,7 @@
     }
 
     <span class="doccomment">/// Get the four-character short name of a script.
-    </span><span class="kw">pub fn </span>short_name(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
+    </span><span class="kw">pub fn </span>short_name(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str {
         <span class="self">self</span>.inner_short_name()
     }
 
@@ -598,7 +599,7 @@
         <span class="self">Self</span>::inner_from_short_name(input)
     }
 
-    <span class="doccomment">/// Is this script &quot;Recommended&quot; according to
+    <span class="doccomment">/// Is this script "Recommended" according to
     /// [UAX #31](www.unicode.org/reports/tr31/#Table_Recommended_Scripts)?
     </span><span class="kw">pub fn </span>is_recommended(<span class="self">self</span>) -&gt; bool {
         <span class="kw">use </span>Script::<span class="kw-2">*</span>;
@@ -625,7 +626,7 @@
             <span class="kw">let </span><span class="kw-2">mut </span>second = <span class="number">0</span>;
             <span class="kw">let </span><span class="kw-2">mut </span>third = <span class="number">0</span>;
             <span class="kw">let </span>bit = script <span class="kw">as </span>u8;
-            <span class="comment">// Find out which field it&#39;s in, and set the appropriate bit there
+            <span class="comment">// Find out which field it's in, and set the appropriate bit there
             </span><span class="kw">if </span>bit &lt; <span class="number">64 </span>{
                 first = <span class="number">1 </span>&lt;&lt; bit <span class="kw">as </span>u64;
             } <span class="kw">else if </span>bit &lt; <span class="number">128 </span>{
@@ -687,7 +688,7 @@
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>Script {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.full_name())
+        <span class="macro">write!</span>(f, <span class="string">"{}"</span>, <span class="self">self</span>.full_name())
     }
 }
 
@@ -711,7 +712,7 @@
 }
 
 <span class="kw">impl </span>ScriptExtension {
-    <span class="comment">// We don&#39;t use the complete u64 of `third`, so the &quot;all&quot; value is not just u32::MAX
+    <span class="comment">// We don't use the complete u64 of `third`, so the "all" value is not just u32::MAX
     // Instead, we take the number of the next (unused) script bit, subtract 128 to bring
     // it in the range of `third`, create a u64 with just that bit set, and subtract 1
     // to create one with all the lower bits set.
@@ -785,7 +786,7 @@
     /// do not intersect. This is equivalent to [`ScriptExtension::intersection`] but it stores the result
     /// in `self`
     ///
-    /// &quot;Common&quot; (`Zyyy`) and &quot;Inherited&quot; (`Zinh`) are considered as intersecting
+    /// "Common" (`Zyyy`) and "Inherited" (`Zinh`) are considered as intersecting
     /// everything, the intersection of `Common` and `Inherited` is `Inherited`
     </span><span class="kw">pub fn </span>intersect_with(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="self">Self</span>) {
         <span class="kw-2">*</span><span class="self">self </span>= <span class="self">self</span>.intersection(other)
@@ -794,7 +795,7 @@
     <span class="doccomment">/// Find the intersection between two ScriptExtensions. Returns Unknown if things
     /// do not intersect.
     ///
-    /// &quot;Common&quot; (`Zyyy`) and &quot;Inherited&quot; (`Zinh`) are considered as intersecting
+    /// "Common" (`Zyyy`) and "Inherited" (`Zinh`) are considered as intersecting
     /// everything, the intersection of `Common` and `Inherited` is `Inherited`
     </span><span class="kw">pub const fn </span>intersection(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>first = <span class="self">self</span>.first &amp; other.first;
@@ -811,7 +812,7 @@
 
     <span class="doccomment">/// Find the union between two ScriptExtensions.
     ///
-    /// &quot;Common&quot; (`Zyyy`) and &quot;Inherited&quot; (`Zinh`) are considered as intersecting
+    /// "Common" (`Zyyy`) and "Inherited" (`Zinh`) are considered as intersecting
     /// everything, the union of `Common` and `Inherited` is `Common`
     </span><span class="kw">pub const fn </span>union(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>first = <span class="self">self</span>.first | other.first;
@@ -865,33 +866,33 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;_ </span>str&gt; <span class="kw">for </span>ScriptExtension {
-    <span class="kw">fn </span>from(o: <span class="kw-2">&amp;</span><span class="lifetime">&#39;_ </span>str) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'_ </span>str&gt; <span class="kw">for </span>ScriptExtension {
+    <span class="kw">fn </span>from(o: <span class="kw-2">&amp;</span><span class="lifetime">'_ </span>str) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::for_str(o)
     }
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>ScriptExtension {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;ScriptExtension(&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(f, <span class="string">"ScriptExtension("</span>)<span class="question-mark">?</span>;
         fmt::Display::fmt(<span class="self">self</span>, f)<span class="question-mark">?</span>;
-        <span class="macro">write!</span>(f, <span class="string">&quot;)&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">")"</span>)
     }
 }
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>ScriptExtension {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
         <span class="kw">if </span><span class="self">self</span>.is_common() {
-            <span class="macro">write!</span>(f, <span class="string">&quot;Common&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">write!</span>(f, <span class="string">"Common"</span>)<span class="question-mark">?</span>;
         } <span class="kw">else if </span><span class="self">self</span>.is_inherited() {
-            <span class="macro">write!</span>(f, <span class="string">&quot;Inherited&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">write!</span>(f, <span class="string">"Inherited"</span>)<span class="question-mark">?</span>;
         } <span class="kw">else if </span><span class="self">self</span>.is_empty() {
-            <span class="macro">write!</span>(f, <span class="string">&quot;Unknown&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">write!</span>(f, <span class="string">"Unknown"</span>)<span class="question-mark">?</span>;
         } <span class="kw">else </span>{
             <span class="kw">let </span><span class="kw-2">mut </span>first = <span class="bool-val">true</span>;
             <span class="kw">for </span>script <span class="kw">in </span><span class="self">self</span>.iter() {
                 <span class="kw">if </span>!first {
-                    <span class="macro">write!</span>(f, <span class="string">&quot; + &quot;</span>)<span class="question-mark">?</span>;
+                    <span class="macro">write!</span>(f, <span class="string">" + "</span>)<span class="question-mark">?</span>;
                     first = <span class="bool-val">false</span>;
                 }
                 script.full_name().fmt(f)<span class="question-mark">?</span>;
@@ -968,9 +969,9 @@
     <span class="kw">use </span>std::collections::HashSet;
     <span class="kw">use </span>std::convert::TryInto;
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;bench&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"bench"</span>)]
     </span><span class="kw">use </span>test::bench::Bencher;
-    <span class="attr">#[cfg(feature = <span class="string">&quot;bench&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"bench"</span>)]
     </span><span class="kw">extern crate </span>test;
 
     <span class="attr">#[test]
@@ -981,10 +982,10 @@
             <span class="kw">let </span>script = Script::for_integer(bit);
             <span class="kw">let </span>ext = script.into();
             <span class="kw">if </span>seen_scripts.contains(<span class="kw-2">&amp;</span>script) {
-                <span class="macro">panic!</span>(<span class="string">&quot;Found script {:?} twice!&quot;</span>, script)
+                <span class="macro">panic!</span>(<span class="string">"Found script {:?} twice!"</span>, script)
             }
             <span class="kw">if </span>seen_exts.contains(<span class="kw-2">&amp;</span>ext) {
-                <span class="macro">panic!</span>(<span class="string">&quot;Found extension {:?} twice!&quot;</span>, ext)
+                <span class="macro">panic!</span>(<span class="string">"Found extension {:?} twice!"</span>, ext)
             }
             seen_scripts.insert(script);
             seen_exts.insert(ext);
@@ -1001,15 +1002,15 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_specific() {
-        <span class="kw">let </span>s = <span class="string">&quot;सवव मानवी व्यद्क् जन्मतःच स्वतींत्र आहेत व त्ाींना समान प्रवतष्ठा व समान अविकार आहेत. त्ाींना ववचारशद्क् व सवविे कबुद्द्धलाभलेली आहे. व त्ाींनी एकमेकाींशी बींिुत्वाचाभावनेने आचरण करावे.&quot;</span>;
+        <span class="kw">let </span>s = <span class="string">"सवव मानवी व्यद्क् जन्मतःच स्वतींत्र आहेत व त्ाींना समान प्रवतष्ठा व समान अविकार आहेत. त्ाींना ववचारशद्क् व सवविे कबुद्द्धलाभलेली आहे. व त्ाींनी एकमेकाींशी बींिुत्वाचाभावनेने आचरण करावे."</span>;
         <span class="kw">let </span>ext = ScriptExtension::for_str(s);
         <span class="macro">assert_eq!</span>(ext, script_extensions::DEVA);
         <span class="macro">println!</span>(
-            <span class="string">&quot;{:?}&quot;</span>,
+            <span class="string">"{:?}"</span>,
             script_extensions::DEVA_DOGR_GUJR_GURU_KHOJ_KTHI_MAHJ_MODI_SIND_TAKR_TIRH
         );
         <span class="macro">println!</span>(
-            <span class="string">&quot;{:?}&quot;</span>,
+            <span class="string">"{:?}"</span>,
             ext.intersection(
                 script_extensions::DEVA_DOGR_GUJR_GURU_KHOJ_KTHI_MAHJ_MODI_SIND_TAKR_TIRH
             )
@@ -1059,7 +1060,7 @@
         <span class="macro">assert!</span>(scr.is_err());
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;bench&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"bench"</span>)]
     #[bench]
     </span><span class="kw">fn </span>bench_script_intersection(b: <span class="kw-2">&amp;mut </span>Bencher) {
         b.iter(|| {
@@ -1069,7 +1070,7 @@
         })
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;bench&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"bench"</span>)]
     #[bench]
     </span><span class="kw">fn </span>bench_ext_to_script(b: <span class="kw-2">&amp;mut </span>Bencher) {
         <span class="kw">let </span>ext: ScriptExtension = Script::Devanagari.into();
@@ -1080,7 +1081,7 @@
         })
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;bench&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"bench"</span>)]
     #[bench]
     </span><span class="kw">fn </span>bench_script_to_ext(b: <span class="kw-2">&amp;mut </span>Bencher) {
         b.iter(|| {
@@ -1090,17 +1091,17 @@
         })
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;bench&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"bench"</span>)]
     #[bench]
     </span><span class="kw">fn </span>bench_ext_intersection(b: <span class="kw-2">&amp;mut </span>Bencher) {
         b.iter(|| {
-            <span class="kw">let </span>e1 = test::black_box(script_extensions::ARAB_ROHG_SYRC_THAA_YEZI);
+            <span class="kw">let </span>e1 = test::black_box(script_extensions::ARAB_NKOO_ROHG_SYRC_THAA_YEZI);
             <span class="kw">let </span>e2 = test::black_box(script_extensions::BENG_DEVA_DOGR_GONG_GONM_GRAN_GUJR_GURU_KNDA_MAHJ_MLYM_NAND_ORYA_SIND_SINH_SYLO_TAKR_TAML_TELU_TIRH);
             test::black_box(e2.intersection(e1));
         })
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;bench&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"bench"</span>)]
     #[bench]
     </span><span class="kw">fn </span>bench_to_vec(b: <span class="kw-2">&amp;mut </span>Bencher) {
         b.iter(|| {
@@ -1109,11 +1110,11 @@
         })
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;bench&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"bench"</span>)]
     #[bench]
     </span><span class="kw">fn </span>bench_string_ext(b: <span class="kw-2">&amp;mut </span>Bencher) {
         b.iter(|| {
-            <span class="kw">let </span>s = test::black_box(<span class="string">&quot;सवव मानवी व्यद्क् जन्मतःच स्वतींत्र आहेत व त्ाींना समान प्रवतष्ठा व समान अविकार आहेत. त्ाींना ववचारशद्क् व सवविे कबुद्द्धलाभलेली आहे. व त्ाींनी एकमेकाींशी बींिुत्वाचाभावनेने आचरण करावे.&quot;</span>);
+            <span class="kw">let </span>s = test::black_box(<span class="string">"सवव मानवी व्यद्क् जन्मतःच स्वतींत्र आहेत व त्ाींना समान प्रवतष्ठा व समान अविकार आहेत. त्ाींना ववचारशद्क् व सवविे कबुद्द्धलाभलेली आहे. व त्ाींनी एकमेकाींशी बींिुत्वाचाभावनेने आचरण करावे."</span>);
             test::black_box(ScriptExtension::for_str(s));
         })
     }

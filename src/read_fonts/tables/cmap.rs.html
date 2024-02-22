@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.4/src/tables/cmap.rs`."><title>cmap.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.5/src/tables/cmap.rs`."><title>cmap.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -572,7 +573,7 @@
 <a href="#572" id="572">572</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! The [cmap](https://docs.microsoft.com/en-us/typography/opentype/spec/cmap) table
 
-</span><span class="macro">include!</span>(<span class="string">&quot;../../generated/generated_cmap.rs&quot;</span>);
+</span><span class="macro">include!</span>(<span class="string">"../../generated/generated_cmap.rs"</span>);
 
 <span class="doccomment">/// Result of mapping a codepoint with a variation selector.
 </span><span class="attr">#[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -585,7 +586,7 @@
     </span>Variant(GlyphId),
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Cmap&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Cmap&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Map a codepoint to a nominal glyph identifier
     ///
     /// This uses the first available subtable that provides a valid mapping.
@@ -611,7 +612,7 @@
     </span>}
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Cmap4&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Cmap4&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Maps a codepoint to a nominal glyph identifier.
     </span><span class="kw">pub fn </span>map_codepoint(<span class="kw-2">&amp;</span><span class="self">self</span>, codepoint: <span class="kw">impl </span>Into&lt;u32&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;GlyphId&gt; {
         <span class="kw">let </span>codepoint = codepoint.into();
@@ -639,7 +640,7 @@
 
     <span class="doccomment">/// Returns an iterator over all (codepoint, glyph identifier) pairs
     /// in the subtable.
-    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Cmap4Iter&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Cmap4Iter&lt;<span class="lifetime">'a</span>&gt; {
         Cmap4Iter::new(<span class="self">self</span>.clone())
     }
 
@@ -662,7 +663,7 @@
 
     <span class="doccomment">/// Returns the [start_code, end_code] range at the given index.
     </span><span class="kw">fn </span>code_range(<span class="kw-2">&amp;</span><span class="self">self</span>, index: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Range&lt;u32&gt;&gt; {
-        <span class="comment">// Extend to u32 to ensure we don&#39;t overflow on the end + 1 bound
+        <span class="comment">// Extend to u32 to ensure we don't overflow on the end + 1 bound
         // below.
         </span><span class="kw">let </span>start = <span class="self">self</span>.start_code().get(index)<span class="question-mark">?</span>.get() <span class="kw">as </span>u32;
         <span class="kw">let </span>end = <span class="self">self</span>.end_code().get(index)<span class="question-mark">?</span>.get() <span class="kw">as </span>u32;
@@ -674,15 +675,15 @@
 <span class="doccomment">/// Iterator over all (codepoint, glyph identifier) pairs in
 /// the subtable.
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>Cmap4Iter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    subtable: Cmap4&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>Cmap4Iter&lt;<span class="lifetime">'a</span>&gt; {
+    subtable: Cmap4&lt;<span class="lifetime">'a</span>&gt;,
     cur_range: std::ops::Range&lt;u32&gt;,
     cur_start_code: u16,
     cur_range_ix: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Cmap4Iter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(subtable: Cmap4&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Cmap4Iter&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>new(subtable: Cmap4&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>cur_range = subtable.code_range(<span class="number">0</span>).unwrap_or_default();
         <span class="kw">let </span>cur_start_code = cur_range.start <span class="kw">as </span>u16;
         <span class="self">Self </span>{
@@ -694,7 +695,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>Cmap4Iter&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>Cmap4Iter&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">type </span>Item = (u32, GlyphId);
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -720,7 +721,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Cmap12&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Cmap12&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Maps a codepoint to a nominal glyph identifier.
     </span><span class="kw">pub fn </span>map_codepoint(<span class="kw-2">&amp;</span><span class="self">self</span>, codepoint: <span class="kw">impl </span>Into&lt;u32&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;GlyphId&gt; {
         <span class="kw">let </span>codepoint = codepoint.into();
@@ -747,7 +748,7 @@
 
     <span class="doccomment">/// Returns an iterator over all (codepoint, glyph identifier) pairs
     /// in the subtable.
-    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Cmap12Iter&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Cmap12Iter&lt;<span class="lifetime">'a</span>&gt; {
         Cmap12Iter::new(<span class="self">self</span>.clone())
     }
 
@@ -778,16 +779,16 @@
 <span class="doccomment">/// Iterator over all (codepoint, glyph identifier) pairs in
 /// the subtable.
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>Cmap12Iter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    subtable: Cmap12&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>Cmap12Iter&lt;<span class="lifetime">'a</span>&gt; {
+    subtable: Cmap12&lt;<span class="lifetime">'a</span>&gt;,
     cur_range: Range&lt;u32&gt;,
     cur_start_code: u32,
     cur_start_glyph_id: u32,
     cur_range_ix: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Cmap12Iter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(subtable: Cmap12&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Cmap12Iter&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>new(subtable: Cmap12&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>(cur_range, cur_start_glyph_id) = subtable.group(<span class="number">0</span>).unwrap_or_default();
         <span class="kw">let </span>cur_start_code = cur_range.start;
         <span class="self">Self </span>{
@@ -800,7 +801,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>Cmap12Iter&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>Cmap12Iter&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">type </span>Item = (u32, GlyphId);
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -827,7 +828,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Cmap14&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Cmap14&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Maps a codepoint and variation selector to a nominal glyph identifier.
     </span><span class="kw">pub fn </span>map_variant(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
@@ -885,7 +886,7 @@
 
     <span class="doccomment">/// Returns an iterator over all (codepoint, selector, mapping variant)
     /// triples in the subtable.
-    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Cmap14Iter&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Cmap14Iter&lt;<span class="lifetime">'a</span>&gt; {
         Cmap14Iter::new(<span class="self">self</span>.clone())
     }
 
@@ -894,8 +895,8 @@
         index: usize,
     ) -&gt; (
         <span class="prelude-ty">Option</span>&lt;VariationSelector&gt;,
-        <span class="prelude-ty">Option</span>&lt;DefaultUvs&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-        <span class="prelude-ty">Option</span>&lt;NonDefaultUvs&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+        <span class="prelude-ty">Option</span>&lt;DefaultUvs&lt;<span class="lifetime">'a</span>&gt;&gt;,
+        <span class="prelude-ty">Option</span>&lt;NonDefaultUvs&lt;<span class="lifetime">'a</span>&gt;&gt;,
     ) {
         <span class="kw">let </span>selector = <span class="self">self</span>.var_selector().get(index).cloned();
         <span class="kw">let </span>default_uvs = selector.as_ref().and_then(|selector| {
@@ -919,16 +920,16 @@
 <span class="doccomment">/// Iterator over all (codepoint, selector, mapping variant) triples
 /// in the subtable.
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>Cmap14Iter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    subtable: Cmap14&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>Cmap14Iter&lt;<span class="lifetime">'a</span>&gt; {
+    subtable: Cmap14&lt;<span class="lifetime">'a</span>&gt;,
     selector_record: <span class="prelude-ty">Option</span>&lt;VariationSelector&gt;,
-    default_uvs: <span class="prelude-ty">Option</span>&lt;DefaultUvsIter&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    non_default_uvs: <span class="prelude-ty">Option</span>&lt;NonDefaultUvsIter&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    default_uvs: <span class="prelude-ty">Option</span>&lt;DefaultUvsIter&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    non_default_uvs: <span class="prelude-ty">Option</span>&lt;NonDefaultUvsIter&lt;<span class="lifetime">'a</span>&gt;&gt;,
     cur_selector_ix: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Cmap14Iter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(subtable: Cmap14&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Cmap14Iter&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>new(subtable: Cmap14&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>(selector_record, default_uvs, non_default_uvs) = subtable.selector(<span class="number">0</span>);
         <span class="self">Self </span>{
             subtable,
@@ -940,7 +941,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>Cmap14Iter&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>Cmap14Iter&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">type </span>Item = (u32, u32, MapVariant);
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -968,13 +969,13 @@
 }
 
 <span class="attr">#[derive(Clone)]
-</span><span class="kw">struct </span>DefaultUvsIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    ranges: std::slice::Iter&lt;<span class="lifetime">&#39;a</span>, UnicodeRange&gt;,
+</span><span class="kw">struct </span>DefaultUvsIter&lt;<span class="lifetime">'a</span>&gt; {
+    ranges: std::slice::Iter&lt;<span class="lifetime">'a</span>, UnicodeRange&gt;,
     cur_range: Range&lt;u32&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; DefaultUvsIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(ranges: DefaultUvs&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; DefaultUvsIter&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>new(ranges: DefaultUvs&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>ranges = ranges.ranges().iter();
         <span class="kw">let </span>cur_range = <span class="kw">if let </span><span class="prelude-val">Some</span>(range) = ranges.next() {
             <span class="kw">let </span>start: u32 = range.start_unicode_value().into();
@@ -987,7 +988,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>DefaultUvsIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>DefaultUvsIter&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">type </span>Item = u32;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -1004,19 +1005,19 @@
 }
 
 <span class="attr">#[derive(Clone)]
-</span><span class="kw">struct </span>NonDefaultUvsIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    iter: std::slice::Iter&lt;<span class="lifetime">&#39;a</span>, UvsMapping&gt;,
+</span><span class="kw">struct </span>NonDefaultUvsIter&lt;<span class="lifetime">'a</span>&gt; {
+    iter: std::slice::Iter&lt;<span class="lifetime">'a</span>, UvsMapping&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; NonDefaultUvsIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(uvs: NonDefaultUvs&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; NonDefaultUvsIter&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>new(uvs: NonDefaultUvs&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             iter: uvs.uvs_mapping().iter(),
         }
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>NonDefaultUvsIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>NonDefaultUvsIter&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">type </span>Item = (u32, GlyphId);
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -1036,16 +1037,16 @@
     </span><span class="kw">fn </span>map_codepoints() {
         <span class="kw">let </span>font = FontRef::new(font_test_data::VAZIRMATN_VAR).unwrap();
         <span class="kw">let </span>cmap = font.cmap().unwrap();
-        <span class="macro">assert_eq!</span>(cmap.map_codepoint(<span class="string">&#39;A&#39;</span>), <span class="prelude-val">Some</span>(GlyphId::new(<span class="number">1</span>)));
-        <span class="macro">assert_eq!</span>(cmap.map_codepoint(<span class="string">&#39;À&#39;</span>), <span class="prelude-val">Some</span>(GlyphId::new(<span class="number">2</span>)));
-        <span class="macro">assert_eq!</span>(cmap.map_codepoint(<span class="string">&#39;`&#39;</span>), <span class="prelude-val">Some</span>(GlyphId::new(<span class="number">3</span>)));
-        <span class="macro">assert_eq!</span>(cmap.map_codepoint(<span class="string">&#39;B&#39;</span>), <span class="prelude-val">None</span>);
+        <span class="macro">assert_eq!</span>(cmap.map_codepoint(<span class="string">'A'</span>), <span class="prelude-val">Some</span>(GlyphId::new(<span class="number">1</span>)));
+        <span class="macro">assert_eq!</span>(cmap.map_codepoint(<span class="string">'À'</span>), <span class="prelude-val">Some</span>(GlyphId::new(<span class="number">2</span>)));
+        <span class="macro">assert_eq!</span>(cmap.map_codepoint(<span class="string">'`'</span>), <span class="prelude-val">Some</span>(GlyphId::new(<span class="number">3</span>)));
+        <span class="macro">assert_eq!</span>(cmap.map_codepoint(<span class="string">'B'</span>), <span class="prelude-val">None</span>);
 
         <span class="kw">let </span>font = FontRef::new(font_test_data::SIMPLE_GLYF).unwrap();
         <span class="kw">let </span>cmap = font.cmap().unwrap();
-        <span class="macro">assert_eq!</span>(cmap.map_codepoint(<span class="string">&#39; &#39;</span>), <span class="prelude-val">Some</span>(GlyphId::new(<span class="number">1</span>)));
+        <span class="macro">assert_eq!</span>(cmap.map_codepoint(<span class="string">' '</span>), <span class="prelude-val">Some</span>(GlyphId::new(<span class="number">1</span>)));
         <span class="macro">assert_eq!</span>(cmap.map_codepoint(<span class="number">0xE_u32</span>), <span class="prelude-val">Some</span>(GlyphId::new(<span class="number">2</span>)));
-        <span class="macro">assert_eq!</span>(cmap.map_codepoint(<span class="string">&#39;B&#39;</span>), <span class="prelude-val">None</span>);
+        <span class="macro">assert_eq!</span>(cmap.map_codepoint(<span class="string">'B'</span>), <span class="prelude-val">None</span>);
     }
 
     <span class="attr">#[test]
@@ -1054,16 +1055,16 @@
         <span class="kw">let </span>font = FontRef::new(font_test_data::CMAP14_FONT1).unwrap();
         <span class="kw">let </span>cmap = font.cmap().unwrap();
         <span class="kw">let </span>cmap14 = find_cmap14(<span class="kw-2">&amp;</span>cmap).unwrap();
-        <span class="kw">let </span>selector = <span class="string">&#39;\u{e0100}&#39;</span>;
-        <span class="macro">assert_eq!</span>(cmap14.map_variant(<span class="string">&#39;a&#39;</span>, selector), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(cmap14.map_variant(<span class="string">&#39;\u{4e00}&#39;</span>, selector), <span class="prelude-val">Some</span>(UseDefault));
-        <span class="macro">assert_eq!</span>(cmap14.map_variant(<span class="string">&#39;\u{4e06}&#39;</span>, selector), <span class="prelude-val">Some</span>(UseDefault));
+        <span class="kw">let </span>selector = <span class="string">'\u{e0100}'</span>;
+        <span class="macro">assert_eq!</span>(cmap14.map_variant(<span class="string">'a'</span>, selector), <span class="prelude-val">None</span>);
+        <span class="macro">assert_eq!</span>(cmap14.map_variant(<span class="string">'\u{4e00}'</span>, selector), <span class="prelude-val">Some</span>(UseDefault));
+        <span class="macro">assert_eq!</span>(cmap14.map_variant(<span class="string">'\u{4e06}'</span>, selector), <span class="prelude-val">Some</span>(UseDefault));
         <span class="macro">assert_eq!</span>(
-            cmap14.map_variant(<span class="string">&#39;\u{4e08}&#39;</span>, selector),
+            cmap14.map_variant(<span class="string">'\u{4e08}'</span>, selector),
             <span class="prelude-val">Some</span>(Variant(GlyphId::new(<span class="number">25</span>)))
         );
         <span class="macro">assert_eq!</span>(
-            cmap14.map_variant(<span class="string">&#39;\u{4e09}&#39;</span>, selector),
+            cmap14.map_variant(<span class="string">'\u{4e09}'</span>, selector),
             <span class="prelude-val">Some</span>(Variant(GlyphId::new(<span class="number">26</span>)))
         );
     }
@@ -1112,7 +1113,7 @@
         <span class="macro">assert_eq!</span>(count, <span class="number">7</span>);
     }
 
-    <span class="kw">fn </span>find_cmap4&lt;<span class="lifetime">&#39;a</span>&gt;(cmap: <span class="kw-2">&amp;</span>Cmap&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Cmap4&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>find_cmap4&lt;<span class="lifetime">'a</span>&gt;(cmap: <span class="kw-2">&amp;</span>Cmap&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Cmap4&lt;<span class="lifetime">'a</span>&gt;&gt; {
         cmap.encoding_records()
             .iter()
             .filter_map(|record| record.subtable(cmap.offset_data()).ok())
@@ -1122,7 +1123,7 @@
             })
     }
 
-    <span class="kw">fn </span>find_cmap12&lt;<span class="lifetime">&#39;a</span>&gt;(cmap: <span class="kw-2">&amp;</span>Cmap&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Cmap12&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>find_cmap12&lt;<span class="lifetime">'a</span>&gt;(cmap: <span class="kw-2">&amp;</span>Cmap&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Cmap12&lt;<span class="lifetime">'a</span>&gt;&gt; {
         cmap.encoding_records()
             .iter()
             .filter_map(|record| record.subtable(cmap.offset_data()).ok())
@@ -1132,7 +1133,7 @@
             })
     }
 
-    <span class="kw">fn </span>find_cmap14&lt;<span class="lifetime">&#39;a</span>&gt;(cmap: <span class="kw-2">&amp;</span>Cmap&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Cmap14&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>find_cmap14&lt;<span class="lifetime">'a</span>&gt;(cmap: <span class="kw-2">&amp;</span>Cmap&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Cmap14&lt;<span class="lifetime">'a</span>&gt;&gt; {
         cmap.encoding_records()
             .iter()
             .filter_map(|record| record.subtable(cmap.offset_data()).ok())

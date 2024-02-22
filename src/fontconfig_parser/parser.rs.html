@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fontconfig-parser-0.5.6/src/parser.rs`."><title>parser.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="fontconfig_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fontconfig-parser-0.5.6/src/parser.rs`."><title>parser.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="fontconfig_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -394,12 +395,12 @@
 </span><span class="kw">use crate</span>::<span class="kw-2">*</span>;
 <span class="kw">use </span>roxmltree::Node;
 
-<span class="kw">pub fn </span>parse_config&lt;<span class="lifetime">&#39;a</span>&gt;(
-    xml_doc: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>roxmltree::Document,
-) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Iterator&lt;Item = <span class="prelude-ty">Result</span>&lt;ConfigPart&gt;&gt; + <span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">pub fn </span>parse_config&lt;<span class="lifetime">'a</span>&gt;(
+    xml_doc: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>roxmltree::Document,
+) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Iterator&lt;Item = <span class="prelude-ty">Result</span>&lt;ConfigPart&gt;&gt; + <span class="lifetime">'a</span>&gt; {
     <span class="kw">let </span>fontconfig = xml_doc.root_element();
 
-    <span class="kw">if </span>fontconfig.tag_name().name() != <span class="string">&quot;fontconfig&quot; </span>{
+    <span class="kw">if </span>fontconfig.tag_name().name() != <span class="string">"fontconfig" </span>{
         <span class="kw">return </span><span class="prelude-val">Err</span>(Error::NoFontconfig);
     }
 
@@ -410,8 +411,8 @@
 
 <span class="kw">fn </span>parse_config_part(child: Node) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;ConfigPart&gt;&gt; {
     <span class="kw">let </span>part = <span class="kw">match </span>child.tag_name().name() {
-        <span class="string">&quot;description&quot; </span>=&gt; ConfigPart::Description(<span class="macro">try_text!</span>(child).into()),
-        <span class="string">&quot;alias&quot; </span>=&gt; {
+        <span class="string">"description" </span>=&gt; ConfigPart::Description(<span class="macro">try_text!</span>(child).into()),
+        <span class="string">"alias" </span>=&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>alias = Alias::default();
 
             <span class="kw">for </span>child <span class="kw">in </span>child.children() {
@@ -419,21 +420,21 @@
                     child
                         .children()
                         .filter_map(|family| <span class="kw">match </span>family.tag_name().name() {
-                            <span class="string">&quot;family&quot; </span>=&gt; family.text().map(Into::into),
+                            <span class="string">"family" </span>=&gt; family.text().map(Into::into),
                             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
                         });
 
                 <span class="kw">match </span>child.tag_name().name() {
-                    <span class="string">&quot;family&quot; </span>=&gt; {
+                    <span class="string">"family" </span>=&gt; {
                         alias.alias = <span class="macro">try_text!</span>(child).into();
                     }
-                    <span class="string">&quot;prefer&quot; </span>=&gt; {
+                    <span class="string">"prefer" </span>=&gt; {
                         alias.prefer.extend(families);
                     }
-                    <span class="string">&quot;accept&quot; </span>=&gt; {
+                    <span class="string">"accept" </span>=&gt; {
                         alias.accept.extend(families);
                     }
-                    <span class="string">&quot;default&quot; </span>=&gt; {
+                    <span class="string">"default" </span>=&gt; {
                         alias.default.extend(families);
                     }
                     <span class="kw">_ </span>=&gt; {}
@@ -442,73 +443,73 @@
 
             ConfigPart::Alias(alias)
         }
-        <span class="string">&quot;dir&quot; </span>=&gt; {
+        <span class="string">"dir" </span>=&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>dir = Dir::default();
 
             <span class="macro">parse_attrs!</span>(child, {
-                <span class="string">&quot;prefix&quot; </span>=&gt; dir.prefix,
+                <span class="string">"prefix" </span>=&gt; dir.prefix,
             }, {
-                <span class="string">&quot;salt&quot; </span>=&gt; dir.salt,
+                <span class="string">"salt" </span>=&gt; dir.salt,
             });
 
             dir.path = <span class="macro">try_text!</span>(child).into();
 
             ConfigPart::Dir(dir)
         }
-        <span class="string">&quot;reset-dirs&quot; </span>=&gt; ConfigPart::ResetDirs,
-        <span class="string">&quot;remap-dir&quot; </span>=&gt; {
+        <span class="string">"reset-dirs" </span>=&gt; ConfigPart::ResetDirs,
+        <span class="string">"remap-dir" </span>=&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>dir = RemapDir::default();
 
             <span class="macro">parse_attrs!</span>(child, {
-                <span class="string">&quot;prefix&quot; </span>=&gt; dir.prefix,
+                <span class="string">"prefix" </span>=&gt; dir.prefix,
             }, {
-                <span class="string">&quot;salt&quot; </span>=&gt; dir.salt,
-                <span class="string">&quot;as-path&quot; </span>=&gt; dir.as_path,
+                <span class="string">"salt" </span>=&gt; dir.salt,
+                <span class="string">"as-path" </span>=&gt; dir.as_path,
             });
 
             dir.path = <span class="macro">try_text!</span>(child).into();
 
             ConfigPart::RemapDir(dir)
         }
-        <span class="string">&quot;cachedir&quot; </span>=&gt; {
+        <span class="string">"cachedir" </span>=&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>dir = CacheDir::default();
 
             <span class="macro">parse_attrs!</span>(child, {
-                <span class="string">&quot;prefix&quot; </span>=&gt; dir.prefix,
+                <span class="string">"prefix" </span>=&gt; dir.prefix,
             });
 
             dir.path = <span class="macro">try_text!</span>(child).into();
 
             ConfigPart::CacheDir(dir)
         }
-        <span class="string">&quot;include&quot; </span>=&gt; {
+        <span class="string">"include" </span>=&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>dir = Include::default();
-            <span class="kw">let </span><span class="kw-2">mut </span>ignore_missing = <span class="string">&quot;&quot;</span>;
+            <span class="kw">let </span><span class="kw-2">mut </span>ignore_missing = <span class="string">""</span>;
 
             <span class="macro">parse_attrs!</span>(child, {
-                <span class="string">&quot;prefix&quot; </span>=&gt; dir.prefix,
+                <span class="string">"prefix" </span>=&gt; dir.prefix,
             }, {
-                <span class="string">&quot;ignore_missing&quot; </span>=&gt; ignore_missing,
+                <span class="string">"ignore_missing" </span>=&gt; ignore_missing,
             });
 
-            dir.ignore_missing = <span class="macro">matches!</span>(ignore_missing, <span class="string">&quot;yes&quot;</span>);
+            dir.ignore_missing = <span class="macro">matches!</span>(ignore_missing, <span class="string">"yes"</span>);
             dir.path = <span class="macro">try_text!</span>(child).into();
 
             ConfigPart::Include(dir)
         }
-        <span class="string">&quot;config&quot; </span>=&gt; {
+        <span class="string">"config" </span>=&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>config = Config::default();
 
             <span class="kw">for </span>child <span class="kw">in </span>child.children() {
                 <span class="kw">match </span>child.tag_name().name() {
-                    <span class="string">&quot;rescan&quot; </span>=&gt; {
+                    <span class="string">"rescan" </span>=&gt; {
                         <span class="kw">if let </span><span class="prelude-val">Some</span>(int) = child.first_element_child() {
-                            <span class="kw">if </span>int.tag_name().name() == <span class="string">&quot;int&quot; </span>{
+                            <span class="kw">if </span>int.tag_name().name() == <span class="string">"int" </span>{
                                 config.rescans.push(<span class="macro">try_text!</span>(int).parse()<span class="question-mark">?</span>);
                             }
                         }
                     }
-                    <span class="string">&quot;blank&quot; </span>=&gt; {
+                    <span class="string">"blank" </span>=&gt; {
                         <span class="kw">if let </span><span class="prelude-val">Some</span>(child) = child.first_element_child() {
                             config.blanks.push(parse_int_or_range(child)<span class="question-mark">?</span>);
                         }
@@ -519,17 +520,17 @@
 
             ConfigPart::Config(config)
         }
-        <span class="string">&quot;selectfont&quot; </span>=&gt; {
+        <span class="string">"selectfont" </span>=&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>s = SelectFont::default();
 
             <span class="kw">for </span>child <span class="kw">in </span>child.children() {
                 <span class="kw">let </span>matches = child.children().filter_map(|c| <span class="kw">match </span>c.tag_name().name() {
-                    <span class="string">&quot;pattern&quot; </span>=&gt; {
+                    <span class="string">"pattern" </span>=&gt; {
                         <span class="kw">let </span>patelts = c.children().filter_map(|patelt| {
-                            <span class="kw">if </span>patelt.tag_name().name() == <span class="string">&quot;patelt&quot; </span>{
+                            <span class="kw">if </span>patelt.tag_name().name() == <span class="string">"patelt" </span>{
                                 <span class="kw">let </span><span class="kw-2">mut </span>kind = PropertyKind::default();
                                 <span class="macro">parse_attrs_opt!</span>(patelt, {
-                                    <span class="string">&quot;name&quot; </span>=&gt; kind,
+                                    <span class="string">"name" </span>=&gt; kind,
                                 });
                                 parse_expr(patelt.first_element_child()<span class="question-mark">?</span>)
                                     .ok()
@@ -540,15 +541,15 @@
                         });
                         <span class="prelude-val">Some</span>(FontMatch::Pattern(patelts.collect()))
                     }
-                    <span class="string">&quot;glob&quot; </span>=&gt; c.text().map(Into::into).map(FontMatch::Glob),
+                    <span class="string">"glob" </span>=&gt; c.text().map(Into::into).map(FontMatch::Glob),
                     <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
                 });
 
                 <span class="kw">match </span>child.tag_name().name() {
-                    <span class="string">&quot;acceptfont&quot; </span>=&gt; {
+                    <span class="string">"acceptfont" </span>=&gt; {
                         s.accepts.extend(matches);
                     }
-                    <span class="string">&quot;rejectfont&quot; </span>=&gt; {
+                    <span class="string">"rejectfont" </span>=&gt; {
                         s.rejects.extend(matches);
                     }
                     <span class="kw">_ </span>=&gt; {}
@@ -557,49 +558,49 @@
 
             ConfigPart::SelectFont(s)
         }
-        <span class="string">&quot;match&quot; </span>=&gt; {
+        <span class="string">"match" </span>=&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>m = Match::default();
 
             <span class="macro">parse_attrs!</span>(child, {
-                <span class="string">&quot;target&quot; </span>=&gt; m.target,
+                <span class="string">"target" </span>=&gt; m.target,
             });
 
             <span class="kw">for </span>child <span class="kw">in </span>child.children() {
                 <span class="kw">match </span>child.tag_name().name() {
-                    <span class="string">&quot;test&quot; </span>=&gt; {
+                    <span class="string">"test" </span>=&gt; {
                         <span class="kw">let </span><span class="kw-2">mut </span>t = Test::default();
                         <span class="kw">let </span><span class="kw-2">mut </span>kind = PropertyKind::default();
 
                         <span class="macro">parse_attrs!</span>(child, {
-                            <span class="string">&quot;name&quot; </span>=&gt; kind,
-                            <span class="string">&quot;qual&quot; </span>=&gt; t.qual,
-                            <span class="string">&quot;target&quot; </span>=&gt; t.target,
-                            <span class="string">&quot;compare&quot; </span>=&gt; t.compare,
+                            <span class="string">"name" </span>=&gt; kind,
+                            <span class="string">"qual" </span>=&gt; t.qual,
+                            <span class="string">"target" </span>=&gt; t.target,
+                            <span class="string">"compare" </span>=&gt; t.compare,
                         });
 
                         t.value = kind.make_property(parse_expr(
                             child
                                 .first_element_child()
-                                .ok_or_else(|| Error::InvalidFormat(<span class="macro">format!</span>(<span class="string">&quot;Empty test value&quot;</span>)))<span class="question-mark">?</span>,
+                                .ok_or_else(|| Error::InvalidFormat(<span class="macro">format!</span>(<span class="string">"Empty test value"</span>)))<span class="question-mark">?</span>,
                         )<span class="question-mark">?</span>);
 
                         m.tests.push(t);
                     }
 
-                    <span class="string">&quot;edit&quot; </span>=&gt; {
+                    <span class="string">"edit" </span>=&gt; {
                         <span class="kw">let </span><span class="kw-2">mut </span>e = Edit::default();
                         <span class="kw">let </span><span class="kw-2">mut </span>kind = PropertyKind::default();
 
                         <span class="macro">parse_attrs!</span>(child, {
-                            <span class="string">&quot;name&quot; </span>=&gt; kind,
-                            <span class="string">&quot;mode&quot; </span>=&gt; e.mode,
-                            <span class="string">&quot;binding&quot; </span>=&gt; e.binding,
+                            <span class="string">"name" </span>=&gt; kind,
+                            <span class="string">"mode" </span>=&gt; e.mode,
+                            <span class="string">"binding" </span>=&gt; e.binding,
                         });
 
                         e.value = kind.make_property(parse_expr(
                             child
                                 .first_element_child()
-                                .ok_or_else(|| Error::InvalidFormat(<span class="macro">format!</span>(<span class="string">&quot;Empty edit value&quot;</span>)))<span class="question-mark">?</span>,
+                                .ok_or_else(|| Error::InvalidFormat(<span class="macro">format!</span>(<span class="string">"Empty edit value"</span>)))<span class="question-mark">?</span>,
                         )<span class="question-mark">?</span>);
 
                         m.edits.push(e);
@@ -622,12 +623,12 @@
     <span class="kw">let </span><span class="kw-2">mut </span>texts = get_texts(<span class="kw-2">&amp;</span>node);
 
     <span class="kw">match </span>node.tag_name().name() {
-        <span class="string">&quot;int&quot; </span>=&gt; <span class="prelude-val">Ok</span>(IntOrRange::Int(<span class="macro">try_text!</span>(node).parse()<span class="question-mark">?</span>)),
-        <span class="string">&quot;range&quot; </span>=&gt; <span class="prelude-val">Ok</span>(IntOrRange::Range(
-            <span class="macro">try_next!</span>(texts, <span class="string">&quot;Expect int&quot;</span>).parse()<span class="question-mark">?</span>,
-            <span class="macro">try_next!</span>(texts, <span class="string">&quot;Expect int&quot;</span>).parse()<span class="question-mark">?</span>,
+        <span class="string">"int" </span>=&gt; <span class="prelude-val">Ok</span>(IntOrRange::Int(<span class="macro">try_text!</span>(node).parse()<span class="question-mark">?</span>)),
+        <span class="string">"range" </span>=&gt; <span class="prelude-val">Ok</span>(IntOrRange::Range(
+            <span class="macro">try_next!</span>(texts, <span class="string">"Expect int"</span>).parse()<span class="question-mark">?</span>,
+            <span class="macro">try_next!</span>(texts, <span class="string">"Expect int"</span>).parse()<span class="question-mark">?</span>,
         )),
-        <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::InvalidFormat(<span class="macro">format!</span>(<span class="string">&quot;Expect IntOrRange&quot;</span>))),
+        <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::InvalidFormat(<span class="macro">format!</span>(<span class="string">"Expect IntOrRange"</span>))),
     }
 }
 
@@ -637,24 +638,24 @@
 
     <span class="macro">macro_rules! </span>next {
         (<span class="macro-nonterminal">$iter</span>:expr) =&gt; {
-            <span class="macro">try_next!</span>(<span class="macro-nonterminal">$iter</span>, <span class="string">&quot;Expect expression&quot;</span>)
+            <span class="macro">try_next!</span>(<span class="macro-nonterminal">$iter</span>, <span class="string">"Expect expression"</span>)
         };
     }
 
     <span class="kw">match </span>node.tag_name().name() {
-        <span class="string">&quot;string&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Value::String(<span class="macro">try_text!</span>(node).into()).into()),
-        <span class="string">&quot;langset&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Value::LangSet(<span class="macro">try_text!</span>(node).into()).into()),
-        <span class="string">&quot;double&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Value::Double(<span class="macro">try_text!</span>(node).parse()<span class="question-mark">?</span>).into()),
-        <span class="string">&quot;int&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Value::Int(<span class="macro">try_text!</span>(node).parse()<span class="question-mark">?</span>).into()),
-        <span class="string">&quot;bool&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Value::Bool(<span class="macro">try_text!</span>(node).parse()<span class="question-mark">?</span>).into()),
-        <span class="string">&quot;const&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Value::Constant(<span class="macro">try_text!</span>(node).parse()<span class="question-mark">?</span>).into()),
-        <span class="string">&quot;matrix&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Expression::Matrix(Box::new([
+        <span class="string">"string" </span>=&gt; <span class="prelude-val">Ok</span>(Value::String(<span class="macro">try_text!</span>(node).into()).into()),
+        <span class="string">"langset" </span>=&gt; <span class="prelude-val">Ok</span>(Value::LangSet(<span class="macro">try_text!</span>(node).into()).into()),
+        <span class="string">"double" </span>=&gt; <span class="prelude-val">Ok</span>(Value::Double(<span class="macro">try_text!</span>(node).parse()<span class="question-mark">?</span>).into()),
+        <span class="string">"int" </span>=&gt; <span class="prelude-val">Ok</span>(Value::Int(<span class="macro">try_text!</span>(node).parse()<span class="question-mark">?</span>).into()),
+        <span class="string">"bool" </span>=&gt; <span class="prelude-val">Ok</span>(Value::Bool(<span class="macro">try_text!</span>(node).parse()<span class="question-mark">?</span>).into()),
+        <span class="string">"const" </span>=&gt; <span class="prelude-val">Ok</span>(Value::Constant(<span class="macro">try_text!</span>(node).parse()<span class="question-mark">?</span>).into()),
+        <span class="string">"matrix" </span>=&gt; <span class="prelude-val">Ok</span>(Expression::Matrix(Box::new([
             <span class="macro">next!</span>(exprs)<span class="question-mark">?</span>,
             <span class="macro">next!</span>(exprs)<span class="question-mark">?</span>,
             <span class="macro">next!</span>(exprs)<span class="question-mark">?</span>,
             <span class="macro">next!</span>(exprs)<span class="question-mark">?</span>,
         ]))),
-        <span class="string">&quot;charset&quot; </span>=&gt; {
+        <span class="string">"charset" </span>=&gt; {
             <span class="kw">let </span>charset = node
                 .children()
                 .filter_map(|c| parse_int_or_range(c).ok())
@@ -662,11 +663,11 @@
 
             <span class="prelude-val">Ok</span>(Value::CharSet(charset).into())
         }
-        <span class="string">&quot;range&quot; </span>=&gt; <span class="prelude-val">Ok</span>(Value::Range(<span class="macro">next!</span>(texts).parse()<span class="question-mark">?</span>, <span class="macro">next!</span>(texts).parse()<span class="question-mark">?</span>).into()),
-        <span class="string">&quot;name&quot; </span>=&gt; {
+        <span class="string">"range" </span>=&gt; <span class="prelude-val">Ok</span>(Value::Range(<span class="macro">next!</span>(texts).parse()<span class="question-mark">?</span>, <span class="macro">next!</span>(texts).parse()<span class="question-mark">?</span>).into()),
+        <span class="string">"name" </span>=&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>target = PropertyTarget::default();
             <span class="macro">parse_attrs!</span>(node, {
-                <span class="string">&quot;target&quot; </span>=&gt; target,
+                <span class="string">"target" </span>=&gt; target,
             });
             <span class="kw">let </span>kind = <span class="macro">try_text!</span>(node).parse()<span class="question-mark">?</span>;
 
@@ -692,7 +693,7 @@
                 ))
             } <span class="kw">else </span>{
                 <span class="prelude-val">Err</span>(Error::InvalidFormat(<span class="macro">format!</span>(
-                    <span class="string">&quot;Unknown expression: {:?}&quot;</span>,
+                    <span class="string">"Unknown expression: {:?}"</span>,
                     node.tag_name(),
                 )))
             }
@@ -700,7 +701,7 @@
     }
 }
 
-<span class="kw">fn </span>get_exprs&lt;<span class="lifetime">&#39;a</span>&gt;(node: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Node) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="prelude-ty">Result</span>&lt;Expression&gt;&gt; + <span class="lifetime">&#39;a </span>{
+<span class="kw">fn </span>get_exprs&lt;<span class="lifetime">'a</span>&gt;(node: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Node) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="prelude-ty">Result</span>&lt;Expression&gt;&gt; + <span class="lifetime">'a </span>{
     node.children().filter_map(|n| {
         <span class="kw">if </span>n.is_element() {
             <span class="prelude-val">Some</span>(parse_expr(n))
@@ -710,7 +711,7 @@
     })
 }
 
-<span class="kw">fn </span>get_texts&lt;<span class="lifetime">&#39;a</span>&gt;(node: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Node) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt; {
+<span class="kw">fn </span>get_texts&lt;<span class="lifetime">'a</span>&gt;(node: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Node) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; {
     node.children()
         .filter_map(|n| <span class="kw">if </span>n.is_element() { n.text() } <span class="kw">else </span>{ <span class="prelude-val">None </span>})
 }
@@ -724,9 +725,9 @@
             <span class="attr">#[test]
             #[should_panic]
             </span><span class="kw">fn </span><span class="macro-nonterminal">$name</span>() {
-                <span class="kw">let </span>doc = roxmltree::Document::parse(<span class="macro-nonterminal">$text</span>).expect(<span class="string">&quot;Parsing xml&quot;</span>);
+                <span class="kw">let </span>doc = roxmltree::Document::parse(<span class="macro-nonterminal">$text</span>).expect(<span class="string">"Parsing xml"</span>);
                 <span class="kw">let </span>node = doc.root_element();
-                <span class="macro-nonterminal">$test_fn</span>(node).expect(<span class="string">&quot;Run parse&quot;</span>);
+                <span class="macro-nonterminal">$test_fn</span>(node).expect(<span class="string">"Run parse"</span>);
             }
         };
     }
@@ -735,9 +736,9 @@
         (<span class="macro-nonterminal">$name</span>:ident, <span class="macro-nonterminal">$test_fn</span>:ident, <span class="macro-nonterminal">$text</span>:expr, <span class="macro-nonterminal">$value</span>:expr,) =&gt; {
             <span class="attr">#[test]
             </span><span class="kw">fn </span><span class="macro-nonterminal">$name</span>() {
-                <span class="kw">let </span>doc = roxmltree::Document::parse(<span class="macro-nonterminal">$text</span>).expect(<span class="string">&quot;Parsing xml&quot;</span>);
+                <span class="kw">let </span>doc = roxmltree::Document::parse(<span class="macro-nonterminal">$text</span>).expect(<span class="string">"Parsing xml"</span>);
                 <span class="kw">let </span>node = doc.root_element();
-                <span class="kw">let </span>ret = <span class="macro-nonterminal">$test_fn</span>(node).expect(<span class="string">&quot;Run parse&quot;</span>);
+                <span class="kw">let </span>ret = <span class="macro-nonterminal">$test_fn</span>(node).expect(<span class="string">"Run parse"</span>);
                 <span class="kw">let </span>expected = <span class="macro-nonterminal">$value</span>;
                 <span class="macro">k9::assert_equal!</span>(expected, ret);
             }
@@ -747,37 +748,37 @@
     <span class="macro">make_parse_test!</span>(
         test_parse_charset,
         parse_expr,
-        <span class="string">&quot;&lt;charset&gt;&lt;range&gt;&lt;int&gt;0&lt;/int&gt;&lt;int&gt;123&lt;/int&gt;&lt;/range&gt;&lt;/charset&gt;&quot;</span>,
+        <span class="string">"&lt;charset&gt;&lt;range&gt;&lt;int&gt;0&lt;/int&gt;&lt;int&gt;123&lt;/int&gt;&lt;/range&gt;&lt;/charset&gt;"</span>,
         Expression::from(<span class="macro">vec!</span>[IntOrRange::Range(<span class="number">0</span>, <span class="number">123</span>)]),
     );
 
     <span class="macro">make_parse_test!</span>(
         test_parse_int,
         parse_expr,
-        <span class="string">&quot;&lt;int&gt;123&lt;/int&gt;&quot;</span>,
+        <span class="string">"&lt;int&gt;123&lt;/int&gt;"</span>,
         Expression::from(<span class="number">123</span>),
     );
 
-    <span class="macro">make_parse_failed_test!</span>(test_parse_invalid_int, parse_expr, <span class="string">&quot;&lt;int&gt;123f&lt;/int&gt;&quot;</span>,);
+    <span class="macro">make_parse_failed_test!</span>(test_parse_invalid_int, parse_expr, <span class="string">"&lt;int&gt;123f&lt;/int&gt;"</span>,);
 
     <span class="macro">make_parse_test!</span>(
         test_parse_range,
         parse_expr,
-        <span class="string">&quot;&lt;range&gt;&lt;int&gt;0&lt;/int&gt;&lt;int&gt;10&lt;/int&gt;&lt;/range&gt;&quot;</span>,
+        <span class="string">"&lt;range&gt;&lt;int&gt;0&lt;/int&gt;&lt;int&gt;10&lt;/int&gt;&lt;/range&gt;"</span>,
         Expression::from(Value::Range(<span class="number">0</span>, <span class="number">10</span>)),
     );
 
     <span class="macro">make_parse_failed_test!</span>(
         test_parse_invalid_range,
         parse_expr,
-        <span class="string">&quot;&lt;range&gt;0&lt;int&gt;10&lt;/int&gt;&lt;/range&gt;&quot;</span>,
+        <span class="string">"&lt;range&gt;0&lt;int&gt;10&lt;/int&gt;&lt;/range&gt;"</span>,
     );
 
     <span class="macro">make_parse_test!</span>(
         test_langset,
         parse_expr,
-        <span class="string">&quot;&lt;langset&gt;ko-KR&lt;/langset&gt;&quot;</span>,
-        Expression::from(Value::LangSet(<span class="string">&quot;ko-KR&quot;</span>.into())),
+        <span class="string">"&lt;langset&gt;ko-KR&lt;/langset&gt;"</span>,
+        Expression::from(Value::LangSet(<span class="string">"ko-KR"</span>.into())),
     );
 }
 </code></pre></div></section></main></body></html>

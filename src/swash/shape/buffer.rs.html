@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/shape/buffer.rs`."><title>buffer.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/shape/buffer.rs`."><title>buffer.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -812,7 +813,7 @@
             <span class="kw">if let </span><span class="prelude-val">Some</span>(id) = <span class="self">self</span>.dotted_circle {
                 <span class="kw">let </span>first = <span class="kw-2">&amp;</span>chars[<span class="number">0</span>];
                 <span class="self">self</span>.push_char(<span class="kw-2">&amp;</span>Char {
-                    ch: <span class="string">&#39;\u{25cc}&#39;</span>,
+                    ch: <span class="string">'\u{25cc}'</span>,
                     shape_class: ShapeClass::Base,
                     joining_type: JoiningType::U,
                     ignorable: <span class="bool-val">false</span>,
@@ -838,7 +839,7 @@
             <span class="kw">if let </span><span class="prelude-val">Some</span>(id) = <span class="self">self</span>.dotted_circle {
                 <span class="kw">let </span>first = <span class="kw-2">&amp;</span>chars[order[<span class="number">0</span>]];
                 <span class="self">self</span>.push_char(<span class="kw-2">&amp;</span>Char {
-                    ch: <span class="string">&#39;\u{25cc}&#39;</span>,
+                    ch: <span class="string">'\u{25cc}'</span>,
                     shape_class: ShapeClass::Base,
                     joining_type: JoiningType::U,
                     ignorable: <span class="bool-val">false</span>,
@@ -864,7 +865,7 @@
             <span class="kw">if let </span><span class="prelude-val">Some</span>(id) = <span class="self">self</span>.dotted_circle {
                 <span class="kw">let </span>first = <span class="kw-2">&amp;</span>chars[<span class="number">0</span>];
                 <span class="self">self</span>.push_char(<span class="kw-2">&amp;</span>Char {
-                    ch: <span class="string">&#39;\u{25cc}&#39;</span>,
+                    ch: <span class="string">'\u{25cc}'</span>,
                     shape_class: ShapeClass::Base,
                     joining_type: JoiningType::U,
                     ignorable: <span class="bool-val">false</span>,
@@ -985,7 +986,7 @@
     <span class="kw">pub fn </span>substitute(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: usize, id: u16) {
         <span class="kw">let </span>g = <span class="kw-2">&amp;mut </span><span class="self">self</span>.glyphs[index];
         <span class="comment">// if TRACE {
-        //     println!(&quot;!subst[{}] {} -&gt; {}&quot;, index, g.id, id);
+        //     println!("!subst[{}] {} -&gt; {}", index, g.id, id);
         // }
         </span>g.id = id;
         g.flags |= SUBSTITUTED;
@@ -993,11 +994,11 @@
 
     <span class="kw">pub fn </span>substitute_ligature(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: usize, id: u16, components: <span class="kw-2">&amp;</span>[usize]) {
         <span class="comment">// if TRACE {
-        //     print!(&quot;!subst[{}] {}&quot;, index, self.glyphs[index].id);
+        //     print!("!subst[{}] {}", index, self.glyphs[index].id);
         //     for c in components {
-        //         print!(&quot; {}&quot;, self.glyphs[*c].id)
+        //         print!(" {}", self.glyphs[*c].id)
         //     }
-        //     println!(&quot; -&gt; {}&quot;, id);
+        //     println!(" -&gt; {}", id);
         // }
         </span><span class="kw">if </span>components.is_empty() {
             <span class="kw">return</span>;
@@ -1049,7 +1050,7 @@
             <span class="kw">return</span>;
         }
         <span class="comment">// if TRACE {
-        //     println!(&quot;!subst[{}] {} -&gt; {:?}&quot;, index, self.glyphs[index].id, ids);
+        //     println!("!subst[{}] {} -&gt; {:?}", index, self.glyphs[index].id, ids);
         // }
         </span><span class="kw">let </span>g = <span class="self">self</span>.glyphs[index];
         <span class="self">self</span>.glyphs
@@ -1120,13 +1121,13 @@
     }
 }
 
-<span class="kw">struct </span>SubstIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    ids: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u16],
+<span class="kw">struct </span>SubstIter&lt;<span class="lifetime">'a</span>&gt; {
+    ids: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u16],
     g: GlyphData,
     cur: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>SubstIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>SubstIter&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">type </span>Item = GlyphData;
 
     <span class="kw">fn </span>size_hint(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (usize, <span class="prelude-ty">Option</span>&lt;usize&gt;) {
@@ -1350,9 +1351,9 @@
         <span class="kw">if </span>ignored[i] {
             <span class="kw">continue</span>;
         }
-        <span class="comment">// println!(&quot; -&gt; i = {}, j = {}&quot;, i, j);
-        // println!(&quot;order: {:?}&quot;, order);
-        // println!(&quot;ignored: {:?}&quot;, &amp;ignored[0..order.len()]);
+        <span class="comment">// println!(" -&gt; i = {}, j = {}", i, j);
+        // println!("order: {:?}", order);
+        // println!("ignored: {:?}", &amp;ignored[0..order.len()]);
         </span>order[j] = i;
         j += <span class="number">1</span>;
         <span class="comment">// Insert reph after final base
@@ -1387,12 +1388,12 @@
     <span class="kw">for </span>(i, j) <span class="kw">in </span>order.iter().enumerate() {
         glyphs[i] = buf[<span class="kw-2">*</span>j];
     }
-    <span class="comment">// println!(&quot;order: {:?}&quot;, order);
+    <span class="comment">// println!("order: {:?}", order);
     // let new = glyphs
     //     .iter()
     //     .map(|g| (g.class, char_kind(g.subclass)))
     //     .collect::&lt;Vec&lt;_&gt;&gt;();
-    // println!(&quot;new: {:?}&quot;, &amp;new[..]);
+    // println!("new: {:?}", &amp;new[..]);
 </span>}
 
 <span class="comment">// Matches the Arabic joining table from Harfbuzz.

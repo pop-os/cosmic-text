@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ttf-parser-0.20.0/src/parser.rs`."><title>parser.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="ttf_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ttf-parser-0.20.0/src/parser.rs`."><title>parser.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="ttf_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -878,7 +879,7 @@
 <a href="#878" id="878">878</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Binary parsing utils.
 //!
-//! This module should not be used directly, unless you&#39;re planning to parse
+//! This module should not be used directly, unless you're planning to parse
 //! some tables manually.
 
 </span><span class="kw">use </span>core::convert::{TryFrom, TryInto};
@@ -888,7 +889,7 @@
 ///
 /// This is a low-level, internal trait that should not be used directly.
 </span><span class="kw">pub trait </span>FromData: Sized {
-    <span class="doccomment">/// Object&#39;s raw data size.
+    <span class="doccomment">/// Object's raw data size.
     ///
     /// Not always the same as `mem::size_of`.
     </span><span class="kw">const </span>SIZE: usize;
@@ -900,9 +901,9 @@
 <span class="doccomment">/// A trait for parsing raw binary data of variable size.
 ///
 /// This is a low-level, internal trait that should not be used directly.
-</span><span class="kw">pub trait </span>FromSlice&lt;<span class="lifetime">&#39;a</span>&gt;: Sized {
+</span><span class="kw">pub trait </span>FromSlice&lt;<span class="lifetime">'a</span>&gt;: Sized {
     <span class="doccomment">/// Parses an object from a raw data.
-    </span><span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt;;
+    </span><span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt;;
 }
 
 <span class="kw">impl </span>FromData <span class="kw">for </span>() {
@@ -1032,9 +1033,9 @@
 
 <span class="doccomment">/// A safe u32 to usize casting.
 ///
-/// Rust doesn&#39;t implement `From&lt;u32&gt; for usize`,
+/// Rust doesn't implement `From&lt;u32&gt; for usize`,
 /// because it has to support 16 bit targets.
-/// We don&#39;t, so we can allow this.
+/// We don't, so we can allow this.
 </span><span class="kw">pub trait </span>NumFrom&lt;T&gt;: Sized {
     <span class="doccomment">/// Converts u32 into usize.
     </span><span class="kw">fn </span>num_from(<span class="kw">_</span>: T) -&gt; <span class="self">Self</span>;
@@ -1043,7 +1044,7 @@
 <span class="kw">impl </span>NumFrom&lt;u32&gt; <span class="kw">for </span>usize {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>num_from(v: u32) -&gt; <span class="self">Self </span>{
-        <span class="attr">#[cfg(any(target_pointer_width = <span class="string">&quot;32&quot;</span>, target_pointer_width = <span class="string">&quot;64&quot;</span>))]
+        <span class="attr">#[cfg(any(target_pointer_width = <span class="string">"32"</span>, target_pointer_width = <span class="string">"64"</span>))]
         </span>{
             v <span class="kw">as </span>usize
         }
@@ -1055,7 +1056,7 @@
 <span class="kw">impl </span>NumFrom&lt;char&gt; <span class="kw">for </span>usize {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>num_from(v: char) -&gt; <span class="self">Self </span>{
-        <span class="attr">#[cfg(any(target_pointer_width = <span class="string">&quot;32&quot;</span>, target_pointer_width = <span class="string">&quot;64&quot;</span>))]
+        <span class="attr">#[cfg(any(target_pointer_width = <span class="string">"32"</span>, target_pointer_width = <span class="string">"64"</span>))]
         </span>{
             v <span class="kw">as </span>usize
         }
@@ -1064,7 +1065,7 @@
     </span>}
 }
 
-<span class="doccomment">/// Just like TryFrom&lt;N&gt;, but for numeric types not supported by the Rust&#39;s std.
+<span class="doccomment">/// Just like TryFrom&lt;N&gt;, but for numeric types not supported by the Rust's std.
 </span><span class="kw">pub trait </span>TryNumFrom&lt;T&gt;: Sized {
     <span class="doccomment">/// Casts between numeric types.
     </span><span class="kw">fn </span>try_num_from(<span class="kw">_</span>: T) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt;;
@@ -1100,10 +1101,10 @@
         // Float as int truncates toward zero, so we want to allow values
         // in the exclusive range `(MIN-1, MAX+1)`.
 
-        // We can&#39;t represent `MIN-1` exactly, but there&#39;s no fractional part
+        // We can't represent `MIN-1` exactly, but there's no fractional part
         // at this magnitude, so we can just use a `MIN` inclusive boundary.
         </span><span class="kw">const </span>MIN: f32 = core::i32::MIN <span class="kw">as </span>f32;
-        <span class="comment">// We can&#39;t represent `MAX` exactly, but it will round up to exactly
+        <span class="comment">// We can't represent `MAX` exactly, but it will round up to exactly
         // `MAX+1` (a power of two) when we cast it.
         </span><span class="kw">const </span>MAX_P1: f32 = core::i32::MAX <span class="kw">as </span>f32;
         <span class="kw">if </span>v &gt;= MIN &amp;&amp; v &lt; MAX_P1 {
@@ -1118,12 +1119,12 @@
 ///
 /// Array values are stored in a continuous data chunk.
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>LazyArray16&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+</span><span class="kw">pub struct </span>LazyArray16&lt;<span class="lifetime">'a</span>, T&gt; {
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     data_type: core::marker::PhantomData&lt;T&gt;,
 }
 
-<span class="kw">impl</span>&lt;T&gt; Default <span class="kw">for </span>LazyArray16&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+<span class="kw">impl</span>&lt;T&gt; Default <span class="kw">for </span>LazyArray16&lt;<span class="lifetime">'_</span>, T&gt; {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         LazyArray16 {
@@ -1133,10 +1134,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: FromData&gt; LazyArray16&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: FromData&gt; LazyArray16&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="doccomment">/// Creates a new `LazyArray`.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>new(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="self">Self </span>{
         LazyArray16 {
             data,
             data_type: core::marker::PhantomData,
@@ -1176,7 +1177,7 @@
         })
     }
 
-    <span class="doccomment">/// Returns array&#39;s length.
+    <span class="doccomment">/// Returns array's length.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         (<span class="self">self</span>.data.len() / T::SIZE) <span class="kw">as </span>u16
@@ -1234,15 +1235,15 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: FromData + core::fmt::Debug + Copy&gt; core::fmt::Debug <span class="kw">for </span>LazyArray16&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: FromData + core::fmt::Debug + Copy&gt; core::fmt::Debug <span class="kw">for </span>LazyArray16&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
         f.debug_list().entries(<span class="self">self</span>.into_iter()).finish()
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: FromData&gt; IntoIterator <span class="kw">for </span>LazyArray16&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: FromData&gt; IntoIterator <span class="kw">for </span>LazyArray16&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">type </span>Item = T;
-    <span class="kw">type </span>IntoIter = LazyArrayIter16&lt;<span class="lifetime">&#39;a</span>, T&gt;;
+    <span class="kw">type </span>IntoIter = LazyArrayIter16&lt;<span class="lifetime">'a</span>, T&gt;;
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
@@ -1256,12 +1257,12 @@
 <span class="doccomment">/// An iterator over `LazyArray16`.
 </span><span class="attr">#[derive(Clone, Copy)]
 #[allow(missing_debug_implementations)]
-</span><span class="kw">pub struct </span>LazyArrayIter16&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    data: LazyArray16&lt;<span class="lifetime">&#39;a</span>, T&gt;,
+</span><span class="kw">pub struct </span>LazyArrayIter16&lt;<span class="lifetime">'a</span>, T&gt; {
+    data: LazyArray16&lt;<span class="lifetime">'a</span>, T&gt;,
     index: u16,
 }
 
-<span class="kw">impl</span>&lt;T: FromData&gt; Default <span class="kw">for </span>LazyArrayIter16&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+<span class="kw">impl</span>&lt;T: FromData&gt; Default <span class="kw">for </span>LazyArrayIter16&lt;<span class="lifetime">'_</span>, T&gt; {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         LazyArrayIter16 {
@@ -1271,7 +1272,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: FromData&gt; Iterator <span class="kw">for </span>LazyArrayIter16&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: FromData&gt; Iterator <span class="kw">for </span>LazyArrayIter16&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">type </span>Item = T;
 
     <span class="attr">#[inline]
@@ -1290,12 +1291,12 @@
 ///
 /// This is a low-level, internal structure that should not be used directly.
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>LazyArray32&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+</span><span class="kw">pub struct </span>LazyArray32&lt;<span class="lifetime">'a</span>, T&gt; {
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     data_type: core::marker::PhantomData&lt;T&gt;,
 }
 
-<span class="kw">impl</span>&lt;T&gt; Default <span class="kw">for </span>LazyArray32&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+<span class="kw">impl</span>&lt;T&gt; Default <span class="kw">for </span>LazyArray32&lt;<span class="lifetime">'_</span>, T&gt; {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         LazyArray32 {
@@ -1305,10 +1306,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: FromData&gt; LazyArray32&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: FromData&gt; LazyArray32&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="doccomment">/// Creates a new `LazyArray`.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>new(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="self">Self </span>{
         LazyArray32 {
             data,
             data_type: core::marker::PhantomData,
@@ -1327,7 +1328,7 @@
         </span>}
     }
 
-    <span class="doccomment">/// Returns array&#39;s length.
+    <span class="doccomment">/// Returns array's length.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
         (<span class="self">self</span>.data.len() / T::SIZE) <span class="kw">as </span>u32
@@ -1384,15 +1385,15 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: FromData + core::fmt::Debug + Copy&gt; core::fmt::Debug <span class="kw">for </span>LazyArray32&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: FromData + core::fmt::Debug + Copy&gt; core::fmt::Debug <span class="kw">for </span>LazyArray32&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
         f.debug_list().entries(<span class="self">self</span>.into_iter()).finish()
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: FromData&gt; IntoIterator <span class="kw">for </span>LazyArray32&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: FromData&gt; IntoIterator <span class="kw">for </span>LazyArray32&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">type </span>Item = T;
-    <span class="kw">type </span>IntoIter = LazyArrayIter32&lt;<span class="lifetime">&#39;a</span>, T&gt;;
+    <span class="kw">type </span>IntoIter = LazyArrayIter32&lt;<span class="lifetime">'a</span>, T&gt;;
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
@@ -1406,12 +1407,12 @@
 <span class="doccomment">/// An iterator over `LazyArray32`.
 </span><span class="attr">#[derive(Clone, Copy)]
 #[allow(missing_debug_implementations)]
-</span><span class="kw">pub struct </span>LazyArrayIter32&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    data: LazyArray32&lt;<span class="lifetime">&#39;a</span>, T&gt;,
+</span><span class="kw">pub struct </span>LazyArrayIter32&lt;<span class="lifetime">'a</span>, T&gt; {
+    data: LazyArray32&lt;<span class="lifetime">'a</span>, T&gt;,
     index: u32,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: FromData&gt; Iterator <span class="kw">for </span>LazyArrayIter32&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: FromData&gt; Iterator <span class="kw">for </span>LazyArrayIter32&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">type </span>Item = T;
 
     <span class="attr">#[inline]
@@ -1432,17 +1433,17 @@
 ///
 /// Multiple offsets can point to the same data.
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>LazyOffsetArray16&lt;<span class="lifetime">&#39;a</span>, T: FromSlice&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
-    <span class="comment">// Zero offsets must be ignored, therefore we&#39;re using `Option&lt;Offset16&gt;`.
-    </span>offsets: LazyArray16&lt;<span class="lifetime">&#39;a</span>, <span class="prelude-ty">Option</span>&lt;Offset16&gt;&gt;,
+</span><span class="kw">pub struct </span>LazyOffsetArray16&lt;<span class="lifetime">'a</span>, T: FromSlice&lt;<span class="lifetime">'a</span>&gt;&gt; {
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
+    <span class="comment">// Zero offsets must be ignored, therefore we're using `Option&lt;Offset16&gt;`.
+    </span>offsets: LazyArray16&lt;<span class="lifetime">'a</span>, <span class="prelude-ty">Option</span>&lt;Offset16&gt;&gt;,
     data_type: core::marker::PhantomData&lt;T&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: FromSlice&lt;<span class="lifetime">&#39;a</span>&gt;&gt; LazyOffsetArray16&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: FromSlice&lt;<span class="lifetime">'a</span>&gt;&gt; LazyOffsetArray16&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="doccomment">/// Creates a new `LazyOffsetArray16`.
     </span><span class="attr">#[allow(dead_code)]
-    </span><span class="kw">pub fn </span>new(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], offsets: LazyArray16&lt;<span class="lifetime">&#39;a</span>, <span class="prelude-ty">Option</span>&lt;Offset16&gt;&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], offsets: LazyArray16&lt;<span class="lifetime">'a</span>, <span class="prelude-ty">Option</span>&lt;Offset16&gt;&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             data,
             offsets,
@@ -1452,7 +1453,7 @@
 
     <span class="doccomment">/// Parses `LazyOffsetArray16` from raw data.
     </span><span class="attr">#[allow(dead_code)]
-    </span><span class="kw">pub fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">pub fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">let </span>count = s.read::&lt;u16&gt;()<span class="question-mark">?</span>;
         <span class="kw">let </span>offsets = s.read_array16(count)<span class="question-mark">?</span>;
@@ -1470,7 +1471,7 @@
         <span class="self">self</span>.data.get(offset..).and_then(T::parse)
     }
 
-    <span class="doccomment">/// Returns array&#39;s length.
+    <span class="doccomment">/// Returns array's length.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="self">self</span>.offsets.len()
@@ -1484,7 +1485,7 @@
     </span>}
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: FromSlice&lt;<span class="lifetime">&#39;a</span>&gt; + core::fmt::Debug + Copy&gt; core::fmt::Debug <span class="kw">for </span>LazyOffsetArray16&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: FromSlice&lt;<span class="lifetime">'a</span>&gt; + core::fmt::Debug + Copy&gt; core::fmt::Debug <span class="kw">for </span>LazyOffsetArray16&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
         f.debug_list().entries(<span class="self">self</span>.into_iter()).finish()
     }
@@ -1493,14 +1494,14 @@
 <span class="doccomment">/// An iterator over [`LazyOffsetArray16`] values.
 </span><span class="attr">#[derive(Clone, Copy)]
 #[allow(missing_debug_implementations)]
-</span><span class="kw">pub struct </span>LazyOffsetArrayIter16&lt;<span class="lifetime">&#39;a</span>, T: FromSlice&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
-    array: LazyOffsetArray16&lt;<span class="lifetime">&#39;a</span>, T&gt;,
+</span><span class="kw">pub struct </span>LazyOffsetArrayIter16&lt;<span class="lifetime">'a</span>, T: FromSlice&lt;<span class="lifetime">'a</span>&gt;&gt; {
+    array: LazyOffsetArray16&lt;<span class="lifetime">'a</span>, T&gt;,
     index: u16,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: FromSlice&lt;<span class="lifetime">&#39;a</span>&gt;&gt; IntoIterator <span class="kw">for </span>LazyOffsetArray16&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: FromSlice&lt;<span class="lifetime">'a</span>&gt;&gt; IntoIterator <span class="kw">for </span>LazyOffsetArray16&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">type </span>Item = T;
-    <span class="kw">type </span>IntoIter = LazyOffsetArrayIter16&lt;<span class="lifetime">&#39;a</span>, T&gt;;
+    <span class="kw">type </span>IntoIter = LazyOffsetArrayIter16&lt;<span class="lifetime">'a</span>, T&gt;;
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
@@ -1511,7 +1512,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: FromSlice&lt;<span class="lifetime">&#39;a</span>&gt;&gt; Iterator <span class="kw">for </span>LazyOffsetArrayIter16&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: FromSlice&lt;<span class="lifetime">'a</span>&gt;&gt; Iterator <span class="kw">for </span>LazyOffsetArrayIter16&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">type </span>Item = T;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -1531,15 +1532,15 @@
 
 <span class="doccomment">/// A streaming binary parser.
 </span><span class="attr">#[derive(Clone, Default, Debug)]
-</span><span class="kw">pub struct </span>Stream&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+</span><span class="kw">pub struct </span>Stream&lt;<span class="lifetime">'a</span>&gt; {
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     offset: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Stream&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Stream&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Creates a new `Stream` parser.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>new(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="self">Self </span>{
         Stream { data, offset: <span class="number">0 </span>}
     }
 
@@ -1547,7 +1548,7 @@
     ///
     /// Returns `None` when `offset` is out of bounds.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>new_at(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], offset: usize) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">pub fn </span>new_at(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], offset: usize) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">if </span>offset &lt;= data.len() {
             <span class="prelude-val">Some</span>(Stream { data, offset })
         } <span class="kw">else </span>{
@@ -1579,13 +1580,13 @@
     ///
     /// Returns `None` when `Stream` is reached the end.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>tail(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt; {
+    </span><span class="kw">pub fn </span>tail(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt; {
         <span class="self">self</span>.data.get(<span class="self">self</span>.offset..)
     }
 
     <span class="doccomment">/// Advances by `FromData::SIZE`.
     ///
-    /// Doesn&#39;t check bounds.
+    /// Doesn't check bounds.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>skip&lt;T: FromData&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.advance(T::SIZE);
@@ -1593,7 +1594,7 @@
 
     <span class="doccomment">/// Advances by the specified `len`.
     ///
-    /// Doesn&#39;t check bounds.
+    /// Doesn't check bounds.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>advance(<span class="kw-2">&amp;mut </span><span class="self">self</span>, len: usize) {
         <span class="self">self</span>.offset += len;
@@ -1627,7 +1628,7 @@
 
     <span class="doccomment">/// Reads N bytes from the stream.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>read_bytes(<span class="kw-2">&amp;mut </span><span class="self">self</span>, len: usize) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt; {
+    </span><span class="kw">pub fn </span>read_bytes(<span class="kw-2">&amp;mut </span><span class="self">self</span>, len: usize) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt; {
         <span class="kw">let </span>v = <span class="self">self</span>.data.get(<span class="self">self</span>.offset..<span class="self">self</span>.offset + len)<span class="question-mark">?</span>;
         <span class="self">self</span>.advance(len);
         <span class="prelude-val">Some</span>(v)
@@ -1635,21 +1636,21 @@
 
     <span class="doccomment">/// Reads the next `count` types as a slice.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>read_array16&lt;T: FromData&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, count: u16) -&gt; <span class="prelude-ty">Option</span>&lt;LazyArray16&lt;<span class="lifetime">&#39;a</span>, T&gt;&gt; {
+    </span><span class="kw">pub fn </span>read_array16&lt;T: FromData&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, count: u16) -&gt; <span class="prelude-ty">Option</span>&lt;LazyArray16&lt;<span class="lifetime">'a</span>, T&gt;&gt; {
         <span class="kw">let </span>len = usize::from(count) * T::SIZE;
         <span class="self">self</span>.read_bytes(len).map(LazyArray16::new)
     }
 
     <span class="doccomment">/// Reads the next `count` types as a slice.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>read_array32&lt;T: FromData&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, count: u32) -&gt; <span class="prelude-ty">Option</span>&lt;LazyArray32&lt;<span class="lifetime">&#39;a</span>, T&gt;&gt; {
+    </span><span class="kw">pub fn </span>read_array32&lt;T: FromData&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, count: u32) -&gt; <span class="prelude-ty">Option</span>&lt;LazyArray32&lt;<span class="lifetime">'a</span>, T&gt;&gt; {
         <span class="kw">let </span>len = usize::num_from(count) * T::SIZE;
         <span class="self">self</span>.read_bytes(len).map(LazyArray32::new)
     }
 
     <span class="attr">#[allow(dead_code)]
     #[inline]
-    </span><span class="kw">pub fn </span>read_at_offset16(<span class="kw-2">&amp;mut </span><span class="self">self</span>, data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt; {
+    </span><span class="kw">pub fn </span>read_at_offset16(<span class="kw-2">&amp;mut </span><span class="self">self</span>, data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt; {
         <span class="kw">let </span>offset = <span class="self">self</span>.read::&lt;Offset16&gt;()<span class="question-mark">?</span>.to_usize();
         data.get(offset..)
     }

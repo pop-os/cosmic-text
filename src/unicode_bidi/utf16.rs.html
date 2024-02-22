@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/unicode-bidi-0.3.15/src/utf16.rs`."><title>utf16.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="unicode_bidi" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/unicode-bidi-0.3.15/src/utf16.rs`."><title>utf16.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="unicode_bidi" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -811,16 +812,16 @@
 };
 <span class="kw">use crate</span>::{BidiClass, BidiDataSource, Direction, Level, LevelRun, ParagraphInfo};
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"hardcoded-data"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::HardcodedBidiData;
 
 <span class="doccomment">/// Initial bidi information of the text (UTF-16 version).
 ///
 /// Contains the text paragraphs and `BidiClass` of its characters.
 </span><span class="attr">#[derive(PartialEq, Debug)]
-</span><span class="kw">pub struct </span>InitialInfo&lt;<span class="lifetime">&#39;text</span>&gt; {
+</span><span class="kw">pub struct </span>InitialInfo&lt;<span class="lifetime">'text</span>&gt; {
     <span class="doccomment">/// The text
-    </span><span class="kw">pub </span>text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;text </span>[u16],
+    </span><span class="kw">pub </span>text: <span class="kw-2">&amp;</span><span class="lifetime">'text </span>[u16],
 
     <span class="doccomment">/// The BidiClass of the character at each code unit in the text.
     /// If a character is multiple code units, its class will appear multiple times in the vector.
@@ -830,19 +831,19 @@
     </span><span class="kw">pub </span>paragraphs: Vec&lt;ParagraphInfo&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;text</span>&gt; InitialInfo&lt;<span class="lifetime">&#39;text</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'text</span>&gt; InitialInfo&lt;<span class="lifetime">'text</span>&gt; {
     <span class="doccomment">/// Find the paragraphs and BidiClasses in a string of text.
     ///
     /// &lt;http://www.unicode.org/reports/tr9/#The_Paragraph_Level&gt;
     ///
     /// Also sets the class for each First Strong Isolate initiator (FSI) to LRI or RLI if a strong
     /// character is found before the matching PDI.  If no strong character is found, the class will
-    /// remain FSI, and it&#39;s up to later stages to treat these as LRI when needed.
+    /// remain FSI, and it's up to later stages to treat these as LRI when needed.
     ///
     /// The `hardcoded-data` Cargo feature (enabled by default) must be enabled to use this.
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
-    #[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
-    </span><span class="kw">pub fn </span>new(text: <span class="kw-2">&amp;</span>[u16], default_para_level: <span class="prelude-ty">Option</span>&lt;Level&gt;) -&gt; InitialInfo&lt;<span class="lifetime">&#39;_</span>&gt; {
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
+    #[cfg(feature = <span class="string">"hardcoded-data"</span>)]
+    </span><span class="kw">pub fn </span>new(text: <span class="kw-2">&amp;</span>[u16], default_para_level: <span class="prelude-ty">Option</span>&lt;Level&gt;) -&gt; InitialInfo&lt;<span class="lifetime">'_</span>&gt; {
         <span class="self">Self</span>::new_with_data_source(<span class="kw-2">&amp;</span>HardcodedBidiData, text, default_para_level)
     }
 
@@ -854,30 +855,30 @@
     ///
     /// Also sets the class for each First Strong Isolate initiator (FSI) to LRI or RLI if a strong
     /// character is found before the matching PDI.  If no strong character is found, the class will
-    /// remain FSI, and it&#39;s up to later stages to treat these as LRI when needed.
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
-    </span><span class="kw">pub fn </span>new_with_data_source&lt;<span class="lifetime">&#39;a</span>, D: BidiDataSource&gt;(
+    /// remain FSI, and it's up to later stages to treat these as LRI when needed.
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
+    </span><span class="kw">pub fn </span>new_with_data_source&lt;<span class="lifetime">'a</span>, D: BidiDataSource&gt;(
         data_source: <span class="kw-2">&amp;</span>D,
-        text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u16],
+        text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u16],
         default_para_level: <span class="prelude-ty">Option</span>&lt;Level&gt;,
-    ) -&gt; InitialInfo&lt;<span class="lifetime">&#39;a</span>&gt; {
+    ) -&gt; InitialInfo&lt;<span class="lifetime">'a</span>&gt; {
         InitialInfoExt::new_with_data_source(data_source, text, default_para_level).base
     }
 }
 
 <span class="doccomment">/// Extended version of InitialInfo (not public API).
 </span><span class="attr">#[derive(PartialEq, Debug)]
-</span><span class="kw">struct </span>InitialInfoExt&lt;<span class="lifetime">&#39;text</span>&gt; {
+</span><span class="kw">struct </span>InitialInfoExt&lt;<span class="lifetime">'text</span>&gt; {
     <span class="doccomment">/// The base InitialInfo for the text, recording its paragraphs and bidi classes.
-    </span>base: InitialInfo&lt;<span class="lifetime">&#39;text</span>&gt;,
+    </span>base: InitialInfo&lt;<span class="lifetime">'text</span>&gt;,
 
-    <span class="doccomment">/// Parallel to base.paragraphs, records whether each paragraph is &quot;pure LTR&quot; that
+    <span class="doccomment">/// Parallel to base.paragraphs, records whether each paragraph is "pure LTR" that
     /// requires no further bidi processing (i.e. there are no RTL characters or bidi
     /// control codes present).
     </span>pure_ltr: Vec&lt;bool&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;text</span>&gt; InitialInfoExt&lt;<span class="lifetime">&#39;text</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'text</span>&gt; InitialInfoExt&lt;<span class="lifetime">'text</span>&gt; {
     <span class="doccomment">/// Find the paragraphs and BidiClasses in a string of text, with a custom [`BidiDataSource`]
     /// for Bidi data. If you just wish to use the hardcoded Bidi data, please use [`InitialInfo::new()`]
     /// instead (enabled with tbe default `hardcoded-data` Cargo feature)
@@ -886,13 +887,13 @@
     ///
     /// Also sets the class for each First Strong Isolate initiator (FSI) to LRI or RLI if a strong
     /// character is found before the matching PDI.  If no strong character is found, the class will
-    /// remain FSI, and it&#39;s up to later stages to treat these as LRI when needed.
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
-    </span><span class="kw">pub fn </span>new_with_data_source&lt;<span class="lifetime">&#39;a</span>, D: BidiDataSource&gt;(
+    /// remain FSI, and it's up to later stages to treat these as LRI when needed.
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
+    </span><span class="kw">pub fn </span>new_with_data_source&lt;<span class="lifetime">'a</span>, D: BidiDataSource&gt;(
         data_source: <span class="kw-2">&amp;</span>D,
-        text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u16],
+        text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u16],
         default_para_level: <span class="prelude-ty">Option</span>&lt;Level&gt;,
-    ) -&gt; InitialInfoExt&lt;<span class="lifetime">&#39;a</span>&gt; {
+    ) -&gt; InitialInfoExt&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>paragraphs = Vec::&lt;ParagraphInfo&gt;::new();
         <span class="kw">let </span><span class="kw-2">mut </span>pure_ltr = Vec::&lt;bool&gt;::new();
         <span class="kw">let </span>(original_classes, <span class="kw">_</span>, <span class="kw">_</span>) = compute_initial_info(
@@ -920,9 +921,9 @@
 /// vectors.
 </span><span class="comment">// TODO: Impl `struct StringProperty&lt;T&gt; { values: Vec&lt;T&gt; }` and use instead of Vec&lt;T&gt;
 </span><span class="attr">#[derive(Debug, PartialEq)]
-</span><span class="kw">pub struct </span>BidiInfo&lt;<span class="lifetime">&#39;text</span>&gt; {
+</span><span class="kw">pub struct </span>BidiInfo&lt;<span class="lifetime">'text</span>&gt; {
     <span class="doccomment">/// The text
-    </span><span class="kw">pub </span>text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;text </span>[u16],
+    </span><span class="kw">pub </span>text: <span class="kw-2">&amp;</span><span class="lifetime">'text </span>[u16],
 
     <span class="doccomment">/// The BidiClass of the character at each byte in the text.
     </span><span class="kw">pub </span>original_classes: Vec&lt;BidiClass&gt;,
@@ -933,11 +934,11 @@
     <span class="doccomment">/// The boundaries and paragraph embedding level of each paragraph within the text.
     ///
     /// TODO: Use SmallVec or similar to avoid overhead when there are only one or two paragraphs?
-    /// Or just don&#39;t include the first paragraph, which always starts at 0?
+    /// Or just don't include the first paragraph, which always starts at 0?
     </span><span class="kw">pub </span>paragraphs: Vec&lt;ParagraphInfo&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;text</span>&gt; BidiInfo&lt;<span class="lifetime">&#39;text</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'text</span>&gt; BidiInfo&lt;<span class="lifetime">'text</span>&gt; {
     <span class="doccomment">/// Split the text into paragraphs and determine the bidi embedding levels for each paragraph.
     ///
     ///
@@ -947,10 +948,10 @@
     /// text that is entirely LTR.  See the `nsBidi` class from Gecko for comparison.
     ///
     /// TODO: Support auto-RTL base direction
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
-    #[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
+    #[cfg(feature = <span class="string">"hardcoded-data"</span>)]
     #[inline]
-    </span><span class="kw">pub fn </span>new(text: <span class="kw-2">&amp;</span>[u16], default_para_level: <span class="prelude-ty">Option</span>&lt;Level&gt;) -&gt; BidiInfo&lt;<span class="lifetime">&#39;_</span>&gt; {
+    </span><span class="kw">pub fn </span>new(text: <span class="kw-2">&amp;</span>[u16], default_para_level: <span class="prelude-ty">Option</span>&lt;Level&gt;) -&gt; BidiInfo&lt;<span class="lifetime">'_</span>&gt; {
         <span class="self">Self</span>::new_with_data_source(<span class="kw-2">&amp;</span>HardcodedBidiData, text, default_para_level)
     }
 
@@ -962,12 +963,12 @@
     /// text that is entirely LTR.  See the `nsBidi` class from Gecko for comparison.
     ///
     /// TODO: Support auto-RTL base direction
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
-    </span><span class="kw">pub fn </span>new_with_data_source&lt;<span class="lifetime">&#39;a</span>, D: BidiDataSource&gt;(
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
+    </span><span class="kw">pub fn </span>new_with_data_source&lt;<span class="lifetime">'a</span>, D: BidiDataSource&gt;(
         data_source: <span class="kw-2">&amp;</span>D,
-        text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u16],
+        text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u16],
         default_para_level: <span class="prelude-ty">Option</span>&lt;Level&gt;,
-    ) -&gt; BidiInfo&lt;<span class="lifetime">&#39;a</span>&gt; {
+    ) -&gt; BidiInfo&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">let </span>InitialInfoExt { base, pure_ltr, .. } =
             InitialInfoExt::new_with_data_source(data_source, text, default_para_level);
 
@@ -1010,7 +1011,7 @@
     ///
     /// [Rule L1]: https://www.unicode.org/reports/tr9/#L1
     /// [Rule L2]: https://www.unicode.org/reports/tr9/#L2
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
     </span><span class="kw">pub fn </span>reordered_levels(<span class="kw-2">&amp;</span><span class="self">self</span>, para: <span class="kw-2">&amp;</span>ParagraphInfo, line: Range&lt;usize&gt;) -&gt; Vec&lt;Level&gt; {
         <span class="macro">assert!</span>(line.start &lt;= <span class="self">self</span>.levels.len());
         <span class="macro">assert!</span>(line.end &lt;= <span class="self">self</span>.levels.len());
@@ -1038,7 +1039,7 @@
     ///
     /// [Rule L1]: https://www.unicode.org/reports/tr9/#L1
     /// [Rule L2]: https://www.unicode.org/reports/tr9/#L2
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
     </span><span class="kw">pub fn </span>reordered_levels_per_char(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         para: <span class="kw-2">&amp;</span>ParagraphInfo,
@@ -1054,8 +1055,8 @@
     ///
     /// [Rule L3]: https://www.unicode.org/reports/tr9/#L3
     /// [Rule L4]: https://www.unicode.org/reports/tr9/#L4
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
-    </span><span class="kw">pub fn </span>reorder_line(<span class="kw-2">&amp;</span><span class="self">self</span>, para: <span class="kw-2">&amp;</span>ParagraphInfo, line: Range&lt;usize&gt;) -&gt; Cow&lt;<span class="lifetime">&#39;text</span>, [u16]&gt; {
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
+    </span><span class="kw">pub fn </span>reorder_line(<span class="kw-2">&amp;</span><span class="self">self</span>, para: <span class="kw-2">&amp;</span>ParagraphInfo, line: Range&lt;usize&gt;) -&gt; Cow&lt;<span class="lifetime">'text</span>, [u16]&gt; {
         <span class="kw">if </span>!level::has_rtl(<span class="kw-2">&amp;</span><span class="self">self</span>.levels[line.clone()]) {
             <span class="kw">return </span><span class="self">self</span>.text[line].into();
         }
@@ -1098,7 +1099,7 @@
     /// assert_eq!(levels.len(), index_map.len());
     /// assert_eq!(index_map, [0, 1, 2, 6, 7, 5, 4, 3]);
     /// ```
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
     #[inline]
     </span><span class="kw">pub fn </span>reorder_visual(levels: <span class="kw-2">&amp;</span>[Level]) -&gt; Vec&lt;usize&gt; {
         reorder_visual(levels)
@@ -1128,7 +1129,7 @@
     /// [Rule L2]: https://www.unicode.org/reports/tr9/#L2
     /// [Rule L3]: https://www.unicode.org/reports/tr9/#L3
     /// [Rule L4]: https://www.unicode.org/reports/tr9/#L4
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
     #[inline]
     </span><span class="kw">pub fn </span>visual_runs(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
@@ -1154,9 +1155,9 @@
 /// character is multiple code units wide, then its class and level will appear multiple times in these
 /// vectors.
 </span><span class="attr">#[derive(Debug, PartialEq)]
-</span><span class="kw">pub struct </span>ParagraphBidiInfo&lt;<span class="lifetime">&#39;text</span>&gt; {
+</span><span class="kw">pub struct </span>ParagraphBidiInfo&lt;<span class="lifetime">'text</span>&gt; {
     <span class="doccomment">/// The text
-    </span><span class="kw">pub </span>text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;text </span>[u16],
+    </span><span class="kw">pub </span>text: <span class="kw-2">&amp;</span><span class="lifetime">'text </span>[u16],
 
     <span class="doccomment">/// The BidiClass of the character at each byte in the text.
     </span><span class="kw">pub </span>original_classes: Vec&lt;BidiClass&gt;,
@@ -1171,7 +1172,7 @@
     </span><span class="kw">pub </span>is_pure_ltr: bool,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;text</span>&gt; ParagraphBidiInfo&lt;<span class="lifetime">&#39;text</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'text</span>&gt; ParagraphBidiInfo&lt;<span class="lifetime">'text</span>&gt; {
     <span class="doccomment">/// Determine the bidi embedding level.
     ///
     ///
@@ -1181,10 +1182,10 @@
     /// text that is entirely LTR.  See the `nsBidi` class from Gecko for comparison.
     ///
     /// TODO: Support auto-RTL base direction
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
-    #[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
+    #[cfg(feature = <span class="string">"hardcoded-data"</span>)]
     #[inline]
-    </span><span class="kw">pub fn </span>new(text: <span class="kw-2">&amp;</span>[u16], default_para_level: <span class="prelude-ty">Option</span>&lt;Level&gt;) -&gt; ParagraphBidiInfo&lt;<span class="lifetime">&#39;_</span>&gt; {
+    </span><span class="kw">pub fn </span>new(text: <span class="kw-2">&amp;</span>[u16], default_para_level: <span class="prelude-ty">Option</span>&lt;Level&gt;) -&gt; ParagraphBidiInfo&lt;<span class="lifetime">'_</span>&gt; {
         <span class="self">Self</span>::new_with_data_source(<span class="kw-2">&amp;</span>HardcodedBidiData, text, default_para_level)
     }
 
@@ -1194,14 +1195,14 @@
     ///
     /// (This is the single-paragraph equivalent of BidiInfo::new_with_data_source,
     /// and should be kept in sync with it.
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
-    </span><span class="kw">pub fn </span>new_with_data_source&lt;<span class="lifetime">&#39;a</span>, D: BidiDataSource&gt;(
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
+    </span><span class="kw">pub fn </span>new_with_data_source&lt;<span class="lifetime">'a</span>, D: BidiDataSource&gt;(
         data_source: <span class="kw-2">&amp;</span>D,
-        text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u16],
+        text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u16],
         default_para_level: <span class="prelude-ty">Option</span>&lt;Level&gt;,
-    ) -&gt; ParagraphBidiInfo&lt;<span class="lifetime">&#39;a</span>&gt; {
+    ) -&gt; ParagraphBidiInfo&lt;<span class="lifetime">'a</span>&gt; {
         <span class="comment">// Here we could create a ParagraphInitialInfo struct to parallel the one
-        // used by BidiInfo, but there doesn&#39;t seem any compelling reason for it.
+        // used by BidiInfo, but there doesn't seem any compelling reason for it.
         </span><span class="kw">let </span>(original_classes, paragraph_level, is_pure_ltr) =
             compute_initial_info(data_source, text, default_para_level, <span class="prelude-val">None</span>);
 
@@ -1242,7 +1243,7 @@
     /// See BidiInfo::reordered_levels for details.
     ///
     /// (This should be kept in sync with BidiInfo::reordered_levels.)
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
     </span><span class="kw">pub fn </span>reordered_levels(<span class="kw-2">&amp;</span><span class="self">self</span>, line: Range&lt;usize&gt;) -&gt; Vec&lt;Level&gt; {
         <span class="macro">assert!</span>(line.start &lt;= <span class="self">self</span>.levels.len());
         <span class="macro">assert!</span>(line.end &lt;= <span class="self">self</span>.levels.len());
@@ -1268,7 +1269,7 @@
     /// See BidiInfo::reordered_levels_per_char for details.
     ///
     /// (This should be kept in sync with BidiInfo::reordered_levels_per_char.)
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
     </span><span class="kw">pub fn </span>reordered_levels_per_char(<span class="kw-2">&amp;</span><span class="self">self</span>, line: Range&lt;usize&gt;) -&gt; Vec&lt;Level&gt; {
         <span class="kw">let </span>levels = <span class="self">self</span>.reordered_levels(line);
         <span class="self">self</span>.text.char_indices().map(|(i, <span class="kw">_</span>)| levels[i]).collect()
@@ -1279,8 +1280,8 @@
     /// See BidiInfo::reorder_line for details.
     ///
     /// (This should be kept in sync with BidiInfo::reorder_line.)
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
-    </span><span class="kw">pub fn </span>reorder_line(<span class="kw-2">&amp;</span><span class="self">self</span>, line: Range&lt;usize&gt;) -&gt; Cow&lt;<span class="lifetime">&#39;text</span>, [u16]&gt; {
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
+    </span><span class="kw">pub fn </span>reorder_line(<span class="kw-2">&amp;</span><span class="self">self</span>, line: Range&lt;usize&gt;) -&gt; Cow&lt;<span class="lifetime">'text</span>, [u16]&gt; {
         <span class="kw">if </span>!level::has_rtl(<span class="kw-2">&amp;</span><span class="self">self</span>.levels[line.clone()]) {
             <span class="kw">return </span><span class="self">self</span>.text[line].into();
         }
@@ -1291,7 +1292,7 @@
     <span class="doccomment">/// Reorders pre-calculated levels of a sequence of characters.
     ///
     /// See BidiInfo::reorder_visual for details.
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
     #[inline]
     </span><span class="kw">pub fn </span>reorder_visual(levels: <span class="kw-2">&amp;</span>[Level]) -&gt; Vec&lt;usize&gt; {
         reorder_visual(levels)
@@ -1304,7 +1305,7 @@
     /// See `BidiInfo::visual_runs` for details.
     ///
     /// (This should be kept in sync with BidiInfo::visual_runs.)
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
     #[inline]
     </span><span class="kw">pub fn </span>visual_runs(<span class="kw-2">&amp;</span><span class="self">self</span>, line: Range&lt;usize&gt;) -&gt; (Vec&lt;Level&gt;, Vec&lt;LevelRun&gt;) {
         <span class="kw">let </span>levels = <span class="self">self</span>.reordered_levels(line.clone());
@@ -1319,7 +1320,7 @@
         !<span class="self">self</span>.is_pure_ltr
     }
 
-    <span class="doccomment">/// Return the paragraph&#39;s Direction (Ltr, Rtl, or Mixed) based on its levels.
+    <span class="doccomment">/// Return the paragraph's Direction (Ltr, Rtl, or Mixed) based on its levels.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>direction(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Direction {
         para_direction(<span class="kw-2">&amp;</span><span class="self">self</span>.levels)
@@ -1330,7 +1331,7 @@
 ///
 /// `text`   the full text passed to the `BidiInfo` or `ParagraphBidiInfo` for analysis
 /// `line`   a range of byte indices within `text` corresponding to one line
-/// `levels` array of `Level` values, with `line`&#39;s levels reordered into visual order
+/// `levels` array of `Level` values, with `line`'s levels reordered into visual order
 /// `runs`   array of `LevelRun`s in visual order
 ///
 /// (`levels` and `runs` are the result of calling `BidiInfo::visual_runs()` or
@@ -1342,12 +1343,12 @@
 ///
 /// [Rule L3]: https://www.unicode.org/reports/tr9/#L3
 /// [Rule L4]: https://www.unicode.org/reports/tr9/#L4
-</span><span class="kw">fn </span>reorder_line&lt;<span class="lifetime">&#39;text</span>&gt;(
-    text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;text </span>[u16],
+</span><span class="kw">fn </span>reorder_line&lt;<span class="lifetime">'text</span>&gt;(
+    text: <span class="kw-2">&amp;</span><span class="lifetime">'text </span>[u16],
     line: Range&lt;usize&gt;,
     levels: Vec&lt;Level&gt;,
     runs: Vec&lt;LevelRun&gt;,
-) -&gt; Cow&lt;<span class="lifetime">&#39;text</span>, [u16]&gt; {
+) -&gt; Cow&lt;<span class="lifetime">'text</span>, [u16]&gt; {
     <span class="comment">// If all isolating run sequences are LTR, no reordering is needed
     </span><span class="kw">if </span>runs.iter().all(|run| levels[run.start].is_ltr()) {
         <span class="kw">return </span>text[line].into();
@@ -1371,14 +1372,14 @@
 /// And it supports all operation in the `Paragraph` that needs also its
 /// `BidiInfo` such as `direction`.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>Paragraph&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;text</span>&gt; {
-    <span class="kw">pub </span>info: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BidiInfo&lt;<span class="lifetime">&#39;text</span>&gt;,
-    <span class="kw">pub </span>para: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ParagraphInfo,
+</span><span class="kw">pub struct </span>Paragraph&lt;<span class="lifetime">'a</span>, <span class="lifetime">'text</span>&gt; {
+    <span class="kw">pub </span>info: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>BidiInfo&lt;<span class="lifetime">'text</span>&gt;,
+    <span class="kw">pub </span>para: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>ParagraphInfo,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;text</span>&gt; Paragraph&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;text</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="lifetime">'text</span>&gt; Paragraph&lt;<span class="lifetime">'a</span>, <span class="lifetime">'text</span>&gt; {
     <span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>new(info: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BidiInfo&lt;<span class="lifetime">&#39;text</span>&gt;, para: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ParagraphInfo) -&gt; Paragraph&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;text</span>&gt; {
+    </span><span class="kw">pub fn </span>new(info: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>BidiInfo&lt;<span class="lifetime">'text</span>&gt;, para: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>ParagraphInfo) -&gt; Paragraph&lt;<span class="lifetime">'a</span>, <span class="lifetime">'text</span>&gt; {
         Paragraph { info, para }
     }
 
@@ -1409,10 +1410,10 @@
     (code &amp; <span class="number">0xFC00</span>) == <span class="number">0xDC00
 </span>}
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;text</span>&gt; TextSource&lt;<span class="lifetime">&#39;text</span>&gt; <span class="kw">for </span>[u16] {
-    <span class="kw">type </span>CharIter = Utf16CharIter&lt;<span class="lifetime">&#39;text</span>&gt;;
-    <span class="kw">type </span>CharIndexIter = Utf16CharIndexIter&lt;<span class="lifetime">&#39;text</span>&gt;;
-    <span class="kw">type </span>IndexLenIter = Utf16IndexLenIter&lt;<span class="lifetime">&#39;text</span>&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'text</span>&gt; TextSource&lt;<span class="lifetime">'text</span>&gt; <span class="kw">for </span>[u16] {
+    <span class="kw">type </span>CharIter = Utf16CharIter&lt;<span class="lifetime">'text</span>&gt;;
+    <span class="kw">type </span>CharIndexIter = Utf16CharIndexIter&lt;<span class="lifetime">'text</span>&gt;;
+    <span class="kw">type </span>IndexLenIter = Utf16IndexLenIter&lt;<span class="lifetime">'text</span>&gt;;
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
@@ -1428,8 +1429,8 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(ch) = char::from_u32(c.into()) {
             <span class="kw">return </span><span class="prelude-val">Some</span>((ch, <span class="number">1</span>));
         }
-        <span class="comment">// If it&#39;s a low surrogate, and was immediately preceded by a high surrogate,
-        // then we&#39;re in the middle of a (valid) character, and should return None.
+        <span class="comment">// If it's a low surrogate, and was immediately preceded by a high surrogate,
+        // then we're in the middle of a (valid) character, and should return None.
         </span><span class="kw">if </span>is_low_surrogate(c) &amp;&amp; index &gt; <span class="number">0 </span>&amp;&amp; is_high_surrogate(<span class="self">self</span>[index - <span class="number">1</span>]) {
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
@@ -1438,13 +1439,13 @@
             <span class="kw">if let </span><span class="prelude-val">Ok</span>(ch) = ch {
                 <span class="comment">// This must be a surrogate pair, otherwise char::from_u32() above should
                 // have succeeded!
-                </span><span class="macro">debug_assert!</span>(ch.len_utf16() == <span class="number">2</span>, <span class="string">&quot;BMP should have already been handled&quot;</span>);
+                </span><span class="macro">debug_assert!</span>(ch.len_utf16() == <span class="number">2</span>, <span class="string">"BMP should have already been handled"</span>);
                 <span class="kw">return </span><span class="prelude-val">Some</span>((ch, ch.len_utf16()));
             }
         } <span class="kw">else </span>{
             <span class="macro">debug_assert!</span>(
                 <span class="bool-val">false</span>,
-                <span class="string">&quot;Why did decode_utf16 return None when we&#39;re not at the end?&quot;
+                <span class="string">"Why did decode_utf16 return None when we're not at the end?"
             </span>);
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
@@ -1458,15 +1459,15 @@
         <span class="kw-2">&amp;</span>(<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span>[u16])[range]
     }
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>chars(<span class="kw-2">&amp;</span><span class="lifetime">&#39;text </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::CharIter {
+    </span><span class="kw">fn </span>chars(<span class="kw-2">&amp;</span><span class="lifetime">'text </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::CharIter {
         Utf16CharIter::new(<span class="kw-2">&amp;</span><span class="self">self</span>)
     }
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>char_indices(<span class="kw-2">&amp;</span><span class="lifetime">&#39;text </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::CharIndexIter {
+    </span><span class="kw">fn </span>char_indices(<span class="kw-2">&amp;</span><span class="lifetime">'text </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::CharIndexIter {
         Utf16CharIndexIter::new(<span class="kw-2">&amp;</span><span class="self">self</span>)
     }
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>indices_lengths(<span class="kw-2">&amp;</span><span class="lifetime">&#39;text </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::IndexLenIter {
+    </span><span class="kw">fn </span>indices_lengths(<span class="kw-2">&amp;</span><span class="lifetime">'text </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::IndexLenIter {
         Utf16IndexLenIter::new(<span class="kw-2">&amp;</span><span class="self">self</span>)
     }
     <span class="attr">#[inline]
@@ -1477,19 +1478,19 @@
 
 <span class="doccomment">/// Iterator over UTF-16 text in a [u16] slice, returning (index, char_len) tuple.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>Utf16IndexLenIter&lt;<span class="lifetime">&#39;text</span>&gt; {
-    text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;text </span>[u16],
+</span><span class="kw">pub struct </span>Utf16IndexLenIter&lt;<span class="lifetime">'text</span>&gt; {
+    text: <span class="kw-2">&amp;</span><span class="lifetime">'text </span>[u16],
     cur_pos: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;text</span>&gt; Utf16IndexLenIter&lt;<span class="lifetime">&#39;text</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'text</span>&gt; Utf16IndexLenIter&lt;<span class="lifetime">'text</span>&gt; {
     <span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>new(text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;text </span>[u16]) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(text: <span class="kw-2">&amp;</span><span class="lifetime">'text </span>[u16]) -&gt; <span class="self">Self </span>{
         Utf16IndexLenIter { text, cur_pos: <span class="number">0 </span>}
     }
 }
 
-<span class="kw">impl </span>Iterator <span class="kw">for </span>Utf16IndexLenIter&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Iterator <span class="kw">for </span>Utf16IndexLenIter&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">type </span>Item = (usize, usize);
 
     <span class="attr">#[inline]
@@ -1505,18 +1506,18 @@
 
 <span class="doccomment">/// Iterator over UTF-16 text in a [u16] slice, returning (index, char) tuple.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>Utf16CharIndexIter&lt;<span class="lifetime">&#39;text</span>&gt; {
-    text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;text </span>[u16],
+</span><span class="kw">pub struct </span>Utf16CharIndexIter&lt;<span class="lifetime">'text</span>&gt; {
+    text: <span class="kw-2">&amp;</span><span class="lifetime">'text </span>[u16],
     cur_pos: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;text</span>&gt; Utf16CharIndexIter&lt;<span class="lifetime">&#39;text</span>&gt; {
-    <span class="kw">pub fn </span>new(text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;text </span>[u16]) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'text</span>&gt; Utf16CharIndexIter&lt;<span class="lifetime">'text</span>&gt; {
+    <span class="kw">pub fn </span>new(text: <span class="kw-2">&amp;</span><span class="lifetime">'text </span>[u16]) -&gt; <span class="self">Self </span>{
         Utf16CharIndexIter { text, cur_pos: <span class="number">0 </span>}
     }
 }
 
-<span class="kw">impl </span>Iterator <span class="kw">for </span>Utf16CharIndexIter&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Iterator <span class="kw">for </span>Utf16CharIndexIter&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">type </span>Item = (usize, char);
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -1532,14 +1533,14 @@
 <span class="doccomment">/// Iterator over UTF-16 text in a [u16] slice, returning Unicode chars.
 /// (Unlike the other iterators above, this also supports reverse iteration.)
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>Utf16CharIter&lt;<span class="lifetime">&#39;text</span>&gt; {
-    text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;text </span>[u16],
+</span><span class="kw">pub struct </span>Utf16CharIter&lt;<span class="lifetime">'text</span>&gt; {
+    text: <span class="kw-2">&amp;</span><span class="lifetime">'text </span>[u16],
     cur_pos: usize,
     end_pos: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;text</span>&gt; Utf16CharIter&lt;<span class="lifetime">&#39;text</span>&gt; {
-    <span class="kw">pub fn </span>new(text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;text </span>[u16]) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'text</span>&gt; Utf16CharIter&lt;<span class="lifetime">'text</span>&gt; {
+    <span class="kw">pub fn </span>new(text: <span class="kw-2">&amp;</span><span class="lifetime">'text </span>[u16]) -&gt; <span class="self">Self </span>{
         Utf16CharIter {
             text,
             cur_pos: <span class="number">0</span>,
@@ -1548,7 +1549,7 @@
     }
 }
 
-<span class="kw">impl </span>Iterator <span class="kw">for </span>Utf16CharIter&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Iterator <span class="kw">for </span>Utf16CharIter&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">type </span>Item = char;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -1560,7 +1561,7 @@
     </span>}
 }
 
-<span class="kw">impl </span>DoubleEndedIterator <span class="kw">for </span>Utf16CharIter&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>DoubleEndedIterator <span class="kw">for </span>Utf16CharIter&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>next_back(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">if </span><span class="self">self</span>.end_pos &lt;= <span class="self">self</span>.cur_pos {
             <span class="kw">return </span><span class="prelude-val">None</span>;

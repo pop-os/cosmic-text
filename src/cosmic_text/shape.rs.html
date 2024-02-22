@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/shape.rs`."><title>shape.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cosmic_text" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/shape.rs`."><title>shape.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cosmic_text" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1469,7 +1470,7 @@
 
 </span><span class="attr">#![allow(clippy::too_many_arguments)]
 
-#[cfg(not(feature = <span class="string">&quot;std&quot;</span>))]
+#[cfg(not(feature = <span class="string">"std"</span>))]
 </span><span class="kw">use </span>alloc::vec::Vec;
 <span class="kw">use </span>core::cmp::{max, min};
 <span class="kw">use </span>core::fmt;
@@ -1494,7 +1495,7 @@
     ///
     /// You should use this strategy when you have complete control of the text
     /// and the font you are displaying in your application.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;swash&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"swash"</span>)]
     </span>Basic,
     <span class="doccomment">/// Advanced text shaping and font fallback.
     ///
@@ -1517,9 +1518,9 @@
         span_rtl: bool,
     ) {
         <span class="kw">match </span><span class="self">self </span>{
-            <span class="attr">#[cfg(feature = <span class="string">&quot;swash&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"swash"</span>)]
             </span><span class="self">Self</span>::Basic =&gt; shape_skip(font_system, glyphs, line, attrs_list, start_run, end_run),
-            <span class="attr">#[cfg(not(feature = <span class="string">&quot;shape-run-cache&quot;</span>))]
+            <span class="attr">#[cfg(not(feature = <span class="string">"shape-run-cache"</span>))]
             </span><span class="self">Self</span>::Advanced =&gt; shape_run(
                 scratch,
                 glyphs,
@@ -1530,7 +1531,7 @@
                 end_run,
                 span_rtl,
             ),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;shape-run-cache&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"shape-run-cache"</span>)]
             </span><span class="self">Self</span>::Advanced =&gt; shape_run_cached(
                 scratch,
                 glyphs,
@@ -1559,8 +1560,8 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>ShapeBuffer {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.pad(<span class="string">&quot;ShapeBuffer { .. }&quot;</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.pad(<span class="string">"ShapeBuffer { .. }"</span>)
     }
 }
 
@@ -1625,7 +1626,7 @@
             descent,
             font_monospace_em_width: font.monospace_em_width(),
             font_id: font.id(),
-            glyph_id: info.glyph_id.try_into().expect(<span class="string">&quot;failed to cast glyph ID&quot;</span>),
+            glyph_id: info.glyph_id.try_into().expect(<span class="string">"failed to cast glyph ID"</span>),
             <span class="comment">//TODO: color should not be related to shaping
             </span>color_opt: attrs.color_opt,
             metadata: attrs.metadata,
@@ -1691,7 +1692,7 @@
         }
     }
 
-    <span class="macro">log::trace!</span>(<span class="string">&quot;      Run {:?}: &#39;{}&#39;&quot;</span>, <span class="kw-2">&amp;</span>scripts, <span class="kw-2">&amp;</span>line[start_run..end_run],);
+    <span class="macro">log::trace!</span>(<span class="string">"      Run {:?}: '{}'"</span>, <span class="kw-2">&amp;</span>scripts, <span class="kw-2">&amp;</span>line[start_run..end_run],);
 
     <span class="kw">let </span>attrs = attrs_list.get_span(start_run);
 
@@ -1706,7 +1707,7 @@
         <span class="kw-2">&amp;</span>line[start_run..end_run],
     );
 
-    <span class="kw">let </span>font = font_iter.next().expect(<span class="string">&quot;no default font found&quot;</span>);
+    <span class="kw">let </span>font = font_iter.next().expect(<span class="string">"no default font found"</span>);
 
     <span class="kw">let </span>glyph_start = glyphs.len();
     <span class="kw">let </span><span class="kw-2">mut </span>missing = shape_fallback(
@@ -1729,7 +1730,7 @@
         };
 
         <span class="macro">log::trace!</span>(
-            <span class="string">&quot;Evaluating fallback with font &#39;{}&#39;&quot;</span>,
+            <span class="string">"Evaluating fallback with font '{}'"</span>,
             font_iter.face_name(font.id())
         );
         <span class="kw">let </span><span class="kw-2">mut </span>fb_glyphs = Vec::new();
@@ -1760,7 +1761,7 @@
             <span class="kw">let </span><span class="kw-2">mut </span>missing_i = <span class="number">0</span>;
             <span class="kw">while </span>missing_i &lt; missing.len() {
                 <span class="kw">if </span>missing[missing_i] &gt;= start &amp;&amp; missing[missing_i] &lt; end {
-                    <span class="comment">// println!(&quot;No longer missing {}&quot;, missing[missing_i]);
+                    <span class="comment">// println!("No longer missing {}", missing[missing_i]);
                     </span>missing.remove(missing_i);
                 } <span class="kw">else </span>{
                     missing_i += <span class="number">1</span>;
@@ -1781,7 +1782,7 @@
             </span><span class="kw">while </span>i &lt; glyphs.len() {
                 <span class="kw">if </span>glyphs[i].start &gt;= start &amp;&amp; glyphs[i].end &lt;= end {
                     <span class="kw">let </span>_glyph = glyphs.remove(i);
-                    <span class="comment">// log::trace!(&quot;Removed {},{} from {}&quot;, _glyph.start, _glyph.end, i);
+                    <span class="comment">// log::trace!("Removed {},{} from {}", _glyph.start, _glyph.end, i);
                 </span>} <span class="kw">else </span>{
                     <span class="kw">break</span>;
                 }
@@ -1790,7 +1791,7 @@
             <span class="kw">while </span>fb_i &lt; fb_glyphs.len() {
                 <span class="kw">if </span>fb_glyphs[fb_i].start &gt;= start &amp;&amp; fb_glyphs[fb_i].end &lt;= end {
                     <span class="kw">let </span>fb_glyph = fb_glyphs.remove(fb_i);
-                    <span class="comment">// log::trace!(&quot;Insert {},{} from font {} at {}&quot;, fb_glyph.start, fb_glyph.end, font_i, i);
+                    <span class="comment">// log::trace!("Insert {},{} from font {} at {}", fb_glyph.start, fb_glyph.end, font_i, i);
                     </span>glyphs.insert(i, fb_glyph);
                     i += <span class="number">1</span>;
                 } <span class="kw">else </span>{
@@ -1805,7 +1806,7 @@
 
     <span class="comment">/*
     for glyph in glyphs.iter() {
-        log::trace!(&quot;&#39;{}&#39;: {}, {}, {}, {}&quot;, &amp;line[glyph.start..glyph.end], glyph.x_advance, glyph.y_advance, glyph.x_offset, glyph.y_offset);
+        log::trace!("'{}': {}, {}, {}, {}", &amp;line[glyph.start..glyph.end], glyph.x_advance, glyph.y_advance, glyph.x_offset, glyph.y_offset);
     }
     */
 
@@ -1813,7 +1814,7 @@
     </span>scratch.scripts = scripts;
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;shape-run-cache&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"shape-run-cache"</span>)]
 </span><span class="kw">fn </span>shape_run_cached(
     scratch: <span class="kw-2">&amp;mut </span>ShapeBuffer,
     glyphs: <span class="kw-2">&amp;mut </span>Vec&lt;ShapeGlyph&gt;,
@@ -1879,7 +1880,7 @@
     font_system.shape_run_cache.insert(key, cache_glyphs);
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;swash&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"swash"</span>)]
 </span><span class="kw">fn </span>shape_skip(
     font_system: <span class="kw-2">&amp;mut </span>FontSystem,
     glyphs: <span class="kw-2">&amp;mut </span>Vec&lt;ShapeGlyph&gt;,
@@ -1892,9 +1893,9 @@
     <span class="kw">let </span>fonts = font_system.get_font_matches(attrs);
 
     <span class="kw">let </span>default_families = [<span class="kw-2">&amp;</span>attrs.family];
-    <span class="kw">let </span><span class="kw-2">mut </span>font_iter = FontFallbackIter::new(font_system, <span class="kw-2">&amp;</span>fonts, <span class="kw-2">&amp;</span>default_families, <span class="kw-2">&amp;</span>[], <span class="string">&quot;&quot;</span>);
+    <span class="kw">let </span><span class="kw-2">mut </span>font_iter = FontFallbackIter::new(font_system, <span class="kw-2">&amp;</span>fonts, <span class="kw-2">&amp;</span>default_families, <span class="kw-2">&amp;</span>[], <span class="string">""</span>);
 
-    <span class="kw">let </span>font = font_iter.next().expect(<span class="string">&quot;no default font found&quot;</span>);
+    <span class="kw">let </span>font = font_iter.next().expect(<span class="string">"no default font found"</span>);
     <span class="kw">let </span>font_id = font.id();
     <span class="kw">let </span>font_monospace_em_width = font.monospace_em_width();
     <span class="kw">let </span>font = font.as_swash();
@@ -2028,8 +2029,8 @@
         <span class="kw">let </span>word = <span class="kw-2">&amp;</span>line[word_range.clone()];
 
         <span class="macro">log::trace!</span>(
-            <span class="string">&quot;      Word{}: &#39;{}&#39;&quot;</span>,
-            <span class="kw">if </span>blank { <span class="string">&quot; BLANK&quot; </span>} <span class="kw">else </span>{ <span class="string">&quot;&quot; </span>},
+            <span class="string">"      Word{}: '{}'"</span>,
+            <span class="kw">if </span>blank { <span class="string">" BLANK" </span>} <span class="kw">else </span>{ <span class="string">"" </span>},
             word
         );
 
@@ -2129,8 +2130,8 @@
         <span class="kw">let </span>span = <span class="kw-2">&amp;</span>line[span_range.start..span_range.end];
 
         <span class="macro">log::trace!</span>(
-            <span class="string">&quot;  Span {}: &#39;{}&#39;&quot;</span>,
-            <span class="kw">if </span>level.is_rtl() { <span class="string">&quot;RTL&quot; </span>} <span class="kw">else </span>{ <span class="string">&quot;LTR&quot; </span>},
+            <span class="string">"  Span {}: '{}'"</span>,
+            <span class="kw">if </span>level.is_rtl() { <span class="string">"RTL" </span>} <span class="kw">else </span>{ <span class="string">"LTR" </span>},
             span
         );
 
@@ -2255,7 +2256,7 @@
             bidi.paragraphs[<span class="number">0</span>].level.is_rtl()
         };
 
-        <span class="macro">log::trace!</span>(<span class="string">&quot;Line {}: &#39;{}&#39;&quot;</span>, <span class="kw">if </span>rtl { <span class="string">&quot;RTL&quot; </span>} <span class="kw">else </span>{ <span class="string">&quot;LTR&quot; </span>}, line);
+        <span class="macro">log::trace!</span>(<span class="string">"Line {}: '{}'"</span>, <span class="kw">if </span>rtl { <span class="string">"RTL" </span>} <span class="kw">else </span>{ <span class="string">"LTR" </span>}, line);
 
         <span class="kw">for </span>para_info <span class="kw">in </span>bidi.paragraphs.iter() {
             <span class="kw">let </span>line_rtl = para_info.level.is_rtl();
@@ -2391,7 +2392,7 @@
         // &lt;http://www.unicode.org/reports/tr9/#L2&gt;
 
         // Stop at the lowest *odd* level.
-        </span>min_level = min_level.new_lowest_ge_rtl().expect(<span class="string">&quot;Level error&quot;</span>);
+        </span>min_level = min_level.new_lowest_ge_rtl().expect(<span class="string">"Level error"</span>);
 
         <span class="kw">while </span>max_level &gt;= min_level {
             <span class="comment">// Look for the start of a sequence of consecutive runs of max_level or higher.
@@ -2418,7 +2419,7 @@
             }
             max_level
                 .lower(<span class="number">1</span>)
-                .expect(<span class="string">&quot;Lowering embedding level below zero&quot;</span>);
+                .expect(<span class="string">"Lowering embedding level below zero"</span>);
         }
 
         runs
@@ -2525,7 +2526,7 @@
                         // wrapping results.
                         </span><span class="kw">if </span>current_visual_line.w + (word_range_width + word_width)
                             &lt;= line_width
-                            <span class="comment">// Include one blank word over the width limit since it won&#39;t be
+                            <span class="comment">// Include one blank word over the width limit since it won't be
                             // counted in the final width
                             </span>|| (word.blank
                                 &amp;&amp; (current_visual_line.w + word_range_width) &lt;= line_width)
@@ -2538,7 +2539,7 @@
                             word_range_width += word_width;
                             <span class="kw">continue</span>;
                         } <span class="kw">else if </span>wrap == Wrap::Glyph
-                            <span class="comment">// Make sure that the word is able to fit on it&#39;s own line, if not, fall back to Glyph wrapping.
+                            <span class="comment">// Make sure that the word is able to fit on it's own line, if not, fall back to Glyph wrapping.
                             </span>|| (wrap == Wrap::WordOrGlyph &amp;&amp; word_width &gt; line_width)
                         {
                             <span class="comment">// Commit the current line so that the word starts on the next line.
@@ -2594,7 +2595,7 @@
                             // If we had a previous range, commit that line before the next word.
                             </span><span class="kw">if </span>word_range_width &gt; <span class="number">0. </span>{
                                 <span class="comment">// Current word causing a wrap is not whitespace, so we ignore the
-                                // previous word if it&#39;s a whitespace
+                                // previous word if it's a whitespace
                                 </span><span class="kw">let </span>trailing_blank = span
                                     .words
                                     .get(i + <span class="number">1</span>)
@@ -2649,7 +2650,7 @@
                         <span class="kw">let </span>word_width = font_size * word.x_advance;
                         <span class="kw">if </span>current_visual_line.w + (word_range_width + word_width)
                             &lt;= line_width
-                            <span class="comment">// Include one blank word over the width limit since it won&#39;t be
+                            <span class="comment">// Include one blank word over the width limit since it won't be
                             // counted in the final width.
                             </span>|| (word.blank
                                 &amp;&amp; (current_visual_line.w + word_range_width) &lt;= line_width)
@@ -2662,7 +2663,7 @@
                             word_range_width += word_width;
                             <span class="kw">continue</span>;
                         } <span class="kw">else if </span>wrap == Wrap::Glyph
-                            <span class="comment">// Make sure that the word is able to fit on it&#39;s own line, if not, fall back to Glyph wrapping.
+                            <span class="comment">// Make sure that the word is able to fit on it's own line, if not, fall back to Glyph wrapping.
                             </span>|| (wrap == Wrap::WordOrGlyph &amp;&amp; word_width &gt; line_width)
                         {
                             <span class="comment">// Commit the current line so that the word starts on the next line.
@@ -2718,7 +2719,7 @@
                             // If we had a previous range, commit that line before the next word.
                             </span><span class="kw">if </span>word_range_width &gt; <span class="number">0. </span>{
                                 <span class="comment">// Current word causing a wrap is not whitespace, so we ignore the
-                                // previous word if it&#39;s a whitespace.
+                                // previous word if it's a whitespace.
                                 </span><span class="kw">let </span>trailing_blank = i &gt; <span class="number">0 </span>&amp;&amp; span.words[i - <span class="number">1</span>].blank;
 
                                 <span class="kw">if </span>trailing_blank {
@@ -2821,13 +2822,13 @@
             // &gt; SPACE are subject to expansion. All other space characters normally have
             // &gt; fixed width.
             //
-            // (also some spaces aren&#39;t followed by potential linebreaks but they could
+            // (also some spaces aren't followed by potential linebreaks but they could
             //  still be expanded)
 
             // Amount of extra width added to each blank space within a line.
             </span><span class="kw">let </span>justification_expansion = <span class="kw">if </span><span class="macro">matches!</span>(align, Align::Justified)
                 &amp;&amp; visual_line.spaces &gt; <span class="number">0
-                </span><span class="comment">// Don&#39;t justify the last line in a paragraph.
+                </span><span class="comment">// Don't justify the last line in a paragraph.
                 </span>&amp;&amp; index != number_of_visual_lines - <span class="number">1
             </span>{
                 (line_width - visual_line.w) / visual_line.spaces <span class="kw">as </span>f32
@@ -2865,7 +2866,7 @@
                                         .max(<span class="number">1.0</span>)
                                         / glyph_to_match_factor
                                         * font_size;
-                                    <span class="macro">log::trace!</span>(<span class="string">&quot;Adjusted glyph font size ({font_size} =&gt; {glyph_font_size})&quot;</span>);
+                                    <span class="macro">log::trace!</span>(<span class="string">"Adjusted glyph font size ({font_size} =&gt; {glyph_font_size})"</span>);
                                     glyph_font_size
                                 }
                                 <span class="kw">_ </span>=&gt; font_size,

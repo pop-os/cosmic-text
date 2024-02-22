@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.4/src/tables/gpos.rs`."><title>gpos.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.5/src/tables/gpos.rs`."><title>gpos.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -142,7 +143,7 @@
 //!
 //! [GPOS]: https://docs.microsoft.com/en-us/typography/opentype/spec/gpos
 
-</span><span class="attr">#[path = <span class="string">&quot;./value_record.rs&quot;</span>]
+</span><span class="attr">#[path = <span class="string">"./value_record.rs"</span>]
 </span><span class="kw">mod </span>value_record;
 
 <span class="kw">use </span><span class="kw">crate</span>::array::ComputedArray;
@@ -156,24 +157,24 @@
 <span class="kw">pub use </span>value_record::ValueRecord;
 
 <span class="attr">#[cfg(test)]
-#[path = <span class="string">&quot;../tests/test_gpos.rs&quot;</span>]
+#[path = <span class="string">"../tests/test_gpos.rs"</span>]
 </span><span class="kw">mod </span>spec_tests;
 
-<span class="macro">include!</span>(<span class="string">&quot;../../generated/generated_gpos.rs&quot;</span>);
+<span class="macro">include!</span>(<span class="string">"../../generated/generated_gpos.rs"</span>);
 
 <span class="doccomment">/// A typed GPOS [LookupList](super::layout::LookupList) table
-</span><span class="kw">pub type </span>PositionLookupList&lt;<span class="lifetime">&#39;a</span>&gt; = <span class="kw">super</span>::layout::LookupList&lt;<span class="lifetime">&#39;a</span>, PositionLookup&lt;<span class="lifetime">&#39;a</span>&gt;&gt;;
+</span><span class="kw">pub type </span>PositionLookupList&lt;<span class="lifetime">'a</span>&gt; = <span class="kw">super</span>::layout::LookupList&lt;<span class="lifetime">'a</span>, PositionLookup&lt;<span class="lifetime">'a</span>&gt;&gt;;
 
 <span class="doccomment">/// A GPOS [SequenceContext](super::layout::SequenceContext)
-</span><span class="kw">pub type </span>PositionSequenceContext&lt;<span class="lifetime">&#39;a</span>&gt; = <span class="kw">super</span>::layout::SequenceContext&lt;<span class="lifetime">&#39;a</span>&gt;;
+</span><span class="kw">pub type </span>PositionSequenceContext&lt;<span class="lifetime">'a</span>&gt; = <span class="kw">super</span>::layout::SequenceContext&lt;<span class="lifetime">'a</span>&gt;;
 
 <span class="doccomment">/// A GPOS [ChainedSequenceContext](super::layout::ChainedSequenceContext)
-</span><span class="kw">pub type </span>PositionChainContext&lt;<span class="lifetime">&#39;a</span>&gt; = <span class="kw">super</span>::layout::ChainedSequenceContext&lt;<span class="lifetime">&#39;a</span>&gt;;
+</span><span class="kw">pub type </span>PositionChainContext&lt;<span class="lifetime">'a</span>&gt; = <span class="kw">super</span>::layout::ChainedSequenceContext&lt;<span class="lifetime">'a</span>&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; AnchorTable&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; AnchorTable&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Attempt to resolve the `Device` or `VariationIndex` table for the
     /// x_coordinate, if present
-    </span><span class="kw">pub fn </span>x_device(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;DeviceOrVariationIndex&lt;<span class="lifetime">&#39;a</span>&gt;, ReadError&gt;&gt; {
+    </span><span class="kw">pub fn </span>x_device(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;DeviceOrVariationIndex&lt;<span class="lifetime">'a</span>&gt;, ReadError&gt;&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             AnchorTable::Format3(inner) =&gt; inner.x_device(),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
@@ -182,7 +183,7 @@
 
     <span class="doccomment">/// Attempt to resolve the `Device` or `VariationIndex` table for the
     /// y_coordinate, if present
-    </span><span class="kw">pub fn </span>y_device(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;DeviceOrVariationIndex&lt;<span class="lifetime">&#39;a</span>&gt;, ReadError&gt;&gt; {
+    </span><span class="kw">pub fn </span>y_device(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;DeviceOrVariationIndex&lt;<span class="lifetime">'a</span>&gt;, ReadError&gt;&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             AnchorTable::Format3(inner) =&gt; inner.y_device(),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
@@ -190,31 +191,31 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: FontRead&lt;<span class="lifetime">&#39;a</span>&gt;&gt; ExtensionLookup&lt;<span class="lifetime">&#39;a</span>, T&gt; <span class="kw">for </span>ExtensionPosFormat1&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: FontRead&lt;<span class="lifetime">'a</span>&gt;&gt; ExtensionLookup&lt;<span class="lifetime">'a</span>, T&gt; <span class="kw">for </span>ExtensionPosFormat1&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">fn </span>extension(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;T, ReadError&gt; {
         <span class="self">self</span>.extension()
     }
 }
 
-<span class="kw">type </span>PosSubtables&lt;<span class="lifetime">&#39;a</span>, T&gt; = Subtables&lt;<span class="lifetime">&#39;a</span>, T, ExtensionPosFormat1&lt;<span class="lifetime">&#39;a</span>, T&gt;&gt;;
+<span class="kw">type </span>PosSubtables&lt;<span class="lifetime">'a</span>, T&gt; = Subtables&lt;<span class="lifetime">'a</span>, T, ExtensionPosFormat1&lt;<span class="lifetime">'a</span>, T&gt;&gt;;
 
 <span class="doccomment">/// The subtables from a GPOS lookup.
 ///
 /// This type is a convenience that removes the need to dig into the
 /// [`PositionLookup`] enum in order to access subtables, and it also abstracts
 /// away the distinction between extension and non-extension lookups.
-</span><span class="kw">pub enum </span>PositionSubtables&lt;<span class="lifetime">&#39;a</span>&gt; {
-    Single(PosSubtables&lt;<span class="lifetime">&#39;a</span>, SinglePos&lt;<span class="lifetime">&#39;a</span>&gt;&gt;),
-    Pair(PosSubtables&lt;<span class="lifetime">&#39;a</span>, PairPos&lt;<span class="lifetime">&#39;a</span>&gt;&gt;),
-    Cursive(PosSubtables&lt;<span class="lifetime">&#39;a</span>, CursivePosFormat1&lt;<span class="lifetime">&#39;a</span>&gt;&gt;),
-    MarkToBase(PosSubtables&lt;<span class="lifetime">&#39;a</span>, MarkBasePosFormat1&lt;<span class="lifetime">&#39;a</span>&gt;&gt;),
-    MarkToLig(PosSubtables&lt;<span class="lifetime">&#39;a</span>, MarkLigPosFormat1&lt;<span class="lifetime">&#39;a</span>&gt;&gt;),
-    MarkToMark(PosSubtables&lt;<span class="lifetime">&#39;a</span>, MarkMarkPosFormat1&lt;<span class="lifetime">&#39;a</span>&gt;&gt;),
-    Contextual(PosSubtables&lt;<span class="lifetime">&#39;a</span>, PositionSequenceContext&lt;<span class="lifetime">&#39;a</span>&gt;&gt;),
-    ChainContextual(PosSubtables&lt;<span class="lifetime">&#39;a</span>, PositionChainContext&lt;<span class="lifetime">&#39;a</span>&gt;&gt;),
+</span><span class="kw">pub enum </span>PositionSubtables&lt;<span class="lifetime">'a</span>&gt; {
+    Single(PosSubtables&lt;<span class="lifetime">'a</span>, SinglePos&lt;<span class="lifetime">'a</span>&gt;&gt;),
+    Pair(PosSubtables&lt;<span class="lifetime">'a</span>, PairPos&lt;<span class="lifetime">'a</span>&gt;&gt;),
+    Cursive(PosSubtables&lt;<span class="lifetime">'a</span>, CursivePosFormat1&lt;<span class="lifetime">'a</span>&gt;&gt;),
+    MarkToBase(PosSubtables&lt;<span class="lifetime">'a</span>, MarkBasePosFormat1&lt;<span class="lifetime">'a</span>&gt;&gt;),
+    MarkToLig(PosSubtables&lt;<span class="lifetime">'a</span>, MarkLigPosFormat1&lt;<span class="lifetime">'a</span>&gt;&gt;),
+    MarkToMark(PosSubtables&lt;<span class="lifetime">'a</span>, MarkMarkPosFormat1&lt;<span class="lifetime">'a</span>&gt;&gt;),
+    Contextual(PosSubtables&lt;<span class="lifetime">'a</span>, PositionSequenceContext&lt;<span class="lifetime">'a</span>&gt;&gt;),
+    ChainContextual(PosSubtables&lt;<span class="lifetime">'a</span>, PositionChainContext&lt;<span class="lifetime">'a</span>&gt;&gt;),
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; PositionLookup&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; PositionLookup&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">pub fn </span>lookup_flag(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LookupFlag {
         <span class="self">self</span>.of_unit_type().lookup_flag()
     }
@@ -232,7 +233,7 @@
     ///
     /// This method handles both extension and non-extension lookups, and saves
     /// the caller needing to dig into the `PositionLookup` enum itself.
-    </span><span class="kw">pub fn </span>subtables(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;PositionSubtables&lt;<span class="lifetime">&#39;a</span>&gt;, ReadError&gt; {
+    </span><span class="kw">pub fn </span>subtables(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;PositionSubtables&lt;<span class="lifetime">'a</span>&gt;, ReadError&gt; {
         <span class="kw">let </span>raw_lookup = <span class="self">self</span>.of_unit_type();
         <span class="kw">let </span>offsets = raw_lookup.subtable_offsets();
         <span class="kw">let </span>data = raw_lookup.offset_data();

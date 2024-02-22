@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ttf-parser-0.20.0/src/tables/hmtx.rs`."><title>hmtx.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ttf_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ttf-parser-0.20.0/src/tables/hmtx.rs`."><title>hmtx.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ttf_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -145,18 +146,18 @@
 <span class="doccomment">/// A [Horizontal/Vertical Metrics Table](
 /// https://docs.microsoft.com/en-us/typography/opentype/spec/hmtx).
 ///
-/// `hmtx` and `vmtx` tables has the same structure, so we&#39;re reusing the same struct for both.
+/// `hmtx` and `vmtx` tables has the same structure, so we're reusing the same struct for both.
 </span><span class="attr">#[derive(Clone, Copy, Debug)]
-</span><span class="kw">pub struct </span>Table&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Table&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// A list of metrics indexed by glyph ID.
-    </span><span class="kw">pub </span>metrics: LazyArray16&lt;<span class="lifetime">&#39;a</span>, Metrics&gt;,
+    </span><span class="kw">pub </span>metrics: LazyArray16&lt;<span class="lifetime">'a</span>, Metrics&gt;,
     <span class="doccomment">/// Side bearings for glyph IDs greater than or equal to the number of `metrics` values.
-    </span><span class="kw">pub </span>bearings: LazyArray16&lt;<span class="lifetime">&#39;a</span>, i16&gt;,
+    </span><span class="kw">pub </span>bearings: LazyArray16&lt;<span class="lifetime">'a</span>, i16&gt;,
     <span class="doccomment">/// Sum of long metrics + bearings.
     </span><span class="kw">pub </span>number_of_metrics: u16,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Table&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Table&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Parses a table from raw data.
     ///
     /// - `number_of_metrics` is from the `hhea`/`vhea` table.
@@ -164,7 +165,7 @@
     </span><span class="kw">pub fn </span>parse(
         <span class="kw-2">mut </span>number_of_metrics: u16,
         number_of_glyphs: NonZeroU16,
-        data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+        data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     ) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">if </span>number_of_metrics == <span class="number">0 </span>{
             <span class="kw">return </span><span class="prelude-val">None</span>;
@@ -173,15 +174,15 @@
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">let </span>metrics = s.read_array16::&lt;Metrics&gt;(number_of_metrics)<span class="question-mark">?</span>;
 
-        <span class="comment">// &#39;If the number_of_metrics is less than the total number of glyphs,
+        <span class="comment">// 'If the number_of_metrics is less than the total number of glyphs,
         // then that array is followed by an array for the left side bearing values
-        // of the remaining glyphs.&#39;
+        // of the remaining glyphs.'
         </span><span class="kw">let </span>bearings_count = number_of_glyphs.get().checked_sub(number_of_metrics);
         <span class="kw">let </span>bearings = <span class="kw">if let </span><span class="prelude-val">Some</span>(count) = bearings_count {
             number_of_metrics += count;
-            <span class="comment">// Some malformed fonts can skip &quot;left side bearing values&quot;
+            <span class="comment">// Some malformed fonts can skip "left side bearing values"
             // even when they are expected.
-            // Therefore if we weren&#39;t able to parser them, simply fallback to an empty array.
+            // Therefore if we weren't able to parser them, simply fallback to an empty array.
             // No need to mark the whole table as malformed.
             </span>s.read_array16::&lt;i16&gt;(count).unwrap_or_default()
         } <span class="kw">else </span>{
@@ -205,9 +206,9 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(metrics) = <span class="self">self</span>.metrics.get(glyph_id.<span class="number">0</span>) {
             <span class="prelude-val">Some</span>(metrics.advance)
         } <span class="kw">else </span>{
-            <span class="comment">// &#39;As an optimization, the number of records can be less than the number of glyphs,
+            <span class="comment">// 'As an optimization, the number of records can be less than the number of glyphs,
             // in which case the advance value of the last record applies
-            // to all remaining glyph IDs.&#39;
+            // to all remaining glyph IDs.'
             </span><span class="self">self</span>.metrics.last().map(|m| m.advance)
         }
     }
@@ -218,9 +219,9 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(metrics) = <span class="self">self</span>.metrics.get(glyph_id.<span class="number">0</span>) {
             <span class="prelude-val">Some</span>(metrics.side_bearing)
         } <span class="kw">else </span>{
-            <span class="comment">// &#39;If the number_of_metrics is less than the total number of glyphs,
+            <span class="comment">// 'If the number_of_metrics is less than the total number of glyphs,
             // then that array is followed by an array for the side bearing values
-            // of the remaining glyphs.&#39;
+            // of the remaining glyphs.'
             </span><span class="self">self</span>.bearings
                 .get(glyph_id.<span class="number">0</span>.checked_sub(<span class="self">self</span>.metrics.len())<span class="question-mark">?</span>)
         }

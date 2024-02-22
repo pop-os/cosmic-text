@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ttf-parser-0.20.0/src/tables/cff/cff1.rs`."><title>cff1.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="ttf_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ttf-parser-0.20.0/src/tables/cff/cff1.rs`."><title>cff1.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="ttf_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1068,7 +1069,7 @@
 <span class="kw">use </span><span class="kw">super</span>::dict::DictionaryParser;
 <span class="kw">use </span><span class="kw">super</span>::encoding::{parse_encoding, Encoding, STANDARD_ENCODING};
 <span class="kw">use </span><span class="kw">super</span>::index::{parse_index, skip_index, Index};
-<span class="attr">#[cfg(feature = <span class="string">&quot;glyph-names&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"glyph-names"</span>)]
 </span><span class="kw">use </span><span class="kw">super</span>::std_names::STANDARD_NAMES;
 <span class="kw">use super</span>::{calc_subroutine_bias, conv_subroutine_index, Builder, CFFError, IsEven, StringId};
 <span class="kw">use </span><span class="kw">crate</span>::parser::{LazyArray16, NumFrom, Stream, TryNumFrom};
@@ -1151,25 +1152,25 @@
 }
 
 <span class="attr">#[derive(Clone, Copy, Debug)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum </span>FontKind&lt;<span class="lifetime">&#39;a</span>&gt; {
-    SID(SIDMetadata&lt;<span class="lifetime">&#39;a</span>&gt;),
-    CID(CIDMetadata&lt;<span class="lifetime">&#39;a</span>&gt;),
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum </span>FontKind&lt;<span class="lifetime">'a</span>&gt; {
+    SID(SIDMetadata&lt;<span class="lifetime">'a</span>&gt;),
+    CID(CIDMetadata&lt;<span class="lifetime">'a</span>&gt;),
 }
 
 <span class="attr">#[derive(Clone, Copy, Default, Debug)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>SIDMetadata&lt;<span class="lifetime">&#39;a</span>&gt; {
-    local_subrs: Index&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>SIDMetadata&lt;<span class="lifetime">'a</span>&gt; {
+    local_subrs: Index&lt;<span class="lifetime">'a</span>&gt;,
     <span class="doccomment">/// Can be zero.
     </span>default_width: f32,
     <span class="doccomment">/// Can be zero.
     </span>nominal_width: f32,
-    encoding: Encoding&lt;<span class="lifetime">&#39;a</span>&gt;,
+    encoding: Encoding&lt;<span class="lifetime">'a</span>&gt;,
 }
 
 <span class="attr">#[derive(Clone, Copy, Default, Debug)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>CIDMetadata&lt;<span class="lifetime">&#39;a</span>&gt; {
-    fd_array: Index&lt;<span class="lifetime">&#39;a</span>&gt;,
-    fd_select: FDSelect&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>CIDMetadata&lt;<span class="lifetime">'a</span>&gt; {
+    fd_array: Index&lt;<span class="lifetime">'a</span>&gt;,
+    fd_select: FDSelect&lt;<span class="lifetime">'a</span>&gt;,
 }
 
 <span class="doccomment">/// An affine transformation matrix.
@@ -1374,11 +1375,11 @@
 ///   3. Get a Private DICT offset from a Font DICT.
 ///   4. Get a local subroutine offset from Private DICT.
 ///   5. Parse a local subroutine at offset.
-</span><span class="kw">fn </span>parse_cid_local_subrs&lt;<span class="lifetime">&#39;a</span>&gt;(
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+</span><span class="kw">fn </span>parse_cid_local_subrs&lt;<span class="lifetime">'a</span>&gt;(
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     glyph_id: GlyphId,
     cid: <span class="kw-2">&amp;</span>CIDMetadata,
-) -&gt; <span class="prelude-ty">Option</span>&lt;Index&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+) -&gt; <span class="prelude-ty">Option</span>&lt;Index&lt;<span class="lifetime">'a</span>&gt;&gt; {
     <span class="kw">let </span>font_dict_index = cid.fd_select.font_dict_index(glyph_id)<span class="question-mark">?</span>;
     <span class="kw">let </span>font_dict_data = cid.fd_array.get(u32::from(font_dict_index))<span class="question-mark">?</span>;
     <span class="kw">let </span>private_dict_range = parse_font_dict(font_dict_data)<span class="question-mark">?</span>;
@@ -1386,22 +1387,22 @@
     <span class="kw">let </span>private_dict = parse_private_dict(private_dict_data);
     <span class="kw">let </span>subroutines_offset = private_dict.local_subroutines_offset<span class="question-mark">?</span>;
 
-    <span class="comment">// &#39;The local subroutines offset is relative to the beginning
-    // of the Private DICT data.&#39;
+    <span class="comment">// 'The local subroutines offset is relative to the beginning
+    // of the Private DICT data.'
     </span><span class="kw">let </span>start = private_dict_range.start.checked_add(subroutines_offset)<span class="question-mark">?</span>;
     <span class="kw">let </span>subrs_data = data.get(start..)<span class="question-mark">?</span>;
     <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(subrs_data);
     parse_index::&lt;u16&gt;(<span class="kw-2">&amp;mut </span>s)
 }
 
-<span class="kw">struct </span>CharStringParserContext&lt;<span class="lifetime">&#39;a</span>&gt; {
-    metadata: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Table&lt;<span class="lifetime">&#39;a</span>&gt;,
+<span class="kw">struct </span>CharStringParserContext&lt;<span class="lifetime">'a</span>&gt; {
+    metadata: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Table&lt;<span class="lifetime">'a</span>&gt;,
     width: <span class="prelude-ty">Option</span>&lt;f32&gt;,
     stems_len: u32,
     has_endchar: bool,
     has_seac: bool,
     glyph_id: GlyphId, <span class="comment">// Required to parse local subroutine in CID fonts.
-    </span>local_subrs: <span class="prelude-ty">Option</span>&lt;Index&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    </span>local_subrs: <span class="prelude-ty">Option</span>&lt;Index&lt;<span class="lifetime">'a</span>&gt;&gt;,
 }
 
 <span class="kw">fn </span>parse_char_string(
@@ -1533,7 +1534,7 @@
                 }
 
                 <span class="comment">// Parse and remember the local subroutine for the current glyph.
-                // Since it&#39;s a pretty complex task, we&#39;re doing it only when
+                // Since it's a pretty complex task, we're doing it only when
                 // a local subroutine is actually requested by the glyphs charstring.
                 </span><span class="kw">if </span>ctx.local_subrs.is_none() {
                     <span class="kw">if let </span>FontKind::CID(<span class="kw-2">ref </span>cid) = ctx.metadata.kind {
@@ -1577,7 +1578,7 @@
             }
             operator::ENDCHAR =&gt; {
                 <span class="kw">if </span>p.stack.len() == <span class="number">4 </span>|| (ctx.width.is_none() &amp;&amp; p.stack.len() == <span class="number">5</span>) {
-                    <span class="comment">// Process &#39;seac&#39;.
+                    <span class="comment">// Process 'seac'.
                     </span><span class="kw">let </span>accent_char = seac_code_to_glyph_id(<span class="kw-2">&amp;</span>ctx.metadata.charset, p.stack.pop())
                         .ok_or(CFFError::InvalidSeacCode)<span class="question-mark">?</span>;
                     <span class="kw">let </span>base_char = seac_code_to_glyph_id(<span class="kw-2">&amp;</span>ctx.metadata.charset, p.stack.pop())
@@ -1728,7 +1729,7 @@
         }
     }
 
-    <span class="comment">// TODO: &#39;A charstring subroutine must end with either an endchar or a return operator.&#39;
+    <span class="comment">// TODO: 'A charstring subroutine must end with either an endchar or a return operator.'
 
     </span><span class="prelude-val">Ok</span>(())
 }
@@ -1754,18 +1755,18 @@
 }
 
 <span class="attr">#[derive(Clone, Copy, Debug)]
-</span><span class="kw">enum </span>FDSelect&lt;<span class="lifetime">&#39;a</span>&gt; {
-    Format0(LazyArray16&lt;<span class="lifetime">&#39;a</span>, u8&gt;),
-    Format3(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]), <span class="comment">// It&#39;s easier to parse it in-place.
+</span><span class="kw">enum </span>FDSelect&lt;<span class="lifetime">'a</span>&gt; {
+    Format0(LazyArray16&lt;<span class="lifetime">'a</span>, u8&gt;),
+    Format3(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]), <span class="comment">// It's easier to parse it in-place.
 </span>}
 
-<span class="kw">impl </span>Default <span class="kw">for </span>FDSelect&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Default <span class="kw">for </span>FDSelect&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         FDSelect::Format0(LazyArray16::default())
     }
 }
 
-<span class="kw">impl </span>FDSelect&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>FDSelect&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>font_dict_index(<span class="kw-2">&amp;</span><span class="self">self</span>, glyph_id: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;u8&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             FDSelect::Format0(<span class="kw-2">ref </span>array) =&gt; array.get(glyph_id.<span class="number">0</span>),
@@ -1776,8 +1777,8 @@
                     <span class="kw">return </span><span class="prelude-val">None</span>;
                 }
 
-                <span class="comment">// &#39;A sentinel GID follows the last range element and serves
-                // to delimit the last range in the array.&#39;
+                <span class="comment">// 'A sentinel GID follows the last range element and serves
+                // to delimit the last range in the array.'
                 // So we can simply increase the number of ranges by one.
                 </span><span class="kw">let </span>number_of_ranges = number_of_ranges.checked_add(<span class="number">1</span>)<span class="question-mark">?</span>;
 
@@ -1801,7 +1802,7 @@
     }
 }
 
-<span class="kw">fn </span>parse_fd_select&lt;<span class="lifetime">&#39;a</span>&gt;(number_of_glyphs: u16, s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;FDSelect&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+<span class="kw">fn </span>parse_fd_select&lt;<span class="lifetime">'a</span>&gt;(number_of_glyphs: u16, s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;FDSelect&lt;<span class="lifetime">'a</span>&gt;&gt; {
     <span class="kw">let </span>format = s.read::&lt;u8&gt;()<span class="question-mark">?</span>;
     <span class="kw">match </span>format {
         <span class="number">0 </span>=&gt; <span class="prelude-val">Some</span>(FDSelect::Format0(s.read_array16::&lt;u8&gt;(number_of_glyphs)<span class="question-mark">?</span>)),
@@ -1810,11 +1811,11 @@
     }
 }
 
-<span class="kw">fn </span>parse_sid_metadata&lt;<span class="lifetime">&#39;a</span>&gt;(
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+<span class="kw">fn </span>parse_sid_metadata&lt;<span class="lifetime">'a</span>&gt;(
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     top_dict: TopDict,
-    encoding: Encoding&lt;<span class="lifetime">&#39;a</span>&gt;,
-) -&gt; <span class="prelude-ty">Option</span>&lt;FontKind&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    encoding: Encoding&lt;<span class="lifetime">'a</span>&gt;,
+) -&gt; <span class="prelude-ty">Option</span>&lt;FontKind&lt;<span class="lifetime">'a</span>&gt;&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>metadata = SIDMetadata::default();
     metadata.encoding = encoding;
 
@@ -1831,8 +1832,8 @@
         top_dict.private_dict_range,
         private_dict.local_subroutines_offset,
     ) {
-        <span class="comment">// &#39;The local subroutines offset is relative to the beginning
-        // of the Private DICT data.&#39;
+        <span class="comment">// 'The local subroutines offset is relative to the beginning
+        // of the Private DICT data.'
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(start) = private_dict_range.start.checked_add(subroutines_offset) {
             <span class="kw">let </span>data = data.get(start..data.len())<span class="question-mark">?</span>;
             <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
@@ -1854,7 +1855,7 @@
     </span>};
 
     <span class="kw">if </span>charset_offset &lt;= charset_id::EXPERT_SUBSET {
-        <span class="comment">// &#39;There are no predefined charsets for CID fonts.&#39;
+        <span class="comment">// 'There are no predefined charsets for CID fonts.'
         // Adobe Technical Note #5176, chapter 18 CID-keyed Fonts
         </span><span class="kw">return </span><span class="prelude-val">None</span>;
     }
@@ -1877,24 +1878,24 @@
 <span class="doccomment">/// A [Compact Font Format Table](
 /// https://docs.microsoft.com/en-us/typography/opentype/spec/cff).
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>Table&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Table&lt;<span class="lifetime">'a</span>&gt; {
     <span class="comment">// The whole CFF table.
     // Used to resolve a local subroutine in a CID font.
-    </span>table_data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    </span>table_data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
 
     <span class="attr">#[allow(dead_code)]
-    </span>strings: Index&lt;<span class="lifetime">&#39;a</span>&gt;,
-    global_subrs: Index&lt;<span class="lifetime">&#39;a</span>&gt;,
-    charset: Charset&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span>strings: Index&lt;<span class="lifetime">'a</span>&gt;,
+    global_subrs: Index&lt;<span class="lifetime">'a</span>&gt;,
+    charset: Charset&lt;<span class="lifetime">'a</span>&gt;,
     number_of_glyphs: NonZeroU16,
     matrix: Matrix,
-    char_strings: Index&lt;<span class="lifetime">&#39;a</span>&gt;,
-    kind: FontKind&lt;<span class="lifetime">&#39;a</span>&gt;,
+    char_strings: Index&lt;<span class="lifetime">'a</span>&gt;,
+    kind: FontKind&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Table&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Table&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Parses a table from raw data.
-    </span><span class="kw">pub fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">pub fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
 
         <span class="comment">// Parse Header.
@@ -1907,7 +1908,7 @@
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
 
-        <span class="comment">// Jump to Name INDEX. It&#39;s not necessarily right after the header.
+        <span class="comment">// Jump to Name INDEX. It's not necessarily right after the header.
         </span><span class="kw">if </span>header_size &gt; <span class="number">4 </span>{
             s.advance(usize::from(header_size) - <span class="number">4</span>);
         }
@@ -1933,7 +1934,7 @@
             parse_index::&lt;u16&gt;(<span class="kw-2">&amp;mut </span>s)<span class="question-mark">?
         </span>};
 
-        <span class="comment">// &#39;The number of glyphs is the value of the count field in the CharStrings INDEX.&#39;
+        <span class="comment">// 'The number of glyphs is the value of the count field in the CharStrings INDEX.'
         </span><span class="kw">let </span>number_of_glyphs = u16::try_from(char_strings.len())
             .ok()
             .and_then(NonZeroU16::new)<span class="question-mark">?</span>;
@@ -2045,7 +2046,7 @@
     }
 
     <span class="doccomment">/// Returns a glyph ID by a name.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;glyph-names&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"glyph-names"</span>)]
     </span><span class="kw">pub fn </span>glyph_index_by_name(<span class="kw-2">&amp;</span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;GlyphId&gt; {
         <span class="kw">match </span><span class="self">self</span>.kind {
             FontKind::SID(<span class="kw">_</span>) =&gt; {
@@ -2066,8 +2067,8 @@
     }
 
     <span class="doccomment">/// Returns a glyph name.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;glyph-names&quot;</span>)]
-    </span><span class="kw">pub fn </span>glyph_name(<span class="kw-2">&amp;</span><span class="self">self</span>, glyph_id: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt; {
+    </span><span class="attr">#[cfg(feature = <span class="string">"glyph-names"</span>)]
+    </span><span class="kw">pub fn </span>glyph_name(<span class="kw-2">&amp;</span><span class="self">self</span>, glyph_id: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; {
         <span class="kw">match </span><span class="self">self</span>.kind {
             FontKind::SID(<span class="kw">_</span>) =&gt; {
                 <span class="kw">let </span>sid = <span class="self">self</span>.charset.gid_to_sid(glyph_id)<span class="question-mark">?</span>;
@@ -2088,7 +2089,7 @@
     <span class="doccomment">/// Returns the CID corresponding to a glyph ID.
     ///
     /// Returns `None` if this is not a CIDFont.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;glyph-names&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"glyph-names"</span>)]
     </span><span class="kw">pub fn </span>glyph_cid(<span class="kw-2">&amp;</span><span class="self">self</span>, glyph_id: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;u16&gt; {
         <span class="kw">match </span><span class="self">self</span>.kind {
             FontKind::SID(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
@@ -2097,9 +2098,9 @@
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Table&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Table&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;Table {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"Table {{ ... }}"</span>)
     }
 }
 </code></pre></div></section></main></body></html>

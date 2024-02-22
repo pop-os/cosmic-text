@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ttf-parser-0.20.0/src/tables/name.rs`."><title>name.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ttf_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ttf-parser-0.20.0/src/tables/name.rs`."><title>name.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ttf_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -336,15 +337,15 @@
 </pre></div><pre class="rust"><code><span class="doccomment">//! A [Naming Table](
 //! https://docs.microsoft.com/en-us/typography/opentype/spec/name) implementation.
 
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">use </span>std::string::String;
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">use </span>std::vec::Vec;
 
 <span class="kw">use </span><span class="kw">crate</span>::parser::{FromData, LazyArray16, Offset, Offset16, Stream};
 <span class="kw">use </span><span class="kw">crate</span>::Language;
 
-<span class="doccomment">/// A list of [name ID](https://docs.microsoft.com/en-us/typography/opentype/spec/name#name-ids)&#39;s.
+<span class="doccomment">/// A list of [name ID](https://docs.microsoft.com/en-us/typography/opentype/spec/name#name-ids)'s.
 </span><span class="kw">pub mod </span>name_id {
     <span class="attr">#![allow(missing_docs)]
 
@@ -448,7 +449,7 @@
 
 <span class="doccomment">/// A [Name Record](https://docs.microsoft.com/en-us/typography/opentype/spec/name#name-records).
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>Name&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Name&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// A platform ID.
     </span><span class="kw">pub </span>platform_id: PlatformId,
     <span class="doccomment">/// A platform-specific encoding ID.
@@ -457,25 +458,25 @@
     </span><span class="kw">pub </span>language_id: u16,
     <span class="doccomment">/// A [Name ID](https://docs.microsoft.com/en-us/typography/opentype/spec/name#name-ids).
     ///
-    /// A predefined list of ID&#39;s can be found in the [`name_id`](name_id/index.html) module.
+    /// A predefined list of ID's can be found in the [`name_id`](name_id/index.html) module.
     </span><span class="kw">pub </span>name_id: u16,
     <span class="doccomment">/// A raw name data.
     ///
     /// Can be in any encoding. Can be empty.
-    </span><span class="kw">pub </span>name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    </span><span class="kw">pub </span>name: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Name&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="doccomment">/// Returns the Name&#39;s data as a UTF-8 string.
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Name&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="doccomment">/// Returns the Name's data as a UTF-8 string.
     ///
     /// Only Unicode names are supported. And since they are stored as UTF-16BE,
-    /// we can&#39;t return `&amp;str` and have to allocate a `String`.
+    /// we can't return `&amp;str` and have to allocate a `String`.
     ///
     /// Supports:
     /// - Unicode Platform ID
     /// - Windows Platform ID + Symbol
     /// - Windows Platform ID + Unicode BMP
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
     #[inline(never)]
     </span><span class="kw">pub fn </span>to_string(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;String&gt; {
         <span class="kw">if </span><span class="self">self</span>.is_unicode() {
@@ -491,7 +492,7 @@
         is_unicode_encoding(<span class="self">self</span>.platform_id, <span class="self">self</span>.encoding_id)
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
     #[inline(never)]
     </span><span class="kw">fn </span>name_from_utf16_be(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;String&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>name: Vec&lt;u16&gt; = Vec::new();
@@ -517,45 +518,45 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; core::fmt::Debug <span class="kw">for </span>Name&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; core::fmt::Debug <span class="kw">for </span>Name&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
         <span class="kw">let </span>name = <span class="self">self</span>.to_string();
-        f.debug_struct(<span class="string">&quot;Name&quot;</span>)
-            .field(<span class="string">&quot;name&quot;</span>, <span class="kw-2">&amp;</span>name.as_deref().unwrap_or(<span class="string">&quot;unsupported encoding&quot;</span>))
-            .field(<span class="string">&quot;platform_id&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.platform_id)
-            .field(<span class="string">&quot;encoding_id&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.encoding_id)
-            .field(<span class="string">&quot;language_id&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.language_id)
-            .field(<span class="string">&quot;language&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.language())
-            .field(<span class="string">&quot;name_id&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.name_id)
+        f.debug_struct(<span class="string">"Name"</span>)
+            .field(<span class="string">"name"</span>, <span class="kw-2">&amp;</span>name.as_deref().unwrap_or(<span class="string">"unsupported encoding"</span>))
+            .field(<span class="string">"platform_id"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.platform_id)
+            .field(<span class="string">"encoding_id"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.encoding_id)
+            .field(<span class="string">"language_id"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.language_id)
+            .field(<span class="string">"language"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.language())
+            .field(<span class="string">"name_id"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.name_id)
             .finish()
     }
 }
 
-<span class="attr">#[cfg(not(feature = <span class="string">&quot;std&quot;</span>))]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; core::fmt::Debug <span class="kw">for </span>Name&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(not(feature = <span class="string">"std"</span>))]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; core::fmt::Debug <span class="kw">for </span>Name&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        f.debug_struct(<span class="string">&quot;Name&quot;</span>)
-            .field(<span class="string">&quot;name&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.name)
-            .field(<span class="string">&quot;platform_id&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.platform_id)
-            .field(<span class="string">&quot;encoding_id&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.encoding_id)
-            .field(<span class="string">&quot;language_id&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.language_id)
-            .field(<span class="string">&quot;language&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.language())
-            .field(<span class="string">&quot;name_id&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.name_id)
+        f.debug_struct(<span class="string">"Name"</span>)
+            .field(<span class="string">"name"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.name)
+            .field(<span class="string">"platform_id"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.platform_id)
+            .field(<span class="string">"encoding_id"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.encoding_id)
+            .field(<span class="string">"language_id"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.language_id)
+            .field(<span class="string">"language"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.language())
+            .field(<span class="string">"name_id"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.name_id)
             .finish()
     }
 }
 
 <span class="doccomment">/// A list of face names.
 </span><span class="attr">#[derive(Clone, Copy, Default)]
-</span><span class="kw">pub struct </span>Names&lt;<span class="lifetime">&#39;a</span>&gt; {
-    records: LazyArray16&lt;<span class="lifetime">&#39;a</span>, NameRecord&gt;,
-    storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+</span><span class="kw">pub struct </span>Names&lt;<span class="lifetime">'a</span>&gt; {
+    records: LazyArray16&lt;<span class="lifetime">'a</span>, NameRecord&gt;,
+    storage: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Names&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Names&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Returns a name at index.
-    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, index: u16) -&gt; <span class="prelude-ty">Option</span>&lt;Name&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, index: u16) -&gt; <span class="prelude-ty">Option</span>&lt;Name&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">let </span>record = <span class="self">self</span>.records.get(index)<span class="question-mark">?</span>;
         <span class="kw">let </span>name_start = record.offset.to_usize();
         <span class="kw">let </span>name_end = name_start + usize::from(record.length);
@@ -580,15 +581,15 @@
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Names&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Names&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;Names {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"Names {{ ... }}"</span>)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IntoIterator <span class="kw">for </span>Names&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">type </span>Item = Name&lt;<span class="lifetime">&#39;a</span>&gt;;
-    <span class="kw">type </span>IntoIter = NamesIter&lt;<span class="lifetime">&#39;a</span>&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; IntoIterator <span class="kw">for </span>Names&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">type </span>Item = Name&lt;<span class="lifetime">'a</span>&gt;;
+    <span class="kw">type </span>IntoIter = NamesIter&lt;<span class="lifetime">'a</span>&gt;;
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
@@ -602,13 +603,13 @@
 <span class="doccomment">/// An iterator over face names.
 </span><span class="attr">#[derive(Clone, Copy)]
 #[allow(missing_debug_implementations)]
-</span><span class="kw">pub struct </span>NamesIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    names: Names&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>NamesIter&lt;<span class="lifetime">'a</span>&gt; {
+    names: Names&lt;<span class="lifetime">'a</span>&gt;,
     index: u16,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>NamesIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">type </span>Item = Name&lt;<span class="lifetime">&#39;a</span>&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>NamesIter&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">type </span>Item = Name&lt;<span class="lifetime">'a</span>&gt;;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">if </span><span class="self">self</span>.index &lt; <span class="self">self</span>.names.len() {
@@ -628,14 +629,14 @@
 <span class="doccomment">/// A [Naming Table](
 /// https://docs.microsoft.com/en-us/typography/opentype/spec/name).
 </span><span class="attr">#[derive(Clone, Copy, Default, Debug)]
-</span><span class="kw">pub struct </span>Table&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Table&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// A list of names.
-    </span><span class="kw">pub </span>names: Names&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub </span>names: Names&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Table&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Table&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Parses a table from raw data.
-    </span><span class="kw">pub fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">pub fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="comment">// https://docs.microsoft.com/en-us/typography/opentype/spec/name#naming-table-format-1
         </span><span class="kw">const </span>LANG_TAG_RECORD_SIZE: u16 = <span class="number">4</span>;
 

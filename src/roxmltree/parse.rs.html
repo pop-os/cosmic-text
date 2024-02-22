@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/roxmltree-0.19.0/src/parse.rs`."><title>parse.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="roxmltree" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/roxmltree-0.19.0/src/parse.rs`."><title>parse.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="roxmltree" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1346,7 +1347,7 @@
     <span class="doccomment">/// The &lt;http://www.w3.org/2000/xmlns/&gt; URI must not be declared.
     </span>UnexpectedXmlnsUri(TextPos),
 
-    <span class="doccomment">/// `xmlns` can&#39;t be used as an element prefix.
+    <span class="doccomment">/// `xmlns` can't be used as an element prefix.
     </span>InvalidElementNamePrefix(TextPos),
 
     <span class="doccomment">/// A namespace was already defined on this element.
@@ -1369,7 +1370,7 @@
     ///
     /// Example:
     /// ```xml
-    /// &lt;!DOCTYPE test [ &lt;!ENTITY p &#39;&lt;/p&gt;&#39;&gt; ]&gt;
+    /// &lt;!DOCTYPE test [ &lt;!ENTITY p '&lt;/p&gt;'&gt; ]&gt;
     /// &lt;root&gt;&amp;p;&lt;/root&gt;
     /// ```
     </span>UnexpectedEntityCloseTag(TextPos),
@@ -1396,7 +1397,7 @@
     /// This also includes namespaces resolving.
     /// So an element like this will lead to an error.
     /// ```xml
-    /// &lt;e xmlns:n1=&#39;http://www.w3.org&#39; xmlns:n2=&#39;http://www.w3.org&#39; n1:a=&#39;b1&#39; n2:a=&#39;b2&#39;/&gt;
+    /// &lt;e xmlns:n1='http://www.w3.org' xmlns:n2='http://www.w3.org' n1:a='b1' n2:a='b2'/&gt;
     /// ```
     </span>DuplicatedAttribute(String, TextPos),
 
@@ -1440,12 +1441,12 @@
     <span class="doccomment">/// An invalid/unexpected character.
     ///
     /// expected, actual, position
-    </span>InvalidChar2(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, u8, TextPos),
+    </span>InvalidChar2(<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, u8, TextPos),
 
     <span class="doccomment">/// An unexpected string.
     ///
     /// Contains what string was expected.
-    </span>InvalidString(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, TextPos),
+    </span>InvalidString(<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, TextPos),
 
     <span class="doccomment">/// An invalid ExternalID in the DTD.
     </span>InvalidExternalID(TextPos),
@@ -1509,127 +1510,127 @@
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
         <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
             Error::InvalidXmlPrefixUri(pos) =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;&#39;xml&#39; namespace prefix mapped to wrong URI at {}&quot;</span>, pos)
+                <span class="macro">write!</span>(f, <span class="string">"'xml' namespace prefix mapped to wrong URI at {}"</span>, pos)
             }
             Error::UnexpectedXmlUri(pos) =&gt; {
                 <span class="macro">write!</span>(
                     f,
-                    <span class="string">&quot;the &#39;xml&#39; namespace URI is used for not &#39;xml&#39; prefix at {}&quot;</span>,
+                    <span class="string">"the 'xml' namespace URI is used for not 'xml' prefix at {}"</span>,
                     pos
                 )
             }
             Error::UnexpectedXmlnsUri(pos) =&gt; {
                 <span class="macro">write!</span>(
                     f,
-                    <span class="string">&quot;the &#39;xmlns&#39; URI is used at {}, but it must not be declared&quot;</span>,
+                    <span class="string">"the 'xmlns' URI is used at {}, but it must not be declared"</span>,
                     pos
                 )
             }
             Error::InvalidElementNamePrefix(pos) =&gt; {
                 <span class="macro">write!</span>(
                     f,
-                    <span class="string">&quot;the &#39;xmlns&#39; prefix is used at {}, but it must not be&quot;</span>,
+                    <span class="string">"the 'xmlns' prefix is used at {}, but it must not be"</span>,
                     pos
                 )
             }
             Error::DuplicatedNamespace(<span class="kw-2">ref </span>name, pos) =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;namespace &#39;{}&#39; at {} is already defined&quot;</span>, name, pos)
+                <span class="macro">write!</span>(f, <span class="string">"namespace '{}' at {} is already defined"</span>, name, pos)
             }
             Error::UnknownNamespace(<span class="kw-2">ref </span>name, pos) =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;an unknown namespace prefix &#39;{}&#39; at {}&quot;</span>, name, pos)
+                <span class="macro">write!</span>(f, <span class="string">"an unknown namespace prefix '{}' at {}"</span>, name, pos)
             }
             Error::UnexpectedCloseTag(<span class="kw-2">ref </span>expected, <span class="kw-2">ref </span>actual, pos) =&gt; {
                 <span class="macro">write!</span>(
                     f,
-                    <span class="string">&quot;expected &#39;{}&#39; tag, not &#39;{}&#39; at {}&quot;</span>,
+                    <span class="string">"expected '{}' tag, not '{}' at {}"</span>,
                     expected, actual, pos
                 )
             }
             Error::UnexpectedEntityCloseTag(pos) =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;unexpected close tag at {}&quot;</span>, pos)
+                <span class="macro">write!</span>(f, <span class="string">"unexpected close tag at {}"</span>, pos)
             }
             Error::MalformedEntityReference(pos) =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;malformed entity reference at {}&quot;</span>, pos)
+                <span class="macro">write!</span>(f, <span class="string">"malformed entity reference at {}"</span>, pos)
             }
             Error::UnknownEntityReference(<span class="kw-2">ref </span>name, pos) =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;unknown entity reference &#39;{}&#39; at {}&quot;</span>, name, pos)
+                <span class="macro">write!</span>(f, <span class="string">"unknown entity reference '{}' at {}"</span>, name, pos)
             }
             Error::EntityReferenceLoop(pos) =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;a possible entity reference loop is detected at {}&quot;</span>, pos)
+                <span class="macro">write!</span>(f, <span class="string">"a possible entity reference loop is detected at {}"</span>, pos)
             }
             Error::InvalidAttributeValue(pos) =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;unescaped &#39;&lt;&#39; found at {}&quot;</span>, pos)
+                <span class="macro">write!</span>(f, <span class="string">"unescaped '&lt;' found at {}"</span>, pos)
             }
             Error::DuplicatedAttribute(<span class="kw-2">ref </span>name, pos) =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;attribute &#39;{}&#39; at {} is already defined&quot;</span>, name, pos)
+                <span class="macro">write!</span>(f, <span class="string">"attribute '{}' at {} is already defined"</span>, name, pos)
             }
             Error::NoRootNode =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;the document does not have a root node&quot;</span>)
+                <span class="macro">write!</span>(f, <span class="string">"the document does not have a root node"</span>)
             }
             Error::UnclosedRootNode =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;the root node was opened but never closed&quot;</span>)
+                <span class="macro">write!</span>(f, <span class="string">"the root node was opened but never closed"</span>)
             }
             Error::UnexpectedDeclaration(pos) =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;unexpected XML declaration at {}&quot;</span>, pos)
+                <span class="macro">write!</span>(f, <span class="string">"unexpected XML declaration at {}"</span>, pos)
             }
             Error::DtdDetected =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;XML with DTD detected&quot;</span>)
+                <span class="macro">write!</span>(f, <span class="string">"XML with DTD detected"</span>)
             }
             Error::NodesLimitReached =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;nodes limit reached&quot;</span>)
+                <span class="macro">write!</span>(f, <span class="string">"nodes limit reached"</span>)
             }
             Error::AttributesLimitReached =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;more than 2^32 attributes were parsed&quot;</span>)
+                <span class="macro">write!</span>(f, <span class="string">"more than 2^32 attributes were parsed"</span>)
             }
             Error::NamespacesLimitReached =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;more than 2^16 unique namespaces were parsed&quot;</span>)
+                <span class="macro">write!</span>(f, <span class="string">"more than 2^16 unique namespaces were parsed"</span>)
             }
             Error::InvalidName(pos) =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;invalid name token at {}&quot;</span>, pos)
+                <span class="macro">write!</span>(f, <span class="string">"invalid name token at {}"</span>, pos)
             }
             Error::NonXmlChar(c, pos) =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;a non-XML character {:?} found at {}&quot;</span>, c, pos)
+                <span class="macro">write!</span>(f, <span class="string">"a non-XML character {:?} found at {}"</span>, c, pos)
             }
             Error::InvalidChar(expected, actual, pos) =&gt; {
                 <span class="macro">write!</span>(
                     f,
-                    <span class="string">&quot;expected &#39;{}&#39; not &#39;{}&#39; at {}&quot;</span>,
+                    <span class="string">"expected '{}' not '{}' at {}"</span>,
                     expected <span class="kw">as </span>char, actual <span class="kw">as </span>char, pos
                 )
             }
             Error::InvalidChar2(expected, actual, pos) =&gt; {
                 <span class="macro">write!</span>(
                     f,
-                    <span class="string">&quot;expected {} not &#39;{}&#39; at {}&quot;</span>,
+                    <span class="string">"expected {} not '{}' at {}"</span>,
                     expected, actual <span class="kw">as </span>char, pos
                 )
             }
             Error::InvalidString(expected, pos) =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;expected &#39;{}&#39; at {}&quot;</span>, expected, pos)
+                <span class="macro">write!</span>(f, <span class="string">"expected '{}' at {}"</span>, expected, pos)
             }
             Error::InvalidExternalID(pos) =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;invalid ExternalID at {}&quot;</span>, pos)
+                <span class="macro">write!</span>(f, <span class="string">"invalid ExternalID at {}"</span>, pos)
             }
             Error::InvalidComment(pos) =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;comment at {} contains &#39;--&#39;&quot;</span>, pos)
+                <span class="macro">write!</span>(f, <span class="string">"comment at {} contains '--'"</span>, pos)
             }
             Error::InvalidCharacterData(pos) =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;&#39;]]&gt;&#39; at {} is not allowed inside a character data&quot;</span>, pos)
+                <span class="macro">write!</span>(f, <span class="string">"']]&gt;' at {} is not allowed inside a character data"</span>, pos)
             }
             Error::UnknownToken(pos) =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;unknown token at {}&quot;</span>, pos)
+                <span class="macro">write!</span>(f, <span class="string">"unknown token at {}"</span>, pos)
             }
             Error::UnexpectedEndOfStream =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;unexpected end of stream&quot;</span>)
+                <span class="macro">write!</span>(f, <span class="string">"unexpected end of stream"</span>)
             }
         }
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">impl </span>std::error::Error <span class="kw">for </span>Error {
     <span class="kw">fn </span>description(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;an XML parsing error&quot;
+        <span class="string">"an XML parsing error"
     </span>}
 }
 
@@ -1670,14 +1671,14 @@
     }
 }
 
-<span class="kw">struct </span>TempAttributeData&lt;<span class="lifetime">&#39;input</span>&gt; {
-    prefix: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str,
-    local: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str,
-    value: StringStorage&lt;<span class="lifetime">&#39;input</span>&gt;,
+<span class="kw">struct </span>TempAttributeData&lt;<span class="lifetime">'input</span>&gt; {
+    prefix: <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str,
+    local: <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str,
+    value: StringStorage&lt;<span class="lifetime">'input</span>&gt;,
     pos: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;input</span>&gt; Document&lt;<span class="lifetime">&#39;input</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'input</span>&gt; Document&lt;<span class="lifetime">'input</span>&gt; {
     <span class="doccomment">/// Parses the input XML string.
     ///
     /// We do not support `&amp;[u8]` or `Reader` because the input must be an already allocated
@@ -1688,7 +1689,7 @@
     /// # Examples
     ///
     /// ```
-    /// let doc = roxmltree::Document::parse(&quot;&lt;e/&gt;&quot;).unwrap();
+    /// let doc = roxmltree::Document::parse("&lt;e/&gt;").unwrap();
     /// assert_eq!(doc.descendants().count(), 2); // root node + `e` element node
     /// ```
     </span><span class="attr">#[inline]
@@ -1705,7 +1706,7 @@
     ///
     /// ```
     /// let opt = roxmltree::ParsingOptions::default();
-    /// let doc = roxmltree::Document::parse_with_options(&quot;&lt;e/&gt;&quot;, opt).unwrap();
+    /// let doc = roxmltree::Document::parse_with_options("&lt;e/&gt;", opt).unwrap();
     /// assert_eq!(doc.descendants().count(), 2); // root node + `e` element node
     /// ```
     </span><span class="attr">#[inline]
@@ -1714,25 +1715,25 @@
     }
 }
 
-<span class="kw">struct </span>Entity&lt;<span class="lifetime">&#39;input</span>&gt; {
-    name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str,
-    value: StrSpan&lt;<span class="lifetime">&#39;input</span>&gt;,
+<span class="kw">struct </span>Entity&lt;<span class="lifetime">'input</span>&gt; {
+    name: <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str,
+    value: StrSpan&lt;<span class="lifetime">'input</span>&gt;,
 }
 
 <span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">struct </span>TagNameSpan&lt;<span class="lifetime">&#39;input</span>&gt; {
-    prefix: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str,
-    name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str,
+</span><span class="kw">struct </span>TagNameSpan&lt;<span class="lifetime">'input</span>&gt; {
+    prefix: <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str,
+    name: <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str,
     pos: usize,
     prefix_pos: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;input</span>&gt; TagNameSpan&lt;<span class="lifetime">&#39;input</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'input</span>&gt; TagNameSpan&lt;<span class="lifetime">'input</span>&gt; {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>new_null() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            prefix: <span class="string">&quot;&quot;</span>,
-            name: <span class="string">&quot;&quot;</span>,
+            prefix: <span class="string">""</span>,
+            name: <span class="string">""</span>,
             pos: <span class="number">0</span>,
             prefix_pos: <span class="number">0</span>,
         }
@@ -1751,8 +1752,8 @@
 /// This is useful for simple loops like:
 ///
 /// ```text
-/// &lt;!ENTITY a &#39;&amp;b;&#39;&gt;
-/// &lt;!ENTITY b &#39;&amp;a;&#39;&gt;
+/// &lt;!ENTITY a '&amp;b;'&gt;
+/// &lt;!ENTITY b '&amp;a;'&gt;
 /// ```
 ///
 /// And, if a text or an attribute has an entity reference and it references more
@@ -1762,11 +1763,11 @@
 /// but the number of references is exponentially increasing:
 ///
 /// ```text
-/// &lt;!ENTITY lol &quot;lol&quot;&gt;
-/// &lt;!ENTITY lol1 &quot;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&quot;&gt;
-/// &lt;!ENTITY lol2 &quot;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&quot;&gt;
-/// &lt;!ENTITY lol3 &quot;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&quot;&gt;
-/// &lt;!ENTITY lol4 &quot;&amp;lol3;&amp;lol3;&amp;lol3;&amp;lol3;&amp;lol3;&amp;lol3;&amp;lol3;&amp;lol3;&amp;lol3;&amp;lol3;&quot;&gt;
+/// &lt;!ENTITY lol "lol"&gt;
+/// &lt;!ENTITY lol1 "&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;"&gt;
+/// &lt;!ENTITY lol2 "&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;"&gt;
+/// &lt;!ENTITY lol3 "&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;"&gt;
+/// &lt;!ENTITY lol4 "&amp;lol3;&amp;lol3;&amp;lol3;&amp;lol3;&amp;lol3;&amp;lol3;&amp;lol3;&amp;lol3;&amp;lol3;&amp;lol3;"&gt;
 /// ```
 </span><span class="attr">#[derive(Default)]
 </span><span class="kw">struct </span>LoopDetector {
@@ -1815,27 +1816,27 @@
     }
 }
 
-<span class="kw">struct </span>Context&lt;<span class="lifetime">&#39;input</span>&gt; {
+<span class="kw">struct </span>Context&lt;<span class="lifetime">'input</span>&gt; {
     opt: ParsingOptions,
     namespace_start_idx: usize,
-    current_attributes: Vec&lt;TempAttributeData&lt;<span class="lifetime">&#39;input</span>&gt;&gt;,
+    current_attributes: Vec&lt;TempAttributeData&lt;<span class="lifetime">'input</span>&gt;&gt;,
     awaiting_subtree: Vec&lt;NodeId&gt;,
-    parent_prefixes: Vec&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str&gt;,
-    entities: Vec&lt;Entity&lt;<span class="lifetime">&#39;input</span>&gt;&gt;,
+    parent_prefixes: Vec&lt;<span class="kw-2">&amp;</span><span class="lifetime">'input </span>str&gt;,
+    entities: Vec&lt;Entity&lt;<span class="lifetime">'input</span>&gt;&gt;,
     after_text: bool,
     parent_id: NodeId,
-    tag_name: TagNameSpan&lt;<span class="lifetime">&#39;input</span>&gt;,
+    tag_name: TagNameSpan&lt;<span class="lifetime">'input</span>&gt;,
     loop_detector: LoopDetector,
-    doc: Document&lt;<span class="lifetime">&#39;input</span>&gt;,
+    doc: Document&lt;<span class="lifetime">'input</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;input</span>&gt; Context&lt;<span class="lifetime">&#39;input</span>&gt; {
-    <span class="kw">fn </span>append_node(<span class="kw-2">&amp;mut </span><span class="self">self</span>, kind: NodeKind&lt;<span class="lifetime">&#39;input</span>&gt;, range: Range&lt;usize&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;NodeId&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'input</span>&gt; Context&lt;<span class="lifetime">'input</span>&gt; {
+    <span class="kw">fn </span>append_node(<span class="kw-2">&amp;mut </span><span class="self">self</span>, kind: NodeKind&lt;<span class="lifetime">'input</span>&gt;, range: Range&lt;usize&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;NodeId&gt; {
         <span class="kw">if </span><span class="self">self</span>.doc.nodes.len() &gt;= <span class="self">self</span>.opt.nodes_limit <span class="kw">as </span>usize {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::NodesLimitReached);
         }
 
-        <span class="attr">#[cfg(not(feature = <span class="string">&quot;positions&quot;</span>))]
+        <span class="attr">#[cfg(not(feature = <span class="string">"positions"</span>))]
         </span><span class="kw">let _ </span>= range;
 
         <span class="kw">let </span>new_child_id = NodeId::from(<span class="self">self</span>.doc.nodes.len());
@@ -1847,7 +1848,7 @@
             next_subtree: <span class="prelude-val">None</span>,
             last_child: <span class="prelude-val">None</span>,
             kind,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;positions&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"positions"</span>)]
             </span>range,
         });
 
@@ -1875,8 +1876,8 @@
 
 <span class="kw">fn </span>parse(text: <span class="kw-2">&amp;</span>str, opt: ParsingOptions) -&gt; <span class="prelude-ty">Result</span>&lt;Document&gt; {
     <span class="comment">// Trying to guess rough nodes and attributes amount.
-    </span><span class="kw">let </span>nodes_capacity = text.bytes().filter(|c| <span class="kw-2">*</span>c == <span class="string">b&#39;&lt;&#39;</span>).count();
-    <span class="kw">let </span>attributes_capacity = text.bytes().filter(|c| <span class="kw-2">*</span>c == <span class="string">b&#39;=&#39;</span>).count();
+    </span><span class="kw">let </span>nodes_capacity = text.bytes().filter(|c| <span class="kw-2">*</span>c == <span class="string">b'&lt;'</span>).count();
+    <span class="kw">let </span>attributes_capacity = text.bytes().filter(|c| <span class="kw-2">*</span>c == <span class="string">b'='</span>).count();
 
     <span class="comment">// Init document.
     </span><span class="kw">let </span><span class="kw-2">mut </span>doc = Document {
@@ -1893,7 +1894,7 @@
         next_subtree: <span class="prelude-val">None</span>,
         last_child: <span class="prelude-val">None</span>,
         kind: NodeKind::Root,
-        <span class="attr">#[cfg(feature = <span class="string">&quot;positions&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"positions"</span>)]
         </span>range: <span class="number">0</span>..text.len(),
     });
 
@@ -1913,7 +1914,7 @@
         loop_detector: LoopDetector::default(),
         doc,
     };
-    ctx.parent_prefixes.push(<span class="string">&quot;&quot;</span>);
+    ctx.parent_prefixes.push(<span class="string">""</span>);
 
     tokenizer::parse(text, opt.allow_dtd, <span class="kw-2">&amp;mut </span>ctx)<span class="question-mark">?</span>;
 
@@ -1933,8 +1934,8 @@
     <span class="prelude-val">Ok</span>(doc)
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;input</span>&gt; tokenizer::XmlEvents&lt;<span class="lifetime">&#39;input</span>&gt; <span class="kw">for </span>Context&lt;<span class="lifetime">&#39;input</span>&gt; {
-    <span class="kw">fn </span>token(<span class="kw-2">&amp;mut </span><span class="self">self</span>, token: tokenizer::Token&lt;<span class="lifetime">&#39;input</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'input</span>&gt; tokenizer::XmlEvents&lt;<span class="lifetime">'input</span>&gt; <span class="kw">for </span>Context&lt;<span class="lifetime">'input</span>&gt; {
+    <span class="kw">fn </span>token(<span class="kw-2">&amp;mut </span><span class="self">self</span>, token: tokenizer::Token&lt;<span class="lifetime">'input</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">match </span>token {
             tokenizer::Token::ProcessingInstruction(target, value, range) =&gt; {
                 <span class="kw">let </span>pi = NodeKind::PI(PI { target, value });
@@ -1986,12 +1987,12 @@
 }
 
 <span class="attr">#[allow(clippy::too_many_arguments)]
-</span><span class="kw">fn </span>process_attribute&lt;<span class="lifetime">&#39;input</span>&gt;(
+</span><span class="kw">fn </span>process_attribute&lt;<span class="lifetime">'input</span>&gt;(
     attr_pos: usize,
-    prefix: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str,
-    local: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str,
-    value: StrSpan&lt;<span class="lifetime">&#39;input</span>&gt;,
-    ctx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;input</span>&gt;,
+    prefix: <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str,
+    local: <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str,
+    value: StrSpan&lt;<span class="lifetime">'input</span>&gt;,
+    ctx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'input</span>&gt;,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">let </span>value = normalize_attribute(value, ctx)<span class="question-mark">?</span>;
 
@@ -2004,7 +2005,7 @@
 
         <span class="kw">let </span>is_xml_ns_uri = value.as_str() == NS_XML_URI;
 
-        <span class="comment">// The prefix &#39;xml&#39; is by definition bound to the namespace name
+        <span class="comment">// The prefix 'xml' is by definition bound to the namespace name
         // http://www.w3.org/XML/1998/namespace.
         // It MUST NOT be bound to any other namespace name.
         </span><span class="kw">if </span>local == NS_XML_PREFIX {
@@ -2060,14 +2061,14 @@
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="kw">fn </span>process_element&lt;<span class="lifetime">&#39;input</span>&gt;(
-    end_token: tokenizer::ElementEnd&lt;<span class="lifetime">&#39;input</span>&gt;,
+<span class="kw">fn </span>process_element&lt;<span class="lifetime">'input</span>&gt;(
+    end_token: tokenizer::ElementEnd&lt;<span class="lifetime">'input</span>&gt;,
     token_range: Range&lt;usize&gt;,
-    ctx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;input</span>&gt;,
+    ctx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'input</span>&gt;,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">if </span>ctx.tag_name.name.is_empty() {
         <span class="comment">// May occur in XML like this:
-        // &lt;!DOCTYPE test [ &lt;!ENTITY p &#39;&lt;/p&gt;&#39;&gt; ]&gt;
+        // &lt;!DOCTYPE test [ &lt;!ENTITY p '&lt;/p&gt;'&gt; ]&gt;
         // &lt;root&gt;&amp;p;&lt;/root&gt;
 
         </span><span class="kw">if let </span>tokenizer::ElementEnd::Close(..) = end_token {
@@ -2075,7 +2076,7 @@
                 ctx.err_pos_at(token_range.start),
             ));
         } <span class="kw">else </span>{
-            <span class="macro">unreachable!</span>(<span class="string">&quot;should be already checked by the tokenizer&quot;</span>);
+            <span class="macro">unreachable!</span>(<span class="string">"should be already checked by the tokenizer"</span>);
         }
     }
 
@@ -2111,7 +2112,7 @@
             // root node and always push another one when changing the parent
             </span><span class="kw">let </span>parent_prefix = <span class="kw-2">*</span>ctx.parent_prefixes.last().unwrap();
 
-            <span class="attr">#[cfg(feature = <span class="string">&quot;positions&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"positions"</span>)]
             </span>{
                 parent_node.range.end = token_range.end;
             }
@@ -2132,7 +2133,7 @@
                 ctx.parent_prefixes.pop();
                 <span class="macro">debug_assert!</span>(!ctx.parent_prefixes.is_empty());
             } <span class="kw">else </span>{
-                <span class="macro">unreachable!</span>(<span class="string">&quot;should be already checked by the tokenizer&quot;</span>);
+                <span class="macro">unreachable!</span>(<span class="string">"should be already checked by the tokenizer"</span>);
             }
         }
         tokenizer::ElementEnd::Open =&gt; {
@@ -2160,7 +2161,7 @@
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="kw">impl </span>Context&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Context&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>resolve_namespaces(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; ShortRange {
         <span class="kw">if let </span>NodeKind::Element { <span class="kw-2">ref </span>namespaces, .. } =
             <span class="self">self</span>.doc.nodes[<span class="self">self</span>.parent_id.get_usize()].kind
@@ -2201,13 +2202,13 @@
     <span class="kw">let </span>current_attributes = core::mem::take(<span class="kw-2">&amp;mut </span>ctx.current_attributes);
     <span class="kw">for </span>attr <span class="kw">in </span>current_attributes {
         <span class="kw">let </span>namespace_idx = <span class="kw">if </span>attr.prefix == NS_XML_PREFIX {
-            <span class="comment">// The prefix &#39;xml&#39; is by definition bound to the namespace name
+            <span class="comment">// The prefix 'xml' is by definition bound to the namespace name
             // http://www.w3.org/XML/1998/namespace. This namespace is added
             // to the document on creation and is always element 0.
             </span><span class="prelude-val">Some</span>(NamespaceIdx(<span class="number">0</span>))
         } <span class="kw">else if </span>attr.prefix.is_empty() {
-            <span class="comment">// &#39;The namespace name for an unprefixed attribute name
-            // always has no value.&#39;
+            <span class="comment">// 'The namespace name for an unprefixed attribute name
+            // always has no value.'
             </span><span class="prelude-val">None
         </span>} <span class="kw">else </span>{
             get_ns_idx_by_prefix(namespaces, attr.pos, attr.prefix, ctx)<span class="question-mark">?
@@ -2229,7 +2230,7 @@
         ctx.doc.attributes.push(AttributeData {
             name: attr_name,
             value: attr.value,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;positions&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"positions"</span>)]
             </span>pos: attr.pos,
         });
     }
@@ -2237,13 +2238,13 @@
     <span class="prelude-val">Ok</span>((start_idx..ctx.doc.attributes.len()).into())
 }
 
-<span class="kw">fn </span>process_text&lt;<span class="lifetime">&#39;input</span>&gt;(
-    text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str,
+<span class="kw">fn </span>process_text&lt;<span class="lifetime">'input</span>&gt;(
+    text: <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str,
     range: Range&lt;usize&gt;,
-    ctx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;input</span>&gt;,
+    ctx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'input</span>&gt;,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="comment">// Add text as is if it has only valid characters.
-    </span><span class="kw">if </span>!text.bytes().any(|b| b == <span class="string">b&#39;&amp;&#39; </span>|| b == <span class="string">b&#39;\r&#39;</span>) {
+    </span><span class="kw">if </span>!text.bytes().any(|b| b == <span class="string">b'&amp;' </span>|| b == <span class="string">b'\r'</span>) {
         append_text(StringStorage::Borrowed(text), range, ctx)<span class="question-mark">?</span>;
         ctx.after_text = <span class="bool-val">true</span>;
         <span class="kw">return </span><span class="prelude-val">Ok</span>(());
@@ -2309,13 +2310,13 @@
 
 <span class="comment">// While the whole purpose of CDATA is to indicate to an XML library that this text
 // has to be stored as is, carriage return (`\r`) is still has to be replaced with `\n`.
-</span><span class="kw">fn </span>process_cdata&lt;<span class="lifetime">&#39;input</span>&gt;(
-    text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str,
+</span><span class="kw">fn </span>process_cdata&lt;<span class="lifetime">'input</span>&gt;(
+    text: <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str,
     range: Range&lt;usize&gt;,
-    ctx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;input</span>&gt;,
+    ctx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'input</span>&gt;,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="comment">// Add text as is if it has only valid characters.
-    </span><span class="kw">if </span>!text.as_bytes().contains(<span class="kw-2">&amp;</span><span class="string">b&#39;\r&#39;</span>) {
+    </span><span class="kw">if </span>!text.as_bytes().contains(<span class="kw-2">&amp;</span><span class="string">b'\r'</span>) {
         append_text(StringStorage::Borrowed(text), range, ctx)<span class="question-mark">?</span>;
         ctx.after_text = <span class="bool-val">true</span>;
         <span class="kw">return </span><span class="prelude-val">Ok</span>(());
@@ -2337,10 +2338,10 @@
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="kw">fn </span>append_text&lt;<span class="lifetime">&#39;input</span>&gt;(
-    text: StringStorage&lt;<span class="lifetime">&#39;input</span>&gt;,
+<span class="kw">fn </span>append_text&lt;<span class="lifetime">'input</span>&gt;(
+    text: StringStorage&lt;<span class="lifetime">'input</span>&gt;,
     range: Range&lt;usize&gt;,
-    ctx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;input</span>&gt;,
+    ctx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'input</span>&gt;,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">if </span>ctx.after_text {
         <span class="comment">// Prepend to a previous text node.
@@ -2362,13 +2363,13 @@
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="kw">enum </span>NextChunk&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">enum </span>NextChunk&lt;<span class="lifetime">'a</span>&gt; {
     Byte(u8),
     Char(char),
-    Text(StrSpan&lt;<span class="lifetime">&#39;a</span>&gt;),
+    Text(StrSpan&lt;<span class="lifetime">'a</span>&gt;),
 }
 
-<span class="kw">fn </span>parse_next_chunk&lt;<span class="lifetime">&#39;a</span>&gt;(stream: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">&#39;a</span>&gt;, entities: <span class="kw-2">&amp;</span>[Entity&lt;<span class="lifetime">&#39;a</span>&gt;]) -&gt; <span class="prelude-ty">Result</span>&lt;NextChunk&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+<span class="kw">fn </span>parse_next_chunk&lt;<span class="lifetime">'a</span>&gt;(stream: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">'a</span>&gt;, entities: <span class="kw-2">&amp;</span>[Entity&lt;<span class="lifetime">'a</span>&gt;]) -&gt; <span class="prelude-ty">Result</span>&lt;NextChunk&lt;<span class="lifetime">'a</span>&gt;&gt; {
     <span class="macro">debug_assert!</span>(!stream.at_end());
 
     <span class="comment">// Safe, because we already checked that stream is not at the end.
@@ -2376,7 +2377,7 @@
     </span><span class="kw">let </span>c = stream.curr_byte_unchecked();
 
     <span class="comment">// Check for character/entity references.
-    </span><span class="kw">if </span>c == <span class="string">b&#39;&amp;&#39; </span>{
+    </span><span class="kw">if </span>c == <span class="string">b'&amp;' </span>{
         <span class="kw">let </span>start = stream.pos();
         <span class="kw">match </span>stream.try_consume_reference() {
             <span class="prelude-val">Some</span>(Reference::Char(ch)) =&gt; <span class="prelude-val">Ok</span>(NextChunk::Char(ch)),
@@ -2400,10 +2401,10 @@
 }
 
 <span class="comment">// https://www.w3.org/TR/REC-xml/#AVNormalize
-</span><span class="kw">fn </span>normalize_attribute&lt;<span class="lifetime">&#39;input</span>&gt;(
-    text: StrSpan&lt;<span class="lifetime">&#39;input</span>&gt;,
-    ctx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;input</span>&gt;,
-) -&gt; <span class="prelude-ty">Result</span>&lt;StringStorage&lt;<span class="lifetime">&#39;input</span>&gt;&gt; {
+</span><span class="kw">fn </span>normalize_attribute&lt;<span class="lifetime">'input</span>&gt;(
+    text: StrSpan&lt;<span class="lifetime">'input</span>&gt;,
+    ctx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'input</span>&gt;,
+) -&gt; <span class="prelude-ty">Result</span>&lt;StringStorage&lt;<span class="lifetime">'input</span>&gt;&gt; {
     <span class="kw">if </span>is_normalization_required(<span class="kw-2">&amp;</span>text) {
         <span class="kw">let </span><span class="kw-2">mut </span>text_buffer = TextBuffer::new();
         _normalize_attribute(text, <span class="kw-2">&amp;mut </span>text_buffer, ctx)<span class="question-mark">?</span>;
@@ -2419,7 +2420,7 @@
     // But in rare cases it can be just an another character.
 
     </span><span class="kw">fn </span>check(c: u8) -&gt; bool {
-        <span class="macro">matches!</span>(c, <span class="string">b&#39;&amp;&#39; </span>| <span class="string">b&#39;\t&#39; </span>| <span class="string">b&#39;\n&#39; </span>| <span class="string">b&#39;\r&#39;</span>)
+        <span class="macro">matches!</span>(c, <span class="string">b'&amp;' </span>| <span class="string">b'\t' </span>| <span class="string">b'\n' </span>| <span class="string">b'\r'</span>)
     }
 
     text.as_str().bytes().any(check)
@@ -2431,7 +2432,7 @@
         <span class="comment">// Safe, because we already checked that the stream is not at the end.
         </span><span class="kw">let </span>c = stream.curr_byte_unchecked();
 
-        <span class="kw">if </span>c != <span class="string">b&#39;&amp;&#39; </span>{
+        <span class="kw">if </span>c != <span class="string">b'&amp;' </span>{
             stream.advance(<span class="number">1</span>);
             buffer.push_from_attr(c, stream.curr_byte().ok());
             <span class="kw">continue</span>;
@@ -2445,7 +2446,7 @@
                     <span class="kw">if </span>ctx.loop_detector.depth &gt; <span class="number">0 </span>{
                         <span class="comment">// Escaped `&lt;` inside an ENTITY is an error.
                         // Escaped `&lt;` outside an ENTITY is ok.
-                        </span><span class="kw">if </span>b == <span class="string">b&#39;&lt;&#39; </span>{
+                        </span><span class="kw">if </span>b == <span class="string">b'&lt;' </span>{
                             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidAttributeValue(
                                 stream.gen_text_pos_from(start),
                             ));
@@ -2490,7 +2491,7 @@
     <span class="comment">// Prefix CAN be empty when the default namespace was defined.
     //
     // Example:
-    // &lt;e xmlns=&#39;http://www.w3.org&#39;/&gt;
+    // &lt;e xmlns='http://www.w3.org'/&gt;
     </span><span class="kw">let </span>prefix_opt = <span class="kw">if </span>prefix.is_empty() {
         <span class="prelude-val">None
     </span>} <span class="kw">else </span>{
@@ -2509,15 +2510,15 @@
                 // we have an unknown namespace.
                 //
                 // Example:
-                // &lt;e random:a=&#39;b&#39;/&gt;
+                // &lt;e random:a='b'/&gt;
                 </span><span class="kw">let </span>pos = ctx.err_pos_at(prefix_pos);
                 <span class="prelude-val">Err</span>(Error::UnknownNamespace(prefix.to_string(), pos))
             } <span class="kw">else </span>{
                 <span class="comment">// If an URI was not found and prefix IS empty than
-                // an element or an attribute doesn&#39;t have a namespace.
+                // an element or an attribute doesn't have a namespace.
                 //
                 // Example:
-                // &lt;e a=&#39;b&#39;/&gt;
+                // &lt;e a='b'/&gt;
                 </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
             }
         }
@@ -2528,7 +2529,7 @@
     <span class="kw">if </span>prefix.is_empty() {
         local.to_string()
     } <span class="kw">else </span>{
-        <span class="macro">alloc::format!</span>(<span class="string">&quot;{}:{}&quot;</span>, prefix, local)
+        <span class="macro">alloc::format!</span>(<span class="string">"{}:{}"</span>, prefix, local)
     }
 }
 
@@ -2587,13 +2588,13 @@
 
     <span class="kw">fn </span>push_from_attr(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>current: u8, next: <span class="prelude-ty">Option</span>&lt;u8&gt;) {
         <span class="comment">// \r in \r\n should be ignored.
-        </span><span class="kw">if </span>current == <span class="string">b&#39;\r&#39; </span>&amp;&amp; next == <span class="prelude-val">Some</span>(<span class="string">b&#39;\n&#39;</span>) {
+        </span><span class="kw">if </span>current == <span class="string">b'\r' </span>&amp;&amp; next == <span class="prelude-val">Some</span>(<span class="string">b'\n'</span>) {
             <span class="kw">return</span>;
         }
 
         <span class="comment">// \n, \r and \t should be converted into spaces.
         </span>current = <span class="kw">match </span>current {
-            <span class="string">b&#39;\n&#39; </span>| <span class="string">b&#39;\r&#39; </span>| <span class="string">b&#39;\t&#39; </span>=&gt; <span class="string">b&#39; &#39;</span>,
+            <span class="string">b'\n' </span>| <span class="string">b'\r' </span>| <span class="string">b'\t' </span>=&gt; <span class="string">b' '</span>,
             <span class="kw">_ </span>=&gt; current,
         };
 
@@ -2604,17 +2605,17 @@
     //
     // https://www.w3.org/TR/xml/#sec-line-ends
     </span><span class="kw">fn </span>push_from_text(<span class="kw-2">&amp;mut </span><span class="self">self</span>, c: u8, at_end: bool) {
-        <span class="kw">if </span><span class="self">self</span>.buffer.last() == <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="string">b&#39;\r&#39;</span>) {
+        <span class="kw">if </span><span class="self">self</span>.buffer.last() == <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="string">b'\r'</span>) {
             <span class="kw">let </span>idx = <span class="self">self</span>.buffer.len() - <span class="number">1</span>;
-            <span class="self">self</span>.buffer[idx] = <span class="string">b&#39;\n&#39;</span>;
+            <span class="self">self</span>.buffer[idx] = <span class="string">b'\n'</span>;
 
-            <span class="kw">if </span>at_end &amp;&amp; c == <span class="string">b&#39;\r&#39; </span>{
-                <span class="self">self</span>.buffer.push(<span class="string">b&#39;\n&#39;</span>);
-            } <span class="kw">else if </span>c != <span class="string">b&#39;\n&#39; </span>{
+            <span class="kw">if </span>at_end &amp;&amp; c == <span class="string">b'\r' </span>{
+                <span class="self">self</span>.buffer.push(<span class="string">b'\n'</span>);
+            } <span class="kw">else if </span>c != <span class="string">b'\n' </span>{
                 <span class="self">self</span>.buffer.push(c);
             }
-        } <span class="kw">else if </span>at_end &amp;&amp; c == <span class="string">b&#39;\r&#39; </span>{
-            <span class="self">self</span>.buffer.push(<span class="string">b&#39;\n&#39;</span>);
+        } <span class="kw">else if </span>at_end &amp;&amp; c == <span class="string">b'\r' </span>{
+            <span class="self">self</span>.buffer.push(<span class="string">b'\n'</span>);
         } <span class="kw">else </span>{
             <span class="self">self</span>.buffer.push(c);
         }

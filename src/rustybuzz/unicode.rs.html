@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustybuzz-0.12.1/src/unicode.rs`."><title>unicode.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustybuzz" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustybuzz-0.12.1/src/unicode.rs`."><title>unicode.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustybuzz" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -917,7 +918,7 @@
 </span><span class="kw">pub mod </span>modified_combining_class {
     <span class="comment">// Hebrew
     //
-    // We permute the &quot;fixed-position&quot; classes 10-26 into the order
+    // We permute the "fixed-position" classes 10-26 into the order
     // described in the SBL Hebrew manual:
     //
     // https://www.sbl-site.org/Fonts/SBLHebrewUserManual1.5x.pdf
@@ -968,7 +969,7 @@
     // Modify Telugu length marks (ccc=84, ccc=91).
     // These are the only matras in the main Indic scripts range that have
     // a non-zero ccc.  That makes them reorder with the Halant that is
-    // ccc=9.  Just zero them, we don&#39;t need them in our Indic shaper.
+    // ccc=9.  Just zero them, we don't need them in our Indic shaper.
     </span><span class="kw">pub const </span>CCC84: u8 = <span class="number">0</span>; <span class="comment">// length mark
     </span><span class="kw">pub const </span>CCC91: u8 = <span class="number">0</span>; <span class="comment">// ai length mark
 
@@ -1395,22 +1396,22 @@
     <span class="kw">fn </span>space_fallback(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Space&gt; {
         <span class="comment">// All GC=Zs chars that can use a fallback.
         </span><span class="kw">match </span><span class="self">self </span>{
-            <span class="string">&#39;\u{0020}&#39; </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE),             <span class="comment">// SPACE
-            </span><span class="string">&#39;\u{00A0}&#39; </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE),             <span class="comment">// NO-BREAK SPACE
-            </span><span class="string">&#39;\u{2000}&#39; </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_EM_2),        <span class="comment">// EN QUAD
-            </span><span class="string">&#39;\u{2001}&#39; </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_EM),          <span class="comment">// EM QUAD
-            </span><span class="string">&#39;\u{2002}&#39; </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_EM_2),        <span class="comment">// EN SPACE
-            </span><span class="string">&#39;\u{2003}&#39; </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_EM),          <span class="comment">// EM SPACE
-            </span><span class="string">&#39;\u{2004}&#39; </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_EM_3),        <span class="comment">// THREE-PER-EM SPACE
-            </span><span class="string">&#39;\u{2005}&#39; </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_EM_4),        <span class="comment">// FOUR-PER-EM SPACE
-            </span><span class="string">&#39;\u{2006}&#39; </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_EM_6),        <span class="comment">// SIX-PER-EM SPACE
-            </span><span class="string">&#39;\u{2007}&#39; </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_FIGURE),      <span class="comment">// FIGURE SPACE
-            </span><span class="string">&#39;\u{2008}&#39; </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_PUNCTUATION), <span class="comment">// PUNCTUATION SPACE
-            </span><span class="string">&#39;\u{2009}&#39; </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_EM_5),        <span class="comment">// THIN SPACE
-            </span><span class="string">&#39;\u{200A}&#39; </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_EM_16),       <span class="comment">// HAIR SPACE
-            </span><span class="string">&#39;\u{202F}&#39; </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_NARROW),      <span class="comment">// NARROW NO-BREAK SPACE
-            </span><span class="string">&#39;\u{205F}&#39; </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_4_EM_18),     <span class="comment">// MEDIUM MATHEMATICAL SPACE
-            </span><span class="string">&#39;\u{3000}&#39; </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_EM),          <span class="comment">// IDEOGRAPHIC SPACE
+            <span class="string">'\u{0020}' </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE),             <span class="comment">// SPACE
+            </span><span class="string">'\u{00A0}' </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE),             <span class="comment">// NO-BREAK SPACE
+            </span><span class="string">'\u{2000}' </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_EM_2),        <span class="comment">// EN QUAD
+            </span><span class="string">'\u{2001}' </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_EM),          <span class="comment">// EM QUAD
+            </span><span class="string">'\u{2002}' </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_EM_2),        <span class="comment">// EN SPACE
+            </span><span class="string">'\u{2003}' </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_EM),          <span class="comment">// EM SPACE
+            </span><span class="string">'\u{2004}' </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_EM_3),        <span class="comment">// THREE-PER-EM SPACE
+            </span><span class="string">'\u{2005}' </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_EM_4),        <span class="comment">// FOUR-PER-EM SPACE
+            </span><span class="string">'\u{2006}' </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_EM_6),        <span class="comment">// SIX-PER-EM SPACE
+            </span><span class="string">'\u{2007}' </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_FIGURE),      <span class="comment">// FIGURE SPACE
+            </span><span class="string">'\u{2008}' </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_PUNCTUATION), <span class="comment">// PUNCTUATION SPACE
+            </span><span class="string">'\u{2009}' </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_EM_5),        <span class="comment">// THIN SPACE
+            </span><span class="string">'\u{200A}' </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_EM_16),       <span class="comment">// HAIR SPACE
+            </span><span class="string">'\u{202F}' </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_NARROW),      <span class="comment">// NARROW NO-BREAK SPACE
+            </span><span class="string">'\u{205F}' </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_4_EM_18),     <span class="comment">// MEDIUM MATHEMATICAL SPACE
+            </span><span class="string">'\u{3000}' </span>=&gt; <span class="prelude-val">Some</span>(space::SPACE_EM),          <span class="comment">// IDEOGRAPHIC SPACE
             </span><span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,                                    <span class="comment">// OGHAM SPACE MARK
         </span>}
     }
@@ -1419,24 +1420,24 @@
         <span class="kw">let </span><span class="kw-2">mut </span>u = <span class="self">self</span>;
 
         <span class="comment">// XXX This hack belongs to the Myanmar shaper.
-        </span><span class="kw">if </span>u == <span class="string">&#39;\u{1037}&#39; </span>{
-            u = <span class="string">&#39;\u{103A}&#39;</span>;
+        </span><span class="kw">if </span>u == <span class="string">'\u{1037}' </span>{
+            u = <span class="string">'\u{103A}'</span>;
         }
 
         <span class="comment">// XXX This hack belongs to the USE shaper (for Tai Tham):
         // Reorder SAKOT to ensure it comes after any tone marks.
-        </span><span class="kw">if </span>u == <span class="string">&#39;\u{1A60}&#39; </span>{
+        </span><span class="kw">if </span>u == <span class="string">'\u{1A60}' </span>{
             <span class="kw">return </span><span class="number">254</span>;
         }
 
         <span class="comment">// XXX This hack belongs to the Tibetan shaper:
         // Reorder PADMA to ensure it comes after any vowel marks.
-        </span><span class="kw">if </span>u == <span class="string">&#39;\u{0FC6}&#39; </span>{
+        </span><span class="kw">if </span>u == <span class="string">'\u{0FC6}' </span>{
             <span class="kw">return </span><span class="number">254</span>;
         }
 
         <span class="comment">// Reorder TSA -PHRU to reorder before U+0F74
-        </span><span class="kw">if </span>u == <span class="string">&#39;\u{0F39}&#39; </span>{
+        </span><span class="kw">if </span>u == <span class="string">'\u{0F39}' </span>{
             <span class="kw">return </span><span class="number">127</span>;
         }
 
@@ -1536,12 +1537,12 @@
     ///
     /// Note: While U+115F, U+1160, U+3164 and U+FFA0 are Default_Ignorable,
     /// we do NOT want to hide them, as the way Uniscribe has implemented them
-    /// is with regular spacing glyphs, and that&#39;s the way fonts are made to work.
+    /// is with regular spacing glyphs, and that's the way fonts are made to work.
     /// As such, we make exceptions for those four.
     /// Also ignoring U+1BCA0..1BCA3. https://github.com/harfbuzz/harfbuzz/issues/503
     ///
     /// Unicode 7.0:
-    /// $ grep &#39;; Default_Ignorable_Code_Point &#39; DerivedCoreProperties.txt | sed &#39;s/;.*#/#/&#39;
+    /// $ grep '; Default_Ignorable_Code_Point ' DerivedCoreProperties.txt | sed 's/;.*#/#/'
     /// 00AD          # Cf       SOFT HYPHEN
     /// 034F          # Mn       COMBINING GRAPHEME JOINER
     /// 061C          # Cf       ARABIC LETTER MARK
@@ -1610,48 +1611,48 @@
     <span class="kw">fn </span>vertical(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;char&gt; {
         <span class="prelude-val">Some</span>(<span class="kw">match </span>u32::from(<span class="self">self</span>) &gt;&gt; <span class="number">8 </span>{
             <span class="number">0x20 </span>=&gt; <span class="kw">match </span><span class="self">self </span>{
-                <span class="string">&#39;\u{2013}&#39; </span>=&gt; <span class="string">&#39;\u{fe32}&#39;</span>, <span class="comment">// EN DASH
-                </span><span class="string">&#39;\u{2014}&#39; </span>=&gt; <span class="string">&#39;\u{fe31}&#39;</span>, <span class="comment">// EM DASH
-                </span><span class="string">&#39;\u{2025}&#39; </span>=&gt; <span class="string">&#39;\u{fe30}&#39;</span>, <span class="comment">// TWO DOT LEADER
-                </span><span class="string">&#39;\u{2026}&#39; </span>=&gt; <span class="string">&#39;\u{fe19}&#39;</span>, <span class="comment">// HORIZONTAL ELLIPSIS
+                <span class="string">'\u{2013}' </span>=&gt; <span class="string">'\u{fe32}'</span>, <span class="comment">// EN DASH
+                </span><span class="string">'\u{2014}' </span>=&gt; <span class="string">'\u{fe31}'</span>, <span class="comment">// EM DASH
+                </span><span class="string">'\u{2025}' </span>=&gt; <span class="string">'\u{fe30}'</span>, <span class="comment">// TWO DOT LEADER
+                </span><span class="string">'\u{2026}' </span>=&gt; <span class="string">'\u{fe19}'</span>, <span class="comment">// HORIZONTAL ELLIPSIS
                 </span><span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">None</span>,
             },
             <span class="number">0x30 </span>=&gt; <span class="kw">match </span><span class="self">self </span>{
-                <span class="string">&#39;\u{3001}&#39; </span>=&gt; <span class="string">&#39;\u{fe11}&#39;</span>, <span class="comment">// IDEOGRAPHIC COMMA
-                </span><span class="string">&#39;\u{3002}&#39; </span>=&gt; <span class="string">&#39;\u{fe12}&#39;</span>, <span class="comment">// IDEOGRAPHIC FULL STOP
-                </span><span class="string">&#39;\u{3008}&#39; </span>=&gt; <span class="string">&#39;\u{fe3f}&#39;</span>, <span class="comment">// LEFT ANGLE BRACKET
-                </span><span class="string">&#39;\u{3009}&#39; </span>=&gt; <span class="string">&#39;\u{fe40}&#39;</span>, <span class="comment">// RIGHT ANGLE BRACKET
-                </span><span class="string">&#39;\u{300a}&#39; </span>=&gt; <span class="string">&#39;\u{fe3d}&#39;</span>, <span class="comment">// LEFT DOUBLE ANGLE BRACKET
-                </span><span class="string">&#39;\u{300b}&#39; </span>=&gt; <span class="string">&#39;\u{fe3e}&#39;</span>, <span class="comment">// RIGHT DOUBLE ANGLE BRACKET
-                </span><span class="string">&#39;\u{300c}&#39; </span>=&gt; <span class="string">&#39;\u{fe41}&#39;</span>, <span class="comment">// LEFT CORNER BRACKET
-                </span><span class="string">&#39;\u{300d}&#39; </span>=&gt; <span class="string">&#39;\u{fe42}&#39;</span>, <span class="comment">// RIGHT CORNER BRACKET
-                </span><span class="string">&#39;\u{300e}&#39; </span>=&gt; <span class="string">&#39;\u{fe43}&#39;</span>, <span class="comment">// LEFT WHITE CORNER BRACKET
-                </span><span class="string">&#39;\u{300f}&#39; </span>=&gt; <span class="string">&#39;\u{fe44}&#39;</span>, <span class="comment">// RIGHT WHITE CORNER BRACKET
-                </span><span class="string">&#39;\u{3010}&#39; </span>=&gt; <span class="string">&#39;\u{fe3b}&#39;</span>, <span class="comment">// LEFT BLACK LENTICULAR BRACKET
-                </span><span class="string">&#39;\u{3011}&#39; </span>=&gt; <span class="string">&#39;\u{fe3c}&#39;</span>, <span class="comment">// RIGHT BLACK LENTICULAR BRACKET
-                </span><span class="string">&#39;\u{3014}&#39; </span>=&gt; <span class="string">&#39;\u{fe39}&#39;</span>, <span class="comment">// LEFT TORTOISE SHELL BRACKET
-                </span><span class="string">&#39;\u{3015}&#39; </span>=&gt; <span class="string">&#39;\u{fe3a}&#39;</span>, <span class="comment">// RIGHT TORTOISE SHELL BRACKET
-                </span><span class="string">&#39;\u{3016}&#39; </span>=&gt; <span class="string">&#39;\u{fe17}&#39;</span>, <span class="comment">// LEFT WHITE LENTICULAR BRACKET
-                </span><span class="string">&#39;\u{3017}&#39; </span>=&gt; <span class="string">&#39;\u{fe18}&#39;</span>, <span class="comment">// RIGHT WHITE LENTICULAR BRACKET
+                <span class="string">'\u{3001}' </span>=&gt; <span class="string">'\u{fe11}'</span>, <span class="comment">// IDEOGRAPHIC COMMA
+                </span><span class="string">'\u{3002}' </span>=&gt; <span class="string">'\u{fe12}'</span>, <span class="comment">// IDEOGRAPHIC FULL STOP
+                </span><span class="string">'\u{3008}' </span>=&gt; <span class="string">'\u{fe3f}'</span>, <span class="comment">// LEFT ANGLE BRACKET
+                </span><span class="string">'\u{3009}' </span>=&gt; <span class="string">'\u{fe40}'</span>, <span class="comment">// RIGHT ANGLE BRACKET
+                </span><span class="string">'\u{300a}' </span>=&gt; <span class="string">'\u{fe3d}'</span>, <span class="comment">// LEFT DOUBLE ANGLE BRACKET
+                </span><span class="string">'\u{300b}' </span>=&gt; <span class="string">'\u{fe3e}'</span>, <span class="comment">// RIGHT DOUBLE ANGLE BRACKET
+                </span><span class="string">'\u{300c}' </span>=&gt; <span class="string">'\u{fe41}'</span>, <span class="comment">// LEFT CORNER BRACKET
+                </span><span class="string">'\u{300d}' </span>=&gt; <span class="string">'\u{fe42}'</span>, <span class="comment">// RIGHT CORNER BRACKET
+                </span><span class="string">'\u{300e}' </span>=&gt; <span class="string">'\u{fe43}'</span>, <span class="comment">// LEFT WHITE CORNER BRACKET
+                </span><span class="string">'\u{300f}' </span>=&gt; <span class="string">'\u{fe44}'</span>, <span class="comment">// RIGHT WHITE CORNER BRACKET
+                </span><span class="string">'\u{3010}' </span>=&gt; <span class="string">'\u{fe3b}'</span>, <span class="comment">// LEFT BLACK LENTICULAR BRACKET
+                </span><span class="string">'\u{3011}' </span>=&gt; <span class="string">'\u{fe3c}'</span>, <span class="comment">// RIGHT BLACK LENTICULAR BRACKET
+                </span><span class="string">'\u{3014}' </span>=&gt; <span class="string">'\u{fe39}'</span>, <span class="comment">// LEFT TORTOISE SHELL BRACKET
+                </span><span class="string">'\u{3015}' </span>=&gt; <span class="string">'\u{fe3a}'</span>, <span class="comment">// RIGHT TORTOISE SHELL BRACKET
+                </span><span class="string">'\u{3016}' </span>=&gt; <span class="string">'\u{fe17}'</span>, <span class="comment">// LEFT WHITE LENTICULAR BRACKET
+                </span><span class="string">'\u{3017}' </span>=&gt; <span class="string">'\u{fe18}'</span>, <span class="comment">// RIGHT WHITE LENTICULAR BRACKET
                 </span><span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">None</span>,
             },
             <span class="number">0xfe </span>=&gt; <span class="kw">match </span><span class="self">self </span>{
-                <span class="string">&#39;\u{fe4f}&#39; </span>=&gt; <span class="string">&#39;\u{fe34}&#39;</span>, <span class="comment">// WAVY LOW LINE
+                <span class="string">'\u{fe4f}' </span>=&gt; <span class="string">'\u{fe34}'</span>, <span class="comment">// WAVY LOW LINE
                 </span><span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">None</span>,
             },
             <span class="number">0xff </span>=&gt; <span class="kw">match </span><span class="self">self </span>{
-                <span class="string">&#39;\u{ff01}&#39; </span>=&gt; <span class="string">&#39;\u{fe15}&#39;</span>, <span class="comment">// FULLWIDTH EXCLAMATION MARK
-                </span><span class="string">&#39;\u{ff08}&#39; </span>=&gt; <span class="string">&#39;\u{fe35}&#39;</span>, <span class="comment">// FULLWIDTH LEFT PARENTHESIS
-                </span><span class="string">&#39;\u{ff09}&#39; </span>=&gt; <span class="string">&#39;\u{fe36}&#39;</span>, <span class="comment">// FULLWIDTH RIGHT PARENTHESIS
-                </span><span class="string">&#39;\u{ff0c}&#39; </span>=&gt; <span class="string">&#39;\u{fe10}&#39;</span>, <span class="comment">// FULLWIDTH COMMA
-                </span><span class="string">&#39;\u{ff1a}&#39; </span>=&gt; <span class="string">&#39;\u{fe13}&#39;</span>, <span class="comment">// FULLWIDTH COLON
-                </span><span class="string">&#39;\u{ff1b}&#39; </span>=&gt; <span class="string">&#39;\u{fe14}&#39;</span>, <span class="comment">// FULLWIDTH SEMICOLON
-                </span><span class="string">&#39;\u{ff1f}&#39; </span>=&gt; <span class="string">&#39;\u{fe16}&#39;</span>, <span class="comment">// FULLWIDTH QUESTION MARK
-                </span><span class="string">&#39;\u{ff3b}&#39; </span>=&gt; <span class="string">&#39;\u{fe47}&#39;</span>, <span class="comment">// FULLWIDTH LEFT SQUARE BRACKET
-                </span><span class="string">&#39;\u{ff3d}&#39; </span>=&gt; <span class="string">&#39;\u{fe48}&#39;</span>, <span class="comment">// FULLWIDTH RIGHT SQUARE BRACKET
-                </span><span class="string">&#39;\u{ff3f}&#39; </span>=&gt; <span class="string">&#39;\u{fe33}&#39;</span>, <span class="comment">// FULLWIDTH LOW LINE
-                </span><span class="string">&#39;\u{ff5b}&#39; </span>=&gt; <span class="string">&#39;\u{fe37}&#39;</span>, <span class="comment">// FULLWIDTH LEFT CURLY BRACKET
-                </span><span class="string">&#39;\u{ff5d}&#39; </span>=&gt; <span class="string">&#39;\u{fe38}&#39;</span>, <span class="comment">// FULLWIDTH RIGHT CURLY BRACKET
+                <span class="string">'\u{ff01}' </span>=&gt; <span class="string">'\u{fe15}'</span>, <span class="comment">// FULLWIDTH EXCLAMATION MARK
+                </span><span class="string">'\u{ff08}' </span>=&gt; <span class="string">'\u{fe35}'</span>, <span class="comment">// FULLWIDTH LEFT PARENTHESIS
+                </span><span class="string">'\u{ff09}' </span>=&gt; <span class="string">'\u{fe36}'</span>, <span class="comment">// FULLWIDTH RIGHT PARENTHESIS
+                </span><span class="string">'\u{ff0c}' </span>=&gt; <span class="string">'\u{fe10}'</span>, <span class="comment">// FULLWIDTH COMMA
+                </span><span class="string">'\u{ff1a}' </span>=&gt; <span class="string">'\u{fe13}'</span>, <span class="comment">// FULLWIDTH COLON
+                </span><span class="string">'\u{ff1b}' </span>=&gt; <span class="string">'\u{fe14}'</span>, <span class="comment">// FULLWIDTH SEMICOLON
+                </span><span class="string">'\u{ff1f}' </span>=&gt; <span class="string">'\u{fe16}'</span>, <span class="comment">// FULLWIDTH QUESTION MARK
+                </span><span class="string">'\u{ff3b}' </span>=&gt; <span class="string">'\u{fe47}'</span>, <span class="comment">// FULLWIDTH LEFT SQUARE BRACKET
+                </span><span class="string">'\u{ff3d}' </span>=&gt; <span class="string">'\u{fe48}'</span>, <span class="comment">// FULLWIDTH RIGHT SQUARE BRACKET
+                </span><span class="string">'\u{ff3f}' </span>=&gt; <span class="string">'\u{fe33}'</span>, <span class="comment">// FULLWIDTH LOW LINE
+                </span><span class="string">'\u{ff5b}' </span>=&gt; <span class="string">'\u{fe37}'</span>, <span class="comment">// FULLWIDTH LEFT CURLY BRACKET
+                </span><span class="string">'\u{ff5d}' </span>=&gt; <span class="string">'\u{fe38}'</span>, <span class="comment">// FULLWIDTH RIGHT CURLY BRACKET
                 </span><span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">None</span>,
             },
             <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">None</span>,
@@ -1709,7 +1710,7 @@
         .binary_search_by(|item| item.<span class="number">0</span>.cmp(<span class="kw-2">&amp;</span>ab))
         .map(|idx| {
             <span class="kw">let </span>chars = <span class="kw-2">&amp;</span><span class="kw">crate</span>::unicode_norm::DECOMPOSITION_TABLE[idx];
-            (chars.<span class="number">1</span>, chars.<span class="number">2</span>.unwrap_or(<span class="string">&#39;\0&#39;</span>))
+            (chars.<span class="number">1</span>, chars.<span class="number">2</span>.unwrap_or(<span class="string">'\0'</span>))
         })
         .ok()
 }

@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/unicode-properties-0.1.1/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="unicode_properties" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/unicode-properties-0.1.1/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="unicode_properties" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -203,12 +204,12 @@
 //! use unicode_properties::UnicodeGeneralCategory;
 //!
 //! fn main() {
-//!     let ch = &#39;🦀&#39;; // U+1F980 CRAB
+//!     let ch = '🦀'; // U+1F980 CRAB
 //!     let is_emoji = ch.is_emoji_char();
 //!     let group = ch.general_category_group();
-//!     println!(&quot;{}({:?})&quot;, ch, group);
-//!     println!(&quot;The above char {} for use as emoji char.&quot;,
-//!              if is_emoji { &quot;is recommended&quot; } else { &quot;is not recommended&quot; });
+//!     println!("{}({:?})", ch, group);
+//!     println!("The above char {} for use as emoji char.",
+//!              if is_emoji { "is recommended" } else { "is not recommended" });
 //! }
 //! ```
 //!
@@ -229,7 +230,7 @@
 #[rustfmt::skip]
 </span><span class="kw">mod </span>tables;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;emoji&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"emoji"</span>)]
 </span><span class="doccomment">/// Query the emoji character properties of a character.
 </span><span class="kw">pub mod </span>emoji {
     <span class="kw">pub use </span><span class="kw">crate</span>::tables::emoji::EmojiStatus;
@@ -244,7 +245,7 @@
             <span class="kw">crate</span>::tables::emoji::is_emoji_status_for_emoji_char(<span class="self">self</span>.emoji_status())
         }
 
-        <span class="doccomment">/// Checks whether this character are used in emoji sequences where they&#39;re not
+        <span class="doccomment">/// Checks whether this character are used in emoji sequences where they're not
         /// intended for independent, direct input, i.e. `Emoji_Component=YES`.
         </span><span class="kw">fn </span>is_emoji_component(<span class="self">self</span>) -&gt; bool {
             <span class="kw">crate</span>::tables::emoji::is_emoji_status_for_emoji_component(<span class="self">self</span>.emoji_status())
@@ -270,21 +271,21 @@
     /// It can be used between the elements of a sequence of characters to indicate that
     /// a single glyph should be presented if available.
     </span><span class="kw">pub fn </span>is_zwj(c: char) -&gt; bool {
-        c == <span class="string">&#39;\u{200D}&#39;
+        c == <span class="string">'\u{200D}'
     </span>}
 
     <span class="attr">#[inline]
     </span><span class="doccomment">/// Checks whether this character is the U+FE0F VARIATION SELECTOR-16 (VS16) character, used to
     /// request an emoji presentation for an emoji character.
     </span><span class="kw">pub fn </span>is_emoji_presentation_selector(c: char) -&gt; bool {
-        c == <span class="string">&#39;\u{FE0F}&#39;
+        c == <span class="string">'\u{FE0F}'
     </span>}
 
     <span class="attr">#[inline]
     </span><span class="doccomment">/// Checks whether this character is the U+FE0E VARIATION SELECTOR-15 (VS15) character, used to
     /// request a text presentation for an emoji character.
     </span><span class="kw">pub fn </span>is_text_presentation_selector(c: char) -&gt; bool {
-        c == <span class="string">&#39;\u{FE0E}&#39;
+        c == <span class="string">'\u{FE0E}'
     </span>}
 
     <span class="attr">#[inline]
@@ -292,7 +293,7 @@
     ///
     /// A pair of REGIONAL INDICATOR symbols is referred to as an emoji_flag_sequence.
     </span><span class="kw">pub fn </span>is_regional_indicator(c: char) -&gt; bool {
-        <span class="macro">matches!</span>(c, <span class="string">&#39;\u{1F1E6}&#39;</span>..=<span class="string">&#39;\u{1F1FF}&#39;</span>)
+        <span class="macro">matches!</span>(c, <span class="string">'\u{1F1E6}'</span>..=<span class="string">'\u{1F1FF}'</span>)
     }
 
     <span class="attr">#[inline]
@@ -300,11 +301,11 @@
     ///
     /// These can be used in indicating variants or extensions of emoji characters.
     </span><span class="kw">pub fn </span>is_tag_character(c: char) -&gt; bool {
-        <span class="macro">matches!</span>(c, <span class="string">&#39;\u{E0020}&#39;</span>..=<span class="string">&#39;\u{E007F}&#39;</span>)
+        <span class="macro">matches!</span>(c, <span class="string">'\u{E0020}'</span>..=<span class="string">'\u{E007F}'</span>)
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;general-category&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"general-category"</span>)]
 </span><span class="doccomment">/// Query the general category property of a character.
 </span><span class="kw">pub mod </span>general_category {
     <span class="kw">pub use </span><span class="kw">crate</span>::tables::general_category::{GeneralCategory, GeneralCategoryGroup};
@@ -341,23 +342,23 @@
 
 <span class="kw">pub use </span>tables::UNICODE_VERSION;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;emoji&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"emoji"</span>)]
 #[doc(inline)]
 </span><span class="kw">pub use </span>emoji::UnicodeEmoji;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;emoji&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"emoji"</span>)]
 #[doc(inline)]
 </span><span class="kw">pub use </span>emoji::EmojiStatus;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;general-category&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"general-category"</span>)]
 #[doc(inline)]
 </span><span class="kw">pub use </span>general_category::GeneralCategory;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;general-category&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"general-category"</span>)]
 #[doc(inline)]
 </span><span class="kw">pub use </span>general_category::GeneralCategoryGroup;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;general-category&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"general-category"</span>)]
 #[doc(inline)]
 </span><span class="kw">pub use </span>general_category::UnicodeGeneralCategory;
 </code></pre></div></section></main></body></html>

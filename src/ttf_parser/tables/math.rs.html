@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ttf-parser-0.20.0/src/tables/math.rs`."><title>math.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ttf_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ttf-parser-0.20.0/src/tables/math.rs`."><title>math.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ttf_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -948,15 +949,15 @@
 <span class="doccomment">/// A [Math Value](https://docs.microsoft.com/en-us/typography/opentype/spec/math#mathvaluerecord)
 /// with optional device corrections.
 </span><span class="attr">#[derive(Clone, Copy, Debug)]
-</span><span class="kw">pub struct </span>MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>MathValue&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// The X or Y value in font design units.
     </span><span class="kw">pub </span>value: i16,
     <span class="doccomment">/// Device corrections for this value.
-    </span><span class="kw">pub </span>device: <span class="prelude-ty">Option</span>&lt;Device&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    </span><span class="kw">pub </span>device: <span class="prelude-ty">Option</span>&lt;Device&lt;<span class="lifetime">'a</span>&gt;&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], parent: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], parent: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="prelude-val">Some</span>(MathValueRecord::parse(data)<span class="question-mark">?</span>.get(parent))
     }
 }
@@ -998,14 +999,14 @@
 <span class="doccomment">/// A mapping from glyphs to
 /// [Math Values](https://docs.microsoft.com/en-us/typography/opentype/spec/math#mathvaluerecord).
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>MathValues&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
-    coverage: Coverage&lt;<span class="lifetime">&#39;a</span>&gt;,
-    records: LazyArray16&lt;<span class="lifetime">&#39;a</span>, MathValueRecord&gt;,
+</span><span class="kw">pub struct </span>MathValues&lt;<span class="lifetime">'a</span>&gt; {
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
+    coverage: Coverage&lt;<span class="lifetime">'a</span>&gt;,
+    records: LazyArray16&lt;<span class="lifetime">'a</span>, MathValueRecord&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FromSlice&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>MathValues&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FromSlice&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>MathValues&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">let </span>coverage = s.parse_at_offset16::&lt;Coverage&gt;(data)<span class="question-mark">?</span>;
         <span class="kw">let </span>count = s.read::&lt;u16&gt;()<span class="question-mark">?</span>;
@@ -1018,36 +1019,36 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; MathValues&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; MathValues&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Returns the value for the glyph or `None` if it is not covered.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, glyph: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;MathValue&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, glyph: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;MathValue&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">let </span>index = <span class="self">self</span>.coverage.get(glyph)<span class="question-mark">?</span>;
         <span class="prelude-val">Some</span>(<span class="self">self</span>.records.get(index)<span class="question-mark">?</span>.get(<span class="self">self</span>.data))
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>MathValues&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>MathValues&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;MathValues {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"MathValues {{ ... }}"</span>)
     }
 }
 
 <span class="doccomment">/// A [Math Constants Table](https://learn.microsoft.com/en-us/typography/opentype/spec/math#mathconstants-table).
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>Constants&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+</span><span class="kw">pub struct </span>Constants&lt;<span class="lifetime">'a</span>&gt; {
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FromSlice&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>Constants&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FromSlice&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>Constants&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="prelude-val">Some</span>(Constants { data })
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Constants&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Constants&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;Constants {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"Constants {{ ... }}"</span>)
     }
 }
 
@@ -1108,7 +1109,7 @@
 <span class="kw">const </span>RADICAL_KERN_AFTER_DEGREE_OFFSET: usize = <span class="number">208</span>;
 <span class="kw">const </span>RADICAL_DEGREE_BOTTOM_RAISE_PERCENT_OFFSET: usize = <span class="number">212</span>;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Constants&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Constants&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Percentage of scaling down for level 1 superscripts and subscripts.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>script_percent_scale_down(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; i16 {
@@ -1137,318 +1138,318 @@
 
     <span class="doccomment">/// White space to be left between math formulas to ensure proper line spacing.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>math_leading(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>math_leading(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(MATH_LEADING_OFFSET)
     }
 
     <span class="doccomment">/// Axis height of the font.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>axis_height(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>axis_height(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(AXIS_HEIGHT_OFFSET)
     }
 
     <span class="doccomment">/// Maximum (ink) height of accent base that does not require raising the accents.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>accent_base_height(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>accent_base_height(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(ACCENT_BASE_HEIGHT_OFFSET)
     }
 
     <span class="doccomment">/// Maximum (ink) height of accent base that does not require flattening the accents.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>flattened_accent_base_height(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>flattened_accent_base_height(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(FLATTENED_ACCENT_BASE_HEIGHT_OFFSET)
     }
 
     <span class="doccomment">/// The standard shift down applied to subscript elements.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>subscript_shift_down(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>subscript_shift_down(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(SUBSCRIPT_SHIFT_DOWN_OFFSET)
     }
 
     <span class="doccomment">/// Maximum allowed height of the (ink) top of subscripts that does not require moving
     /// subscripts further down.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>subscript_top_max(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>subscript_top_max(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(SUBSCRIPT_TOP_MAX_OFFSET)
     }
 
     <span class="doccomment">/// Minimum allowed drop of the baseline of subscripts relative to the (ink) bottom of the
     /// base.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>subscript_baseline_drop_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>subscript_baseline_drop_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(SUBSCRIPT_BASELINE_DROP_MIN_OFFSET)
     }
 
     <span class="doccomment">/// Standard shift up applied to superscript elements.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>superscript_shift_up(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>superscript_shift_up(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(SUPERSCRIPT_SHIFT_UP_OFFSET)
     }
 
     <span class="doccomment">/// Standard shift of superscripts relative to the base, in cramped style.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>superscript_shift_up_cramped(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>superscript_shift_up_cramped(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(SUPERSCRIPT_SHIFT_UP_CRAMPED_OFFSET)
     }
 
     <span class="doccomment">/// Minimum allowed height of the (ink) bottom of superscripts that does not require moving
     /// subscripts further up.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>superscript_bottom_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>superscript_bottom_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(SUPERSCRIPT_BOTTOM_MIN_OFFSET)
     }
 
     <span class="doccomment">/// Maximum allowed drop of the baseline of superscripts relative to the (ink) top of the
     /// base.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>superscript_baseline_drop_max(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>superscript_baseline_drop_max(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(SUPERSCRIPT_BASELINE_DROP_MAX_OFFSET)
     }
 
     <span class="doccomment">/// Minimum gap between the superscript and subscript ink.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>sub_superscript_gap_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>sub_superscript_gap_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(SUB_SUPERSCRIPT_GAP_MIN_OFFSET)
     }
 
     <span class="doccomment">/// The maximum level to which the (ink) bottom of superscript can be pushed to increase the
     /// gap between superscript and subscript, before subscript starts being moved down.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>superscript_bottom_max_with_subscript(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>superscript_bottom_max_with_subscript(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(SUPERSCRIPT_BOTTOM_MAX_WITH_SUBSCRIPT_OFFSET)
     }
 
     <span class="doccomment">/// Extra white space to be added after each subscript and superscript.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>space_after_script(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>space_after_script(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(SPACE_AFTER_SCRIPT_OFFSET)
     }
 
     <span class="doccomment">/// Minimum gap between the (ink) bottom of the upper limit, and the (ink) top of the base
     /// operator.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>upper_limit_gap_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>upper_limit_gap_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(UPPER_LIMIT_GAP_MIN_OFFSET)
     }
 
     <span class="doccomment">/// Minimum distance between baseline of upper limit and (ink) top of the base operator.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>upper_limit_baseline_rise_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>upper_limit_baseline_rise_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(UPPER_LIMIT_BASELINE_RISE_MIN_OFFSET)
     }
 
     <span class="doccomment">/// Minimum gap between (ink) top of the lower limit, and (ink) bottom of the base operator.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>lower_limit_gap_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>lower_limit_gap_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(LOWER_LIMIT_GAP_MIN_OFFSET)
     }
 
     <span class="doccomment">/// Minimum distance between baseline of the lower limit and (ink) bottom of the base operator.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>lower_limit_baseline_drop_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>lower_limit_baseline_drop_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(LOWER_LIMIT_BASELINE_DROP_MIN_OFFSET)
     }
 
     <span class="doccomment">/// Standard shift up applied to the top element of a stack.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>stack_top_shift_up(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>stack_top_shift_up(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(STACK_TOP_SHIFT_UP_OFFSET)
     }
 
     <span class="doccomment">/// Standard shift up applied to the top element of a stack in display style.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>stack_top_display_style_shift_up(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>stack_top_display_style_shift_up(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(STACK_TOP_DISPLAY_STYLE_SHIFT_UP_OFFSET)
     }
 
     <span class="doccomment">/// Standard shift down applied to the bottom element of a stack.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>stack_bottom_shift_down(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>stack_bottom_shift_down(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(STACK_BOTTOM_SHIFT_DOWN_OFFSET)
     }
 
     <span class="doccomment">/// Standard shift down applied to the bottom element of a stack in display style.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>stack_bottom_display_style_shift_down(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>stack_bottom_display_style_shift_down(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(STACK_BOTTOM_DISPLAY_STYLE_SHIFT_DOWN_OFFSET)
     }
 
     <span class="doccomment">/// Minimum gap between (ink) bottom of the top element of a stack, and the (ink) top of the
     /// bottom element.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>stack_gap_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>stack_gap_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(STACK_GAP_MIN_OFFSET)
     }
 
     <span class="doccomment">/// Minimum gap between (ink) bottom of the top element of a stack, and the (ink) top of the
     /// bottom element in display style.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>stack_display_style_gap_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>stack_display_style_gap_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(STACK_DISPLAY_STYLE_GAP_MIN_OFFSET)
     }
 
     <span class="doccomment">/// Standard shift up applied to the top element of the stretch stack.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>stretch_stack_top_shift_up(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>stretch_stack_top_shift_up(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(STRETCH_STACK_TOP_SHIFT_UP_OFFSET)
     }
 
     <span class="doccomment">/// Standard shift down applied to the bottom element of the stretch stack.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>stretch_stack_bottom_shift_down(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>stretch_stack_bottom_shift_down(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(STRETCH_STACK_BOTTOM_SHIFT_DOWN_OFFSET)
     }
 
     <span class="doccomment">/// Minimum gap between the ink of the stretched element, and the (ink) bottom of the element above.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>stretch_stack_gap_above_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>stretch_stack_gap_above_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(STRETCH_STACK_GAP_ABOVE_MIN_OFFSET)
     }
 
     <span class="doccomment">/// Minimum gap between the ink of the stretched element, and the (ink) top of the element below.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>stretch_stack_gap_below_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>stretch_stack_gap_below_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(STRETCH_STACK_GAP_BELOW_MIN_OFFSET)
     }
 
     <span class="doccomment">/// Standard shift up applied to the numerator.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>fraction_numerator_shift_up(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>fraction_numerator_shift_up(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(FRACTION_NUMERATOR_SHIFT_UP_OFFSET)
     }
 
     <span class="doccomment">/// Standard shift up applied to the numerator in display style.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>fraction_numerator_display_style_shift_up(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>fraction_numerator_display_style_shift_up(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(FRACTION_NUMERATOR_DISPLAY_STYLE_SHIFT_UP_OFFSET)
     }
 
     <span class="doccomment">/// Standard shift down applied to the denominator.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>fraction_denominator_shift_down(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>fraction_denominator_shift_down(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(FRACTION_DENOMINATOR_SHIFT_DOWN_OFFSET)
     }
 
     <span class="doccomment">/// Standard shift down applied to the denominator in display style.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>fraction_denominator_display_style_shift_down(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>fraction_denominator_display_style_shift_down(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(FRACTION_DENOMINATOR_DISPLAY_STYLE_SHIFT_DOWN_OFFSET)
     }
 
     <span class="doccomment">/// Minimum tolerated gap between the (ink) bottom of the numerator and the ink of the
     /// fraction bar.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>fraction_numerator_gap_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>fraction_numerator_gap_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(FRACTION_NUMERATOR_GAP_MIN_OFFSET)
     }
 
     <span class="doccomment">/// Minimum tolerated gap between the (ink) bottom of the numerator and the ink of the
     /// fraction bar in display style.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>fraction_num_display_style_gap_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>fraction_num_display_style_gap_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(FRACTION_NUM_DISPLAY_STYLE_GAP_MIN_OFFSET)
     }
 
     <span class="doccomment">/// Thickness of the fraction bar.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>fraction_rule_thickness(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>fraction_rule_thickness(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(FRACTION_RULE_THICKNESS_OFFSET)
     }
 
     <span class="doccomment">/// Minimum tolerated gap between the (ink) top of the denominator and the ink of the fraction bar.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>fraction_denominator_gap_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>fraction_denominator_gap_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(FRACTION_DENOMINATOR_GAP_MIN_OFFSET)
     }
 
     <span class="doccomment">/// Minimum tolerated gap between the (ink) top of the denominator and the ink of the fraction
     /// bar in display style.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>fraction_denom_display_style_gap_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>fraction_denom_display_style_gap_min(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(FRACTION_DENOM_DISPLAY_STYLE_GAP_MIN_OFFSET)
     }
 
     <span class="doccomment">/// Horizontal distance between the top and bottom elements of a skewed fraction.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>skewed_fraction_horizontal_gap(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>skewed_fraction_horizontal_gap(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(SKEWED_FRACTION_HORIZONTAL_GAP_OFFSET)
     }
 
     <span class="doccomment">/// Vertical distance between the ink of the top and bottom elements of a skewed fraction.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>skewed_fraction_vertical_gap(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>skewed_fraction_vertical_gap(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(SKEWED_FRACTION_VERTICAL_GAP_OFFSET)
     }
 
     <span class="doccomment">/// Distance between the overbar and the (ink) top of he base.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>overbar_vertical_gap(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>overbar_vertical_gap(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(OVERBAR_VERTICAL_GAP_OFFSET)
     }
 
     <span class="doccomment">/// Thickness of overbar.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>overbar_rule_thickness(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>overbar_rule_thickness(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(OVERBAR_RULE_THICKNESS_OFFSET)
     }
 
     <span class="doccomment">/// Extra white space reserved above the overbar.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>overbar_extra_ascender(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>overbar_extra_ascender(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(OVERBAR_EXTRA_ASCENDER_OFFSET)
     }
 
     <span class="doccomment">/// Distance between underbar and (ink) bottom of the base.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>underbar_vertical_gap(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>underbar_vertical_gap(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(UNDERBAR_VERTICAL_GAP_OFFSET)
     }
 
     <span class="doccomment">/// Thickness of underbar.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>underbar_rule_thickness(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>underbar_rule_thickness(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(UNDERBAR_RULE_THICKNESS_OFFSET)
     }
 
     <span class="doccomment">/// Extra white space reserved below the underbar.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>underbar_extra_descender(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>underbar_extra_descender(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(UNDERBAR_EXTRA_DESCENDER_OFFSET)
     }
 
     <span class="doccomment">/// Space between the (ink) top of the expression and the bar over it.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>radical_vertical_gap(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>radical_vertical_gap(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(RADICAL_VERTICAL_GAP_OFFSET)
     }
 
     <span class="doccomment">/// Space between the (ink) top of the expression and the bar over it.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>radical_display_style_vertical_gap(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>radical_display_style_vertical_gap(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(RADICAL_DISPLAY_STYLE_VERTICAL_GAP_OFFSET)
     }
 
     <span class="doccomment">/// Thickness of the radical rule.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>radical_rule_thickness(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>radical_rule_thickness(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(RADICAL_RULE_THICKNESS_OFFSET)
     }
 
     <span class="doccomment">/// Extra white space reserved above the radical.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>radical_extra_ascender(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>radical_extra_ascender(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(RADICAL_EXTRA_ASCENDER_OFFSET)
     }
 
     <span class="doccomment">/// Extra horizontal kern before the degree of a radical, if such is present.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>radical_kern_before_degree(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>radical_kern_before_degree(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(RADICAL_KERN_BEFORE_DEGREE_OFFSET)
     }
 
     <span class="doccomment">/// Negative kern after the degree of a radical, if such is present.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>radical_kern_after_degree(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>radical_kern_after_degree(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.read_record(RADICAL_KERN_AFTER_DEGREE_OFFSET)
     }
 
@@ -1473,7 +1474,7 @@
 
     <span class="doccomment">/// Read a `MathValueRecord` at an offset into the table.
     </span><span class="attr">#[inline]
-    </span><span class="kw">fn </span>read_record(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: usize) -&gt; MathValue&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">fn </span>read_record(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: usize) -&gt; MathValue&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.data
             .get(offset..)
             .and_then(|data| MathValue::parse(data, <span class="self">self</span>.data))
@@ -1486,13 +1487,13 @@
 
 <span class="doccomment">/// A [Math Kern Table](https://learn.microsoft.com/en-us/typography/opentype/spec/math#mathkern-table).
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>Kern&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
-    heights: LazyArray16&lt;<span class="lifetime">&#39;a</span>, MathValueRecord&gt;,
-    kerns: LazyArray16&lt;<span class="lifetime">&#39;a</span>, MathValueRecord&gt;,
+</span><span class="kw">pub struct </span>Kern&lt;<span class="lifetime">'a</span>&gt; {
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
+    heights: LazyArray16&lt;<span class="lifetime">'a</span>, MathValueRecord&gt;,
+    kerns: LazyArray16&lt;<span class="lifetime">'a</span>, MathValueRecord&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Kern&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Kern&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Number of heights at which the kern value changes.
     </span><span class="kw">pub fn </span>count(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="self">self</span>.heights.len()
@@ -1501,20 +1502,20 @@
     <span class="doccomment">/// The correction height at the given index.
     ///
     /// The index must be smaller than `count()`.
-    </span><span class="kw">pub fn </span>height(<span class="kw-2">&amp;</span><span class="self">self</span>, index: u16) -&gt; <span class="prelude-ty">Option</span>&lt;MathValue&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>height(<span class="kw-2">&amp;</span><span class="self">self</span>, index: u16) -&gt; <span class="prelude-ty">Option</span>&lt;MathValue&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="prelude-val">Some</span>(<span class="self">self</span>.heights.get(index)<span class="question-mark">?</span>.get(<span class="self">self</span>.data))
     }
 
     <span class="doccomment">/// The kern value at the given index.
     ///
     /// The index must be smaller than or equal to `count()`.
-    </span><span class="kw">pub fn </span>kern(<span class="kw-2">&amp;</span><span class="self">self</span>, index: u16) -&gt; <span class="prelude-ty">Option</span>&lt;MathValue&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>kern(<span class="kw-2">&amp;</span><span class="self">self</span>, index: u16) -&gt; <span class="prelude-ty">Option</span>&lt;MathValue&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="prelude-val">Some</span>(<span class="self">self</span>.kerns.get(index)<span class="question-mark">?</span>.get(<span class="self">self</span>.data))
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FromSlice&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>Kern&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FromSlice&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>Kern&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">let </span>count = s.read::&lt;u16&gt;()<span class="question-mark">?</span>;
         <span class="kw">let </span>heights = s.read_array16::&lt;MathValueRecord&gt;(count)<span class="question-mark">?</span>;
@@ -1527,9 +1528,9 @@
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Kern&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Kern&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;Kern {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"Kern {{ ... }}"</span>)
     }
 }
 
@@ -1556,7 +1557,7 @@
 }
 
 <span class="kw">impl </span>KernInfoRecord {
-    <span class="kw">fn </span>get&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; KernInfo&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>get&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; KernInfo&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">let </span>parse_field = |offset: <span class="prelude-ty">Option</span>&lt;Offset16&gt;| {
             offset
                 .and_then(|offset| data.get(offset.to_usize()..))
@@ -1574,27 +1575,27 @@
 <span class="doccomment">/// An [entry in a Math Kern Info Table](
 /// https://learn.microsoft.com/en-us/typography/opentype/spec/math#mathkerninforecord).
 </span><span class="attr">#[derive(Clone, Debug)]
-</span><span class="kw">pub struct </span>KernInfo&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>KernInfo&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// The kerning data for the top-right corner.
-    </span><span class="kw">pub </span>top_right: <span class="prelude-ty">Option</span>&lt;Kern&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    </span><span class="kw">pub </span>top_right: <span class="prelude-ty">Option</span>&lt;Kern&lt;<span class="lifetime">'a</span>&gt;&gt;,
     <span class="doccomment">/// The kerning data for the top-left corner.
-    </span><span class="kw">pub </span>top_left: <span class="prelude-ty">Option</span>&lt;Kern&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    </span><span class="kw">pub </span>top_left: <span class="prelude-ty">Option</span>&lt;Kern&lt;<span class="lifetime">'a</span>&gt;&gt;,
     <span class="doccomment">/// The kerning data for the bottom-right corner.
-    </span><span class="kw">pub </span>bottom_right: <span class="prelude-ty">Option</span>&lt;Kern&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    </span><span class="kw">pub </span>bottom_right: <span class="prelude-ty">Option</span>&lt;Kern&lt;<span class="lifetime">'a</span>&gt;&gt;,
     <span class="doccomment">/// The kerning data for the bottom-left corner.
-    </span><span class="kw">pub </span>bottom_left: <span class="prelude-ty">Option</span>&lt;Kern&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    </span><span class="kw">pub </span>bottom_left: <span class="prelude-ty">Option</span>&lt;Kern&lt;<span class="lifetime">'a</span>&gt;&gt;,
 }
 
 <span class="doccomment">/// A [Math Kern Info Table](https://docs.microsoft.com/en-us/typography/opentype/spec/math#mathkerninfo-table).
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>KernInfos&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
-    coverage: Coverage&lt;<span class="lifetime">&#39;a</span>&gt;,
-    records: LazyArray16&lt;<span class="lifetime">&#39;a</span>, KernInfoRecord&gt;,
+</span><span class="kw">pub struct </span>KernInfos&lt;<span class="lifetime">'a</span>&gt; {
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
+    coverage: Coverage&lt;<span class="lifetime">'a</span>&gt;,
+    records: LazyArray16&lt;<span class="lifetime">'a</span>, KernInfoRecord&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FromSlice&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>KernInfos&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FromSlice&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>KernInfos&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">let </span>coverage = s.parse_at_offset16::&lt;Coverage&gt;(data)<span class="question-mark">?</span>;
         <span class="kw">let </span>count = s.read::&lt;u16&gt;()<span class="question-mark">?</span>;
@@ -1607,36 +1608,36 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; KernInfos&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; KernInfos&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Returns the kerning info for the glyph or `None` if it is not covered.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, glyph: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;KernInfo&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, glyph: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;KernInfo&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">let </span>index = <span class="self">self</span>.coverage.get(glyph)<span class="question-mark">?</span>;
         <span class="prelude-val">Some</span>(<span class="self">self</span>.records.get(index)<span class="question-mark">?</span>.get(<span class="self">self</span>.data))
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>KernInfos&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>KernInfos&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;KernInfos {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"KernInfos {{ ... }}"</span>)
     }
 }
 
 <span class="doccomment">/// A [Math Glyph Info Table](https://learn.microsoft.com/en-us/typography/opentype/spec/math#mathglyphinfo-table).
 </span><span class="attr">#[derive(Clone, Copy, Debug)]
-</span><span class="kw">pub struct </span>GlyphInfo&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>GlyphInfo&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Per-glyph italics correction values.
-    </span><span class="kw">pub </span>italic_corrections: <span class="prelude-ty">Option</span>&lt;MathValues&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    </span><span class="kw">pub </span>italic_corrections: <span class="prelude-ty">Option</span>&lt;MathValues&lt;<span class="lifetime">'a</span>&gt;&gt;,
     <span class="doccomment">/// Per-glyph horizontal positions for attaching mathematical accents.
-    </span><span class="kw">pub </span>top_accent_attachments: <span class="prelude-ty">Option</span>&lt;MathValues&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    </span><span class="kw">pub </span>top_accent_attachments: <span class="prelude-ty">Option</span>&lt;MathValues&lt;<span class="lifetime">'a</span>&gt;&gt;,
     <span class="doccomment">/// Glyphs which are _extended shapes_.
-    </span><span class="kw">pub </span>extended_shapes: <span class="prelude-ty">Option</span>&lt;Coverage&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    </span><span class="kw">pub </span>extended_shapes: <span class="prelude-ty">Option</span>&lt;Coverage&lt;<span class="lifetime">'a</span>&gt;&gt;,
     <span class="doccomment">/// Per-glyph information for mathematical kerning.
-    </span><span class="kw">pub </span>kern_infos: <span class="prelude-ty">Option</span>&lt;KernInfos&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    </span><span class="kw">pub </span>kern_infos: <span class="prelude-ty">Option</span>&lt;KernInfos&lt;<span class="lifetime">'a</span>&gt;&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FromSlice&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>GlyphInfo&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FromSlice&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>GlyphInfo&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="prelude-val">Some</span>(GlyphInfo {
             italic_corrections: s.parse_at_offset16::&lt;MathValues&gt;(data),
@@ -1699,15 +1700,15 @@
 
 <span class="doccomment">/// A [Glyph Assembly Table](https://learn.microsoft.com/en-us/typography/opentype/spec/math#glyphassembly-table).
 </span><span class="attr">#[derive(Clone, Copy, Debug)]
-</span><span class="kw">pub struct </span>GlyphAssembly&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>GlyphAssembly&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// The italics correction of the assembled glyph.
-    </span><span class="kw">pub </span>italics_correction: MathValue&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub </span>italics_correction: MathValue&lt;<span class="lifetime">'a</span>&gt;,
     <span class="doccomment">/// Parts the assembly is composed of.
-    </span><span class="kw">pub </span>parts: LazyArray16&lt;<span class="lifetime">&#39;a</span>, GlyphPart&gt;,
+    </span><span class="kw">pub </span>parts: LazyArray16&lt;<span class="lifetime">'a</span>, GlyphPart&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FromSlice&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>GlyphAssembly&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FromSlice&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>GlyphAssembly&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">let </span>italics_correction = s.read::&lt;MathValueRecord&gt;()<span class="question-mark">?</span>.get(data);
         <span class="kw">let </span>count = s.read::&lt;u16&gt;()<span class="question-mark">?</span>;
@@ -1743,15 +1744,15 @@
 <span class="doccomment">/// A [Math Glyph Construction Table](
 /// https://learn.microsoft.com/en-us/typography/opentype/spec/math#mathglyphconstruction-table).
 </span><span class="attr">#[derive(Clone, Copy, Debug)]
-</span><span class="kw">pub struct </span>GlyphConstruction&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>GlyphConstruction&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// A general recipe on how to construct a variant with large advance width/height.
-    </span><span class="kw">pub </span>assembly: <span class="prelude-ty">Option</span>&lt;GlyphAssembly&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    </span><span class="kw">pub </span>assembly: <span class="prelude-ty">Option</span>&lt;GlyphAssembly&lt;<span class="lifetime">'a</span>&gt;&gt;,
     <span class="doccomment">/// Prepared variants of the glyph with varying advances.
-    </span><span class="kw">pub </span>variants: LazyArray16&lt;<span class="lifetime">&#39;a</span>, GlyphVariant&gt;,
+    </span><span class="kw">pub </span>variants: LazyArray16&lt;<span class="lifetime">'a</span>, GlyphVariant&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FromSlice&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>GlyphConstruction&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FromSlice&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>GlyphConstruction&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">let </span>assembly = s.parse_at_offset16::&lt;GlyphAssembly&gt;(data);
         <span class="kw">let </span>variant_count = s.read::&lt;u16&gt;()<span class="question-mark">?</span>;
@@ -1764,16 +1765,16 @@
 /// [Math Glyph Construction Tables](
 /// https://learn.microsoft.com/en-us/typography/opentype/spec/math#mathglyphconstruction-table).
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>GlyphConstructions&lt;<span class="lifetime">&#39;a</span>&gt; {
-    coverage: Coverage&lt;<span class="lifetime">&#39;a</span>&gt;,
-    constructions: LazyOffsetArray16&lt;<span class="lifetime">&#39;a</span>, GlyphConstruction&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+</span><span class="kw">pub struct </span>GlyphConstructions&lt;<span class="lifetime">'a</span>&gt; {
+    coverage: Coverage&lt;<span class="lifetime">'a</span>&gt;,
+    constructions: LazyOffsetArray16&lt;<span class="lifetime">'a</span>, GlyphConstruction&lt;<span class="lifetime">'a</span>&gt;&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; GlyphConstructions&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; GlyphConstructions&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>new(
-        data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
-        coverage: <span class="prelude-ty">Option</span>&lt;Coverage&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-        offsets: LazyArray16&lt;<span class="lifetime">&#39;a</span>, <span class="prelude-ty">Option</span>&lt;Offset16&gt;&gt;,
+        data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
+        coverage: <span class="prelude-ty">Option</span>&lt;Coverage&lt;<span class="lifetime">'a</span>&gt;&gt;,
+        offsets: LazyArray16&lt;<span class="lifetime">'a</span>, <span class="prelude-ty">Option</span>&lt;Offset16&gt;&gt;,
     ) -&gt; <span class="self">Self </span>{
         GlyphConstructions {
             coverage: coverage.unwrap_or(Coverage::Format1 {
@@ -1785,32 +1786,32 @@
 
     <span class="doccomment">/// Returns the construction for the glyph or `None` if it is not covered.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, glyph: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;GlyphConstruction&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, glyph: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;GlyphConstruction&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">let </span>index = <span class="self">self</span>.coverage.get(glyph)<span class="question-mark">?</span>;
         <span class="self">self</span>.constructions.get(index)
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>GlyphConstructions&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>GlyphConstructions&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;GlyphConstructions {{ ... }}&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"GlyphConstructions {{ ... }}"</span>)
     }
 }
 
 <span class="doccomment">/// A [Math Variants Table](
 /// https://learn.microsoft.com/en-us/typography/opentype/spec/math#mathvariants-table).
 </span><span class="attr">#[derive(Clone, Copy, Debug)]
-</span><span class="kw">pub struct </span>Variants&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Variants&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Minimum overlap of connecting glyphs during glyph construction, in design units.
     </span><span class="kw">pub </span>min_connector_overlap: u16,
     <span class="doccomment">/// Constructions for shapes growing in the vertical direction.
-    </span><span class="kw">pub </span>vertical_constructions: GlyphConstructions&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub </span>vertical_constructions: GlyphConstructions&lt;<span class="lifetime">'a</span>&gt;,
     <span class="doccomment">/// Constructions for shapes growing in the horizontal direction.
-    </span><span class="kw">pub </span>horizontal_constructions: GlyphConstructions&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span><span class="kw">pub </span>horizontal_constructions: GlyphConstructions&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FromSlice&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>Variants&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FromSlice&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>Variants&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">let </span>min_connector_overlap = s.read::&lt;u16&gt;()<span class="question-mark">?</span>;
         <span class="kw">let </span>vertical_coverage = s.parse_at_offset16::&lt;Coverage&gt;(data);
@@ -1837,18 +1838,18 @@
 
 <span class="doccomment">/// A [Math Table](https://docs.microsoft.com/en-us/typography/opentype/spec/math).
 </span><span class="attr">#[derive(Clone, Copy, Debug)]
-</span><span class="kw">pub struct </span>Table&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Table&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Math positioning constants.
-    </span><span class="kw">pub </span>constants: <span class="prelude-ty">Option</span>&lt;Constants&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    </span><span class="kw">pub </span>constants: <span class="prelude-ty">Option</span>&lt;Constants&lt;<span class="lifetime">'a</span>&gt;&gt;,
     <span class="doccomment">/// Per-glyph positioning information.
-    </span><span class="kw">pub </span>glyph_info: <span class="prelude-ty">Option</span>&lt;GlyphInfo&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    </span><span class="kw">pub </span>glyph_info: <span class="prelude-ty">Option</span>&lt;GlyphInfo&lt;<span class="lifetime">'a</span>&gt;&gt;,
     <span class="doccomment">/// Variants and assembly recipes for growable glyphs.
-    </span><span class="kw">pub </span>variants: <span class="prelude-ty">Option</span>&lt;Variants&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    </span><span class="kw">pub </span>variants: <span class="prelude-ty">Option</span>&lt;Variants&lt;<span class="lifetime">'a</span>&gt;&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Table&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Table&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Parses a table from raw data.
-    </span><span class="kw">pub fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">pub fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
         <span class="kw">let </span>major_version = s.read::&lt;u16&gt;()<span class="question-mark">? </span><span class="kw">as </span>u8;
         s.skip::&lt;u16&gt;(); <span class="comment">// minor version
@@ -1864,12 +1865,12 @@
     }
 }
 
-<span class="kw">trait </span>StreamExt&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse_at_offset16&lt;T: FromSlice&lt;<span class="lifetime">&#39;a</span>&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt;;
+<span class="kw">trait </span>StreamExt&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse_at_offset16&lt;T: FromSlice&lt;<span class="lifetime">'a</span>&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt;;
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; StreamExt&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>Stream&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>parse_at_offset16&lt;T: FromSlice&lt;<span class="lifetime">&#39;a</span>&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; StreamExt&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>Stream&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>parse_at_offset16&lt;T: FromSlice&lt;<span class="lifetime">'a</span>&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
         <span class="kw">let </span>offset = <span class="self">self</span>.read::&lt;<span class="prelude-ty">Option</span>&lt;Offset16&gt;&gt;()<span class="question-mark">??</span>.to_usize();
         data.get(offset..).and_then(T::parse)
     }

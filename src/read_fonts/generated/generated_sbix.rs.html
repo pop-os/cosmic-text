@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.4/src/tables/../../generated/generated_sbix.rs`."><title>generated_sbix.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.5/src/tables/../../generated/generated_sbix.rs`."><title>generated_sbix.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -649,7 +650,7 @@
 
 <span class="doccomment">/// Sbix header flags.
 </span><span class="attr">#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = <span class="string">&quot;serde&quot;</span>, derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = <span class="string">"serde"</span>, derive(serde::Serialize, serde::Deserialize))]
 </span><span class="kw">pub struct </span>HeaderFlags {
     bits: u16,
 }
@@ -783,7 +784,7 @@
     /// Specifically, the returned set contains all flags present in
     /// `self`, except for the ones present in `other`.
     ///
-    /// It is also conceptually equivalent to the &quot;bit-clear&quot; operation:
+    /// It is also conceptually equivalent to the "bit-clear" operation:
     /// `flags &amp; !other` (and this syntax is also supported).
     ///
     /// This is equivalent to using the `-` operator (e.g.
@@ -892,21 +893,21 @@
 <span class="kw">impl </span>std::fmt::Debug <span class="kw">for </span>HeaderFlags {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter) -&gt; std::fmt::Result {
         <span class="kw">let </span>members: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span>str, <span class="self">Self</span>)] = <span class="kw-2">&amp;</span>[
-            (<span class="string">&quot;ALWAYS_SET&quot;</span>, <span class="self">Self</span>::ALWAYS_SET),
-            (<span class="string">&quot;DRAW_OUTLINES&quot;</span>, <span class="self">Self</span>::DRAW_OUTLINES),
+            (<span class="string">"ALWAYS_SET"</span>, <span class="self">Self</span>::ALWAYS_SET),
+            (<span class="string">"DRAW_OUTLINES"</span>, <span class="self">Self</span>::DRAW_OUTLINES),
         ];
         <span class="kw">let </span><span class="kw-2">mut </span>first = <span class="bool-val">true</span>;
         <span class="kw">for </span>(name, value) <span class="kw">in </span>members {
             <span class="kw">if </span><span class="self">self</span>.contains(<span class="kw-2">*</span>value) {
                 <span class="kw">if </span>!first {
-                    f.write_str(<span class="string">&quot; | &quot;</span>)<span class="question-mark">?</span>;
+                    f.write_str(<span class="string">" | "</span>)<span class="question-mark">?</span>;
                 }
                 first = <span class="bool-val">false</span>;
                 f.write_str(name)<span class="question-mark">?</span>;
             }
         }
         <span class="kw">if </span>first {
-            f.write_str(<span class="string">&quot;(empty)&quot;</span>)<span class="question-mark">?</span>;
+            f.write_str(<span class="string">"(empty)"</span>)<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
     }
@@ -947,9 +948,9 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;HeaderFlags&gt; <span class="kw">for </span>FieldType&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>from(src: HeaderFlags) -&gt; FieldType&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; From&lt;HeaderFlags&gt; <span class="kw">for </span>FieldType&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>from(src: HeaderFlags) -&gt; FieldType&lt;<span class="lifetime">'a</span>&gt; {
         src.bits().into()
     }
 }
@@ -981,17 +982,17 @@
     }
 }
 
-<span class="kw">impl </span>TopLevelTable <span class="kw">for </span>Sbix&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>TopLevelTable <span class="kw">for </span>Sbix&lt;<span class="lifetime">'_</span>&gt; {
     <span class="doccomment">/// `sbix`
-    </span><span class="kw">const </span>TAG: Tag = Tag::new(<span class="string">b&quot;sbix&quot;</span>);
+    </span><span class="kw">const </span>TAG: Tag = Tag::new(<span class="string">b"sbix"</span>);
 }
 
-<span class="kw">impl </span>ReadArgs <span class="kw">for </span>Sbix&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>ReadArgs <span class="kw">for </span>Sbix&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">type </span>Args = u16;
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontReadWithArgs&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>Sbix&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read_with_args(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;, args: <span class="kw-2">&amp;</span>u16) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontReadWithArgs&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>Sbix&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read_with_args(data: FontData&lt;<span class="lifetime">'a</span>&gt;, args: <span class="kw-2">&amp;</span>u16) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span>num_glyphs = <span class="kw-2">*</span>args;
         <span class="kw">let </span><span class="kw-2">mut </span>cursor = data.cursor();
         cursor.advance::&lt;u16&gt;();
@@ -1006,21 +1007,21 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Sbix&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Sbix&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// A constructor that requires additional arguments.
     ///
     /// This type requires some external state in order to be
     /// parsed.
-    </span><span class="kw">pub fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;, num_glyphs: u16) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+    </span><span class="kw">pub fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;, num_glyphs: u16) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span>args = num_glyphs;
         <span class="self">Self</span>::read_with_args(data, <span class="kw-2">&amp;</span>args)
     }
 }
 
 <span class="doccomment">/// The [sbix (Standard Bitmap Graphics)](https://docs.microsoft.com/en-us/typography/opentype/spec/sbix) table
-</span><span class="kw">pub type </span>Sbix&lt;<span class="lifetime">&#39;a</span>&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, SbixMarker&gt;;
+</span><span class="kw">pub type </span>Sbix&lt;<span class="lifetime">'a</span>&gt; = TableRef&lt;<span class="lifetime">'a</span>, SbixMarker&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Sbix&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Sbix&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Table version number — set to 1.
     </span><span class="kw">pub fn </span>version(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.version_byte_range();
@@ -1041,14 +1042,14 @@
         <span class="self">self</span>.data.read_at(range.start).unwrap()
     }
 
-    <span class="doccomment">/// Offsets from the beginning of the &#39;sbix&#39; table to data for each individual bitmap strike.
-    </span><span class="kw">pub fn </span>strike_offsets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[BigEndian&lt;Offset32&gt;] {
+    <span class="doccomment">/// Offsets from the beginning of the 'sbix' table to data for each individual bitmap strike.
+    </span><span class="kw">pub fn </span>strike_offsets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[BigEndian&lt;Offset32&gt;] {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.strike_offsets_byte_range();
         <span class="self">self</span>.data.read_array(range).unwrap()
     }
 
     <span class="doccomment">/// A dynamically resolving wrapper for [`strike_offsets`][Self::strike_offsets].
-    </span><span class="kw">pub fn </span>strikes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ArrayOfOffsets&lt;<span class="lifetime">&#39;a</span>, Strike&lt;<span class="lifetime">&#39;a</span>&gt;, Offset32&gt; {
+    </span><span class="kw">pub fn </span>strikes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ArrayOfOffsets&lt;<span class="lifetime">'a</span>, Strike&lt;<span class="lifetime">'a</span>&gt;, Offset32&gt; {
         <span class="kw">let </span>data = <span class="self">self</span>.data;
         <span class="kw">let </span>offsets = <span class="self">self</span>.strike_offsets();
         <span class="kw">let </span>args = <span class="self">self</span>.num_glyphs();
@@ -1060,21 +1061,21 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>Sbix&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>Sbix&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;Sbix&quot;
+        <span class="string">"Sbix"
     </span>}
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">match </span>idx {
-            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;version&quot;</span>, <span class="self">self</span>.version())),
-            <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;flags&quot;</span>, <span class="self">self</span>.flags())),
-            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;num_strikes&quot;</span>, <span class="self">self</span>.num_strikes())),
+            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"version"</span>, <span class="self">self</span>.version())),
+            <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"flags"</span>, <span class="self">self</span>.flags())),
+            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"num_strikes"</span>, <span class="self">self</span>.num_strikes())),
             <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>({
                 <span class="kw">let </span>data = <span class="self">self</span>.data;
                 <span class="kw">let </span>args = <span class="self">self</span>.num_glyphs();
                 Field::new(
-                    <span class="string">&quot;strike_offsets&quot;</span>,
+                    <span class="string">"strike_offsets"</span>,
                     FieldType::array_of_offsets(
                         better_type_name::&lt;Strike&gt;(),
                         <span class="self">self</span>.strike_offsets(),
@@ -1090,10 +1091,10 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>Sbix&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt;).fmt(f)
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>Sbix&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt;).fmt(f)
     }
 }
 
@@ -1119,12 +1120,12 @@
     }
 }
 
-<span class="kw">impl </span>ReadArgs <span class="kw">for </span>Strike&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>ReadArgs <span class="kw">for </span>Strike&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">type </span>Args = u16;
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontReadWithArgs&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>Strike&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read_with_args(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;, args: <span class="kw-2">&amp;</span>u16) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontReadWithArgs&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>Strike&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read_with_args(data: FontData&lt;<span class="lifetime">'a</span>&gt;, args: <span class="kw-2">&amp;</span>u16) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span>num_glyphs = <span class="kw-2">*</span>args;
         <span class="kw">let </span><span class="kw-2">mut </span>cursor = data.cursor();
         cursor.advance::&lt;u16&gt;();
@@ -1137,21 +1138,21 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Strike&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Strike&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// A constructor that requires additional arguments.
     ///
     /// This type requires some external state in order to be
     /// parsed.
-    </span><span class="kw">pub fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;, num_glyphs: u16) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+    </span><span class="kw">pub fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;, num_glyphs: u16) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span>args = num_glyphs;
         <span class="self">Self</span>::read_with_args(data, <span class="kw-2">&amp;</span>args)
     }
 }
 
 <span class="doccomment">/// [Strike](https://learn.microsoft.com/en-us/typography/opentype/spec/sbix#strikes) header table
-</span><span class="kw">pub type </span>Strike&lt;<span class="lifetime">&#39;a</span>&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, StrikeMarker&gt;;
+</span><span class="kw">pub type </span>Strike&lt;<span class="lifetime">'a</span>&gt; = TableRef&lt;<span class="lifetime">'a</span>, StrikeMarker&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Strike&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Strike&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// The PPEM size for which this strike was designed.
     </span><span class="kw">pub fn </span>ppem(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.ppem_byte_range();
@@ -1165,31 +1166,31 @@
     }
 
     <span class="doccomment">/// Offset from the beginning of the strike data header to bitmap data for an individual glyph ID.
-    </span><span class="kw">pub fn </span>glyph_data_offsets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[BigEndian&lt;u32&gt;] {
+    </span><span class="kw">pub fn </span>glyph_data_offsets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[BigEndian&lt;u32&gt;] {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.glyph_data_offsets_byte_range();
         <span class="self">self</span>.data.read_array(range).unwrap()
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>Strike&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>Strike&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;Strike&quot;
+        <span class="string">"Strike"
     </span>}
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">match </span>idx {
-            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;ppem&quot;</span>, <span class="self">self</span>.ppem())),
-            <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;ppi&quot;</span>, <span class="self">self</span>.ppi())),
-            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;glyph_data_offsets&quot;</span>, <span class="self">self</span>.glyph_data_offsets())),
+            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"ppem"</span>, <span class="self">self</span>.ppem())),
+            <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"ppi"</span>, <span class="self">self</span>.ppi())),
+            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"glyph_data_offsets"</span>, <span class="self">self</span>.glyph_data_offsets())),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         }
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>Strike&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt;).fmt(f)
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>Strike&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt;).fmt(f)
     }
 }
 
@@ -1219,8 +1220,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRead&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>GlyphData&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRead&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>GlyphData&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>cursor = data.cursor();
         cursor.advance::&lt;i16&gt;();
         cursor.advance::&lt;i16&gt;();
@@ -1232,9 +1233,9 @@
 }
 
 <span class="doccomment">/// [Glyph data](https://learn.microsoft.com/en-us/typography/opentype/spec/sbix#glyph-data) table
-</span><span class="kw">pub type </span>GlyphData&lt;<span class="lifetime">&#39;a</span>&gt; = TableRef&lt;<span class="lifetime">&#39;a</span>, GlyphDataMarker&gt;;
+</span><span class="kw">pub type </span>GlyphData&lt;<span class="lifetime">'a</span>&gt; = TableRef&lt;<span class="lifetime">'a</span>, GlyphDataMarker&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; GlyphData&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; GlyphData&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// The horizontal (x-axis) position of the left edge of the bitmap graphic in relation to the glyph design space origin.
     </span><span class="kw">pub fn </span>origin_offset_x(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; i16 {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.origin_offset_x_byte_range();
@@ -1247,39 +1248,39 @@
         <span class="self">self</span>.data.read_at(range.start).unwrap()
     }
 
-    <span class="doccomment">/// Indicates the format of the embedded graphic data: one of &#39;jpg &#39;, &#39;png &#39; or &#39;tiff&#39;, or the special format &#39;dupe&#39;.
+    <span class="doccomment">/// Indicates the format of the embedded graphic data: one of 'jpg ', 'png ' or 'tiff', or the special format 'dupe'.
     </span><span class="kw">pub fn </span>graphic_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Tag {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.graphic_type_byte_range();
         <span class="self">self</span>.data.read_at(range.start).unwrap()
     }
 
     <span class="doccomment">/// The actual embedded graphic data. The total length is inferred from sequential entries in the glyphDataOffsets array and the fixed size (8 bytes) of the preceding fields.
-    </span><span class="kw">pub fn </span>data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8] {
+    </span><span class="kw">pub fn </span>data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8] {
         <span class="kw">let </span>range = <span class="self">self</span>.shape.data_byte_range();
         <span class="self">self</span>.data.read_array(range).unwrap()
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>GlyphData&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>GlyphData&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;GlyphData&quot;
+        <span class="string">"GlyphData"
     </span>}
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">match </span>idx {
-            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;origin_offset_x&quot;</span>, <span class="self">self</span>.origin_offset_x())),
-            <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;origin_offset_y&quot;</span>, <span class="self">self</span>.origin_offset_y())),
-            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;graphic_type&quot;</span>, <span class="self">self</span>.graphic_type())),
-            <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">&quot;data&quot;</span>, <span class="self">self</span>.data())),
+            <span class="number">0usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"origin_offset_x"</span>, <span class="self">self</span>.origin_offset_x())),
+            <span class="number">1usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"origin_offset_y"</span>, <span class="self">self</span>.origin_offset_y())),
+            <span class="number">2usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"graphic_type"</span>, <span class="self">self</span>.graphic_type())),
+            <span class="number">3usize </span>=&gt; <span class="prelude-val">Some</span>(Field::new(<span class="string">"data"</span>, <span class="self">self</span>.data())),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         }
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>GlyphData&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">&#39;a</span>&gt;).fmt(f)
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>GlyphData&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="kw">dyn </span>SomeTable&lt;<span class="lifetime">'a</span>&gt;).fmt(f)
     }
 }
 </code></pre></div></section></main></body></html>

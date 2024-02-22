@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/yazi-0.1.6/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="yazi" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/yazi-0.1.6/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="yazi" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -456,13 +457,13 @@
 //!
 //! # Quick Start
 //!
-//! So you&#39;ve got some bytes, they all fit in memory, you don&#39;t need to reuse allocations,
+//! So you've got some bytes, they all fit in memory, you don't need to reuse allocations,
 //! and you just want to compress or decompress them. This section is for you.
 //!
 //! Cargo.toml:
 //! ```toml
 //! [dependencies]
-//! yazi = &quot;0.1.4&quot;
+//! yazi = "0.1.4"
 //! ```
 //!
 //! The [`compress`](fn.compress.html) and [`decompress`](fn.decompress.html) functions
@@ -485,7 +486,7 @@
 //!
 //! # Compression
 //!
-//! To compress data, you&#39;ll need to create an instance of the
+//! To compress data, you'll need to create an instance of the
 //! [`Encoder`](struct.Encoder.html) struct. The [`new`](struct.Encoder.html#method.new)
 //! method can
 //! be used to construct an encoder on the stack, but the internal buffers are large
@@ -513,7 +514,7 @@
 //! ```
 //!
 //! The encoder itself does not provide any functionality. It simply stores state and
-//! configuration. To actually compress data, you&#39;ll need an
+//! configuration. To actually compress data, you'll need an
 //! [`EncoderStream`](struct.EncoderStream.html). A stream is a binding between an
 //! encoder and some specific output that will receive the compressed data. This
 //! design allows an encoder to be reused with different types of outputs without paying the
@@ -535,7 +536,7 @@
 //! containing the total number of compressed bytes written to the output on success, or an
 //! [`Error`](enum.Error.html) describing the problem on failure.
 //!
-//! Let&#39;s write a function that compresses some arbitrary bytes into a vector:
+//! Let's write a function that compresses some arbitrary bytes into a vector:
 //! ```
 //! fn compress_bytes(buf: &amp;[u8]) -&gt; Result&lt;Vec&lt;u8&gt;, yazi::Error&gt; {
 //!     use yazi::Encoder;
@@ -548,7 +549,7 @@
 //! }
 //! ```
 //!
-//! Now let&#39;s do something a bit more interesting, and given two paths, compress
+//! Now let's do something a bit more interesting, and given two paths, compress
 //! one file into another:
 //! ```
 //! fn compress_file(source: &amp;str, dest: &amp;str) -&gt; Result&lt;u64, yazi::Error&gt; {
@@ -573,13 +574,13 @@
 //!
 //! # Decompression
 //!
-//! If you&#39;ve already read the section on compression, the API for decompression
+//! If you've already read the section on compression, the API for decompression
 //! is essentially identical with the types replaced by [`Decoder`](struct.Decoder.html)
 //! and [`DecoderStream`](struct.DecoderStream.html). The documentation is copied here
 //! almost verbatim for the sake of completeness and for those who might have skipped
 //! directly to this section.
 //!
-//! To decompress data, you&#39;ll need to create an instance of the
+//! To decompress data, you'll need to create an instance of the
 //! [`Decoder`](struct.Decoder.html) struct. The [`new`](struct.Decoder.html#method.new)
 //! method can be used to construct a decoder on the stack, and unlike encoders, the
 //! decoder struct is relatively small (~10k) and generally safe to stack allocate. You can
@@ -599,7 +600,7 @@
 //! ```
 //!
 //! The decoder itself does not provide any functionality. It simply stores state and
-//! configuration. To actually decompress data, you&#39;ll need a
+//! configuration. To actually decompress data, you'll need a
 //! [`DecoderStream`](struct.DecoderStream.html). A stream is a binding between a
 //! decoder and some specific output that will receive the decompressed data. This
 //! design allows a decoder to be reused with different types of outputs without paying the
@@ -622,7 +623,7 @@
 //! Adler-32 checksum (if the stream was zlib-encoded) on success, or an
 //! [`Error`](enum.Error.html) describing the problem on failure.
 //!
-//! Let&#39;s write a function that decompresses a zlib bitstream into a vector and verifies
+//! Let's write a function that decompresses a zlib bitstream into a vector and verifies
 //! the checksum:
 //! ```
 //! fn decompress_zlib(buf: &amp;[u8]) -&gt; Result&lt;Vec&lt;u8&gt;, yazi::Error&gt; {
@@ -641,7 +642,7 @@
 //! }
 //! ```
 //!
-//! Now let&#39;s do something a bit more interesting, and given two paths, decompress
+//! Now let's do something a bit more interesting, and given two paths, decompress
 //! one file into another:
 //! ```
 //! fn decompress_file(source: &amp;str, dest: &amp;str) -&gt; Result&lt;(u64, Option&lt;u32&gt;), yazi::Error&gt; {
@@ -760,7 +761,7 @@
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
     <span class="kw">fn </span>generate_bytes() -&gt; Vec&lt;u8&gt; {
-        <span class="kw">const </span>BYTES: <span class="kw-2">&amp;</span>[u8; <span class="number">26</span>] = <span class="string">b&quot;abcdefghijklmnopqrstuvwxyz&quot;</span>;
+        <span class="kw">const </span>BYTES: <span class="kw-2">&amp;</span>[u8; <span class="number">26</span>] = <span class="string">b"abcdefghijklmnopqrstuvwxyz"</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>buf = Vec::new();
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="number">4096 </span>{
             <span class="kw">if </span>i % <span class="number">3 </span>== <span class="number">0 </span>{

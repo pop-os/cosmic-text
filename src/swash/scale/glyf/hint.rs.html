@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/scale/glyf/hint.rs`."><title>hint.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/scale/glyf/hint.rs`."><title>hint.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -2608,7 +2609,7 @@
 </span><span class="attr">#[derive(Copy, Clone, PartialEq, Debug)]
 #[allow(dead_code)]
 </span><span class="kw">pub enum </span>HinterMode {
-    <span class="doccomment">/// &quot;Full&quot; hinting mode. May generate rough outlines and poor horizontal
+    <span class="doccomment">/// "Full" hinting mode. May generate rough outlines and poor horizontal
     /// spacing.
     </span>Legacy,
     <span class="doccomment">/// Subpixel mode for grayscale rendering.
@@ -2677,22 +2678,22 @@
 }
 
 <span class="doccomment">/// Glyph zone for TrueType hinting.
-</span><span class="kw">pub struct </span>Zone&lt;<span class="lifetime">&#39;a</span>&gt; {
-    unscaled: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[Point],
-    original: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[Point],
-    points: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[Point],
-    tags: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[u8],
-    contours: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u16],
+</span><span class="kw">pub struct </span>Zone&lt;<span class="lifetime">'a</span>&gt; {
+    unscaled: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[Point],
+    original: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[Point],
+    points: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[Point],
+    tags: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[u8],
+    contours: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u16],
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Zone&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Zone&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Creates a new hinting zone.
     </span><span class="kw">pub fn </span>new(
-        unscaled: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[Point],
-        original: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[Point],
-        points: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[Point],
-        tags: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[u8],
-        contours: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u16],
+        unscaled: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[Point],
+        original: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[Point],
+        points: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[Point],
+        tags: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[u8],
+        contours: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u16],
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             unscaled,
@@ -2831,15 +2832,15 @@
 }
 
 <span class="doccomment">/// TrueType hinting engine.
-</span><span class="kw">pub struct </span>Hinter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    store: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[i32],
-    cvt: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[i32],
-    fdefs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[Function],
-    idefs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[Function],
-    stack: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[i32],
-    twilight: Zone&lt;<span class="lifetime">&#39;a</span>&gt;,
-    glyph: Zone&lt;<span class="lifetime">&#39;a</span>&gt;,
-    coords: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[i16],
+</span><span class="kw">pub struct </span>Hinter&lt;<span class="lifetime">'a</span>&gt; {
+    store: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[i32],
+    cvt: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[i32],
+    fdefs: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[Function],
+    idefs: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[Function],
+    stack: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[i32],
+    twilight: Zone&lt;<span class="lifetime">'a</span>&gt;,
+    glyph: Zone&lt;<span class="lifetime">'a</span>&gt;,
+    coords: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[i16],
     axis_count: u16,
     zp0: u8,
     zp1: u8,
@@ -2867,17 +2868,17 @@
     compat: bool,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Hinter&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Hinter&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Creates a new hinting engine.
     </span><span class="kw">pub fn </span>new(
-        storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[i32],
-        cvt: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[i32],
-        function_defs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[Function],
-        instruction_defs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[Function],
-        stack: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[i32],
-        twilight: Zone&lt;<span class="lifetime">&#39;a</span>&gt;,
-        glyph: Zone&lt;<span class="lifetime">&#39;a</span>&gt;,
-        coords: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[i16],
+        storage: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[i32],
+        cvt: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[i32],
+        function_defs: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[Function],
+        instruction_defs: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[Function],
+        stack: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[i32],
+        twilight: Zone&lt;<span class="lifetime">'a</span>&gt;,
+        glyph: Zone&lt;<span class="lifetime">'a</span>&gt;,
+        coords: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[i16],
         axis_count: u16,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
@@ -2917,7 +2918,7 @@
         }
     }
 
-    <span class="kw">pub fn </span>run_fpgm&lt;<span class="lifetime">&#39;b</span>&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, state: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>HinterState, fpgm: <span class="kw-2">&amp;</span>[u8]) -&gt; bool {
+    <span class="kw">pub fn </span>run_fpgm&lt;<span class="lifetime">'b</span>&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, state: <span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw-2">mut </span>HinterState, fpgm: <span class="kw-2">&amp;</span>[u8]) -&gt; bool {
         <span class="kw">let </span>programs = [fpgm, <span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;</span>[]];
         <span class="kw">for </span>f <span class="kw">in </span><span class="self">self</span>.fdefs.iter_mut() {
             <span class="kw-2">*</span>f = Function::default();
@@ -2935,9 +2936,9 @@
         <span class="self">self</span>.execute(state, programs, <span class="number">0</span>, <span class="bool-val">false</span>).is_some()
     }
 
-    <span class="kw">pub fn </span>run_prep&lt;<span class="lifetime">&#39;b</span>&gt;(
+    <span class="kw">pub fn </span>run_prep&lt;<span class="lifetime">'b</span>&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        state: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>HinterState,
+        state: <span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw-2">mut </span>HinterState,
         mode: HinterMode,
         fpgm: <span class="kw-2">&amp;</span>[u8],
         prep: <span class="kw-2">&amp;</span>[u8],
@@ -2972,9 +2973,9 @@
         </span>}
     }
 
-    <span class="kw">pub fn </span>run&lt;<span class="lifetime">&#39;b</span>&gt;(
+    <span class="kw">pub fn </span>run&lt;<span class="lifetime">'b</span>&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        state: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>HinterState,
+        state: <span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw-2">mut </span>HinterState,
         fpgm: <span class="kw-2">&amp;</span>[u8],
         prep: <span class="kw-2">&amp;</span>[u8],
         ins: <span class="kw-2">&amp;</span>[u8],
@@ -2999,7 +3000,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Hinter&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Hinter&lt;<span class="lifetime">'a</span>&gt; {
     <span class="attr">#[inline(always)]
     </span><span class="kw">fn </span>zp(<span class="kw-2">&amp;</span><span class="self">self</span>, zone: u8) -&gt; <span class="kw-2">&amp;</span>Zone {
         <span class="kw">if </span>zone == <span class="number">1 </span>{
@@ -3009,7 +3010,7 @@
     }
 
     <span class="attr">#[inline(always)]
-    </span><span class="kw">fn </span>zp_mut&lt;<span class="lifetime">&#39;b</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span><span class="self">self</span>, zone: u8) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>Zone&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">fn </span>zp_mut&lt;<span class="lifetime">'b</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw-2">mut </span><span class="self">self</span>, zone: u8) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw-2">mut </span>Zone&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">if </span>zone == <span class="number">1 </span>{
             <span class="kw">return </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.glyph;
         }
@@ -3025,7 +3026,7 @@
     }
 
     <span class="attr">#[inline(always)]
-    </span><span class="kw">fn </span>zp0_mut&lt;<span class="lifetime">&#39;b</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>Zone&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">fn </span>zp0_mut&lt;<span class="lifetime">'b</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw-2">mut </span>Zone&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">if </span><span class="self">self</span>.zp0 == <span class="number">1 </span>{
             <span class="kw">return </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.glyph;
         }
@@ -3041,7 +3042,7 @@
     }
 
     <span class="attr">#[inline(always)]
-    </span><span class="kw">fn </span>zp1_mut&lt;<span class="lifetime">&#39;b</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>Zone&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">fn </span>zp1_mut&lt;<span class="lifetime">'b</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw-2">mut </span>Zone&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">if </span><span class="self">self</span>.zp1 == <span class="number">1 </span>{
             <span class="kw">return </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.glyph;
         }
@@ -3057,7 +3058,7 @@
     }
 
     <span class="attr">#[inline(always)]
-    </span><span class="kw">fn </span>zp2_mut&lt;<span class="lifetime">&#39;b</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>Zone&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">fn </span>zp2_mut&lt;<span class="lifetime">'b</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw-2">mut </span>Zone&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">if </span><span class="self">self</span>.zp2 == <span class="number">1 </span>{
             <span class="kw">return </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.glyph;
         }
@@ -3432,10 +3433,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Hinter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>execute&lt;<span class="lifetime">&#39;b</span>&gt;(
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Hinter&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>execute&lt;<span class="lifetime">'b</span>&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        state: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>HinterState,
+        state: <span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw-2">mut </span>HinterState,
         programs: [<span class="kw-2">&amp;</span>[u8]; <span class="number">3</span>],
         <span class="kw-2">mut </span>program: u8,
         composite: bool,
@@ -3522,14 +3523,14 @@
             <span class="kw">if </span>TRACE {
                 <span class="comment">// let name = OPCODE_NAME[opcode as usize];
                 // for _ in 0..callstack_top {
-                //     print!(&quot;.&quot;);
+                //     print!(".");
                 // }
-                // print!(&quot;{} [{}] {}&quot;, count, pc, name);
+                // print!("{} [{}] {}", count, pc, name);
                 // let pcnt = if stack_top &lt; 8 { stack_top } else { 8 };
                 // for i in 1..=pcnt {
-                //     print!(&quot; {}&quot;, self.stack[stack_top - i]);
+                //     print!(" {}", self.stack[stack_top - i]);
                 // }
-                // println!(&quot;&quot;);
+                // println!("");
             </span>}
 
             <span class="kw">let </span>a0 = args;
@@ -4787,7 +4788,7 @@
             <span class="kw">if </span>TRACE {
                 <span class="comment">// if trpt &lt; self.glyph.points.len() {
                 //     println!(
-                //         &quot;&gt;&gt;&gt;&gt;&gt;&gt; {}, {}&quot;,
+                //         "&gt;&gt;&gt;&gt;&gt;&gt; {}, {}",
                 //         self.glyph.points[trpt].x, self.glyph.points[trpt].y
                 //     );
                 // }
@@ -5017,35 +5018,35 @@
     ];
 
     <span class="attr">#[rustfmt::skip]
-    </span><span class="kw">pub const </span>OPCODE_NAME: [<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str; <span class="number">256</span>] = [
-        <span class="string">&quot;SVTCA0&quot;</span>, <span class="string">&quot;SVTCA1&quot;</span>, <span class="string">&quot;SPVTCA0&quot;</span>, <span class="string">&quot;SPVTCA1&quot;</span>, <span class="string">&quot;SFVTCA0&quot;</span>, <span class="string">&quot;SFVTCA1&quot;</span>, <span class="string">&quot;SPVTL0&quot;</span>, <span class="string">&quot;SPVTL1&quot;</span>, <span class="string">&quot;SFVTL0&quot;</span>,
-        <span class="string">&quot;SFVTL1&quot;</span>, <span class="string">&quot;SPVFS&quot;</span>, <span class="string">&quot;SFVFS&quot;</span>, <span class="string">&quot;GPV&quot;</span>, <span class="string">&quot;GFV&quot;</span>, <span class="string">&quot;SFVTPV&quot;</span>, <span class="string">&quot;ISECT&quot;</span>, <span class="string">&quot;SRP0&quot;</span>, <span class="string">&quot;SRP1&quot;</span>, <span class="string">&quot;SRP2&quot;</span>, <span class="string">&quot;SZP0&quot;</span>,
-        <span class="string">&quot;SZP1&quot;</span>, <span class="string">&quot;SZP2&quot;</span>, <span class="string">&quot;SZPS&quot;</span>, <span class="string">&quot;SLOOP&quot;</span>, <span class="string">&quot;RTG&quot;</span>, <span class="string">&quot;RTHG&quot;</span>, <span class="string">&quot;SMD&quot;</span>, <span class="string">&quot;ELSE&quot;</span>, <span class="string">&quot;JMPR&quot;</span>, <span class="string">&quot;SCVTCI&quot;</span>, <span class="string">&quot;SSWCI&quot;</span>,
-        <span class="string">&quot;SSW&quot;</span>, <span class="string">&quot;DUP&quot;</span>, <span class="string">&quot;POP&quot;</span>, <span class="string">&quot;CLEAR&quot;</span>, <span class="string">&quot;SWAP&quot;</span>, <span class="string">&quot;DEPTH&quot;</span>, <span class="string">&quot;CINDEX&quot;</span>, <span class="string">&quot;MINDEX&quot;</span>, <span class="string">&quot;ALIGNPTS&quot;</span>, <span class="string">&quot;OP28&quot;</span>, <span class="string">&quot;UTP&quot;</span>,
-        <span class="string">&quot;LOOPCALL&quot;</span>, <span class="string">&quot;CALL&quot;</span>, <span class="string">&quot;FDEF&quot;</span>, <span class="string">&quot;ENDF&quot;</span>, <span class="string">&quot;MDAP0&quot;</span>, <span class="string">&quot;MDAP1&quot;</span>, <span class="string">&quot;IUP0&quot;</span>, <span class="string">&quot;IUP1&quot;</span>, <span class="string">&quot;SHP0&quot;</span>, <span class="string">&quot;SHP1&quot;</span>, <span class="string">&quot;SHC0&quot;</span>,
-        <span class="string">&quot;SHC1&quot;</span>, <span class="string">&quot;SHZ0&quot;</span>, <span class="string">&quot;SHZ1&quot;</span>, <span class="string">&quot;SHPIX&quot;</span>, <span class="string">&quot;IP&quot;</span>, <span class="string">&quot;MSIRP0&quot;</span>, <span class="string">&quot;MSIRP1&quot;</span>, <span class="string">&quot;ALIGNRP&quot;</span>, <span class="string">&quot;RTDG&quot;</span>, <span class="string">&quot;MIAP0&quot;</span>, <span class="string">&quot;MIAP1&quot;</span>,
-        <span class="string">&quot;NPUSHB&quot;</span>, <span class="string">&quot;NPUSHW&quot;</span>, <span class="string">&quot;WS&quot;</span>, <span class="string">&quot;RS&quot;</span>, <span class="string">&quot;WCVTP&quot;</span>, <span class="string">&quot;RCVT&quot;</span>, <span class="string">&quot;GC0&quot;</span>, <span class="string">&quot;GC1&quot;</span>, <span class="string">&quot;SCFS&quot;</span>, <span class="string">&quot;MD0&quot;</span>, <span class="string">&quot;MD1&quot;</span>, <span class="string">&quot;MPPEM&quot;</span>,
-        <span class="string">&quot;MPS&quot;</span>, <span class="string">&quot;FLIPON&quot;</span>, <span class="string">&quot;FLIPOFF&quot;</span>, <span class="string">&quot;DEBUG&quot;</span>, <span class="string">&quot;LT&quot;</span>, <span class="string">&quot;LTEQ&quot;</span>, <span class="string">&quot;GT&quot;</span>, <span class="string">&quot;GTEQ&quot;</span>, <span class="string">&quot;EQ&quot;</span>, <span class="string">&quot;NEQ&quot;</span>, <span class="string">&quot;ODD&quot;</span>, <span class="string">&quot;EVEN&quot;</span>,
-        <span class="string">&quot;IF&quot;</span>, <span class="string">&quot;EIF&quot;</span>, <span class="string">&quot;AND&quot;</span>, <span class="string">&quot;OR&quot;</span>, <span class="string">&quot;NOT&quot;</span>, <span class="string">&quot;DELTAP1&quot;</span>, <span class="string">&quot;SDB&quot;</span>, <span class="string">&quot;SDS&quot;</span>, <span class="string">&quot;ADD&quot;</span>, <span class="string">&quot;SUB&quot;</span>, <span class="string">&quot;DIV&quot;</span>, <span class="string">&quot;MUL&quot;</span>, <span class="string">&quot;ABS&quot;</span>,
-        <span class="string">&quot;NEG&quot;</span>, <span class="string">&quot;FLOOR&quot;</span>, <span class="string">&quot;CEILING&quot;</span>, <span class="string">&quot;ROUND00&quot;</span>, <span class="string">&quot;ROUND01&quot;</span>, <span class="string">&quot;ROUND10&quot;</span>, <span class="string">&quot;ROUND11&quot;</span>, <span class="string">&quot;NROUND00&quot;</span>, <span class="string">&quot;NROUND01&quot;</span>,
-        <span class="string">&quot;NROUND10&quot;</span>, <span class="string">&quot;NROUND11&quot;</span>, <span class="string">&quot;WCVTF&quot;</span>, <span class="string">&quot;DELTAP2&quot;</span>, <span class="string">&quot;DELTAP3&quot;</span>, <span class="string">&quot;DELTAC1&quot;</span>, <span class="string">&quot;DELTAC2&quot;</span>, <span class="string">&quot;DELTAC3&quot;</span>,
-        <span class="string">&quot;SROUND&quot;</span>, <span class="string">&quot;S45ROUND&quot;</span>, <span class="string">&quot;JROT&quot;</span>, <span class="string">&quot;JROF&quot;</span>, <span class="string">&quot;ROFF&quot;</span>, <span class="string">&quot;OP7B&quot;</span>, <span class="string">&quot;RUTG&quot;</span>, <span class="string">&quot;RDTG&quot;</span>, <span class="string">&quot;SANGW&quot;</span>, <span class="string">&quot;AA&quot;</span>, <span class="string">&quot;FLIPPT&quot;</span>,
-        <span class="string">&quot;FLIPRGON&quot;</span>, <span class="string">&quot;FLIPRGOFF&quot;</span>, <span class="string">&quot;OP83&quot;</span>, <span class="string">&quot;OP84&quot;</span>, <span class="string">&quot;SCANCTRL&quot;</span>, <span class="string">&quot;SDPVTL0&quot;</span>, <span class="string">&quot;SDPVTL1&quot;</span>, <span class="string">&quot;GETINFO&quot;</span>, <span class="string">&quot;IDEF&quot;</span>,
-        <span class="string">&quot;ROLL&quot;</span>, <span class="string">&quot;MAX&quot;</span>, <span class="string">&quot;MIN&quot;</span>, <span class="string">&quot;SCANTYPE&quot;</span>, <span class="string">&quot;INSTCTRL&quot;</span>, <span class="string">&quot;OP8F&quot;</span>, <span class="string">&quot;OP90&quot;</span>, <span class="string">&quot;OP91&quot;</span>, <span class="string">&quot;OP92&quot;</span>, <span class="string">&quot;OP93&quot;</span>, <span class="string">&quot;OP94&quot;</span>,
-        <span class="string">&quot;OP95&quot;</span>, <span class="string">&quot;OP96&quot;</span>, <span class="string">&quot;OP97&quot;</span>, <span class="string">&quot;OP98&quot;</span>, <span class="string">&quot;OP99&quot;</span>, <span class="string">&quot;OP9A&quot;</span>, <span class="string">&quot;OP9B&quot;</span>, <span class="string">&quot;OP9C&quot;</span>, <span class="string">&quot;OP9D&quot;</span>, <span class="string">&quot;OP9E&quot;</span>, <span class="string">&quot;OP9F&quot;</span>, <span class="string">&quot;OPA0&quot;</span>,
-        <span class="string">&quot;OPA1&quot;</span>, <span class="string">&quot;OPA2&quot;</span>, <span class="string">&quot;OPA3&quot;</span>, <span class="string">&quot;OPA4&quot;</span>, <span class="string">&quot;OPA5&quot;</span>, <span class="string">&quot;OPA6&quot;</span>, <span class="string">&quot;OPA7&quot;</span>, <span class="string">&quot;OPA8&quot;</span>, <span class="string">&quot;OPA9&quot;</span>, <span class="string">&quot;OPAA&quot;</span>, <span class="string">&quot;OPAB&quot;</span>, <span class="string">&quot;OPAC&quot;</span>,
-        <span class="string">&quot;OPAD&quot;</span>, <span class="string">&quot;OPAE&quot;</span>, <span class="string">&quot;OPAF&quot;</span>, <span class="string">&quot;PUSHB000&quot;</span>, <span class="string">&quot;PUSHB001&quot;</span>, <span class="string">&quot;PUSHB010&quot;</span>, <span class="string">&quot;PUSHB011&quot;</span>, <span class="string">&quot;PUSHB100&quot;</span>, <span class="string">&quot;PUSHB101&quot;</span>,
-        <span class="string">&quot;PUSHB110&quot;</span>, <span class="string">&quot;PUSHB111&quot;</span>, <span class="string">&quot;PUSHW000&quot;</span>, <span class="string">&quot;PUSHW001&quot;</span>, <span class="string">&quot;PUSHW010&quot;</span>, <span class="string">&quot;PUSHW011&quot;</span>, <span class="string">&quot;PUSHW100&quot;</span>, <span class="string">&quot;PUSHW101&quot;</span>,
-        <span class="string">&quot;PUSHW110&quot;</span>, <span class="string">&quot;PUSHW111&quot;</span>, <span class="string">&quot;MDRP00000&quot;</span>, <span class="string">&quot;MDRP00001&quot;</span>, <span class="string">&quot;MDRP00010&quot;</span>, <span class="string">&quot;MDRP00011&quot;</span>, <span class="string">&quot;MDRP00100&quot;</span>,
-        <span class="string">&quot;MDRP00101&quot;</span>, <span class="string">&quot;MDRP00110&quot;</span>, <span class="string">&quot;MDRP00111&quot;</span>, <span class="string">&quot;MDRP01000&quot;</span>, <span class="string">&quot;MDRP01001&quot;</span>, <span class="string">&quot;MDRP01010&quot;</span>, <span class="string">&quot;MDRP01011&quot;</span>,
-        <span class="string">&quot;MDRP01100&quot;</span>, <span class="string">&quot;MDRP01101&quot;</span>, <span class="string">&quot;MDRP01110&quot;</span>, <span class="string">&quot;MDRP01111&quot;</span>, <span class="string">&quot;MDRP10000&quot;</span>, <span class="string">&quot;MDRP10001&quot;</span>, <span class="string">&quot;MDRP10010&quot;</span>,
-        <span class="string">&quot;MDRP10011&quot;</span>, <span class="string">&quot;MDRP10100&quot;</span>, <span class="string">&quot;MDRP10101&quot;</span>, <span class="string">&quot;MDRP10110&quot;</span>, <span class="string">&quot;MDRP10111&quot;</span>, <span class="string">&quot;MDRP11000&quot;</span>, <span class="string">&quot;MDRP11001&quot;</span>,
-        <span class="string">&quot;MDRP11010&quot;</span>, <span class="string">&quot;MDRP11011&quot;</span>, <span class="string">&quot;MDRP11100&quot;</span>, <span class="string">&quot;MDRP11101&quot;</span>, <span class="string">&quot;MDRP11110&quot;</span>, <span class="string">&quot;MDRP11111&quot;</span>, <span class="string">&quot;MIRP00000&quot;</span>,
-        <span class="string">&quot;MIRP00001&quot;</span>, <span class="string">&quot;MIRP00010&quot;</span>, <span class="string">&quot;MIRP00011&quot;</span>, <span class="string">&quot;MIRP00100&quot;</span>, <span class="string">&quot;MIRP00101&quot;</span>, <span class="string">&quot;MIRP00110&quot;</span>, <span class="string">&quot;MIRP00111&quot;</span>,
-        <span class="string">&quot;MIRP01000&quot;</span>, <span class="string">&quot;MIRP01001&quot;</span>, <span class="string">&quot;MIRP01010&quot;</span>, <span class="string">&quot;MIRP01011&quot;</span>, <span class="string">&quot;MIRP01100&quot;</span>, <span class="string">&quot;MIRP01101&quot;</span>, <span class="string">&quot;MIRP01110&quot;</span>,
-        <span class="string">&quot;MIRP01111&quot;</span>, <span class="string">&quot;MIRP10000&quot;</span>, <span class="string">&quot;MIRP10001&quot;</span>, <span class="string">&quot;MIRP10010&quot;</span>, <span class="string">&quot;MIRP10011&quot;</span>, <span class="string">&quot;MIRP10100&quot;</span>, <span class="string">&quot;MIRP10101&quot;</span>,
-        <span class="string">&quot;MIRP10110&quot;</span>, <span class="string">&quot;MIRP10111&quot;</span>, <span class="string">&quot;MIRP11000&quot;</span>, <span class="string">&quot;MIRP11001&quot;</span>, <span class="string">&quot;MIRP11010&quot;</span>, <span class="string">&quot;MIRP11011&quot;</span>, <span class="string">&quot;MIRP11100&quot;</span>,
-        <span class="string">&quot;MIRP11101&quot;</span>, <span class="string">&quot;MIRP11110&quot;</span>, <span class="string">&quot;MIRP11111&quot;</span>,
+    </span><span class="kw">pub const </span>OPCODE_NAME: [<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str; <span class="number">256</span>] = [
+        <span class="string">"SVTCA0"</span>, <span class="string">"SVTCA1"</span>, <span class="string">"SPVTCA0"</span>, <span class="string">"SPVTCA1"</span>, <span class="string">"SFVTCA0"</span>, <span class="string">"SFVTCA1"</span>, <span class="string">"SPVTL0"</span>, <span class="string">"SPVTL1"</span>, <span class="string">"SFVTL0"</span>,
+        <span class="string">"SFVTL1"</span>, <span class="string">"SPVFS"</span>, <span class="string">"SFVFS"</span>, <span class="string">"GPV"</span>, <span class="string">"GFV"</span>, <span class="string">"SFVTPV"</span>, <span class="string">"ISECT"</span>, <span class="string">"SRP0"</span>, <span class="string">"SRP1"</span>, <span class="string">"SRP2"</span>, <span class="string">"SZP0"</span>,
+        <span class="string">"SZP1"</span>, <span class="string">"SZP2"</span>, <span class="string">"SZPS"</span>, <span class="string">"SLOOP"</span>, <span class="string">"RTG"</span>, <span class="string">"RTHG"</span>, <span class="string">"SMD"</span>, <span class="string">"ELSE"</span>, <span class="string">"JMPR"</span>, <span class="string">"SCVTCI"</span>, <span class="string">"SSWCI"</span>,
+        <span class="string">"SSW"</span>, <span class="string">"DUP"</span>, <span class="string">"POP"</span>, <span class="string">"CLEAR"</span>, <span class="string">"SWAP"</span>, <span class="string">"DEPTH"</span>, <span class="string">"CINDEX"</span>, <span class="string">"MINDEX"</span>, <span class="string">"ALIGNPTS"</span>, <span class="string">"OP28"</span>, <span class="string">"UTP"</span>,
+        <span class="string">"LOOPCALL"</span>, <span class="string">"CALL"</span>, <span class="string">"FDEF"</span>, <span class="string">"ENDF"</span>, <span class="string">"MDAP0"</span>, <span class="string">"MDAP1"</span>, <span class="string">"IUP0"</span>, <span class="string">"IUP1"</span>, <span class="string">"SHP0"</span>, <span class="string">"SHP1"</span>, <span class="string">"SHC0"</span>,
+        <span class="string">"SHC1"</span>, <span class="string">"SHZ0"</span>, <span class="string">"SHZ1"</span>, <span class="string">"SHPIX"</span>, <span class="string">"IP"</span>, <span class="string">"MSIRP0"</span>, <span class="string">"MSIRP1"</span>, <span class="string">"ALIGNRP"</span>, <span class="string">"RTDG"</span>, <span class="string">"MIAP0"</span>, <span class="string">"MIAP1"</span>,
+        <span class="string">"NPUSHB"</span>, <span class="string">"NPUSHW"</span>, <span class="string">"WS"</span>, <span class="string">"RS"</span>, <span class="string">"WCVTP"</span>, <span class="string">"RCVT"</span>, <span class="string">"GC0"</span>, <span class="string">"GC1"</span>, <span class="string">"SCFS"</span>, <span class="string">"MD0"</span>, <span class="string">"MD1"</span>, <span class="string">"MPPEM"</span>,
+        <span class="string">"MPS"</span>, <span class="string">"FLIPON"</span>, <span class="string">"FLIPOFF"</span>, <span class="string">"DEBUG"</span>, <span class="string">"LT"</span>, <span class="string">"LTEQ"</span>, <span class="string">"GT"</span>, <span class="string">"GTEQ"</span>, <span class="string">"EQ"</span>, <span class="string">"NEQ"</span>, <span class="string">"ODD"</span>, <span class="string">"EVEN"</span>,
+        <span class="string">"IF"</span>, <span class="string">"EIF"</span>, <span class="string">"AND"</span>, <span class="string">"OR"</span>, <span class="string">"NOT"</span>, <span class="string">"DELTAP1"</span>, <span class="string">"SDB"</span>, <span class="string">"SDS"</span>, <span class="string">"ADD"</span>, <span class="string">"SUB"</span>, <span class="string">"DIV"</span>, <span class="string">"MUL"</span>, <span class="string">"ABS"</span>,
+        <span class="string">"NEG"</span>, <span class="string">"FLOOR"</span>, <span class="string">"CEILING"</span>, <span class="string">"ROUND00"</span>, <span class="string">"ROUND01"</span>, <span class="string">"ROUND10"</span>, <span class="string">"ROUND11"</span>, <span class="string">"NROUND00"</span>, <span class="string">"NROUND01"</span>,
+        <span class="string">"NROUND10"</span>, <span class="string">"NROUND11"</span>, <span class="string">"WCVTF"</span>, <span class="string">"DELTAP2"</span>, <span class="string">"DELTAP3"</span>, <span class="string">"DELTAC1"</span>, <span class="string">"DELTAC2"</span>, <span class="string">"DELTAC3"</span>,
+        <span class="string">"SROUND"</span>, <span class="string">"S45ROUND"</span>, <span class="string">"JROT"</span>, <span class="string">"JROF"</span>, <span class="string">"ROFF"</span>, <span class="string">"OP7B"</span>, <span class="string">"RUTG"</span>, <span class="string">"RDTG"</span>, <span class="string">"SANGW"</span>, <span class="string">"AA"</span>, <span class="string">"FLIPPT"</span>,
+        <span class="string">"FLIPRGON"</span>, <span class="string">"FLIPRGOFF"</span>, <span class="string">"OP83"</span>, <span class="string">"OP84"</span>, <span class="string">"SCANCTRL"</span>, <span class="string">"SDPVTL0"</span>, <span class="string">"SDPVTL1"</span>, <span class="string">"GETINFO"</span>, <span class="string">"IDEF"</span>,
+        <span class="string">"ROLL"</span>, <span class="string">"MAX"</span>, <span class="string">"MIN"</span>, <span class="string">"SCANTYPE"</span>, <span class="string">"INSTCTRL"</span>, <span class="string">"OP8F"</span>, <span class="string">"OP90"</span>, <span class="string">"OP91"</span>, <span class="string">"OP92"</span>, <span class="string">"OP93"</span>, <span class="string">"OP94"</span>,
+        <span class="string">"OP95"</span>, <span class="string">"OP96"</span>, <span class="string">"OP97"</span>, <span class="string">"OP98"</span>, <span class="string">"OP99"</span>, <span class="string">"OP9A"</span>, <span class="string">"OP9B"</span>, <span class="string">"OP9C"</span>, <span class="string">"OP9D"</span>, <span class="string">"OP9E"</span>, <span class="string">"OP9F"</span>, <span class="string">"OPA0"</span>,
+        <span class="string">"OPA1"</span>, <span class="string">"OPA2"</span>, <span class="string">"OPA3"</span>, <span class="string">"OPA4"</span>, <span class="string">"OPA5"</span>, <span class="string">"OPA6"</span>, <span class="string">"OPA7"</span>, <span class="string">"OPA8"</span>, <span class="string">"OPA9"</span>, <span class="string">"OPAA"</span>, <span class="string">"OPAB"</span>, <span class="string">"OPAC"</span>,
+        <span class="string">"OPAD"</span>, <span class="string">"OPAE"</span>, <span class="string">"OPAF"</span>, <span class="string">"PUSHB000"</span>, <span class="string">"PUSHB001"</span>, <span class="string">"PUSHB010"</span>, <span class="string">"PUSHB011"</span>, <span class="string">"PUSHB100"</span>, <span class="string">"PUSHB101"</span>,
+        <span class="string">"PUSHB110"</span>, <span class="string">"PUSHB111"</span>, <span class="string">"PUSHW000"</span>, <span class="string">"PUSHW001"</span>, <span class="string">"PUSHW010"</span>, <span class="string">"PUSHW011"</span>, <span class="string">"PUSHW100"</span>, <span class="string">"PUSHW101"</span>,
+        <span class="string">"PUSHW110"</span>, <span class="string">"PUSHW111"</span>, <span class="string">"MDRP00000"</span>, <span class="string">"MDRP00001"</span>, <span class="string">"MDRP00010"</span>, <span class="string">"MDRP00011"</span>, <span class="string">"MDRP00100"</span>,
+        <span class="string">"MDRP00101"</span>, <span class="string">"MDRP00110"</span>, <span class="string">"MDRP00111"</span>, <span class="string">"MDRP01000"</span>, <span class="string">"MDRP01001"</span>, <span class="string">"MDRP01010"</span>, <span class="string">"MDRP01011"</span>,
+        <span class="string">"MDRP01100"</span>, <span class="string">"MDRP01101"</span>, <span class="string">"MDRP01110"</span>, <span class="string">"MDRP01111"</span>, <span class="string">"MDRP10000"</span>, <span class="string">"MDRP10001"</span>, <span class="string">"MDRP10010"</span>,
+        <span class="string">"MDRP10011"</span>, <span class="string">"MDRP10100"</span>, <span class="string">"MDRP10101"</span>, <span class="string">"MDRP10110"</span>, <span class="string">"MDRP10111"</span>, <span class="string">"MDRP11000"</span>, <span class="string">"MDRP11001"</span>,
+        <span class="string">"MDRP11010"</span>, <span class="string">"MDRP11011"</span>, <span class="string">"MDRP11100"</span>, <span class="string">"MDRP11101"</span>, <span class="string">"MDRP11110"</span>, <span class="string">"MDRP11111"</span>, <span class="string">"MIRP00000"</span>,
+        <span class="string">"MIRP00001"</span>, <span class="string">"MIRP00010"</span>, <span class="string">"MIRP00011"</span>, <span class="string">"MIRP00100"</span>, <span class="string">"MIRP00101"</span>, <span class="string">"MIRP00110"</span>, <span class="string">"MIRP00111"</span>,
+        <span class="string">"MIRP01000"</span>, <span class="string">"MIRP01001"</span>, <span class="string">"MIRP01010"</span>, <span class="string">"MIRP01011"</span>, <span class="string">"MIRP01100"</span>, <span class="string">"MIRP01101"</span>, <span class="string">"MIRP01110"</span>,
+        <span class="string">"MIRP01111"</span>, <span class="string">"MIRP10000"</span>, <span class="string">"MIRP10001"</span>, <span class="string">"MIRP10010"</span>, <span class="string">"MIRP10011"</span>, <span class="string">"MIRP10100"</span>, <span class="string">"MIRP10101"</span>,
+        <span class="string">"MIRP10110"</span>, <span class="string">"MIRP10111"</span>, <span class="string">"MIRP11000"</span>, <span class="string">"MIRP11001"</span>, <span class="string">"MIRP11010"</span>, <span class="string">"MIRP11011"</span>, <span class="string">"MIRP11100"</span>,
+        <span class="string">"MIRP11101"</span>, <span class="string">"MIRP11110"</span>, <span class="string">"MIRP11111"</span>,
     ];
 
     <span class="kw">pub const </span>OP_SVTCA0: u8 = <span class="number">0x00</span>;

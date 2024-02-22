@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustybuzz-0.12.1/src/complex/hebrew.rs`."><title>hebrew.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustybuzz" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustybuzz-0.12.1/src/complex/hebrew.rs`."><title>hebrew.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustybuzz" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -149,40 +150,40 @@
     decompose: <span class="prelude-val">None</span>,
     compose: <span class="prelude-val">Some</span>(compose),
     setup_masks: <span class="prelude-val">None</span>,
-    gpos_tag: <span class="prelude-val">Some</span>(Tag::from_bytes(<span class="string">b&quot;hebr&quot;</span>)),
+    gpos_tag: <span class="prelude-val">Some</span>(Tag::from_bytes(<span class="string">b"hebr"</span>)),
     reorder_marks: <span class="prelude-val">None</span>,
     zero_width_marks: <span class="prelude-val">Some</span>(ZeroWidthMarksMode::ByGdefLate),
     fallback_position: <span class="bool-val">true</span>,
 };
 
 <span class="kw">const </span>S_DAGESH_FORMS: <span class="kw-2">&amp;</span>[char] = <span class="kw-2">&amp;</span>[
-    <span class="string">&#39;\u{FB30}&#39;</span>, <span class="comment">// ALEF
-    </span><span class="string">&#39;\u{FB31}&#39;</span>, <span class="comment">// BET
-    </span><span class="string">&#39;\u{FB32}&#39;</span>, <span class="comment">// GIMEL
-    </span><span class="string">&#39;\u{FB33}&#39;</span>, <span class="comment">// DALET
-    </span><span class="string">&#39;\u{FB34}&#39;</span>, <span class="comment">// HE
-    </span><span class="string">&#39;\u{FB35}&#39;</span>, <span class="comment">// VAV
-    </span><span class="string">&#39;\u{FB36}&#39;</span>, <span class="comment">// ZAYIN
-    </span><span class="string">&#39;\u{0000}&#39;</span>, <span class="comment">// HET
-    </span><span class="string">&#39;\u{FB38}&#39;</span>, <span class="comment">// TET
-    </span><span class="string">&#39;\u{FB39}&#39;</span>, <span class="comment">// YOD
-    </span><span class="string">&#39;\u{FB3A}&#39;</span>, <span class="comment">// FINAL KAF
-    </span><span class="string">&#39;\u{FB3B}&#39;</span>, <span class="comment">// KAF
-    </span><span class="string">&#39;\u{FB3C}&#39;</span>, <span class="comment">// LAMED
-    </span><span class="string">&#39;\u{0000}&#39;</span>, <span class="comment">// FINAL MEM
-    </span><span class="string">&#39;\u{FB3E}&#39;</span>, <span class="comment">// MEM
-    </span><span class="string">&#39;\u{0000}&#39;</span>, <span class="comment">// FINAL NUN
-    </span><span class="string">&#39;\u{FB40}&#39;</span>, <span class="comment">// NUN
-    </span><span class="string">&#39;\u{FB41}&#39;</span>, <span class="comment">// SAMEKH
-    </span><span class="string">&#39;\u{0000}&#39;</span>, <span class="comment">// AYIN
-    </span><span class="string">&#39;\u{FB43}&#39;</span>, <span class="comment">// FINAL PE
-    </span><span class="string">&#39;\u{FB44}&#39;</span>, <span class="comment">// PE
-    </span><span class="string">&#39;\u{0000}&#39;</span>, <span class="comment">// FINAL TSADI
-    </span><span class="string">&#39;\u{FB46}&#39;</span>, <span class="comment">// TSADI
-    </span><span class="string">&#39;\u{FB47}&#39;</span>, <span class="comment">// QOF
-    </span><span class="string">&#39;\u{FB48}&#39;</span>, <span class="comment">// RESH
-    </span><span class="string">&#39;\u{FB49}&#39;</span>, <span class="comment">// SHIN
-    </span><span class="string">&#39;\u{FB4A}&#39;</span>, <span class="comment">// TAV
+    <span class="string">'\u{FB30}'</span>, <span class="comment">// ALEF
+    </span><span class="string">'\u{FB31}'</span>, <span class="comment">// BET
+    </span><span class="string">'\u{FB32}'</span>, <span class="comment">// GIMEL
+    </span><span class="string">'\u{FB33}'</span>, <span class="comment">// DALET
+    </span><span class="string">'\u{FB34}'</span>, <span class="comment">// HE
+    </span><span class="string">'\u{FB35}'</span>, <span class="comment">// VAV
+    </span><span class="string">'\u{FB36}'</span>, <span class="comment">// ZAYIN
+    </span><span class="string">'\u{0000}'</span>, <span class="comment">// HET
+    </span><span class="string">'\u{FB38}'</span>, <span class="comment">// TET
+    </span><span class="string">'\u{FB39}'</span>, <span class="comment">// YOD
+    </span><span class="string">'\u{FB3A}'</span>, <span class="comment">// FINAL KAF
+    </span><span class="string">'\u{FB3B}'</span>, <span class="comment">// KAF
+    </span><span class="string">'\u{FB3C}'</span>, <span class="comment">// LAMED
+    </span><span class="string">'\u{0000}'</span>, <span class="comment">// FINAL MEM
+    </span><span class="string">'\u{FB3E}'</span>, <span class="comment">// MEM
+    </span><span class="string">'\u{0000}'</span>, <span class="comment">// FINAL NUN
+    </span><span class="string">'\u{FB40}'</span>, <span class="comment">// NUN
+    </span><span class="string">'\u{FB41}'</span>, <span class="comment">// SAMEKH
+    </span><span class="string">'\u{0000}'</span>, <span class="comment">// AYIN
+    </span><span class="string">'\u{FB43}'</span>, <span class="comment">// FINAL PE
+    </span><span class="string">'\u{FB44}'</span>, <span class="comment">// PE
+    </span><span class="string">'\u{0000}'</span>, <span class="comment">// FINAL TSADI
+    </span><span class="string">'\u{FB46}'</span>, <span class="comment">// TSADI
+    </span><span class="string">'\u{FB47}'</span>, <span class="comment">// QOF
+    </span><span class="string">'\u{FB48}'</span>, <span class="comment">// RESH
+    </span><span class="string">'\u{FB49}'</span>, <span class="comment">// SHIN
+    </span><span class="string">'\u{FB4A}'</span>, <span class="comment">// TAV
 </span>];
 
 <span class="kw">fn </span>compose(ctx: <span class="kw-2">&amp;</span>ShapeNormalizeContext, a: char, b: char) -&gt; <span class="prelude-ty">Option</span>&lt;char&gt; {
@@ -201,29 +202,29 @@
                 <span class="number">0x05B4 </span>=&gt; {
                     <span class="comment">// HIRIQ
                     </span><span class="kw">match </span>a {
-                        <span class="number">0x05D9 </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">&#39;\u{FB1D}&#39;</span>), <span class="comment">// YOD
+                        <span class="number">0x05D9 </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">'\u{FB1D}'</span>), <span class="comment">// YOD
                         </span><span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
                     }
                 }
                 <span class="number">0x05B7 </span>=&gt; {
                     <span class="comment">// patah
                     </span><span class="kw">match </span>a {
-                        <span class="number">0x05D9 </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">&#39;\u{FB1F}&#39;</span>), <span class="comment">// YIDDISH YOD YOD
-                        </span><span class="number">0x05D0 </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">&#39;\u{FB2E}&#39;</span>), <span class="comment">// ALEF
+                        <span class="number">0x05D9 </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">'\u{FB1F}'</span>), <span class="comment">// YIDDISH YOD YOD
+                        </span><span class="number">0x05D0 </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">'\u{FB2E}'</span>), <span class="comment">// ALEF
                         </span><span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
                     }
                 }
                 <span class="number">0x05B8 </span>=&gt; {
                     <span class="comment">// QAMATS
                     </span><span class="kw">match </span>a {
-                        <span class="number">0x05D0 </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">&#39;\u{FB2F}&#39;</span>), <span class="comment">// ALEF
+                        <span class="number">0x05D0 </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">'\u{FB2F}'</span>), <span class="comment">// ALEF
                         </span><span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
                     }
                 }
                 <span class="number">0x05B9 </span>=&gt; {
                     <span class="comment">// HOLAM
                     </span><span class="kw">match </span>a {
-                        <span class="number">0x05D5 </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">&#39;\u{FB4B}&#39;</span>), <span class="comment">// VAV
+                        <span class="number">0x05D5 </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">'\u{FB4B}'</span>), <span class="comment">// VAV
                         </span><span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
                     }
                 }
@@ -232,39 +233,39 @@
                     </span><span class="kw">match </span>a {
                         <span class="number">0x05D0</span>..=<span class="number">0x05EA </span>=&gt; {
                             <span class="kw">let </span>c = S_DAGESH_FORMS[a <span class="kw">as </span>usize - <span class="number">0x05D0</span>];
-                            <span class="kw">if </span>c != <span class="string">&#39;\0&#39; </span>{
+                            <span class="kw">if </span>c != <span class="string">'\0' </span>{
                                 <span class="prelude-val">Some</span>(c)
                             } <span class="kw">else </span>{
                                 <span class="prelude-val">None
                             </span>}
                         }
-                        <span class="number">0xFB2A </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">&#39;\u{FB2C}&#39;</span>), <span class="comment">// SHIN WITH SHIN DOT
-                        </span><span class="number">0xFB2B </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">&#39;\u{FB2D}&#39;</span>), <span class="comment">// SHIN WITH SIN DOT
+                        <span class="number">0xFB2A </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">'\u{FB2C}'</span>), <span class="comment">// SHIN WITH SHIN DOT
+                        </span><span class="number">0xFB2B </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">'\u{FB2D}'</span>), <span class="comment">// SHIN WITH SIN DOT
                         </span><span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
                     }
                 }
                 <span class="number">0x05BF </span>=&gt; {
                     <span class="comment">// RAFE
                     </span><span class="kw">match </span>a {
-                        <span class="number">0x05D1 </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">&#39;\u{FB4C}&#39;</span>), <span class="comment">// BET
-                        </span><span class="number">0x05DB </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">&#39;\u{FB4D}&#39;</span>), <span class="comment">// KAF
-                        </span><span class="number">0x05E4 </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">&#39;\u{FB4E}&#39;</span>), <span class="comment">// PE
+                        <span class="number">0x05D1 </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">'\u{FB4C}'</span>), <span class="comment">// BET
+                        </span><span class="number">0x05DB </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">'\u{FB4D}'</span>), <span class="comment">// KAF
+                        </span><span class="number">0x05E4 </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">'\u{FB4E}'</span>), <span class="comment">// PE
                         </span><span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
                     }
                 }
                 <span class="number">0x05C1 </span>=&gt; {
                     <span class="comment">// SHIN DOT
                     </span><span class="kw">match </span>a {
-                        <span class="number">0x05E9 </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">&#39;\u{FB2A}&#39;</span>), <span class="comment">// SHIN
-                        </span><span class="number">0xFB49 </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">&#39;\u{FB2C}&#39;</span>), <span class="comment">// SHIN WITH DAGESH
+                        <span class="number">0x05E9 </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">'\u{FB2A}'</span>), <span class="comment">// SHIN
+                        </span><span class="number">0xFB49 </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">'\u{FB2C}'</span>), <span class="comment">// SHIN WITH DAGESH
                         </span><span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
                     }
                 }
                 <span class="number">0x05C2 </span>=&gt; {
                     <span class="comment">// SIN DOT
                     </span><span class="kw">match </span>a {
-                        <span class="number">0x05E9 </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">&#39;\u{FB2B}&#39;</span>), <span class="comment">// SHIN
-                        </span><span class="number">0xFB49 </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">&#39;\u{FB2D}&#39;</span>), <span class="comment">// SHIN WITH DAGESH
+                        <span class="number">0x05E9 </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">'\u{FB2B}'</span>), <span class="comment">// SHIN
+                        </span><span class="number">0xFB49 </span>=&gt; <span class="prelude-val">Some</span>(<span class="string">'\u{FB2D}'</span>), <span class="comment">// SHIN WITH DAGESH
                         </span><span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
                     }
                 }

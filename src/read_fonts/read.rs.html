@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.4/src/read.rs`."><title>read.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.5/src/read.rs`."><title>read.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -197,19 +198,19 @@
 /// is, tables that do not require any external state in order to interpret their
 /// underlying bytes. (Tables that require external state implement
 /// [`FontReadWithArgs`] instead)
-</span><span class="kw">pub trait </span>FontRead&lt;<span class="lifetime">&#39;a</span>&gt;: Sized {
+</span><span class="kw">pub trait </span>FontRead&lt;<span class="lifetime">'a</span>&gt;: Sized {
     <span class="doccomment">/// Read an instace of `Self` from the provided data, performing validation.
     ///
     /// In the case of a table, this method is responsible for ensuring the input
     /// data is consistent: this means ensuring that any versioned fields are
     /// present as required by the version, and that any array lengths are not
     /// out-of-bounds.
-    </span><span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt;;
+    </span><span class="kw">fn </span>read(data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt;;
 }
 
 <span class="comment">//NOTE: this is separate so that it can be a super trait of FontReadWithArgs and
-//ComputeSize, without them needing to know about each other? I&#39;m not sure this
-//is necessary, but I don&#39;t know the full heirarchy of traits I&#39;m going to need
+//ComputeSize, without them needing to know about each other? I'm not sure this
+//is necessary, but I don't know the full heirarchy of traits I'm going to need
 //yet, so this seems... okay?
 
 </span><span class="doccomment">/// A trait for a type that needs additional arguments to be read.
@@ -222,26 +223,26 @@
 /// You should not need to use this directly; it is intended to be used from
 /// generated code. Any type that requires external arguments also has a custom
 /// `read` constructor where you can pass those arguments like normal.
-</span><span class="kw">pub trait </span>FontReadWithArgs&lt;<span class="lifetime">&#39;a</span>&gt;: Sized + ReadArgs {
+</span><span class="kw">pub trait </span>FontReadWithArgs&lt;<span class="lifetime">'a</span>&gt;: Sized + ReadArgs {
     <span class="doccomment">/// read an item, using the provided args.
     ///
     /// If successful, returns a new item of this type, and the number of bytes
     /// used to construct it.
     ///
     /// If a type requires multiple arguments, they will be passed as a tuple.
-    </span><span class="kw">fn </span>read_with_args(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;, args: <span class="kw-2">&amp;</span><span class="self">Self</span>::Args) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt;;
+    </span><span class="kw">fn </span>read_with_args(data: FontData&lt;<span class="lifetime">'a</span>&gt;, args: <span class="kw-2">&amp;</span><span class="self">Self</span>::Args) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt;;
 }
 
 <span class="comment">// a blanket impl of ReadArgs/FontReadWithArgs for general FontRead types.
 //
 // This is used by ArrayOfOffsets/ArrayOfNullableOffsets to provide a common
 // interface for regardless of whether a type has args.
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: FontRead&lt;<span class="lifetime">&#39;a</span>&gt;&gt; ReadArgs <span class="kw">for </span>T {
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: FontRead&lt;<span class="lifetime">'a</span>&gt;&gt; ReadArgs <span class="kw">for </span>T {
     <span class="kw">type </span>Args = ();
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: FontRead&lt;<span class="lifetime">&#39;a</span>&gt;&gt; FontReadWithArgs&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>T {
-    <span class="kw">fn </span>read_with_args(data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>::Args) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: FontRead&lt;<span class="lifetime">'a</span>&gt;&gt; FontReadWithArgs&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>T {
+    <span class="kw">fn </span>read_with_args(data: FontData&lt;<span class="lifetime">'a</span>&gt;, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>::Args) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ReadError&gt; {
         <span class="self">Self</span>::read(data)
     }
 }
@@ -345,31 +346,31 @@
     NullOffset,
     TableIsMissing(Tag),
     MetricIsMissing(Tag),
-    MalformedData(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str),
+    MalformedData(<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str),
 }
 
 <span class="kw">impl </span>std::fmt::Display <span class="kw">for </span>ReadError {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; core::fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; core::fmt::Result {
         <span class="kw">match </span><span class="self">self </span>{
-            ReadError::OutOfBounds =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;An offset was out of bounds&quot;</span>),
-            ReadError::InvalidFormat(x) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;Invalid format &#39;{x}&#39;&quot;</span>),
-            ReadError::InvalidSfnt(ver) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;Invalid sfnt version 0x{ver:08X}&quot;</span>),
-            ReadError::InvalidTtc(tag) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;Invalid ttc tag {tag}&quot;</span>),
+            ReadError::OutOfBounds =&gt; <span class="macro">write!</span>(f, <span class="string">"An offset was out of bounds"</span>),
+            ReadError::InvalidFormat(x) =&gt; <span class="macro">write!</span>(f, <span class="string">"Invalid format '{x}'"</span>),
+            ReadError::InvalidSfnt(ver) =&gt; <span class="macro">write!</span>(f, <span class="string">"Invalid sfnt version 0x{ver:08X}"</span>),
+            ReadError::InvalidTtc(tag) =&gt; <span class="macro">write!</span>(f, <span class="string">"Invalid ttc tag {tag}"</span>),
             ReadError::InvalidCollectionIndex(ix) =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;Invalid index {ix} for font collection&quot;</span>)
+                <span class="macro">write!</span>(f, <span class="string">"Invalid index {ix} for font collection"</span>)
             }
             ReadError::InvalidArrayLen =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;Specified array length not a multiple of item size&quot;</span>)
+                <span class="macro">write!</span>(f, <span class="string">"Specified array length not a multiple of item size"</span>)
             }
-            ReadError::ValidationError =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;A validation error occured&quot;</span>),
-            ReadError::NullOffset =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;An offset was unexpectedly null&quot;</span>),
-            ReadError::TableIsMissing(tag) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;the {tag} table is missing&quot;</span>),
-            ReadError::MetricIsMissing(tag) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;the {tag} metric is missing&quot;</span>),
-            ReadError::MalformedData(msg) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;Malformed data: &#39;{msg}&#39;&quot;</span>),
+            ReadError::ValidationError =&gt; <span class="macro">write!</span>(f, <span class="string">"A validation error occured"</span>),
+            ReadError::NullOffset =&gt; <span class="macro">write!</span>(f, <span class="string">"An offset was unexpectedly null"</span>),
+            ReadError::TableIsMissing(tag) =&gt; <span class="macro">write!</span>(f, <span class="string">"the {tag} table is missing"</span>),
+            ReadError::MetricIsMissing(tag) =&gt; <span class="macro">write!</span>(f, <span class="string">"the {tag} metric is missing"</span>),
+            ReadError::MalformedData(msg) =&gt; <span class="macro">write!</span>(f, <span class="string">"Malformed data: '{msg}'"</span>),
         }
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">impl </span>std::error::Error <span class="kw">for </span>ReadError {}
 </code></pre></div></section></main></body></html>

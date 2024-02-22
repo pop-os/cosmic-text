@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustybuzz-0.12.1/src/complex/hangul.rs`."><title>hangul.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustybuzz" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustybuzz-0.12.1/src/complex/hangul.rs`."><title>hangul.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustybuzz" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -454,7 +455,7 @@
 }
 
 <span class="kw">fn </span>override_features(planner: <span class="kw-2">&amp;mut </span>ShapePlanner) {
-    <span class="comment">// Uniscribe does not apply &#39;calt&#39; for Hangul, and certain fonts
+    <span class="comment">// Uniscribe does not apply 'calt' for Hangul, and certain fonts
     // (Noto Sans CJK, Source Sans Han, etc) apply all of jamo lookups
     // in calt, which is not desirable.
     </span>planner
@@ -489,7 +490,7 @@
     //   - Otherwise, fully decompose and apply ljmo/vjmo/tjmo features.
     //   - If a valid syllable is followed by a Hangul tone mark, reorder the tone
     //     mark to precede the whole syllable - unless it is a zero-width glyph, in
-    //     which case we leave it untouched, assuming it&#39;s designed to overstrike.
+    //     which case we leave it untouched, assuming it's designed to overstrike.
     //
     // That is, of the different possible syllables:
     //
@@ -522,9 +523,9 @@
         <span class="kw">if </span>is_hangul_tone(u) {
             <span class="comment">// We could cache the width of the tone marks and the existence of dotted-circle,
             // but the use of the Hangul tone mark characters seems to be rare enough that
-            // I didn&#39;t bother for now.
+            // I didn't bother for now.
             </span><span class="kw">if </span>start &lt; end &amp;&amp; end == buffer.out_len {
-                <span class="comment">// Tone mark follows a valid syllable; move it in front, unless it&#39;s zero width.
+                <span class="comment">// Tone mark follows a valid syllable; move it in front, unless it's zero width.
                 </span>buffer.unsafe_to_break_from_outbuffer(start, buffer.idx);
                 buffer.next_glyph();
                 <span class="kw">if </span>!is_zero_width_char(face, c) {
@@ -589,7 +590,7 @@
                 <span class="kw">let </span>offset = <span class="kw">if </span>t != <span class="number">0 </span>{ <span class="number">3 </span>} <span class="kw">else </span>{ <span class="number">2 </span>};
                 buffer.unsafe_to_break(buffer.idx, buffer.idx + offset);
 
-                <span class="comment">// We&#39;ve got a syllable &lt;L,V,T?&gt;; see if it can potentially be composed.
+                <span class="comment">// We've got a syllable &lt;L,V,T?&gt;; see if it can potentially be composed.
                 </span><span class="kw">if </span>is_combining_l(l) &amp;&amp; is_combining_v(v) &amp;&amp; (t == <span class="number">0 </span>|| is_combining_t(t)) {
                     <span class="comment">// Try to compose; if this succeeds, end is set to start+1.
                     </span><span class="kw">let </span>s = S_BASE + (l - L_BASE) * N_COUNT + (v - V_BASE) * T_COUNT + tindex;
@@ -601,8 +602,8 @@
                     }
                 }
 
-                <span class="comment">// We didn&#39;t compose, either because it&#39;s an Old Hangul syllable without a
-                // precomposed character in Unicode, or because the font didn&#39;t support the
+                <span class="comment">// We didn't compose, either because it's an Old Hangul syllable without a
+                // precomposed character in Unicode, or because the font didn't support the
                 // necessary precomposed glyph.
                 // Set jamo features on the individual glyphs, and advance past them.
                 </span>buffer.cur_mut(<span class="number">0</span>).set_hangul_shaping_feature(LJMO);
@@ -649,7 +650,7 @@
                 }
             }
 
-            <span class="comment">// Otherwise, decompose if font doesn&#39;t support &lt;LV&gt; or &lt;LVT&gt;,
+            <span class="comment">// Otherwise, decompose if font doesn't support &lt;LV&gt; or &lt;LVT&gt;,
             // or if having non-combining &lt;LV,T&gt;.  Note that we already handled
             // combining &lt;LV,T&gt; above.
             </span><span class="kw">if </span>!has_glyph
@@ -693,14 +694,14 @@
             }
 
             <span class="kw">if </span>has_glyph {
-                <span class="comment">// We didn&#39;t decompose the S, so just advance past it.
+                <span class="comment">// We didn't decompose the S, so just advance past it.
                 </span>end = start + <span class="number">1</span>;
                 buffer.next_glyph();
                 <span class="kw">continue</span>;
             }
         }
 
-        <span class="comment">// Didn&#39;t find a recognizable syllable, so we leave end &lt;= start;
+        <span class="comment">// Didn't find a recognizable syllable, so we leave end &lt;= start;
         // this will prevent tone-mark reordering happening.
         </span>buffer.next_glyph();
     }

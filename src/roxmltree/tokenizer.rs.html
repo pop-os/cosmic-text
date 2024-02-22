@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/roxmltree-0.19.0/src/tokenizer.rs`."><title>tokenizer.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="roxmltree" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/roxmltree-0.19.0/src/tokenizer.rs`."><title>tokenizer.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="roxmltree" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1133,7 +1134,7 @@
     </span><span class="kw">fn </span>is_xml_name_start(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="comment">// Check for ASCII first.
         </span><span class="kw">if </span><span class="kw-2">*</span><span class="self">self </span><span class="kw">as </span>u32 &lt;= <span class="number">128 </span>{
-            <span class="kw">return </span><span class="macro">matches!</span>(<span class="kw-2">*</span><span class="self">self </span><span class="kw">as </span>u8, <span class="string">b&#39;A&#39;</span>..=<span class="string">b&#39;Z&#39; </span>| <span class="string">b&#39;a&#39;</span>..=<span class="string">b&#39;z&#39; </span>| <span class="string">b&#39;:&#39; </span>| <span class="string">b&#39;_&#39;</span>);
+            <span class="kw">return </span><span class="macro">matches!</span>(<span class="kw-2">*</span><span class="self">self </span><span class="kw">as </span>u8, <span class="string">b'A'</span>..=<span class="string">b'Z' </span>| <span class="string">b'a'</span>..=<span class="string">b'z' </span>| <span class="string">b':' </span>| <span class="string">b'_'</span>);
         }
 
         <span class="macro">matches!</span>(<span class="kw-2">*</span><span class="self">self </span><span class="kw">as </span>u32,
@@ -1201,12 +1202,12 @@
 <span class="kw">impl </span>XmlByteExt <span class="kw">for </span>u8 {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>is_xml_space(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="macro">matches!</span>(<span class="kw-2">*</span><span class="self">self</span>, <span class="string">b&#39; &#39; </span>| <span class="string">b&#39;\t&#39; </span>| <span class="string">b&#39;\n&#39; </span>| <span class="string">b&#39;\r&#39;</span>)
+        <span class="macro">matches!</span>(<span class="kw-2">*</span><span class="self">self</span>, <span class="string">b' ' </span>| <span class="string">b'\t' </span>| <span class="string">b'\n' </span>| <span class="string">b'\r'</span>)
     }
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>is_xml_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="macro">matches!</span>(<span class="kw-2">*</span><span class="self">self</span>, <span class="string">b&#39;A&#39;</span>..=<span class="string">b&#39;Z&#39; </span>| <span class="string">b&#39;a&#39;</span>..=<span class="string">b&#39;z&#39;</span>| <span class="string">b&#39;0&#39;</span>..=<span class="string">b&#39;9&#39;</span>| <span class="string">b&#39;:&#39; </span>| <span class="string">b&#39;_&#39; </span>| <span class="string">b&#39;-&#39; </span>| <span class="string">b&#39;.&#39;</span>)
+        <span class="macro">matches!</span>(<span class="kw-2">*</span><span class="self">self</span>, <span class="string">b'A'</span>..=<span class="string">b'Z' </span>| <span class="string">b'a'</span>..=<span class="string">b'z'</span>| <span class="string">b'0'</span>..=<span class="string">b'9'</span>| <span class="string">b':' </span>| <span class="string">b'_' </span>| <span class="string">b'-' </span>| <span class="string">b'.'</span>)
     }
 }
 
@@ -1216,19 +1217,19 @@
 /// from which it was parsed.
 </span><span class="attr">#[must_use]
 #[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>StrSpan&lt;<span class="lifetime">&#39;input</span>&gt; {
-    text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str,
+</span><span class="kw">pub struct </span>StrSpan&lt;<span class="lifetime">'input</span>&gt; {
+    text: <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str,
     start: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;input</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str&gt; <span class="kw">for </span>StrSpan&lt;<span class="lifetime">&#39;input</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'input</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'input </span>str&gt; <span class="kw">for </span>StrSpan&lt;<span class="lifetime">'input</span>&gt; {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>from(text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">fn </span>from(text: <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str) -&gt; <span class="self">Self </span>{
         StrSpan { text, start: <span class="number">0 </span>}
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;input</span>&gt; StrSpan&lt;<span class="lifetime">&#39;input</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'input</span>&gt; StrSpan&lt;<span class="lifetime">'input</span>&gt; {
     <span class="attr">#[inline]
     </span><span class="kw">pub fn </span>from_substr(text: <span class="kw-2">&amp;</span>str, start: usize, end: usize) -&gt; StrSpan {
         <span class="macro">debug_assert!</span>(start &lt;= end);
@@ -1244,63 +1245,63 @@
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>as_str(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str {
+    </span><span class="kw">pub fn </span>as_str(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str {
         <span class="self">self</span>.text
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>slice_region(<span class="kw-2">&amp;</span><span class="self">self</span>, start: usize, end: usize) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str {
+    </span><span class="kw">fn </span>slice_region(<span class="kw-2">&amp;</span><span class="self">self</span>, start: usize, end: usize) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str {
         <span class="kw-2">&amp;</span><span class="self">self</span>.text[start..end]
     }
 }
 
-<span class="kw">pub enum </span>Token&lt;<span class="lifetime">&#39;input</span>&gt; {
+<span class="kw">pub enum </span>Token&lt;<span class="lifetime">'input</span>&gt; {
     <span class="comment">// &lt;?target content?&gt;
-    </span>ProcessingInstruction(<span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str, <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str&gt;, Range&lt;usize&gt;),
+    </span>ProcessingInstruction(<span class="kw-2">&amp;</span><span class="lifetime">'input </span>str, <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'input </span>str&gt;, Range&lt;usize&gt;),
 
     <span class="comment">// &lt;!-- text --&gt;
-    </span>Comment(<span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str, Range&lt;usize&gt;),
+    </span>Comment(<span class="kw-2">&amp;</span><span class="lifetime">'input </span>str, Range&lt;usize&gt;),
 
-    <span class="comment">// &lt;!ENTITY ns_extend &quot;http://test.com&quot;&gt;
-    </span>EntityDeclaration(<span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str, StrSpan&lt;<span class="lifetime">&#39;input</span>&gt;),
+    <span class="comment">// &lt;!ENTITY ns_extend "http://test.com"&gt;
+    </span>EntityDeclaration(<span class="kw-2">&amp;</span><span class="lifetime">'input </span>str, StrSpan&lt;<span class="lifetime">'input</span>&gt;),
 
     <span class="comment">// &lt;ns:elem
-    </span>ElementStart(<span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str, <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str, usize),
+    </span>ElementStart(<span class="kw-2">&amp;</span><span class="lifetime">'input </span>str, <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str, usize),
 
-    <span class="comment">// ns:attr=&quot;value&quot;
-    </span>Attribute(usize, <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str, <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str, StrSpan&lt;<span class="lifetime">&#39;input</span>&gt;),
+    <span class="comment">// ns:attr="value"
+    </span>Attribute(usize, <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str, <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str, StrSpan&lt;<span class="lifetime">'input</span>&gt;),
 
-    ElementEnd(ElementEnd&lt;<span class="lifetime">&#39;input</span>&gt;, Range&lt;usize&gt;),
+    ElementEnd(ElementEnd&lt;<span class="lifetime">'input</span>&gt;, Range&lt;usize&gt;),
 
     <span class="comment">// Contains text between elements including whitespaces.
     // Basically everything between `&gt;` and `&lt;`.
     // Except `]]&gt;`, which is not allowed and will lead to an error.
-    </span>Text(<span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str, Range&lt;usize&gt;),
+    </span>Text(<span class="kw-2">&amp;</span><span class="lifetime">'input </span>str, Range&lt;usize&gt;),
 
     <span class="comment">// &lt;![CDATA[text]]&gt;
-    </span>Cdata(<span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str, Range&lt;usize&gt;),
+    </span>Cdata(<span class="kw-2">&amp;</span><span class="lifetime">'input </span>str, Range&lt;usize&gt;),
 }
 
 <span class="doccomment">/// `ElementEnd` token.
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub enum </span>ElementEnd&lt;<span class="lifetime">&#39;input</span>&gt; {
+</span><span class="kw">pub enum </span>ElementEnd&lt;<span class="lifetime">'input</span>&gt; {
     <span class="doccomment">/// Indicates `&gt;`
     </span>Open,
     <span class="doccomment">/// Indicates `&lt;/ns:name&gt;`
-    </span>Close(<span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str, <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str),
+    </span>Close(<span class="kw-2">&amp;</span><span class="lifetime">'input </span>str, <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str),
     <span class="doccomment">/// Indicates `/&gt;`
     </span>Empty,
 }
 
-<span class="kw">pub trait </span>XmlEvents&lt;<span class="lifetime">&#39;input</span>&gt; {
-    <span class="kw">fn </span>token(<span class="kw-2">&amp;mut </span><span class="self">self</span>, token: Token&lt;<span class="lifetime">&#39;input</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
+<span class="kw">pub trait </span>XmlEvents&lt;<span class="lifetime">'input</span>&gt; {
+    <span class="kw">fn </span>token(<span class="kw-2">&amp;mut </span><span class="self">self</span>, token: Token&lt;<span class="lifetime">'input</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
 }
 
 <span class="comment">// document ::= prolog element Misc*
-</span><span class="kw">pub fn </span>parse&lt;<span class="lifetime">&#39;input</span>&gt;(
-    text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str,
+</span><span class="kw">pub fn </span>parse&lt;<span class="lifetime">'input</span>&gt;(
+    text: <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str,
     allow_dtd: bool,
-    events: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>XmlEvents&lt;<span class="lifetime">&#39;input</span>&gt;,
+    events: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>XmlEvents&lt;<span class="lifetime">'input</span>&gt;,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">let </span>s = <span class="kw-2">&amp;mut </span>Stream::new(text);
 
@@ -1309,14 +1310,14 @@
         s.advance(<span class="number">3</span>);
     }
 
-    <span class="kw">if </span>s.starts_with(<span class="string">b&quot;&lt;?xml &quot;</span>) {
+    <span class="kw">if </span>s.starts_with(<span class="string">b"&lt;?xml "</span>) {
         parse_declaration(s)<span class="question-mark">?</span>;
     }
 
     parse_misc(s, events)<span class="question-mark">?</span>;
 
     s.skip_spaces();
-    <span class="kw">if </span>s.starts_with(<span class="string">b&quot;&lt;!DOCTYPE&quot;</span>) {
+    <span class="kw">if </span>s.starts_with(<span class="string">b"&lt;!DOCTYPE"</span>) {
         <span class="kw">if </span>!allow_dtd {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::DtdDetected);
         }
@@ -1326,7 +1327,7 @@
     }
 
     s.skip_spaces();
-    <span class="kw">if </span>s.curr_byte().ok() == <span class="prelude-val">Some</span>(<span class="string">b&#39;&lt;&#39;</span>) {
+    <span class="kw">if </span>s.curr_byte().ok() == <span class="prelude-val">Some</span>(<span class="string">b'&lt;'</span>) {
         parse_element(s, events)<span class="question-mark">?</span>;
     }
 
@@ -1340,12 +1341,12 @@
 }
 
 <span class="comment">// Misc ::= Comment | PI | S
-</span><span class="kw">fn </span>parse_misc&lt;<span class="lifetime">&#39;input</span>&gt;(s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">&#39;input</span>&gt;, events: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>XmlEvents&lt;<span class="lifetime">&#39;input</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+</span><span class="kw">fn </span>parse_misc&lt;<span class="lifetime">'input</span>&gt;(s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">'input</span>&gt;, events: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>XmlEvents&lt;<span class="lifetime">'input</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">while </span>!s.at_end() {
         s.skip_spaces();
-        <span class="kw">if </span>s.starts_with(<span class="string">b&quot;&lt;!--&quot;</span>) {
+        <span class="kw">if </span>s.starts_with(<span class="string">b"&lt;!--"</span>) {
             parse_comment(s, events)<span class="question-mark">?</span>;
-        } <span class="kw">else if </span>s.starts_with(<span class="string">b&quot;&lt;?&quot;</span>) {
+        } <span class="kw">else if </span>s.starts_with(<span class="string">b"&lt;?"</span>) {
             parse_pi(s, events)<span class="question-mark">?</span>;
         } <span class="kw">else </span>{
             <span class="kw">break</span>;
@@ -1355,16 +1356,16 @@
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="comment">// XMLDecl ::= &#39;&lt;?xml&#39; VersionInfo EncodingDecl? SDDecl? S? &#39;?&gt;&#39;
+<span class="comment">// XMLDecl ::= '&lt;?xml' VersionInfo EncodingDecl? SDDecl? S? '?&gt;'
 //
-// We don&#39;t actually return a token for the XML declaration and only validate it.
+// We don't actually return a token for the XML declaration and only validate it.
 </span><span class="kw">fn </span>parse_declaration(s: <span class="kw-2">&amp;mut </span>Stream) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">fn </span>consume_spaces(s: <span class="kw-2">&amp;mut </span>Stream) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">if </span>s.starts_with_space() {
             s.skip_spaces();
-        } <span class="kw">else if </span>!s.starts_with(<span class="string">b&quot;?&gt;&quot;</span>) &amp;&amp; !s.at_end() {
+        } <span class="kw">else if </span>!s.starts_with(<span class="string">b"?&gt;"</span>) &amp;&amp; !s.at_end() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidChar2(
-                <span class="string">&quot;a whitespace&quot;</span>,
+                <span class="string">"a whitespace"</span>,
                 s.curr_byte_unchecked(),
                 s.gen_text_pos(),
             ));
@@ -1376,41 +1377,41 @@
     s.advance(<span class="number">5</span>); <span class="comment">// &lt;?xml
     </span>consume_spaces(s)<span class="question-mark">?</span>;
 
-    <span class="comment">// The `version` &quot;attribute&quot; is mandatory.
-    </span><span class="kw">if </span>!s.starts_with(<span class="string">b&quot;version&quot;</span>) {
+    <span class="comment">// The `version` "attribute" is mandatory.
+    </span><span class="kw">if </span>!s.starts_with(<span class="string">b"version"</span>) {
         <span class="comment">// Will trigger the InvalidString error, which is what we want.
-        </span><span class="kw">return </span>s.skip_string(<span class="string">b&quot;version&quot;</span>);
+        </span><span class="kw">return </span>s.skip_string(<span class="string">b"version"</span>);
     }
     <span class="kw">let _ </span>= parse_attribute(s)<span class="question-mark">?</span>;
     consume_spaces(s)<span class="question-mark">?</span>;
 
-    <span class="kw">if </span>s.starts_with(<span class="string">b&quot;encoding&quot;</span>) {
+    <span class="kw">if </span>s.starts_with(<span class="string">b"encoding"</span>) {
         <span class="kw">let _ </span>= parse_attribute(s)<span class="question-mark">?</span>;
         consume_spaces(s)<span class="question-mark">?</span>;
     }
 
-    <span class="kw">if </span>s.starts_with(<span class="string">b&quot;standalone&quot;</span>) {
+    <span class="kw">if </span>s.starts_with(<span class="string">b"standalone"</span>) {
         <span class="kw">let _ </span>= parse_attribute(s)<span class="question-mark">?</span>;
     }
 
     s.skip_spaces();
-    s.skip_string(<span class="string">b&quot;?&gt;&quot;</span>)<span class="question-mark">?</span>;
+    s.skip_string(<span class="string">b"?&gt;"</span>)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="comment">// &#39;&lt;!--&#39; ((Char - &#39;-&#39;) | (&#39;-&#39; (Char - &#39;-&#39;)))* &#39;--&gt;&#39;
-</span><span class="kw">fn </span>parse_comment&lt;<span class="lifetime">&#39;input</span>&gt;(s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">&#39;input</span>&gt;, events: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>XmlEvents&lt;<span class="lifetime">&#39;input</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+<span class="comment">// '&lt;!--' ((Char - '-') | ('-' (Char - '-')))* '--&gt;'
+</span><span class="kw">fn </span>parse_comment&lt;<span class="lifetime">'input</span>&gt;(s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">'input</span>&gt;, events: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>XmlEvents&lt;<span class="lifetime">'input</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">let </span>start = s.pos();
     s.advance(<span class="number">4</span>);
-    <span class="kw">let </span>text = s.consume_chars(|s, c| !(c == <span class="string">&#39;-&#39; </span>&amp;&amp; s.starts_with(<span class="string">b&quot;--&gt;&quot;</span>)))<span class="question-mark">?</span>;
-    s.skip_string(<span class="string">b&quot;--&gt;&quot;</span>)<span class="question-mark">?</span>;
+    <span class="kw">let </span>text = s.consume_chars(|s, c| !(c == <span class="string">'-' </span>&amp;&amp; s.starts_with(<span class="string">b"--&gt;"</span>)))<span class="question-mark">?</span>;
+    s.skip_string(<span class="string">b"--&gt;"</span>)<span class="question-mark">?</span>;
 
-    <span class="kw">if </span>text.contains(<span class="string">&quot;--&quot;</span>) {
+    <span class="kw">if </span>text.contains(<span class="string">"--"</span>) {
         <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidComment(s.gen_text_pos_from(start)));
     }
 
-    <span class="kw">if </span>text.ends_with(<span class="string">&#39;-&#39;</span>) {
+    <span class="kw">if </span>text.ends_with(<span class="string">'-'</span>) {
         <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidComment(s.gen_text_pos_from(start)));
     }
 
@@ -1420,10 +1421,10 @@
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="comment">// PI       ::= &#39;&lt;?&#39; PITarget (S (Char* - (Char* &#39;?&gt;&#39; Char*)))? &#39;?&gt;&#39;
-// PITarget ::= Name - ((&#39;X&#39; | &#39;x&#39;) (&#39;M&#39; | &#39;m&#39;) (&#39;L&#39; | &#39;l&#39;))
-</span><span class="kw">fn </span>parse_pi&lt;<span class="lifetime">&#39;input</span>&gt;(s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">&#39;input</span>&gt;, events: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>XmlEvents&lt;<span class="lifetime">&#39;input</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-    <span class="kw">if </span>s.starts_with(<span class="string">b&quot;&lt;?xml &quot;</span>) {
+<span class="comment">// PI       ::= '&lt;?' PITarget (S (Char* - (Char* '?&gt;' Char*)))? '?&gt;'
+// PITarget ::= Name - (('X' | 'x') ('M' | 'm') ('L' | 'l'))
+</span><span class="kw">fn </span>parse_pi&lt;<span class="lifetime">'input</span>&gt;(s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">'input</span>&gt;, events: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>XmlEvents&lt;<span class="lifetime">'input</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">if </span>s.starts_with(<span class="string">b"&lt;?xml "</span>) {
         <span class="kw">return </span><span class="prelude-val">Err</span>(Error::UnexpectedDeclaration(s.gen_text_pos()));
     }
 
@@ -1431,26 +1432,26 @@
     s.advance(<span class="number">2</span>);
     <span class="kw">let </span>target = s.consume_name()<span class="question-mark">?</span>;
     s.skip_spaces();
-    <span class="kw">let </span>content = s.consume_chars(|s, c| !(c == <span class="string">&#39;?&#39; </span>&amp;&amp; s.starts_with(<span class="string">b&quot;?&gt;&quot;</span>)))<span class="question-mark">?</span>;
+    <span class="kw">let </span>content = s.consume_chars(|s, c| !(c == <span class="string">'?' </span>&amp;&amp; s.starts_with(<span class="string">b"?&gt;"</span>)))<span class="question-mark">?</span>;
     <span class="kw">let </span>content = <span class="kw">if </span>!content.is_empty() {
         <span class="prelude-val">Some</span>(content)
     } <span class="kw">else </span>{
         <span class="prelude-val">None
     </span>};
 
-    s.skip_string(<span class="string">b&quot;?&gt;&quot;</span>)<span class="question-mark">?</span>;
+    s.skip_string(<span class="string">b"?&gt;"</span>)<span class="question-mark">?</span>;
 
     <span class="kw">let </span>range = s.range_from(start);
     events.token(Token::ProcessingInstruction(target, content, range))<span class="question-mark">?</span>;
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="kw">fn </span>parse_doctype&lt;<span class="lifetime">&#39;input</span>&gt;(s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">&#39;input</span>&gt;, events: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>XmlEvents&lt;<span class="lifetime">&#39;input</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+<span class="kw">fn </span>parse_doctype&lt;<span class="lifetime">'input</span>&gt;(s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">'input</span>&gt;, events: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>XmlEvents&lt;<span class="lifetime">'input</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">let </span>start = s.pos();
     parse_doctype_start(s)<span class="question-mark">?</span>;
     s.skip_spaces();
 
-    <span class="kw">if </span>s.curr_byte() == <span class="prelude-val">Ok</span>(<span class="string">b&#39;&gt;&#39;</span>) {
+    <span class="kw">if </span>s.curr_byte() == <span class="prelude-val">Ok</span>(<span class="string">b'&gt;'</span>) {
         s.advance(<span class="number">1</span>);
         <span class="kw">return </span><span class="prelude-val">Ok</span>(());
     }
@@ -1458,31 +1459,31 @@
     s.advance(<span class="number">1</span>); <span class="comment">// [
     </span><span class="kw">while </span>!s.at_end() {
         s.skip_spaces();
-        <span class="kw">if </span>s.starts_with(<span class="string">b&quot;&lt;!ENTITY&quot;</span>) {
+        <span class="kw">if </span>s.starts_with(<span class="string">b"&lt;!ENTITY"</span>) {
             parse_entity_decl(s, events)<span class="question-mark">?</span>;
-        } <span class="kw">else if </span>s.starts_with(<span class="string">b&quot;&lt;!--&quot;</span>) {
+        } <span class="kw">else if </span>s.starts_with(<span class="string">b"&lt;!--"</span>) {
             parse_comment(s, events)<span class="question-mark">?</span>;
-        } <span class="kw">else if </span>s.starts_with(<span class="string">b&quot;&lt;?&quot;</span>) {
+        } <span class="kw">else if </span>s.starts_with(<span class="string">b"&lt;?"</span>) {
             parse_pi(s, events)<span class="question-mark">?</span>;
-        } <span class="kw">else if </span>s.starts_with(<span class="string">b&quot;]&quot;</span>) {
-            <span class="comment">// DTD ends with &#39;]&#39; S? &#39;&gt;&#39;, therefore we have to skip possible spaces.
+        } <span class="kw">else if </span>s.starts_with(<span class="string">b"]"</span>) {
+            <span class="comment">// DTD ends with ']' S? '&gt;', therefore we have to skip possible spaces.
             </span>s.advance(<span class="number">1</span>);
             s.skip_spaces();
             <span class="kw">match </span>s.curr_byte() {
-                <span class="prelude-val">Ok</span>(<span class="string">b&#39;&gt;&#39;</span>) =&gt; {
+                <span class="prelude-val">Ok</span>(<span class="string">b'&gt;'</span>) =&gt; {
                     s.advance(<span class="number">1</span>);
                     <span class="kw">break</span>;
                 }
                 <span class="prelude-val">Ok</span>(c) =&gt; {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidChar2(<span class="string">&quot;&#39;&gt;&#39;&quot;</span>, c, s.gen_text_pos()));
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidChar2(<span class="string">"'&gt;'"</span>, c, s.gen_text_pos()));
                 }
                 <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; {
                     <span class="kw">return </span><span class="prelude-val">Err</span>(Error::UnexpectedEndOfStream);
                 }
             }
-        } <span class="kw">else if </span>s.starts_with(<span class="string">b&quot;&lt;!ELEMENT&quot;</span>)
-            || s.starts_with(<span class="string">b&quot;&lt;!ATTLIST&quot;</span>)
-            || s.starts_with(<span class="string">b&quot;&lt;!NOTATION&quot;</span>)
+        } <span class="kw">else if </span>s.starts_with(<span class="string">b"&lt;!ELEMENT"</span>)
+            || s.starts_with(<span class="string">b"&lt;!ATTLIST"</span>)
+            || s.starts_with(<span class="string">b"&lt;!NOTATION"</span>)
         {
             <span class="kw">if </span>consume_decl(s).is_err() {
                 <span class="kw">let </span>pos = s.gen_text_pos_from(start);
@@ -1496,7 +1497,7 @@
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="comment">// doctypedecl ::= &#39;&lt;!DOCTYPE&#39; S Name (S ExternalID)? S? (&#39;[&#39; intSubset &#39;]&#39; S?)? &#39;&gt;&#39;
+<span class="comment">// doctypedecl ::= '&lt;!DOCTYPE' S Name (S ExternalID)? S? ('[' intSubset ']' S?)? '&gt;'
 </span><span class="kw">fn </span>parse_doctype_start(s: <span class="kw-2">&amp;mut </span>Stream) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     s.advance(<span class="number">9</span>);
 
@@ -1508,16 +1509,16 @@
     s.skip_spaces();
 
     <span class="kw">let </span>c = s.curr_byte()<span class="question-mark">?</span>;
-    <span class="kw">if </span>c != <span class="string">b&#39;[&#39; </span>&amp;&amp; c != <span class="string">b&#39;&gt;&#39; </span>{
-        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidChar2(<span class="string">&quot;&#39;[&#39; or &#39;&gt;&#39;&quot;</span>, c, s.gen_text_pos()));
+    <span class="kw">if </span>c != <span class="string">b'[' </span>&amp;&amp; c != <span class="string">b'&gt;' </span>{
+        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidChar2(<span class="string">"'[' or '&gt;'"</span>, c, s.gen_text_pos()));
     }
 
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="comment">// ExternalID ::= &#39;SYSTEM&#39; S SystemLiteral | &#39;PUBLIC&#39; S PubidLiteral S SystemLiteral
+<span class="comment">// ExternalID ::= 'SYSTEM' S SystemLiteral | 'PUBLIC' S PubidLiteral S SystemLiteral
 </span><span class="kw">fn </span>parse_external_id(s: <span class="kw-2">&amp;mut </span>Stream) -&gt; <span class="prelude-ty">Result</span>&lt;bool&gt; {
-    <span class="kw">let </span>v = <span class="kw">if </span>s.starts_with(<span class="string">b&quot;SYSTEM&quot;</span>) || s.starts_with(<span class="string">b&quot;PUBLIC&quot;</span>) {
+    <span class="kw">let </span>v = <span class="kw">if </span>s.starts_with(<span class="string">b"SYSTEM"</span>) || s.starts_with(<span class="string">b"PUBLIC"</span>) {
         <span class="kw">let </span>start = s.pos();
         s.advance(<span class="number">6</span>);
         <span class="kw">let </span>id = s.slice_back(start);
@@ -1527,7 +1528,7 @@
         <span class="kw">let _ </span>= s.consume_bytes(|c| c != quote);
         s.consume_byte(quote)<span class="question-mark">?</span>;
 
-        <span class="kw">if </span>id == <span class="string">&quot;SYSTEM&quot; </span>{
+        <span class="kw">if </span>id == <span class="string">"SYSTEM" </span>{
             <span class="comment">// Ok
         </span>} <span class="kw">else </span>{
             s.consume_spaces()<span class="question-mark">?</span>;
@@ -1545,16 +1546,16 @@
 }
 
 <span class="comment">// EntityDecl  ::= GEDecl | PEDecl
-// GEDecl      ::= &#39;&lt;!ENTITY&#39; S Name S EntityDef S? &#39;&gt;&#39;
-// PEDecl      ::= &#39;&lt;!ENTITY&#39; S &#39;%&#39; S Name S PEDef S? &#39;&gt;&#39;
-</span><span class="kw">fn </span>parse_entity_decl&lt;<span class="lifetime">&#39;input</span>&gt;(
-    s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">&#39;input</span>&gt;,
-    events: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>XmlEvents&lt;<span class="lifetime">&#39;input</span>&gt;,
+// GEDecl      ::= '&lt;!ENTITY' S Name S EntityDef S? '&gt;'
+// PEDecl      ::= '&lt;!ENTITY' S '%' S Name S PEDef S? '&gt;'
+</span><span class="kw">fn </span>parse_entity_decl&lt;<span class="lifetime">'input</span>&gt;(
+    s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">'input</span>&gt;,
+    events: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>XmlEvents&lt;<span class="lifetime">'input</span>&gt;,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     s.advance(<span class="number">8</span>);
     s.consume_spaces()<span class="question-mark">?</span>;
 
-    <span class="kw">let </span>is_ge = <span class="kw">if </span>s.try_consume_byte(<span class="string">b&#39;%&#39;</span>) {
+    <span class="kw">let </span>is_ge = <span class="kw">if </span>s.try_consume_byte(<span class="string">b'%'</span>) {
         s.consume_spaces()<span class="question-mark">?</span>;
         <span class="bool-val">false
     </span>} <span class="kw">else </span>{
@@ -1567,24 +1568,24 @@
         events.token(Token::EntityDeclaration(name, definition))<span class="question-mark">?</span>;
     }
     s.skip_spaces();
-    s.consume_byte(<span class="string">b&#39;&gt;&#39;</span>)<span class="question-mark">?</span>;
+    s.consume_byte(<span class="string">b'&gt;'</span>)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(())
 }
 
 <span class="comment">// EntityDef   ::= EntityValue | (ExternalID NDataDecl?)
 // PEDef       ::= EntityValue | ExternalID
-// EntityValue ::= &#39;&quot;&#39; ([^%&amp;&quot;] | PEReference | Reference)* &#39;&quot;&#39; |  &quot;&#39;&quot; ([^%&amp;&#39;]
-//                             | PEReference | Reference)* &quot;&#39;&quot;
-// ExternalID  ::= &#39;SYSTEM&#39; S SystemLiteral | &#39;PUBLIC&#39; S PubidLiteral S SystemLiteral
-// NDataDecl   ::= S &#39;NDATA&#39; S Name
-</span><span class="kw">fn </span>parse_entity_def&lt;<span class="lifetime">&#39;input</span>&gt;(
-    s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">&#39;input</span>&gt;,
+// EntityValue ::= '"' ([^%&amp;"] | PEReference | Reference)* '"' |  "'" ([^%&amp;']
+//                             | PEReference | Reference)* "'"
+// ExternalID  ::= 'SYSTEM' S SystemLiteral | 'PUBLIC' S PubidLiteral S SystemLiteral
+// NDataDecl   ::= S 'NDATA' S Name
+</span><span class="kw">fn </span>parse_entity_def&lt;<span class="lifetime">'input</span>&gt;(
+    s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">'input</span>&gt;,
     is_ge: bool,
-) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;StrSpan&lt;<span class="lifetime">&#39;input</span>&gt;&gt;&gt; {
+) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;StrSpan&lt;<span class="lifetime">'input</span>&gt;&gt;&gt; {
     <span class="kw">let </span>c = s.curr_byte()<span class="question-mark">?</span>;
     <span class="kw">match </span>c {
-        <span class="string">b&#39;&quot;&#39; </span>| <span class="string">b&#39;\&#39;&#39; </span>=&gt; {
+        <span class="string">b'"' </span>| <span class="string">b'\'' </span>=&gt; {
             <span class="kw">let </span>quote = s.consume_quote()<span class="question-mark">?</span>;
             <span class="kw">let </span>start = s.pos();
             s.skip_bytes(|c| c != quote);
@@ -1592,11 +1593,11 @@
             s.consume_byte(quote)<span class="question-mark">?</span>;
             <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(value))
         }
-        <span class="string">b&#39;S&#39; </span>| <span class="string">b&#39;P&#39; </span>=&gt; {
+        <span class="string">b'S' </span>| <span class="string">b'P' </span>=&gt; {
             <span class="kw">if </span>parse_external_id(s)<span class="question-mark">? </span>{
                 <span class="kw">if </span>is_ge {
                     s.skip_spaces();
-                    <span class="kw">if </span>s.starts_with(<span class="string">b&quot;NDATA&quot;</span>) {
+                    <span class="kw">if </span>s.starts_with(<span class="string">b"NDATA"</span>) {
                         s.advance(<span class="number">5</span>);
                         s.consume_spaces()<span class="question-mark">?</span>;
                         s.skip_name()<span class="question-mark">?</span>;
@@ -1611,20 +1612,20 @@
         }
         <span class="kw">_ </span>=&gt; {
             <span class="kw">let </span>pos = s.gen_text_pos();
-            <span class="prelude-val">Err</span>(Error::InvalidChar2(<span class="string">&quot;a quote, SYSTEM or PUBLIC&quot;</span>, c, pos))
+            <span class="prelude-val">Err</span>(Error::InvalidChar2(<span class="string">"a quote, SYSTEM or PUBLIC"</span>, c, pos))
         }
     }
 }
 
 <span class="kw">fn </span>consume_decl(s: <span class="kw-2">&amp;mut </span>Stream) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-    s.skip_bytes(|c| c != <span class="string">b&#39;&gt;&#39;</span>);
-    s.consume_byte(<span class="string">b&#39;&gt;&#39;</span>)<span class="question-mark">?</span>;
+    s.skip_bytes(|c| c != <span class="string">b'&gt;'</span>);
+    s.consume_byte(<span class="string">b'&gt;'</span>)<span class="question-mark">?</span>;
     <span class="prelude-val">Ok</span>(())
 }
 
 <span class="comment">// element ::= EmptyElemTag | STag content ETag
-// &#39;&lt;&#39; Name (S Attribute)* S? &#39;&gt;&#39;
-</span><span class="kw">fn </span>parse_element&lt;<span class="lifetime">&#39;input</span>&gt;(s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">&#39;input</span>&gt;, events: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>XmlEvents&lt;<span class="lifetime">&#39;input</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+// '&lt;' Name (S Attribute)* S? '&gt;'
+</span><span class="kw">fn </span>parse_element&lt;<span class="lifetime">'input</span>&gt;(s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">'input</span>&gt;, events: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>XmlEvents&lt;<span class="lifetime">'input</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">let </span>start = s.pos();
     s.advance(<span class="number">1</span>); <span class="comment">// &lt;
     </span><span class="kw">let </span>(prefix, local) = s.consume_qname()<span class="question-mark">?</span>;
@@ -1636,14 +1637,14 @@
         s.skip_spaces();
         <span class="kw">let </span>start = s.pos();
         <span class="kw">match </span>s.curr_byte()<span class="question-mark">? </span>{
-            <span class="string">b&#39;/&#39; </span>=&gt; {
+            <span class="string">b'/' </span>=&gt; {
                 s.advance(<span class="number">1</span>);
-                s.consume_byte(<span class="string">b&#39;&gt;&#39;</span>)<span class="question-mark">?</span>;
+                s.consume_byte(<span class="string">b'&gt;'</span>)<span class="question-mark">?</span>;
                 <span class="kw">let </span>range = s.range_from(start);
                 events.token(Token::ElementEnd(ElementEnd::Empty, range))<span class="question-mark">?</span>;
                 <span class="kw">break</span>;
             }
-            <span class="string">b&#39;&gt;&#39; </span>=&gt; {
+            <span class="string">b'&gt;' </span>=&gt; {
                 s.advance(<span class="number">1</span>);
                 <span class="kw">let </span>range = s.range_from(start);
                 events.token(Token::ElementEnd(ElementEnd::Open, range))<span class="question-mark">?</span>;
@@ -1666,7 +1667,7 @@
                 <span class="kw">let </span>quote_c = quote <span class="kw">as </span>char;
                 <span class="comment">// The attribute value must not contain the &lt; character.
                 </span><span class="kw">let </span>value_start = s.pos();
-                s.skip_chars(|<span class="kw">_</span>, c| c != quote_c &amp;&amp; c != <span class="string">&#39;&lt;&#39;</span>)<span class="question-mark">?</span>;
+                s.skip_chars(|<span class="kw">_</span>, c| c != quote_c &amp;&amp; c != <span class="string">'&lt;'</span>)<span class="question-mark">?</span>;
                 <span class="kw">let </span>value = s.slice_back_span(value_start);
                 s.consume_byte(quote)<span class="question-mark">?</span>;
                 events.token(Token::Attribute(start, prefix, local, value))<span class="question-mark">?</span>;
@@ -1682,40 +1683,40 @@
 }
 
 <span class="comment">// Attribute ::= Name Eq AttValue
-</span><span class="kw">fn </span>parse_attribute&lt;<span class="lifetime">&#39;input</span>&gt;(
-    s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">&#39;input</span>&gt;,
-) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str, <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str, StrSpan&lt;<span class="lifetime">&#39;input</span>&gt;)&gt; {
+</span><span class="kw">fn </span>parse_attribute&lt;<span class="lifetime">'input</span>&gt;(
+    s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">'input</span>&gt;,
+) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'input </span>str, <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str, StrSpan&lt;<span class="lifetime">'input</span>&gt;)&gt; {
     <span class="kw">let </span>(prefix, local) = s.consume_qname()<span class="question-mark">?</span>;
     s.consume_eq()<span class="question-mark">?</span>;
     <span class="kw">let </span>quote = s.consume_quote()<span class="question-mark">?</span>;
     <span class="kw">let </span>quote_c = quote <span class="kw">as </span>char;
     <span class="comment">// The attribute value must not contain the &lt; character.
     </span><span class="kw">let </span>value_start = s.pos();
-    s.skip_chars(|<span class="kw">_</span>, c| c != quote_c &amp;&amp; c != <span class="string">&#39;&lt;&#39;</span>)<span class="question-mark">?</span>;
+    s.skip_chars(|<span class="kw">_</span>, c| c != quote_c &amp;&amp; c != <span class="string">'&lt;'</span>)<span class="question-mark">?</span>;
     <span class="kw">let </span>value = s.slice_back_span(value_start);
     s.consume_byte(quote)<span class="question-mark">?</span>;
     <span class="prelude-val">Ok</span>((prefix, local, value))
 }
 
 <span class="comment">// content ::= CharData? ((element | Reference | CDSect | PI | Comment) CharData?)*
-</span><span class="kw">pub fn </span>parse_content&lt;<span class="lifetime">&#39;input</span>&gt;(
-    s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">&#39;input</span>&gt;,
-    events: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>XmlEvents&lt;<span class="lifetime">&#39;input</span>&gt;,
+</span><span class="kw">pub fn </span>parse_content&lt;<span class="lifetime">'input</span>&gt;(
+    s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">'input</span>&gt;,
+    events: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>XmlEvents&lt;<span class="lifetime">'input</span>&gt;,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">while </span>!s.at_end() {
         <span class="kw">match </span>s.curr_byte() {
-            <span class="prelude-val">Ok</span>(<span class="string">b&#39;&lt;&#39;</span>) =&gt; <span class="kw">match </span>s.next_byte() {
-                <span class="prelude-val">Ok</span>(<span class="string">b&#39;!&#39;</span>) =&gt; {
-                    <span class="kw">if </span>s.starts_with(<span class="string">b&quot;&lt;!--&quot;</span>) {
+            <span class="prelude-val">Ok</span>(<span class="string">b'&lt;'</span>) =&gt; <span class="kw">match </span>s.next_byte() {
+                <span class="prelude-val">Ok</span>(<span class="string">b'!'</span>) =&gt; {
+                    <span class="kw">if </span>s.starts_with(<span class="string">b"&lt;!--"</span>) {
                         parse_comment(s, events)<span class="question-mark">?</span>;
-                    } <span class="kw">else if </span>s.starts_with(<span class="string">b&quot;&lt;![CDATA[&quot;</span>) {
+                    } <span class="kw">else if </span>s.starts_with(<span class="string">b"&lt;![CDATA["</span>) {
                         parse_cdata(s, events)<span class="question-mark">?</span>;
                     } <span class="kw">else </span>{
                         <span class="kw">return </span><span class="prelude-val">Err</span>(Error::UnknownToken(s.gen_text_pos()));
                     }
                 }
-                <span class="prelude-val">Ok</span>(<span class="string">b&#39;?&#39;</span>) =&gt; parse_pi(s, events)<span class="question-mark">?</span>,
-                <span class="prelude-val">Ok</span>(<span class="string">b&#39;/&#39;</span>) =&gt; {
+                <span class="prelude-val">Ok</span>(<span class="string">b'?'</span>) =&gt; parse_pi(s, events)<span class="question-mark">?</span>,
+                <span class="prelude-val">Ok</span>(<span class="string">b'/'</span>) =&gt; {
                     parse_close_element(s, events)<span class="question-mark">?</span>;
                     <span class="kw">break</span>;
                 }
@@ -1731,30 +1732,30 @@
 }
 
 <span class="comment">// CDSect  ::= CDStart CData CDEnd
-// CDStart ::= &#39;&lt;![CDATA[&#39;
-// CData   ::= (Char* - (Char* &#39;]]&gt;&#39; Char*))
-// CDEnd   ::= &#39;]]&gt;&#39;
-</span><span class="kw">fn </span>parse_cdata&lt;<span class="lifetime">&#39;input</span>&gt;(s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">&#39;input</span>&gt;, events: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>XmlEvents&lt;<span class="lifetime">&#39;input</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+// CDStart ::= '&lt;![CDATA['
+// CData   ::= (Char* - (Char* ']]&gt;' Char*))
+// CDEnd   ::= ']]&gt;'
+</span><span class="kw">fn </span>parse_cdata&lt;<span class="lifetime">'input</span>&gt;(s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">'input</span>&gt;, events: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>XmlEvents&lt;<span class="lifetime">'input</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">let </span>start = s.pos();
     s.advance(<span class="number">9</span>); <span class="comment">// &lt;![CDATA[
-    </span><span class="kw">let </span>text = s.consume_chars(|s, c| !(c == <span class="string">&#39;]&#39; </span>&amp;&amp; s.starts_with(<span class="string">b&quot;]]&gt;&quot;</span>)))<span class="question-mark">?</span>;
-    s.skip_string(<span class="string">b&quot;]]&gt;&quot;</span>)<span class="question-mark">?</span>;
+    </span><span class="kw">let </span>text = s.consume_chars(|s, c| !(c == <span class="string">']' </span>&amp;&amp; s.starts_with(<span class="string">b"]]&gt;"</span>)))<span class="question-mark">?</span>;
+    s.skip_string(<span class="string">b"]]&gt;"</span>)<span class="question-mark">?</span>;
     <span class="kw">let </span>range = s.range_from(start);
     events.token(Token::Cdata(text, range))<span class="question-mark">?</span>;
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="comment">// &#39;&lt;/&#39; Name S? &#39;&gt;&#39;
-</span><span class="kw">fn </span>parse_close_element&lt;<span class="lifetime">&#39;input</span>&gt;(
-    s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">&#39;input</span>&gt;,
-    events: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>XmlEvents&lt;<span class="lifetime">&#39;input</span>&gt;,
+<span class="comment">// '&lt;/' Name S? '&gt;'
+</span><span class="kw">fn </span>parse_close_element&lt;<span class="lifetime">'input</span>&gt;(
+    s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">'input</span>&gt;,
+    events: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>XmlEvents&lt;<span class="lifetime">'input</span>&gt;,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">let </span>start = s.pos();
     s.advance(<span class="number">2</span>); <span class="comment">// &lt;/
 
     </span><span class="kw">let </span>(prefix, tag_name) = s.consume_qname()<span class="question-mark">?</span>;
     s.skip_spaces();
-    s.consume_byte(<span class="string">b&#39;&gt;&#39;</span>)<span class="question-mark">?</span>;
+    s.consume_byte(<span class="string">b'&gt;'</span>)<span class="question-mark">?</span>;
 
     <span class="kw">let </span>range = s.range_from(start);
     events.token(Token::ElementEnd(
@@ -1764,15 +1765,15 @@
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="kw">fn </span>parse_text&lt;<span class="lifetime">&#39;input</span>&gt;(s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">&#39;input</span>&gt;, events: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>XmlEvents&lt;<span class="lifetime">&#39;input</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+<span class="kw">fn </span>parse_text&lt;<span class="lifetime">'input</span>&gt;(s: <span class="kw-2">&amp;mut </span>Stream&lt;<span class="lifetime">'input</span>&gt;, events: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>XmlEvents&lt;<span class="lifetime">'input</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">let </span>start = s.pos();
-    <span class="kw">let </span>text = s.consume_chars(|<span class="kw">_</span>, c| c != <span class="string">&#39;&lt;&#39;</span>)<span class="question-mark">?</span>;
+    <span class="kw">let </span>text = s.consume_chars(|<span class="kw">_</span>, c| c != <span class="string">'&lt;'</span>)<span class="question-mark">?</span>;
 
     <span class="comment">// According to the spec, `]]&gt;` must not appear inside a Text node.
     // https://www.w3.org/TR/xml/#syntax
     //
-    // Search for `&gt;` first, since it&#39;s a bit faster than looking for `]]&gt;`.
-    </span><span class="kw">if </span>text.contains(<span class="string">&#39;&gt;&#39;</span>) &amp;&amp; text.contains(<span class="string">&quot;]]&gt;&quot;</span>) {
+    // Search for `&gt;` first, since it's a bit faster than looking for `]]&gt;`.
+    </span><span class="kw">if </span>text.contains(<span class="string">'&gt;'</span>) &amp;&amp; text.contains(<span class="string">"]]&gt;"</span>) {
         <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidCharacterData(s.gen_text_pos()));
     }
 
@@ -1783,11 +1784,11 @@
 
 <span class="doccomment">/// Representation of the [Reference](https://www.w3.org/TR/xml/#NT-Reference) value.
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub enum </span>Reference&lt;<span class="lifetime">&#39;input</span>&gt; {
+</span><span class="kw">pub enum </span>Reference&lt;<span class="lifetime">'input</span>&gt; {
     <span class="doccomment">/// An entity reference.
     ///
     /// &lt;https://www.w3.org/TR/xml/#NT-EntityRef&gt;
-    </span>Entity(<span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str),
+    </span>Entity(<span class="kw-2">&amp;</span><span class="lifetime">'input </span>str),
 
     <span class="doccomment">/// A character reference.
     ///
@@ -1796,15 +1797,15 @@
 }
 
 <span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>Stream&lt;<span class="lifetime">&#39;input</span>&gt; {
+</span><span class="kw">pub struct </span>Stream&lt;<span class="lifetime">'input</span>&gt; {
     pos: usize,
     end: usize,
-    span: StrSpan&lt;<span class="lifetime">&#39;input</span>&gt;,
+    span: StrSpan&lt;<span class="lifetime">'input</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;input</span>&gt; Stream&lt;<span class="lifetime">&#39;input</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'input</span>&gt; Stream&lt;<span class="lifetime">'input</span>&gt; {
     <span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>new(text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(text: <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str) -&gt; <span class="self">Self </span>{
         Stream {
             pos: <span class="number">0</span>,
             end: text.len(),
@@ -1813,7 +1814,7 @@
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>from_substr(text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str, fragment: Range&lt;usize&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>from_substr(text: <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str, fragment: Range&lt;usize&gt;) -&gt; <span class="self">Self </span>{
         Stream {
             pos: fragment.start,
             end: fragment.end,
@@ -1886,7 +1887,7 @@
         }
     }
 
-    <span class="kw">fn </span>skip_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>, text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">fn </span>skip_string(<span class="kw-2">&amp;mut </span><span class="self">self</span>, text: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">if </span>!<span class="self">self</span>.starts_with(text) {
             <span class="kw">let </span>pos = <span class="self">self</span>.gen_text_pos();
 
@@ -1901,7 +1902,7 @@
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>consume_bytes&lt;F: Fn(u8) -&gt; bool&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, f: F) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str {
+    </span><span class="kw">fn </span>consume_bytes&lt;F: Fn(u8) -&gt; bool&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, f: F) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str {
         <span class="kw">let </span>start = <span class="self">self</span>.pos;
         <span class="self">self</span>.skip_bytes(f);
         <span class="self">self</span>.slice_back(start)
@@ -1914,7 +1915,7 @@
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>consume_chars&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, f: F) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str&gt;
+    </span><span class="kw">fn </span>consume_chars&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, f: F) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'input </span>str&gt;
     <span class="kw">where
         </span>F: Fn(<span class="kw-2">&amp;</span>Stream, char) -&gt; bool,
     {
@@ -1942,17 +1943,17 @@
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>chars(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; str::Chars&lt;<span class="lifetime">&#39;input</span>&gt; {
+    </span><span class="kw">fn </span>chars(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; str::Chars&lt;<span class="lifetime">'input</span>&gt; {
         <span class="self">self</span>.span.as_str()[<span class="self">self</span>.pos..<span class="self">self</span>.end].chars()
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>slice_back(<span class="kw-2">&amp;</span><span class="self">self</span>, pos: usize) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str {
+    </span><span class="kw">fn </span>slice_back(<span class="kw-2">&amp;</span><span class="self">self</span>, pos: usize) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str {
         <span class="self">self</span>.span.slice_region(pos, <span class="self">self</span>.pos)
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>slice_back_span(<span class="kw-2">&amp;</span><span class="self">self</span>, pos: usize) -&gt; StrSpan&lt;<span class="lifetime">&#39;input</span>&gt; {
+    </span><span class="kw">fn </span>slice_back_span(<span class="kw-2">&amp;</span><span class="self">self</span>, pos: usize) -&gt; StrSpan&lt;<span class="lifetime">'input</span>&gt; {
         StrSpan::from_substr(<span class="self">self</span>.span.text, pos, <span class="self">self</span>.pos)
     }
 
@@ -1981,7 +1982,7 @@
 
         <span class="kw">if </span>!<span class="self">self</span>.starts_with_space() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidChar2(
-                <span class="string">&quot;a whitespace&quot;</span>,
+                <span class="string">"a whitespace"</span>,
                 <span class="self">self</span>.curr_byte_unchecked(),
                 <span class="self">self</span>.gen_text_pos(),
             ));
@@ -1992,7 +1993,7 @@
     }
 
     <span class="doccomment">/// Consumes according to: &lt;https://www.w3.org/TR/xml/#NT-Reference&gt;
-    </span><span class="kw">pub fn </span>try_consume_reference(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Reference&lt;<span class="lifetime">&#39;input</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>try_consume_reference(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Reference&lt;<span class="lifetime">'input</span>&gt;&gt; {
         <span class="kw">let </span>start = <span class="self">self</span>.pos();
 
         <span class="comment">// Consume reference on a substream.
@@ -2006,15 +2007,15 @@
     }
 
     <span class="attr">#[inline(never)]
-    </span><span class="kw">fn </span>consume_reference(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Reference&lt;<span class="lifetime">&#39;input</span>&gt;&gt; {
-        <span class="kw">if </span>!<span class="self">self</span>.try_consume_byte(<span class="string">b&#39;&amp;&#39;</span>) {
+    </span><span class="kw">fn </span>consume_reference(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Reference&lt;<span class="lifetime">'input</span>&gt;&gt; {
+        <span class="kw">if </span>!<span class="self">self</span>.try_consume_byte(<span class="string">b'&amp;'</span>) {
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
 
-        <span class="kw">let </span>reference = <span class="kw">if </span><span class="self">self</span>.try_consume_byte(<span class="string">b&#39;#&#39;</span>) {
-            <span class="kw">let </span>(value, radix) = <span class="kw">if </span><span class="self">self</span>.try_consume_byte(<span class="string">b&#39;x&#39;</span>) {
+        <span class="kw">let </span>reference = <span class="kw">if </span><span class="self">self</span>.try_consume_byte(<span class="string">b'#'</span>) {
+            <span class="kw">let </span>(value, radix) = <span class="kw">if </span><span class="self">self</span>.try_consume_byte(<span class="string">b'x'</span>) {
                 <span class="kw">let </span>value =
-                    <span class="self">self</span>.consume_bytes(|c| <span class="macro">matches!</span>(c, <span class="string">b&#39;0&#39;</span>..=<span class="string">b&#39;9&#39; </span>| <span class="string">b&#39;A&#39;</span>..=<span class="string">b&#39;F&#39; </span>| <span class="string">b&#39;a&#39;</span>..=<span class="string">b&#39;f&#39;</span>));
+                    <span class="self">self</span>.consume_bytes(|c| <span class="macro">matches!</span>(c, <span class="string">b'0'</span>..=<span class="string">b'9' </span>| <span class="string">b'A'</span>..=<span class="string">b'F' </span>| <span class="string">b'a'</span>..=<span class="string">b'f'</span>));
                 (value, <span class="number">16</span>)
             } <span class="kw">else </span>{
                 <span class="kw">let </span>value = <span class="self">self</span>.consume_bytes(|c| c.is_ascii_digit());
@@ -2023,7 +2024,7 @@
 
             <span class="kw">let </span>n = u32::from_str_radix(value, radix).ok()<span class="question-mark">?</span>;
 
-            <span class="kw">let </span>c = char::from_u32(n).unwrap_or(<span class="string">&#39;\u{FFFD}&#39;</span>);
+            <span class="kw">let </span>c = char::from_u32(n).unwrap_or(<span class="string">'\u{FFFD}'</span>);
             <span class="kw">if </span>!c.is_xml_char() {
                 <span class="kw">return </span><span class="prelude-val">None</span>;
             }
@@ -2032,22 +2033,22 @@
         } <span class="kw">else </span>{
             <span class="kw">let </span>name = <span class="self">self</span>.consume_name().ok()<span class="question-mark">?</span>;
             <span class="kw">match </span>name {
-                <span class="string">&quot;quot&quot; </span>=&gt; Reference::Char(<span class="string">&#39;&quot;&#39;</span>),
-                <span class="string">&quot;amp&quot; </span>=&gt; Reference::Char(<span class="string">&#39;&amp;&#39;</span>),
-                <span class="string">&quot;apos&quot; </span>=&gt; Reference::Char(<span class="string">&#39;\&#39;&#39;</span>),
-                <span class="string">&quot;lt&quot; </span>=&gt; Reference::Char(<span class="string">&#39;&lt;&#39;</span>),
-                <span class="string">&quot;gt&quot; </span>=&gt; Reference::Char(<span class="string">&#39;&gt;&#39;</span>),
+                <span class="string">"quot" </span>=&gt; Reference::Char(<span class="string">'"'</span>),
+                <span class="string">"amp" </span>=&gt; Reference::Char(<span class="string">'&amp;'</span>),
+                <span class="string">"apos" </span>=&gt; Reference::Char(<span class="string">'\''</span>),
+                <span class="string">"lt" </span>=&gt; Reference::Char(<span class="string">'&lt;'</span>),
+                <span class="string">"gt" </span>=&gt; Reference::Char(<span class="string">'&gt;'</span>),
                 <span class="kw">_ </span>=&gt; Reference::Entity(name),
             }
         };
 
-        <span class="self">self</span>.consume_byte(<span class="string">b&#39;;&#39;</span>).ok()<span class="question-mark">?</span>;
+        <span class="self">self</span>.consume_byte(<span class="string">b';'</span>).ok()<span class="question-mark">?</span>;
 
         <span class="prelude-val">Some</span>(reference)
     }
 
     <span class="doccomment">/// Consumes according to: &lt;https://www.w3.org/TR/xml/#NT-Name&gt;
-    </span><span class="kw">fn </span>consume_name(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str&gt; {
+    </span><span class="kw">fn </span>consume_name(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'input </span>str&gt; {
         <span class="kw">let </span>start = <span class="self">self</span>.pos();
         <span class="self">self</span>.skip_name()<span class="question-mark">?</span>;
 
@@ -2086,7 +2087,7 @@
     ///
     /// Consumes according to: &lt;https://www.w3.org/TR/xml-names/#ns-qualnames&gt;
     </span><span class="attr">#[inline(never)]
-    </span><span class="kw">fn </span>consume_qname(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str, <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str)&gt; {
+    </span><span class="kw">fn </span>consume_qname(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'input </span>str, <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str)&gt; {
         <span class="kw">let </span>start = <span class="self">self</span>.pos();
 
         <span class="kw">let </span><span class="kw-2">mut </span>splitter = <span class="prelude-val">None</span>;
@@ -2095,7 +2096,7 @@
             <span class="comment">// Check for ASCII first for performance reasons.
             </span><span class="kw">let </span>b = <span class="self">self</span>.curr_byte_unchecked();
             <span class="kw">if </span>b &lt; <span class="number">128 </span>{
-                <span class="kw">if </span>b == <span class="string">b&#39;:&#39; </span>{
+                <span class="kw">if </span>b == <span class="string">b':' </span>{
                     <span class="kw">if </span>splitter.is_none() {
                         splitter = <span class="prelude-val">Some</span>(<span class="self">self</span>.pos());
                         <span class="self">self</span>.advance(<span class="number">1</span>);
@@ -2151,7 +2152,7 @@
 
     <span class="kw">fn </span>consume_eq(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.skip_spaces();
-        <span class="self">self</span>.consume_byte(<span class="string">b&#39;=&#39;</span>)<span class="question-mark">?</span>;
+        <span class="self">self</span>.consume_byte(<span class="string">b'='</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.skip_spaces();
 
         <span class="prelude-val">Ok</span>(())
@@ -2159,11 +2160,11 @@
 
     <span class="kw">fn </span>consume_quote(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;u8&gt; {
         <span class="kw">let </span>c = <span class="self">self</span>.curr_byte()<span class="question-mark">?</span>;
-        <span class="kw">if </span>c == <span class="string">b&#39;\&#39;&#39; </span>|| c == <span class="string">b&#39;&quot;&#39; </span>{
+        <span class="kw">if </span>c == <span class="string">b'\'' </span>|| c == <span class="string">b'"' </span>{
             <span class="self">self</span>.advance(<span class="number">1</span>);
             <span class="prelude-val">Ok</span>(c)
         } <span class="kw">else </span>{
-            <span class="prelude-val">Err</span>(Error::InvalidChar2(<span class="string">&quot;a quote&quot;</span>, c, <span class="self">self</span>.gen_text_pos()))
+            <span class="prelude-val">Err</span>(Error::InvalidChar2(<span class="string">"a quote"</span>, c, <span class="self">self</span>.gen_text_pos()))
         }
     }
 
@@ -2193,7 +2194,7 @@
     <span class="kw">fn </span>calc_curr_row(text: <span class="kw-2">&amp;</span>str, end: usize) -&gt; u32 {
         <span class="kw">let </span><span class="kw-2">mut </span>row = <span class="number">1</span>;
         <span class="kw">for </span>c <span class="kw">in </span><span class="kw-2">&amp;</span>text.as_bytes()[..end] {
-            <span class="kw">if </span><span class="kw-2">*</span>c == <span class="string">b&#39;\n&#39; </span>{
+            <span class="kw">if </span><span class="kw-2">*</span>c == <span class="string">b'\n' </span>{
                 row += <span class="number">1</span>;
             }
         }
@@ -2204,7 +2205,7 @@
     <span class="kw">fn </span>calc_curr_col(text: <span class="kw-2">&amp;</span>str, end: usize) -&gt; u32 {
         <span class="kw">let </span><span class="kw-2">mut </span>col = <span class="number">1</span>;
         <span class="kw">for </span>c <span class="kw">in </span>text[..end].chars().rev() {
-            <span class="kw">if </span>c == <span class="string">&#39;\n&#39; </span>{
+            <span class="kw">if </span>c == <span class="string">'\n' </span>{
                 <span class="kw">break</span>;
             } <span class="kw">else </span>{
                 col += <span class="number">1</span>;

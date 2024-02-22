@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustybuzz-0.12.1/src/text_parser.rs`."><title>text_parser.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustybuzz" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustybuzz-0.12.1/src/text_parser.rs`."><title>text_parser.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustybuzz" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -143,14 +144,14 @@
 <a href="#143" id="143">143</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::Tag;
 
-<span class="kw">pub struct </span>TextParser&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">pub struct </span>TextParser&lt;<span class="lifetime">'a</span>&gt; {
     pos: usize,
-    text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str,
+    text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TextParser&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TextParser&lt;<span class="lifetime">'a</span>&gt; {
     <span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>new(text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str) -&gt; <span class="self">Self </span>{
         TextParser { pos: <span class="number">0</span>, text }
     }
 
@@ -191,7 +192,7 @@
 
     <span class="attr">#[inline]
     </span><span class="kw">pub fn </span>skip_spaces(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="comment">// Unlike harfbuzz::ISSPACE, is_ascii_whitespace doesn&#39;t includes `\v`, but whatever.
+        <span class="comment">// Unlike harfbuzz::ISSPACE, is_ascii_whitespace doesn't includes `\v`, but whatever.
         </span><span class="kw">while </span>!<span class="self">self</span>.at_end() &amp;&amp; <span class="self">self</span>.curr_byte_unchecked().is_ascii_whitespace() {
             <span class="self">self</span>.advance(<span class="number">1</span>);
         }
@@ -199,7 +200,7 @@
 
     <span class="kw">pub fn </span>consume_quote(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;u8&gt; {
         <span class="kw">let </span>c = <span class="self">self</span>.curr_byte()<span class="question-mark">?</span>;
-        <span class="kw">if </span><span class="macro">matches!</span>(c, <span class="string">b&#39;\&#39;&#39; </span>| <span class="string">b&#39;&quot;&#39;</span>) {
+        <span class="kw">if </span><span class="macro">matches!</span>(c, <span class="string">b'\'' </span>| <span class="string">b'"'</span>) {
             <span class="self">self</span>.advance(<span class="number">1</span>);
             <span class="prelude-val">Some</span>(c)
         } <span class="kw">else </span>{
@@ -208,7 +209,7 @@
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>consume_bytes&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, f: F) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str
+    </span><span class="kw">pub fn </span>consume_bytes&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, f: F) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str
     <span class="kw">where
         </span>F: Fn(u8) -&gt; bool,
     {
@@ -227,7 +228,7 @@
     }
 
     <span class="kw">pub fn </span>consume_tag(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Tag&gt; {
-        <span class="kw">let </span>tag = <span class="self">self</span>.consume_bytes(|c| c.is_ascii_alphanumeric() || c == <span class="string">b&#39;_&#39;</span>);
+        <span class="kw">let </span>tag = <span class="self">self</span>.consume_bytes(|c| c.is_ascii_alphanumeric() || c == <span class="string">b'_'</span>);
         <span class="kw">if </span>tag.len() &gt; <span class="number">4 </span>{
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
@@ -238,7 +239,7 @@
     <span class="kw">pub fn </span>consume_i32(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;i32&gt; {
         <span class="kw">let </span>start = <span class="self">self</span>.pos;
 
-        <span class="kw">if </span><span class="macro">matches!</span>(<span class="self">self</span>.curr_byte(), <span class="prelude-val">Some</span>(<span class="string">b&#39;-&#39;</span>) | <span class="prelude-val">Some</span>(<span class="string">b&#39;+&#39;</span>)) {
+        <span class="kw">if </span><span class="macro">matches!</span>(<span class="self">self</span>.curr_byte(), <span class="prelude-val">Some</span>(<span class="string">b'-'</span>) | <span class="prelude-val">Some</span>(<span class="string">b'+'</span>)) {
             <span class="self">self</span>.advance(<span class="number">1</span>);
         }
 
@@ -251,13 +252,13 @@
 
         <span class="comment">// TODO: does number like 1-e2 required?
 
-        </span><span class="kw">if </span><span class="macro">matches!</span>(<span class="self">self</span>.curr_byte(), <span class="prelude-val">Some</span>(<span class="string">b&#39;-&#39;</span>) | <span class="prelude-val">Some</span>(<span class="string">b&#39;+&#39;</span>)) {
+        </span><span class="kw">if </span><span class="macro">matches!</span>(<span class="self">self</span>.curr_byte(), <span class="prelude-val">Some</span>(<span class="string">b'-'</span>) | <span class="prelude-val">Some</span>(<span class="string">b'+'</span>)) {
             <span class="self">self</span>.advance(<span class="number">1</span>);
         }
 
         <span class="self">self</span>.skip_bytes(|c| c.is_ascii_digit());
 
-        <span class="kw">if </span><span class="self">self</span>.consume_byte(<span class="string">b&#39;.&#39;</span>).is_some() {
+        <span class="kw">if </span><span class="self">self</span>.consume_byte(<span class="string">b'.'</span>).is_some() {
             <span class="self">self</span>.skip_bytes(|c| c.is_ascii_digit());
         }
 
@@ -269,13 +270,13 @@
 
         <span class="kw">let </span>value = <span class="self">self</span>.consume_bytes(|c| c.is_ascii_alphabetic()).as_bytes();
         <span class="kw">if </span>value.len() == <span class="number">2 </span>{
-            <span class="kw">if </span>value[<span class="number">0</span>].to_ascii_lowercase() == <span class="string">b&#39;o&#39; </span>&amp;&amp; value[<span class="number">1</span>].to_ascii_lowercase() == <span class="string">b&#39;n&#39; </span>{
+            <span class="kw">if </span>value[<span class="number">0</span>].to_ascii_lowercase() == <span class="string">b'o' </span>&amp;&amp; value[<span class="number">1</span>].to_ascii_lowercase() == <span class="string">b'n' </span>{
                 <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="bool-val">true</span>);
             }
         } <span class="kw">else if </span>value.len() == <span class="number">3 </span>{
-            <span class="kw">if </span>value[<span class="number">0</span>].to_ascii_lowercase() == <span class="string">b&#39;o&#39;
-                </span>&amp;&amp; value[<span class="number">1</span>].to_ascii_lowercase() == <span class="string">b&#39;f&#39;
-                </span>&amp;&amp; value[<span class="number">2</span>].to_ascii_lowercase() == <span class="string">b&#39;f&#39;
+            <span class="kw">if </span>value[<span class="number">0</span>].to_ascii_lowercase() == <span class="string">b'o'
+                </span>&amp;&amp; value[<span class="number">1</span>].to_ascii_lowercase() == <span class="string">b'f'
+                </span>&amp;&amp; value[<span class="number">2</span>].to_ascii_lowercase() == <span class="string">b'f'
             </span>{
                 <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="bool-val">false</span>);
             }

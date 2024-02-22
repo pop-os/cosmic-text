@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/font-types-0.4.2/src/fixed.rs`."><title>fixed.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="font_types" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/font-types-0.4.2/src/fixed.rs`."><title>fixed.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="font_types" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -462,9 +463,9 @@
 </span><span class="macro">macro_rules! </span>fixed_impl {
     (<span class="macro-nonterminal">$name</span>:ident, <span class="macro-nonterminal">$bits</span>:literal, <span class="macro-nonterminal">$fract_bits</span>:literal, <span class="macro-nonterminal">$ty</span>:ty) =&gt; {
         <span class="attr">#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-        #[cfg_attr(feature = <span class="string">&quot;serde&quot;</span>, derive(serde::Serialize, serde::Deserialize))]
+        #[cfg_attr(feature = <span class="string">"serde"</span>, derive(serde::Serialize, serde::Deserialize))]
         #[repr(transparent)]
-        #[doc = <span class="macro">concat!</span>(<span class="macro">stringify!</span>(<span class="macro-nonterminal">$bits</span>), <span class="string">&quot;-bit signed fixed point number with &quot;</span>, <span class="macro">stringify!</span>(<span class="macro-nonterminal">$fract_bits</span>), <span class="string">&quot; bits of fraction.&quot; </span>)]
+        #[doc = <span class="macro">concat!</span>(<span class="macro">stringify!</span>(<span class="macro-nonterminal">$bits</span>), <span class="string">"-bit signed fixed point number with "</span>, <span class="macro">stringify!</span>(<span class="macro-nonterminal">$fract_bits</span>), <span class="string">" bits of fraction." </span>)]
         </span><span class="kw">pub struct </span><span class="macro-nonterminal">$name</span>(<span class="macro-nonterminal">$ty</span>);
         <span class="kw">impl </span><span class="macro-nonterminal">$name </span>{
             <span class="doccomment">/// Minimum value.
@@ -473,7 +474,7 @@
             <span class="doccomment">/// Maximum value.
             </span><span class="kw">pub const </span>MAX: <span class="self">Self </span>= <span class="self">Self</span>(&lt;<span class="macro-nonterminal">$ty</span>&gt;::MAX);
 
-            <span class="doccomment">/// This type&#39;s smallest representable value
+            <span class="doccomment">/// This type's smallest representable value
             </span><span class="kw">pub const </span>EPSILON: <span class="self">Self </span>= <span class="self">Self</span>(<span class="number">1</span>);
 
             <span class="doccomment">/// Representation of 0.0.
@@ -689,23 +690,23 @@
 </span><span class="macro">macro_rules! </span>float_conv {
     (<span class="macro-nonterminal">$name</span>:ident, <span class="macro-nonterminal">$to</span>:ident, <span class="macro-nonterminal">$from</span>:ident, <span class="macro-nonterminal">$ty</span>:ty) =&gt; {
         <span class="kw">impl </span><span class="macro-nonterminal">$name </span>{
-            <span class="attr">#[doc = <span class="macro">concat!</span>(<span class="string">&quot;Creates a fixed point value from a&quot;</span>, <span class="macro">stringify!</span>(<span class="macro-nonterminal">$ty</span>), <span class="string">&quot;.&quot;</span>)]
+            <span class="attr">#[doc = <span class="macro">concat!</span>(<span class="string">"Creates a fixed point value from a"</span>, <span class="macro">stringify!</span>(<span class="macro-nonterminal">$ty</span>), <span class="string">"."</span>)]
             </span><span class="doccomment">///
             /// This operation is lossy; the float will be rounded to the nearest
             /// representable value.
             </span><span class="kw">pub fn </span><span class="macro-nonterminal">$from</span>(x: <span class="macro-nonterminal">$ty</span>) -&gt; <span class="self">Self </span>{
-                <span class="attr">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, test))]
+                <span class="attr">#[cfg(any(feature = <span class="string">"std"</span>, test))]
                 </span><span class="kw">return </span><span class="self">Self</span>((x * <span class="self">Self</span>::ONE.<span class="number">0 </span><span class="kw">as </span><span class="macro-nonterminal">$ty</span>).round() <span class="kw">as _</span>);
                 <span class="comment">//NOTE: this behaviour is not exactly equivalent, but should be okay?
                 //what matters is that we are rounding *away from zero*.
-                </span><span class="attr">#[cfg(all(not(feature = <span class="string">&quot;std&quot;</span>), not(test)))]
+                </span><span class="attr">#[cfg(all(not(feature = <span class="string">"std"</span>), not(test)))]
                 </span><span class="self">Self</span>(
                     (x * <span class="self">Self</span>::ONE.<span class="number">0 </span><span class="kw">as </span><span class="macro-nonterminal">$ty </span>+ (<span class="number">0.5 </span>* (-<span class="number">1.0 </span>* x.is_sign_negative() <span class="kw">as </span>u8 <span class="kw">as </span><span class="macro-nonterminal">$ty</span>)))
                         <span class="kw">as _</span>,
                 )
             }
 
-            <span class="attr">#[doc = <span class="macro">concat!</span>(<span class="string">&quot;Returns the value as an &quot;</span>, <span class="macro">stringify!</span>(<span class="macro-nonterminal">$ty</span>), <span class="string">&quot;.&quot;</span>)]
+            <span class="attr">#[doc = <span class="macro">concat!</span>(<span class="string">"Returns the value as an "</span>, <span class="macro">stringify!</span>(<span class="macro-nonterminal">$ty</span>), <span class="string">"."</span>)]
             </span><span class="doccomment">///
             /// This operation is lossless: all representable values can be
             /// round-tripped.
@@ -767,8 +768,8 @@
     /// This specific conversion is defined by the spec:
     /// &lt;https://learn.microsoft.com/en-us/typography/opentype/spec/otvaroverview#coordinate-scales-and-normalization&gt;
     ///
-    /// &quot;5. Convert the final, normalized 16.16 coordinate value to 2.14 by this method: add 0x00000002,
-    /// and sign-extend shift to the right by 2.&quot;
+    /// "5. Convert the final, normalized 16.16 coordinate value to 2.14 by this method: add 0x00000002,
+    /// and sign-extend shift to the right by 2."
     </span><span class="attr">#[inline(always)]
     </span><span class="kw">pub const fn </span>to_f2dot14(<span class="self">self</span>) -&gt; F2Dot14 {
         F2Dot14((<span class="self">self</span>.<span class="number">0</span>.wrapping_add(<span class="number">2</span>) &gt;&gt; <span class="number">2</span>) <span class="kw">as _</span>)
@@ -857,7 +858,7 @@
         <span class="macro">assert_eq!</span>(Fixed(<span class="number">0x0001_8000</span>).round(), Fixed(<span class="number">0x0002_0000</span>));
     }
 
-    <span class="comment">// disabled because it&#39;s slow; these were just for my edification anyway
+    <span class="comment">// disabled because it's slow; these were just for my edification anyway
     //#[test]
     //fn roundtrip_fixed() {
     //for i in i32::MIN..=i32::MAX {

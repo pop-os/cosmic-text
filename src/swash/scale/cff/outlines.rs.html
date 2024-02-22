@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/scale/cff/outlines.rs`."><title>outlines.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/scale/cff/outlines.rs`."><title>outlines.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -735,7 +736,7 @@
 ///
 /// # Subfonts
 ///
-/// CFF tables can contain multiple logical &quot;subfonts&quot; which determine the
+/// CFF tables can contain multiple logical "subfonts" which determine the
 /// state required for processing some subset of glyphs. This state is
 /// accessed using the [`FDArray and FDSelect`](https://adobe-type-tools.github.io/font-tech-notes/pdfs/5176.CFF.pdf#page=28)
 /// operators to select an appropriate subfont for any given glyph identifier.
@@ -745,24 +746,24 @@
 /// [`subfont`](Self::subfont) method to create an appropriately configured
 /// subfont for that glyph.
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>Outlines&lt;<span class="lifetime">&#39;a</span>&gt; {
-    version: Version&lt;<span class="lifetime">&#39;a</span>&gt;,
-    top_dict: TopDict&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>Outlines&lt;<span class="lifetime">'a</span>&gt; {
+    version: Version&lt;<span class="lifetime">'a</span>&gt;,
+    top_dict: TopDict&lt;<span class="lifetime">'a</span>&gt;,
     units_per_em: u16,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Outlines&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Outlines&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Creates a new scaler for the given font.
     ///
     /// This will choose an underyling CFF2 or CFF table from the font, in that
     /// order.
-    </span><span class="kw">pub fn </span>new(font: <span class="kw-2">&amp;</span><span class="kw">impl </span>TableProvider&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
+    </span><span class="kw">pub fn </span>new(font: <span class="kw-2">&amp;</span><span class="kw">impl </span>TableProvider&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
         <span class="kw">let </span>units_per_em = font.head()<span class="question-mark">?</span>.units_per_em();
         <span class="kw">if let </span><span class="prelude-val">Ok</span>(cff2) = font.cff2() {
             <span class="self">Self</span>::from_cff2(cff2, units_per_em)
         } <span class="kw">else </span>{
-            <span class="comment">// &quot;The Name INDEX in the CFF data must contain only one entry;
-            // that is, there must be only one font in the CFF FontSet&quot;
+            <span class="comment">// "The Name INDEX in the CFF data must contain only one entry;
+            // that is, there must be only one font in the CFF FontSet"
             // So we always pass 0 for Top DICT index when reading from an
             // OpenType font.
             // &lt;https://learn.microsoft.com/en-us/typography/opentype/spec/cff&gt;
@@ -771,7 +772,7 @@
     }
 
     <span class="kw">pub fn </span>from_cff(
-        cff1: Cff&lt;<span class="lifetime">&#39;a</span>&gt;,
+        cff1: Cff&lt;<span class="lifetime">'a</span>&gt;,
         top_dict_index: usize,
         units_per_em: u16,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
@@ -784,7 +785,7 @@
         })
     }
 
-    <span class="kw">pub fn </span>from_cff2(cff2: Cff2&lt;<span class="lifetime">&#39;a</span>&gt;, units_per_em: u16) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
+    <span class="kw">pub fn </span>from_cff2(cff2: Cff2&lt;<span class="lifetime">'a</span>&gt;, units_per_em: u16) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
         <span class="kw">let </span>table_data = cff2.offset_data().as_bytes();
         <span class="kw">let </span>top_dict = TopDict::new(table_data, cff2.top_dict_data(), <span class="bool-val">true</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
@@ -822,7 +823,7 @@
     </span><span class="kw">pub fn </span>subfont_index(<span class="kw-2">&amp;</span><span class="self">self</span>, glyph_id: GlyphId) -&gt; u32 {
         <span class="comment">// For CFF tables, an FDSelect index will be present for CID-keyed
         // fonts. Otherwise, the Top DICT will contain an entry for the
-        // &quot;global&quot; Private DICT.
+        // "global" Private DICT.
         // See &lt;https://adobe-type-tools.github.io/font-tech-notes/pdfs/5176.CFF.pdf#page=27&gt;
         //
         // CFF2 tables always contain a Font DICT and an FDSelect is only
@@ -946,14 +947,14 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn </span>offset_data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FontData&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>offset_data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FontData&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.version {
             Version::Version1(cff1) =&gt; cff1.offset_data(),
             Version::Version2(cff2) =&gt; cff2.offset_data(),
         }
     }
 
-    <span class="kw">fn </span>global_subrs(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Index&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>global_subrs(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Index&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.version {
             Version::Version1(cff1) =&gt; cff1.global_subrs().into(),
             Version::Version2(cff2) =&gt; cff2.global_subrs().into(),
@@ -983,11 +984,11 @@
 }
 
 <span class="attr">#[derive(Clone)]
-</span><span class="kw">enum </span>Version&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">enum </span>Version&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// &lt;https://learn.microsoft.com/en-us/typography/opentype/spec/cff&gt;
-    </span>Version1(Cff&lt;<span class="lifetime">&#39;a</span>&gt;),
+    </span>Version1(Cff&lt;<span class="lifetime">'a</span>&gt;),
     <span class="doccomment">/// &lt;https://learn.microsoft.com/en-us/typography/opentype/spec/cff2&gt;
-    </span>Version2(Cff2&lt;<span class="lifetime">&#39;a</span>&gt;),
+    </span>Version2(Cff2&lt;<span class="lifetime">'a</span>&gt;),
 }
 
 <span class="doccomment">/// Specifies local subroutines and hinting parameters for some subset of
@@ -1008,7 +1009,7 @@
 
 <span class="kw">impl </span>Subfont {
     <span class="doccomment">/// Returns the local subroutine index.
-    </span><span class="kw">pub fn </span>subrs&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, scaler: <span class="kw-2">&amp;</span>Outlines&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Index&lt;<span class="lifetime">&#39;a</span>&gt;&gt;, Error&gt; {
+    </span><span class="kw">pub fn </span>subrs&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, scaler: <span class="kw-2">&amp;</span>Outlines&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Index&lt;<span class="lifetime">'a</span>&gt;&gt;, Error&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(subrs_offset) = <span class="self">self</span>.subrs_offset {
             <span class="kw">let </span>offset_data = scaler.offset_data().as_bytes();
             <span class="kw">let </span>index_data = offset_data.get(subrs_offset..).unwrap_or_default();
@@ -1020,11 +1021,11 @@
 
     <span class="doccomment">/// Creates a new blend state for the given normalized variation
     /// coordinates.
-    </span><span class="kw">pub fn </span>blend_state&lt;<span class="lifetime">&#39;a</span>&gt;(
+    </span><span class="kw">pub fn </span>blend_state&lt;<span class="lifetime">'a</span>&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        scaler: <span class="kw-2">&amp;</span>Outlines&lt;<span class="lifetime">&#39;a</span>&gt;,
-        coords: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[F2Dot14],
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;BlendState&lt;<span class="lifetime">&#39;a</span>&gt;&gt;, Error&gt; {
+        scaler: <span class="kw-2">&amp;</span>Outlines&lt;<span class="lifetime">'a</span>&gt;,
+        coords: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[F2Dot14],
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;BlendState&lt;<span class="lifetime">'a</span>&gt;&gt;, Error&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(var_store) = scaler.top_dict.var_store.clone() {
             <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(BlendState::new(var_store, coords, <span class="self">self</span>.store_index)<span class="question-mark">?</span>))
         } <span class="kw">else </span>{
@@ -1036,16 +1037,16 @@
 <span class="doccomment">/// Entries that we parse from the Top DICT that are required to support
 /// charstring evaluation.
 </span><span class="attr">#[derive(Clone, Default)]
-</span><span class="kw">struct </span>TopDict&lt;<span class="lifetime">&#39;a</span>&gt; {
-    charstrings: <span class="prelude-ty">Option</span>&lt;Index&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    font_dicts: <span class="prelude-ty">Option</span>&lt;Index&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    fd_select: <span class="prelude-ty">Option</span>&lt;FdSelect&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+</span><span class="kw">struct </span>TopDict&lt;<span class="lifetime">'a</span>&gt; {
+    charstrings: <span class="prelude-ty">Option</span>&lt;Index&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    font_dicts: <span class="prelude-ty">Option</span>&lt;Index&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    fd_select: <span class="prelude-ty">Option</span>&lt;FdSelect&lt;<span class="lifetime">'a</span>&gt;&gt;,
     private_dict_range: <span class="prelude-ty">Option</span>&lt;Range&lt;usize&gt;&gt;,
-    var_store: <span class="prelude-ty">Option</span>&lt;ItemVariationStore&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    var_store: <span class="prelude-ty">Option</span>&lt;ItemVariationStore&lt;<span class="lifetime">'a</span>&gt;&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TopDict&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(table_data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], top_dict_data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], is_cff2: bool) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TopDict&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>new(table_data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], top_dict_data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], is_cff2: bool) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>items = TopDict::default();
         <span class="kw">for </span>entry <span class="kw">in </span>dict::entries(top_dict_data, <span class="prelude-val">None</span>) {
             <span class="kw">match </span>entry<span class="question-mark">? </span>{
@@ -1085,20 +1086,20 @@
 <span class="doccomment">/// Command sink adapter that applies a scaling factor.
 ///
 /// This assumes a 26.6 scaling factor packed into a Fixed and thus,
-/// this is not public and exists only to match FreeType&#39;s exact
+/// this is not public and exists only to match FreeType's exact
 /// scaling process.
-</span><span class="kw">struct </span>ScalingSink26Dot6&lt;<span class="lifetime">&#39;a</span>, S&gt; {
-    inner: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>S,
+</span><span class="kw">struct </span>ScalingSink26Dot6&lt;<span class="lifetime">'a</span>, S&gt; {
+    inner: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>S,
     scale: Fixed,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, S&gt; ScalingSink26Dot6&lt;<span class="lifetime">&#39;a</span>, S&gt; {
-    <span class="kw">fn </span>new(sink: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>S, scale: Fixed) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, S&gt; ScalingSink26Dot6&lt;<span class="lifetime">'a</span>, S&gt; {
+    <span class="kw">fn </span>new(sink: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>S, scale: Fixed) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ scale, inner: sink }
     }
 
     <span class="kw">fn </span>scale(<span class="kw-2">&amp;</span><span class="self">self</span>, coord: Fixed) -&gt; Fixed {
-        <span class="comment">// The following dance is necessary to exactly match FreeType&#39;s
+        <span class="comment">// The following dance is necessary to exactly match FreeType's
         // application of scaling factors. This seems to be the result
         // of merging the contributed Adobe code while not breaking the
         // FreeType public API.
@@ -1127,7 +1128,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, S: CommandSink&gt; CommandSink <span class="kw">for </span>ScalingSink26Dot6&lt;<span class="lifetime">&#39;a</span>, S&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, S: CommandSink&gt; CommandSink <span class="kw">for </span>ScalingSink26Dot6&lt;<span class="lifetime">'a</span>, S&gt; {
     <span class="kw">fn </span>hstem(<span class="kw-2">&amp;mut </span><span class="self">self</span>, y: Fixed, dy: Fixed) {
         <span class="self">self</span>.inner.hstem(y, dy);
     }
@@ -1171,23 +1172,23 @@
 <span class="doccomment">/// Command sink adapter that supresses degenerate move and line commands.
 ///
 /// FreeType avoids emitting empty contours and zero length lines to prevent
-/// artifacts when stem darkening is enabled. We don&#39;t support stem darkening
-/// because it&#39;s not enabled by any of our clients but we remove the degenerate
+/// artifacts when stem darkening is enabled. We don't support stem darkening
+/// because it's not enabled by any of our clients but we remove the degenerate
 /// elements regardless to match the output.
 ///
 /// See &lt;https://gitlab.freedesktop.org/freetype/freetype/-/blob/80a507a6b8e3d2906ad2c8ba69329bd2fb2a85ef/src/psaux/pshints.c#L1786&gt;
-</span><span class="kw">struct </span>NopFilteringSink&lt;<span class="lifetime">&#39;a</span>, S&gt; {
+</span><span class="kw">struct </span>NopFilteringSink&lt;<span class="lifetime">'a</span>, S&gt; {
     start: <span class="prelude-ty">Option</span>&lt;(Fixed, Fixed)&gt;,
     last: <span class="prelude-ty">Option</span>&lt;(Fixed, Fixed)&gt;,
     pending_move: <span class="prelude-ty">Option</span>&lt;(Fixed, Fixed)&gt;,
-    inner: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>S,
+    inner: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>S,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, S&gt; NopFilteringSink&lt;<span class="lifetime">&#39;a</span>, S&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, S&gt; NopFilteringSink&lt;<span class="lifetime">'a</span>, S&gt;
 <span class="kw">where
     </span>S: CommandSink,
 {
-    <span class="kw">fn </span>new(inner: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>S) -&gt; <span class="self">Self </span>{
+    <span class="kw">fn </span>new(inner: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>S) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             start: <span class="prelude-val">None</span>,
             last: <span class="prelude-val">None</span>,
@@ -1219,7 +1220,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, S&gt; CommandSink <span class="kw">for </span>NopFilteringSink&lt;<span class="lifetime">&#39;a</span>, S&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, S&gt; CommandSink <span class="kw">for </span>NopFilteringSink&lt;<span class="lifetime">'a</span>, S&gt;
 <span class="kw">where
     </span>S: CommandSink,
 {
@@ -1305,7 +1306,7 @@
             <span class="macro">assert_eq!</span>(
                 sink.scale(Fixed::from_f64(coord)).to_f32(),
                 expected,
-                <span class="string">&quot;scaling coord {coord}&quot;
+                <span class="string">"scaling coord {coord}"
             </span>);
         }
     }
@@ -1405,7 +1406,7 @@
                 .unwrap();
             <span class="kw">if </span>path.elements != expected_outline.path {
                 <span class="macro">panic!</span>(
-                    <span class="string">&quot;mismatch in glyph path for id {} (size: {}, coords: {:?}): path: {:?} expected_path: {:?}&quot;</span>,
+                    <span class="string">"mismatch in glyph path for id {} (size: {}, coords: {:?}): path: {:?} expected_path: {:?}"</span>,
                     expected_outline.glyph_id,
                     expected_outline.size,
                     expected_outline.coords,

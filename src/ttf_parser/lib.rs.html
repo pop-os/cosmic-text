@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ttf-parser-0.20.0/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="ttf_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ttf-parser-0.20.0/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="ttf_parser" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -2360,7 +2361,7 @@ Font parsing starts with a [`Face`].
 #![allow(clippy::field_reassign_with_default)]
 #![allow(clippy::upper_case_acronyms)]
 
-#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+#[cfg(feature = <span class="string">"std"</span>)]
 #[macro_use]
 </span><span class="kw">extern crate </span>std;
 
@@ -2373,39 +2374,39 @@ Font parsing starts with a [`Face`].
     };
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;apple-layout&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"apple-layout"</span>)]
 </span><span class="kw">mod </span>aat;
-<span class="attr">#[cfg(feature = <span class="string">&quot;opentype-layout&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"opentype-layout"</span>)]
 </span><span class="kw">mod </span>ggg;
 <span class="kw">mod </span>language;
 <span class="kw">mod </span>parser;
 <span class="kw">mod </span>tables;
-<span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
 </span><span class="kw">mod </span>var_store;
 
 <span class="kw">use </span>head::IndexToLocationFormat;
 <span class="kw">pub use </span>parser::{Fixed, FromData, LazyArray16, LazyArray32, LazyArrayIter16, LazyArrayIter32};
 <span class="kw">use </span>parser::{NumFrom, Offset, Offset32, Stream, TryNumFrom};
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
 </span><span class="kw">pub use </span>fvar::VariationAxis;
 
 <span class="kw">pub use </span>language::Language;
 <span class="kw">pub use </span>name::{name_id, PlatformId};
 <span class="kw">pub use </span>os2::{Permissions, ScriptMetrics, Style, UnicodeRanges, Weight, Width};
 <span class="kw">pub use </span>tables::CFFError;
-<span class="attr">#[cfg(feature = <span class="string">&quot;apple-layout&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"apple-layout"</span>)]
 </span><span class="kw">pub use </span>tables::{ankr, feat, kerx, morx, trak};
-<span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
 </span><span class="kw">pub use </span>tables::{avar, cff2, fvar, gvar, hvar, mvar};
 <span class="kw">pub use </span>tables::{cbdt, cblc, cff1 <span class="kw">as </span>cff, vhea};
 <span class="kw">pub use </span>tables::{
     cmap, colr, cpal, glyf, head, hhea, hmtx, kern, loca, maxp, name, os2, post, sbix, svg, vorg,
 };
-<span class="attr">#[cfg(feature = <span class="string">&quot;opentype-layout&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"opentype-layout"</span>)]
 </span><span class="kw">pub use </span>tables::{gdef, gpos, gsub, math};
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;opentype-layout&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"opentype-layout"</span>)]
 </span><span class="kw">pub mod </span>opentype_layout {
     <span class="doccomment">//! This module contains
     //! [OpenType Layout](https://docs.microsoft.com/en-us/typography/opentype/spec/chapter2#overview)
@@ -2413,7 +2414,7 @@ Font parsing starts with a [`Face`].
     </span><span class="kw">pub use </span><span class="kw">crate</span>::ggg::<span class="kw-2">*</span>;
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;apple-layout&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"apple-layout"</span>)]
 </span><span class="kw">pub mod </span>apple_layout {
     <span class="doccomment">//! This module contains
     //! [Apple Advanced Typography Layout](
@@ -2505,7 +2506,7 @@ Font parsing starts with a [`Face`].
 /// ```
 /// use ttf_parser::{Variation, Tag};
 ///
-/// Variation { axis: Tag::from_bytes(b&quot;wght&quot;), value: 500.0 };
+/// Variation { axis: Tag::from_bytes(b"wght"), value: 500.0 };
 /// ```
 </span><span class="attr">#[derive(Clone, Copy, PartialEq, Debug)]
 </span><span class="kw">pub struct </span>Variation {
@@ -2526,7 +2527,7 @@ Font parsing starts with a [`Face`].
     /// # Example
     ///
     /// ```rust
-    /// println!(&quot;{}&quot;, ttf_parser::Tag::from_bytes(b&quot;name&quot;));
+    /// println!("{}", ttf_parser::Tag::from_bytes(b"name"));
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub const fn </span>from_bytes(bytes: <span class="kw-2">&amp;</span>[u8; <span class="number">4</span>]) -&gt; <span class="self">Self </span>{
@@ -2549,7 +2550,7 @@ Font parsing starts with a [`Face`].
             <span class="kw">return </span>Tag::from_bytes(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]);
         }
 
-        <span class="kw">let </span><span class="kw-2">mut </span>iter = bytes.iter().cloned().chain(core::iter::repeat(<span class="string">b&#39; &#39;</span>));
+        <span class="kw">let </span><span class="kw-2">mut </span>iter = bytes.iter().cloned().chain(core::iter::repeat(<span class="string">b' '</span>));
         Tag::from_bytes(<span class="kw-2">&amp;</span>[
             iter.next().unwrap(),
             iter.next().unwrap(),
@@ -2595,22 +2596,22 @@ Font parsing starts with a [`Face`].
 
 <span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Tag {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;Tag({})&quot;</span>, <span class="self">self</span>)
+    </span><span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; core::fmt::Result {
+        <span class="macro">write!</span>(f, <span class="string">"Tag({})"</span>, <span class="self">self</span>)
     }
 }
 
 <span class="kw">impl </span>core::fmt::Display <span class="kw">for </span>Tag {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; core::fmt::Result {
+    </span><span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; core::fmt::Result {
         <span class="kw">let </span>b = <span class="self">self</span>.to_chars();
         <span class="macro">write!</span>(
             f,
-            <span class="string">&quot;{}{}{}{}&quot;</span>,
-            b.get(<span class="number">0</span>).unwrap_or(<span class="kw-2">&amp;</span><span class="string">&#39; &#39;</span>),
-            b.get(<span class="number">1</span>).unwrap_or(<span class="kw-2">&amp;</span><span class="string">&#39; &#39;</span>),
-            b.get(<span class="number">2</span>).unwrap_or(<span class="kw-2">&amp;</span><span class="string">&#39; &#39;</span>),
-            b.get(<span class="number">3</span>).unwrap_or(<span class="kw-2">&amp;</span><span class="string">&#39; &#39;</span>)
+            <span class="string">"{}{}{}{}"</span>,
+            b.get(<span class="number">0</span>).unwrap_or(<span class="kw-2">&amp;</span><span class="string">' '</span>),
+            b.get(<span class="number">1</span>).unwrap_or(<span class="kw-2">&amp;</span><span class="string">' '</span>),
+            b.get(<span class="number">2</span>).unwrap_or(<span class="kw-2">&amp;</span><span class="string">' '</span>),
+            b.get(<span class="number">3</span>).unwrap_or(<span class="kw-2">&amp;</span><span class="string">' '</span>)
         )
     }
 }
@@ -2639,7 +2640,7 @@ Font parsing starts with a [`Face`].
 
 <span class="doccomment">/// A rectangle.
 ///
-/// Doesn&#39;t guarantee that `x_min` &lt;= `x_max` and/or `y_min` &lt;= `y_max`.
+/// Doesn't guarantee that `x_min` &lt;= `x_max` and/or `y_min` &lt;= `y_max`.
 </span><span class="attr">#[repr(C)]
 #[allow(missing_docs)]
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -2661,13 +2662,13 @@ Font parsing starts with a [`Face`].
         }
     }
 
-    <span class="doccomment">/// Returns rect&#39;s width.
+    <span class="doccomment">/// Returns rect's width.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>width(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; i16 {
         <span class="self">self</span>.x_max - <span class="self">self</span>.x_min
     }
 
-    <span class="doccomment">/// Returns rect&#39;s height.
+    <span class="doccomment">/// Returns rect's height.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>height(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; i16 {
         <span class="self">self</span>.y_max - <span class="self">self</span>.y_min
@@ -2736,7 +2737,7 @@ Font parsing starts with a [`Face`].
         Transform { a, b, c, d, e, f }
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
     #[inline]
     </span><span class="kw">pub fn </span>new_translate(tx: f32, ty: f32) -&gt; <span class="self">Self </span>{
         Transform::new(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>, tx, ty)
@@ -2792,7 +2793,7 @@ Font parsing starts with a [`Face`].
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
         <span class="macro">write!</span>(
             f,
-            <span class="string">&quot;Transform({} {} {} {} {} {})&quot;</span>,
+            <span class="string">"Transform({} {} {} {} {} {})"</span>,
             <span class="self">self</span>.a, <span class="self">self</span>.b, <span class="self">self</span>.c, <span class="self">self</span>.d, <span class="self">self</span>.e, <span class="self">self</span>.f
         )
     }
@@ -2910,16 +2911,16 @@ Font parsing starts with a [`Face`].
     /// The first group of four bytes corresponds to the top-left pixel, proceeding through
     /// succeeding pixels moving left to right. Each byte corresponds to a color channel and the
     /// channels within a pixel are in blue, green, red, alpha order. Color values are
-    /// pre-multiplied by the alpha. For example, the color &quot;full-green with half translucency&quot;
+    /// pre-multiplied by the alpha. For example, the color "full-green with half translucency"
     /// is encoded as `\x00\x80\x00\x80`, and not `\x00\xFF\x00\x80`.
     </span>BitmapPremulBgra32,
 }
 
-<span class="doccomment">/// A glyph&#39;s raster image.
+<span class="doccomment">/// A glyph's raster image.
 ///
 /// Note, that glyph metrics are in pixels and not in font units.
 </span><span class="attr">#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-</span><span class="kw">pub struct </span>RasterGlyphImage&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>RasterGlyphImage&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Horizontal offset.
     </span><span class="kw">pub </span>x: i16,
 
@@ -2928,12 +2929,12 @@ Font parsing starts with a [`Face`].
 
     <span class="doccomment">/// Image width.
     ///
-    /// It doesn&#39;t guarantee that this value is the same as set in the `data`.
+    /// It doesn't guarantee that this value is the same as set in the `data`.
     </span><span class="kw">pub </span>width: u16,
 
     <span class="doccomment">/// Image height.
     ///
-    /// It doesn&#39;t guarantee that this value is the same as set in the `data`.
+    /// It doesn't guarantee that this value is the same as set in the `data`.
     </span><span class="kw">pub </span>height: u16,
 
     <span class="doccomment">/// A pixels per em of the selected strike.
@@ -2942,8 +2943,8 @@ Font parsing starts with a [`Face`].
     <span class="doccomment">/// An image format.
     </span><span class="kw">pub </span>format: RasterImageFormat,
 
-    <span class="doccomment">/// A raw image data. It&#39;s up to the caller to decode it.
-    </span><span class="kw">pub </span>data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    <span class="doccomment">/// A raw image data. It's up to the caller to decode it.
+    </span><span class="kw">pub </span>data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
 }
 
 <span class="doccomment">/// A raw table record.
@@ -2972,17 +2973,17 @@ Font parsing starts with a [`Face`].
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
 </span><span class="kw">const </span>MAX_VAR_COORDS: usize = <span class="number">32</span>;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
 #[derive(Clone, Default)]
 </span><span class="kw">struct </span>VarCoords {
     data: [NormalizedCoordinate; MAX_VAR_COORDS],
     len: u8,
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
 </span><span class="kw">impl </span>VarCoords {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>as_slice(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[NormalizedCoordinate] {
@@ -3021,19 +3022,19 @@ Font parsing starts with a [`Face`].
 }
 
 <span class="kw">impl </span>core::fmt::Display <span class="kw">for </span>FaceParsingError {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; core::fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; core::fmt::Result {
         <span class="kw">match </span><span class="self">self </span>{
-            FaceParsingError::MalformedFont =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;malformed font&quot;</span>),
-            FaceParsingError::UnknownMagic =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;unknown magic&quot;</span>),
-            FaceParsingError::FaceIndexOutOfBounds =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;face index is out of bounds&quot;</span>),
-            FaceParsingError::NoHeadTable =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;the head table is missing or malformed&quot;</span>),
-            FaceParsingError::NoHheaTable =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;the hhea table is missing or malformed&quot;</span>),
-            FaceParsingError::NoMaxpTable =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;the maxp table is missing or malformed&quot;</span>),
+            FaceParsingError::MalformedFont =&gt; <span class="macro">write!</span>(f, <span class="string">"malformed font"</span>),
+            FaceParsingError::UnknownMagic =&gt; <span class="macro">write!</span>(f, <span class="string">"unknown magic"</span>),
+            FaceParsingError::FaceIndexOutOfBounds =&gt; <span class="macro">write!</span>(f, <span class="string">"face index is out of bounds"</span>),
+            FaceParsingError::NoHeadTable =&gt; <span class="macro">write!</span>(f, <span class="string">"the head table is missing or malformed"</span>),
+            FaceParsingError::NoHheaTable =&gt; <span class="macro">write!</span>(f, <span class="string">"the hhea table is missing or malformed"</span>),
+            FaceParsingError::NoMaxpTable =&gt; <span class="macro">write!</span>(f, <span class="string">"the maxp table is missing or malformed"</span>),
         }
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">impl </span>std::error::Error <span class="kw">for </span>FaceParsingError {}
 
 <span class="doccomment">/// A raw font face.
@@ -3045,14 +3046,14 @@ Font parsing starts with a [`Face`].
 /// Then you can either parse just a singe table from a font/face or populate [`RawFaceTables`]
 /// manually before passing it to [`Face::from_raw_tables`].
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>RawFace&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>RawFace&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// The input font file data.
-    </span><span class="kw">pub </span>data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    </span><span class="kw">pub </span>data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     <span class="doccomment">/// An array of table records.
-    </span><span class="kw">pub </span>table_records: LazyArray16&lt;<span class="lifetime">&#39;a</span>, TableRecord&gt;,
+    </span><span class="kw">pub </span>table_records: LazyArray16&lt;<span class="lifetime">'a</span>, TableRecord&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; RawFace&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; RawFace&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Creates a new [`RawFace`] from a raw data.
     ///
     /// `index` indicates the specific font face in a font collection.
@@ -3060,8 +3061,8 @@ Font parsing starts with a [`Face`].
     /// Set to 0 if unsure.
     ///
     /// While we do reuse [`FaceParsingError`], `No*Table` errors will not be throws.
-    </span><span class="attr">#[deprecated(since = <span class="string">&quot;0.16.0&quot;</span>, note = <span class="string">&quot;use `parse` instead&quot;</span>)]
-    </span><span class="kw">pub fn </span>from_slice(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], index: u32) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, FaceParsingError&gt; {
+    </span><span class="attr">#[deprecated(since = <span class="string">"0.16.0"</span>, note = <span class="string">"use `parse` instead"</span>)]
+    </span><span class="kw">pub fn </span>from_slice(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], index: u32) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, FaceParsingError&gt; {
         <span class="self">Self</span>::parse(data, index)
     }
 
@@ -3072,7 +3073,7 @@ Font parsing starts with a [`Face`].
     /// Set to 0 if unsure.
     ///
     /// While we do reuse [`FaceParsingError`], `No*Table` errors will not be throws.
-    </span><span class="kw">pub fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], index: u32) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, FaceParsingError&gt; {
+    </span><span class="kw">pub fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], index: u32) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, FaceParsingError&gt; {
         <span class="comment">// https://docs.microsoft.com/en-us/typography/opentype/spec/otff#organization-of-an-opentype-font
 
         </span><span class="kw">let </span><span class="kw-2">mut </span>s = Stream::new(data);
@@ -3101,7 +3102,7 @@ Font parsing starts with a [`Face`].
             <span class="comment">// Read **face** magic.
             // Each face in a font collection also starts with a magic.
             </span><span class="kw">let </span>magic = s.read::&lt;Magic&gt;().ok_or(FaceParsingError::UnknownMagic)<span class="question-mark">?</span>;
-            <span class="comment">// And face in a font collection can&#39;t be another collection.
+            <span class="comment">// And face in a font collection can't be another collection.
             </span><span class="kw">if </span>magic == Magic::FontCollection {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(FaceParsingError::UnknownMagic);
             }
@@ -3126,7 +3127,7 @@ Font parsing starts with a [`Face`].
     }
 
     <span class="doccomment">/// Returns the raw data of a selected table.
-    </span><span class="kw">pub fn </span>table(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: Tag) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt; {
+    </span><span class="kw">pub fn </span>table(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: Tag) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt; {
         <span class="kw">let </span>(<span class="kw">_</span>, table) = <span class="self">self
             </span>.table_records
             .binary_search_by(|record| record.tag.cmp(<span class="kw-2">&amp;</span>tag))<span class="question-mark">?</span>;
@@ -3137,9 +3138,9 @@ Font parsing starts with a [`Face`].
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>RawFace&lt;<span class="lifetime">&#39;_</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;RawFace {{ ... }}&quot;</span>)
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>RawFace&lt;<span class="lifetime">'_</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; core::fmt::Result {
+        <span class="macro">write!</span>(f, <span class="string">"RawFace {{ ... }}"</span>)
     }
 }
 
@@ -3153,69 +3154,69 @@ Font parsing starts with a [`Face`].
 </span><span class="attr">#[allow(missing_docs)]
 #[allow(missing_debug_implementations)]
 #[derive(Clone, Default)]
-</span><span class="kw">pub struct </span>RawFaceTables&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>RawFaceTables&lt;<span class="lifetime">'a</span>&gt; {
     <span class="comment">// Mandatory tables.
-    </span><span class="kw">pub </span>head: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
-    <span class="kw">pub </span>hhea: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
-    <span class="kw">pub </span>maxp: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    </span><span class="kw">pub </span>head: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
+    <span class="kw">pub </span>hhea: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
+    <span class="kw">pub </span>maxp: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
 
-    <span class="kw">pub </span>bdat: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="kw">pub </span>bloc: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="kw">pub </span>cbdt: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="kw">pub </span>cblc: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="kw">pub </span>cff: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="kw">pub </span>cmap: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="kw">pub </span>colr: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="kw">pub </span>cpal: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="kw">pub </span>ebdt: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="kw">pub </span>eblc: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="kw">pub </span>glyf: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="kw">pub </span>hmtx: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="kw">pub </span>kern: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="kw">pub </span>loca: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="kw">pub </span>name: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="kw">pub </span>os2: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="kw">pub </span>post: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="kw">pub </span>sbix: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="kw">pub </span>svg: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="kw">pub </span>vhea: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="kw">pub </span>vmtx: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="kw">pub </span>vorg: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
+    <span class="kw">pub </span>bdat: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="kw">pub </span>bloc: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="kw">pub </span>cbdt: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="kw">pub </span>cblc: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="kw">pub </span>cff: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="kw">pub </span>cmap: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="kw">pub </span>colr: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="kw">pub </span>cpal: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="kw">pub </span>ebdt: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="kw">pub </span>eblc: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="kw">pub </span>glyf: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="kw">pub </span>hmtx: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="kw">pub </span>kern: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="kw">pub </span>loca: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="kw">pub </span>name: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="kw">pub </span>os2: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="kw">pub </span>post: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="kw">pub </span>sbix: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="kw">pub </span>svg: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="kw">pub </span>vhea: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="kw">pub </span>vmtx: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="kw">pub </span>vorg: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;opentype-layout&quot;</span>)]
-    </span><span class="kw">pub </span>gdef: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;opentype-layout&quot;</span>)]
-    </span><span class="kw">pub </span>gpos: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;opentype-layout&quot;</span>)]
-    </span><span class="kw">pub </span>gsub: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;opentype-layout&quot;</span>)]
-    </span><span class="kw">pub </span>math: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"opentype-layout"</span>)]
+    </span><span class="kw">pub </span>gdef: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"opentype-layout"</span>)]
+    </span><span class="kw">pub </span>gpos: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"opentype-layout"</span>)]
+    </span><span class="kw">pub </span>gsub: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"opentype-layout"</span>)]
+    </span><span class="kw">pub </span>math: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;apple-layout&quot;</span>)]
-    </span><span class="kw">pub </span>ankr: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;apple-layout&quot;</span>)]
-    </span><span class="kw">pub </span>feat: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;apple-layout&quot;</span>)]
-    </span><span class="kw">pub </span>kerx: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;apple-layout&quot;</span>)]
-    </span><span class="kw">pub </span>morx: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;apple-layout&quot;</span>)]
-    </span><span class="kw">pub </span>trak: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"apple-layout"</span>)]
+    </span><span class="kw">pub </span>ankr: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"apple-layout"</span>)]
+    </span><span class="kw">pub </span>feat: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"apple-layout"</span>)]
+    </span><span class="kw">pub </span>kerx: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"apple-layout"</span>)]
+    </span><span class="kw">pub </span>morx: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"apple-layout"</span>)]
+    </span><span class="kw">pub </span>trak: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
-    </span><span class="kw">pub </span>avar: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
-    </span><span class="kw">pub </span>cff2: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
-    </span><span class="kw">pub </span>fvar: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
-    </span><span class="kw">pub </span>gvar: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
-    </span><span class="kw">pub </span>hvar: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
-    </span><span class="kw">pub </span>mvar: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
-    </span><span class="kw">pub </span>vvar: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
+    </span><span class="kw">pub </span>avar: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
+    </span><span class="kw">pub </span>cff2: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
+    </span><span class="kw">pub </span>fvar: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
+    </span><span class="kw">pub </span>gvar: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
+    </span><span class="kw">pub </span>hvar: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
+    </span><span class="kw">pub </span>mvar: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
+    </span><span class="kw">pub </span>vvar: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
 }
 
 <span class="doccomment">/// Parsed face tables.
@@ -3228,90 +3229,90 @@ Font parsing starts with a [`Face`].
 </span><span class="attr">#[allow(missing_docs)]
 #[allow(missing_debug_implementations)]
 #[derive(Clone)]
-</span><span class="kw">pub struct </span>FaceTables&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>FaceTables&lt;<span class="lifetime">'a</span>&gt; {
     <span class="comment">// Mandatory tables.
     </span><span class="kw">pub </span>head: head::Table,
     <span class="kw">pub </span>hhea: hhea::Table,
     <span class="kw">pub </span>maxp: maxp::Table,
 
-    <span class="kw">pub </span>bdat: <span class="prelude-ty">Option</span>&lt;cbdt::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="kw">pub </span>cbdt: <span class="prelude-ty">Option</span>&lt;cbdt::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="kw">pub </span>cff: <span class="prelude-ty">Option</span>&lt;cff::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="kw">pub </span>cmap: <span class="prelude-ty">Option</span>&lt;cmap::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="kw">pub </span>colr: <span class="prelude-ty">Option</span>&lt;colr::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="kw">pub </span>ebdt: <span class="prelude-ty">Option</span>&lt;cbdt::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="kw">pub </span>glyf: <span class="prelude-ty">Option</span>&lt;glyf::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="kw">pub </span>hmtx: <span class="prelude-ty">Option</span>&lt;hmtx::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="kw">pub </span>kern: <span class="prelude-ty">Option</span>&lt;kern::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="kw">pub </span>name: <span class="prelude-ty">Option</span>&lt;name::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="kw">pub </span>os2: <span class="prelude-ty">Option</span>&lt;os2::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="kw">pub </span>post: <span class="prelude-ty">Option</span>&lt;post::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="kw">pub </span>sbix: <span class="prelude-ty">Option</span>&lt;sbix::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="kw">pub </span>svg: <span class="prelude-ty">Option</span>&lt;svg::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    <span class="kw">pub </span>bdat: <span class="prelude-ty">Option</span>&lt;cbdt::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="kw">pub </span>cbdt: <span class="prelude-ty">Option</span>&lt;cbdt::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="kw">pub </span>cff: <span class="prelude-ty">Option</span>&lt;cff::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="kw">pub </span>cmap: <span class="prelude-ty">Option</span>&lt;cmap::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="kw">pub </span>colr: <span class="prelude-ty">Option</span>&lt;colr::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="kw">pub </span>ebdt: <span class="prelude-ty">Option</span>&lt;cbdt::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="kw">pub </span>glyf: <span class="prelude-ty">Option</span>&lt;glyf::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="kw">pub </span>hmtx: <span class="prelude-ty">Option</span>&lt;hmtx::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="kw">pub </span>kern: <span class="prelude-ty">Option</span>&lt;kern::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="kw">pub </span>name: <span class="prelude-ty">Option</span>&lt;name::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="kw">pub </span>os2: <span class="prelude-ty">Option</span>&lt;os2::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="kw">pub </span>post: <span class="prelude-ty">Option</span>&lt;post::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="kw">pub </span>sbix: <span class="prelude-ty">Option</span>&lt;sbix::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="kw">pub </span>svg: <span class="prelude-ty">Option</span>&lt;svg::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
     <span class="kw">pub </span>vhea: <span class="prelude-ty">Option</span>&lt;vhea::Table&gt;,
-    <span class="kw">pub </span>vmtx: <span class="prelude-ty">Option</span>&lt;hmtx::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="kw">pub </span>vorg: <span class="prelude-ty">Option</span>&lt;vorg::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    <span class="kw">pub </span>vmtx: <span class="prelude-ty">Option</span>&lt;hmtx::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="kw">pub </span>vorg: <span class="prelude-ty">Option</span>&lt;vorg::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;opentype-layout&quot;</span>)]
-    </span><span class="kw">pub </span>gdef: <span class="prelude-ty">Option</span>&lt;gdef::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;opentype-layout&quot;</span>)]
-    </span><span class="kw">pub </span>gpos: <span class="prelude-ty">Option</span>&lt;opentype_layout::LayoutTable&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;opentype-layout&quot;</span>)]
-    </span><span class="kw">pub </span>gsub: <span class="prelude-ty">Option</span>&lt;opentype_layout::LayoutTable&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;opentype-layout&quot;</span>)]
-    </span><span class="kw">pub </span>math: <span class="prelude-ty">Option</span>&lt;math::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"opentype-layout"</span>)]
+    </span><span class="kw">pub </span>gdef: <span class="prelude-ty">Option</span>&lt;gdef::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"opentype-layout"</span>)]
+    </span><span class="kw">pub </span>gpos: <span class="prelude-ty">Option</span>&lt;opentype_layout::LayoutTable&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"opentype-layout"</span>)]
+    </span><span class="kw">pub </span>gsub: <span class="prelude-ty">Option</span>&lt;opentype_layout::LayoutTable&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"opentype-layout"</span>)]
+    </span><span class="kw">pub </span>math: <span class="prelude-ty">Option</span>&lt;math::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;apple-layout&quot;</span>)]
-    </span><span class="kw">pub </span>ankr: <span class="prelude-ty">Option</span>&lt;ankr::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;apple-layout&quot;</span>)]
-    </span><span class="kw">pub </span>feat: <span class="prelude-ty">Option</span>&lt;feat::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;apple-layout&quot;</span>)]
-    </span><span class="kw">pub </span>kerx: <span class="prelude-ty">Option</span>&lt;kerx::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;apple-layout&quot;</span>)]
-    </span><span class="kw">pub </span>morx: <span class="prelude-ty">Option</span>&lt;morx::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;apple-layout&quot;</span>)]
-    </span><span class="kw">pub </span>trak: <span class="prelude-ty">Option</span>&lt;trak::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"apple-layout"</span>)]
+    </span><span class="kw">pub </span>ankr: <span class="prelude-ty">Option</span>&lt;ankr::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"apple-layout"</span>)]
+    </span><span class="kw">pub </span>feat: <span class="prelude-ty">Option</span>&lt;feat::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"apple-layout"</span>)]
+    </span><span class="kw">pub </span>kerx: <span class="prelude-ty">Option</span>&lt;kerx::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"apple-layout"</span>)]
+    </span><span class="kw">pub </span>morx: <span class="prelude-ty">Option</span>&lt;morx::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"apple-layout"</span>)]
+    </span><span class="kw">pub </span>trak: <span class="prelude-ty">Option</span>&lt;trak::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
-    </span><span class="kw">pub </span>avar: <span class="prelude-ty">Option</span>&lt;avar::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
-    </span><span class="kw">pub </span>cff2: <span class="prelude-ty">Option</span>&lt;cff2::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
-    </span><span class="kw">pub </span>fvar: <span class="prelude-ty">Option</span>&lt;fvar::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
-    </span><span class="kw">pub </span>gvar: <span class="prelude-ty">Option</span>&lt;gvar::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
-    </span><span class="kw">pub </span>hvar: <span class="prelude-ty">Option</span>&lt;hvar::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
-    </span><span class="kw">pub </span>mvar: <span class="prelude-ty">Option</span>&lt;mvar::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
-    </span><span class="kw">pub </span>vvar: <span class="prelude-ty">Option</span>&lt;hvar::Table&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
+    </span><span class="kw">pub </span>avar: <span class="prelude-ty">Option</span>&lt;avar::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
+    </span><span class="kw">pub </span>cff2: <span class="prelude-ty">Option</span>&lt;cff2::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
+    </span><span class="kw">pub </span>fvar: <span class="prelude-ty">Option</span>&lt;fvar::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
+    </span><span class="kw">pub </span>gvar: <span class="prelude-ty">Option</span>&lt;gvar::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
+    </span><span class="kw">pub </span>hvar: <span class="prelude-ty">Option</span>&lt;hvar::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
+    </span><span class="kw">pub </span>mvar: <span class="prelude-ty">Option</span>&lt;mvar::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
+    </span><span class="kw">pub </span>vvar: <span class="prelude-ty">Option</span>&lt;hvar::Table&lt;<span class="lifetime">'a</span>&gt;&gt;,
 }
 
 <span class="doccomment">/// A font face.
 ///
 /// Provides a high-level API for working with TrueType fonts.
-/// If you&#39;re not familiar with how TrueType works internally, you should use this type.
+/// If you're not familiar with how TrueType works internally, you should use this type.
 /// If you do know and want a bit more low-level access - checkout [`FaceTables`].
 ///
-/// Note that `Face` doesn&#39;t own the font data and doesn&#39;t allocate anything in heap.
-/// Therefore you cannot &quot;store&quot; it. The idea is that you should parse the `Face`
+/// Note that `Face` doesn't own the font data and doesn't allocate anything in heap.
+/// Therefore you cannot "store" it. The idea is that you should parse the `Face`
 /// when needed, get required data and forget about it.
-/// That&#39;s why the initial parsing is highly optimized and should not become a bottleneck.
+/// That's why the initial parsing is highly optimized and should not become a bottleneck.
 ///
 /// If you still want to store `Face` - checkout
 /// [owned_ttf_parser](https://crates.io/crates/owned_ttf_parser). Requires `unsafe`.
 ///
-/// While `Face` is technically copyable, we disallow it because it&#39;s almost 2KB big.
+/// While `Face` is technically copyable, we disallow it because it's almost 2KB big.
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>Face&lt;<span class="lifetime">&#39;a</span>&gt; {
-    raw_face: RawFace&lt;<span class="lifetime">&#39;a</span>&gt;,
-    tables: FaceTables&lt;<span class="lifetime">&#39;a</span>&gt;, <span class="comment">// Parsed tables.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+</span><span class="kw">pub struct </span>Face&lt;<span class="lifetime">'a</span>&gt; {
+    raw_face: RawFace&lt;<span class="lifetime">'a</span>&gt;,
+    tables: FaceTables&lt;<span class="lifetime">'a</span>&gt;, <span class="comment">// Parsed tables.
+    </span><span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
     </span>coordinates: VarCoords,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Face&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Face&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Creates a new [`Face`] from a raw data.
     ///
     /// `index` indicates the specific font face in a font collection.
@@ -3324,8 +3325,8 @@ Font parsing starts with a [`Face`].
     /// Required tables: `head`, `hhea` and `maxp`.
     ///
     /// If an optional table has invalid data it will be skipped.
-    </span><span class="attr">#[deprecated(since = <span class="string">&quot;0.16.0&quot;</span>, note = <span class="string">&quot;use `parse` instead&quot;</span>)]
-    </span><span class="kw">pub fn </span>from_slice(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], index: u32) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, FaceParsingError&gt; {
+    </span><span class="attr">#[deprecated(since = <span class="string">"0.16.0"</span>, note = <span class="string">"use `parse` instead"</span>)]
+    </span><span class="kw">pub fn </span>from_slice(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], index: u32) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, FaceParsingError&gt; {
         <span class="self">Self</span>::parse(data, index)
     }
 
@@ -3341,19 +3342,19 @@ Font parsing starts with a [`Face`].
     /// Required tables: `head`, `hhea` and `maxp`.
     ///
     /// If an optional table has invalid data it will be skipped.
-    </span><span class="kw">pub fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], index: u32) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, FaceParsingError&gt; {
+    </span><span class="kw">pub fn </span>parse(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], index: u32) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, FaceParsingError&gt; {
         <span class="kw">let </span>raw_face = RawFace::parse(data, index)<span class="question-mark">?</span>;
         <span class="kw">let </span>raw_tables = <span class="self">Self</span>::collect_tables(raw_face);
 
         <span class="attr">#[allow(unused_mut)]
         </span><span class="kw">let </span><span class="kw-2">mut </span>face = Face {
             raw_face,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
             </span>coordinates: VarCoords::default(),
             tables: <span class="self">Self</span>::parse_tables(raw_tables)<span class="question-mark">?</span>,
         };
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
         </span>{
             <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>fvar) = face.tables.fvar {
                 face.coordinates.len = fvar.axes.len().min(MAX_VAR_COORDS <span class="kw">as </span>u16) <span class="kw">as </span>u8;
@@ -3363,7 +3364,7 @@ Font parsing starts with a [`Face`].
         <span class="prelude-val">Ok</span>(face)
     }
 
-    <span class="kw">fn </span>collect_tables(raw_face: RawFace&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; RawFaceTables&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>collect_tables(raw_face: RawFace&lt;<span class="lifetime">'a</span>&gt;) -&gt; RawFaceTables&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>tables = RawFaceTables::default();
 
         <span class="kw">for </span>record <span class="kw">in </span>raw_face.table_records {
@@ -3375,63 +3376,63 @@ Font parsing starts with a [`Face`].
 
             <span class="kw">let </span>table_data = raw_face.data.get(start..end);
             <span class="kw">match </span><span class="kw-2">&amp;</span>record.tag.to_bytes() {
-                <span class="string">b&quot;bdat&quot; </span>=&gt; tables.bdat = table_data,
-                <span class="string">b&quot;bloc&quot; </span>=&gt; tables.bloc = table_data,
-                <span class="string">b&quot;CBDT&quot; </span>=&gt; tables.cbdt = table_data,
-                <span class="string">b&quot;CBLC&quot; </span>=&gt; tables.cblc = table_data,
-                <span class="string">b&quot;CFF &quot; </span>=&gt; tables.cff = table_data,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
-                </span><span class="string">b&quot;CFF2&quot; </span>=&gt; tables.cff2 = table_data,
-                <span class="string">b&quot;COLR&quot; </span>=&gt; tables.colr = table_data,
-                <span class="string">b&quot;CPAL&quot; </span>=&gt; tables.cpal = table_data,
-                <span class="string">b&quot;EBDT&quot; </span>=&gt; tables.ebdt = table_data,
-                <span class="string">b&quot;EBLC&quot; </span>=&gt; tables.eblc = table_data,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;opentype-layout&quot;</span>)]
-                </span><span class="string">b&quot;GDEF&quot; </span>=&gt; tables.gdef = table_data,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;opentype-layout&quot;</span>)]
-                </span><span class="string">b&quot;GPOS&quot; </span>=&gt; tables.gpos = table_data,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;opentype-layout&quot;</span>)]
-                </span><span class="string">b&quot;GSUB&quot; </span>=&gt; tables.gsub = table_data,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;opentype-layout&quot;</span>)]
-                </span><span class="string">b&quot;MATH&quot; </span>=&gt; tables.math = table_data,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
-                </span><span class="string">b&quot;HVAR&quot; </span>=&gt; tables.hvar = table_data,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
-                </span><span class="string">b&quot;MVAR&quot; </span>=&gt; tables.mvar = table_data,
-                <span class="string">b&quot;OS/2&quot; </span>=&gt; tables.os2 = table_data,
-                <span class="string">b&quot;SVG &quot; </span>=&gt; tables.svg = table_data,
-                <span class="string">b&quot;VORG&quot; </span>=&gt; tables.vorg = table_data,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
-                </span><span class="string">b&quot;VVAR&quot; </span>=&gt; tables.vvar = table_data,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;apple-layout&quot;</span>)]
-                </span><span class="string">b&quot;ankr&quot; </span>=&gt; tables.ankr = table_data,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
-                </span><span class="string">b&quot;avar&quot; </span>=&gt; tables.avar = table_data,
-                <span class="string">b&quot;cmap&quot; </span>=&gt; tables.cmap = table_data,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;apple-layout&quot;</span>)]
-                </span><span class="string">b&quot;feat&quot; </span>=&gt; tables.feat = table_data,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
-                </span><span class="string">b&quot;fvar&quot; </span>=&gt; tables.fvar = table_data,
-                <span class="string">b&quot;glyf&quot; </span>=&gt; tables.glyf = table_data,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
-                </span><span class="string">b&quot;gvar&quot; </span>=&gt; tables.gvar = table_data,
-                <span class="string">b&quot;head&quot; </span>=&gt; tables.head = table_data.unwrap_or_default(),
-                <span class="string">b&quot;hhea&quot; </span>=&gt; tables.hhea = table_data.unwrap_or_default(),
-                <span class="string">b&quot;hmtx&quot; </span>=&gt; tables.hmtx = table_data,
-                <span class="string">b&quot;kern&quot; </span>=&gt; tables.kern = table_data,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;apple-layout&quot;</span>)]
-                </span><span class="string">b&quot;kerx&quot; </span>=&gt; tables.kerx = table_data,
-                <span class="string">b&quot;loca&quot; </span>=&gt; tables.loca = table_data,
-                <span class="string">b&quot;maxp&quot; </span>=&gt; tables.maxp = table_data.unwrap_or_default(),
-                <span class="attr">#[cfg(feature = <span class="string">&quot;apple-layout&quot;</span>)]
-                </span><span class="string">b&quot;morx&quot; </span>=&gt; tables.morx = table_data,
-                <span class="string">b&quot;name&quot; </span>=&gt; tables.name = table_data,
-                <span class="string">b&quot;post&quot; </span>=&gt; tables.post = table_data,
-                <span class="string">b&quot;sbix&quot; </span>=&gt; tables.sbix = table_data,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;apple-layout&quot;</span>)]
-                </span><span class="string">b&quot;trak&quot; </span>=&gt; tables.trak = table_data,
-                <span class="string">b&quot;vhea&quot; </span>=&gt; tables.vhea = table_data,
-                <span class="string">b&quot;vmtx&quot; </span>=&gt; tables.vmtx = table_data,
+                <span class="string">b"bdat" </span>=&gt; tables.bdat = table_data,
+                <span class="string">b"bloc" </span>=&gt; tables.bloc = table_data,
+                <span class="string">b"CBDT" </span>=&gt; tables.cbdt = table_data,
+                <span class="string">b"CBLC" </span>=&gt; tables.cblc = table_data,
+                <span class="string">b"CFF " </span>=&gt; tables.cff = table_data,
+                <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
+                </span><span class="string">b"CFF2" </span>=&gt; tables.cff2 = table_data,
+                <span class="string">b"COLR" </span>=&gt; tables.colr = table_data,
+                <span class="string">b"CPAL" </span>=&gt; tables.cpal = table_data,
+                <span class="string">b"EBDT" </span>=&gt; tables.ebdt = table_data,
+                <span class="string">b"EBLC" </span>=&gt; tables.eblc = table_data,
+                <span class="attr">#[cfg(feature = <span class="string">"opentype-layout"</span>)]
+                </span><span class="string">b"GDEF" </span>=&gt; tables.gdef = table_data,
+                <span class="attr">#[cfg(feature = <span class="string">"opentype-layout"</span>)]
+                </span><span class="string">b"GPOS" </span>=&gt; tables.gpos = table_data,
+                <span class="attr">#[cfg(feature = <span class="string">"opentype-layout"</span>)]
+                </span><span class="string">b"GSUB" </span>=&gt; tables.gsub = table_data,
+                <span class="attr">#[cfg(feature = <span class="string">"opentype-layout"</span>)]
+                </span><span class="string">b"MATH" </span>=&gt; tables.math = table_data,
+                <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
+                </span><span class="string">b"HVAR" </span>=&gt; tables.hvar = table_data,
+                <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
+                </span><span class="string">b"MVAR" </span>=&gt; tables.mvar = table_data,
+                <span class="string">b"OS/2" </span>=&gt; tables.os2 = table_data,
+                <span class="string">b"SVG " </span>=&gt; tables.svg = table_data,
+                <span class="string">b"VORG" </span>=&gt; tables.vorg = table_data,
+                <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
+                </span><span class="string">b"VVAR" </span>=&gt; tables.vvar = table_data,
+                <span class="attr">#[cfg(feature = <span class="string">"apple-layout"</span>)]
+                </span><span class="string">b"ankr" </span>=&gt; tables.ankr = table_data,
+                <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
+                </span><span class="string">b"avar" </span>=&gt; tables.avar = table_data,
+                <span class="string">b"cmap" </span>=&gt; tables.cmap = table_data,
+                <span class="attr">#[cfg(feature = <span class="string">"apple-layout"</span>)]
+                </span><span class="string">b"feat" </span>=&gt; tables.feat = table_data,
+                <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
+                </span><span class="string">b"fvar" </span>=&gt; tables.fvar = table_data,
+                <span class="string">b"glyf" </span>=&gt; tables.glyf = table_data,
+                <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
+                </span><span class="string">b"gvar" </span>=&gt; tables.gvar = table_data,
+                <span class="string">b"head" </span>=&gt; tables.head = table_data.unwrap_or_default(),
+                <span class="string">b"hhea" </span>=&gt; tables.hhea = table_data.unwrap_or_default(),
+                <span class="string">b"hmtx" </span>=&gt; tables.hmtx = table_data,
+                <span class="string">b"kern" </span>=&gt; tables.kern = table_data,
+                <span class="attr">#[cfg(feature = <span class="string">"apple-layout"</span>)]
+                </span><span class="string">b"kerx" </span>=&gt; tables.kerx = table_data,
+                <span class="string">b"loca" </span>=&gt; tables.loca = table_data,
+                <span class="string">b"maxp" </span>=&gt; tables.maxp = table_data.unwrap_or_default(),
+                <span class="attr">#[cfg(feature = <span class="string">"apple-layout"</span>)]
+                </span><span class="string">b"morx" </span>=&gt; tables.morx = table_data,
+                <span class="string">b"name" </span>=&gt; tables.name = table_data,
+                <span class="string">b"post" </span>=&gt; tables.post = table_data,
+                <span class="string">b"sbix" </span>=&gt; tables.sbix = table_data,
+                <span class="attr">#[cfg(feature = <span class="string">"apple-layout"</span>)]
+                </span><span class="string">b"trak" </span>=&gt; tables.trak = table_data,
+                <span class="string">b"vhea" </span>=&gt; tables.vhea = table_data,
+                <span class="string">b"vmtx" </span>=&gt; tables.vmtx = table_data,
                 <span class="kw">_ </span>=&gt; {}
             }
         }
@@ -3440,19 +3441,19 @@ Font parsing starts with a [`Face`].
     }
 
     <span class="doccomment">/// Creates a new [`Face`] from provided [`RawFaceTables`].
-    </span><span class="kw">pub fn </span>from_raw_tables(raw_tables: RawFaceTables&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, FaceParsingError&gt; {
+    </span><span class="kw">pub fn </span>from_raw_tables(raw_tables: RawFaceTables&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, FaceParsingError&gt; {
         <span class="attr">#[allow(unused_mut)]
         </span><span class="kw">let </span><span class="kw-2">mut </span>face = Face {
             raw_face: RawFace {
                 data: <span class="kw-2">&amp;</span>[],
                 table_records: LazyArray16::default(),
             },
-            <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
             </span>coordinates: VarCoords::default(),
             tables: <span class="self">Self</span>::parse_tables(raw_tables)<span class="question-mark">?</span>,
         };
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
         </span>{
             <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>fvar) = face.tables.fvar {
                 face.coordinates.len = fvar.axes.len().min(MAX_VAR_COORDS <span class="kw">as </span>u16) <span class="kw">as </span>u8;
@@ -3462,7 +3463,7 @@ Font parsing starts with a [`Face`].
         <span class="prelude-val">Ok</span>(face)
     }
 
-    <span class="kw">fn </span>parse_tables(raw_tables: RawFaceTables&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;FaceTables&lt;<span class="lifetime">&#39;a</span>&gt;, FaceParsingError&gt; {
+    <span class="kw">fn </span>parse_tables(raw_tables: RawFaceTables&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;FaceTables&lt;<span class="lifetime">'a</span>&gt;, FaceParsingError&gt; {
         <span class="kw">let </span>head = head::Table::parse(raw_tables.head).ok_or(FaceParsingError::NoHeadTable)<span class="question-mark">?</span>;
         <span class="kw">let </span>hhea = hhea::Table::parse(raw_tables.hhea).ok_or(FaceParsingError::NoHheaTable)<span class="question-mark">?</span>;
         <span class="kw">let </span>maxp = maxp::Table::parse(raw_tables.maxp).ok_or(FaceParsingError::NoMaxpTable)<span class="question-mark">?</span>;
@@ -3549,56 +3550,56 @@ Font parsing starts with a [`Face`].
             vmtx,
             vorg: raw_tables.vorg.and_then(vorg::Table::parse),
 
-            <span class="attr">#[cfg(feature = <span class="string">&quot;opentype-layout&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"opentype-layout"</span>)]
             </span>gdef: raw_tables.gdef.and_then(gdef::Table::parse),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;opentype-layout&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"opentype-layout"</span>)]
             </span>gpos: raw_tables
                 .gpos
                 .and_then(opentype_layout::LayoutTable::parse),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;opentype-layout&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"opentype-layout"</span>)]
             </span>gsub: raw_tables
                 .gsub
                 .and_then(opentype_layout::LayoutTable::parse),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;opentype-layout&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"opentype-layout"</span>)]
             </span>math: raw_tables.math.and_then(math::Table::parse),
 
-            <span class="attr">#[cfg(feature = <span class="string">&quot;apple-layout&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"apple-layout"</span>)]
             </span>ankr: raw_tables
                 .ankr
                 .and_then(|data| ankr::Table::parse(maxp.number_of_glyphs, data)),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;apple-layout&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"apple-layout"</span>)]
             </span>feat: raw_tables.feat.and_then(feat::Table::parse),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;apple-layout&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"apple-layout"</span>)]
             </span>kerx: raw_tables
                 .kerx
                 .and_then(|data| kerx::Table::parse(maxp.number_of_glyphs, data)),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;apple-layout&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"apple-layout"</span>)]
             </span>morx: raw_tables
                 .morx
                 .and_then(|data| morx::Table::parse(maxp.number_of_glyphs, data)),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;apple-layout&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"apple-layout"</span>)]
             </span>trak: raw_tables.trak.and_then(trak::Table::parse),
 
-            <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
             </span>avar: raw_tables.avar.and_then(avar::Table::parse),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
             </span>cff2: raw_tables.cff2.and_then(cff2::Table::parse),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
             </span>fvar: raw_tables.fvar.and_then(fvar::Table::parse),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
             </span>gvar: raw_tables.gvar.and_then(gvar::Table::parse),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
             </span>hvar: raw_tables.hvar.and_then(hvar::Table::parse),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
             </span>mvar: raw_tables.mvar.and_then(mvar::Table::parse),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
             </span>vvar: raw_tables.vvar.and_then(hvar::Table::parse),
         })
     }
 
     <span class="doccomment">/// Returns low-level face tables.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>tables(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>FaceTables&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>tables(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>FaceTables&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw-2">&amp;</span><span class="self">self</span>.tables
     }
 
@@ -3608,7 +3609,7 @@ Font parsing starts with a [`Face`].
     ///
     /// Available only for faces created using [`Face::parse()`](struct.Face.html#method.parse).
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>raw_face(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>RawFace&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>raw_face(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>RawFace&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw-2">&amp;</span><span class="self">self</span>.raw_face
     }
 
@@ -3617,9 +3618,9 @@ Font parsing starts with a [`Face`].
     /// Useful if you want to parse the data manually.
     ///
     /// Available only for faces created using [`Face::parse()`](struct.Face.html#method.parse).
-    </span><span class="attr">#[deprecated(since = <span class="string">&quot;0.16.0&quot;</span>, note = <span class="string">&quot;use `self.raw_face().table()` instead&quot;</span>)]
+    </span><span class="attr">#[deprecated(since = <span class="string">"0.16.0"</span>, note = <span class="string">"use `self.raw_face().table()` instead"</span>)]
     #[inline]
-    </span><span class="kw">pub fn </span>table_data(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: Tag) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt; {
+    </span><span class="kw">pub fn </span>table_data(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: Tag) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt; {
         <span class="self">self</span>.raw_face.table(tag)
     }
 
@@ -3627,7 +3628,7 @@ Font parsing starts with a [`Face`].
     ///
     /// Contains face name and other strings.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>names(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; name::Names&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>names(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; name::Names&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.tables.name.unwrap_or_default().names
     }
 
@@ -3691,19 +3692,19 @@ Font parsing starts with a [`Face`].
     /// Simply checks the presence of a `fvar` table.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>is_variable(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
         </span>{
             <span class="comment">// `fvar::Table::parse` already checked that `axisCount` is non-zero.
             </span><span class="self">self</span>.tables.fvar.is_some()
         }
 
-        <span class="attr">#[cfg(not(feature = <span class="string">&quot;variable-fonts&quot;</span>))]
+        <span class="attr">#[cfg(not(feature = <span class="string">"variable-fonts"</span>))]
         </span>{
             <span class="bool-val">false
         </span>}
     }
 
-    <span class="doccomment">/// Returns face&#39;s weight.
+    <span class="doccomment">/// Returns face's weight.
     ///
     /// Returns `Weight::Normal` when OS/2 table is not present.
     </span><span class="attr">#[inline]
@@ -3711,7 +3712,7 @@ Font parsing starts with a [`Face`].
         <span class="macro">try_opt_or!</span>(<span class="self">self</span>.tables.os2, Weight::default()).weight()
     }
 
-    <span class="doccomment">/// Returns face&#39;s width.
+    <span class="doccomment">/// Returns face's width.
     ///
     /// Returns `Width::Normal` when OS/2 table is not present or when value is invalid.
     </span><span class="attr">#[inline]
@@ -3719,7 +3720,7 @@ Font parsing starts with a [`Face`].
         <span class="macro">try_opt_or!</span>(<span class="self">self</span>.tables.os2, Width::default()).width()
     }
 
-    <span class="doccomment">/// Returns face&#39;s italic angle.
+    <span class="doccomment">/// Returns face's italic angle.
     ///
     /// Returns `None` when `post` table is not present.
     </span><span class="attr">#[inline]
@@ -3738,7 +3739,7 @@ Font parsing starts with a [`Face`].
         <span class="kw">if let </span><span class="prelude-val">Some</span>(os_2) = <span class="self">self</span>.tables.os2 {
             <span class="kw">if </span>os_2.use_typographic_metrics() {
                 <span class="kw">let </span>value = os_2.typographic_ascender();
-                <span class="kw">return </span><span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b&quot;hasc&quot;</span>), value);
+                <span class="kw">return </span><span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b"hasc"</span>), value);
             }
         }
 
@@ -3748,9 +3749,9 @@ Font parsing starts with a [`Face`].
                 value = os_2.typographic_ascender();
                 <span class="kw">if </span>value == <span class="number">0 </span>{
                     value = os_2.windows_ascender();
-                    value = <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b&quot;hcla&quot;</span>), value);
+                    value = <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b"hcla"</span>), value);
                 } <span class="kw">else </span>{
-                    value = <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b&quot;hasc&quot;</span>), value);
+                    value = <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b"hasc"</span>), value);
                 }
             }
         }
@@ -3766,7 +3767,7 @@ Font parsing starts with a [`Face`].
         <span class="kw">if let </span><span class="prelude-val">Some</span>(os_2) = <span class="self">self</span>.tables.os2 {
             <span class="kw">if </span>os_2.use_typographic_metrics() {
                 <span class="kw">let </span>value = os_2.typographic_descender();
-                <span class="kw">return </span><span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b&quot;hdsc&quot;</span>), value);
+                <span class="kw">return </span><span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b"hdsc"</span>), value);
             }
         }
 
@@ -3776,9 +3777,9 @@ Font parsing starts with a [`Face`].
                 value = os_2.typographic_descender();
                 <span class="kw">if </span>value == <span class="number">0 </span>{
                     value = os_2.windows_descender();
-                    value = <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b&quot;hcld&quot;</span>), value);
+                    value = <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b"hcld"</span>), value);
                 } <span class="kw">else </span>{
-                    value = <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b&quot;hdsc&quot;</span>), value);
+                    value = <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b"hdsc"</span>), value);
                 }
             }
         }
@@ -3786,7 +3787,7 @@ Font parsing starts with a [`Face`].
         value
     }
 
-    <span class="doccomment">/// Returns face&#39;s height.
+    <span class="doccomment">/// Returns face's height.
     ///
     /// This method is affected by variation axes.
     </span><span class="attr">#[inline]
@@ -3802,7 +3803,7 @@ Font parsing starts with a [`Face`].
         <span class="kw">if let </span><span class="prelude-val">Some</span>(os_2) = <span class="self">self</span>.tables.os2 {
             <span class="kw">if </span>os_2.use_typographic_metrics() {
                 <span class="kw">let </span>value = os_2.typographic_line_gap();
-                <span class="kw">return </span><span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b&quot;hlgp&quot;</span>), value);
+                <span class="kw">return </span><span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b"hlgp"</span>), value);
             }
         }
 
@@ -3812,7 +3813,7 @@ Font parsing starts with a [`Face`].
             <span class="kw">if let </span><span class="prelude-val">Some</span>(os_2) = <span class="self">self</span>.tables.os2 {
                 <span class="kw">if </span>os_2.typographic_ascender() != <span class="number">0 </span>|| os_2.typographic_descender() != <span class="number">0 </span>{
                     value = os_2.typographic_line_gap();
-                    value = <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b&quot;hlgp&quot;</span>), value);
+                    value = <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b"hlgp"</span>), value);
                 } <span class="kw">else </span>{
                     value = <span class="number">0</span>;
                 }
@@ -3834,7 +3835,7 @@ Font parsing starts with a [`Face`].
     </span><span class="kw">pub fn </span>typographic_ascender(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;i16&gt; {
         <span class="self">self</span>.tables.os2.map(|table| {
             <span class="kw">let </span>v = table.typographic_ascender();
-            <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b&quot;hasc&quot;</span>), v)
+            <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b"hasc"</span>), v)
         })
     }
 
@@ -3850,7 +3851,7 @@ Font parsing starts with a [`Face`].
     </span><span class="kw">pub fn </span>typographic_descender(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;i16&gt; {
         <span class="self">self</span>.tables.os2.map(|table| {
             <span class="kw">let </span>v = table.typographic_descender();
-            <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b&quot;hdsc&quot;</span>), v)
+            <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b"hdsc"</span>), v)
         })
     }
 
@@ -3866,7 +3867,7 @@ Font parsing starts with a [`Face`].
     </span><span class="kw">pub fn </span>typographic_line_gap(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;i16&gt; {
         <span class="self">self</span>.tables.os2.map(|table| {
             <span class="kw">let </span>v = table.typographic_line_gap();
-            <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b&quot;hlgp&quot;</span>), v)
+            <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b"hlgp"</span>), v)
         })
     }
 
@@ -3878,7 +3879,7 @@ Font parsing starts with a [`Face`].
         <span class="self">self</span>.tables
             .vhea
             .map(|vhea| vhea.ascender)
-            .map(|v| <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b&quot;vasc&quot;</span>), v))
+            .map(|v| <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b"vasc"</span>), v))
     }
 
     <span class="doccomment">/// Returns a vertical face descender.
@@ -3889,7 +3890,7 @@ Font parsing starts with a [`Face`].
         <span class="self">self</span>.tables
             .vhea
             .map(|vhea| vhea.descender)
-            .map(|v| <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b&quot;vdsc&quot;</span>), v))
+            .map(|v| <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b"vdsc"</span>), v))
     }
 
     <span class="doccomment">/// Returns a vertical face height.
@@ -3908,10 +3909,10 @@ Font parsing starts with a [`Face`].
         <span class="self">self</span>.tables
             .vhea
             .map(|vhea| vhea.line_gap)
-            .map(|v| <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b&quot;vlgp&quot;</span>), v))
+            .map(|v| <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b"vlgp"</span>), v))
     }
 
-    <span class="doccomment">/// Returns face&#39;s units per EM.
+    <span class="doccomment">/// Returns face's units per EM.
     ///
     /// Guarantee to be in a 16..=16384 range.
     </span><span class="attr">#[inline]
@@ -3919,7 +3920,7 @@ Font parsing starts with a [`Face`].
         <span class="self">self</span>.tables.head.units_per_em
     }
 
-    <span class="doccomment">/// Returns face&#39;s x height.
+    <span class="doccomment">/// Returns face's x height.
     ///
     /// This method is affected by variation axes.
     ///
@@ -3929,10 +3930,10 @@ Font parsing starts with a [`Face`].
         <span class="self">self</span>.tables
             .os2
             .and_then(|os_2| os_2.x_height())
-            .map(|v| <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b&quot;xhgt&quot;</span>), v))
+            .map(|v| <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b"xhgt"</span>), v))
     }
 
-    <span class="doccomment">/// Returns face&#39;s capital height.
+    <span class="doccomment">/// Returns face's capital height.
     ///
     /// This method is affected by variation axes.
     ///
@@ -3942,10 +3943,10 @@ Font parsing starts with a [`Face`].
         <span class="self">self</span>.tables
             .os2
             .and_then(|os_2| os_2.capital_height())
-            .map(|v| <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b&quot;cpht&quot;</span>), v))
+            .map(|v| <span class="self">self</span>.apply_metrics_variation(Tag::from_bytes(<span class="string">b"cpht"</span>), v))
     }
 
-    <span class="doccomment">/// Returns face&#39;s underline metrics.
+    <span class="doccomment">/// Returns face's underline metrics.
     ///
     /// This method is affected by variation axes.
     ///
@@ -3955,14 +3956,14 @@ Font parsing starts with a [`Face`].
         <span class="kw">let </span><span class="kw-2">mut </span>metrics = <span class="self">self</span>.tables.post<span class="question-mark">?</span>.underline_metrics;
 
         <span class="kw">if </span><span class="self">self</span>.is_variable() {
-            <span class="self">self</span>.apply_metrics_variation_to(Tag::from_bytes(<span class="string">b&quot;undo&quot;</span>), <span class="kw-2">&amp;mut </span>metrics.position);
-            <span class="self">self</span>.apply_metrics_variation_to(Tag::from_bytes(<span class="string">b&quot;unds&quot;</span>), <span class="kw-2">&amp;mut </span>metrics.thickness);
+            <span class="self">self</span>.apply_metrics_variation_to(Tag::from_bytes(<span class="string">b"undo"</span>), <span class="kw-2">&amp;mut </span>metrics.position);
+            <span class="self">self</span>.apply_metrics_variation_to(Tag::from_bytes(<span class="string">b"unds"</span>), <span class="kw-2">&amp;mut </span>metrics.thickness);
         }
 
         <span class="prelude-val">Some</span>(metrics)
     }
 
-    <span class="doccomment">/// Returns face&#39;s strikeout metrics.
+    <span class="doccomment">/// Returns face's strikeout metrics.
     ///
     /// This method is affected by variation axes.
     ///
@@ -3972,14 +3973,14 @@ Font parsing starts with a [`Face`].
         <span class="kw">let </span><span class="kw-2">mut </span>metrics = <span class="self">self</span>.tables.os2<span class="question-mark">?</span>.strikeout_metrics();
 
         <span class="kw">if </span><span class="self">self</span>.is_variable() {
-            <span class="self">self</span>.apply_metrics_variation_to(Tag::from_bytes(<span class="string">b&quot;stro&quot;</span>), <span class="kw-2">&amp;mut </span>metrics.position);
-            <span class="self">self</span>.apply_metrics_variation_to(Tag::from_bytes(<span class="string">b&quot;strs&quot;</span>), <span class="kw-2">&amp;mut </span>metrics.thickness);
+            <span class="self">self</span>.apply_metrics_variation_to(Tag::from_bytes(<span class="string">b"stro"</span>), <span class="kw-2">&amp;mut </span>metrics.position);
+            <span class="self">self</span>.apply_metrics_variation_to(Tag::from_bytes(<span class="string">b"strs"</span>), <span class="kw-2">&amp;mut </span>metrics.thickness);
         }
 
         <span class="prelude-val">Some</span>(metrics)
     }
 
-    <span class="doccomment">/// Returns face&#39;s subscript metrics.
+    <span class="doccomment">/// Returns face's subscript metrics.
     ///
     /// This method is affected by variation axes.
     ///
@@ -3989,16 +3990,16 @@ Font parsing starts with a [`Face`].
         <span class="kw">let </span><span class="kw-2">mut </span>metrics = <span class="self">self</span>.tables.os2<span class="question-mark">?</span>.subscript_metrics();
 
         <span class="kw">if </span><span class="self">self</span>.is_variable() {
-            <span class="self">self</span>.apply_metrics_variation_to(Tag::from_bytes(<span class="string">b&quot;sbxs&quot;</span>), <span class="kw-2">&amp;mut </span>metrics.x_size);
-            <span class="self">self</span>.apply_metrics_variation_to(Tag::from_bytes(<span class="string">b&quot;sbys&quot;</span>), <span class="kw-2">&amp;mut </span>metrics.y_size);
-            <span class="self">self</span>.apply_metrics_variation_to(Tag::from_bytes(<span class="string">b&quot;sbxo&quot;</span>), <span class="kw-2">&amp;mut </span>metrics.x_offset);
-            <span class="self">self</span>.apply_metrics_variation_to(Tag::from_bytes(<span class="string">b&quot;sbyo&quot;</span>), <span class="kw-2">&amp;mut </span>metrics.y_offset);
+            <span class="self">self</span>.apply_metrics_variation_to(Tag::from_bytes(<span class="string">b"sbxs"</span>), <span class="kw-2">&amp;mut </span>metrics.x_size);
+            <span class="self">self</span>.apply_metrics_variation_to(Tag::from_bytes(<span class="string">b"sbys"</span>), <span class="kw-2">&amp;mut </span>metrics.y_size);
+            <span class="self">self</span>.apply_metrics_variation_to(Tag::from_bytes(<span class="string">b"sbxo"</span>), <span class="kw-2">&amp;mut </span>metrics.x_offset);
+            <span class="self">self</span>.apply_metrics_variation_to(Tag::from_bytes(<span class="string">b"sbyo"</span>), <span class="kw-2">&amp;mut </span>metrics.y_offset);
         }
 
         <span class="prelude-val">Some</span>(metrics)
     }
 
-    <span class="doccomment">/// Returns face&#39;s superscript metrics.
+    <span class="doccomment">/// Returns face's superscript metrics.
     ///
     /// This method is affected by variation axes.
     ///
@@ -4008,10 +4009,10 @@ Font parsing starts with a [`Face`].
         <span class="kw">let </span><span class="kw-2">mut </span>metrics = <span class="self">self</span>.tables.os2<span class="question-mark">?</span>.superscript_metrics();
 
         <span class="kw">if </span><span class="self">self</span>.is_variable() {
-            <span class="self">self</span>.apply_metrics_variation_to(Tag::from_bytes(<span class="string">b&quot;spxs&quot;</span>), <span class="kw-2">&amp;mut </span>metrics.x_size);
-            <span class="self">self</span>.apply_metrics_variation_to(Tag::from_bytes(<span class="string">b&quot;spys&quot;</span>), <span class="kw-2">&amp;mut </span>metrics.y_size);
-            <span class="self">self</span>.apply_metrics_variation_to(Tag::from_bytes(<span class="string">b&quot;spxo&quot;</span>), <span class="kw-2">&amp;mut </span>metrics.x_offset);
-            <span class="self">self</span>.apply_metrics_variation_to(Tag::from_bytes(<span class="string">b&quot;spyo&quot;</span>), <span class="kw-2">&amp;mut </span>metrics.y_offset);
+            <span class="self">self</span>.apply_metrics_variation_to(Tag::from_bytes(<span class="string">b"spxs"</span>), <span class="kw-2">&amp;mut </span>metrics.x_size);
+            <span class="self">self</span>.apply_metrics_variation_to(Tag::from_bytes(<span class="string">b"spys"</span>), <span class="kw-2">&amp;mut </span>metrics.y_size);
+            <span class="self">self</span>.apply_metrics_variation_to(Tag::from_bytes(<span class="string">b"spxo"</span>), <span class="kw-2">&amp;mut </span>metrics.x_offset);
+            <span class="self">self</span>.apply_metrics_variation_to(Tag::from_bytes(<span class="string">b"spyo"</span>), <span class="kw-2">&amp;mut </span>metrics.y_offset);
         }
 
         <span class="prelude-val">Some</span>(metrics)
@@ -4056,7 +4057,7 @@ Font parsing starts with a [`Face`].
     ///
     /// Never zero.
     ///
-    /// The value was already parsed, so this function doesn&#39;t involve any parsing.
+    /// The value was already parsed, so this function doesn't involve any parsing.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>number_of_glyphs(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u16 {
         <span class="self">self</span>.tables.maxp.number_of_glyphs.get()
@@ -4089,7 +4090,7 @@ Font parsing starts with a [`Face`].
     /// Uses the `post` and `CFF` tables as sources.
     ///
     /// Returns `None` when no name is associated with a `glyph`.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;glyph-names&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"glyph-names"</span>)]
     #[inline]
     </span><span class="kw">pub fn </span>glyph_index_by_name(<span class="kw-2">&amp;</span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;GlyphId&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(name) = <span class="self">self
@@ -4133,12 +4134,12 @@ Font parsing starts with a [`Face`].
         <span class="prelude-val">None
     </span>}
 
-    <span class="doccomment">/// Returns glyph&#39;s horizontal advance.
+    <span class="doccomment">/// Returns glyph's horizontal advance.
     ///
     /// This method is affected by variation axes.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>glyph_hor_advance(<span class="kw-2">&amp;</span><span class="self">self</span>, glyph_id: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;u16&gt; {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
         </span>{
             <span class="kw">let </span><span class="kw-2">mut </span>advance = <span class="self">self</span>.tables.hmtx<span class="question-mark">?</span>.advance(glyph_id)<span class="question-mark">? </span><span class="kw">as </span>f32;
 
@@ -4146,7 +4147,7 @@ Font parsing starts with a [`Face`].
                 <span class="comment">// Ignore variation offset when `hvar` is not set.
                 </span><span class="kw">if let </span><span class="prelude-val">Some</span>(hvar) = <span class="self">self</span>.tables.hvar {
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(offset) = hvar.advance_offset(glyph_id, <span class="self">self</span>.coords()) {
-                        <span class="comment">// We can&#39;t use `round()` in `no_std`, so this is the next best thing.
+                        <span class="comment">// We can't use `round()` in `no_std`, so this is the next best thing.
                         </span>advance += offset + <span class="number">0.5</span>;
                     }
                 }
@@ -4155,18 +4156,18 @@ Font parsing starts with a [`Face`].
             u16::try_num_from(advance)
         }
 
-        <span class="attr">#[cfg(not(feature = <span class="string">&quot;variable-fonts&quot;</span>))]
+        <span class="attr">#[cfg(not(feature = <span class="string">"variable-fonts"</span>))]
         </span>{
             <span class="self">self</span>.tables.hmtx<span class="question-mark">?</span>.advance(glyph_id)
         }
     }
 
-    <span class="doccomment">/// Returns glyph&#39;s vertical advance.
+    <span class="doccomment">/// Returns glyph's vertical advance.
     ///
     /// This method is affected by variation axes.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>glyph_ver_advance(<span class="kw-2">&amp;</span><span class="self">self</span>, glyph_id: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;u16&gt; {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
         </span>{
             <span class="kw">let </span><span class="kw-2">mut </span>advance = <span class="self">self</span>.tables.vmtx<span class="question-mark">?</span>.advance(glyph_id)<span class="question-mark">? </span><span class="kw">as </span>f32;
 
@@ -4174,7 +4175,7 @@ Font parsing starts with a [`Face`].
                 <span class="comment">// Ignore variation offset when `vvar` is not set.
                 </span><span class="kw">if let </span><span class="prelude-val">Some</span>(vvar) = <span class="self">self</span>.tables.vvar {
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(offset) = vvar.advance_offset(glyph_id, <span class="self">self</span>.coords()) {
-                        <span class="comment">// We can&#39;t use `round()` in `no_std`, so this is the next best thing.
+                        <span class="comment">// We can't use `round()` in `no_std`, so this is the next best thing.
                         </span>advance += offset + <span class="number">0.5</span>;
                     }
                 }
@@ -4183,18 +4184,18 @@ Font parsing starts with a [`Face`].
             u16::try_num_from(advance)
         }
 
-        <span class="attr">#[cfg(not(feature = <span class="string">&quot;variable-fonts&quot;</span>))]
+        <span class="attr">#[cfg(not(feature = <span class="string">"variable-fonts"</span>))]
         </span>{
             <span class="self">self</span>.tables.vmtx<span class="question-mark">?</span>.advance(glyph_id)
         }
     }
 
-    <span class="doccomment">/// Returns glyph&#39;s horizontal side bearing.
+    <span class="doccomment">/// Returns glyph's horizontal side bearing.
     ///
     /// This method is affected by variation axes.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>glyph_hor_side_bearing(<span class="kw-2">&amp;</span><span class="self">self</span>, glyph_id: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;i16&gt; {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
         </span>{
             <span class="kw">let </span><span class="kw-2">mut </span>bearing = <span class="self">self</span>.tables.hmtx<span class="question-mark">?</span>.side_bearing(glyph_id)<span class="question-mark">? </span><span class="kw">as </span>f32;
 
@@ -4202,7 +4203,7 @@ Font parsing starts with a [`Face`].
                 <span class="comment">// Ignore variation offset when `hvar` is not set.
                 </span><span class="kw">if let </span><span class="prelude-val">Some</span>(hvar) = <span class="self">self</span>.tables.hvar {
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(offset) = hvar.side_bearing_offset(glyph_id, <span class="self">self</span>.coords()) {
-                        <span class="comment">// We can&#39;t use `round()` in `no_std`, so this is the next best thing.
+                        <span class="comment">// We can't use `round()` in `no_std`, so this is the next best thing.
                         </span>bearing += offset + <span class="number">0.5</span>;
                     }
                 }
@@ -4211,18 +4212,18 @@ Font parsing starts with a [`Face`].
             i16::try_num_from(bearing)
         }
 
-        <span class="attr">#[cfg(not(feature = <span class="string">&quot;variable-fonts&quot;</span>))]
+        <span class="attr">#[cfg(not(feature = <span class="string">"variable-fonts"</span>))]
         </span>{
             <span class="self">self</span>.tables.hmtx<span class="question-mark">?</span>.side_bearing(glyph_id)
         }
     }
 
-    <span class="doccomment">/// Returns glyph&#39;s vertical side bearing.
+    <span class="doccomment">/// Returns glyph's vertical side bearing.
     ///
     /// This method is affected by variation axes.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>glyph_ver_side_bearing(<span class="kw-2">&amp;</span><span class="self">self</span>, glyph_id: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;i16&gt; {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
         </span>{
             <span class="kw">let </span><span class="kw-2">mut </span>bearing = <span class="self">self</span>.tables.vmtx<span class="question-mark">?</span>.side_bearing(glyph_id)<span class="question-mark">? </span><span class="kw">as </span>f32;
 
@@ -4230,7 +4231,7 @@ Font parsing starts with a [`Face`].
                 <span class="comment">// Ignore variation offset when `vvar` is not set.
                 </span><span class="kw">if let </span><span class="prelude-val">Some</span>(vvar) = <span class="self">self</span>.tables.vvar {
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(offset) = vvar.side_bearing_offset(glyph_id, <span class="self">self</span>.coords()) {
-                        <span class="comment">// We can&#39;t use `round()` in `no_std`, so this is the next best thing.
+                        <span class="comment">// We can't use `round()` in `no_std`, so this is the next best thing.
                         </span>bearing += offset + <span class="number">0.5</span>;
                     }
                 }
@@ -4239,24 +4240,24 @@ Font parsing starts with a [`Face`].
             i16::try_num_from(bearing)
         }
 
-        <span class="attr">#[cfg(not(feature = <span class="string">&quot;variable-fonts&quot;</span>))]
+        <span class="attr">#[cfg(not(feature = <span class="string">"variable-fonts"</span>))]
         </span>{
             <span class="self">self</span>.tables.vmtx<span class="question-mark">?</span>.side_bearing(glyph_id)
         }
     }
 
-    <span class="doccomment">/// Returns glyph&#39;s vertical origin according to
+    <span class="doccomment">/// Returns glyph's vertical origin according to
     /// [Vertical Origin Table](https://docs.microsoft.com/en-us/typography/opentype/spec/vorg).
     </span><span class="kw">pub fn </span>glyph_y_origin(<span class="kw-2">&amp;</span><span class="self">self</span>, glyph_id: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;i16&gt; {
         <span class="self">self</span>.tables.vorg.map(|vorg| vorg.glyph_y_origin(glyph_id))
     }
 
-    <span class="doccomment">/// Returns glyph&#39;s name.
+    <span class="doccomment">/// Returns glyph's name.
     ///
     /// Uses the `post` and `CFF` tables as sources.
     ///
     /// Returns `None` when no name is associated with a `glyph`.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;glyph-names&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"glyph-names"</span>)]
     #[inline]
     </span><span class="kw">pub fn </span>glyph_name(<span class="kw-2">&amp;</span><span class="self">self</span>, glyph_id: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(name) = <span class="self">self</span>.tables.post.and_then(|post| post.glyph_name(glyph_id)) {
@@ -4280,7 +4281,7 @@ Font parsing starts with a [`Face`].
     /// **Warning**: since `ttf-parser` is a pull parser,
     /// `OutlineBuilder` will emit segments even when outline is partially malformed.
     /// You must check `outline_glyph()` result before using
-    /// `OutlineBuilder`&#39;s output.
+    /// `OutlineBuilder`'s output.
     ///
     /// `gvar`, `glyf`, `CFF` and `CFF2` tables are supported.
     /// And they will be accesses in this specific order.
@@ -4299,32 +4300,32 @@ Font parsing starts with a [`Face`].
     ///
     /// impl ttf_parser::OutlineBuilder for Builder {
     ///     fn move_to(&amp;mut self, x: f32, y: f32) {
-    ///         write!(&amp;mut self.0, &quot;M {} {} &quot;, x, y).unwrap();
+    ///         write!(&amp;mut self.0, "M {} {} ", x, y).unwrap();
     ///     }
     ///
     ///     fn line_to(&amp;mut self, x: f32, y: f32) {
-    ///         write!(&amp;mut self.0, &quot;L {} {} &quot;, x, y).unwrap();
+    ///         write!(&amp;mut self.0, "L {} {} ", x, y).unwrap();
     ///     }
     ///
     ///     fn quad_to(&amp;mut self, x1: f32, y1: f32, x: f32, y: f32) {
-    ///         write!(&amp;mut self.0, &quot;Q {} {} {} {} &quot;, x1, y1, x, y).unwrap();
+    ///         write!(&amp;mut self.0, "Q {} {} {} {} ", x1, y1, x, y).unwrap();
     ///     }
     ///
     ///     fn curve_to(&amp;mut self, x1: f32, y1: f32, x2: f32, y2: f32, x: f32, y: f32) {
-    ///         write!(&amp;mut self.0, &quot;C {} {} {} {} {} {} &quot;, x1, y1, x2, y2, x, y).unwrap();
+    ///         write!(&amp;mut self.0, "C {} {} {} {} {} {} ", x1, y1, x2, y2, x, y).unwrap();
     ///     }
     ///
     ///     fn close(&amp;mut self) {
-    ///         write!(&amp;mut self.0, &quot;Z &quot;).unwrap();
+    ///         write!(&amp;mut self.0, "Z ").unwrap();
     ///     }
     /// }
     ///
-    /// let data = std::fs::read(&quot;tests/fonts/demo.ttf&quot;).unwrap();
+    /// let data = std::fs::read("tests/fonts/demo.ttf").unwrap();
     /// let face = ttf_parser::Face::parse(&amp;data, 0).unwrap();
     /// let mut builder = Builder(String::new());
     /// let bbox = face.outline_glyph(ttf_parser::GlyphId(1), &amp;mut builder).unwrap();
-    /// assert_eq!(builder.0, &quot;M 173 267 L 369 267 L 270 587 L 173 267 Z M 6 0 L 224 656 \
-    ///                        L 320 656 L 541 0 L 452 0 L 390 200 L 151 200 L 85 0 L 6 0 Z &quot;);
+    /// assert_eq!(builder.0, "M 173 267 L 369 267 L 270 587 L 173 267 Z M 6 0 L 224 656 \
+    ///                        L 320 656 L 541 0 L 452 0 L 390 200 L 151 200 L 85 0 L 6 0 Z ");
     /// assert_eq!(bbox, ttf_parser::Rect { x_min: 6, y_min: 0, x_max: 541, y_max: 656 });
     /// ```
     </span><span class="attr">#[inline]
@@ -4333,7 +4334,7 @@ Font parsing starts with a [`Face`].
         glyph_id: GlyphId,
         builder: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>OutlineBuilder,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;Rect&gt; {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
         </span>{
             <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>gvar) = <span class="self">self</span>.tables.gvar {
                 <span class="kw">return </span>gvar.outline(<span class="self">self</span>.tables.glyf<span class="question-mark">?</span>, <span class="self">self</span>.coords(), glyph_id, builder);
@@ -4348,7 +4349,7 @@ Font parsing starts with a [`Face`].
             <span class="kw">return </span>cff.outline(glyph_id, builder).ok();
         }
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
         </span>{
             <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>cff2) = <span class="self">self</span>.tables.cff2 {
                 <span class="kw">return </span>cff2.outline(<span class="self">self</span>.coords(), glyph_id, builder).ok();
@@ -4363,7 +4364,7 @@ Font parsing starts with a [`Face`].
     /// This is just a shorthand for `outline_glyph()` since only the `glyf` table stores
     /// a bounding box. We ignore `glyf` table bboxes because they can be malformed.
     /// In case of CFF and variable fonts we have to actually outline
-    /// a glyph to find it&#39;s bounding box.
+    /// a glyph to find it's bounding box.
     ///
     /// When a glyph is defined by a raster or a vector image,
     /// that can be obtained via `glyph_image()`,
@@ -4385,7 +4386,7 @@ Font parsing starts with a [`Face`].
         <span class="self">self</span>.tables.head.global_bbox
     }
 
-    <span class="doccomment">/// Returns a reference to a glyph&#39;s raster image.
+    <span class="doccomment">/// Returns a reference to a glyph's raster image.
     ///
     /// A font can define a glyph using a raster or a vector image instead of a simple outline.
     /// Which is primarily used for emojis. This method should be used to access raster images.
@@ -4396,7 +4397,7 @@ Font parsing starts with a [`Face`].
     /// To get the largest image simply use `std::u16::MAX`.
     ///
     /// Note that this method will return an encoded image. It should be decoded
-    /// by the caller. We don&#39;t validate or preprocess it in any way.
+    /// by the caller. We don't validate or preprocess it in any way.
     ///
     /// Also, a font can contain both: images and outlines. So when this method returns `None`
     /// you should also try `outline_glyph()` afterwards.
@@ -4404,7 +4405,7 @@ Font parsing starts with a [`Face`].
     /// There are multiple ways an image can be stored in a TrueType font
     /// and this method supports most of them.
     /// This includes `sbix`, `bloc` + `bdat`, `EBLC` + `EBDT`, `CBLC` + `CBDT`.
-    /// And font&#39;s tables will be accesses in this specific order.
+    /// And font's tables will be accesses in this specific order.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>glyph_raster_image(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
@@ -4431,19 +4432,19 @@ Font parsing starts with a [`Face`].
         <span class="prelude-val">None
     </span>}
 
-    <span class="doccomment">/// Returns a reference to a glyph&#39;s SVG image.
+    <span class="doccomment">/// Returns a reference to a glyph's SVG image.
     ///
     /// A font can define a glyph using a raster or a vector image instead of a simple outline.
     /// Which is primarily used for emojis. This method should be used to access SVG images.
     ///
     /// Note that this method will return just an SVG data. It should be rendered
     /// or even decompressed (in case of SVGZ) by the caller.
-    /// We don&#39;t validate or preprocess it in any way.
+    /// We don't validate or preprocess it in any way.
     ///
     /// Also, a font can contain both: images and outlines. So when this method returns `None`
     /// you should also try `outline_glyph()` afterwards.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>glyph_svg_image(<span class="kw-2">&amp;</span><span class="self">self</span>, glyph_id: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;svg::SvgDocument&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>glyph_svg_image(<span class="kw-2">&amp;</span><span class="self">self</span>, glyph_id: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;svg::SvgDocument&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="self">self</span>.tables.svg.and_then(|svg| svg.documents.find(glyph_id))
     }
 
@@ -4493,9 +4494,9 @@ Font parsing starts with a [`Face`].
     }
 
     <span class="doccomment">/// Returns an iterator over variation axes.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
     #[inline]
-    </span><span class="kw">pub fn </span>variation_axes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LazyArray16&lt;<span class="lifetime">&#39;a</span>, VariationAxis&gt; {
+    </span><span class="kw">pub fn </span>variation_axes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LazyArray16&lt;<span class="lifetime">'a</span>, VariationAxis&gt; {
         <span class="self">self</span>.tables.fvar.map(|fvar| fvar.axes).unwrap_or_default()
     }
 
@@ -4507,8 +4508,8 @@ Font parsing starts with a [`Face`].
     ///
     /// Since coordinates are stored on the stack, we allow only 32 of them.
     ///
-    /// Returns `None` when face is not variable or doesn&#39;t have such axis.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+    /// Returns `None` when face is not variable or doesn't have such axis.
+    </span><span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
     </span><span class="kw">pub fn </span>set_variation(<span class="kw-2">&amp;mut </span><span class="self">self</span>, axis: Tag, value: f32) -&gt; <span class="prelude-ty">Option</span>&lt;()&gt; {
         <span class="kw">if </span>!<span class="self">self</span>.is_variable() {
             <span class="kw">return </span><span class="prelude-val">None</span>;
@@ -4534,20 +4535,20 @@ Font parsing starts with a [`Face`].
     }
 
     <span class="doccomment">/// Returns the current normalized variation coordinates.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
     #[inline]
     </span><span class="kw">pub fn </span>variation_coordinates(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[NormalizedCoordinate] {
         <span class="self">self</span>.coordinates.as_slice()
     }
 
     <span class="doccomment">/// Checks that face has non-default variation coordinates.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
     #[inline]
     </span><span class="kw">pub fn </span>has_non_default_variation_coordinates(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.coordinates.as_slice().iter().any(|c| c.<span class="number">0 </span>!= <span class="number">0</span>)
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
     #[inline]
     </span><span class="kw">fn </span>metrics_var_offset(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: Tag) -&gt; f32 {
         <span class="self">self</span>.tables
@@ -4562,7 +4563,7 @@ Font parsing starts with a [`Face`].
         value
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
     #[inline]
     </span><span class="kw">fn </span>apply_metrics_variation_to(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: Tag, value: <span class="kw-2">&amp;mut </span>i16) {
         <span class="kw">if </span><span class="self">self</span>.is_variable() {
@@ -4574,24 +4575,24 @@ Font parsing starts with a [`Face`].
         }
     }
 
-    <span class="attr">#[cfg(not(feature = <span class="string">&quot;variable-fonts&quot;</span>))]
+    <span class="attr">#[cfg(not(feature = <span class="string">"variable-fonts"</span>))]
     #[inline]
     </span><span class="kw">fn </span>apply_metrics_variation_to(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: Tag, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>i16) {}
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;variable-fonts&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"variable-fonts"</span>)]
     #[inline]
     </span><span class="kw">fn </span>coords(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[NormalizedCoordinate] {
         <span class="self">self</span>.coordinates.as_slice()
     }
 }
 
-<span class="kw">struct </span>DefaultTableProvider&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
-    tables: LazyArrayIter16&lt;<span class="lifetime">&#39;a</span>, TableRecord&gt;,
+<span class="kw">struct </span>DefaultTableProvider&lt;<span class="lifetime">'a</span>&gt; {
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
+    tables: LazyArrayIter16&lt;<span class="lifetime">'a</span>, TableRecord&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>DefaultTableProvider&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">type </span>Item = <span class="prelude-ty">Result</span>&lt;(Tag, <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;), FaceParsingError&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>DefaultTableProvider&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">type </span>Item = <span class="prelude-ty">Result</span>&lt;(Tag, <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;), FaceParsingError&gt;;
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -4609,9 +4610,9 @@ Font parsing starts with a [`Face`].
     }
 }
 
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Face&lt;<span class="lifetime">&#39;_</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;Face()&quot;</span>)
+<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Face&lt;<span class="lifetime">'_</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; core::fmt::Result {
+        <span class="macro">write!</span>(f, <span class="string">"Face()"</span>)
     }
 }
 

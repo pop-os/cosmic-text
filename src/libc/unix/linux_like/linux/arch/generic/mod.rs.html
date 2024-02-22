@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/libc-0.2.153/src/unix/linux_like/linux/arch/generic/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../../../../../" data-static-root-path="../../../../../../../static.files/" data-current-crate="libc" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../../../../src-files.js"></script><script defer src="../../../../../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/libc-0.2.153/src/unix/linux_like/linux/arch/generic/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../../../../../" data-static-root-path="../../../../../../../static.files/" data-current-crate="libc" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../../../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../../../../../src-files.js"></script><script defer src="../../../../../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../../../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -425,12 +426,12 @@
 <span class="macro">cfg_if! </span>{
     <span class="comment">// Some of these platforms in CI already have these constants.
     // But they may still not have those _OLD ones.
-    </span><span class="kw">if </span><span class="attr">#[cfg(all(any(target_arch = <span class="string">&quot;x86&quot;</span>,
-                     target_arch = <span class="string">&quot;x86_64&quot;</span>,
-                     target_arch = <span class="string">&quot;aarch64&quot;</span>,
-                     target_arch = <span class="string">&quot;csky&quot;</span>,
-                     target_arch = <span class="string">&quot;loongarch64&quot;</span>),
-                 not(any(target_env = <span class="string">&quot;musl&quot;</span>, target_env = <span class="string">&quot;ohos&quot;</span>))))] </span>{
+    </span><span class="kw">if </span><span class="attr">#[cfg(all(any(target_arch = <span class="string">"x86"</span>,
+                     target_arch = <span class="string">"x86_64"</span>,
+                     target_arch = <span class="string">"aarch64"</span>,
+                     target_arch = <span class="string">"csky"</span>,
+                     target_arch = <span class="string">"loongarch64"</span>),
+                 not(any(target_env = <span class="string">"musl"</span>, target_env = <span class="string">"ohos"</span>))))] </span>{
         <span class="kw">pub const </span>SO_TIMESTAMP_NEW: ::c_int = <span class="number">63</span>;
         <span class="kw">pub const </span>SO_TIMESTAMPNS_NEW: ::c_int = <span class="number">64</span>;
         <span class="kw">pub const </span>SO_TIMESTAMPING_NEW: ::c_int = <span class="number">65</span>;
@@ -443,14 +444,14 @@
 // pub const SO_BUSY_POLL_BUDGET: ::c_int = 70;
 
 </span><span class="macro">cfg_if! </span>{
-    <span class="kw">if </span><span class="attr">#[cfg(any(target_arch = <span class="string">&quot;x86&quot;</span>,
-                 target_arch = <span class="string">&quot;x86_64&quot;</span>,
-                 target_arch = <span class="string">&quot;arm&quot;</span>,
-                 target_arch = <span class="string">&quot;aarch64&quot;</span>,
-                 target_arch = <span class="string">&quot;riscv64&quot;</span>,
-                 target_arch = <span class="string">&quot;s390x&quot;</span>,
-                 target_arch = <span class="string">&quot;csky&quot;</span>,
-                 target_arch = <span class="string">&quot;loongarch64&quot;</span>))] </span>{
+    <span class="kw">if </span><span class="attr">#[cfg(any(target_arch = <span class="string">"x86"</span>,
+                 target_arch = <span class="string">"x86_64"</span>,
+                 target_arch = <span class="string">"arm"</span>,
+                 target_arch = <span class="string">"aarch64"</span>,
+                 target_arch = <span class="string">"riscv64"</span>,
+                 target_arch = <span class="string">"s390x"</span>,
+                 target_arch = <span class="string">"csky"</span>,
+                 target_arch = <span class="string">"loongarch64"</span>))] </span>{
         <span class="kw">pub const </span>FICLONE: ::c_ulong = <span class="number">0x40049409</span>;
         <span class="kw">pub const </span>FICLONERANGE: ::c_ulong = <span class="number">0x4020940D</span>;
     }
@@ -549,9 +550,9 @@
     // DD-SS_SSSS_SSSS_SSSS-TTTT_TTTT-NNNN_NNNN
     // where D stands for direction (either None (00), Read (01) or Write (11))
     // where S stands for size (int, long, struct...)
-    // where T stands for type (&#39;f&#39;,&#39;v&#39;,&#39;X&#39;...)
+    // where T stands for type ('f','v','X'...)
     // where N stands for NR (NumbeR)
-    </span><span class="kw">if </span><span class="attr">#[cfg(any(target_arch = <span class="string">&quot;x86&quot;</span>, target_arch = <span class="string">&quot;arm&quot;</span>))] </span>{
+    </span><span class="kw">if </span><span class="attr">#[cfg(any(target_arch = <span class="string">"x86"</span>, target_arch = <span class="string">"arm"</span>))] </span>{
         <span class="kw">pub const </span>FS_IOC_GETFLAGS: ::Ioctl = <span class="number">0x80046601</span>;
         <span class="kw">pub const </span>FS_IOC_SETFLAGS: ::Ioctl = <span class="number">0x40046602</span>;
         <span class="kw">pub const </span>FS_IOC_GETVERSION: ::Ioctl = <span class="number">0x80047601</span>;
@@ -560,11 +561,11 @@
         <span class="kw">pub const </span>FS_IOC32_SETFLAGS: ::Ioctl = <span class="number">0x40046602</span>;
         <span class="kw">pub const </span>FS_IOC32_GETVERSION: ::Ioctl = <span class="number">0x80047601</span>;
         <span class="kw">pub const </span>FS_IOC32_SETVERSION: ::Ioctl = <span class="number">0x40047602</span>;
-    } <span class="kw">else if </span><span class="attr">#[cfg(any(target_arch = <span class="string">&quot;x86_64&quot;</span>,
-                        target_arch = <span class="string">&quot;riscv64&quot;</span>,
-                        target_arch = <span class="string">&quot;aarch64&quot;</span>,
-                        target_arch = <span class="string">&quot;s390x&quot;</span>,
-                        target_arch = <span class="string">&quot;loongarch64&quot;</span>))] </span>{
+    } <span class="kw">else if </span><span class="attr">#[cfg(any(target_arch = <span class="string">"x86_64"</span>,
+                        target_arch = <span class="string">"riscv64"</span>,
+                        target_arch = <span class="string">"aarch64"</span>,
+                        target_arch = <span class="string">"s390x"</span>,
+                        target_arch = <span class="string">"loongarch64"</span>))] </span>{
         <span class="kw">pub const </span>FS_IOC_GETFLAGS: ::Ioctl = <span class="number">0x80086601</span>;
         <span class="kw">pub const </span>FS_IOC_SETFLAGS: ::Ioctl = <span class="number">0x40086602</span>;
         <span class="kw">pub const </span>FS_IOC_GETVERSION: ::Ioctl = <span class="number">0x80087601</span>;
@@ -577,8 +578,8 @@
 }
 
 <span class="macro">cfg_if! </span>{
-    <span class="kw">if </span><span class="attr">#[cfg(any(target_arch = <span class="string">&quot;arm&quot;</span>,
-                 target_arch = <span class="string">&quot;s390x&quot;</span>))] </span>{
+    <span class="kw">if </span><span class="attr">#[cfg(any(target_arch = <span class="string">"arm"</span>,
+                 target_arch = <span class="string">"s390x"</span>))] </span>{
         <span class="kw">pub const </span>FIOQSIZE: ::Ioctl = <span class="number">0x545E</span>;
     } <span class="kw">else </span>{
         <span class="kw">pub const </span>FIOQSIZE: ::Ioctl = <span class="number">0x5460</span>;
@@ -603,8 +604,8 @@
 <span class="comment">// RLIMIT Constants
 
 </span><span class="macro">cfg_if! </span>{
-    <span class="kw">if </span><span class="attr">#[cfg(any(target_env = <span class="string">&quot;gnu&quot;</span>,
-                 target_env = <span class="string">&quot;uclibc&quot;</span>))] </span>{
+    <span class="kw">if </span><span class="attr">#[cfg(any(target_env = <span class="string">"gnu"</span>,
+                 target_env = <span class="string">"uclibc"</span>))] </span>{
 
         <span class="kw">pub const </span>RLIMIT_CPU: ::__rlimit_resource_t = <span class="number">0</span>;
         <span class="kw">pub const </span>RLIMIT_FSIZE: ::__rlimit_resource_t = <span class="number">1</span>;
@@ -623,10 +624,10 @@
         <span class="kw">pub const </span>RLIMIT_RTPRIO: ::__rlimit_resource_t = <span class="number">14</span>;
         <span class="kw">pub const </span>RLIMIT_RTTIME: ::__rlimit_resource_t = <span class="number">15</span>;
         <span class="attr">#[allow(deprecated)]
-        #[deprecated(since = <span class="string">&quot;0.2.64&quot;</span>, note = <span class="string">&quot;Not stable across OS versions&quot;</span>)]
+        #[deprecated(since = <span class="string">"0.2.64"</span>, note = <span class="string">"Not stable across OS versions"</span>)]
         </span><span class="kw">pub const </span>RLIMIT_NLIMITS: ::__rlimit_resource_t = RLIM_NLIMITS;
 
-    } <span class="kw">else if </span><span class="attr">#[cfg(any(target_env = <span class="string">&quot;musl&quot;</span>, target_env = <span class="string">&quot;ohos&quot;</span>))] </span>{
+    } <span class="kw">else if </span><span class="attr">#[cfg(any(target_env = <span class="string">"musl"</span>, target_env = <span class="string">"ohos"</span>))] </span>{
 
         <span class="kw">pub const </span>RLIMIT_CPU: ::c_int = <span class="number">0</span>;
         <span class="kw">pub const </span>RLIMIT_FSIZE: ::c_int = <span class="number">1</span>;
@@ -644,21 +645,21 @@
         <span class="kw">pub const </span>RLIMIT_NICE: ::c_int = <span class="number">13</span>;
         <span class="kw">pub const </span>RLIMIT_RTPRIO: ::c_int = <span class="number">14</span>;
         <span class="kw">pub const </span>RLIMIT_RTTIME: ::c_int = <span class="number">15</span>;
-        <span class="attr">#[deprecated(since = <span class="string">&quot;0.2.64&quot;</span>, note = <span class="string">&quot;Not stable across OS versions&quot;</span>)]
+        <span class="attr">#[deprecated(since = <span class="string">"0.2.64"</span>, note = <span class="string">"Not stable across OS versions"</span>)]
         </span><span class="kw">pub const </span>RLIM_NLIMITS: ::c_int = <span class="number">15</span>;
         <span class="attr">#[allow(deprecated)]
-        #[deprecated(since = <span class="string">&quot;0.2.64&quot;</span>, note = <span class="string">&quot;Not stable across OS versions&quot;</span>)]
+        #[deprecated(since = <span class="string">"0.2.64"</span>, note = <span class="string">"Not stable across OS versions"</span>)]
         </span><span class="kw">pub const </span>RLIMIT_NLIMITS: ::c_int = RLIM_NLIMITS;
     }
 }
 
 <span class="macro">cfg_if! </span>{
-    <span class="kw">if </span><span class="attr">#[cfg(target_env = <span class="string">&quot;gnu&quot;</span>)] </span>{
-        <span class="attr">#[deprecated(since = <span class="string">&quot;0.2.64&quot;</span>, note = <span class="string">&quot;Not stable across OS versions&quot;</span>)]
+    <span class="kw">if </span><span class="attr">#[cfg(target_env = <span class="string">"gnu"</span>)] </span>{
+        <span class="attr">#[deprecated(since = <span class="string">"0.2.64"</span>, note = <span class="string">"Not stable across OS versions"</span>)]
         </span><span class="kw">pub const </span>RLIM_NLIMITS: ::__rlimit_resource_t = <span class="number">16</span>;
     }
-    <span class="kw">else if </span><span class="attr">#[cfg(target_env = <span class="string">&quot;uclibc&quot;</span>)] </span>{
-        <span class="attr">#[deprecated(since = <span class="string">&quot;0.2.64&quot;</span>, note = <span class="string">&quot;Not stable across OS versions&quot;</span>)]
+    <span class="kw">else if </span><span class="attr">#[cfg(target_env = <span class="string">"uclibc"</span>)] </span>{
+        <span class="attr">#[deprecated(since = <span class="string">"0.2.64"</span>, note = <span class="string">"Not stable across OS versions"</span>)]
         </span><span class="kw">pub const </span>RLIM_NLIMITS: ::__rlimit_resource_t = <span class="number">15</span>;
     }
 }

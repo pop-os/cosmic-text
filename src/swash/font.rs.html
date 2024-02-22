@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/font.rs`."><title>font.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/font.rs`."><title>font.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -268,15 +269,15 @@
 
 <span class="doccomment">/// Reference to the content of a font file.
 </span><span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">pub struct </span>FontDataRef&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+</span><span class="kw">pub struct </span>FontDataRef&lt;<span class="lifetime">'a</span>&gt; {
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     len: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontDataRef&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontDataRef&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Creates font data from the specified bytes. Returns `None` if the bytes
     /// cannot trivially be determined to represent a font.
-    </span><span class="kw">pub fn </span>new(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">pub fn </span>new(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">if </span>!raw_data::is_font(data, <span class="number">0</span>) &amp;&amp; !raw_data::is_collection(data) {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -293,7 +294,7 @@
     }
 
     <span class="doccomment">/// Returns the underlying data.
-    </span><span class="kw">pub fn </span>data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8] {
+    </span><span class="kw">pub fn </span>data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8] {
         <span class="self">self</span>.data
     }
 
@@ -308,12 +309,12 @@
     </span>}
 
     <span class="doccomment">/// Returns the font at the specified index.
-    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, index: usize) -&gt; <span class="prelude-ty">Option</span>&lt;FontRef&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, index: usize) -&gt; <span class="prelude-ty">Option</span>&lt;FontRef&lt;<span class="lifetime">'a</span>&gt;&gt; {
         FontRef::from_offset(<span class="self">self</span>.data, raw_data::offset(<span class="self">self</span>.data, index <span class="kw">as </span>u32)<span class="question-mark">?</span>)
     }
 
     <span class="doccomment">/// Returns an iterator over the available fonts.
-    </span><span class="kw">pub fn </span>fonts(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Fonts&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>fonts(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Fonts&lt;<span class="lifetime">'a</span>&gt; {
         Fonts {
             data: <span class="kw-2">*</span><span class="self">self</span>,
             pos: <span class="number">0</span>,
@@ -333,7 +334,7 @@
 /// to slice the data at the offset.
 ///
 /// # Getting started
-/// As a primer, let&#39;s write a function to read a font file, construct a font reference
+/// As a primer, let's write a function to read a font file, construct a font reference
 /// and print the [`Attributes`](super::Attributes) and all of the associated
 /// [`LocalizedString`](super::LocalizedString)s (including names, copyright information
 /// and other metadata).
@@ -346,11 +347,11 @@
 ///     // Create a font reference for the first font in the file
 ///     let font = FontRef::from_index(&amp;font_data, 0)?;
 ///     // Print the font attributes (stretch, weight and style)
-///     println!(&quot;{}&quot;, font.attributes());
+///     println!("{}", font.attributes());
 ///     // Iterate through the localized strings
 ///     for string in font.localized_strings() {
 ///         // Print the string identifier and the actual value
-///         println!(&quot;[{:?}] {}&quot;, string.id(), string.to_string());
+///         println!("[{:?}] {}", string.id(), string.to_string());
 ///     }
 ///     Some(())
 /// }
@@ -359,10 +360,10 @@
 /// # Owning your fonts
 /// The [`FontRef`] struct is designed to be agnostic with regard to the font management
 /// policy of higher level crates and applications, and as such, contains borrowed
-/// data and is intended to be used as a transient resource. If you&#39;re using this
-/// library, you&#39;ll likely want to create your own type to represent a font.
+/// data and is intended to be used as a transient resource. If you're using this
+/// library, you'll likely want to create your own type to represent a font.
 /// Regardless of the complexity of your management strategy, the basic pattern remains
-/// the same, so we&#39;ll build a simple `Font` struct here that can load fonts from a
+/// the same, so we'll build a simple `Font` struct here that can load fonts from a
 /// file using a basic `Vec&lt;u8&gt;` as a backing store.
 /// ```
 /// use swash::{Attributes, CacheKey, Charmap, FontRef};
@@ -399,10 +400,10 @@
 ///         self.as_ref().charmap()
 ///     }
 ///
-///     // Create the transient font reference for accessing this crate&#39;s
+///     // Create the transient font reference for accessing this crate's
 ///     // functionality.
 ///     pub fn as_ref(&amp;self) -&gt; FontRef {
-///         // Note that you&#39;ll want to initialize the struct directly here as
+///         // Note that you'll want to initialize the struct directly here as
 ///         // using any of the FontRef constructors will generate a new key which,
 ///         // while completely safe, will nullify the performance optimizations of
 ///         // the caching mechanisms used in this crate.
@@ -414,33 +415,33 @@
 ///     }
 /// }
 /// ```
-/// In the example above, it&#39;s trivial to replace the `Vec&lt;u8&gt;` with an
+/// In the example above, it's trivial to replace the `Vec&lt;u8&gt;` with an
 /// `Rc&lt;Vec&lt;u8&gt;&gt;` for a reference counted version or an `Arc&lt;Vec&lt;u8&gt;&gt;` for fonts
 /// that are shareable across threads. You may also consider memory mapping
 /// your font data, particularly for larger fonts (hello Apple Color Emoji!).
 ///
 </span><span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">pub struct </span>FontRef&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>FontRef&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Full content of a file containing the font.
-    </span><span class="kw">pub </span>data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    </span><span class="kw">pub </span>data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     <span class="doccomment">/// Offset to the table directory of the font.
     </span><span class="kw">pub </span>offset: u32,
     <span class="doccomment">/// Key for identifying a font in various caches.
     </span><span class="kw">pub </span>key: CacheKey,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontRef&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontRef&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Creates a new font from the specified font data and the index of the
     /// desired font. Returns `None` if the data does not represent a font file
     /// or the index is out of bounds.
-    </span><span class="kw">pub fn </span>from_index(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], index: usize) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">pub fn </span>from_index(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], index: usize) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         FontDataRef::new(data)<span class="question-mark">?</span>.get(index)
     }
 
     <span class="doccomment">/// Creates a new font from the specified font data and offset to the
     /// table directory. Returns `None` if the offset is out of bounds or the
     /// data at the offset does not represent a table directory.
-    </span><span class="kw">pub fn </span>from_offset(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], offset: u32) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">pub fn </span>from_offset(data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], offset: u32) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">if </span>!raw_data::is_font(data, offset) {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -453,8 +454,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; RawFont&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>FontRef&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8] {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; RawFont&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>FontRef&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8] {
         <span class="self">self</span>.data
     }
 
@@ -464,13 +465,13 @@
 }
 
 <span class="doccomment">/// Iterator over a collection of fonts.
-</span><span class="kw">pub struct </span>Fonts&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: FontDataRef&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>Fonts&lt;<span class="lifetime">'a</span>&gt; {
+    data: FontDataRef&lt;<span class="lifetime">'a</span>&gt;,
     pos: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>Fonts&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">type </span>Item = FontRef&lt;<span class="lifetime">&#39;a</span>&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>Fonts&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">type </span>Item = FontRef&lt;<span class="lifetime">'a</span>&gt;;
 
     <span class="kw">fn </span>size_hint(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (usize, <span class="prelude-ty">Option</span>&lt;usize&gt;) {
         <span class="kw">let </span>remaining = (<span class="self">self</span>.data.len - <span class="self">self</span>.pos) <span class="kw">as </span>usize;
@@ -494,15 +495,15 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ExactSizeIterator <span class="kw">for </span>Fonts&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ExactSizeIterator <span class="kw">for </span>Fonts&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         (<span class="self">self</span>.data.len - <span class="self">self</span>.pos) <span class="kw">as </span>usize
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IntoIterator <span class="kw">for </span>FontDataRef&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">type </span>IntoIter = Fonts&lt;<span class="lifetime">&#39;a</span>&gt;;
-    <span class="kw">type </span>Item = FontRef&lt;<span class="lifetime">&#39;a</span>&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; IntoIterator <span class="kw">for </span>FontDataRef&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">type </span>IntoIter = Fonts&lt;<span class="lifetime">'a</span>&gt;;
+    <span class="kw">type </span>Item = FontRef&lt;<span class="lifetime">'a</span>&gt;;
 
     <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
         <span class="self">self</span>.fonts()
@@ -515,13 +516,13 @@
     </span><span class="kw">fn </span>table_by_tag(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: Tag) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt;;
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TableProvider <span class="kw">for </span>FontRef&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TableProvider <span class="kw">for </span>FontRef&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>table_by_tag(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: Tag) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt; {
         <span class="self">self</span>.table_data(tag)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TableProvider <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>FontRef&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TableProvider <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>FontRef&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>table_by_tag(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: Tag) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt; {
         <span class="self">self</span>.table_data(tag)
     }

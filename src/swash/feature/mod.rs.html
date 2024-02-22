@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/feature/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/feature/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -275,7 +276,7 @@
 <span class="kw">use super</span>::{FontRef, Tag};
 <span class="kw">use </span><span class="kw">crate</span>::text::{Language, Script};
 
-<span class="kw">const </span>DFLT: u32 = raw_tag(<span class="string">b&quot;DFLT&quot;</span>);
+<span class="kw">const </span>DFLT: u32 = raw_tag(<span class="string">b"DFLT"</span>);
 
 <span class="attr">#[derive(Copy, Clone)]
 </span><span class="kw">enum </span>Kind {
@@ -288,15 +289,15 @@
 
 <span class="kw">impl </span>Kind {
     <span class="kw">fn </span>from_font(font: <span class="kw-2">&amp;</span>FontRef) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>gsub = font.table_offset(raw_tag(<span class="string">b&quot;GSUB&quot;</span>));
-        <span class="kw">let </span>gpos = font.table_offset(raw_tag(<span class="string">b&quot;GPOS&quot;</span>));
+        <span class="kw">let </span>gsub = font.table_offset(raw_tag(<span class="string">b"GSUB"</span>));
+        <span class="kw">let </span>gpos = font.table_offset(raw_tag(<span class="string">b"GPOS"</span>));
         <span class="kw">if </span>gsub != <span class="number">0 </span>|| gpos != <span class="number">0 </span>{
             <span class="kw">return </span><span class="self">Self</span>::At(gsub, gpos);
         }
-        <span class="kw">let </span>morx = font.table_offset(raw_tag(<span class="string">b&quot;morx&quot;</span>));
+        <span class="kw">let </span>morx = font.table_offset(raw_tag(<span class="string">b"morx"</span>));
         <span class="kw">if </span>morx != <span class="number">0 </span>{
-            <span class="kw">let </span>kern = font.table_offset(raw_tag(<span class="string">b&quot;kern&quot;</span>)) != <span class="number">0
-                </span>|| font.table_offset(raw_tag(<span class="string">b&quot;kerx&quot;</span>)) != <span class="number">0</span>;
+            <span class="kw">let </span>kern = font.table_offset(raw_tag(<span class="string">b"kern"</span>)) != <span class="number">0
+                </span>|| font.table_offset(raw_tag(<span class="string">b"kerx"</span>)) != <span class="number">0</span>;
             <span class="kw">return </span><span class="self">Self</span>::Aat(morx, kern);
         }
         <span class="self">Self</span>::None
@@ -304,20 +305,20 @@
 }
 
 <span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">enum </span>WritingSystemsKind&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">enum </span>WritingSystemsKind&lt;<span class="lifetime">'a</span>&gt; {
     <span class="prelude-val">None</span>,
-    At(at::WritingSystems&lt;<span class="lifetime">&#39;a</span>&gt;),
-    Aat(aat::OnceItem&lt;<span class="lifetime">&#39;a</span>&gt;),
+    At(at::WritingSystems&lt;<span class="lifetime">'a</span>&gt;),
+    Aat(aat::OnceItem&lt;<span class="lifetime">'a</span>&gt;),
 }
 
 <span class="doccomment">/// Iterator over a collection of writing systems.
 </span><span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">pub struct </span>WritingSystems&lt;<span class="lifetime">&#39;a</span>&gt; {
-    kind: WritingSystemsKind&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>WritingSystems&lt;<span class="lifetime">'a</span>&gt; {
+    kind: WritingSystemsKind&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; WritingSystems&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>from_font(font: <span class="kw-2">&amp;</span>FontRef&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; WritingSystems&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>from_font(font: <span class="kw-2">&amp;</span>FontRef&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>kind = Kind::from_font(font);
         WritingSystems {
             kind: <span class="kw">match </span>kind {
@@ -335,13 +336,13 @@
 }
 
 <span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">enum </span>WritingSystemKind&lt;<span class="lifetime">&#39;a</span>&gt; {
-    At(at::WritingSystem&lt;<span class="lifetime">&#39;a</span>&gt;),
-    Aat(aat::Item&lt;<span class="lifetime">&#39;a</span>&gt;),
+</span><span class="kw">enum </span>WritingSystemKind&lt;<span class="lifetime">'a</span>&gt; {
+    At(at::WritingSystem&lt;<span class="lifetime">'a</span>&gt;),
+    Aat(aat::Item&lt;<span class="lifetime">'a</span>&gt;),
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>WritingSystems&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">type </span>Item = WritingSystem&lt;<span class="lifetime">&#39;a</span>&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>WritingSystems&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">type </span>Item = WritingSystem&lt;<span class="lifetime">'a</span>&gt;;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.kind {
@@ -370,14 +371,14 @@
 
 <span class="doccomment">/// Script, language and associated typographic features available in a font.
 </span><span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">pub struct </span>WritingSystem&lt;<span class="lifetime">&#39;a</span>&gt; {
-    kind: WritingSystemKind&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>WritingSystem&lt;<span class="lifetime">'a</span>&gt; {
+    kind: WritingSystemKind&lt;<span class="lifetime">'a</span>&gt;,
     script_tag: Tag,
     lang_tag: Tag,
     lang: <span class="prelude-ty">Option</span>&lt;Language&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; WritingSystem&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; WritingSystem&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Returns the OpenType script tag for the writing system.
     </span><span class="kw">pub fn </span>script_tag(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Tag {
         <span class="self">self</span>.script_tag
@@ -400,7 +401,7 @@
 
     <span class="doccomment">/// Returns an iterator over the features provided by the writing
     /// system.
-    </span><span class="kw">pub fn </span>features(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Features&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>features(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Features&lt;<span class="lifetime">'a</span>&gt; {
         Features {
             kind: <span class="kw">match </span><span class="self">self</span>.kind {
                 WritingSystemKind::At(item) =&gt; FeaturesKind::At(item.features()),
@@ -413,18 +414,18 @@
 }
 
 <span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">enum </span>FeaturesKind&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">enum </span>FeaturesKind&lt;<span class="lifetime">'a</span>&gt; {
     <span class="prelude-val">None</span>,
-    At(at::Features&lt;<span class="lifetime">&#39;a</span>&gt;),
-    AtAll(at::AllFeatures&lt;<span class="lifetime">&#39;a</span>&gt;),
-    Aat(aat::Features&lt;<span class="lifetime">&#39;a</span>&gt;),
+    At(at::Features&lt;<span class="lifetime">'a</span>&gt;),
+    AtAll(at::AllFeatures&lt;<span class="lifetime">'a</span>&gt;),
+    Aat(aat::Features&lt;<span class="lifetime">'a</span>&gt;),
 }
 
 <span class="doccomment">/// Typographic rule that produces modifications to a sequence of glyphs.
 </span><span class="attr">#[derive(Copy, Clone)]
 </span><span class="kw">pub struct </span>Feature {
     tag: Tag,
-    name: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt;,
+    name: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str&gt;,
     action: Action,
 }
 
@@ -443,7 +444,7 @@
     }
 
     <span class="doccomment">/// Returns the name of the feature, if available.
-    </span><span class="kw">pub fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt; {
+    </span><span class="kw">pub fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str&gt; {
         <span class="self">self</span>.name
     }
 
@@ -466,12 +467,12 @@
 
 <span class="doccomment">/// Iterator over a collection of typographic features.
 </span><span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">pub struct </span>Features&lt;<span class="lifetime">&#39;a</span>&gt; {
-    kind: FeaturesKind&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>Features&lt;<span class="lifetime">'a</span>&gt; {
+    kind: FeaturesKind&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Features&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>from_font(font: <span class="kw-2">&amp;</span>FontRef&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Features&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>from_font(font: <span class="kw-2">&amp;</span>FontRef&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>kind = Kind::from_font(font);
         <span class="self">Self </span>{
             kind: <span class="kw">match </span>kind {
@@ -487,10 +488,10 @@
     }
 }
 
-<span class="kw">const </span>MARK: u32 = raw_tag(<span class="string">b&quot;mark&quot;</span>);
-<span class="kw">const </span>MKMK: u32 = raw_tag(<span class="string">b&quot;mkmk&quot;</span>);
+<span class="kw">const </span>MARK: u32 = raw_tag(<span class="string">b"mark"</span>);
+<span class="kw">const </span>MKMK: u32 = raw_tag(<span class="string">b"mkmk"</span>);
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>Features&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>Features&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">type </span>Item = Feature;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -521,7 +522,7 @@
             }
             FeaturesKind::Aat(iter) =&gt; {
                 <span class="kw">let </span>(tag, name) = iter.next()<span class="question-mark">?</span>;
-                <span class="kw">let </span>action = <span class="kw">if </span>tag == raw_tag(<span class="string">b&quot;kern&quot;</span>) {
+                <span class="kw">let </span>action = <span class="kw">if </span>tag == raw_tag(<span class="string">b"kern"</span>) {
                     Action::Adjustment
                 } <span class="kw">else </span>{
                     Action::Substitution

@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustybuzz-0.12.1/src/ot/position.rs`."><title>position.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustybuzz" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustybuzz-0.12.1/src/ot/position.rs`."><title>position.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustybuzz" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -778,18 +779,18 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; LayoutTable <span class="kw">for </span>PositioningTable&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; LayoutTable <span class="kw">for </span>PositioningTable&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">const </span>INDEX: TableIndex = TableIndex::GPOS;
     <span class="kw">const </span>IN_PLACE: bool = <span class="bool-val">true</span>;
 
-    <span class="kw">type </span>Lookup = PositioningLookup&lt;<span class="lifetime">&#39;a</span>&gt;;
+    <span class="kw">type </span>Lookup = PositioningLookup&lt;<span class="lifetime">'a</span>&gt;;
 
     <span class="kw">fn </span>get_lookup(<span class="kw-2">&amp;</span><span class="self">self</span>, index: LookupIndex) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="self">Self</span>::Lookup&gt; {
         <span class="self">self</span>.lookups.get(usize::from(index))
     }
 }
 
-<span class="kw">impl </span>LayoutLookup <span class="kw">for </span>PositioningLookup&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>LayoutLookup <span class="kw">for </span>PositioningLookup&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>props(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
         <span class="self">self</span>.props
     }
@@ -803,7 +804,7 @@
     }
 }
 
-<span class="kw">impl </span>Apply <span class="kw">for </span>PositioningLookup&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Apply <span class="kw">for </span>PositioningLookup&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>apply(<span class="kw-2">&amp;</span><span class="self">self</span>, ctx: <span class="kw-2">&amp;mut </span>ApplyContext) -&gt; <span class="prelude-ty">Option</span>&lt;()&gt; {
         <span class="kw">if </span><span class="self">self</span>.covers(ctx.buffer.cur(<span class="number">0</span>).as_glyph()) {
             <span class="kw">for </span>subtable <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.subtables {
@@ -817,7 +818,7 @@
     </span>}
 }
 
-<span class="kw">impl </span>Apply <span class="kw">for </span>PositioningSubtable&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Apply <span class="kw">for </span>PositioningSubtable&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>apply(<span class="kw-2">&amp;</span><span class="self">self</span>, ctx: <span class="kw-2">&amp;mut </span>ApplyContext) -&gt; <span class="prelude-ty">Option</span>&lt;()&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::Single(t) =&gt; t.apply(ctx),
@@ -832,7 +833,7 @@
     }
 }
 
-<span class="kw">impl </span>Apply <span class="kw">for </span>SingleAdjustment&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Apply <span class="kw">for </span>SingleAdjustment&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>apply(<span class="kw-2">&amp;</span><span class="self">self</span>, ctx: <span class="kw-2">&amp;mut </span>ApplyContext) -&gt; <span class="prelude-ty">Option</span>&lt;()&gt; {
         <span class="kw">let </span>glyph = ctx.buffer.cur(<span class="number">0</span>).as_glyph();
         <span class="kw">let </span>record = <span class="kw">match </span><span class="self">self </span>{
@@ -851,7 +852,7 @@
     }
 }
 
-<span class="kw">impl </span>Apply <span class="kw">for </span>PairAdjustment&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Apply <span class="kw">for </span>PairAdjustment&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>apply(<span class="kw-2">&amp;</span><span class="self">self</span>, ctx: <span class="kw-2">&amp;mut </span>ApplyContext) -&gt; <span class="prelude-ty">Option</span>&lt;()&gt; {
         <span class="kw">let </span>first = ctx.buffer.cur(<span class="number">0</span>).as_glyph();
         <span class="kw">let </span>index = <span class="self">self</span>.coverage().get(first)<span class="question-mark">?</span>;
@@ -876,7 +877,7 @@
 
         <span class="kw">let </span>flag1 = records.<span class="number">0</span>.apply(ctx, ctx.buffer.idx);
         <span class="kw">let </span>flag2 = records.<span class="number">1</span>.apply(ctx, pos);
-        <span class="comment">// Note the intentional use of &quot;|&quot; instead of short-circuit &quot;||&quot;.
+        <span class="comment">// Note the intentional use of "|" instead of short-circuit "||".
         </span><span class="kw">if </span>flag1 | flag2 {
             ctx.buffer.unsafe_to_break(ctx.buffer.idx, pos + <span class="number">1</span>);
         }
@@ -886,7 +887,7 @@
     }
 }
 
-<span class="kw">impl </span>Apply <span class="kw">for </span>CursiveAdjustment&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Apply <span class="kw">for </span>CursiveAdjustment&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>apply(<span class="kw-2">&amp;</span><span class="self">self</span>, ctx: <span class="kw-2">&amp;mut </span>ApplyContext) -&gt; <span class="prelude-ty">Option</span>&lt;()&gt; {
         <span class="kw">let </span>this = ctx.buffer.cur(<span class="number">0</span>).as_glyph();
 
@@ -945,7 +946,7 @@
         // the root stays on baseline and each node aligns itself against its
         // parent.
         //
-        // Optimize things for the case of RightToLeft, as that&#39;s most common in
+        // Optimize things for the case of RightToLeft, as that's most common in
         // Arabic.
         </span><span class="kw">let </span><span class="kw-2">mut </span>child = i;
         <span class="kw">let </span><span class="kw-2">mut </span>parent = j;
@@ -1018,7 +1019,7 @@
     pos[j].set_attach_type(attach_type);
 }
 
-<span class="kw">impl </span>Apply <span class="kw">for </span>MarkToBaseAdjustment&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Apply <span class="kw">for </span>MarkToBaseAdjustment&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>apply(<span class="kw-2">&amp;</span><span class="self">self</span>, ctx: <span class="kw-2">&amp;mut </span>ApplyContext) -&gt; <span class="prelude-ty">Option</span>&lt;()&gt; {
         <span class="kw">let </span>buffer = <span class="kw-2">&amp;</span>ctx.buffer;
         <span class="kw">let </span>mark_glyph = ctx.buffer.cur(<span class="number">0</span>).as_glyph();
@@ -1063,7 +1064,7 @@
     }
 }
 
-<span class="kw">impl </span>Apply <span class="kw">for </span>MarkToLigatureAdjustment&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Apply <span class="kw">for </span>MarkToLigatureAdjustment&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>apply(<span class="kw-2">&amp;</span><span class="self">self</span>, ctx: <span class="kw-2">&amp;mut </span>ApplyContext) -&gt; <span class="prelude-ty">Option</span>&lt;()&gt; {
         <span class="kw">let </span>buffer = <span class="kw-2">&amp;</span>ctx.buffer;
         <span class="kw">let </span>mark_glyph = ctx.buffer.cur(<span class="number">0</span>).as_glyph();
@@ -1108,7 +1109,7 @@
     }
 }
 
-<span class="kw">impl </span>Apply <span class="kw">for </span>MarkToMarkAdjustment&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Apply <span class="kw">for </span>MarkToMarkAdjustment&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>apply(<span class="kw-2">&amp;</span><span class="self">self</span>, ctx: <span class="kw-2">&amp;mut </span>ApplyContext) -&gt; <span class="prelude-ty">Option</span>&lt;()&gt; {
         <span class="kw">let </span>buffer = <span class="kw-2">&amp;</span>ctx.buffer;
         <span class="kw">let </span>mark1_glyph = ctx.buffer.cur(<span class="number">0</span>).as_glyph();
@@ -1136,7 +1137,7 @@
             // or marks belonging to the same ligature component.
             </span>id1 == <span class="number">0 </span>|| comp1 == comp2
         } <span class="kw">else </span>{
-            <span class="comment">// If ligature ids don&#39;t match, it may be the case that one of the marks
+            <span class="comment">// If ligature ids don't match, it may be the case that one of the marks
             // itself is a ligature.  In which case match.
             </span>(id1 &gt; <span class="number">0 </span>&amp;&amp; comp1 == <span class="number">0</span>) || (id2 &gt; <span class="number">0 </span>&amp;&amp; comp2 == <span class="number">0</span>)
         };
@@ -1157,7 +1158,7 @@
     <span class="kw">fn </span>apply(<span class="kw-2">&amp;</span><span class="self">self</span>, ctx: <span class="kw-2">&amp;mut </span>ApplyContext, idx: usize) -&gt; bool;
 }
 
-<span class="kw">impl </span>ValueRecordExt <span class="kw">for </span>ValueRecord&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>ValueRecordExt <span class="kw">for </span>ValueRecord&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>apply(<span class="kw-2">&amp;</span><span class="self">self</span>, ctx: <span class="kw-2">&amp;mut </span>ApplyContext, idx: usize) -&gt; bool {
         <span class="kw">let </span>horizontal = ctx.buffer.direction.is_horizontal();
         <span class="kw">let </span><span class="kw-2">mut </span>pos = ctx.buffer.pos[idx];
@@ -1236,7 +1237,7 @@
     ) -&gt; <span class="prelude-ty">Option</span>&lt;()&gt;;
 }
 
-<span class="kw">impl </span>MarkArrayExt <span class="kw">for </span>MarkArray&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>MarkArrayExt <span class="kw">for </span>MarkArray&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>apply(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         ctx: <span class="kw-2">&amp;mut </span>ApplyContext,
@@ -1245,7 +1246,7 @@
         glyph_index: u16,
         glyph_pos: usize,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;()&gt; {
-        <span class="comment">// If this subtable doesn&#39;t have an anchor for this base and this class
+        <span class="comment">// If this subtable doesn't have an anchor for this base and this class
         // return `None` such that the subsequent subtables have a chance at it.
         </span><span class="kw">let </span>(mark_class, mark_anchor) = <span class="self">self</span>.get(mark_index)<span class="question-mark">?</span>;
         <span class="kw">let </span>base_anchor = anchors.get(glyph_index, mark_class)<span class="question-mark">?</span>;
@@ -1274,7 +1275,7 @@
     <span class="kw">pub const </span>CURSIVE: u8 = <span class="number">2</span>;
 }
 
-<span class="doccomment">/// Just like TryFrom&lt;N&gt;, but for numeric types not supported by the Rust&#39;s std.
+<span class="doccomment">/// Just like TryFrom&lt;N&gt;, but for numeric types not supported by the Rust's std.
 </span><span class="kw">pub trait </span>TryNumFrom&lt;T&gt;: Sized {
     <span class="doccomment">/// Casts between numeric types.
     </span><span class="kw">fn </span>try_num_from(<span class="kw">_</span>: T) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt;;
@@ -1288,10 +1289,10 @@
         // Float as int truncates toward zero, so we want to allow values
         // in the exclusive range `(MIN-1, MAX+1)`.
 
-        // We can&#39;t represent `MIN-1` exactly, but there&#39;s no fractional part
+        // We can't represent `MIN-1` exactly, but there's no fractional part
         // at this magnitude, so we can just use a `MIN` inclusive boundary.
         </span><span class="kw">const </span>MIN: f32 = core::i32::MIN <span class="kw">as </span>f32;
-        <span class="comment">// We can&#39;t represent `MAX` exactly, but it will round up to exactly
+        <span class="comment">// We can't represent `MAX` exactly, but it will round up to exactly
         // `MAX+1` (a power of two) when we cast it.
         </span><span class="kw">const </span>MAX_P1: f32 = core::i32::MAX <span class="kw">as </span>f32;
         <span class="kw">if </span>v &gt;= MIN &amp;&amp; v &lt; MAX_P1 {
@@ -1307,7 +1308,7 @@
     <span class="kw">fn </span>get_y_delta(<span class="kw-2">&amp;</span><span class="self">self</span>, face: <span class="kw-2">&amp;</span>Face) -&gt; <span class="prelude-ty">Option</span>&lt;i32&gt;;
 }
 
-<span class="kw">impl </span>DeviceExt <span class="kw">for </span>Device&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>DeviceExt <span class="kw">for </span>Device&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>get_x_delta(<span class="kw-2">&amp;</span><span class="self">self</span>, face: <span class="kw-2">&amp;</span>Face) -&gt; <span class="prelude-ty">Option</span>&lt;i32&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             Device::Hinting(hinting) =&gt; hinting.x_delta(face.units_per_em, face.pixels_per_em()),
@@ -1343,7 +1344,7 @@
     <span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, face: <span class="kw-2">&amp;</span>Face) -&gt; (i32, i32);
 }
 
-<span class="kw">impl </span>AnchorExt <span class="kw">for </span>Anchor&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>AnchorExt <span class="kw">for </span>Anchor&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, face: <span class="kw-2">&amp;</span>Face) -&gt; (i32, i32) {
         <span class="kw">let </span><span class="kw-2">mut </span>x = i32::from(<span class="self">self</span>.x);
         <span class="kw">let </span><span class="kw-2">mut </span>y = i32::from(<span class="self">self</span>.y);

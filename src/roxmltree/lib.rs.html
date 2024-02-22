@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/roxmltree-0.19.0/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="roxmltree" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/roxmltree-0.19.0/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="roxmltree" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1713,7 +1714,7 @@ License: ISC.
 
 </span><span class="kw">extern crate </span>alloc;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">extern crate </span>std;
 
 <span class="kw">use </span>core::cmp::Ordering;
@@ -1733,14 +1734,14 @@ License: ISC.
 <span class="kw">pub use </span><span class="kw">crate</span>::parse::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// The &lt;http://www.w3.org/XML/1998/namespace&gt; URI.
-</span><span class="kw">pub const </span>NS_XML_URI: <span class="kw-2">&amp;</span>str = <span class="string">&quot;http://www.w3.org/XML/1998/namespace&quot;</span>;
-<span class="doccomment">/// The prefix &#39;xml&#39;, which is by definition bound to NS_XML_URI
-</span><span class="kw">const </span>NS_XML_PREFIX: <span class="kw-2">&amp;</span>str = <span class="string">&quot;xml&quot;</span>;
+</span><span class="kw">pub const </span>NS_XML_URI: <span class="kw-2">&amp;</span>str = <span class="string">"http://www.w3.org/XML/1998/namespace"</span>;
+<span class="doccomment">/// The prefix 'xml', which is by definition bound to NS_XML_URI
+</span><span class="kw">const </span>NS_XML_PREFIX: <span class="kw-2">&amp;</span>str = <span class="string">"xml"</span>;
 
 <span class="doccomment">/// The &lt;http://www.w3.org/2000/xmlns/&gt; URI.
-</span><span class="kw">pub const </span>NS_XMLNS_URI: <span class="kw-2">&amp;</span>str = <span class="string">&quot;http://www.w3.org/2000/xmlns/&quot;</span>;
-<span class="doccomment">/// The string &#39;xmlns&#39;, which is used to declare new namespaces
-</span><span class="kw">const </span>XMLNS: <span class="kw-2">&amp;</span>str = <span class="string">&quot;xmlns&quot;</span>;
+</span><span class="kw">pub const </span>NS_XMLNS_URI: <span class="kw-2">&amp;</span>str = <span class="string">"http://www.w3.org/2000/xmlns/"</span>;
+<span class="doccomment">/// The string 'xmlns', which is used to declare new namespaces
+</span><span class="kw">const </span>XMLNS: <span class="kw-2">&amp;</span>str = <span class="string">"xmlns"</span>;
 
 <span class="doccomment">/// Position in text.
 ///
@@ -1761,7 +1762,7 @@ License: ISC.
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>TextPos {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;{}:{}&quot;</span>, <span class="self">self</span>.row, <span class="self">self</span>.col)
+        <span class="macro">write!</span>(f, <span class="string">"{}:{}"</span>, <span class="self">self</span>.row, <span class="self">self</span>.col)
     }
 }
 
@@ -1774,7 +1775,7 @@ License: ISC.
 /// Root, Element, PI, Comment and Text.
 ///
 /// As you can see there are no XML declaration and CDATA types.
-/// The XML declaration is basically skipped, since it doesn&#39;t contain any
+/// The XML declaration is basically skipped, since it doesn't contain any
 /// valuable information (we support only UTF-8 anyway).
 /// And CDATA will be converted into a Text node as is, without
 /// any preprocessing (you can read more about it
@@ -1787,28 +1788,28 @@ License: ISC.
 /// [`Node::node_type()`]: struct.Node.html#method.node_type
 /// [`Node::text()`]: struct.Node.html#method.text
 /// [`Node::tail()`]: struct.Node.html#method.tail
-</span><span class="kw">pub struct </span>Document&lt;<span class="lifetime">&#39;input</span>&gt; {
+</span><span class="kw">pub struct </span>Document&lt;<span class="lifetime">'input</span>&gt; {
     <span class="doccomment">/// An original data.
     ///
     /// Required for `text_pos_at` methods.
-    </span>text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str,
-    nodes: Vec&lt;NodeData&lt;<span class="lifetime">&#39;input</span>&gt;&gt;,
-    attributes: Vec&lt;AttributeData&lt;<span class="lifetime">&#39;input</span>&gt;&gt;,
-    namespaces: Namespaces&lt;<span class="lifetime">&#39;input</span>&gt;,
+    </span>text: <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str,
+    nodes: Vec&lt;NodeData&lt;<span class="lifetime">'input</span>&gt;&gt;,
+    attributes: Vec&lt;AttributeData&lt;<span class="lifetime">'input</span>&gt;&gt;,
+    namespaces: Namespaces&lt;<span class="lifetime">'input</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;input</span>&gt; Document&lt;<span class="lifetime">&#39;input</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'input</span>&gt; Document&lt;<span class="lifetime">'input</span>&gt; {
     <span class="doccomment">/// Returns the root node.
     ///
     /// # Examples
     ///
     /// ```
-    /// let doc = roxmltree::Document::parse(&quot;&lt;e/&gt;&quot;).unwrap();
+    /// let doc = roxmltree::Document::parse("&lt;e/&gt;").unwrap();
     /// assert!(doc.root().is_root());
-    /// assert!(doc.root().first_child().unwrap().has_tag_name(&quot;e&quot;));
+    /// assert!(doc.root().first_child().unwrap().has_tag_name("e"));
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>root&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>) -&gt; Node&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
+    </span><span class="kw">pub fn </span>root&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>) -&gt; Node&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
         Node {
             id: NodeId::new(<span class="number">0</span>),
             d: <span class="kw-2">&amp;</span><span class="self">self</span>.nodes[<span class="number">0</span>],
@@ -1823,20 +1824,20 @@ License: ISC.
     /// # Examples
     ///
     /// ```
-    /// let doc = roxmltree::Document::parse(&quot;\
+    /// let doc = roxmltree::Document::parse("\
     /// &lt;p&gt;
     ///     text
     /// &lt;/p&gt;
-    /// &quot;).unwrap();
+    /// ").unwrap();
     ///
     /// use roxmltree::NodeId;
     /// assert_eq!(doc.get_node(NodeId::new(0)).unwrap(), doc.root());
-    /// assert_eq!(doc.get_node(NodeId::new(1)), doc.descendants().find(|n| n.has_tag_name(&quot;p&quot;)));
+    /// assert_eq!(doc.get_node(NodeId::new(1)), doc.descendants().find(|n| n.has_tag_name("p")));
     /// assert_eq!(doc.get_node(NodeId::new(2)), doc.descendants().find(|n| n.is_text()));
     /// assert_eq!(doc.get_node(NodeId::new(3)), None);
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>get_node&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, id: NodeId) -&gt; <span class="prelude-ty">Option</span>&lt;Node&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>get_node&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, id: NodeId) -&gt; <span class="prelude-ty">Option</span>&lt;Node&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt;&gt; {
         <span class="self">self</span>.nodes.get(id.get_usize()).map(|data| Node {
             id,
             d: data,
@@ -1853,22 +1854,22 @@ License: ISC.
     /// # Examples
     ///
     /// ```
-    /// let doc = roxmltree::Document::parse(&quot;&lt;!-- comment --&gt;&lt;e/&gt;&quot;).unwrap();
-    /// assert!(doc.root_element().has_tag_name(&quot;e&quot;));
+    /// let doc = roxmltree::Document::parse("&lt;!-- comment --&gt;&lt;e/&gt;").unwrap();
+    /// assert!(doc.root_element().has_tag_name("e"));
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>root_element&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>) -&gt; Node&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
+    </span><span class="kw">pub fn </span>root_element&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>) -&gt; Node&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
         <span class="comment">// `expect` is safe, because the `Document` is guarantee to have at least one element.
         </span><span class="self">self</span>.root()
             .first_element_child()
-            .expect(<span class="string">&quot;XML documents must contain a root element&quot;</span>)
+            .expect(<span class="string">"XML documents must contain a root element"</span>)
     }
 
-    <span class="doccomment">/// Returns an iterator over document&#39;s descendant nodes.
+    <span class="doccomment">/// Returns an iterator over document's descendant nodes.
     ///
     /// Shorthand for `doc.root().descendants()`.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>descendants(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Descendants&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;input</span>&gt; {
+    </span><span class="kw">pub fn </span>descendants(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Descendants&lt;<span class="lifetime">'_</span>, <span class="lifetime">'input</span>&gt; {
         <span class="self">self</span>.root().descendants()
     }
 
@@ -1881,9 +1882,9 @@ License: ISC.
     /// ```
     /// use roxmltree::*;
     ///
-    /// let doc = Document::parse(&quot;\
+    /// let doc = Document::parse("\
     /// &lt;!-- comment --&gt;
-    /// &lt;e/&gt;&quot;
+    /// &lt;e/&gt;"
     /// ).unwrap();
     ///
     /// assert_eq!(doc.text_pos_at(10), TextPos::new(1, 11));
@@ -1901,29 +1902,29 @@ License: ISC.
     /// ```
     /// use roxmltree::*;
     ///
-    /// let doc = Document::parse(&quot;&lt;e/&gt;&quot;).unwrap();
+    /// let doc = Document::parse("&lt;e/&gt;").unwrap();
     ///
-    /// assert_eq!(doc.input_text(), &quot;&lt;e/&gt;&quot;);
+    /// assert_eq!(doc.input_text(), "&lt;e/&gt;");
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>input_text(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str {
+    </span><span class="kw">pub fn </span>input_text(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str {
         <span class="self">self</span>.text
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;input</span>&gt; fmt::Debug <span class="kw">for </span>Document&lt;<span class="lifetime">&#39;input</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'input</span>&gt; fmt::Debug <span class="kw">for </span>Document&lt;<span class="lifetime">'input</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; <span class="prelude-ty">Result</span>&lt;(), fmt::Error&gt; {
         <span class="kw">if </span>!<span class="self">self</span>.root().has_children() {
-            <span class="kw">return </span><span class="macro">write!</span>(f, <span class="string">&quot;Document []&quot;</span>);
+            <span class="kw">return </span><span class="macro">write!</span>(f, <span class="string">"Document []"</span>);
         }
 
         <span class="macro">macro_rules! </span>writeln_indented {
             (<span class="macro-nonterminal">$depth</span>:expr, <span class="macro-nonterminal">$f</span>:expr, <span class="macro-nonterminal">$fmt</span>:expr) =&gt; {
-                <span class="kw">for _ in </span><span class="number">0</span>..<span class="macro-nonterminal">$depth </span>{ <span class="macro">write!</span>(<span class="macro-nonterminal">$f</span>, <span class="string">&quot;    &quot;</span>)<span class="question-mark">?</span>; }
+                <span class="kw">for _ in </span><span class="number">0</span>..<span class="macro-nonterminal">$depth </span>{ <span class="macro">write!</span>(<span class="macro-nonterminal">$f</span>, <span class="string">"    "</span>)<span class="question-mark">?</span>; }
                 <span class="macro">writeln!</span>(<span class="macro-nonterminal">$f</span>, <span class="macro-nonterminal">$fmt</span>)<span class="question-mark">?</span>;
             };
             (<span class="macro-nonterminal">$depth</span>:expr, <span class="macro-nonterminal">$f</span>:expr, <span class="macro-nonterminal">$fmt</span>:expr, $(<span class="macro-nonterminal">$arg</span>:tt)<span class="kw-2">*</span>) =&gt; {
-                <span class="kw">for _ in </span><span class="number">0</span>..<span class="macro-nonterminal">$depth </span>{ <span class="macro">write!</span>(<span class="macro-nonterminal">$f</span>, <span class="string">&quot;    &quot;</span>)<span class="question-mark">?</span>; }
+                <span class="kw">for _ in </span><span class="number">0</span>..<span class="macro-nonterminal">$depth </span>{ <span class="macro">write!</span>(<span class="macro-nonterminal">$f</span>, <span class="string">"    "</span>)<span class="question-mark">?</span>; }
                 <span class="macro">writeln!</span>(<span class="macro-nonterminal">$f</span>, <span class="macro-nonterminal">$fmt</span>, $(<span class="macro-nonterminal">$arg</span>)<span class="kw-2">*</span>)<span class="question-mark">?</span>;
             };
         }
@@ -1943,11 +1944,11 @@ License: ISC.
                 <span class="kw">return </span><span class="prelude-val">Ok</span>(());
             }
 
-            <span class="macro">writeln_indented!</span>(depth, f, <span class="string">&quot;{}: [&quot;</span>, prefix);
+            <span class="macro">writeln_indented!</span>(depth, f, <span class="string">"{}: ["</span>, prefix);
             <span class="kw">for </span>v <span class="kw">in </span>data {
-                <span class="macro">writeln_indented!</span>(depth + <span class="number">1</span>, f, <span class="string">&quot;{:?}&quot;</span>, v);
+                <span class="macro">writeln_indented!</span>(depth + <span class="number">1</span>, f, <span class="string">"{:?}"</span>, v);
             }
-            <span class="macro">writeln_indented!</span>(depth, f, <span class="string">&quot;]&quot;</span>);
+            <span class="macro">writeln_indented!</span>(depth, f, <span class="string">"]"</span>);
 
             <span class="prelude-val">Ok</span>(())
         }
@@ -1959,29 +1960,29 @@ License: ISC.
         ) -&gt; <span class="prelude-ty">Result</span>&lt;(), fmt::Error&gt; {
             <span class="kw">for </span>child <span class="kw">in </span>parent.children() {
                 <span class="kw">if </span>child.is_element() {
-                    <span class="macro">writeln_indented!</span>(depth, f, <span class="string">&quot;Element {{&quot;</span>);
-                    <span class="macro">writeln_indented!</span>(depth, f, <span class="string">&quot;    tag_name: {:?}&quot;</span>, child.tag_name());
-                    print_into_iter(<span class="string">&quot;attributes&quot;</span>, child.attributes(), depth + <span class="number">1</span>, f)<span class="question-mark">?</span>;
-                    print_into_iter(<span class="string">&quot;namespaces&quot;</span>, child.namespaces(), depth + <span class="number">1</span>, f)<span class="question-mark">?</span>;
+                    <span class="macro">writeln_indented!</span>(depth, f, <span class="string">"Element {{"</span>);
+                    <span class="macro">writeln_indented!</span>(depth, f, <span class="string">"    tag_name: {:?}"</span>, child.tag_name());
+                    print_into_iter(<span class="string">"attributes"</span>, child.attributes(), depth + <span class="number">1</span>, f)<span class="question-mark">?</span>;
+                    print_into_iter(<span class="string">"namespaces"</span>, child.namespaces(), depth + <span class="number">1</span>, f)<span class="question-mark">?</span>;
 
                     <span class="kw">if </span>child.has_children() {
-                        <span class="macro">writeln_indented!</span>(depth, f, <span class="string">&quot;    children: [&quot;</span>);
+                        <span class="macro">writeln_indented!</span>(depth, f, <span class="string">"    children: ["</span>);
                         print_children(child, depth + <span class="number">2</span>, f)<span class="question-mark">?</span>;
-                        <span class="macro">writeln_indented!</span>(depth, f, <span class="string">&quot;    ]&quot;</span>);
+                        <span class="macro">writeln_indented!</span>(depth, f, <span class="string">"    ]"</span>);
                     }
 
-                    <span class="macro">writeln_indented!</span>(depth, f, <span class="string">&quot;}}&quot;</span>);
+                    <span class="macro">writeln_indented!</span>(depth, f, <span class="string">"}}"</span>);
                 } <span class="kw">else </span>{
-                    <span class="macro">writeln_indented!</span>(depth, f, <span class="string">&quot;{:?}&quot;</span>, child);
+                    <span class="macro">writeln_indented!</span>(depth, f, <span class="string">"{:?}"</span>, child);
                 }
             }
 
             <span class="prelude-val">Ok</span>(())
         }
 
-        <span class="macro">writeln!</span>(f, <span class="string">&quot;Document [&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(f, <span class="string">"Document ["</span>)<span class="question-mark">?</span>;
         print_children(<span class="self">self</span>.root(), <span class="number">1</span>, f)<span class="question-mark">?</span>;
-        <span class="macro">writeln!</span>(f, <span class="string">&quot;]&quot;</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(f, <span class="string">"]"</span>)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(())
     }
@@ -2007,9 +2008,9 @@ License: ISC.
 <span class="doccomment">/// A processing instruction.
 </span><span class="attr">#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[allow(missing_docs)]
-</span><span class="kw">pub struct </span>PI&lt;<span class="lifetime">&#39;input</span>&gt; {
-    <span class="kw">pub </span>target: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str,
-    <span class="kw">pub </span>value: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str&gt;,
+</span><span class="kw">pub struct </span>PI&lt;<span class="lifetime">'input</span>&gt; {
+    <span class="kw">pub </span>target: <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str,
+    <span class="kw">pub </span>value: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'input </span>str&gt;,
 }
 
 <span class="doccomment">/// A short range.
@@ -2046,7 +2047,7 @@ License: ISC.
 ///
 /// An index into a `Tree`-internal `Vec`.
 ///
-/// Note that this value should be used with care since `roxmltree` doesn&#39;t
+/// Note that this value should be used with care since `roxmltree` doesn't
 /// check that `NodeId` actually belongs to a selected `Document`.
 /// So you can end up in a situation, when `NodeId` produced by one `Document`
 /// is used to select a node in another `Document`.
@@ -2093,33 +2094,33 @@ License: ISC.
 }
 
 <span class="attr">#[derive(Debug)]
-</span><span class="kw">enum </span>NodeKind&lt;<span class="lifetime">&#39;input</span>&gt; {
+</span><span class="kw">enum </span>NodeKind&lt;<span class="lifetime">'input</span>&gt; {
     Root,
     Element {
-        tag_name: ExpandedNameIndexed&lt;<span class="lifetime">&#39;input</span>&gt;,
+        tag_name: ExpandedNameIndexed&lt;<span class="lifetime">'input</span>&gt;,
         attributes: ShortRange,
         namespaces: ShortRange,
     },
-    PI(PI&lt;<span class="lifetime">&#39;input</span>&gt;),
-    Comment(StringStorage&lt;<span class="lifetime">&#39;input</span>&gt;),
-    Text(StringStorage&lt;<span class="lifetime">&#39;input</span>&gt;),
+    PI(PI&lt;<span class="lifetime">'input</span>&gt;),
+    Comment(StringStorage&lt;<span class="lifetime">'input</span>&gt;),
+    Text(StringStorage&lt;<span class="lifetime">'input</span>&gt;),
 }
 
 <span class="attr">#[derive(Debug)]
-</span><span class="kw">struct </span>NodeData&lt;<span class="lifetime">&#39;input</span>&gt; {
+</span><span class="kw">struct </span>NodeData&lt;<span class="lifetime">'input</span>&gt; {
     parent: <span class="prelude-ty">Option</span>&lt;NodeId&gt;,
     prev_sibling: <span class="prelude-ty">Option</span>&lt;NodeId&gt;,
     next_subtree: <span class="prelude-ty">Option</span>&lt;NodeId&gt;,
     last_child: <span class="prelude-ty">Option</span>&lt;NodeId&gt;,
-    kind: NodeKind&lt;<span class="lifetime">&#39;input</span>&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;positions&quot;</span>)]
+    kind: NodeKind&lt;<span class="lifetime">'input</span>&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"positions"</span>)]
     </span>range: Range&lt;usize&gt;,
 }
 
-<span class="attr">#[cfg(target_has_atomic = <span class="string">&quot;ptr&quot;</span>)]
+<span class="attr">#[cfg(target_has_atomic = <span class="string">"ptr"</span>)]
 </span><span class="kw">type </span>OwnedSharedString = alloc::sync::Arc&lt;str&gt;;
 
-<span class="attr">#[cfg(not(target_has_atomic = <span class="string">&quot;ptr&quot;</span>))]
+<span class="attr">#[cfg(not(target_has_atomic = <span class="string">"ptr"</span>))]
 </span><span class="kw">type </span>OwnedSharedString = alloc::rc::Rc&lt;str&gt;;
 
 <span class="doccomment">/// A string storage.
@@ -2130,18 +2131,18 @@ License: ISC.
 /// But in some cases post-processing is necessary and we have to allocate them.
 ///
 /// All owned, allocated strings are stored as `Arc&lt;str&gt;` or as `Rc&lt;str&gt;` on targets
-/// were `Arc` isn&#39;t available.
+/// were `Arc` isn't available.
 /// And unlike `Cow&lt;&amp;str&gt;`, `StringStorage` is immutable and can be cheaply cloned.
 </span><span class="attr">#[derive(Clone, Eq, Debug)]
-</span><span class="kw">pub enum </span>StringStorage&lt;<span class="lifetime">&#39;input</span>&gt; {
+</span><span class="kw">pub enum </span>StringStorage&lt;<span class="lifetime">'input</span>&gt; {
     <span class="doccomment">/// A raw slice of the input string.
-    </span>Borrowed(<span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str),
+    </span>Borrowed(<span class="kw-2">&amp;</span><span class="lifetime">'input </span>str),
 
     <span class="doccomment">/// A reference-counted string.
     </span>Owned(OwnedSharedString),
 }
 
-<span class="kw">impl </span>StringStorage&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>StringStorage&lt;<span class="lifetime">'_</span>&gt; {
     <span class="doccomment">/// Creates a new owned string from `&amp;str` or `String`.
     </span><span class="kw">pub fn </span>new_owned&lt;T: Into&lt;OwnedSharedString&gt;&gt;(s: T) -&gt; <span class="self">Self </span>{
         StringStorage::Owned(s.into())
@@ -2156,19 +2157,19 @@ License: ISC.
     }
 }
 
-<span class="kw">impl </span>PartialEq <span class="kw">for </span>StringStorage&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>PartialEq <span class="kw">for </span>StringStorage&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
         <span class="self">self</span>.as_str() == other.as_str()
     }
 }
 
-<span class="kw">impl </span>core::fmt::Display <span class="kw">for </span>StringStorage&lt;<span class="lifetime">&#39;_</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.as_str())
+<span class="kw">impl </span>core::fmt::Display <span class="kw">for </span>StringStorage&lt;<span class="lifetime">'_</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        <span class="macro">write!</span>(f, <span class="string">"{}"</span>, <span class="self">self</span>.as_str())
     }
 }
 
-<span class="kw">impl </span>core::ops::Deref <span class="kw">for </span>StringStorage&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>core::ops::Deref <span class="kw">for </span>StringStorage&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">type </span>Target = str;
 
     <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
@@ -2177,110 +2178,110 @@ License: ISC.
 }
 
 <span class="attr">#[derive(Clone, Debug)]
-</span><span class="kw">struct </span>AttributeData&lt;<span class="lifetime">&#39;input</span>&gt; {
-    name: ExpandedNameIndexed&lt;<span class="lifetime">&#39;input</span>&gt;,
-    value: StringStorage&lt;<span class="lifetime">&#39;input</span>&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;positions&quot;</span>)]
+</span><span class="kw">struct </span>AttributeData&lt;<span class="lifetime">'input</span>&gt; {
+    name: ExpandedNameIndexed&lt;<span class="lifetime">'input</span>&gt;,
+    value: StringStorage&lt;<span class="lifetime">'input</span>&gt;,
+    <span class="attr">#[cfg(feature = <span class="string">"positions"</span>)]
     </span>pos: usize,
 }
 
 <span class="doccomment">/// An attribute.
 </span><span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">pub struct </span>Attribute&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>: <span class="lifetime">&#39;a</span>&gt; {
-    doc: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Document&lt;<span class="lifetime">&#39;input</span>&gt;,
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>AttributeData&lt;<span class="lifetime">&#39;input</span>&gt;,
+</span><span class="kw">pub struct </span>Attribute&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>: <span class="lifetime">'a</span>&gt; {
+    doc: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Document&lt;<span class="lifetime">'input</span>&gt;,
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>AttributeData&lt;<span class="lifetime">'input</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; Attribute&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
-    <span class="doccomment">/// Returns attribute&#39;s namespace URI.
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; Attribute&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
+    <span class="doccomment">/// Returns attribute's namespace URI.
     ///
     /// # Examples
     ///
     /// ```
     /// let doc = roxmltree::Document::parse(
-    ///     &quot;&lt;e xmlns:n=&#39;http://www.w3.org&#39; a=&#39;b&#39; n:a=&#39;c&#39;/&gt;&quot;
+    ///     "&lt;e xmlns:n='http://www.w3.org' a='b' n:a='c'/&gt;"
     /// ).unwrap();
     ///
     /// assert_eq!(doc.root_element().attributes().nth(0).unwrap().namespace(), None);
-    /// assert_eq!(doc.root_element().attributes().nth(1).unwrap().namespace(), Some(&quot;http://www.w3.org&quot;));
+    /// assert_eq!(doc.root_element().attributes().nth(1).unwrap().namespace(), Some("http://www.w3.org"));
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>namespace(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt; {
+    </span><span class="kw">pub fn </span>namespace(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; {
         <span class="self">self</span>.data.name.namespace(<span class="self">self</span>.doc).map(Namespace::uri)
     }
 
-    <span class="doccomment">/// Returns attribute&#39;s name.
+    <span class="doccomment">/// Returns attribute's name.
     ///
     /// # Examples
     ///
     /// ```
     /// let doc = roxmltree::Document::parse(
-    ///     &quot;&lt;e xmlns:n=&#39;http://www.w3.org&#39; a=&#39;b&#39; n:a=&#39;c&#39;/&gt;&quot;
+    ///     "&lt;e xmlns:n='http://www.w3.org' a='b' n:a='c'/&gt;"
     /// ).unwrap();
     ///
-    /// assert_eq!(doc.root_element().attributes().nth(0).unwrap().name(), &quot;a&quot;);
-    /// assert_eq!(doc.root_element().attributes().nth(1).unwrap().name(), &quot;a&quot;);
+    /// assert_eq!(doc.root_element().attributes().nth(0).unwrap().name(), "a");
+    /// assert_eq!(doc.root_element().attributes().nth(1).unwrap().name(), "a");
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str {
+    </span><span class="kw">pub fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str {
         <span class="self">self</span>.data.name.local_name
     }
 
-    <span class="doccomment">/// Returns attribute&#39;s value.
+    <span class="doccomment">/// Returns attribute's value.
     ///
     /// # Examples
     ///
     /// ```
     /// let doc = roxmltree::Document::parse(
-    ///     &quot;&lt;e xmlns:n=&#39;http://www.w3.org&#39; a=&#39;b&#39; n:a=&#39;c&#39;/&gt;&quot;
+    ///     "&lt;e xmlns:n='http://www.w3.org' a='b' n:a='c'/&gt;"
     /// ).unwrap();
     ///
-    /// assert_eq!(doc.root_element().attributes().nth(0).unwrap().value(), &quot;b&quot;);
-    /// assert_eq!(doc.root_element().attributes().nth(1).unwrap().value(), &quot;c&quot;);
+    /// assert_eq!(doc.root_element().attributes().nth(0).unwrap().value(), "b");
+    /// assert_eq!(doc.root_element().attributes().nth(1).unwrap().value(), "c");
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str {
+    </span><span class="kw">pub fn </span>value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str {
         <span class="kw-2">&amp;</span><span class="self">self</span>.data.value
     }
 
-    <span class="doccomment">/// Returns attribute&#39;s value storage.
+    <span class="doccomment">/// Returns attribute's value storage.
     ///
     /// Useful when you need a more low-level access to an allocated string.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>value_storage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>StringStorage&lt;<span class="lifetime">&#39;input</span>&gt; {
+    </span><span class="kw">pub fn </span>value_storage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>StringStorage&lt;<span class="lifetime">'input</span>&gt; {
         <span class="kw-2">&amp;</span><span class="self">self</span>.data.value
     }
 
-    <span class="doccomment">/// Returns attribute&#39;s position in bytes in the original document.
+    <span class="doccomment">/// Returns attribute's position in bytes in the original document.
     ///
     /// You can calculate a human-readable text position via [Document::text_pos_at].
     ///
     /// ```text
-    /// &lt;e attr=&#39;value&#39;/&gt;
+    /// &lt;e attr='value'/&gt;
     ///    ^
     /// ```
     ///
     /// [Document::text_pos_at]: struct.Document.html#method.text_pos_at
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;positions&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"positions"</span>)]
     #[inline]
     </span><span class="kw">pub fn </span>position(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="self">self</span>.data.pos
     }
 }
 
-<span class="kw">impl </span>PartialEq <span class="kw">for </span>Attribute&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>PartialEq <span class="kw">for </span>Attribute&lt;<span class="lifetime">'_</span>, <span class="lifetime">'_</span>&gt; {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>Attribute&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) -&gt; bool {
+    </span><span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>Attribute&lt;<span class="lifetime">'_</span>, <span class="lifetime">'_</span>&gt;) -&gt; bool {
         <span class="self">self</span>.data.name.as_expanded_name(<span class="self">self</span>.doc) == other.data.name.as_expanded_name(other.doc)
             &amp;&amp; <span class="self">self</span>.data.value == other.data.value
     }
 }
 
-<span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Attribute&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Attribute&lt;<span class="lifetime">'_</span>, <span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; <span class="prelude-ty">Result</span>&lt;(), fmt::Error&gt; {
         <span class="macro">write!</span>(
             f,
-            <span class="string">&quot;Attribute {{ name: {:?}, value: {:?} }}&quot;</span>,
+            <span class="string">"Attribute {{ name: {:?}, value: {:?} }}"</span>,
             <span class="self">self</span>.data.name.as_expanded_name(<span class="self">self</span>.doc),
             <span class="self">self</span>.data.value
         )
@@ -2291,33 +2292,33 @@ License: ISC.
 ///
 /// Contains URI and *prefix* pair.
 </span><span class="attr">#[derive(Clone, PartialEq, Eq, Debug)]
-</span><span class="kw">pub struct </span>Namespace&lt;<span class="lifetime">&#39;input</span>&gt; {
-    name: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str&gt;,
-    uri: StringStorage&lt;<span class="lifetime">&#39;input</span>&gt;,
+</span><span class="kw">pub struct </span>Namespace&lt;<span class="lifetime">'input</span>&gt; {
+    name: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'input </span>str&gt;,
+    uri: StringStorage&lt;<span class="lifetime">'input</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;input</span>&gt; Namespace&lt;<span class="lifetime">&#39;input</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'input</span>&gt; Namespace&lt;<span class="lifetime">'input</span>&gt; {
     <span class="doccomment">/// Returns namespace name/prefix.
     ///
     /// # Examples
     ///
     /// ```
     /// let doc = roxmltree::Document::parse(
-    ///     &quot;&lt;e xmlns:n=&#39;http://www.w3.org&#39;/&gt;&quot;
+    ///     "&lt;e xmlns:n='http://www.w3.org'/&gt;"
     /// ).unwrap();
     ///
-    /// assert_eq!(doc.root_element().namespaces().nth(0).unwrap().name(), Some(&quot;n&quot;));
+    /// assert_eq!(doc.root_element().namespaces().nth(0).unwrap().name(), Some("n"));
     /// ```
     ///
     /// ```
     /// let doc = roxmltree::Document::parse(
-    ///     &quot;&lt;e xmlns=&#39;http://www.w3.org&#39;/&gt;&quot;
+    ///     "&lt;e xmlns='http://www.w3.org'/&gt;"
     /// ).unwrap();
     ///
     /// assert_eq!(doc.root_element().namespaces().nth(0).unwrap().name(), None);
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str&gt; {
+    </span><span class="kw">pub fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'input </span>str&gt; {
         <span class="self">self</span>.name
     }
 
@@ -2327,10 +2328,10 @@ License: ISC.
     ///
     /// ```
     /// let doc = roxmltree::Document::parse(
-    ///     &quot;&lt;e xmlns:n=&#39;http://www.w3.org&#39;/&gt;&quot;
+    ///     "&lt;e xmlns:n='http://www.w3.org'/&gt;"
     /// ).unwrap();
     ///
-    /// assert_eq!(doc.root_element().namespaces().nth(0).unwrap().uri(), &quot;http://www.w3.org&quot;);
+    /// assert_eq!(doc.root_element().namespaces().nth(0).unwrap().uri(), "http://www.w3.org");
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>uri(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
@@ -2339,22 +2340,22 @@ License: ISC.
 }
 
 <span class="attr">#[derive(Default)]
-</span><span class="kw">struct </span>Namespaces&lt;<span class="lifetime">&#39;input</span>&gt; {
+</span><span class="kw">struct </span>Namespaces&lt;<span class="lifetime">'input</span>&gt; {
     <span class="comment">// Deduplicated namespace values used throughout the document
-    </span>values: Vec&lt;Namespace&lt;<span class="lifetime">&#39;input</span>&gt;&gt;,
+    </span>values: Vec&lt;Namespace&lt;<span class="lifetime">'input</span>&gt;&gt;,
     <span class="comment">// Indices into the above in tree order as the document is parsed
     </span>tree_order: Vec&lt;NamespaceIdx&gt;,
     <span class="comment">// Indices into the above sorted by value used for deduplication
     </span>sorted_order: Vec&lt;NamespaceIdx&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;input</span>&gt; Namespaces&lt;<span class="lifetime">&#39;input</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'input</span>&gt; Namespaces&lt;<span class="lifetime">'input</span>&gt; {
     <span class="kw">fn </span>push_ns(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        name: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str&gt;,
-        uri: StringStorage&lt;<span class="lifetime">&#39;input</span>&gt;,
+        name: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'input </span>str&gt;,
+        uri: StringStorage&lt;<span class="lifetime">'input</span>&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-        <span class="macro">debug_assert_ne!</span>(name, <span class="prelude-val">Some</span>(<span class="string">&quot;&quot;</span>));
+        <span class="macro">debug_assert_ne!</span>(name, <span class="prelude-val">Some</span>(<span class="string">""</span>));
 
         <span class="kw">let </span>idx = <span class="kw">match </span><span class="self">self</span>.sorted_order.binary_search_by(|idx| {
             <span class="kw">let </span>value = <span class="kw-2">&amp;</span><span class="self">self</span>.values[idx.<span class="number">0 </span><span class="kw">as </span>usize];
@@ -2398,7 +2399,7 @@ License: ISC.
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: NamespaceIdx) -&gt; <span class="kw-2">&amp;</span>Namespace&lt;<span class="lifetime">&#39;input</span>&gt; {
+    </span><span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: NamespaceIdx) -&gt; <span class="kw-2">&amp;</span>Namespace&lt;<span class="lifetime">'input</span>&gt; {
         <span class="kw-2">&amp;</span><span class="self">self</span>.values[idx.<span class="number">0 </span><span class="kw">as </span>usize]
     }
 }
@@ -2408,19 +2409,19 @@ License: ISC.
 </span><span class="kw">struct </span>NamespaceIdx(u16);
 
 <span class="attr">#[derive(Clone, Copy, Debug)]
-</span><span class="kw">struct </span>ExpandedNameIndexed&lt;<span class="lifetime">&#39;input</span>&gt; {
+</span><span class="kw">struct </span>ExpandedNameIndexed&lt;<span class="lifetime">'input</span>&gt; {
     namespace_idx: <span class="prelude-ty">Option</span>&lt;NamespaceIdx&gt;,
-    local_name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str,
+    local_name: <span class="kw-2">&amp;</span><span class="lifetime">'input </span>str,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;input</span>&gt; ExpandedNameIndexed&lt;<span class="lifetime">&#39;input</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'input</span>&gt; ExpandedNameIndexed&lt;<span class="lifetime">'input</span>&gt; {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>namespace&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, doc: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Document&lt;<span class="lifetime">&#39;input</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Namespace&lt;<span class="lifetime">&#39;input</span>&gt;&gt; {
+    </span><span class="kw">fn </span>namespace&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, doc: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Document&lt;<span class="lifetime">'input</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Namespace&lt;<span class="lifetime">'input</span>&gt;&gt; {
         <span class="self">self</span>.namespace_idx.map(|idx| doc.namespaces.get(idx))
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>as_expanded_name&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, doc: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Document&lt;<span class="lifetime">&#39;input</span>&gt;) -&gt; ExpandedName&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
+    </span><span class="kw">fn </span>as_expanded_name&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, doc: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Document&lt;<span class="lifetime">'input</span>&gt;) -&gt; ExpandedName&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
         ExpandedName {
             uri: <span class="self">self</span>.namespace(doc).map(Namespace::uri),
             name: <span class="self">self</span>.local_name,
@@ -2432,23 +2433,23 @@ License: ISC.
 ///
 /// Contains an namespace URI and name pair.
 </span><span class="attr">#[derive(Clone, Copy, PartialEq, Eq)]
-</span><span class="kw">pub struct </span>ExpandedName&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; {
-    uri: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt;,
-    name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>str,
+</span><span class="kw">pub struct </span>ExpandedName&lt;<span class="lifetime">'a</span>, <span class="lifetime">'b</span>&gt; {
+    uri: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt;,
+    name: <span class="kw-2">&amp;</span><span class="lifetime">'b </span>str,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; ExpandedName&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="lifetime">'b</span>&gt; ExpandedName&lt;<span class="lifetime">'a</span>, <span class="lifetime">'b</span>&gt; {
     <span class="doccomment">/// Returns a namespace URI.
     ///
     /// # Examples
     ///
     /// ```
-    /// let doc = roxmltree::Document::parse(&quot;&lt;e xmlns=&#39;http://www.w3.org&#39;/&gt;&quot;).unwrap();
+    /// let doc = roxmltree::Document::parse("&lt;e xmlns='http://www.w3.org'/&gt;").unwrap();
     ///
-    /// assert_eq!(doc.root_element().tag_name().namespace(), Some(&quot;http://www.w3.org&quot;));
+    /// assert_eq!(doc.root_element().tag_name().namespace(), Some("http://www.w3.org"));
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>namespace(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt; {
+    </span><span class="kw">pub fn </span>namespace(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; {
         <span class="self">self</span>.uri
     }
 
@@ -2457,17 +2458,17 @@ License: ISC.
     /// # Examples
     ///
     /// ```
-    /// let doc = roxmltree::Document::parse(&quot;&lt;e/&gt;&quot;).unwrap();
+    /// let doc = roxmltree::Document::parse("&lt;e/&gt;").unwrap();
     ///
-    /// assert_eq!(doc.root_element().tag_name().name(), &quot;e&quot;);
+    /// assert_eq!(doc.root_element().tag_name().name(), "e");
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>str {
+    </span><span class="kw">pub fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'b </span>str {
         <span class="self">self</span>.name
     }
 }
 
-<span class="kw">impl </span>ExpandedName&lt;<span class="lifetime">&#39;static</span>, <span class="lifetime">&#39;static</span>&gt; {
+<span class="kw">impl </span>ExpandedName&lt;<span class="lifetime">'static</span>, <span class="lifetime">'static</span>&gt; {
     <span class="doccomment">/// Create a new instance from static data.
     ///
     /// # Example
@@ -2475,9 +2476,9 @@ License: ISC.
     /// ```rust
     /// use roxmltree::ExpandedName;
     /// const DAV_HREF: ExpandedName =
-    ///     ExpandedName::from_static(&quot;urn:ietf:params:xml:ns:caldav:&quot;, &quot;calendar-data&quot;);
+    ///     ExpandedName::from_static("urn:ietf:params:xml:ns:caldav:", "calendar-data");
     /// ```
-    </span><span class="kw">pub const fn </span>from_static(uri: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub const fn </span>from_static(uri: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, name: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             uri: <span class="prelude-val">Some</span>(uri),
             name,
@@ -2485,25 +2486,25 @@ License: ISC.
     }
 }
 
-<span class="kw">impl </span>fmt::Debug <span class="kw">for </span>ExpandedName&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>fmt::Debug <span class="kw">for </span>ExpandedName&lt;<span class="lifetime">'_</span>, <span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; <span class="prelude-ty">Result</span>&lt;(), fmt::Error&gt; {
         <span class="kw">match </span><span class="self">self</span>.namespace() {
-            <span class="prelude-val">Some</span>(ns) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{{{}}}{}&quot;</span>, ns, <span class="self">self</span>.name),
-            <span class="prelude-val">None </span>=&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.name),
+            <span class="prelude-val">Some</span>(ns) =&gt; <span class="macro">write!</span>(f, <span class="string">"{{{}}}{}"</span>, ns, <span class="self">self</span>.name),
+            <span class="prelude-val">None </span>=&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, <span class="self">self</span>.name),
         }
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>str&gt; <span class="kw">for </span>ExpandedName&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="lifetime">'b</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'b </span>str&gt; <span class="kw">for </span>ExpandedName&lt;<span class="lifetime">'a</span>, <span class="lifetime">'b</span>&gt; {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>from(v: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>str) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">fn </span>from(v: <span class="kw-2">&amp;</span><span class="lifetime">'b </span>str) -&gt; <span class="self">Self </span>{
         ExpandedName { uri: <span class="prelude-val">None</span>, name: v }
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; From&lt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str, <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>str)&gt; <span class="kw">for </span>ExpandedName&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="lifetime">'b</span>&gt; From&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str, <span class="kw-2">&amp;</span><span class="lifetime">'b </span>str)&gt; <span class="kw">for </span>ExpandedName&lt;<span class="lifetime">'a</span>, <span class="lifetime">'b</span>&gt; {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>from(v: (<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str, <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>str)) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">fn </span>from(v: (<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str, <span class="kw-2">&amp;</span><span class="lifetime">'b </span>str)) -&gt; <span class="self">Self </span>{
         ExpandedName {
             uri: <span class="prelude-val">Some</span>(v.<span class="number">0</span>),
             name: v.<span class="number">1</span>,
@@ -2516,7 +2517,7 @@ License: ISC.
 /// # Document Order
 ///
 /// The implementation of the `Ord` traits for `Node` is based on the concept of *document-order*.
-/// In layman&#39;s terms, document-order is the order in which one would see each element if
+/// In layman's terms, document-order is the order in which one would see each element if
 /// one opened a document in a text editor or web browser and scrolled down.
 /// Document-order convention is followed in XPath, CSS Counters, and DOM selectors API
 /// to ensure consistent results from selection.
@@ -2535,39 +2536,39 @@ License: ISC.
 /// The use of document-order in DOM Selectors is described here in the
 /// [W3C Selectors API Level 1](https://www.w3.org/TR/selectors-api/#the-apis)
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">pub struct </span>Node&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>: <span class="lifetime">&#39;a</span>&gt; {
-    <span class="doccomment">/// Node&#39;s ID.
+</span><span class="kw">pub struct </span>Node&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>: <span class="lifetime">'a</span>&gt; {
+    <span class="doccomment">/// Node's ID.
     </span>id: NodeId,
 
     <span class="doccomment">/// The tree containing the node.
-    </span>doc: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Document&lt;<span class="lifetime">&#39;input</span>&gt;,
+    </span>doc: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Document&lt;<span class="lifetime">'input</span>&gt;,
 
-    <span class="doccomment">/// Node&#39;s data.
-    </span>d: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>NodeData&lt;<span class="lifetime">&#39;input</span>&gt;,
+    <span class="doccomment">/// Node's data.
+    </span>d: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>NodeData&lt;<span class="lifetime">'input</span>&gt;,
 }
 
-<span class="kw">impl </span>Eq <span class="kw">for </span>Node&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt; {}
+<span class="kw">impl </span>Eq <span class="kw">for </span>Node&lt;<span class="lifetime">'_</span>, <span class="lifetime">'_</span>&gt; {}
 
-<span class="kw">impl </span>PartialEq <span class="kw">for </span>Node&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>PartialEq <span class="kw">for </span>Node&lt;<span class="lifetime">'_</span>, <span class="lifetime">'_</span>&gt; {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
         (<span class="self">self</span>.id, <span class="self">self</span>.doc <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_</span>) == (other.id, other.doc <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_</span>)
     }
 }
 
-<span class="kw">impl </span>PartialOrd <span class="kw">for </span>Node&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>PartialOrd <span class="kw">for </span>Node&lt;<span class="lifetime">'_</span>, <span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Ordering&gt; {
         <span class="prelude-val">Some</span>(<span class="self">self</span>.cmp(other))
     }
 }
 
-<span class="kw">impl </span>Ord <span class="kw">for </span>Node&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Ord <span class="kw">for </span>Node&lt;<span class="lifetime">'_</span>, <span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; Ordering {
         (<span class="self">self</span>.id.<span class="number">0</span>, <span class="self">self</span>.doc <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_</span>).cmp(<span class="kw-2">&amp;</span>(other.id.<span class="number">0</span>, other.doc <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_</span>))
     }
 }
 
-<span class="kw">impl </span>Hash <span class="kw">for </span>Node&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Hash <span class="kw">for </span>Node&lt;<span class="lifetime">'_</span>, <span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>hash&lt;H: Hasher&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, state: <span class="kw-2">&amp;mut </span>H) {
         <span class="self">self</span>.id.<span class="number">0</span>.hash(state);
         (<span class="self">self</span>.doc <span class="kw">as </span><span class="kw-2">*const </span>Document).hash(state);
@@ -2575,8 +2576,8 @@ License: ISC.
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>: <span class="lifetime">&#39;a</span>&gt; Node&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
-    <span class="doccomment">/// Returns node&#39;s type.
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>: <span class="lifetime">'a</span>&gt; Node&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
+    <span class="doccomment">/// Returns node's type.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>node_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; NodeType {
         <span class="kw">match </span><span class="self">self</span>.d.kind {
@@ -2618,29 +2619,29 @@ License: ISC.
         <span class="self">self</span>.node_type() == NodeType::Text
     }
 
-    <span class="doccomment">/// Returns node&#39;s document.
+    <span class="doccomment">/// Returns node's document.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>document(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Document&lt;<span class="lifetime">&#39;input</span>&gt; {
+    </span><span class="kw">pub fn </span>document(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Document&lt;<span class="lifetime">'input</span>&gt; {
         <span class="self">self</span>.doc
     }
 
-    <span class="doccomment">/// Returns node&#39;s tag name.
+    <span class="doccomment">/// Returns node's tag name.
     ///
     /// Returns an empty name with no namespace if the current node is not an element.
     ///
     /// # Examples
     ///
     /// ```
-    /// let doc = roxmltree::Document::parse(&quot;&lt;e xmlns=&#39;http://www.w3.org&#39;/&gt;&quot;).unwrap();
+    /// let doc = roxmltree::Document::parse("&lt;e xmlns='http://www.w3.org'/&gt;").unwrap();
     ///
-    /// assert_eq!(doc.root_element().tag_name().namespace(), Some(&quot;http://www.w3.org&quot;));
-    /// assert_eq!(doc.root_element().tag_name().name(), &quot;e&quot;);
+    /// assert_eq!(doc.root_element().tag_name().namespace(), Some("http://www.w3.org"));
+    /// assert_eq!(doc.root_element().tag_name().name(), "e");
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>tag_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ExpandedName&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
+    </span><span class="kw">pub fn </span>tag_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ExpandedName&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
         <span class="kw">match </span><span class="self">self</span>.d.kind {
             NodeKind::Element { <span class="kw-2">ref </span>tag_name, .. } =&gt; tag_name.as_expanded_name(<span class="self">self</span>.doc),
-            <span class="kw">_ </span>=&gt; <span class="string">&quot;&quot;</span>.into(),
+            <span class="kw">_ </span>=&gt; <span class="string">""</span>.into(),
         }
     }
 
@@ -2649,17 +2650,17 @@ License: ISC.
     /// # Examples
     ///
     /// ```
-    /// let doc = roxmltree::Document::parse(&quot;&lt;e xmlns=&#39;http://www.w3.org&#39;/&gt;&quot;).unwrap();
+    /// let doc = roxmltree::Document::parse("&lt;e xmlns='http://www.w3.org'/&gt;").unwrap();
     ///
-    /// assert!(doc.root_element().has_tag_name(&quot;e&quot;));
-    /// assert!(doc.root_element().has_tag_name((&quot;http://www.w3.org&quot;, &quot;e&quot;)));
+    /// assert!(doc.root_element().has_tag_name("e"));
+    /// assert!(doc.root_element().has_tag_name(("http://www.w3.org", "e")));
     ///
-    /// assert!(!doc.root_element().has_tag_name(&quot;b&quot;));
-    /// assert!(!doc.root_element().has_tag_name((&quot;http://www.w4.org&quot;, &quot;e&quot;)));
+    /// assert!(!doc.root_element().has_tag_name("b"));
+    /// assert!(!doc.root_element().has_tag_name(("http://www.w4.org", "e")));
     /// ```
-    </span><span class="kw">pub fn </span>has_tag_name&lt;<span class="lifetime">&#39;n</span>, <span class="lifetime">&#39;m</span>, N&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: N) -&gt; bool
+    </span><span class="kw">pub fn </span>has_tag_name&lt;<span class="lifetime">'n</span>, <span class="lifetime">'m</span>, N&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: N) -&gt; bool
     <span class="kw">where
-        </span>N: Into&lt;ExpandedName&lt;<span class="lifetime">&#39;n</span>, <span class="lifetime">&#39;m</span>&gt;&gt;,
+        </span>N: Into&lt;ExpandedName&lt;<span class="lifetime">'n</span>, <span class="lifetime">'m</span>&gt;&gt;,
     {
         <span class="kw">let </span>name = name.into();
 
@@ -2672,22 +2673,22 @@ License: ISC.
         }
     }
 
-    <span class="doccomment">/// Returns node&#39;s default namespace URI.
+    <span class="doccomment">/// Returns node's default namespace URI.
     ///
     /// # Examples
     ///
     /// ```
-    /// let doc = roxmltree::Document::parse(&quot;&lt;e xmlns=&#39;http://www.w3.org&#39;/&gt;&quot;).unwrap();
+    /// let doc = roxmltree::Document::parse("&lt;e xmlns='http://www.w3.org'/&gt;").unwrap();
     ///
-    /// assert_eq!(doc.root_element().default_namespace(), Some(&quot;http://www.w3.org&quot;));
+    /// assert_eq!(doc.root_element().default_namespace(), Some("http://www.w3.org"));
     /// ```
     ///
     /// ```
-    /// let doc = roxmltree::Document::parse(&quot;&lt;e xmlns:n=&#39;http://www.w3.org&#39;/&gt;&quot;).unwrap();
+    /// let doc = roxmltree::Document::parse("&lt;e xmlns:n='http://www.w3.org'/&gt;").unwrap();
     ///
     /// assert_eq!(doc.root_element().default_namespace(), None);
     /// ```
-    </span><span class="kw">pub fn </span>default_namespace(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt; {
+    </span><span class="kw">pub fn </span>default_namespace(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; {
         <span class="self">self</span>.namespaces()
             .find(|ns| ns.name.is_none())
             .map(|v| v.uri.as_ref())
@@ -2698,17 +2699,17 @@ License: ISC.
     /// # Examples
     ///
     /// ```
-    /// let doc = roxmltree::Document::parse(&quot;&lt;e xmlns:n=&#39;http://www.w3.org&#39;/&gt;&quot;).unwrap();
+    /// let doc = roxmltree::Document::parse("&lt;e xmlns:n='http://www.w3.org'/&gt;").unwrap();
     ///
-    /// assert_eq!(doc.root_element().lookup_prefix(&quot;http://www.w3.org&quot;), Some(&quot;n&quot;));
+    /// assert_eq!(doc.root_element().lookup_prefix("http://www.w3.org"), Some("n"));
     /// ```
     ///
     /// ```
-    /// let doc = roxmltree::Document::parse(&quot;&lt;e xmlns:n=&#39;&#39;/&gt;&quot;).unwrap();
+    /// let doc = roxmltree::Document::parse("&lt;e xmlns:n=''/&gt;").unwrap();
     ///
-    /// assert_eq!(doc.root_element().lookup_prefix(&quot;&quot;), Some(&quot;n&quot;));
+    /// assert_eq!(doc.root_element().lookup_prefix(""), Some("n"));
     /// ```
-    </span><span class="kw">pub fn </span>lookup_prefix(<span class="kw-2">&amp;</span><span class="self">self</span>, uri: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>str&gt; {
+    </span><span class="kw">pub fn </span>lookup_prefix(<span class="kw-2">&amp;</span><span class="self">self</span>, uri: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'input </span>str&gt; {
         <span class="kw">if </span>uri == NS_XML_URI {
             <span class="kw">return </span><span class="prelude-val">Some</span>(NS_XML_PREFIX);
         }
@@ -2724,43 +2725,43 @@ License: ISC.
     /// # Examples
     ///
     /// ```
-    /// let doc = roxmltree::Document::parse(&quot;&lt;e xmlns:n=&#39;http://www.w3.org&#39;/&gt;&quot;).unwrap();
+    /// let doc = roxmltree::Document::parse("&lt;e xmlns:n='http://www.w3.org'/&gt;").unwrap();
     ///
-    /// assert_eq!(doc.root_element().lookup_namespace_uri(Some(&quot;n&quot;)), Some(&quot;http://www.w3.org&quot;));
+    /// assert_eq!(doc.root_element().lookup_namespace_uri(Some("n")), Some("http://www.w3.org"));
     /// ```
     ///
     /// ```
-    /// let doc = roxmltree::Document::parse(&quot;&lt;e xmlns=&#39;http://www.w3.org&#39;/&gt;&quot;).unwrap();
+    /// let doc = roxmltree::Document::parse("&lt;e xmlns='http://www.w3.org'/&gt;").unwrap();
     ///
-    /// assert_eq!(doc.root_element().lookup_namespace_uri(None), Some(&quot;http://www.w3.org&quot;));
+    /// assert_eq!(doc.root_element().lookup_namespace_uri(None), Some("http://www.w3.org"));
     /// ```
-    </span><span class="kw">pub fn </span>lookup_namespace_uri(<span class="kw-2">&amp;</span><span class="self">self</span>, prefix: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt; {
+    </span><span class="kw">pub fn </span>lookup_namespace_uri(<span class="kw-2">&amp;</span><span class="self">self</span>, prefix: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; {
         <span class="self">self</span>.namespaces()
             .find(|ns| ns.name == prefix)
             .map(|v| v.uri.as_ref())
     }
 
-    <span class="doccomment">/// Returns element&#39;s attribute value.
+    <span class="doccomment">/// Returns element's attribute value.
     ///
     /// # Examples
     ///
     /// ```
-    /// let doc = roxmltree::Document::parse(&quot;&lt;e a=&#39;b&#39;/&gt;&quot;).unwrap();
+    /// let doc = roxmltree::Document::parse("&lt;e a='b'/&gt;").unwrap();
     ///
-    /// assert_eq!(doc.root_element().attribute(&quot;a&quot;), Some(&quot;b&quot;));
+    /// assert_eq!(doc.root_element().attribute("a"), Some("b"));
     /// ```
     ///
     /// ```
     /// let doc = roxmltree::Document::parse(
-    ///     &quot;&lt;e xmlns:n=&#39;http://www.w3.org&#39; a=&#39;b&#39; n:a=&#39;c&#39;/&gt;&quot;
+    ///     "&lt;e xmlns:n='http://www.w3.org' a='b' n:a='c'/&gt;"
     /// ).unwrap();
     ///
-    /// assert_eq!(doc.root_element().attribute(&quot;a&quot;), Some(&quot;b&quot;));
-    /// assert_eq!(doc.root_element().attribute((&quot;http://www.w3.org&quot;, &quot;a&quot;)), Some(&quot;c&quot;));
+    /// assert_eq!(doc.root_element().attribute("a"), Some("b"));
+    /// assert_eq!(doc.root_element().attribute(("http://www.w3.org", "a")), Some("c"));
     /// ```
-    </span><span class="kw">pub fn </span>attribute&lt;<span class="lifetime">&#39;n</span>, <span class="lifetime">&#39;m</span>, N&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: N) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt;
+    </span><span class="kw">pub fn </span>attribute&lt;<span class="lifetime">'n</span>, <span class="lifetime">'m</span>, N&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: N) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt;
     <span class="kw">where
-        </span>N: Into&lt;ExpandedName&lt;<span class="lifetime">&#39;n</span>, <span class="lifetime">&#39;m</span>&gt;&gt;,
+        </span>N: Into&lt;ExpandedName&lt;<span class="lifetime">'n</span>, <span class="lifetime">'m</span>&gt;&gt;,
     {
         <span class="kw">let </span>name = name.into();
         <span class="self">self</span>.attributes()
@@ -2768,14 +2769,14 @@ License: ISC.
             .map(|a| a.value())
     }
 
-    <span class="doccomment">/// Returns element&#39;s attribute object.
+    <span class="doccomment">/// Returns element's attribute object.
     ///
     /// The same as [`attribute()`], but returns the `Attribute` itself instead of a value string.
     ///
     /// [`attribute()`]: struct.Node.html#method.attribute
-    </span><span class="kw">pub fn </span>attribute_node&lt;<span class="lifetime">&#39;n</span>, <span class="lifetime">&#39;m</span>, N&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: N) -&gt; <span class="prelude-ty">Option</span>&lt;Attribute&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt;&gt;
+    </span><span class="kw">pub fn </span>attribute_node&lt;<span class="lifetime">'n</span>, <span class="lifetime">'m</span>, N&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: N) -&gt; <span class="prelude-ty">Option</span>&lt;Attribute&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt;&gt;
     <span class="kw">where
-        </span>N: Into&lt;ExpandedName&lt;<span class="lifetime">&#39;n</span>, <span class="lifetime">&#39;m</span>&gt;&gt;,
+        </span>N: Into&lt;ExpandedName&lt;<span class="lifetime">'n</span>, <span class="lifetime">'m</span>&gt;&gt;,
     {
         <span class="kw">let </span>name = name.into();
         <span class="self">self</span>.attributes()
@@ -2788,53 +2789,53 @@ License: ISC.
     ///
     /// ```
     /// let doc = roxmltree::Document::parse(
-    ///     &quot;&lt;e xmlns:n=&#39;http://www.w3.org&#39; a=&#39;b&#39; n:a=&#39;c&#39;/&gt;&quot;
+    ///     "&lt;e xmlns:n='http://www.w3.org' a='b' n:a='c'/&gt;"
     /// ).unwrap();
     ///
-    /// assert!(doc.root_element().has_attribute(&quot;a&quot;));
-    /// assert!(doc.root_element().has_attribute((&quot;http://www.w3.org&quot;, &quot;a&quot;)));
+    /// assert!(doc.root_element().has_attribute("a"));
+    /// assert!(doc.root_element().has_attribute(("http://www.w3.org", "a")));
     ///
-    /// assert!(!doc.root_element().has_attribute(&quot;b&quot;));
-    /// assert!(!doc.root_element().has_attribute((&quot;http://www.w4.org&quot;, &quot;a&quot;)));
+    /// assert!(!doc.root_element().has_attribute("b"));
+    /// assert!(!doc.root_element().has_attribute(("http://www.w4.org", "a")));
     /// ```
-    </span><span class="kw">pub fn </span>has_attribute&lt;<span class="lifetime">&#39;n</span>, <span class="lifetime">&#39;m</span>, N&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: N) -&gt; bool
+    </span><span class="kw">pub fn </span>has_attribute&lt;<span class="lifetime">'n</span>, <span class="lifetime">'m</span>, N&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, name: N) -&gt; bool
     <span class="kw">where
-        </span>N: Into&lt;ExpandedName&lt;<span class="lifetime">&#39;n</span>, <span class="lifetime">&#39;m</span>&gt;&gt;,
+        </span>N: Into&lt;ExpandedName&lt;<span class="lifetime">'n</span>, <span class="lifetime">'m</span>&gt;&gt;,
     {
         <span class="kw">let </span>name = name.into();
         <span class="self">self</span>.attributes()
             .any(|a| a.data.name.as_expanded_name(<span class="self">self</span>.doc) == name)
     }
 
-    <span class="doccomment">/// Returns element&#39;s attributes.
+    <span class="doccomment">/// Returns element's attributes.
     ///
     /// # Examples
     ///
     /// ```
     /// let doc = roxmltree::Document::parse(
-    ///     &quot;&lt;e xmlns:n=&#39;http://www.w3.org&#39; a=&#39;b&#39; n:a=&#39;c&#39;/&gt;&quot;
+    ///     "&lt;e xmlns:n='http://www.w3.org' a='b' n:a='c'/&gt;"
     /// ).unwrap();
     ///
     /// assert_eq!(doc.root_element().attributes().len(), 2);
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>attributes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Attributes&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
+    </span><span class="kw">pub fn </span>attributes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Attributes&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
         Attributes::new(<span class="self">self</span>)
     }
 
-    <span class="doccomment">/// Returns element&#39;s namespaces.
+    <span class="doccomment">/// Returns element's namespaces.
     ///
     /// # Examples
     ///
     /// ```
     /// let doc = roxmltree::Document::parse(
-    ///     &quot;&lt;e xmlns:n=&#39;http://www.w3.org&#39;/&gt;&quot;
+    ///     "&lt;e xmlns:n='http://www.w3.org'/&gt;"
     /// ).unwrap();
     ///
     /// assert_eq!(doc.root_element().namespaces().len(), 1);
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>namespaces(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; NamespaceIter&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
+    </span><span class="kw">pub fn </span>namespaces(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; NamespaceIter&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
         <span class="kw">let </span>namespaces = <span class="kw">match </span><span class="self">self</span>.d.kind {
             NodeKind::Element { <span class="kw-2">ref </span>namespaces, .. } =&gt; {
                 <span class="kw-2">&amp;</span><span class="self">self</span>.doc.namespaces.tree_order[namespaces.to_urange()]
@@ -2848,7 +2849,7 @@ License: ISC.
         }
     }
 
-    <span class="doccomment">/// Returns node&#39;s text.
+    <span class="doccomment">/// Returns node's text.
     ///
     /// - for an element will return a first text child
     /// - for a comment will return a self text
@@ -2857,32 +2858,32 @@ License: ISC.
     /// # Examples
     ///
     /// ```
-    /// let doc = roxmltree::Document::parse(&quot;\
+    /// let doc = roxmltree::Document::parse("\
     /// &lt;p&gt;
     ///     text
     /// &lt;/p&gt;
-    /// &quot;).unwrap();
+    /// ").unwrap();
     ///
     /// assert_eq!(doc.root_element().text(),
-    ///            Some(&quot;\n    text\n&quot;));
+    ///            Some("\n    text\n"));
     /// assert_eq!(doc.root_element().first_child().unwrap().text(),
-    ///            Some(&quot;\n    text\n&quot;));
+    ///            Some("\n    text\n"));
     /// ```
     ///
     /// ```
-    /// let doc = roxmltree::Document::parse(&quot;&lt;!-- comment --&gt;&lt;e/&gt;&quot;).unwrap();
+    /// let doc = roxmltree::Document::parse("&lt;!-- comment --&gt;&lt;e/&gt;").unwrap();
     ///
-    /// assert_eq!(doc.root().first_child().unwrap().text(), Some(&quot; comment &quot;));
+    /// assert_eq!(doc.root().first_child().unwrap().text(), Some(" comment "));
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>text(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt; {
+    </span><span class="kw">pub fn </span>text(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; {
         <span class="self">self</span>.text_storage().map(|s| s.as_str())
     }
 
-    <span class="doccomment">/// Returns node&#39;s text storage.
+    <span class="doccomment">/// Returns node's text storage.
     ///
     /// Useful when you need a more low-level access to an allocated string.
-    </span><span class="kw">pub fn </span>text_storage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>StringStorage&lt;<span class="lifetime">&#39;input</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>text_storage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>StringStorage&lt;<span class="lifetime">'input</span>&gt;&gt; {
         <span class="kw">match </span><span class="self">self</span>.d.kind {
             NodeKind::Element { .. } =&gt; <span class="kw">match </span><span class="self">self</span>.first_child() {
                 <span class="prelude-val">Some</span>(child) <span class="kw">if </span>child.is_text() =&gt; <span class="kw">match </span><span class="self">self</span>.doc.nodes[child.id.get_usize()].kind {
@@ -2897,31 +2898,31 @@ License: ISC.
         }
     }
 
-    <span class="doccomment">/// Returns element&#39;s tail text.
+    <span class="doccomment">/// Returns element's tail text.
     ///
     /// # Examples
     ///
     /// ```
-    /// let doc = roxmltree::Document::parse(&quot;\
+    /// let doc = roxmltree::Document::parse("\
     /// &lt;root&gt;
     ///     text1
     ///     &lt;p/&gt;
     ///     text2
     /// &lt;/root&gt;
-    /// &quot;).unwrap();
+    /// ").unwrap();
     ///
-    /// let p = doc.descendants().find(|n| n.has_tag_name(&quot;p&quot;)).unwrap();
-    /// assert_eq!(p.tail(), Some(&quot;\n    text2\n&quot;));
+    /// let p = doc.descendants().find(|n| n.has_tag_name("p")).unwrap();
+    /// assert_eq!(p.tail(), Some("\n    text2\n"));
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>tail(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt; {
+    </span><span class="kw">pub fn </span>tail(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; {
         <span class="self">self</span>.tail_storage().map(|s| s.as_str())
     }
 
-    <span class="doccomment">/// Returns element&#39;s tail text storage.
+    <span class="doccomment">/// Returns element's tail text storage.
     ///
     /// Useful when you need a more low-level access to an allocated string.
-    </span><span class="kw">pub fn </span>tail_storage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>StringStorage&lt;<span class="lifetime">&#39;input</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>tail_storage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>StringStorage&lt;<span class="lifetime">'input</span>&gt;&gt; {
         <span class="kw">if </span>!<span class="self">self</span>.is_element() {
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
@@ -2937,7 +2938,7 @@ License: ISC.
 
     <span class="doccomment">/// Returns node as Processing Instruction.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>pi(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;PI&lt;<span class="lifetime">&#39;input</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>pi(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;PI&lt;<span class="lifetime">'input</span>&gt;&gt; {
         <span class="kw">match </span><span class="self">self</span>.d.kind {
             NodeKind::PI(pi) =&gt; <span class="prelude-val">Some</span>(pi),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
@@ -2976,7 +2977,7 @@ License: ISC.
                 <span class="kw">let </span>possibly_self = node
                     .d
                     .prev_sibling
-                    .expect(<span class="string">&quot;next_subtree will always have a previous sibling&quot;</span>);
+                    .expect(<span class="string">"next_subtree will always have a previous sibling"</span>);
                 <span class="kw">if </span>possibly_self == <span class="self">self</span>.id {
                     <span class="prelude-val">Some</span>(node)
                 } <span class="kw">else </span>{
@@ -3028,7 +3029,7 @@ License: ISC.
 
     <span class="doccomment">/// Returns an iterator over ancestor nodes starting at this node.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>ancestors(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AxisIter&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
+    </span><span class="kw">pub fn </span>ancestors(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AxisIter&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
         AxisIter {
             node: <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="self">self</span>),
             next: Node::parent,
@@ -3037,7 +3038,7 @@ License: ISC.
 
     <span class="doccomment">/// Returns an iterator over previous sibling nodes starting at this node.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>prev_siblings(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AxisIter&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
+    </span><span class="kw">pub fn </span>prev_siblings(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AxisIter&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
         AxisIter {
             node: <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="self">self</span>),
             next: Node::prev_sibling,
@@ -3046,7 +3047,7 @@ License: ISC.
 
     <span class="doccomment">/// Returns an iterator over next sibling nodes starting at this node.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>next_siblings(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AxisIter&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
+    </span><span class="kw">pub fn </span>next_siblings(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AxisIter&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
         AxisIter {
             node: <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="self">self</span>),
             next: Node::next_sibling,
@@ -3055,7 +3056,7 @@ License: ISC.
 
     <span class="doccomment">/// Returns an iterator over first children nodes starting at this node.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>first_children(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AxisIter&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
+    </span><span class="kw">pub fn </span>first_children(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AxisIter&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
         AxisIter {
             node: <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="self">self</span>),
             next: Node::first_child,
@@ -3064,7 +3065,7 @@ License: ISC.
 
     <span class="doccomment">/// Returns an iterator over last children nodes starting at this node.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>last_children(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AxisIter&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
+    </span><span class="kw">pub fn </span>last_children(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; AxisIter&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
         AxisIter {
             node: <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="self">self</span>),
             next: Node::last_child,
@@ -3073,7 +3074,7 @@ License: ISC.
 
     <span class="doccomment">/// Returns an iterator over children nodes.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>children(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Children&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
+    </span><span class="kw">pub fn </span>children(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Children&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
         Children {
             front: <span class="self">self</span>.first_child(),
             back: <span class="self">self</span>.last_child(),
@@ -3082,56 +3083,56 @@ License: ISC.
 
     <span class="doccomment">/// Returns an iterator over this node and its descendants.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>descendants(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Descendants&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
+    </span><span class="kw">pub fn </span>descendants(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Descendants&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
         Descendants::new(<span class="kw-2">*</span><span class="self">self</span>)
     }
 
-    <span class="doccomment">/// Returns node&#39;s range in bytes in the original document.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;positions&quot;</span>)]
+    <span class="doccomment">/// Returns node's range in bytes in the original document.
+    </span><span class="attr">#[cfg(feature = <span class="string">"positions"</span>)]
     #[inline]
     </span><span class="kw">pub fn </span>range(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Range&lt;usize&gt; {
         <span class="self">self</span>.d.range.clone()
     }
 
-    <span class="doccomment">/// Returns node&#39;s NodeId
+    <span class="doccomment">/// Returns node's NodeId
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; NodeId {
         <span class="self">self</span>.id
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>: <span class="lifetime">&#39;a</span>&gt; fmt::Debug <span class="kw">for </span>Node&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>: <span class="lifetime">'a</span>&gt; fmt::Debug <span class="kw">for </span>Node&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; <span class="prelude-ty">Result</span>&lt;(), fmt::Error&gt; {
         <span class="kw">match </span><span class="self">self</span>.d.kind {
-            NodeKind::Root =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;Root&quot;</span>),
+            NodeKind::Root =&gt; <span class="macro">write!</span>(f, <span class="string">"Root"</span>),
             NodeKind::Element { .. } =&gt; {
                 <span class="macro">write!</span>(
                     f,
-                    <span class="string">&quot;Element {{ tag_name: {:?}, attributes: {:?}, namespaces: {:?} }}&quot;</span>,
+                    <span class="string">"Element {{ tag_name: {:?}, attributes: {:?}, namespaces: {:?} }}"</span>,
                     <span class="self">self</span>.tag_name(),
                     <span class="self">self</span>.attributes(),
                     <span class="self">self</span>.namespaces()
                 )
             }
             NodeKind::PI(pi) =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;PI {{ target: {:?}, value: {:?} }}&quot;</span>, pi.target, pi.value)
+                <span class="macro">write!</span>(f, <span class="string">"PI {{ target: {:?}, value: {:?} }}"</span>, pi.target, pi.value)
             }
-            NodeKind::Comment(<span class="kw-2">ref </span>text) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;Comment({:?})&quot;</span>, text.as_str()),
-            NodeKind::Text(<span class="kw-2">ref </span>text) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;Text({:?})&quot;</span>, text.as_str()),
+            NodeKind::Comment(<span class="kw-2">ref </span>text) =&gt; <span class="macro">write!</span>(f, <span class="string">"Comment({:?})"</span>, text.as_str()),
+            NodeKind::Text(<span class="kw-2">ref </span>text) =&gt; <span class="macro">write!</span>(f, <span class="string">"Text({:?})"</span>, text.as_str()),
         }
     }
 }
 
-<span class="doccomment">/// Iterator over a node&#39;s attributes
+<span class="doccomment">/// Iterator over a node's attributes
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>Attributes&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
-    doc: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Document&lt;<span class="lifetime">&#39;input</span>&gt;,
-    attrs: core::slice::Iter&lt;<span class="lifetime">&#39;a</span>, AttributeData&lt;<span class="lifetime">&#39;input</span>&gt;&gt;,
+</span><span class="kw">pub struct </span>Attributes&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
+    doc: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Document&lt;<span class="lifetime">'input</span>&gt;,
+    attrs: core::slice::Iter&lt;<span class="lifetime">'a</span>, AttributeData&lt;<span class="lifetime">'input</span>&gt;&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; Attributes&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; Attributes&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>new(node: <span class="kw-2">&amp;</span>Node&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt;) -&gt; Attributes&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
+    </span><span class="kw">fn </span>new(node: <span class="kw-2">&amp;</span>Node&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt;) -&gt; Attributes&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
         <span class="kw">let </span>attrs = <span class="kw">match </span>node.d.kind {
             NodeKind::Element { <span class="kw-2">ref </span>attributes, .. } =&gt; {
                 <span class="kw-2">&amp;</span>node.doc.attributes[attributes.to_urange()]
@@ -3145,8 +3146,8 @@ License: ISC.
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; Iterator <span class="kw">for </span>Attributes&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
-    <span class="kw">type </span>Item = Attribute&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; Iterator <span class="kw">for </span>Attributes&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
+    <span class="kw">type </span>Item = Attribute&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt;;
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -3170,7 +3171,7 @@ License: ISC.
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; DoubleEndedIterator <span class="kw">for </span>Attributes&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; DoubleEndedIterator <span class="kw">for </span>Attributes&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>next_back(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="self">self</span>.attrs.next_back().map(|attr| Attribute {
@@ -3180,25 +3181,25 @@ License: ISC.
     }
 }
 
-<span class="kw">impl </span>ExactSizeIterator <span class="kw">for </span>Attributes&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt; {}
+<span class="kw">impl </span>ExactSizeIterator <span class="kw">for </span>Attributes&lt;<span class="lifetime">'_</span>, <span class="lifetime">'_</span>&gt; {}
 
-<span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Attributes&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Attributes&lt;<span class="lifetime">'_</span>, <span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; <span class="prelude-ty">Result</span>&lt;(), fmt::Error&gt; {
-        f.debug_struct(<span class="string">&quot;Attributes&quot;</span>)
-            .field(<span class="string">&quot;attrs&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.attrs)
+        f.debug_struct(<span class="string">"Attributes"</span>)
+            .field(<span class="string">"attrs"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.attrs)
             .finish()
     }
 }
 
 <span class="doccomment">/// Iterator over specified axis.
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>AxisIter&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>: <span class="lifetime">&#39;a</span>&gt; {
-    node: <span class="prelude-ty">Option</span>&lt;Node&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt;&gt;,
-    next: <span class="kw">fn</span>(<span class="kw-2">&amp;</span>Node&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Node&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt;&gt;,
+</span><span class="kw">pub struct </span>AxisIter&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>: <span class="lifetime">'a</span>&gt; {
+    node: <span class="prelude-ty">Option</span>&lt;Node&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt;&gt;,
+    next: <span class="kw">fn</span>(<span class="kw-2">&amp;</span>Node&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Node&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt;&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>: <span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>AxisIter&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
-    <span class="kw">type </span>Item = Node&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>: <span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>AxisIter&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
+    <span class="kw">type </span>Item = Node&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt;;
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -3208,24 +3209,24 @@ License: ISC.
     }
 }
 
-<span class="kw">impl </span>fmt::Debug <span class="kw">for </span>AxisIter&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>fmt::Debug <span class="kw">for </span>AxisIter&lt;<span class="lifetime">'_</span>, <span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; <span class="prelude-ty">Result</span>&lt;(), fmt::Error&gt; {
-        f.debug_struct(<span class="string">&quot;AxisIter&quot;</span>)
-            .field(<span class="string">&quot;node&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.node)
-            .field(<span class="string">&quot;next&quot;</span>, <span class="kw-2">&amp;</span><span class="string">&quot;fn()&quot;</span>)
+        f.debug_struct(<span class="string">"AxisIter"</span>)
+            .field(<span class="string">"node"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.node)
+            .field(<span class="string">"next"</span>, <span class="kw-2">&amp;</span><span class="string">"fn()"</span>)
             .finish()
     }
 }
 
 <span class="doccomment">/// Iterator over children.
 </span><span class="attr">#[derive(Clone, Debug)]
-</span><span class="kw">pub struct </span>Children&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>: <span class="lifetime">&#39;a</span>&gt; {
-    front: <span class="prelude-ty">Option</span>&lt;Node&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt;&gt;,
-    back: <span class="prelude-ty">Option</span>&lt;Node&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt;&gt;,
+</span><span class="kw">pub struct </span>Children&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>: <span class="lifetime">'a</span>&gt; {
+    front: <span class="prelude-ty">Option</span>&lt;Node&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt;&gt;,
+    back: <span class="prelude-ty">Option</span>&lt;Node&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt;&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>: <span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>Children&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
-    <span class="kw">type </span>Item = Node&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>: <span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>Children&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
+    <span class="kw">type </span>Item = Node&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt;;
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -3241,7 +3242,7 @@ License: ISC.
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>: <span class="lifetime">&#39;a</span>&gt; DoubleEndedIterator <span class="kw">for </span>Children&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>: <span class="lifetime">'a</span>&gt; DoubleEndedIterator <span class="kw">for </span>Children&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>next_back(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">if </span><span class="self">self</span>.back == <span class="self">self</span>.front {
@@ -3258,15 +3259,15 @@ License: ISC.
 
 <span class="doccomment">/// Iterator over a node and its descendants.
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>Descendants&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
-    doc: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Document&lt;<span class="lifetime">&#39;input</span>&gt;,
-    nodes: core::iter::Enumerate&lt;core::slice::Iter&lt;<span class="lifetime">&#39;a</span>, NodeData&lt;<span class="lifetime">&#39;input</span>&gt;&gt;&gt;,
+</span><span class="kw">pub struct </span>Descendants&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
+    doc: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Document&lt;<span class="lifetime">'input</span>&gt;,
+    nodes: core::iter::Enumerate&lt;core::slice::Iter&lt;<span class="lifetime">'a</span>, NodeData&lt;<span class="lifetime">'input</span>&gt;&gt;&gt;,
     from: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; Descendants&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; Descendants&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>new(start: Node&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">fn </span>new(start: Node&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>from = start.id.get_usize();
 
         <span class="kw">let </span>until = start
@@ -3285,8 +3286,8 @@ License: ISC.
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; Iterator <span class="kw">for </span>Descendants&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
-    <span class="kw">type </span>Item = Node&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; Iterator <span class="kw">for </span>Descendants&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
+    <span class="kw">type </span>Item = Node&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt;;
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -3312,7 +3313,7 @@ License: ISC.
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; DoubleEndedIterator <span class="kw">for </span>Descendants&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; DoubleEndedIterator <span class="kw">for </span>Descendants&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>next_back(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="self">self</span>.nodes.next_back().map(|(idx, data)| Node {
@@ -3323,26 +3324,26 @@ License: ISC.
     }
 }
 
-<span class="kw">impl </span>ExactSizeIterator <span class="kw">for </span>Descendants&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt; {}
+<span class="kw">impl </span>ExactSizeIterator <span class="kw">for </span>Descendants&lt;<span class="lifetime">'_</span>, <span class="lifetime">'_</span>&gt; {}
 
-<span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Descendants&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Descendants&lt;<span class="lifetime">'_</span>, <span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; <span class="prelude-ty">Result</span>&lt;(), fmt::Error&gt; {
-        f.debug_struct(<span class="string">&quot;Descendants&quot;</span>)
-            .field(<span class="string">&quot;nodes&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.nodes)
-            .field(<span class="string">&quot;from&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.from)
+        f.debug_struct(<span class="string">"Descendants"</span>)
+            .field(<span class="string">"nodes"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.nodes)
+            .field(<span class="string">"from"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.from)
             .finish()
     }
 }
 
 <span class="doccomment">/// Iterator over the namespaces attached to a node.
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>NamespaceIter&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
-    doc: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Document&lt;<span class="lifetime">&#39;input</span>&gt;,
-    namespaces: core::slice::Iter&lt;<span class="lifetime">&#39;a</span>, NamespaceIdx&gt;,
+</span><span class="kw">pub struct </span>NamespaceIter&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
+    doc: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Document&lt;<span class="lifetime">'input</span>&gt;,
+    namespaces: core::slice::Iter&lt;<span class="lifetime">'a</span>, NamespaceIdx&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; Iterator <span class="kw">for </span>NamespaceIter&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
-    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Namespace&lt;<span class="lifetime">&#39;input</span>&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; Iterator <span class="kw">for </span>NamespaceIter&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Namespace&lt;<span class="lifetime">'input</span>&gt;;
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -3364,7 +3365,7 @@ License: ISC.
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; DoubleEndedIterator <span class="kw">for </span>NamespaceIter&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;input</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; DoubleEndedIterator <span class="kw">for </span>NamespaceIter&lt;<span class="lifetime">'a</span>, <span class="lifetime">'input</span>&gt; {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>next_back(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="self">self</span>.namespaces
@@ -3373,12 +3374,12 @@ License: ISC.
     }
 }
 
-<span class="kw">impl </span>ExactSizeIterator <span class="kw">for </span>NamespaceIter&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt; {}
+<span class="kw">impl </span>ExactSizeIterator <span class="kw">for </span>NamespaceIter&lt;<span class="lifetime">'_</span>, <span class="lifetime">'_</span>&gt; {}
 
-<span class="kw">impl </span>fmt::Debug <span class="kw">for </span>NamespaceIter&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>fmt::Debug <span class="kw">for </span>NamespaceIter&lt;<span class="lifetime">'_</span>, <span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; <span class="prelude-ty">Result</span>&lt;(), fmt::Error&gt; {
-        f.debug_struct(<span class="string">&quot;NamespaceIter&quot;</span>)
-            .field(<span class="string">&quot;namespaces&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.namespaces)
+        f.debug_struct(<span class="string">"NamespaceIter"</span>)
+            .field(<span class="string">"namespaces"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.namespaces)
             .finish()
     }
 }

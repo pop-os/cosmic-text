@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.4/src/tables/name.rs`."><title>name.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.5/src/tables/name.rs`."><title>name.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -302,13 +303,13 @@
 <a href="#302" id="302">302</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! The [name (Naming)](https://docs.microsoft.com/en-us/typography/opentype/spec/name) table
 
-</span><span class="macro">include!</span>(<span class="string">&quot;../../generated/generated_name.rs&quot;</span>);
+</span><span class="macro">include!</span>(<span class="string">"../../generated/generated_name.rs"</span>);
 
 <span class="kw">pub use </span>types::NameId;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Name&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Name&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// The FontData containing the encoded name strings.
-    </span><span class="kw">pub fn </span>string_data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FontData&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>string_data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FontData&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">let </span>base = <span class="self">self</span>.offset_data();
         <span class="kw">let </span>off = <span class="self">self</span>.storage_offset();
         base.split_off(off <span class="kw">as </span>usize).unwrap_or_default()
@@ -317,7 +318,7 @@
 
 <span class="kw">impl </span>NameRecord {
     <span class="doccomment">/// Return a type that can decode the string data for this name entry.
-    </span><span class="kw">pub fn </span>string&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;NameString&lt;<span class="lifetime">&#39;a</span>&gt;, ReadError&gt; {
+    </span><span class="kw">pub fn </span>string&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;NameString&lt;<span class="lifetime">'a</span>&gt;, ReadError&gt; {
         <span class="kw">let </span>start = <span class="self">self</span>.string_offset().non_null().unwrap_or(<span class="number">0</span>);
         <span class="kw">let </span>end = start + <span class="self">self</span>.length() <span class="kw">as </span>usize;
 
@@ -333,7 +334,7 @@
 
 <span class="kw">impl </span>LangTagRecord {
     <span class="doccomment">/// Return a type that can decode the string data for this name entry.
-    </span><span class="kw">pub fn </span>lang_tag&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;NameString&lt;<span class="lifetime">&#39;a</span>&gt;, ReadError&gt; {
+    </span><span class="kw">pub fn </span>lang_tag&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;NameString&lt;<span class="lifetime">'a</span>&gt;, ReadError&gt; {
         <span class="kw">let </span>start = <span class="self">self</span>.lang_tag_offset().non_null().unwrap_or(<span class="number">0</span>);
         <span class="kw">let </span>end = start + <span class="self">self</span>.length() <span class="kw">as </span>usize;
 
@@ -352,14 +353,14 @@
 ///
 /// This provides an iterator over characters.
 </span><span class="attr">#[derive(Copy, Clone, PartialEq, Eq)]
-</span><span class="kw">pub struct </span>NameString&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+</span><span class="kw">pub struct </span>NameString&lt;<span class="lifetime">'a</span>&gt; {
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     encoding: Encoding,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; NameString&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; NameString&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// An iterator over the `char`s in this name.
-    </span><span class="kw">pub fn </span>chars(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CharIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>chars(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CharIter&lt;<span class="lifetime">'a</span>&gt; {
         CharIter {
             data: <span class="self">self</span>.data,
             encoding: <span class="self">self</span>.encoding,
@@ -368,16 +369,16 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; traversal::SomeString&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>NameString&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>iter_chars(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Box&lt;<span class="kw">dyn </span>Iterator&lt;Item = char&gt; + <span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; traversal::SomeString&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>NameString&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>iter_chars(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Box&lt;<span class="kw">dyn </span>Iterator&lt;Item = char&gt; + <span class="lifetime">'a</span>&gt; {
         Box::new(<span class="self">self</span>.into_iter())
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
 </span><span class="kw">impl </span>NameRecord {
-    <span class="kw">fn </span>traverse_string&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; traversal::FieldType&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>traverse_string&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; traversal::FieldType&lt;<span class="lifetime">'a</span>&gt; {
         FieldType::StringOffset(traversal::StringOffset {
             offset: <span class="self">self</span>.string_offset().into(),
             target: <span class="self">self</span>.string(data).map(|s| Box::new(s) <span class="kw">as _</span>),
@@ -385,9 +386,9 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
 </span><span class="kw">impl </span>LangTagRecord {
-    <span class="kw">fn </span>traverse_lang_tag&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; traversal::FieldType&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>traverse_lang_tag&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; traversal::FieldType&lt;<span class="lifetime">'a</span>&gt; {
         FieldType::StringOffset(traversal::StringOffset {
             offset: <span class="self">self</span>.lang_tag_offset().into(),
             target: <span class="self">self</span>.lang_tag(data).map(|s| Box::new(s) <span class="kw">as _</span>),
@@ -395,15 +396,15 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IntoIterator <span class="kw">for </span>NameString&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; IntoIterator <span class="kw">for </span>NameString&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">type </span>Item = char;
-    <span class="kw">type </span>IntoIter = CharIter&lt;<span class="lifetime">&#39;a</span>&gt;;
+    <span class="kw">type </span>IntoIter = CharIter&lt;<span class="lifetime">'a</span>&gt;;
     <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
         <span class="self">self</span>.chars()
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Display <span class="kw">for </span>NameString&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Display <span class="kw">for </span>NameString&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter) -&gt; std::fmt::Result {
         <span class="kw">for </span>c <span class="kw">in </span><span class="self">self</span>.chars() {
             c.fmt(f)<span class="question-mark">?</span>;
@@ -412,21 +413,21 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>NameString&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::fmt::Debug <span class="kw">for </span>NameString&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter) -&gt; std::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;\&quot;{self}\&quot;&quot;</span>)
+        <span class="macro">write!</span>(f, <span class="string">"\"{self}\""</span>)
     }
 }
 
 <span class="doccomment">/// An iterator over the chars of a name record.
 </span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>CharIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+</span><span class="kw">pub struct </span>CharIter&lt;<span class="lifetime">'a</span>&gt; {
+    data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     encoding: Encoding,
     pos: usize,
 }
 
-<span class="kw">impl </span>CharIter&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>CharIter&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>bump_u16(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;u16&gt; {
         <span class="kw">let </span>result = <span class="self">self
             </span>.data
@@ -443,7 +444,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>CharIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>CharIter&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">type </span>Item = char;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -584,7 +585,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>mac_roman() {
-        <span class="kw">static </span>INPUT: <span class="kw-2">&amp;</span>str = <span class="string">&quot;Joachim Müller-Lancé&quot;</span>;
+        <span class="kw">static </span>INPUT: <span class="kw-2">&amp;</span>str = <span class="string">"Joachim Müller-Lancé"</span>;
         <span class="kw">for </span>c <span class="kw">in </span>INPUT.chars() {
             <span class="kw">let </span>enc = MacRomanMapping.encode(c).unwrap();
             <span class="macro">assert_eq!</span>(MacRomanMapping.decode(enc), c);
@@ -599,7 +600,7 @@
             encoding: Encoding::Utf16Be,
             pos: <span class="number">0</span>,
         };
-        <span class="macro">assert!</span>(chars.eq([<span class="string">&#39;ऄ&#39;</span>, std::char::REPLACEMENT_CHARACTER].into_iter()))
+        <span class="macro">assert!</span>(chars.eq([<span class="string">'ऄ'</span>, std::char::REPLACEMENT_CHARACTER].into_iter()))
     }
 }
 </code></pre></div></section></main></body></html>

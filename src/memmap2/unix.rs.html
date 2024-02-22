@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/memmap2-0.9.4/src/unix.rs`."><title>unix.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="memmap2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/memmap2-0.9.4/src/unix.rs`."><title>unix.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="memmap2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -465,52 +466,52 @@
 <span class="kw">use </span>std::{io, ptr};
 
 <span class="attr">#[cfg(any(
-    all(target_os = <span class="string">&quot;linux&quot;</span>, not(target_arch = <span class="string">&quot;mips&quot;</span>)),
-    target_os = <span class="string">&quot;freebsd&quot;</span>,
-    target_os = <span class="string">&quot;android&quot;
+    all(target_os = <span class="string">"linux"</span>, not(target_arch = <span class="string">"mips"</span>)),
+    target_os = <span class="string">"freebsd"</span>,
+    target_os = <span class="string">"android"
 </span>))]
 </span><span class="kw">const </span>MAP_STACK: libc::c_int = libc::MAP_STACK;
 
 <span class="attr">#[cfg(not(any(
-    all(target_os = <span class="string">&quot;linux&quot;</span>, not(target_arch = <span class="string">&quot;mips&quot;</span>)),
-    target_os = <span class="string">&quot;freebsd&quot;</span>,
-    target_os = <span class="string">&quot;android&quot;
+    all(target_os = <span class="string">"linux"</span>, not(target_arch = <span class="string">"mips"</span>)),
+    target_os = <span class="string">"freebsd"</span>,
+    target_os = <span class="string">"android"
 </span>)))]
 </span><span class="kw">const </span>MAP_STACK: libc::c_int = <span class="number">0</span>;
 
-<span class="attr">#[cfg(any(target_os = <span class="string">&quot;linux&quot;</span>, target_os = <span class="string">&quot;android&quot;</span>))]
+<span class="attr">#[cfg(any(target_os = <span class="string">"linux"</span>, target_os = <span class="string">"android"</span>))]
 </span><span class="kw">const </span>MAP_POPULATE: libc::c_int = libc::MAP_POPULATE;
 
-<span class="attr">#[cfg(not(any(target_os = <span class="string">&quot;linux&quot;</span>, target_os = <span class="string">&quot;android&quot;</span>)))]
+<span class="attr">#[cfg(not(any(target_os = <span class="string">"linux"</span>, target_os = <span class="string">"android"</span>)))]
 </span><span class="kw">const </span>MAP_POPULATE: libc::c_int = <span class="number">0</span>;
 
-<span class="attr">#[cfg(any(target_os = <span class="string">&quot;linux&quot;</span>, target_os = <span class="string">&quot;android&quot;</span>))]
+<span class="attr">#[cfg(any(target_os = <span class="string">"linux"</span>, target_os = <span class="string">"android"</span>))]
 </span><span class="kw">const </span>MAP_HUGETLB: libc::c_int = libc::MAP_HUGETLB;
 
-<span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
+<span class="attr">#[cfg(target_os = <span class="string">"linux"</span>)]
 </span><span class="kw">const </span>MAP_HUGE_MASK: libc::c_int = libc::MAP_HUGE_MASK;
 
-<span class="attr">#[cfg(any(target_os = <span class="string">&quot;linux&quot;</span>, target_os = <span class="string">&quot;android&quot;</span>))]
+<span class="attr">#[cfg(any(target_os = <span class="string">"linux"</span>, target_os = <span class="string">"android"</span>))]
 </span><span class="kw">const </span>MAP_HUGE_SHIFT: libc::c_int = libc::MAP_HUGE_SHIFT;
 
-<span class="attr">#[cfg(not(any(target_os = <span class="string">&quot;linux&quot;</span>, target_os = <span class="string">&quot;android&quot;</span>)))]
+<span class="attr">#[cfg(not(any(target_os = <span class="string">"linux"</span>, target_os = <span class="string">"android"</span>)))]
 </span><span class="kw">const </span>MAP_HUGETLB: libc::c_int = <span class="number">0</span>;
 
-<span class="attr">#[cfg(not(target_os = <span class="string">&quot;linux&quot;</span>))]
+<span class="attr">#[cfg(not(target_os = <span class="string">"linux"</span>))]
 </span><span class="kw">const </span>MAP_HUGE_MASK: libc::c_int = <span class="number">0</span>;
 
-<span class="attr">#[cfg(not(any(target_os = <span class="string">&quot;linux&quot;</span>, target_os = <span class="string">&quot;android&quot;</span>)))]
+<span class="attr">#[cfg(not(any(target_os = <span class="string">"linux"</span>, target_os = <span class="string">"android"</span>)))]
 </span><span class="kw">const </span>MAP_HUGE_SHIFT: libc::c_int = <span class="number">0</span>;
 
 <span class="attr">#[cfg(any(
-    target_os = <span class="string">&quot;android&quot;</span>,
-    all(target_os = <span class="string">&quot;linux&quot;</span>, not(target_env = <span class="string">&quot;musl&quot;</span>))
+    target_os = <span class="string">"android"</span>,
+    all(target_os = <span class="string">"linux"</span>, not(target_env = <span class="string">"musl"</span>))
 ))]
 </span><span class="kw">use </span>libc::{mmap64 <span class="kw">as </span>mmap, off64_t <span class="kw">as </span>off_t};
 
 <span class="attr">#[cfg(not(any(
-    target_os = <span class="string">&quot;android&quot;</span>,
-    all(target_os = <span class="string">&quot;linux&quot;</span>, not(target_env = <span class="string">&quot;musl&quot;</span>))
+    target_os = <span class="string">"android"</span>,
+    all(target_os = <span class="string">"linux"</span>, not(target_env = <span class="string">"musl"</span>))
 )))]
 </span><span class="kw">use </span>libc::{mmap, off_t};
 
@@ -556,19 +557,19 @@
     <span class="kw">fn </span>adjust_mmap_params(len: usize, alignment: usize) -&gt; io::Result&lt;(usize, usize)&gt; {
         <span class="kw">use </span>std::isize;
 
-        <span class="comment">// Rust&#39;s slice cannot be larger than isize::MAX.
+        <span class="comment">// Rust's slice cannot be larger than isize::MAX.
         // See https://doc.rust-lang.org/std/slice/fn.from_raw_parts.html
         //
         // This is not a problem on 64-bit targets, but on 32-bit one
         // having a file or an anonymous mapping larger than 2GB is quite normal
         // and we have to prevent it.
         //
-        // The code below is essentially the same as in Rust&#39;s std:
+        // The code below is essentially the same as in Rust's std:
         // https://github.com/rust-lang/rust/blob/db78ab70a88a0a5e89031d7ee4eccec835dcdbde/library/alloc/src/raw_vec.rs#L495
         </span><span class="kw">if </span>std::mem::size_of::&lt;usize&gt;() &lt; <span class="number">8 </span>&amp;&amp; len &gt; isize::MAX <span class="kw">as </span>usize {
             <span class="kw">return </span><span class="prelude-val">Err</span>(io::Error::new(
                 io::ErrorKind::InvalidData,
-                <span class="string">&quot;memory map length overflows isize&quot;</span>,
+                <span class="string">"memory map length overflows isize"</span>,
             ));
         }
 
@@ -620,7 +621,7 @@
         <span class="comment">// There are two possible memory layouts we could have, depending on
         // the length and offset passed when constructing this instance:
         //
-        // 1. The &quot;normal&quot; memory layout looks like this:
+        // 1. The "normal" memory layout looks like this:
         //
         //         |&lt;------------------&gt;|&lt;----------------------&gt;|
         //     mmap ptr    offset      ptr     public slice
@@ -646,9 +647,9 @@
         //    zero. Otherwise, we have a memory map of offset bytes and not a
         //    zero-length memory map.
         //
-        //    This doesn&#39;t fit cleanly into a (ptr, len, offset) tuple. Instead,
+        //    This doesn't fit cleanly into a (ptr, len, offset) tuple. Instead,
         //    we fudge it slightly: a zero-length memory map turns into a
-        //    mapping of length one and can&#39;t be told apart outside of this
+        //    mapping of length one and can't be told apart outside of this
         //    method without knowing the original length.
         </span><span class="kw">if </span>len == <span class="number">0 </span>{
             (<span class="self">self</span>.ptr, <span class="number">1</span>, <span class="number">0</span>)
@@ -667,8 +668,8 @@
     /// - If `len + offset == 0` then the memory mapping must be of length 1.
     /// - `offset` must be less than the current page size.
     </span><span class="kw">unsafe fn </span>from_raw_parts(ptr: <span class="kw-2">*mut </span>libc::c_void, len: usize, offset: usize) -&gt; <span class="self">Self </span>{
-        <span class="macro">debug_assert_eq!</span>(ptr <span class="kw">as </span>usize % page_size(), <span class="number">0</span>, <span class="string">&quot;ptr not page-aligned&quot;</span>);
-        <span class="macro">debug_assert!</span>(offset &lt; page_size(), <span class="string">&quot;offset larger than page size&quot;</span>);
+        <span class="macro">debug_assert_eq!</span>(ptr <span class="kw">as </span>usize % page_size(), <span class="number">0</span>, <span class="string">"ptr not page-aligned"</span>);
+        <span class="macro">debug_assert!</span>(offset &lt; page_size(), <span class="string">"offset larger than page size"</span>);
 
         <span class="self">Self </span>{
             ptr: ptr.add(offset),
@@ -838,7 +839,7 @@
         }
     }
 
-    <span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
+    <span class="attr">#[cfg(target_os = <span class="string">"linux"</span>)]
     </span><span class="kw">pub fn </span>remap(<span class="kw-2">&amp;mut </span><span class="self">self</span>, new_len: usize, options: <span class="kw">crate</span>::RemapOptions) -&gt; io::Result&lt;()&gt; {
         <span class="kw">let </span>(old_ptr, old_len, offset) = <span class="self">self</span>.as_mmap_params();
         <span class="kw">let </span>(map_len, offset) = <span class="self">Self</span>::adjust_mmap_params(new_len, offset)<span class="question-mark">?</span>;
@@ -849,7 +850,7 @@
             <span class="kw">if </span>new_ptr == libc::MAP_FAILED {
                 <span class="prelude-val">Err</span>(io::Error::last_os_error())
             } <span class="kw">else </span>{
-                <span class="comment">// We explicitly don&#39;t drop self since the pointer within is no longer valid.
+                <span class="comment">// We explicitly don't drop self since the pointer within is no longer valid.
                 </span>ptr::write(<span class="self">self</span>, <span class="self">Self</span>::from_raw_parts(new_ptr, new_len, offset));
                 <span class="prelude-val">Ok</span>(())
             }

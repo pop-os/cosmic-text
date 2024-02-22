@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.4/src/tables/layout.rs`."><title>layout.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/read-fonts-0.15.5/src/tables/layout.rs`."><title>layout.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="read_fonts" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -437,7 +438,7 @@
 <a href="#437" id="437">437</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! OpenType Layout common table formats
 
-</span><span class="attr">#[path = <span class="string">&quot;./lookupflag.rs&quot;</span>]
+</span><span class="attr">#[path = <span class="string">"./lookupflag.rs"</span>]
 </span><span class="kw">mod </span>lookupflag;
 
 <span class="kw">use </span>core::cmp::Ordering;
@@ -445,18 +446,18 @@
 <span class="kw">pub use </span>lookupflag::LookupFlag;
 
 <span class="attr">#[cfg(test)]
-#[path = <span class="string">&quot;../tests/layout.rs&quot;</span>]
+#[path = <span class="string">"../tests/layout.rs"</span>]
 </span><span class="kw">mod </span>spec_tests;
 
-<span class="macro">include!</span>(<span class="string">&quot;../../generated/generated_layout.rs&quot;</span>);
+<span class="macro">include!</span>(<span class="string">"../../generated/generated_layout.rs"</span>);
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: FontRead&lt;<span class="lifetime">&#39;a</span>&gt;&gt; Lookup&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: FontRead&lt;<span class="lifetime">'a</span>&gt;&gt; Lookup&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">pub fn </span>get_subtable(<span class="kw-2">&amp;</span><span class="self">self</span>, offset: Offset16) -&gt; <span class="prelude-ty">Result</span>&lt;T, ReadError&gt; {
         <span class="self">self</span>.resolve_offset(offset)
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-    </span><span class="kw">fn </span>traverse_lookup_flag(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; traversal::FieldType&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+    </span><span class="kw">fn </span>traverse_lookup_flag(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; traversal::FieldType&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.lookup_flag().to_bits().into()
     }
 }
@@ -465,7 +466,7 @@
 ///
 /// This is necessary because GPOS and GSUB have different concrete types
 /// for their extension lookups.
-</span><span class="kw">pub trait </span>ExtensionLookup&lt;<span class="lifetime">&#39;a</span>, T: FontRead&lt;<span class="lifetime">&#39;a</span>&gt;&gt;: FontRead&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub trait </span>ExtensionLookup&lt;<span class="lifetime">'a</span>, T: FontRead&lt;<span class="lifetime">'a</span>&gt;&gt;: FontRead&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>extension(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;T, ReadError&gt;;
 }
 
@@ -473,19 +474,19 @@
 ///
 /// This is used to implement more ergonomic access to lookup subtables for
 /// GPOS &amp; GSUB lookup tables.
-</span><span class="kw">pub enum </span>Subtables&lt;<span class="lifetime">&#39;a</span>, T: FontRead&lt;<span class="lifetime">&#39;a</span>&gt;, Ext: ExtensionLookup&lt;<span class="lifetime">&#39;a</span>, T&gt;&gt; {
-    Subtable(ArrayOfOffsets&lt;<span class="lifetime">&#39;a</span>, T&gt;),
-    Extension(ArrayOfOffsets&lt;<span class="lifetime">&#39;a</span>, Ext&gt;),
+</span><span class="kw">pub enum </span>Subtables&lt;<span class="lifetime">'a</span>, T: FontRead&lt;<span class="lifetime">'a</span>&gt;, Ext: ExtensionLookup&lt;<span class="lifetime">'a</span>, T&gt;&gt; {
+    Subtable(ArrayOfOffsets&lt;<span class="lifetime">'a</span>, T&gt;),
+    Extension(ArrayOfOffsets&lt;<span class="lifetime">'a</span>, Ext&gt;),
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: FontRead&lt;<span class="lifetime">&#39;a</span>&gt; + <span class="lifetime">&#39;a</span>, Ext: ExtensionLookup&lt;<span class="lifetime">&#39;a</span>, T&gt; + <span class="lifetime">&#39;a</span>&gt; Subtables&lt;<span class="lifetime">&#39;a</span>, T, Ext&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: FontRead&lt;<span class="lifetime">'a</span>&gt; + <span class="lifetime">'a</span>, Ext: ExtensionLookup&lt;<span class="lifetime">'a</span>, T&gt; + <span class="lifetime">'a</span>&gt; Subtables&lt;<span class="lifetime">'a</span>, T, Ext&gt; {
     <span class="doccomment">/// create a new subtables array given offests to non-extension subtables
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(offsets: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[BigEndian&lt;Offset16&gt;], data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(offsets: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[BigEndian&lt;Offset16&gt;], data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="self">Self </span>{
         Subtables::Subtable(ArrayOfOffsets::new(offsets, data, ()))
     }
 
     <span class="doccomment">/// create a new subtables array given offsets to extension subtables
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new_ext(offsets: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[BigEndian&lt;Offset16&gt;], data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new_ext(offsets: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[BigEndian&lt;Offset16&gt;], data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="self">Self </span>{
         Subtables::Extension(ArrayOfOffsets::new(offsets, data, ()))
     }
 
@@ -510,7 +511,7 @@
     }
 
     <span class="doccomment">/// Return an iterator over all the subtables in the collection
-    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="prelude-ty">Result</span>&lt;T, ReadError&gt;&gt; + <span class="lifetime">&#39;a </span>{
+    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="prelude-ty">Result</span>&lt;T, ReadError&gt;&gt; + <span class="lifetime">'a </span>{
         <span class="kw">let </span>(left, right) = <span class="kw">match </span><span class="self">self </span>{
             Subtables::Subtable(inner) =&gt; (<span class="prelude-val">Some</span>(inner.iter()), <span class="prelude-val">None</span>),
             Subtables::Extension(inner) =&gt; (
@@ -525,36 +526,36 @@
 }
 
 <span class="doccomment">/// An enum for different possible tables referenced by [Feature::feature_params_offset]
-</span><span class="kw">pub enum </span>FeatureParams&lt;<span class="lifetime">&#39;a</span>&gt; {
-    StylisticSet(StylisticSetParams&lt;<span class="lifetime">&#39;a</span>&gt;),
-    Size(SizeParams&lt;<span class="lifetime">&#39;a</span>&gt;),
-    CharacterVariant(CharacterVariantParams&lt;<span class="lifetime">&#39;a</span>&gt;),
+</span><span class="kw">pub enum </span>FeatureParams&lt;<span class="lifetime">'a</span>&gt; {
+    StylisticSet(StylisticSetParams&lt;<span class="lifetime">'a</span>&gt;),
+    Size(SizeParams&lt;<span class="lifetime">'a</span>&gt;),
+    CharacterVariant(CharacterVariantParams&lt;<span class="lifetime">'a</span>&gt;),
 }
 
-<span class="kw">impl </span>ReadArgs <span class="kw">for </span>FeatureParams&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>ReadArgs <span class="kw">for </span>FeatureParams&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">type </span>Args = Tag;
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; FontReadWithArgs&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>FeatureParams&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>read_with_args(bytes: FontData&lt;<span class="lifetime">&#39;a</span>&gt;, args: <span class="kw-2">&amp;</span>Tag) -&gt; <span class="prelude-ty">Result</span>&lt;FeatureParams&lt;<span class="lifetime">&#39;a</span>&gt;, ReadError&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FontReadWithArgs&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>FeatureParams&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>read_with_args(bytes: FontData&lt;<span class="lifetime">'a</span>&gt;, args: <span class="kw-2">&amp;</span>Tag) -&gt; <span class="prelude-ty">Result</span>&lt;FeatureParams&lt;<span class="lifetime">'a</span>&gt;, ReadError&gt; {
         <span class="kw">match </span><span class="kw-2">*</span>args {
-            t <span class="kw">if </span>t == Tag::new(<span class="string">b&quot;size&quot;</span>) =&gt; SizeParams::read(bytes).map(<span class="self">Self</span>::Size),
-            <span class="comment">// to whoever is debugging this dumb bug I wrote: I&#39;m sorry.
-            </span>t <span class="kw">if </span><span class="kw-2">&amp;</span>t.to_raw()[..<span class="number">2</span>] == <span class="string">b&quot;ss&quot; </span>=&gt; {
+            t <span class="kw">if </span>t == Tag::new(<span class="string">b"size"</span>) =&gt; SizeParams::read(bytes).map(<span class="self">Self</span>::Size),
+            <span class="comment">// to whoever is debugging this dumb bug I wrote: I'm sorry.
+            </span>t <span class="kw">if </span><span class="kw-2">&amp;</span>t.to_raw()[..<span class="number">2</span>] == <span class="string">b"ss" </span>=&gt; {
                 StylisticSetParams::read(bytes).map(<span class="self">Self</span>::StylisticSet)
             }
-            t <span class="kw">if </span><span class="kw-2">&amp;</span>t.to_raw()[..<span class="number">2</span>] == <span class="string">b&quot;cv&quot; </span>=&gt; {
+            t <span class="kw">if </span><span class="kw-2">&amp;</span>t.to_raw()[..<span class="number">2</span>] == <span class="string">b"cv" </span>=&gt; {
                 CharacterVariantParams::read(bytes).map(<span class="self">Self</span>::CharacterVariant)
             }
             <span class="comment">// NOTE: what even is our error condition here? an offset exists but
-            // we don&#39;t know the tag?
+            // we don't know the tag?
             </span><span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(ReadError::InvalidFormat(<span class="number">0xdead</span>)),
         }
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;traversal&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SomeTable&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>FeatureParams&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"traversal"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SomeTable&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>FeatureParams&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
         <span class="kw">match </span><span class="self">self </span>{
             FeatureParams::StylisticSet(table) =&gt; table.type_name(),
@@ -563,7 +564,7 @@
         }
     }
 
-    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+    <span class="kw">fn </span>get_field(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Field&lt;<span class="lifetime">'a</span>&gt;&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             FeatureParams::StylisticSet(table) =&gt; table.get_field(idx),
             FeatureParams::Size(table) =&gt; table.get_field(idx),
@@ -573,14 +574,14 @@
 }
 
 <span class="kw">impl </span>FeatureTableSubstitutionRecord {
-    <span class="kw">pub fn </span>alternate_feature&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, data: FontData&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Feature&lt;<span class="lifetime">&#39;a</span>&gt;, ReadError&gt; {
+    <span class="kw">pub fn </span>alternate_feature&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, data: FontData&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Feature&lt;<span class="lifetime">'a</span>&gt;, ReadError&gt; {
         <span class="self">self</span>.alternate_feature_offset()
-            .resolve_with_args(data, <span class="kw-2">&amp;</span>Tag::new(<span class="string">b&quot;NULL&quot;</span>))
+            .resolve_with_args(data, <span class="kw-2">&amp;</span>Tag::new(<span class="string">b"NULL"</span>))
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; CoverageTable&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = GlyphId&gt; + <span class="lifetime">&#39;a </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; CoverageTable&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = GlyphId&gt; + <span class="lifetime">'a </span>{
         <span class="comment">// all one expression so that we have a single return type
         </span><span class="kw">let </span>(iter1, iter2) = <span class="kw">match </span><span class="self">self </span>{
             CoverageTable::Format1(t) =&gt; (<span class="prelude-val">Some</span>(t.glyph_array().iter().map(|g| g.get())), <span class="prelude-val">None</span>),
@@ -605,7 +606,7 @@
     }
 }
 
-<span class="kw">impl </span>CoverageFormat1&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>CoverageFormat1&lt;<span class="lifetime">'_</span>&gt; {
     <span class="doccomment">/// If this glyph is in the coverage table, returns its index
     </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, gid: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;u16&gt; {
         <span class="kw">let </span>be_glyph: BigEndian&lt;GlyphId&gt; = gid.into();
@@ -616,7 +617,7 @@
     }
 }
 
-<span class="kw">impl </span>CoverageFormat2&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>CoverageFormat2&lt;<span class="lifetime">'_</span>&gt; {
     <span class="doccomment">/// If this glyph is in the coverage table, returns its index
     </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, gid: GlyphId) -&gt; <span class="prelude-ty">Option</span>&lt;u16&gt; {
         <span class="self">self</span>.range_records()
@@ -638,7 +639,7 @@
 }
 
 <span class="kw">impl </span>RangeRecord {
-    <span class="kw">fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = GlyphId&gt; + <span class="lifetime">&#39;_ </span>{
+    <span class="kw">fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = GlyphId&gt; + <span class="lifetime">'_ </span>{
         (<span class="self">self</span>.start_glyph_id().to_u16()..=<span class="self">self</span>.end_glyph_id().to_u16()).map(GlyphId::new)
     }
 }
@@ -659,7 +660,7 @@
     }
 }
 
-<span class="comment">// we as a &#39;format&#39; in codegen, and the generic error type for an invalid format
+<span class="comment">// we as a 'format' in codegen, and the generic error type for an invalid format
 // stores the value as an i64, so we need this conversion.
 </span><span class="kw">impl </span>From&lt;DeltaFormat&gt; <span class="kw">for </span>i64 {
     <span class="kw">fn </span>from(value: DeltaFormat) -&gt; <span class="self">Self </span>{
@@ -667,7 +668,7 @@
     </span>}
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ClassDefFormat1&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ClassDefFormat1&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Get the class for this glyph id
     </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, gid: GlyphId) -&gt; u16 {
         <span class="kw">if </span>gid &lt; <span class="self">self</span>.start_glyph_id() {
@@ -681,7 +682,7 @@
     }
 
     <span class="doccomment">/// Iterate over each glyph and its class.
-    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = (GlyphId, u16)&gt; + <span class="lifetime">&#39;a </span>{
+    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = (GlyphId, u16)&gt; + <span class="lifetime">'a </span>{
         <span class="kw">let </span>start = <span class="self">self</span>.start_glyph_id();
         <span class="self">self</span>.class_value_array()
             .iter()
@@ -693,7 +694,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ClassDefFormat2&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ClassDefFormat2&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Get the class for this glyph id
     </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, gid: GlyphId) -&gt; u16 {
         <span class="kw">let </span>records = <span class="self">self</span>.class_range_records();
@@ -710,7 +711,7 @@
     </span>}
 
     <span class="doccomment">/// Iterate over each glyph and its class.
-    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = (GlyphId, u16)&gt; + <span class="lifetime">&#39;a </span>{
+    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = (GlyphId, u16)&gt; + <span class="lifetime">'a </span>{
         <span class="self">self</span>.class_range_records().iter().flat_map(|range| {
             <span class="kw">let </span>start = range.start_glyph_id().to_u16();
             <span class="kw">let </span>end = range.end_glyph_id().to_u16();
@@ -719,7 +720,7 @@
     }
 }
 
-<span class="kw">impl </span>ClassDef&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>ClassDef&lt;<span class="lifetime">'_</span>&gt; {
     <span class="doccomment">/// Get the class for this glyph id
     </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, gid: GlyphId) -&gt; u16 {
         <span class="kw">match </span><span class="self">self </span>{
@@ -731,7 +732,7 @@
     <span class="doccomment">/// Iterate over each glyph and its class.
     ///
     /// This will not include class 0 unless it has been explicitly assigned.
-    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = (GlyphId, u16)&gt; + <span class="lifetime">&#39;_ </span>{
+    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = (GlyphId, u16)&gt; + <span class="lifetime">'_ </span>{
         <span class="kw">let </span>(one, two) = <span class="kw">match </span><span class="self">self </span>{
             ClassDef::Format1(inner) =&gt; (<span class="prelude-val">Some</span>(inner.iter()), <span class="prelude-val">None</span>),
             ClassDef::Format2(inner) =&gt; (<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(inner.iter())),
@@ -740,9 +741,9 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Device&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Device&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Iterate over the decoded values for this device
-    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = i8&gt; + <span class="lifetime">&#39;a </span>{
+    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = i8&gt; + <span class="lifetime">'a </span>{
         <span class="kw">let </span>format = <span class="self">self</span>.delta_format();
         <span class="kw">let </span><span class="kw-2">mut </span>n = (<span class="self">self</span>.end_size() - <span class="self">self</span>.start_size()) <span class="kw">as </span>usize + <span class="number">1</span>;
         <span class="kw">let </span>deltas_per_word = <span class="kw">match </span>format {

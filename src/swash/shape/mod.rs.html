@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/shape/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/shape/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -927,18 +928,18 @@ and is out of scope for this crate.
 
 All shaping in this crate takes place within the purview of a
 [`ShapeContext`]. This opaque struct manages internal LRU caches and scratch
-buffers that are necessary for the shaping process. Generally, you&#39;ll
+buffers that are necessary for the shaping process. Generally, you'll
 want to keep an instance that persists for more than one layout pass as
 this amortizes the cost of allocations, reduces contention for the global
 heap and increases the hit rate for the internal acceleration structures. If
-you&#39;re doing multithreaded layout, you should keep a context per thread.
+you're doing multithreaded layout, you should keep a context per thread.
 
 The only method available on the context is [`builder`](ShapeContext::builder)
 which takes a type that can be converted into a [`FontRef`] as an argument
 and produces a [`ShaperBuilder`] that provides options for configuring and
 building a [`Shaper`].
 
-Here, we&#39;ll create a context and build a shaper for Arabic text at 16px:
+Here, we'll create a context and build a shaper for Arabic text at 16px:
 ```
 # use swash::{FontRef, CacheKey, shape::*, text::Script};
 # let font: FontRef = FontRef { data: &amp;[], offset: 0, key: CacheKey::new() };
@@ -963,7 +964,7 @@ let mut context = ShapeContext::new();
 let mut shaper = context.builder(font)
     .script(Script::Latin)
     .size(14.)
-    .features(&amp;[(&quot;dlig&quot;, 1)])
+    .features(&amp;[("dlig", 1)])
     .build();
 ```
 
@@ -984,7 +985,7 @@ let mut context = ShapeContext::new();
 let mut shaper = context.builder(font)
     .script(Script::Latin)
     .size(14.)
-    .variations(&amp;[(&quot;wght&quot;, 520.5)])
+    .variations(&amp;[("wght", 520.5)])
     .build();
 ```
 
@@ -1000,7 +1001,7 @@ method with a string:
 # let font: FontRef = FontRef { data: &amp;[], offset: 0, key: CacheKey::new() };
 # let mut context = ShapeContext::new();
 # let mut shaper = context.builder(font).build();
-shaper.add_str(&quot;a quick brown fox?&quot;);
+shaper.add_str("a quick brown fox?");
 ```
 
 You can call [`add_str`](Shaper::add_str) multiple times to add a sequence
@@ -1025,7 +1026,7 @@ mechanism.
 All of this is served by the functionality in the
 [`text::cluster`](crate::text::cluster) module.
 
-Let&#39;s see a somewhat contrived example that demonstrates the process:
+Let's see a somewhat contrived example that demonstrates the process:
 ```
 use swash::text::cluster::{CharCluster, CharInfo, Parser, Token};
 # use swash::{FontRef, CacheKey, shape::*, text::Script, tag_from_bytes};
@@ -1034,15 +1035,15 @@ use swash::text::cluster::{CharCluster, CharInfo, Parser, Token};
 let mut shaper = context.builder(font)
     .script(Script::Latin)
     .build();
-// We&#39;ll need the character map for our font
+// We'll need the character map for our font
 let charmap = font.charmap();
-// And some storage for the cluster we&#39;re working with
+// And some storage for the cluster we're working with
 let mut cluster = CharCluster::new();
 // Now we build a cluster parser which takes a script and
 // an iterator that yields a Token per character
 let mut parser = Parser::new(
     Script::Latin,
-    &quot;a quick brown fox?&quot;.char_indices().map(|(i, ch)| Token {
+    "a quick brown fox?".char_indices().map(|(i, ch)| Token {
         // The character
         ch,
         // Offset of the character in code units
@@ -1065,7 +1066,7 @@ while parser.next(&amp;mut cluster) {
 }
 ```
 
-Phew! That&#39;s quite a lot of work. It also happens to be exactly what
+Phew! That's quite a lot of work. It also happens to be exactly what
 [`add_str`](Shaper::add_str) does internally.
 
 So why bother? As mentioned earlier, this method allows you to customize
@@ -1083,7 +1084,7 @@ parser with boundary analysis:
 ```
 use swash::text::{analyze, Script};
 use swash::text::cluster::{CharInfo, Parser, Token};
-let text = &quot;a quick brown fox?&quot;;
+let text = "a quick brown fox?";
 let mut parser = Parser::new(
     Script::Latin,
     text.char_indices()
@@ -1110,7 +1111,7 @@ will return the index of the best matching font:
 use swash::FontRef;
 use swash::text::cluster::{CharCluster, Status};
 
-fn select_font&lt;&#39;a&gt;(fonts: &amp;[FontRef&lt;&#39;a&gt;], cluster: &amp;mut CharCluster) -&gt; Option&lt;usize&gt; {
+fn select_font&lt;'a&gt;(fonts: &amp;[FontRef&lt;'a&gt;], cluster: &amp;mut CharCluster) -&gt; Option&lt;usize&gt; {
     let mut best = None;
     for (i, font) in fonts.iter().enumerate() {
         let charmap = font.charmap();
@@ -1132,7 +1133,7 @@ of the characters in the cluster so that it can select the best form for each
 candidate font.
 
 Since this process is done during shaping, upon return we compare the selected
-font with our current font and if they&#39;re different, we complete shaping for the
+font with our current font and if they're different, we complete shaping for the
 clusters submitted so far and continue the process by building a new shaper with
 the selected font. By doing manual cluster parsing and nominal glyph mapping
 _outside_ the shaper, we can implement per-cluster font fallback without the costly
@@ -1150,7 +1151,7 @@ Please note that, unlike HarfBuzz, this shaper does _not_ reverse runs that are 
 right-to-left order. The reasoning is that, for correctness, line breaking must be
 done in logical order and reversing runs should occur during bidi reordering.
 
-Also pertinent to right-to-left runs: you&#39;ll need to ensure that you reverse
+Also pertinent to right-to-left runs: you'll need to ensure that you reverse
 _clusters_ and not _glyphs_. Intra-cluster glyphs must remain in logical order
 for proper mark placement.
 */
@@ -1222,7 +1223,7 @@ for proper mark placement.
 
     <span class="doccomment">/// Creates a new builder for constructing a shaper with this context
     /// and the specified font.
-    </span><span class="kw">pub fn </span>builder&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>, font: <span class="kw">impl </span>Into&lt;FontRef&lt;<span class="lifetime">&#39;a</span>&gt;&gt;) -&gt; ShaperBuilder&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>builder&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">self</span>, font: <span class="kw">impl </span>Into&lt;FontRef&lt;<span class="lifetime">'a</span>&gt;&gt;) -&gt; ShaperBuilder&lt;<span class="lifetime">'a</span>&gt; {
         ShaperBuilder::new(<span class="self">self</span>, font)
     }
 }
@@ -1266,14 +1267,14 @@ for proper mark placement.
 <span class="doccomment">/// Builder for configuring a shaper.
 ///
 /// See the module level [documentation](index.html#building-the-shaper) for more detail.
-</span><span class="kw">pub struct </span>ShaperBuilder&lt;<span class="lifetime">&#39;a</span>&gt; {
-    state: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>State,
-    feature_cache: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>FeatureCache,
-    font: FontRef&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>ShaperBuilder&lt;<span class="lifetime">'a</span>&gt; {
+    state: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>State,
+    feature_cache: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>FeatureCache,
+    font: FontRef&lt;<span class="lifetime">'a</span>&gt;,
     font_id: u64,
-    font_entry: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>FontEntry,
-    coords: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Vec&lt;i16&gt;,
-    charmap: Charmap&lt;<span class="lifetime">&#39;a</span>&gt;,
+    font_entry: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>FontEntry,
+    coords: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Vec&lt;i16&gt;,
+    charmap: Charmap&lt;<span class="lifetime">'a</span>&gt;,
     dotted_circle: <span class="prelude-ty">Option</span>&lt;u16&gt;,
     retain_ignorables: bool,
     size: f32,
@@ -1282,10 +1283,10 @@ for proper mark placement.
     dir: Direction,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ShaperBuilder&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ShaperBuilder&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Creates a new builder for configuring a shaper with the specified
     /// context and font.
-    </span><span class="kw">fn </span>new(context: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>ShapeContext, font: <span class="kw">impl </span>Into&lt;FontRef&lt;<span class="lifetime">&#39;a</span>&gt;&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">fn </span>new(context: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>ShapeContext, font: <span class="kw">impl </span>Into&lt;FontRef&lt;<span class="lifetime">'a</span>&gt;&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>font = font.into();
         <span class="kw">let </span>(font_id, font_entry) = context.font_cache.get(<span class="kw-2">&amp;</span>font, |font| FontEntry::new(font));
         context.state.reset();
@@ -1387,7 +1388,7 @@ for proper mark placement.
     /// default value is `false`.
     </span><span class="kw">pub fn </span>insert_dotted_circles(<span class="kw-2">mut </span><span class="self">self</span>, yes: bool) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>yes {
-            <span class="kw">let </span>gid = <span class="self">self</span>.charmap.map(<span class="string">&#39;\u{25cc}&#39;</span>);
+            <span class="kw">let </span>gid = <span class="self">self</span>.charmap.map(<span class="string">'\u{25cc}'</span>);
             <span class="kw">if </span>gid != <span class="number">0 </span>{
                 <span class="self">self</span>.dotted_circle = <span class="prelude-val">Some</span>(gid);
             }
@@ -1405,7 +1406,7 @@ for proper mark placement.
     </span>}
 
     <span class="doccomment">/// Builds a shaper for the current configuration.
-    </span><span class="kw">pub fn </span>build(<span class="self">self</span>) -&gt; Shaper&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>build(<span class="self">self</span>) -&gt; Shaper&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">let </span>engine = Engine::new(
             <span class="kw-2">&amp;</span><span class="self">self</span>.font_entry.metadata,
             <span class="self">self</span>.font.data,
@@ -1463,23 +1464,23 @@ for proper mark placement.
 /// typographic rules and features.
 ///
 /// See the module level [documentation](index.html#feeding-the-shaper) for detail.
-</span><span class="kw">pub struct </span>Shaper&lt;<span class="lifetime">&#39;a</span>&gt; {
-    state: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>State,
-    font: FontRef&lt;<span class="lifetime">&#39;a</span>&gt;,
-    font_entry: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>FontEntry,
-    charmap: Charmap&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>Shaper&lt;<span class="lifetime">'a</span>&gt; {
+    state: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>State,
+    font: FontRef&lt;<span class="lifetime">'a</span>&gt;,
+    font_entry: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>FontEntry,
+    charmap: Charmap&lt;<span class="lifetime">'a</span>&gt;,
     retain_ignorables: bool,
     size: f32,
     script: Script,
     joined: bool,
     dir: Direction,
-    engine: Engine&lt;<span class="lifetime">&#39;a</span>&gt;,
-    store: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>FeatureStore&gt;,
+    engine: Engine&lt;<span class="lifetime">'a</span>&gt;,
+    store: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>FeatureStore&gt;,
     sub_mask: FeatureMask,
     pos_mask: FeatureMask,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Shaper&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Shaper&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Adds a character cluster to the shaper.
     </span><span class="kw">pub fn </span>add_cluster(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cluster: <span class="kw-2">&amp;</span>CharCluster) {
         <span class="kw">let </span>buf = <span class="kw-2">&amp;mut </span><span class="self">self</span>.state.buffer;
@@ -1515,7 +1516,7 @@ for proper mark placement.
                 </span>e.gsub(s, s.groups.default, buf, <span class="prelude-val">Some</span>(range.clone()));
                 <span class="kw">for </span>g <span class="kw">in </span><span class="kw-2">&amp;mut </span>buf.glyphs[range] {
                     <span class="kw">if </span>g.char_class == ShapeClass::Halant &amp;&amp; g.flags &amp; SUBSTITUTED != <span class="number">0 </span>{
-                        <span class="comment">// Don&#39;t prevent reordering across a virama that has been substituted
+                        <span class="comment">// Don't prevent reordering across a virama that has been substituted
                         </span>g.char_class = ShapeClass::Other;
                     }
                 }
@@ -1678,7 +1679,7 @@ for proper mark placement.
         }
     }
 
-    <span class="comment">// FIXME: when writing docs, I realized that it&#39;s impossible
+    <span class="comment">// FIXME: when writing docs, I realized that it's impossible
     // to use the result of this function correctly with RTL runs
     // that contain marks.
 

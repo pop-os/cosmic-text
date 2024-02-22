@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/libm-0.2.8/src/math/pow.rs`."><title>pow.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="libm" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/libm-0.2.8/src/math/pow.rs`."><title>pow.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="libm" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -653,9 +654,9 @@
 //      1. Compute and return log2(x) in two pieces:
 //              log2(x) = w1 + w2,
 //         where w1 has 53-24 = 29 bit trailing zeros.
-//      2. Perform y*log2(x) = n+y&#39; by simulating muti-precision
-//         arithmetic, where |y&#39;|&lt;=0.5.
-//      3. Return x**y = 2**n*exp(y&#39;*log2)
+//      2. Perform y*log2(x) = n+y' by simulating muti-precision
+//         arithmetic, where |y'|&lt;=0.5.
+//      3. Return x**y = 2**n*exp(y'*log2)
 //
 // Special cases:
 //      1.  (anything) ** 0  is 1
@@ -1097,7 +1098,7 @@
             } <span class="kw">else </span>{
                 pow(base, exponent) == expected
             },
-            <span class="string">&quot;{} ** {} was {} instead of {}&quot;</span>,
+            <span class="string">"{} ** {} was {} instead of {}"</span>,
             base,
             exponent,
             res,
@@ -1121,9 +1122,9 @@
                 <span class="kw">let </span>exp = expected(<span class="kw-2">*</span>val);
                 <span class="kw">let </span>res = computed(<span class="kw-2">*</span>val);
 
-                <span class="attr">#[cfg(all(target_arch = <span class="string">&quot;x86&quot;</span>, not(target_feature = <span class="string">&quot;sse2&quot;</span>)))]
+                <span class="attr">#[cfg(all(target_arch = <span class="string">"x86"</span>, not(target_feature = <span class="string">"sse2"</span>)))]
                 </span><span class="kw">let </span>exp = <span class="macro">force_eval!</span>(exp);
-                <span class="attr">#[cfg(all(target_arch = <span class="string">&quot;x86&quot;</span>, not(target_feature = <span class="string">&quot;sse2&quot;</span>)))]
+                <span class="attr">#[cfg(all(target_arch = <span class="string">"x86"</span>, not(target_feature = <span class="string">"sse2"</span>)))]
                 </span><span class="kw">let </span>res = <span class="macro">force_eval!</span>(res);
                 <span class="macro">assert!</span>(
                     <span class="kw">if </span>exp.is_nan() {
@@ -1131,7 +1132,7 @@
                     } <span class="kw">else </span>{
                         exp == res
                     },
-                    <span class="string">&quot;test for {} was {} instead of {}&quot;</span>,
+                    <span class="string">"test for {} was {} instead of {}"</span>,
                     val,
                     res,
                     exp
@@ -1176,7 +1177,7 @@
         </span>test_sets_as_exponent(NEG_INFINITY, <span class="kw-2">&amp;</span>[POS_ODDS], NEG_INFINITY);
 
         <span class="comment">// (-Infinity ^ anything but odd ints should be == -0 ^ (-anything))
-        // We can lump in pos/neg odd ints here because they don&#39;t seem to
+        // We can lump in pos/neg odd ints here because they don't seem to
         // cause panics (div by zero) in release mode (I think).
         </span>test_sets(ALL, <span class="kw-2">&amp;</span>|v: f64| pow(NEG_INFINITY, v), <span class="kw-2">&amp;</span>|v: f64| pow(-<span class="number">0.0</span>, -v));
     }
@@ -1214,7 +1215,7 @@
         </span>test_sets_as_exponent(<span class="number">0.0</span>, <span class="kw-2">&amp;</span>POS[<span class="number">1</span>..], <span class="number">0.0</span>);
 
         <span class="comment">// (+0 ^ anything negative but 0 and NAN should be Infinity)
-        // (this should panic because we&#39;re dividing by zero)
+        // (this should panic because we're dividing by zero)
         </span>test_sets_as_exponent(<span class="number">0.0</span>, <span class="kw-2">&amp;</span>NEG[<span class="number">1</span>..], INFINITY);
 
         <span class="comment">// Negative Zero as the base:

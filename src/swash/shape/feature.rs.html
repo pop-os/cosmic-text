@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/shape/feature.rs`."><title>feature.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/swash-0.1.12/src/shape/feature.rs`."><title>feature.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -74,57 +75,57 @@
 </span><span class="kw">use </span><span class="kw">super</span>::internal::{raw_tag, RawTag};
 
 <span class="comment">// Default tag used in various places.
-</span><span class="kw">pub const </span>_DFLT: RawTag = raw_tag(<span class="string">b&quot;DFLT&quot;</span>);
+</span><span class="kw">pub const </span>_DFLT: RawTag = raw_tag(<span class="string">b"DFLT"</span>);
 
 <span class="comment">// Substitution features.
-</span><span class="kw">pub const </span>CCMP: RawTag = raw_tag(<span class="string">b&quot;ccmp&quot;</span>);
-<span class="kw">pub const </span>LOCL: RawTag = raw_tag(<span class="string">b&quot;locl&quot;</span>);
-<span class="kw">pub const </span>RVRN: RawTag = raw_tag(<span class="string">b&quot;rvrn&quot;</span>);
-<span class="kw">pub const </span>LIGA: RawTag = raw_tag(<span class="string">b&quot;liga&quot;</span>);
-<span class="kw">pub const </span>CLIG: RawTag = raw_tag(<span class="string">b&quot;clig&quot;</span>);
-<span class="kw">pub const </span>RLIG: RawTag = raw_tag(<span class="string">b&quot;rlig&quot;</span>);
-<span class="kw">pub const </span>_DLIG: RawTag = raw_tag(<span class="string">b&quot;dlig&quot;</span>);
-<span class="kw">pub const </span>CALT: RawTag = raw_tag(<span class="string">b&quot;calt&quot;</span>);
-<span class="kw">pub const </span>LJMO: RawTag = raw_tag(<span class="string">b&quot;ljmo&quot;</span>);
-<span class="kw">pub const </span>VJMO: RawTag = raw_tag(<span class="string">b&quot;vjmo&quot;</span>);
-<span class="kw">pub const </span>TJMO: RawTag = raw_tag(<span class="string">b&quot;tjmo&quot;</span>);
-<span class="kw">pub const </span>NUKT: RawTag = raw_tag(<span class="string">b&quot;nukt&quot;</span>);
-<span class="kw">pub const </span>AKHN: RawTag = raw_tag(<span class="string">b&quot;akhn&quot;</span>);
-<span class="kw">pub const </span>RKRF: RawTag = raw_tag(<span class="string">b&quot;rkrf&quot;</span>);
-<span class="kw">pub const </span>HALF: RawTag = raw_tag(<span class="string">b&quot;half&quot;</span>);
-<span class="kw">pub const </span>HALN: RawTag = raw_tag(<span class="string">b&quot;haln&quot;</span>);
-<span class="kw">pub const </span>VATU: RawTag = raw_tag(<span class="string">b&quot;vatu&quot;</span>);
-<span class="kw">pub const </span>CJCT: RawTag = raw_tag(<span class="string">b&quot;cjct&quot;</span>);
-<span class="kw">pub const </span>ISOL: RawTag = raw_tag(<span class="string">b&quot;isol&quot;</span>);
-<span class="kw">pub const </span>INIT: RawTag = raw_tag(<span class="string">b&quot;init&quot;</span>);
-<span class="kw">pub const </span>MEDI: RawTag = raw_tag(<span class="string">b&quot;medi&quot;</span>);
-<span class="kw">pub const </span>MED2: RawTag = raw_tag(<span class="string">b&quot;med2&quot;</span>);
-<span class="kw">pub const </span>FINA: RawTag = raw_tag(<span class="string">b&quot;fina&quot;</span>);
-<span class="kw">pub const </span>FIN2: RawTag = raw_tag(<span class="string">b&quot;fin2&quot;</span>);
-<span class="kw">pub const </span>FIN3: RawTag = raw_tag(<span class="string">b&quot;fin3&quot;</span>);
-<span class="kw">pub const </span>MSET: RawTag = raw_tag(<span class="string">b&quot;mset&quot;</span>);
-<span class="kw">pub const </span>RPHF: RawTag = raw_tag(<span class="string">b&quot;rphf&quot;</span>);
-<span class="kw">pub const </span>PREF: RawTag = raw_tag(<span class="string">b&quot;pref&quot;</span>);
-<span class="kw">pub const </span>ABVF: RawTag = raw_tag(<span class="string">b&quot;abvf&quot;</span>);
-<span class="kw">pub const </span>BLWF: RawTag = raw_tag(<span class="string">b&quot;blwf&quot;</span>);
-<span class="kw">pub const </span>PSTF: RawTag = raw_tag(<span class="string">b&quot;pstf&quot;</span>);
-<span class="kw">pub const </span>PRES: RawTag = raw_tag(<span class="string">b&quot;pres&quot;</span>);
-<span class="kw">pub const </span>ABVS: RawTag = raw_tag(<span class="string">b&quot;abvs&quot;</span>);
-<span class="kw">pub const </span>BLWS: RawTag = raw_tag(<span class="string">b&quot;blws&quot;</span>);
-<span class="kw">pub const </span>PSTS: RawTag = raw_tag(<span class="string">b&quot;psts&quot;</span>);
-<span class="kw">pub const </span>RCLT: RawTag = raw_tag(<span class="string">b&quot;rclt&quot;</span>);
-<span class="kw">pub const </span>VERT: RawTag = raw_tag(<span class="string">b&quot;vert&quot;</span>);
-<span class="kw">pub const </span>VRT2: RawTag = raw_tag(<span class="string">b&quot;vrt2&quot;</span>);
-<span class="kw">pub const </span>RTLM: RawTag = raw_tag(<span class="string">b&quot;rtlm&quot;</span>);
+</span><span class="kw">pub const </span>CCMP: RawTag = raw_tag(<span class="string">b"ccmp"</span>);
+<span class="kw">pub const </span>LOCL: RawTag = raw_tag(<span class="string">b"locl"</span>);
+<span class="kw">pub const </span>RVRN: RawTag = raw_tag(<span class="string">b"rvrn"</span>);
+<span class="kw">pub const </span>LIGA: RawTag = raw_tag(<span class="string">b"liga"</span>);
+<span class="kw">pub const </span>CLIG: RawTag = raw_tag(<span class="string">b"clig"</span>);
+<span class="kw">pub const </span>RLIG: RawTag = raw_tag(<span class="string">b"rlig"</span>);
+<span class="kw">pub const </span>_DLIG: RawTag = raw_tag(<span class="string">b"dlig"</span>);
+<span class="kw">pub const </span>CALT: RawTag = raw_tag(<span class="string">b"calt"</span>);
+<span class="kw">pub const </span>LJMO: RawTag = raw_tag(<span class="string">b"ljmo"</span>);
+<span class="kw">pub const </span>VJMO: RawTag = raw_tag(<span class="string">b"vjmo"</span>);
+<span class="kw">pub const </span>TJMO: RawTag = raw_tag(<span class="string">b"tjmo"</span>);
+<span class="kw">pub const </span>NUKT: RawTag = raw_tag(<span class="string">b"nukt"</span>);
+<span class="kw">pub const </span>AKHN: RawTag = raw_tag(<span class="string">b"akhn"</span>);
+<span class="kw">pub const </span>RKRF: RawTag = raw_tag(<span class="string">b"rkrf"</span>);
+<span class="kw">pub const </span>HALF: RawTag = raw_tag(<span class="string">b"half"</span>);
+<span class="kw">pub const </span>HALN: RawTag = raw_tag(<span class="string">b"haln"</span>);
+<span class="kw">pub const </span>VATU: RawTag = raw_tag(<span class="string">b"vatu"</span>);
+<span class="kw">pub const </span>CJCT: RawTag = raw_tag(<span class="string">b"cjct"</span>);
+<span class="kw">pub const </span>ISOL: RawTag = raw_tag(<span class="string">b"isol"</span>);
+<span class="kw">pub const </span>INIT: RawTag = raw_tag(<span class="string">b"init"</span>);
+<span class="kw">pub const </span>MEDI: RawTag = raw_tag(<span class="string">b"medi"</span>);
+<span class="kw">pub const </span>MED2: RawTag = raw_tag(<span class="string">b"med2"</span>);
+<span class="kw">pub const </span>FINA: RawTag = raw_tag(<span class="string">b"fina"</span>);
+<span class="kw">pub const </span>FIN2: RawTag = raw_tag(<span class="string">b"fin2"</span>);
+<span class="kw">pub const </span>FIN3: RawTag = raw_tag(<span class="string">b"fin3"</span>);
+<span class="kw">pub const </span>MSET: RawTag = raw_tag(<span class="string">b"mset"</span>);
+<span class="kw">pub const </span>RPHF: RawTag = raw_tag(<span class="string">b"rphf"</span>);
+<span class="kw">pub const </span>PREF: RawTag = raw_tag(<span class="string">b"pref"</span>);
+<span class="kw">pub const </span>ABVF: RawTag = raw_tag(<span class="string">b"abvf"</span>);
+<span class="kw">pub const </span>BLWF: RawTag = raw_tag(<span class="string">b"blwf"</span>);
+<span class="kw">pub const </span>PSTF: RawTag = raw_tag(<span class="string">b"pstf"</span>);
+<span class="kw">pub const </span>PRES: RawTag = raw_tag(<span class="string">b"pres"</span>);
+<span class="kw">pub const </span>ABVS: RawTag = raw_tag(<span class="string">b"abvs"</span>);
+<span class="kw">pub const </span>BLWS: RawTag = raw_tag(<span class="string">b"blws"</span>);
+<span class="kw">pub const </span>PSTS: RawTag = raw_tag(<span class="string">b"psts"</span>);
+<span class="kw">pub const </span>RCLT: RawTag = raw_tag(<span class="string">b"rclt"</span>);
+<span class="kw">pub const </span>VERT: RawTag = raw_tag(<span class="string">b"vert"</span>);
+<span class="kw">pub const </span>VRT2: RawTag = raw_tag(<span class="string">b"vrt2"</span>);
+<span class="kw">pub const </span>RTLM: RawTag = raw_tag(<span class="string">b"rtlm"</span>);
 
 <span class="comment">// Positioning features.
-</span><span class="kw">pub const </span>KERN: RawTag = raw_tag(<span class="string">b&quot;kern&quot;</span>);
-<span class="kw">pub const </span>DIST: RawTag = raw_tag(<span class="string">b&quot;dist&quot;</span>);
-<span class="kw">pub const </span>ABVM: RawTag = raw_tag(<span class="string">b&quot;abvm&quot;</span>);
-<span class="kw">pub const </span>BLWM: RawTag = raw_tag(<span class="string">b&quot;blwm&quot;</span>);
-<span class="kw">pub const </span>CURS: RawTag = raw_tag(<span class="string">b&quot;curs&quot;</span>);
-<span class="kw">pub const </span>MARK: RawTag = raw_tag(<span class="string">b&quot;mark&quot;</span>);
-<span class="kw">pub const </span>MKMK: RawTag = raw_tag(<span class="string">b&quot;mkmk&quot;</span>);
+</span><span class="kw">pub const </span>KERN: RawTag = raw_tag(<span class="string">b"kern"</span>);
+<span class="kw">pub const </span>DIST: RawTag = raw_tag(<span class="string">b"dist"</span>);
+<span class="kw">pub const </span>ABVM: RawTag = raw_tag(<span class="string">b"abvm"</span>);
+<span class="kw">pub const </span>BLWM: RawTag = raw_tag(<span class="string">b"blwm"</span>);
+<span class="kw">pub const </span>CURS: RawTag = raw_tag(<span class="string">b"curs"</span>);
+<span class="kw">pub const </span>MARK: RawTag = raw_tag(<span class="string">b"mark"</span>);
+<span class="kw">pub const </span>MKMK: RawTag = raw_tag(<span class="string">b"mkmk"</span>);
 
 <span class="comment">// Arabic joining masks.
 </span><span class="kw">pub const </span>ISOL_MASK: u8 = <span class="number">1</span>;

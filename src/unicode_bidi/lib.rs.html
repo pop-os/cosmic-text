@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/unicode-bidi-0.3.15/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="unicode_bidi" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/unicode-bidi-0.3.15/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="unicode_bidi" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -2256,18 +2257,18 @@
 //! ## Example
 //!
 //! ```rust
-//! # #[cfg(feature = &quot;hardcoded-data&quot;)] {
+//! # #[cfg(feature = "hardcoded-data")] {
 //! use unicode_bidi::BidiInfo;
 //!
 //! // This example text is defined using `concat!` because some browsers
 //! // and text editors have trouble displaying bidi strings.
 //! let text = concat![
-//!   &quot;א&quot;,
-//!   &quot;ב&quot;,
-//!   &quot;ג&quot;,
-//!   &quot;a&quot;,
-//!   &quot;b&quot;,
-//!   &quot;c&quot;,
+//!   "א",
+//!   "ב",
+//!   "ג",
+//!   "a",
+//!   "b",
+//!   "c",
 //! ];
 //!
 //! // Resolve embedding levels within the text.  Pass `None` to detect the
@@ -2281,20 +2282,20 @@
 //! assert_eq!(para.level.is_rtl(), true);
 //!
 //! // Re-ordering is done after wrapping each paragraph into a sequence of
-//! // lines. For this example, I&#39;ll just use a single line that spans the
+//! // lines. For this example, I'll just use a single line that spans the
 //! // entire paragraph.
 //! let line = para.range.clone();
 //!
 //! let display = bidi_info.reorder_line(para, line);
 //! assert_eq!(display, concat![
-//!   &quot;a&quot;,
-//!   &quot;b&quot;,
-//!   &quot;c&quot;,
-//!   &quot;ג&quot;,
-//!   &quot;ב&quot;,
-//!   &quot;א&quot;,
+//!   "a",
+//!   "b",
+//!   "c",
+//!   "ג",
+//!   "ב",
+//!   "א",
 //! ]);
-//! # } // feature = &quot;hardcoded-data&quot;
+//! # } // feature = "hardcoded-data"
 //! ```
 //!
 //! # Features
@@ -2309,7 +2310,7 @@
 
 </span><span class="attr">#![no_std]
 </span><span class="comment">// We need to link to std to make doc tests work on older Rust versions
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">extern crate </span>std;
 <span class="attr">#[macro_use]
 </span><span class="kw">extern crate </span>alloc;
@@ -2330,7 +2331,7 @@
 <span class="kw">pub use </span><span class="kw">crate</span>::level::{Level, LTR_LEVEL, RTL_LEVEL};
 <span class="kw">pub use </span><span class="kw">crate</span>::prepare::LevelRun;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"hardcoded-data"</span>)]
 </span><span class="kw">pub use </span><span class="kw">crate</span>::char_data::{bidi_class, HardcodedBidiData};
 
 <span class="kw">use </span>alloc::borrow::Cow;
@@ -2349,7 +2350,7 @@
 /// We implement this for str (UTF-8) and for [u16] (UTF-16, native-endian).
 /// (For internal unicode-bidi use; API may be unstable.)
 /// This trait is sealed and cannot be implemented for types outside this crate.
-</span><span class="kw">pub trait </span>TextSource&lt;<span class="lifetime">&#39;text</span>&gt;: private::Sealed {
+</span><span class="kw">pub trait </span>TextSource&lt;<span class="lifetime">'text</span>&gt;: private::Sealed {
     <span class="kw">type </span>CharIter: Iterator&lt;Item = char&gt;;
     <span class="kw">type </span>CharIndexIter: Iterator&lt;Item = (usize, char)&gt;;
     <span class="kw">type </span>IndexLenIter: Iterator&lt;Item = (usize, usize)&gt;;
@@ -2365,26 +2366,26 @@
     </span><span class="kw">fn </span>char_at(<span class="kw-2">&amp;</span><span class="self">self</span>, index: usize) -&gt; <span class="prelude-ty">Option</span>&lt;(char, usize)&gt;;
 
     <span class="doccomment">/// Return a subrange of the text, indexed by code units.
-    /// (We don&#39;t implement all of the Index trait, just the minimum we use.)
+    /// (We don't implement all of the Index trait, just the minimum we use.)
     </span><span class="attr">#[doc(hidden)]
     </span><span class="kw">fn </span>subrange(<span class="kw-2">&amp;</span><span class="self">self</span>, range: Range&lt;usize&gt;) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>;
 
     <span class="doccomment">/// An iterator over the text returning Unicode characters,
     /// REPLACEMENT_CHAR for invalid code units.
     </span><span class="attr">#[doc(hidden)]
-    </span><span class="kw">fn </span>chars(<span class="kw-2">&amp;</span><span class="lifetime">&#39;text </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::CharIter;
+    </span><span class="kw">fn </span>chars(<span class="kw-2">&amp;</span><span class="lifetime">'text </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::CharIter;
 
     <span class="doccomment">/// An iterator over the text returning (index, char) tuples,
     /// where index is the starting code-unit index of the character,
     /// and char is its Unicode value (or REPLACEMENT_CHAR if invalid).
     </span><span class="attr">#[doc(hidden)]
-    </span><span class="kw">fn </span>char_indices(<span class="kw-2">&amp;</span><span class="lifetime">&#39;text </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::CharIndexIter;
+    </span><span class="kw">fn </span>char_indices(<span class="kw-2">&amp;</span><span class="lifetime">'text </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::CharIndexIter;
 
     <span class="doccomment">/// An iterator over the text returning (index, length) tuples,
     /// where index is the starting code-unit index of the character,
     /// and length is its length in code units.
     </span><span class="attr">#[doc(hidden)]
-    </span><span class="kw">fn </span>indices_lengths(<span class="kw-2">&amp;</span><span class="lifetime">&#39;text </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::IndexLenIter;
+    </span><span class="kw">fn </span>indices_lengths(<span class="kw-2">&amp;</span><span class="lifetime">'text </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::IndexLenIter;
 
     <span class="doccomment">/// Number of code units the given character uses.
     </span><span class="attr">#[doc(hidden)]
@@ -2431,9 +2432,9 @@
 ///
 /// Contains the text paragraphs and `BidiClass` of its characters.
 </span><span class="attr">#[derive(PartialEq, Debug)]
-</span><span class="kw">pub struct </span>InitialInfo&lt;<span class="lifetime">&#39;text</span>&gt; {
+</span><span class="kw">pub struct </span>InitialInfo&lt;<span class="lifetime">'text</span>&gt; {
     <span class="doccomment">/// The text
-    </span><span class="kw">pub </span>text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;text </span>str,
+    </span><span class="kw">pub </span>text: <span class="kw-2">&amp;</span><span class="lifetime">'text </span>str,
 
     <span class="doccomment">/// The BidiClass of the character at each byte in the text.
     /// If a character is multiple bytes, its class will appear multiple times in the vector.
@@ -2443,19 +2444,19 @@
     </span><span class="kw">pub </span>paragraphs: Vec&lt;ParagraphInfo&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;text</span>&gt; InitialInfo&lt;<span class="lifetime">&#39;text</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'text</span>&gt; InitialInfo&lt;<span class="lifetime">'text</span>&gt; {
     <span class="doccomment">/// Find the paragraphs and BidiClasses in a string of text.
     ///
     /// &lt;http://www.unicode.org/reports/tr9/#The_Paragraph_Level&gt;
     ///
     /// Also sets the class for each First Strong Isolate initiator (FSI) to LRI or RLI if a strong
     /// character is found before the matching PDI.  If no strong character is found, the class will
-    /// remain FSI, and it&#39;s up to later stages to treat these as LRI when needed.
+    /// remain FSI, and it's up to later stages to treat these as LRI when needed.
     ///
     /// The `hardcoded-data` Cargo feature (enabled by default) must be enabled to use this.
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
-    #[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
-    </span><span class="kw">pub fn </span>new(text: <span class="kw-2">&amp;</span>str, default_para_level: <span class="prelude-ty">Option</span>&lt;Level&gt;) -&gt; InitialInfo&lt;<span class="lifetime">&#39;_</span>&gt; {
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
+    #[cfg(feature = <span class="string">"hardcoded-data"</span>)]
+    </span><span class="kw">pub fn </span>new(text: <span class="kw-2">&amp;</span>str, default_para_level: <span class="prelude-ty">Option</span>&lt;Level&gt;) -&gt; InitialInfo&lt;<span class="lifetime">'_</span>&gt; {
         <span class="self">Self</span>::new_with_data_source(<span class="kw-2">&amp;</span>HardcodedBidiData, text, default_para_level)
     }
 
@@ -2467,30 +2468,30 @@
     ///
     /// Also sets the class for each First Strong Isolate initiator (FSI) to LRI or RLI if a strong
     /// character is found before the matching PDI.  If no strong character is found, the class will
-    /// remain FSI, and it&#39;s up to later stages to treat these as LRI when needed.
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
-    </span><span class="kw">pub fn </span>new_with_data_source&lt;<span class="lifetime">&#39;a</span>, D: BidiDataSource&gt;(
+    /// remain FSI, and it's up to later stages to treat these as LRI when needed.
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
+    </span><span class="kw">pub fn </span>new_with_data_source&lt;<span class="lifetime">'a</span>, D: BidiDataSource&gt;(
         data_source: <span class="kw-2">&amp;</span>D,
-        text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str,
+        text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str,
         default_para_level: <span class="prelude-ty">Option</span>&lt;Level&gt;,
-    ) -&gt; InitialInfo&lt;<span class="lifetime">&#39;a</span>&gt; {
+    ) -&gt; InitialInfo&lt;<span class="lifetime">'a</span>&gt; {
         InitialInfoExt::new_with_data_source(data_source, text, default_para_level).base
     }
 }
 
 <span class="doccomment">/// Extended version of InitialInfo (not public API).
 </span><span class="attr">#[derive(PartialEq, Debug)]
-</span><span class="kw">struct </span>InitialInfoExt&lt;<span class="lifetime">&#39;text</span>&gt; {
+</span><span class="kw">struct </span>InitialInfoExt&lt;<span class="lifetime">'text</span>&gt; {
     <span class="doccomment">/// The base InitialInfo for the text, recording its paragraphs and bidi classes.
-    </span>base: InitialInfo&lt;<span class="lifetime">&#39;text</span>&gt;,
+    </span>base: InitialInfo&lt;<span class="lifetime">'text</span>&gt;,
 
-    <span class="doccomment">/// Parallel to base.paragraphs, records whether each paragraph is &quot;pure LTR&quot; that
+    <span class="doccomment">/// Parallel to base.paragraphs, records whether each paragraph is "pure LTR" that
     /// requires no further bidi processing (i.e. there are no RTL characters or bidi
     /// control codes present).
     </span>pure_ltr: Vec&lt;bool&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;text</span>&gt; InitialInfoExt&lt;<span class="lifetime">&#39;text</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'text</span>&gt; InitialInfoExt&lt;<span class="lifetime">'text</span>&gt; {
     <span class="doccomment">/// Find the paragraphs and BidiClasses in a string of text, with a custom [`BidiDataSource`]
     /// for Bidi data. If you just wish to use the hardcoded Bidi data, please use [`InitialInfo::new()`]
     /// instead (enabled with tbe default `hardcoded-data` Cargo feature)
@@ -2499,13 +2500,13 @@
     ///
     /// Also sets the class for each First Strong Isolate initiator (FSI) to LRI or RLI if a strong
     /// character is found before the matching PDI.  If no strong character is found, the class will
-    /// remain FSI, and it&#39;s up to later stages to treat these as LRI when needed.
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
-    </span><span class="kw">pub fn </span>new_with_data_source&lt;<span class="lifetime">&#39;a</span>, D: BidiDataSource&gt;(
+    /// remain FSI, and it's up to later stages to treat these as LRI when needed.
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
+    </span><span class="kw">pub fn </span>new_with_data_source&lt;<span class="lifetime">'a</span>, D: BidiDataSource&gt;(
         data_source: <span class="kw-2">&amp;</span>D,
-        text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str,
+        text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str,
         default_para_level: <span class="prelude-ty">Option</span>&lt;Level&gt;,
-    ) -&gt; InitialInfoExt&lt;<span class="lifetime">&#39;a</span>&gt; {
+    ) -&gt; InitialInfoExt&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>paragraphs = Vec::&lt;ParagraphInfo&gt;::new();
         <span class="kw">let </span><span class="kw-2">mut </span>pure_ltr = Vec::&lt;bool&gt;::new();
         <span class="kw">let </span>(original_classes, <span class="kw">_</span>, <span class="kw">_</span>) = compute_initial_info(
@@ -2533,15 +2534,15 @@
 /// separator characters in the text, treating it just as a single paragraph.
 /// Returns the array of BidiClass values for each code unit of the text, along with
 /// the embedding level and pure-ltr flag for the *last* (or only) paragraph.
-</span><span class="kw">fn </span>compute_initial_info&lt;<span class="lifetime">&#39;a</span>, D: BidiDataSource, T: TextSource&lt;<span class="lifetime">&#39;a</span>&gt; + <span class="question-mark">?</span>Sized&gt;(
+</span><span class="kw">fn </span>compute_initial_info&lt;<span class="lifetime">'a</span>, D: BidiDataSource, T: TextSource&lt;<span class="lifetime">'a</span>&gt; + <span class="question-mark">?</span>Sized&gt;(
     data_source: <span class="kw-2">&amp;</span>D,
-    text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T,
+    text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T,
     default_para_level: <span class="prelude-ty">Option</span>&lt;Level&gt;,
     <span class="kw-2">mut </span>split_paragraphs: <span class="prelude-ty">Option</span>&lt;(<span class="kw-2">&amp;mut </span>Vec&lt;ParagraphInfo&gt;, <span class="kw-2">&amp;mut </span>Vec&lt;bool&gt;)&gt;,
 ) -&gt; (Vec&lt;BidiClass&gt;, Level, bool) {
     <span class="kw">let </span><span class="kw-2">mut </span>original_classes = Vec::with_capacity(text.len());
 
-    <span class="comment">// The stack contains the starting code unit index for each nested isolate we&#39;re inside.
+    <span class="comment">// The stack contains the starting code unit index for each nested isolate we're inside.
     </span><span class="kw">let </span><span class="kw-2">mut </span>isolate_stack = Vec::new();
 
     <span class="macro">debug_assert!</span>(
@@ -2559,20 +2560,20 @@
     // RTL characters or bidi control characters are encountered in the paragraph.
     </span><span class="kw">let </span><span class="kw-2">mut </span>is_pure_ltr = <span class="bool-val">true</span>;
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;flame_it&quot;</span>)]
-    </span>flame::start(<span class="string">&quot;compute_initial_info(): iter text.char_indices()&quot;</span>);
+    <span class="attr">#[cfg(feature = <span class="string">"flame_it"</span>)]
+    </span>flame::start(<span class="string">"compute_initial_info(): iter text.char_indices()"</span>);
 
     <span class="kw">for </span>(i, c) <span class="kw">in </span>text.char_indices() {
         <span class="kw">let </span>class = data_source.bidi_class(c);
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;flame_it&quot;</span>)]
-        </span>flame::start(<span class="string">&quot;original_classes.extend()&quot;</span>);
+        <span class="attr">#[cfg(feature = <span class="string">"flame_it"</span>)]
+        </span>flame::start(<span class="string">"original_classes.extend()"</span>);
 
         <span class="kw">let </span>len = T::char_len(c);
         original_classes.extend(repeat(class).take(len));
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;flame_it&quot;</span>)]
-        </span>flame::end(<span class="string">&quot;original_classes.extend()&quot;</span>);
+        <span class="attr">#[cfg(feature = <span class="string">"flame_it"</span>)]
+        </span>flame::end(<span class="string">"original_classes.extend()"</span>);
 
         <span class="kw">match </span>class {
             B =&gt; {
@@ -2652,8 +2653,8 @@
     }
     <span class="macro">debug_assert_eq!</span>(original_classes.len(), text.len());
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;flame_it&quot;</span>)]
-    </span>flame::end(<span class="string">&quot;compute_initial_info(): iter text.char_indices()&quot;</span>);
+    <span class="attr">#[cfg(feature = <span class="string">"flame_it"</span>)]
+    </span>flame::end(<span class="string">"compute_initial_info(): iter text.char_indices()"</span>);
 
     (
         original_classes,
@@ -2669,9 +2670,9 @@
 /// vectors.
 </span><span class="comment">// TODO: Impl `struct StringProperty&lt;T&gt; { values: Vec&lt;T&gt; }` and use instead of Vec&lt;T&gt;
 </span><span class="attr">#[derive(Debug, PartialEq)]
-</span><span class="kw">pub struct </span>BidiInfo&lt;<span class="lifetime">&#39;text</span>&gt; {
+</span><span class="kw">pub struct </span>BidiInfo&lt;<span class="lifetime">'text</span>&gt; {
     <span class="doccomment">/// The text
-    </span><span class="kw">pub </span>text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;text </span>str,
+    </span><span class="kw">pub </span>text: <span class="kw-2">&amp;</span><span class="lifetime">'text </span>str,
 
     <span class="doccomment">/// The BidiClass of the character at each byte in the text.
     </span><span class="kw">pub </span>original_classes: Vec&lt;BidiClass&gt;,
@@ -2682,11 +2683,11 @@
     <span class="doccomment">/// The boundaries and paragraph embedding level of each paragraph within the text.
     ///
     /// TODO: Use SmallVec or similar to avoid overhead when there are only one or two paragraphs?
-    /// Or just don&#39;t include the first paragraph, which always starts at 0?
+    /// Or just don't include the first paragraph, which always starts at 0?
     </span><span class="kw">pub </span>paragraphs: Vec&lt;ParagraphInfo&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;text</span>&gt; BidiInfo&lt;<span class="lifetime">&#39;text</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'text</span>&gt; BidiInfo&lt;<span class="lifetime">'text</span>&gt; {
     <span class="doccomment">/// Split the text into paragraphs and determine the bidi embedding levels for each paragraph.
     ///
     ///
@@ -2696,10 +2697,10 @@
     /// text that is entirely LTR.  See the `nsBidi` class from Gecko for comparison.
     ///
     /// TODO: Support auto-RTL base direction
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
-    #[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
+    #[cfg(feature = <span class="string">"hardcoded-data"</span>)]
     #[inline]
-    </span><span class="kw">pub fn </span>new(text: <span class="kw-2">&amp;</span>str, default_para_level: <span class="prelude-ty">Option</span>&lt;Level&gt;) -&gt; BidiInfo&lt;<span class="lifetime">&#39;_</span>&gt; {
+    </span><span class="kw">pub fn </span>new(text: <span class="kw-2">&amp;</span>str, default_para_level: <span class="prelude-ty">Option</span>&lt;Level&gt;) -&gt; BidiInfo&lt;<span class="lifetime">'_</span>&gt; {
         <span class="self">Self</span>::new_with_data_source(<span class="kw-2">&amp;</span>HardcodedBidiData, text, default_para_level)
     }
 
@@ -2711,12 +2712,12 @@
     /// text that is entirely LTR.  See the `nsBidi` class from Gecko for comparison.
     ///
     /// TODO: Support auto-RTL base direction
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
-    </span><span class="kw">pub fn </span>new_with_data_source&lt;<span class="lifetime">&#39;a</span>, D: BidiDataSource&gt;(
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
+    </span><span class="kw">pub fn </span>new_with_data_source&lt;<span class="lifetime">'a</span>, D: BidiDataSource&gt;(
         data_source: <span class="kw-2">&amp;</span>D,
-        text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str,
+        text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str,
         default_para_level: <span class="prelude-ty">Option</span>&lt;Level&gt;,
-    ) -&gt; BidiInfo&lt;<span class="lifetime">&#39;a</span>&gt; {
+    ) -&gt; BidiInfo&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">let </span>InitialInfoExt { base, pure_ltr, .. } =
             InitialInfoExt::new_with_data_source(data_source, text, default_para_level);
 
@@ -2759,7 +2760,7 @@
     ///
     /// [Rule L1]: https://www.unicode.org/reports/tr9/#L1
     /// [Rule L2]: https://www.unicode.org/reports/tr9/#L2
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
     </span><span class="kw">pub fn </span>reordered_levels(<span class="kw-2">&amp;</span><span class="self">self</span>, para: <span class="kw-2">&amp;</span>ParagraphInfo, line: Range&lt;usize&gt;) -&gt; Vec&lt;Level&gt; {
         <span class="macro">assert!</span>(line.start &lt;= <span class="self">self</span>.levels.len());
         <span class="macro">assert!</span>(line.end &lt;= <span class="self">self</span>.levels.len());
@@ -2791,7 +2792,7 @@
     ///
     /// [Rule L1]: https://www.unicode.org/reports/tr9/#L1
     /// [Rule L2]: https://www.unicode.org/reports/tr9/#L2
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
     </span><span class="kw">pub fn </span>reordered_levels_per_char(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         para: <span class="kw-2">&amp;</span>ParagraphInfo,
@@ -2807,8 +2808,8 @@
     ///
     /// [Rule L3]: https://www.unicode.org/reports/tr9/#L3
     /// [Rule L4]: https://www.unicode.org/reports/tr9/#L4
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
-    </span><span class="kw">pub fn </span>reorder_line(<span class="kw-2">&amp;</span><span class="self">self</span>, para: <span class="kw-2">&amp;</span>ParagraphInfo, line: Range&lt;usize&gt;) -&gt; Cow&lt;<span class="lifetime">&#39;text</span>, str&gt; {
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
+    </span><span class="kw">pub fn </span>reorder_line(<span class="kw-2">&amp;</span><span class="self">self</span>, para: <span class="kw-2">&amp;</span>ParagraphInfo, line: Range&lt;usize&gt;) -&gt; Cow&lt;<span class="lifetime">'text</span>, str&gt; {
         <span class="kw">if </span>!level::has_rtl(<span class="kw-2">&amp;</span><span class="self">self</span>.levels[line.clone()]) {
             <span class="kw">return </span><span class="self">self</span>.text[line].into();
         }
@@ -2851,7 +2852,7 @@
     /// assert_eq!(levels.len(), index_map.len());
     /// assert_eq!(index_map, [0, 1, 2, 6, 7, 5, 4, 3]);
     /// ```
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
     #[inline]
     </span><span class="kw">pub fn </span>reorder_visual(levels: <span class="kw-2">&amp;</span>[Level]) -&gt; Vec&lt;usize&gt; {
         reorder_visual(levels)
@@ -2881,7 +2882,7 @@
     /// [Rule L2]: https://www.unicode.org/reports/tr9/#L2
     /// [Rule L3]: https://www.unicode.org/reports/tr9/#L3
     /// [Rule L4]: https://www.unicode.org/reports/tr9/#L4
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
     #[inline]
     </span><span class="kw">pub fn </span>visual_runs(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
@@ -2907,9 +2908,9 @@
 /// character is multiple bytes wide, then its class and level will appear multiple times in these
 /// vectors.
 </span><span class="attr">#[derive(Debug, PartialEq)]
-</span><span class="kw">pub struct </span>ParagraphBidiInfo&lt;<span class="lifetime">&#39;text</span>&gt; {
+</span><span class="kw">pub struct </span>ParagraphBidiInfo&lt;<span class="lifetime">'text</span>&gt; {
     <span class="doccomment">/// The text
-    </span><span class="kw">pub </span>text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;text </span>str,
+    </span><span class="kw">pub </span>text: <span class="kw-2">&amp;</span><span class="lifetime">'text </span>str,
 
     <span class="doccomment">/// The BidiClass of the character at each byte in the text.
     </span><span class="kw">pub </span>original_classes: Vec&lt;BidiClass&gt;,
@@ -2924,7 +2925,7 @@
     </span><span class="kw">pub </span>is_pure_ltr: bool,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;text</span>&gt; ParagraphBidiInfo&lt;<span class="lifetime">&#39;text</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'text</span>&gt; ParagraphBidiInfo&lt;<span class="lifetime">'text</span>&gt; {
     <span class="doccomment">/// Determine the bidi embedding level.
     ///
     ///
@@ -2934,10 +2935,10 @@
     /// text that is entirely LTR.  See the `nsBidi` class from Gecko for comparison.
     ///
     /// TODO: Support auto-RTL base direction
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
-    #[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
+    #[cfg(feature = <span class="string">"hardcoded-data"</span>)]
     #[inline]
-    </span><span class="kw">pub fn </span>new(text: <span class="kw-2">&amp;</span>str, default_para_level: <span class="prelude-ty">Option</span>&lt;Level&gt;) -&gt; ParagraphBidiInfo&lt;<span class="lifetime">&#39;_</span>&gt; {
+    </span><span class="kw">pub fn </span>new(text: <span class="kw-2">&amp;</span>str, default_para_level: <span class="prelude-ty">Option</span>&lt;Level&gt;) -&gt; ParagraphBidiInfo&lt;<span class="lifetime">'_</span>&gt; {
         <span class="self">Self</span>::new_with_data_source(<span class="kw-2">&amp;</span>HardcodedBidiData, text, default_para_level)
     }
 
@@ -2947,14 +2948,14 @@
     ///
     /// (This is the single-paragraph equivalent of BidiInfo::new_with_data_source,
     /// and should be kept in sync with it.
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
-    </span><span class="kw">pub fn </span>new_with_data_source&lt;<span class="lifetime">&#39;a</span>, D: BidiDataSource&gt;(
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
+    </span><span class="kw">pub fn </span>new_with_data_source&lt;<span class="lifetime">'a</span>, D: BidiDataSource&gt;(
         data_source: <span class="kw-2">&amp;</span>D,
-        text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str,
+        text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str,
         default_para_level: <span class="prelude-ty">Option</span>&lt;Level&gt;,
-    ) -&gt; ParagraphBidiInfo&lt;<span class="lifetime">&#39;a</span>&gt; {
+    ) -&gt; ParagraphBidiInfo&lt;<span class="lifetime">'a</span>&gt; {
         <span class="comment">// Here we could create a ParagraphInitialInfo struct to parallel the one
-        // used by BidiInfo, but there doesn&#39;t seem any compelling reason for it.
+        // used by BidiInfo, but there doesn't seem any compelling reason for it.
         </span><span class="kw">let </span>(original_classes, paragraph_level, is_pure_ltr) =
             compute_initial_info(data_source, text, default_para_level, <span class="prelude-val">None</span>);
 
@@ -2995,7 +2996,7 @@
     /// See BidiInfo::reordered_levels for details.
     ///
     /// (This should be kept in sync with BidiInfo::reordered_levels.)
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
     </span><span class="kw">pub fn </span>reordered_levels(<span class="kw-2">&amp;</span><span class="self">self</span>, line: Range&lt;usize&gt;) -&gt; Vec&lt;Level&gt; {
         <span class="macro">assert!</span>(line.start &lt;= <span class="self">self</span>.levels.len());
         <span class="macro">assert!</span>(line.end &lt;= <span class="self">self</span>.levels.len());
@@ -3021,7 +3022,7 @@
     /// See BidiInfo::reordered_levels_per_char for details.
     ///
     /// (This should be kept in sync with BidiInfo::reordered_levels_per_char.)
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
     </span><span class="kw">pub fn </span>reordered_levels_per_char(<span class="kw-2">&amp;</span><span class="self">self</span>, line: Range&lt;usize&gt;) -&gt; Vec&lt;Level&gt; {
         <span class="kw">let </span>levels = <span class="self">self</span>.reordered_levels(line);
         <span class="self">self</span>.text.char_indices().map(|(i, <span class="kw">_</span>)| levels[i]).collect()
@@ -3032,8 +3033,8 @@
     /// See BidiInfo::reorder_line for details.
     ///
     /// (This should be kept in sync with BidiInfo::reorder_line.)
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
-    </span><span class="kw">pub fn </span>reorder_line(<span class="kw-2">&amp;</span><span class="self">self</span>, line: Range&lt;usize&gt;) -&gt; Cow&lt;<span class="lifetime">&#39;text</span>, str&gt; {
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
+    </span><span class="kw">pub fn </span>reorder_line(<span class="kw-2">&amp;</span><span class="self">self</span>, line: Range&lt;usize&gt;) -&gt; Cow&lt;<span class="lifetime">'text</span>, str&gt; {
         <span class="kw">if </span>!level::has_rtl(<span class="kw-2">&amp;</span><span class="self">self</span>.levels[line.clone()]) {
             <span class="kw">return </span><span class="self">self</span>.text[line].into();
         }
@@ -3046,7 +3047,7 @@
     <span class="doccomment">/// Reorders pre-calculated levels of a sequence of characters.
     ///
     /// See BidiInfo::reorder_visual for details.
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
     #[inline]
     </span><span class="kw">pub fn </span>reorder_visual(levels: <span class="kw-2">&amp;</span>[Level]) -&gt; Vec&lt;usize&gt; {
         reorder_visual(levels)
@@ -3059,7 +3060,7 @@
     /// See BidiInfo::visual_runs for details.
     ///
     /// (This should be kept in sync with BidiInfo::visual_runs.)
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
     #[inline]
     </span><span class="kw">pub fn </span>visual_runs(<span class="kw-2">&amp;</span><span class="self">self</span>, line: Range&lt;usize&gt;) -&gt; (Vec&lt;Level&gt;, Vec&lt;LevelRun&gt;) {
         <span class="kw">let </span>levels = <span class="self">self</span>.reordered_levels(line.clone());
@@ -3074,7 +3075,7 @@
         !<span class="self">self</span>.is_pure_ltr
     }
 
-    <span class="doccomment">/// Return the paragraph&#39;s Direction (Ltr, Rtl, or Mixed) based on its levels.
+    <span class="doccomment">/// Return the paragraph's Direction (Ltr, Rtl, or Mixed) based on its levels.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>direction(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Direction {
         para_direction(<span class="kw-2">&amp;</span><span class="self">self</span>.levels)
@@ -3085,7 +3086,7 @@
 ///
 /// `text`   the full text passed to the `BidiInfo` or `ParagraphBidiInfo` for analysis
 /// `line`   a range of byte indices within `text` corresponding to one line
-/// `levels` array of `Level` values, with `line`&#39;s levels reordered into visual order
+/// `levels` array of `Level` values, with `line`'s levels reordered into visual order
 /// `runs`   array of `LevelRun`s in visual order
 ///
 /// (`levels` and `runs` are the result of calling `BidiInfo::visual_runs()` or
@@ -3097,12 +3098,12 @@
 ///
 /// [Rule L3]: https://www.unicode.org/reports/tr9/#L3
 /// [Rule L4]: https://www.unicode.org/reports/tr9/#L4
-</span><span class="kw">fn </span>reorder_line&lt;<span class="lifetime">&#39;text</span>&gt;(
-    text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;text </span>str,
+</span><span class="kw">fn </span>reorder_line&lt;<span class="lifetime">'text</span>&gt;(
+    text: <span class="kw-2">&amp;</span><span class="lifetime">'text </span>str,
     line: Range&lt;usize&gt;,
     levels: Vec&lt;Level&gt;,
     runs: Vec&lt;LevelRun&gt;,
-) -&gt; Cow&lt;<span class="lifetime">&#39;text</span>, str&gt; {
+) -&gt; Cow&lt;<span class="lifetime">'text</span>, str&gt; {
     <span class="comment">// If all isolating run sequences are LTR, no reordering is needed
     </span><span class="kw">if </span>runs.iter().all(|run| levels[run.start].is_ltr()) {
         <span class="kw">return </span>text[line].into();
@@ -3169,7 +3170,7 @@
     // &lt;http://www.unicode.org/reports/tr9/#L2&gt;
 
     // Stop at the lowest *odd* level.
-    </span>min_level = min_level.new_lowest_ge_rtl().expect(<span class="string">&quot;Level error&quot;</span>);
+    </span>min_level = min_level.new_lowest_ge_rtl().expect(<span class="string">"Level error"</span>);
     <span class="comment">// This loop goes through contiguous chunks of level runs that have a level
     // ≥ max_level and reverses their contents, reducing max_level by 1 each time.
     </span><span class="kw">while </span>max_level &gt;= min_level {
@@ -3196,7 +3197,7 @@
         }
         max_level
             .lower(<span class="number">1</span>)
-            .expect(<span class="string">&quot;Lowering embedding level below zero&quot;</span>);
+            .expect(<span class="string">"Lowering embedding level below zero"</span>);
     }
     (levels, runs)
 }
@@ -3270,7 +3271,7 @@
 
     <span class="comment">// Stop at the lowest *odd* level, since everything below that
     // is LTR and does not need further reordering
-    </span>min = min.new_lowest_ge_rtl().expect(<span class="string">&quot;Level error&quot;</span>);
+    </span>min = min.new_lowest_ge_rtl().expect(<span class="string">"Level error"</span>);
 
     <span class="comment">// For each max level, take all contiguous chunks of
     // levels ≥ max and reverse them
@@ -3289,7 +3290,7 @@
             }
         }
 
-        max.lower(<span class="number">1</span>).expect(<span class="string">&quot;Level error&quot;</span>);
+        max.lower(<span class="number">1</span>).expect(<span class="string">"Level error"</span>);
     }
 
     result
@@ -3297,11 +3298,11 @@
 
 <span class="doccomment">/// The core of BidiInfo initialization, factored out into a function that both
 /// the utf-8 and utf-16 versions of BidiInfo can use.
-</span><span class="kw">fn </span>compute_bidi_info_for_para&lt;<span class="lifetime">&#39;a</span>, D: BidiDataSource, T: TextSource&lt;<span class="lifetime">&#39;a</span>&gt; + <span class="question-mark">?</span>Sized&gt;(
+</span><span class="kw">fn </span>compute_bidi_info_for_para&lt;<span class="lifetime">'a</span>, D: BidiDataSource, T: TextSource&lt;<span class="lifetime">'a</span>&gt; + <span class="question-mark">?</span>Sized&gt;(
     data_source: <span class="kw-2">&amp;</span>D,
     para: <span class="kw-2">&amp;</span>ParagraphInfo,
     is_pure_ltr: bool,
-    text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T,
+    text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T,
     original_classes: <span class="kw-2">&amp;</span>[BidiClass],
     processing_classes: <span class="kw-2">&amp;mut </span>[BidiClass],
     levels: <span class="kw-2">&amp;mut </span>Vec&lt;Level&gt;,
@@ -3347,10 +3348,10 @@
 /// This runs [Rule L1]
 ///
 /// [Rule L1]: https://www.unicode.org/reports/tr9/#L1
-</span><span class="kw">fn </span>reorder_levels&lt;<span class="lifetime">&#39;a</span>, T: TextSource&lt;<span class="lifetime">&#39;a</span>&gt; + <span class="question-mark">?</span>Sized&gt;(
+</span><span class="kw">fn </span>reorder_levels&lt;<span class="lifetime">'a</span>, T: TextSource&lt;<span class="lifetime">'a</span>&gt; + <span class="question-mark">?</span>Sized&gt;(
     line_classes: <span class="kw-2">&amp;</span>[BidiClass],
     line_levels: <span class="kw-2">&amp;mut </span>[Level],
-    line_text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T,
+    line_text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T,
     para_level: Level,
 ) {
     <span class="comment">// Reset some whitespace chars to paragraph level.
@@ -3407,14 +3408,14 @@
 /// And it supports all operation in the `Paragraph` that needs also its
 /// `BidiInfo` such as `direction`.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>Paragraph&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;text</span>&gt; {
-    <span class="kw">pub </span>info: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BidiInfo&lt;<span class="lifetime">&#39;text</span>&gt;,
-    <span class="kw">pub </span>para: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ParagraphInfo,
+</span><span class="kw">pub struct </span>Paragraph&lt;<span class="lifetime">'a</span>, <span class="lifetime">'text</span>&gt; {
+    <span class="kw">pub </span>info: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>BidiInfo&lt;<span class="lifetime">'text</span>&gt;,
+    <span class="kw">pub </span>para: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>ParagraphInfo,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;text</span>&gt; Paragraph&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;text</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="lifetime">'text</span>&gt; Paragraph&lt;<span class="lifetime">'a</span>, <span class="lifetime">'text</span>&gt; {
     <span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>new(info: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BidiInfo&lt;<span class="lifetime">&#39;text</span>&gt;, para: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ParagraphInfo) -&gt; Paragraph&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;text</span>&gt; {
+    </span><span class="kw">pub fn </span>new(info: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>BidiInfo&lt;<span class="lifetime">'text</span>&gt;, para: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>ParagraphInfo) -&gt; Paragraph&lt;<span class="lifetime">'a</span>, <span class="lifetime">'text</span>&gt; {
         Paragraph { info, para }
     }
 
@@ -3433,7 +3434,7 @@
 }
 
 <span class="doccomment">/// Return the directionality of the paragraph (Left, Right or Mixed) from its levels.
-</span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
+</span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
 </span><span class="kw">fn </span>para_direction(levels: <span class="kw-2">&amp;</span>[Level]) -&gt; Direction {
     <span class="kw">let </span><span class="kw-2">mut </span>ltr = <span class="bool-val">false</span>;
     <span class="kw">let </span><span class="kw-2">mut </span>rtl = <span class="bool-val">false</span>;
@@ -3464,7 +3465,7 @@
 ///
 /// The levels assigned to these characters are not specified by the algorithm.  This function
 /// assigns each one the level of the previous character, to avoid breaking level runs.
-</span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;flame_it&quot;</span>, flamer::flame)]
+</span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
 </span><span class="kw">fn </span>assign_levels_to_removed_chars(para_level: Level, classes: <span class="kw-2">&amp;</span>[BidiClass], levels: <span class="kw-2">&amp;mut </span>[Level]) {
     <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..levels.len() {
         <span class="kw">if </span>prepare::removed_by_x9(classes[i]) {
@@ -3482,16 +3483,16 @@
 /// such character has type R or AL, Direction::Rtl is returned.
 ///
 /// If the string does not contain any character of these types (outside of embedded isolate runs),
-/// then Direction::Mixed is returned (but should be considered as meaning &quot;neutral&quot; or &quot;unknown&quot;,
+/// then Direction::Mixed is returned (but should be considered as meaning "neutral" or "unknown",
 /// not in fact mixed directions).
 ///
 /// This is a lightweight function for use when only the base direction is needed and no further
 /// bidi processing of the text is needed.
 ///
 /// If the text contains paragraph separators, this function considers only the first paragraph.
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"hardcoded-data"</span>)]
 #[inline]
-</span><span class="kw">pub fn </span>get_base_direction&lt;<span class="lifetime">&#39;a</span>, T: TextSource&lt;<span class="lifetime">&#39;a</span>&gt; + <span class="question-mark">?</span>Sized&gt;(text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T) -&gt; Direction {
+</span><span class="kw">pub fn </span>get_base_direction&lt;<span class="lifetime">'a</span>, T: TextSource&lt;<span class="lifetime">'a</span>&gt; + <span class="question-mark">?</span>Sized&gt;(text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T) -&gt; Direction {
     get_base_direction_with_data_source(<span class="kw-2">&amp;</span>HardcodedBidiData, text)
 }
 
@@ -3502,35 +3503,35 @@
 /// separator, but just resets the embedding level and continues to look for a strongly-
 /// directional character. So the result will be the base direction of the first paragraph
 /// that is not purely neutral characters.
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"hardcoded-data"</span>)]
 #[inline]
-</span><span class="kw">pub fn </span>get_base_direction_full&lt;<span class="lifetime">&#39;a</span>, T: TextSource&lt;<span class="lifetime">&#39;a</span>&gt; + <span class="question-mark">?</span>Sized&gt;(text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T) -&gt; Direction {
+</span><span class="kw">pub fn </span>get_base_direction_full&lt;<span class="lifetime">'a</span>, T: TextSource&lt;<span class="lifetime">'a</span>&gt; + <span class="question-mark">?</span>Sized&gt;(text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T) -&gt; Direction {
     get_base_direction_full_with_data_source(<span class="kw-2">&amp;</span>HardcodedBidiData, text)
 }
 
 <span class="attr">#[inline]
-</span><span class="kw">pub fn </span>get_base_direction_with_data_source&lt;<span class="lifetime">&#39;a</span>, D: BidiDataSource, T: TextSource&lt;<span class="lifetime">&#39;a</span>&gt; + <span class="question-mark">?</span>Sized&gt;(
+</span><span class="kw">pub fn </span>get_base_direction_with_data_source&lt;<span class="lifetime">'a</span>, D: BidiDataSource, T: TextSource&lt;<span class="lifetime">'a</span>&gt; + <span class="question-mark">?</span>Sized&gt;(
     data_source: <span class="kw-2">&amp;</span>D,
-    text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T,
+    text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T,
 ) -&gt; Direction {
     get_base_direction_impl(data_source, text, <span class="bool-val">false</span>)
 }
 
 <span class="attr">#[inline]
 </span><span class="kw">pub fn </span>get_base_direction_full_with_data_source&lt;
-    <span class="lifetime">&#39;a</span>,
+    <span class="lifetime">'a</span>,
     D: BidiDataSource,
-    T: TextSource&lt;<span class="lifetime">&#39;a</span>&gt; + <span class="question-mark">?</span>Sized,
+    T: TextSource&lt;<span class="lifetime">'a</span>&gt; + <span class="question-mark">?</span>Sized,
 &gt;(
     data_source: <span class="kw-2">&amp;</span>D,
-    text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T,
+    text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T,
 ) -&gt; Direction {
     get_base_direction_impl(data_source, text, <span class="bool-val">true</span>)
 }
 
-<span class="kw">fn </span>get_base_direction_impl&lt;<span class="lifetime">&#39;a</span>, D: BidiDataSource, T: TextSource&lt;<span class="lifetime">&#39;a</span>&gt; + <span class="question-mark">?</span>Sized&gt;(
+<span class="kw">fn </span>get_base_direction_impl&lt;<span class="lifetime">'a</span>, D: BidiDataSource, T: TextSource&lt;<span class="lifetime">'a</span>&gt; + <span class="question-mark">?</span>Sized&gt;(
     data_source: <span class="kw-2">&amp;</span>D,
-    text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T,
+    text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T,
     use_full_text: bool,
 ) -&gt; Direction {
     <span class="kw">let </span><span class="kw-2">mut </span>isolate_level = <span class="number">0</span>;
@@ -3546,16 +3547,16 @@
         }
     }
     <span class="comment">// If no strong char was found, return Mixed. Normally this will be treated as Ltr by callers
-    // (see rule P3), but we don&#39;t map this to Ltr here so that a caller that wants to apply other
+    // (see rule P3), but we don't map this to Ltr here so that a caller that wants to apply other
     // heuristics to an all-neutral paragraph can tell the difference.
     </span>Direction::Mixed
 }
 
 <span class="doccomment">/// Implementation of TextSource for UTF-8 text (a string slice).
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;text</span>&gt; TextSource&lt;<span class="lifetime">&#39;text</span>&gt; <span class="kw">for </span>str {
-    <span class="kw">type </span>CharIter = core::str::Chars&lt;<span class="lifetime">&#39;text</span>&gt;;
-    <span class="kw">type </span>CharIndexIter = core::str::CharIndices&lt;<span class="lifetime">&#39;text</span>&gt;;
-    <span class="kw">type </span>IndexLenIter = Utf8IndexLenIter&lt;<span class="lifetime">&#39;text</span>&gt;;
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'text</span>&gt; TextSource&lt;<span class="lifetime">'text</span>&gt; <span class="kw">for </span>str {
+    <span class="kw">type </span>CharIter = core::str::Chars&lt;<span class="lifetime">'text</span>&gt;;
+    <span class="kw">type </span>CharIndexIter = core::str::CharIndices&lt;<span class="lifetime">'text</span>&gt;;
+    <span class="kw">type </span>IndexLenIter = Utf8IndexLenIter&lt;<span class="lifetime">'text</span>&gt;;
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
@@ -3575,15 +3576,15 @@
         <span class="kw-2">&amp;</span>(<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span>str)[range]
     }
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>chars(<span class="kw-2">&amp;</span><span class="lifetime">&#39;text </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::CharIter {
+    </span><span class="kw">fn </span>chars(<span class="kw-2">&amp;</span><span class="lifetime">'text </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::CharIter {
         (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span>str).chars()
     }
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>char_indices(<span class="kw-2">&amp;</span><span class="lifetime">&#39;text </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::CharIndexIter {
+    </span><span class="kw">fn </span>char_indices(<span class="kw-2">&amp;</span><span class="lifetime">'text </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::CharIndexIter {
         (<span class="self">self </span><span class="kw">as </span><span class="kw-2">&amp;</span>str).char_indices()
     }
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>indices_lengths(<span class="kw-2">&amp;</span><span class="lifetime">&#39;text </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::IndexLenIter {
+    </span><span class="kw">fn </span>indices_lengths(<span class="kw-2">&amp;</span><span class="lifetime">'text </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::IndexLenIter {
         Utf8IndexLenIter::new(<span class="kw-2">&amp;</span><span class="self">self</span>)
     }
     <span class="attr">#[inline]
@@ -3594,20 +3595,20 @@
 
 <span class="doccomment">/// Iterator over (UTF-8) string slices returning (index, char_len) tuple.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>Utf8IndexLenIter&lt;<span class="lifetime">&#39;text</span>&gt; {
-    iter: CharIndices&lt;<span class="lifetime">&#39;text</span>&gt;,
+</span><span class="kw">pub struct </span>Utf8IndexLenIter&lt;<span class="lifetime">'text</span>&gt; {
+    iter: CharIndices&lt;<span class="lifetime">'text</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;text</span>&gt; Utf8IndexLenIter&lt;<span class="lifetime">&#39;text</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'text</span>&gt; Utf8IndexLenIter&lt;<span class="lifetime">'text</span>&gt; {
     <span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>new(text: <span class="kw-2">&amp;</span><span class="lifetime">&#39;text </span>str) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(text: <span class="kw-2">&amp;</span><span class="lifetime">'text </span>str) -&gt; <span class="self">Self </span>{
         Utf8IndexLenIter {
             iter: text.char_indices(),
         }
     }
 }
 
-<span class="kw">impl </span>Iterator <span class="kw">for </span>Utf8IndexLenIter&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Iterator <span class="kw">for </span>Utf8IndexLenIter&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">type </span>Item = (usize, usize);
 
     <span class="attr">#[inline]
@@ -3625,7 +3626,7 @@
 }
 
 <span class="attr">#[cfg(test)]
-#[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
+#[cfg(feature = <span class="string">"hardcoded-data"</span>)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
@@ -3638,14 +3639,14 @@
     </span><span class="kw">fn </span>test_utf16_text_source() {
         <span class="kw">let </span>text: <span class="kw-2">&amp;</span>[u16] =
             <span class="kw-2">&amp;</span>[<span class="number">0x41</span>, <span class="number">0xD801</span>, <span class="number">0xDC01</span>, <span class="number">0x20</span>, <span class="number">0xD800</span>, <span class="number">0x20</span>, <span class="number">0xDFFF</span>, <span class="number">0x20</span>, <span class="number">0xDC00</span>, <span class="number">0xD800</span>];
-        <span class="macro">assert_eq!</span>(text.char_at(<span class="number">0</span>), <span class="prelude-val">Some</span>((<span class="string">&#39;A&#39;</span>, <span class="number">1</span>)));
-        <span class="macro">assert_eq!</span>(text.char_at(<span class="number">1</span>), <span class="prelude-val">Some</span>((<span class="string">&#39;\u{10401}&#39;</span>, <span class="number">2</span>)));
+        <span class="macro">assert_eq!</span>(text.char_at(<span class="number">0</span>), <span class="prelude-val">Some</span>((<span class="string">'A'</span>, <span class="number">1</span>)));
+        <span class="macro">assert_eq!</span>(text.char_at(<span class="number">1</span>), <span class="prelude-val">Some</span>((<span class="string">'\u{10401}'</span>, <span class="number">2</span>)));
         <span class="macro">assert_eq!</span>(text.char_at(<span class="number">2</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(text.char_at(<span class="number">3</span>), <span class="prelude-val">Some</span>((<span class="string">&#39; &#39;</span>, <span class="number">1</span>)));
+        <span class="macro">assert_eq!</span>(text.char_at(<span class="number">3</span>), <span class="prelude-val">Some</span>((<span class="string">' '</span>, <span class="number">1</span>)));
         <span class="macro">assert_eq!</span>(text.char_at(<span class="number">4</span>), <span class="prelude-val">Some</span>((char::REPLACEMENT_CHARACTER, <span class="number">1</span>)));
-        <span class="macro">assert_eq!</span>(text.char_at(<span class="number">5</span>), <span class="prelude-val">Some</span>((<span class="string">&#39; &#39;</span>, <span class="number">1</span>)));
+        <span class="macro">assert_eq!</span>(text.char_at(<span class="number">5</span>), <span class="prelude-val">Some</span>((<span class="string">' '</span>, <span class="number">1</span>)));
         <span class="macro">assert_eq!</span>(text.char_at(<span class="number">6</span>), <span class="prelude-val">Some</span>((char::REPLACEMENT_CHARACTER, <span class="number">1</span>)));
-        <span class="macro">assert_eq!</span>(text.char_at(<span class="number">7</span>), <span class="prelude-val">Some</span>((<span class="string">&#39; &#39;</span>, <span class="number">1</span>)));
+        <span class="macro">assert_eq!</span>(text.char_at(<span class="number">7</span>), <span class="prelude-val">Some</span>((<span class="string">' '</span>, <span class="number">1</span>)));
         <span class="macro">assert_eq!</span>(text.char_at(<span class="number">8</span>), <span class="prelude-val">Some</span>((char::REPLACEMENT_CHARACTER, <span class="number">1</span>)));
         <span class="macro">assert_eq!</span>(text.char_at(<span class="number">9</span>), <span class="prelude-val">Some</span>((char::REPLACEMENT_CHARACTER, <span class="number">1</span>)));
         <span class="macro">assert_eq!</span>(text.char_at(<span class="number">10</span>), <span class="prelude-val">None</span>);
@@ -3658,15 +3659,15 @@
         <span class="macro">assert_eq!</span>(text.len(), <span class="number">10</span>);
         <span class="macro">assert_eq!</span>(text.chars().count(), <span class="number">9</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>chars = text.chars();
-        <span class="macro">assert_eq!</span>(chars.next(), <span class="prelude-val">Some</span>(<span class="string">&#39;A&#39;</span>));
-        <span class="macro">assert_eq!</span>(chars.next(), <span class="prelude-val">Some</span>(<span class="string">&#39;\u{10401}&#39;</span>));
-        <span class="macro">assert_eq!</span>(chars.next(), <span class="prelude-val">Some</span>(<span class="string">&#39; &#39;</span>));
-        <span class="macro">assert_eq!</span>(chars.next(), <span class="prelude-val">Some</span>(<span class="string">&#39;\u{FFFD}&#39;</span>));
-        <span class="macro">assert_eq!</span>(chars.next(), <span class="prelude-val">Some</span>(<span class="string">&#39; &#39;</span>));
-        <span class="macro">assert_eq!</span>(chars.next(), <span class="prelude-val">Some</span>(<span class="string">&#39;\u{FFFD}&#39;</span>));
-        <span class="macro">assert_eq!</span>(chars.next(), <span class="prelude-val">Some</span>(<span class="string">&#39; &#39;</span>));
-        <span class="macro">assert_eq!</span>(chars.next(), <span class="prelude-val">Some</span>(<span class="string">&#39;\u{FFFD}&#39;</span>));
-        <span class="macro">assert_eq!</span>(chars.next(), <span class="prelude-val">Some</span>(<span class="string">&#39;\u{FFFD}&#39;</span>));
+        <span class="macro">assert_eq!</span>(chars.next(), <span class="prelude-val">Some</span>(<span class="string">'A'</span>));
+        <span class="macro">assert_eq!</span>(chars.next(), <span class="prelude-val">Some</span>(<span class="string">'\u{10401}'</span>));
+        <span class="macro">assert_eq!</span>(chars.next(), <span class="prelude-val">Some</span>(<span class="string">' '</span>));
+        <span class="macro">assert_eq!</span>(chars.next(), <span class="prelude-val">Some</span>(<span class="string">'\u{FFFD}'</span>));
+        <span class="macro">assert_eq!</span>(chars.next(), <span class="prelude-val">Some</span>(<span class="string">' '</span>));
+        <span class="macro">assert_eq!</span>(chars.next(), <span class="prelude-val">Some</span>(<span class="string">'\u{FFFD}'</span>));
+        <span class="macro">assert_eq!</span>(chars.next(), <span class="prelude-val">Some</span>(<span class="string">' '</span>));
+        <span class="macro">assert_eq!</span>(chars.next(), <span class="prelude-val">Some</span>(<span class="string">'\u{FFFD}'</span>));
+        <span class="macro">assert_eq!</span>(chars.next(), <span class="prelude-val">Some</span>(<span class="string">'\u{FFFD}'</span>));
         <span class="macro">assert_eq!</span>(chars.next(), <span class="prelude-val">None</span>);
     }
 
@@ -3675,7 +3676,7 @@
         <span class="kw">let </span>tests = <span class="macro">vec!</span>[
             (
                 <span class="comment">// text
-                </span><span class="string">&quot;a1&quot;</span>,
+                </span><span class="string">"a1"</span>,
                 <span class="comment">// expected bidi classes per utf-8 byte
                 </span><span class="macro">vec!</span>[L, EN],
                 <span class="comment">// expected paragraph-info for utf-8
@@ -3693,7 +3694,7 @@
             ),
             (
                 <span class="comment">// Arabic, space, Hebrew
-                </span><span class="string">&quot;\u{0639} \u{05D0}&quot;</span>,
+                </span><span class="string">"\u{0639} \u{05D0}"</span>,
                 <span class="macro">vec!</span>[AL, AL, WS, R, R],
                 <span class="macro">vec!</span>[ParagraphInfo {
                     range: <span class="number">0</span>..<span class="number">5</span>,
@@ -3707,7 +3708,7 @@
             ),
             (
                 <span class="comment">// SMP characters from Kharoshthi, Cuneiform, Adlam:
-                </span><span class="string">&quot;\u{10A00}\u{12000}\u{1E900}&quot;</span>,
+                </span><span class="string">"\u{10A00}\u{12000}\u{1E900}"</span>,
                 <span class="macro">vec!</span>[R, R, R, R, L, L, L, L, R, R, R, R],
                 <span class="macro">vec!</span>[ParagraphInfo {
                     range: <span class="number">0</span>..<span class="number">12</span>,
@@ -3720,7 +3721,7 @@
                 }],
             ),
             (
-                <span class="string">&quot;a\u{2029}b&quot;</span>,
+                <span class="string">"a\u{2029}b"</span>,
                 <span class="macro">vec!</span>[L, B, B, B, L],
                 <span class="macro">vec!</span>[
                     ParagraphInfo {
@@ -3745,7 +3746,7 @@
                 ],
             ),
             (
-                <span class="string">&quot;\u{2068}א\u{2069}a&quot;</span>, <span class="comment">// U+2068 FSI, U+2069 PDI
+                <span class="string">"\u{2068}א\u{2069}a"</span>, <span class="comment">// U+2068 FSI, U+2069 PDI
                 </span><span class="macro">vec!</span>[RLI, RLI, RLI, R, R, PDI, PDI, PDI, L],
                 <span class="macro">vec!</span>[ParagraphInfo {
                     range: <span class="number">0</span>..<span class="number">9</span>,
@@ -3781,12 +3782,12 @@
     }
 
     <span class="attr">#[test]
-    #[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
+    #[cfg(feature = <span class="string">"hardcoded-data"</span>)]
     </span><span class="kw">fn </span>test_process_text() {
         <span class="kw">let </span>tests = <span class="macro">vec!</span>[
             (
                 <span class="comment">// text
-                </span><span class="string">&quot;abc123&quot;</span>,
+                </span><span class="string">"abc123"</span>,
                 <span class="comment">// base level
                 </span><span class="prelude-val">Some</span>(LTR_LEVEL),
                 <span class="comment">// levels
@@ -3809,7 +3810,7 @@
                 }],
             ),
             (
-                <span class="string">&quot;abc \u{05D0}\u{05D1}\u{05D2}&quot;</span>,
+                <span class="string">"abc \u{05D0}\u{05D1}\u{05D2}"</span>,
                 <span class="prelude-val">Some</span>(LTR_LEVEL),
                 Level::vec(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>]),
                 <span class="macro">vec!</span>[L, L, L, WS, R, R, R, R, R, R],
@@ -3825,7 +3826,7 @@
                 }],
             ),
             (
-                <span class="string">&quot;abc \u{05D0}\u{05D1}\u{05D2}&quot;</span>,
+                <span class="string">"abc \u{05D0}\u{05D1}\u{05D2}"</span>,
                 <span class="prelude-val">Some</span>(RTL_LEVEL),
                 Level::vec(<span class="kw-2">&amp;</span>[<span class="number">2</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>]),
                 <span class="macro">vec!</span>[L, L, L, WS, R, R, R, R, R, R],
@@ -3841,7 +3842,7 @@
                 }],
             ),
             (
-                <span class="string">&quot;\u{05D0}\u{05D1}\u{05D2} abc&quot;</span>,
+                <span class="string">"\u{05D0}\u{05D1}\u{05D2} abc"</span>,
                 <span class="prelude-val">Some</span>(LTR_LEVEL),
                 Level::vec(<span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]),
                 <span class="macro">vec!</span>[R, R, R, R, R, R, WS, L, L, L],
@@ -3857,7 +3858,7 @@
                 }],
             ),
             (
-                <span class="string">&quot;\u{05D0}\u{05D1}\u{05D2} abc&quot;</span>,
+                <span class="string">"\u{05D0}\u{05D1}\u{05D2} abc"</span>,
                 <span class="prelude-val">None</span>,
                 Level::vec(<span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">2</span>]),
                 <span class="macro">vec!</span>[R, R, R, R, R, R, WS, L, L, L],
@@ -3873,7 +3874,7 @@
                 }],
             ),
             (
-                <span class="string">&quot;\u{063A}2\u{0638} \u{05D0}2\u{05D2}&quot;</span>,
+                <span class="string">"\u{063A}2\u{0638} \u{05D0}2\u{05D2}"</span>,
                 <span class="prelude-val">Some</span>(LTR_LEVEL),
                 Level::vec(<span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">1</span>, <span class="number">1</span>]),
                 <span class="macro">vec!</span>[AL, AL, EN, AL, AL, WS, R, R, EN, R, R],
@@ -3889,7 +3890,7 @@
                 }],
             ),
             (
-                <span class="string">&quot;a א.\nג&quot;</span>,
+                <span class="string">"a א.\nג"</span>,
                 <span class="prelude-val">None</span>,
                 Level::vec(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>]),
                 <span class="macro">vec!</span>[L, WS, R, R, CS, B, R, R],
@@ -3918,7 +3919,7 @@
             ),
             <span class="comment">// BidiTest:69635 (AL ET EN)
             </span>(
-                <span class="string">&quot;\u{060B}\u{20CF}\u{06F9}&quot;</span>,
+                <span class="string">"\u{060B}\u{20CF}\u{06F9}"</span>,
                 <span class="prelude-val">None</span>,
                 Level::vec(<span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>]),
                 <span class="macro">vec!</span>[AL, AL, ET, ET, ET, EN, EN],
@@ -3984,14 +3985,14 @@
     }
 
     <span class="attr">#[test]
-    #[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
+    #[cfg(feature = <span class="string">"hardcoded-data"</span>)]
     </span><span class="kw">fn </span>test_paragraph_bidi_info() {
         <span class="comment">// Passing text that includes a paragraph break to the ParagraphBidiInfo API:
         // this is a misuse of the API by the client, but our behavior is safe &amp;
         // consistent. The embedded paragraph break acts like a separator (tab) would.
         </span><span class="kw">let </span>tests = <span class="macro">vec!</span>[
             (
-                <span class="string">&quot;a א.\nג&quot;</span>,
+                <span class="string">"a א.\nג"</span>,
                 <span class="prelude-val">None</span>,
                 <span class="comment">// utf-8 results:
                 </span><span class="macro">vec!</span>[L, WS, R, R, CS, B, R, R],
@@ -4004,7 +4005,7 @@
                 <span class="bool-val">false</span>,
             ),
             (
-                <span class="string">&quot;\u{5d1} a.\nb.&quot;</span>,
+                <span class="string">"\u{5d1} a.\nb."</span>,
                 <span class="prelude-val">None</span>,
                 <span class="comment">// utf-8 results:
                 </span><span class="macro">vec!</span>[R, R, WS, L, CS, B, L, CS],
@@ -4017,7 +4018,7 @@
                 <span class="bool-val">false</span>,
             ),
             (
-                <span class="string">&quot;a א.\tג&quot;</span>,
+                <span class="string">"a א.\tג"</span>,
                 <span class="prelude-val">None</span>,
                 <span class="comment">// utf-8 results:
                 </span><span class="macro">vec!</span>[L, WS, R, R, CS, S, R, R],
@@ -4030,7 +4031,7 @@
                 <span class="bool-val">false</span>,
             ),
             (
-                <span class="string">&quot;\u{5d1} a.\tb.&quot;</span>,
+                <span class="string">"\u{5d1} a.\tb."</span>,
                 <span class="prelude-val">None</span>,
                 <span class="comment">// utf-8 results:
                 </span><span class="macro">vec!</span>[R, R, WS, L, CS, S, L, CS],
@@ -4070,28 +4071,28 @@
     }
 
     <span class="attr">#[test]
-    #[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
+    #[cfg(feature = <span class="string">"hardcoded-data"</span>)]
     </span><span class="kw">fn </span>test_bidi_info_has_rtl() {
         <span class="kw">let </span>tests = <span class="macro">vec!</span>[
             <span class="comment">// ASCII only
-            </span>(<span class="string">&quot;123&quot;</span>, <span class="prelude-val">None</span>, <span class="bool-val">false</span>),
-            (<span class="string">&quot;123&quot;</span>, <span class="prelude-val">Some</span>(LTR_LEVEL), <span class="bool-val">false</span>),
-            (<span class="string">&quot;123&quot;</span>, <span class="prelude-val">Some</span>(RTL_LEVEL), <span class="bool-val">false</span>),
-            (<span class="string">&quot;abc&quot;</span>, <span class="prelude-val">None</span>, <span class="bool-val">false</span>),
-            (<span class="string">&quot;abc&quot;</span>, <span class="prelude-val">Some</span>(LTR_LEVEL), <span class="bool-val">false</span>),
-            (<span class="string">&quot;abc&quot;</span>, <span class="prelude-val">Some</span>(RTL_LEVEL), <span class="bool-val">false</span>),
-            (<span class="string">&quot;abc 123&quot;</span>, <span class="prelude-val">None</span>, <span class="bool-val">false</span>),
-            (<span class="string">&quot;abc\n123&quot;</span>, <span class="prelude-val">None</span>, <span class="bool-val">false</span>),
+            </span>(<span class="string">"123"</span>, <span class="prelude-val">None</span>, <span class="bool-val">false</span>),
+            (<span class="string">"123"</span>, <span class="prelude-val">Some</span>(LTR_LEVEL), <span class="bool-val">false</span>),
+            (<span class="string">"123"</span>, <span class="prelude-val">Some</span>(RTL_LEVEL), <span class="bool-val">false</span>),
+            (<span class="string">"abc"</span>, <span class="prelude-val">None</span>, <span class="bool-val">false</span>),
+            (<span class="string">"abc"</span>, <span class="prelude-val">Some</span>(LTR_LEVEL), <span class="bool-val">false</span>),
+            (<span class="string">"abc"</span>, <span class="prelude-val">Some</span>(RTL_LEVEL), <span class="bool-val">false</span>),
+            (<span class="string">"abc 123"</span>, <span class="prelude-val">None</span>, <span class="bool-val">false</span>),
+            (<span class="string">"abc\n123"</span>, <span class="prelude-val">None</span>, <span class="bool-val">false</span>),
             <span class="comment">// With Hebrew
-            </span>(<span class="string">&quot;\u{05D0}\u{05D1}\u{05BC}\u{05D2}&quot;</span>, <span class="prelude-val">None</span>, <span class="bool-val">true</span>),
-            (<span class="string">&quot;\u{05D0}\u{05D1}\u{05BC}\u{05D2}&quot;</span>, <span class="prelude-val">Some</span>(LTR_LEVEL), <span class="bool-val">true</span>),
-            (<span class="string">&quot;\u{05D0}\u{05D1}\u{05BC}\u{05D2}&quot;</span>, <span class="prelude-val">Some</span>(RTL_LEVEL), <span class="bool-val">true</span>),
-            (<span class="string">&quot;abc \u{05D0}\u{05D1}\u{05BC}\u{05D2}&quot;</span>, <span class="prelude-val">None</span>, <span class="bool-val">true</span>),
-            (<span class="string">&quot;abc\n\u{05D0}\u{05D1}\u{05BC}\u{05D2}&quot;</span>, <span class="prelude-val">None</span>, <span class="bool-val">true</span>),
-            (<span class="string">&quot;\u{05D0}\u{05D1}\u{05BC}\u{05D2} abc&quot;</span>, <span class="prelude-val">None</span>, <span class="bool-val">true</span>),
-            (<span class="string">&quot;\u{05D0}\u{05D1}\u{05BC}\u{05D2}\nabc&quot;</span>, <span class="prelude-val">None</span>, <span class="bool-val">true</span>),
-            (<span class="string">&quot;\u{05D0}\u{05D1}\u{05BC}\u{05D2} 123&quot;</span>, <span class="prelude-val">None</span>, <span class="bool-val">true</span>),
-            (<span class="string">&quot;\u{05D0}\u{05D1}\u{05BC}\u{05D2}\n123&quot;</span>, <span class="prelude-val">None</span>, <span class="bool-val">true</span>),
+            </span>(<span class="string">"\u{05D0}\u{05D1}\u{05BC}\u{05D2}"</span>, <span class="prelude-val">None</span>, <span class="bool-val">true</span>),
+            (<span class="string">"\u{05D0}\u{05D1}\u{05BC}\u{05D2}"</span>, <span class="prelude-val">Some</span>(LTR_LEVEL), <span class="bool-val">true</span>),
+            (<span class="string">"\u{05D0}\u{05D1}\u{05BC}\u{05D2}"</span>, <span class="prelude-val">Some</span>(RTL_LEVEL), <span class="bool-val">true</span>),
+            (<span class="string">"abc \u{05D0}\u{05D1}\u{05BC}\u{05D2}"</span>, <span class="prelude-val">None</span>, <span class="bool-val">true</span>),
+            (<span class="string">"abc\n\u{05D0}\u{05D1}\u{05BC}\u{05D2}"</span>, <span class="prelude-val">None</span>, <span class="bool-val">true</span>),
+            (<span class="string">"\u{05D0}\u{05D1}\u{05BC}\u{05D2} abc"</span>, <span class="prelude-val">None</span>, <span class="bool-val">true</span>),
+            (<span class="string">"\u{05D0}\u{05D1}\u{05BC}\u{05D2}\nabc"</span>, <span class="prelude-val">None</span>, <span class="bool-val">true</span>),
+            (<span class="string">"\u{05D0}\u{05D1}\u{05BC}\u{05D2} 123"</span>, <span class="prelude-val">None</span>, <span class="bool-val">true</span>),
+            (<span class="string">"\u{05D0}\u{05D1}\u{05BC}\u{05D2}\n123"</span>, <span class="prelude-val">None</span>, <span class="bool-val">true</span>),
         ];
 
         <span class="kw">for </span>t <span class="kw">in </span>tests {
@@ -4100,8 +4101,8 @@
         }
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
-    </span><span class="kw">fn </span>reorder_paras(text: <span class="kw-2">&amp;</span>str) -&gt; Vec&lt;Cow&lt;<span class="lifetime">&#39;_</span>, str&gt;&gt; {
+    <span class="attr">#[cfg(feature = <span class="string">"hardcoded-data"</span>)]
+    </span><span class="kw">fn </span>reorder_paras(text: <span class="kw-2">&amp;</span>str) -&gt; Vec&lt;Cow&lt;<span class="lifetime">'_</span>, str&gt;&gt; {
         <span class="kw">let </span>bidi_info = BidiInfo::new(text, <span class="prelude-val">None</span>);
         bidi_info
             .paragraphs
@@ -4110,8 +4111,8 @@
             .collect()
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
-    </span><span class="kw">fn </span>reorder_paras_u16(text: <span class="kw-2">&amp;</span>[u16]) -&gt; Vec&lt;Cow&lt;<span class="lifetime">&#39;_</span>, [u16]&gt;&gt; {
+    <span class="attr">#[cfg(feature = <span class="string">"hardcoded-data"</span>)]
+    </span><span class="kw">fn </span>reorder_paras_u16(text: <span class="kw-2">&amp;</span>[u16]) -&gt; Vec&lt;Cow&lt;<span class="lifetime">'_</span>, [u16]&gt;&gt; {
         <span class="kw">let </span>bidi_info = BidiInfoU16::new(text, <span class="prelude-val">None</span>);
         bidi_info
             .paragraphs
@@ -4121,52 +4122,52 @@
     }
 
     <span class="attr">#[test]
-    #[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
+    #[cfg(feature = <span class="string">"hardcoded-data"</span>)]
     </span><span class="kw">fn </span>test_reorder_line() {
         <span class="kw">let </span>tests = <span class="macro">vec!</span>[
             <span class="comment">// Bidi_Class: L L L B L L L B L L L
-            </span>(<span class="string">&quot;abc\ndef\nghi&quot;</span>, <span class="macro">vec!</span>[<span class="string">&quot;abc\n&quot;</span>, <span class="string">&quot;def\n&quot;</span>, <span class="string">&quot;ghi&quot;</span>]),
+            </span>(<span class="string">"abc\ndef\nghi"</span>, <span class="macro">vec!</span>[<span class="string">"abc\n"</span>, <span class="string">"def\n"</span>, <span class="string">"ghi"</span>]),
             <span class="comment">// Bidi_Class: L L EN B L L EN B L L EN
-            </span>(<span class="string">&quot;ab1\nde2\ngh3&quot;</span>, <span class="macro">vec!</span>[<span class="string">&quot;ab1\n&quot;</span>, <span class="string">&quot;de2\n&quot;</span>, <span class="string">&quot;gh3&quot;</span>]),
+            </span>(<span class="string">"ab1\nde2\ngh3"</span>, <span class="macro">vec!</span>[<span class="string">"ab1\n"</span>, <span class="string">"de2\n"</span>, <span class="string">"gh3"</span>]),
             <span class="comment">// Bidi_Class: L L L B AL AL AL
-            </span>(<span class="string">&quot;abc\nابج&quot;</span>, <span class="macro">vec!</span>[<span class="string">&quot;abc\n&quot;</span>, <span class="string">&quot;جبا&quot;</span>]),
+            </span>(<span class="string">"abc\nابج"</span>, <span class="macro">vec!</span>[<span class="string">"abc\n"</span>, <span class="string">"جبا"</span>]),
             <span class="comment">// Bidi_Class: AL AL AL B L L L
             </span>(
-                <span class="string">&quot;\u{0627}\u{0628}\u{062C}\nabc&quot;</span>,
-                <span class="macro">vec!</span>[<span class="string">&quot;\n\u{062C}\u{0628}\u{0627}&quot;</span>, <span class="string">&quot;abc&quot;</span>],
+                <span class="string">"\u{0627}\u{0628}\u{062C}\nabc"</span>,
+                <span class="macro">vec!</span>[<span class="string">"\n\u{062C}\u{0628}\u{0627}"</span>, <span class="string">"abc"</span>],
             ),
-            (<span class="string">&quot;1.-2&quot;</span>, <span class="macro">vec!</span>[<span class="string">&quot;1.-2&quot;</span>]),
-            (<span class="string">&quot;1-.2&quot;</span>, <span class="macro">vec!</span>[<span class="string">&quot;1-.2&quot;</span>]),
-            (<span class="string">&quot;abc אבג&quot;</span>, <span class="macro">vec!</span>[<span class="string">&quot;abc גבא&quot;</span>]),
+            (<span class="string">"1.-2"</span>, <span class="macro">vec!</span>[<span class="string">"1.-2"</span>]),
+            (<span class="string">"1-.2"</span>, <span class="macro">vec!</span>[<span class="string">"1-.2"</span>]),
+            (<span class="string">"abc אבג"</span>, <span class="macro">vec!</span>[<span class="string">"abc גבא"</span>]),
             <span class="comment">// Numbers being weak LTR characters, cannot reorder strong RTL
-            </span>(<span class="string">&quot;123 \u{05D0}\u{05D1}\u{05D2}&quot;</span>, <span class="macro">vec!</span>[<span class="string">&quot;גבא 123&quot;</span>]),
-            (<span class="string">&quot;abc\u{202A}def&quot;</span>, <span class="macro">vec!</span>[<span class="string">&quot;abc\u{202A}def&quot;</span>]),
+            </span>(<span class="string">"123 \u{05D0}\u{05D1}\u{05D2}"</span>, <span class="macro">vec!</span>[<span class="string">"גבא 123"</span>]),
+            (<span class="string">"abc\u{202A}def"</span>, <span class="macro">vec!</span>[<span class="string">"abc\u{202A}def"</span>]),
             (
-                <span class="string">&quot;abc\u{202A}def\u{202C}ghi&quot;</span>,
-                <span class="macro">vec!</span>[<span class="string">&quot;abc\u{202A}def\u{202C}ghi&quot;</span>],
+                <span class="string">"abc\u{202A}def\u{202C}ghi"</span>,
+                <span class="macro">vec!</span>[<span class="string">"abc\u{202A}def\u{202C}ghi"</span>],
             ),
             (
-                <span class="string">&quot;abc\u{2066}def\u{2069}ghi&quot;</span>,
-                <span class="macro">vec!</span>[<span class="string">&quot;abc\u{2066}def\u{2069}ghi&quot;</span>],
+                <span class="string">"abc\u{2066}def\u{2069}ghi"</span>,
+                <span class="macro">vec!</span>[<span class="string">"abc\u{2066}def\u{2069}ghi"</span>],
             ),
             <span class="comment">// Testing for RLE Character
-            </span>(<span class="string">&quot;\u{202B}abc אבג\u{202C}&quot;</span>, <span class="macro">vec!</span>[<span class="string">&quot;\u{202b}גבא abc\u{202c}&quot;</span>]),
+            </span>(<span class="string">"\u{202B}abc אבג\u{202C}"</span>, <span class="macro">vec!</span>[<span class="string">"\u{202b}גבא abc\u{202c}"</span>]),
             <span class="comment">// Testing neutral characters
-            </span>(<span class="string">&quot;\u{05D0}בג? אבג&quot;</span>, <span class="macro">vec!</span>[<span class="string">&quot;גבא ?גבא&quot;</span>]),
+            </span>(<span class="string">"\u{05D0}בג? אבג"</span>, <span class="macro">vec!</span>[<span class="string">"גבא ?גבא"</span>]),
             <span class="comment">// Testing neutral characters with special case
-            </span>(<span class="string">&quot;A אבג?&quot;</span>, <span class="macro">vec!</span>[<span class="string">&quot;A גבא?&quot;</span>]),
+            </span>(<span class="string">"A אבג?"</span>, <span class="macro">vec!</span>[<span class="string">"A גבא?"</span>]),
             <span class="comment">// Testing neutral characters with Implicit RTL Marker
-            </span>(<span class="string">&quot;A אבג?\u{200F}&quot;</span>, <span class="macro">vec!</span>[<span class="string">&quot;A \u{200F}?גבא&quot;</span>]),
-            (<span class="string">&quot;\u{05D0}בג abc&quot;</span>, <span class="macro">vec!</span>[<span class="string">&quot;abc גבא&quot;</span>]),
-            (<span class="string">&quot;abc\u{2067}.-\u{2069}ghi&quot;</span>, <span class="macro">vec!</span>[<span class="string">&quot;abc\u{2067}-.\u{2069}ghi&quot;</span>]),
+            </span>(<span class="string">"A אבג?\u{200F}"</span>, <span class="macro">vec!</span>[<span class="string">"A \u{200F}?גבא"</span>]),
+            (<span class="string">"\u{05D0}בג abc"</span>, <span class="macro">vec!</span>[<span class="string">"abc גבא"</span>]),
+            (<span class="string">"abc\u{2067}.-\u{2069}ghi"</span>, <span class="macro">vec!</span>[<span class="string">"abc\u{2067}-.\u{2069}ghi"</span>]),
             (
-                <span class="string">&quot;Hello, \u{2068}\u{202E}world\u{202C}\u{2069}!&quot;</span>,
-                <span class="macro">vec!</span>[<span class="string">&quot;Hello, \u{2068}\u{202E}\u{202C}dlrow\u{2069}!&quot;</span>],
+                <span class="string">"Hello, \u{2068}\u{202E}world\u{202C}\u{2069}!"</span>,
+                <span class="macro">vec!</span>[<span class="string">"Hello, \u{2068}\u{202E}\u{202C}dlrow\u{2069}!"</span>],
             ),
             <span class="comment">// With mirrorable characters in RTL run
-            </span>(<span class="string">&quot;\u{05D0}(ב)ג.&quot;</span>, <span class="macro">vec!</span>[<span class="string">&quot;.ג)ב(א&quot;</span>]),
+            </span>(<span class="string">"\u{05D0}(ב)ג."</span>, <span class="macro">vec!</span>[<span class="string">".ג)ב(א"</span>]),
             <span class="comment">// With mirrorable characters on level boundary
-            </span>(<span class="string">&quot;\u{05D0}ב(גד[&amp;ef].)gh&quot;</span>, <span class="macro">vec!</span>[<span class="string">&quot;gh).]ef&amp;[דג(בא&quot;</span>]),
+            </span>(<span class="string">"\u{05D0}ב(גד[&amp;ef].)gh"</span>, <span class="macro">vec!</span>[<span class="string">"gh).]ef&amp;[דג(בא"</span>]),
         ];
 
         <span class="kw">for </span>t <span class="kw">in </span>tests {
@@ -4213,19 +4214,19 @@
     }
 
     <span class="attr">#[test]
-    #[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
+    #[cfg(feature = <span class="string">"hardcoded-data"</span>)]
     </span><span class="kw">fn </span>test_reordered_levels() {
         <span class="kw">let </span>tests = <span class="macro">vec!</span>[
             <span class="comment">// BidiTest:946 (LRI PDI)
             </span>(
-                <span class="string">&quot;\u{2067}\u{2069}&quot;</span>,
+                <span class="string">"\u{2067}\u{2069}"</span>,
                 <span class="macro">vec!</span>[Level::vec(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>])],
                 <span class="macro">vec!</span>[Level::vec(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">0</span>])],
                 <span class="macro">vec!</span>[Level::vec(<span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">0</span>])],
             ),
             <span class="comment">// BidiTest:69635 (AL ET EN)
             </span>(
-                <span class="string">&quot;\u{060B}\u{20CF}\u{06F9}&quot;</span>,
+                <span class="string">"\u{060B}\u{20CF}\u{06F9}"</span>,
                 <span class="macro">vec!</span>[Level::vec(<span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>])],
                 <span class="macro">vec!</span>[Level::vec(<span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">1</span>, <span class="number">2</span>])],
                 <span class="macro">vec!</span>[Level::vec(<span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">1</span>, <span class="number">2</span>])],
@@ -4243,10 +4244,10 @@
         <span class="kw">let </span>tests = <span class="macro">vec!</span>[
             <span class="comment">// BidiTest:291284 (AN RLI PDF R)
             </span>(
-                <span class="string">&quot;\u{0605}\u{2067}\u{202C}\u{0590}&quot;</span>,
-                <span class="macro">vec!</span>[<span class="kw-2">&amp;</span>[<span class="string">&quot;2&quot;</span>, <span class="string">&quot;2&quot;</span>, <span class="string">&quot;0&quot;</span>, <span class="string">&quot;0&quot;</span>, <span class="string">&quot;0&quot;</span>, <span class="string">&quot;x&quot;</span>, <span class="string">&quot;x&quot;</span>, <span class="string">&quot;x&quot;</span>, <span class="string">&quot;1&quot;</span>, <span class="string">&quot;1&quot;</span>]],
-                <span class="macro">vec!</span>[<span class="kw-2">&amp;</span>[<span class="string">&quot;2&quot;</span>, <span class="string">&quot;0&quot;</span>, <span class="string">&quot;x&quot;</span>, <span class="string">&quot;1&quot;</span>]],
-                <span class="macro">vec!</span>[<span class="kw-2">&amp;</span>[<span class="string">&quot;2&quot;</span>, <span class="string">&quot;0&quot;</span>, <span class="string">&quot;x&quot;</span>, <span class="string">&quot;1&quot;</span>]],
+                <span class="string">"\u{0605}\u{2067}\u{202C}\u{0590}"</span>,
+                <span class="macro">vec!</span>[<span class="kw-2">&amp;</span>[<span class="string">"2"</span>, <span class="string">"2"</span>, <span class="string">"0"</span>, <span class="string">"0"</span>, <span class="string">"0"</span>, <span class="string">"x"</span>, <span class="string">"x"</span>, <span class="string">"x"</span>, <span class="string">"1"</span>, <span class="string">"1"</span>]],
+                <span class="macro">vec!</span>[<span class="kw-2">&amp;</span>[<span class="string">"2"</span>, <span class="string">"0"</span>, <span class="string">"x"</span>, <span class="string">"1"</span>]],
+                <span class="macro">vec!</span>[<span class="kw-2">&amp;</span>[<span class="string">"2"</span>, <span class="string">"0"</span>, <span class="string">"x"</span>, <span class="string">"1"</span>]],
             ),
         ];
 
@@ -4258,7 +4259,7 @@
             <span class="macro">assert_eq!</span>(reordered_levels_per_char_for_paras_u16(text), t.<span class="number">2</span>);
         }
 
-        <span class="kw">let </span>text = <span class="string">&quot;aa טֶ&quot;</span>;
+        <span class="kw">let </span>text = <span class="string">"aa טֶ"</span>;
         <span class="kw">let </span>bidi_info = BidiInfo::new(text, <span class="prelude-val">None</span>);
         <span class="macro">assert_eq!</span>(
             bidi_info.reordered_levels(<span class="kw-2">&amp;</span>bidi_info.paragraphs[<span class="number">0</span>], <span class="number">3</span>..<span class="number">7</span>),
@@ -4275,13 +4276,13 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_paragraph_info_len() {
-        <span class="kw">let </span>text = <span class="string">&quot;hello world&quot;</span>;
+        <span class="kw">let </span>text = <span class="string">"hello world"</span>;
         <span class="kw">let </span>bidi_info = BidiInfo::new(text, <span class="prelude-val">None</span>);
         <span class="macro">assert_eq!</span>(bidi_info.paragraphs.len(), <span class="number">1</span>);
         <span class="macro">assert_eq!</span>(bidi_info.paragraphs[<span class="number">0</span>].len(), text.len());
 
-        <span class="kw">let </span>text2 = <span class="string">&quot;How are you&quot;</span>;
-        <span class="kw">let </span>whole_text = <span class="macro">format!</span>(<span class="string">&quot;{}\n{}&quot;</span>, text, text2);
+        <span class="kw">let </span>text2 = <span class="string">"How are you"</span>;
+        <span class="kw">let </span>whole_text = <span class="macro">format!</span>(<span class="string">"{}\n{}"</span>, text, text2);
         <span class="kw">let </span>bidi_info = BidiInfo::new(<span class="kw-2">&amp;</span>whole_text, <span class="prelude-val">None</span>);
         <span class="macro">assert_eq!</span>(bidi_info.paragraphs.len(), <span class="number">2</span>);
 
@@ -4307,9 +4308,9 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_direction() {
-        <span class="kw">let </span>ltr_text = <span class="string">&quot;hello world&quot;</span>;
-        <span class="kw">let </span>rtl_text = <span class="string">&quot;أهلا بكم&quot;</span>;
-        <span class="kw">let </span>all_paragraphs = <span class="macro">format!</span>(<span class="string">&quot;{}\n{}\n{}{}&quot;</span>, ltr_text, rtl_text, ltr_text, rtl_text);
+        <span class="kw">let </span>ltr_text = <span class="string">"hello world"</span>;
+        <span class="kw">let </span>rtl_text = <span class="string">"أهلا بكم"</span>;
+        <span class="kw">let </span>all_paragraphs = <span class="macro">format!</span>(<span class="string">"{}\n{}\n{}{}"</span>, ltr_text, rtl_text, ltr_text, rtl_text);
         <span class="kw">let </span>bidi_info = BidiInfo::new(<span class="kw-2">&amp;</span>all_paragraphs, <span class="prelude-val">None</span>);
         <span class="macro">assert_eq!</span>(bidi_info.paragraphs.len(), <span class="number">3</span>);
         <span class="kw">let </span>p_ltr = Paragraph::new(<span class="kw-2">&amp;</span>bidi_info, <span class="kw-2">&amp;</span>bidi_info.paragraphs[<span class="number">0</span>]);
@@ -4333,7 +4334,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_edge_cases_direction() {
         <span class="comment">// No paragraphs for empty text.
-        </span><span class="kw">let </span>empty = <span class="string">&quot;&quot;</span>;
+        </span><span class="kw">let </span>empty = <span class="string">""</span>;
         <span class="kw">let </span>bidi_info = BidiInfo::new(empty, Option::from(RTL_LEVEL));
         <span class="macro">assert_eq!</span>(bidi_info.paragraphs.len(), <span class="number">0</span>);
 
@@ -4344,13 +4345,13 @@
         <span class="kw">let </span>tests = <span class="macro">vec!</span>[
             <span class="comment">// The paragraph separator will take the value of the default direction
             // which is left to right.
-            </span>(<span class="string">&quot;\n&quot;</span>, <span class="prelude-val">None</span>, Direction::Ltr),
+            </span>(<span class="string">"\n"</span>, <span class="prelude-val">None</span>, Direction::Ltr),
             <span class="comment">// The paragraph separator will take the value of the given initial direction
             // which is left to right.
-            </span>(<span class="string">&quot;\n&quot;</span>, Option::from(LTR_LEVEL), Direction::Ltr),
+            </span>(<span class="string">"\n"</span>, Option::from(LTR_LEVEL), Direction::Ltr),
             <span class="comment">// The paragraph separator will take the value of the given initial direction
             // which is right to left.
-            </span>(<span class="string">&quot;\n&quot;</span>, Option::from(RTL_LEVEL), Direction::Rtl),
+            </span>(<span class="string">"\n"</span>, Option::from(RTL_LEVEL), Direction::Rtl),
         ];
 
         <span class="kw">for </span>t <span class="kw">in </span>tests {
@@ -4367,9 +4368,9 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_level_at() {
-        <span class="kw">let </span>ltr_text = <span class="string">&quot;hello world&quot;</span>;
-        <span class="kw">let </span>rtl_text = <span class="string">&quot;أهلا بكم&quot;</span>;
-        <span class="kw">let </span>all_paragraphs = <span class="macro">format!</span>(<span class="string">&quot;{}\n{}\n{}{}&quot;</span>, ltr_text, rtl_text, ltr_text, rtl_text);
+        <span class="kw">let </span>ltr_text = <span class="string">"hello world"</span>;
+        <span class="kw">let </span>rtl_text = <span class="string">"أهلا بكم"</span>;
+        <span class="kw">let </span>all_paragraphs = <span class="macro">format!</span>(<span class="string">"{}\n{}\n{}{}"</span>, ltr_text, rtl_text, ltr_text, rtl_text);
         <span class="kw">let </span>bidi_info = BidiInfo::new(<span class="kw-2">&amp;</span>all_paragraphs, <span class="prelude-val">None</span>);
         <span class="macro">assert_eq!</span>(bidi_info.paragraphs.len(), <span class="number">3</span>);
 
@@ -4403,13 +4404,13 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_get_base_direction() {
         <span class="kw">let </span>tests = <span class="macro">vec!</span>[
-            (<span class="string">&quot;&quot;</span>, Direction::Mixed), <span class="comment">// return Mixed if no strong character found
-            </span>(<span class="string">&quot;123[]-+\u{2019}\u{2060}\u{00bf}?&quot;</span>, Direction::Mixed),
-            (<span class="string">&quot;3.14\npi&quot;</span>, Direction::Mixed), <span class="comment">// only first paragraph is considered
-            </span>(<span class="string">&quot;[123 &#39;abc&#39;]&quot;</span>, Direction::Ltr),
-            (<span class="string">&quot;[123 &#39;\u{0628}&#39; abc&quot;</span>, Direction::Rtl),
-            (<span class="string">&quot;[123 &#39;\u{2066}abc\u{2069}&#39;\u{0628}]&quot;</span>, Direction::Rtl), <span class="comment">// embedded isolate is ignored
-            </span>(<span class="string">&quot;[123 &#39;\u{2066}abc\u{2068}&#39;\u{0628}]&quot;</span>, Direction::Mixed),
+            (<span class="string">""</span>, Direction::Mixed), <span class="comment">// return Mixed if no strong character found
+            </span>(<span class="string">"123[]-+\u{2019}\u{2060}\u{00bf}?"</span>, Direction::Mixed),
+            (<span class="string">"3.14\npi"</span>, Direction::Mixed), <span class="comment">// only first paragraph is considered
+            </span>(<span class="string">"[123 'abc']"</span>, Direction::Ltr),
+            (<span class="string">"[123 '\u{0628}' abc"</span>, Direction::Rtl),
+            (<span class="string">"[123 '\u{2066}abc\u{2069}'\u{0628}]"</span>, Direction::Rtl), <span class="comment">// embedded isolate is ignored
+            </span>(<span class="string">"[123 '\u{2066}abc\u{2068}'\u{0628}]"</span>, Direction::Mixed),
         ];
 
         <span class="kw">for </span>t <span class="kw">in </span>tests {
@@ -4422,15 +4423,15 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_get_base_direction_full() {
         <span class="kw">let </span>tests = <span class="macro">vec!</span>[
-            (<span class="string">&quot;&quot;</span>, Direction::Mixed), <span class="comment">// return Mixed if no strong character found
-            </span>(<span class="string">&quot;123[]-+\u{2019}\u{2060}\u{00bf}?&quot;</span>, Direction::Mixed),
-            (<span class="string">&quot;3.14\npi&quot;</span>, Direction::Ltr), <span class="comment">// direction taken from the second paragraph
-            </span>(<span class="string">&quot;3.14\n\u{05D0}&quot;</span>, Direction::Rtl), <span class="comment">// direction taken from the second paragraph
-            </span>(<span class="string">&quot;[123 &#39;abc&#39;]&quot;</span>, Direction::Ltr),
-            (<span class="string">&quot;[123 &#39;\u{0628}&#39; abc&quot;</span>, Direction::Rtl),
-            (<span class="string">&quot;[123 &#39;\u{2066}abc\u{2069}&#39;\u{0628}]&quot;</span>, Direction::Rtl), <span class="comment">// embedded isolate is ignored
-            </span>(<span class="string">&quot;[123 &#39;\u{2066}abc\u{2068}&#39;\u{0628}]&quot;</span>, Direction::Mixed),
-            (<span class="string">&quot;[123 &#39;\u{2066}abc\u{2068}&#39;\n\u{0628}]&quot;</span>, Direction::Rtl), <span class="comment">// \n resets embedding level
+            (<span class="string">""</span>, Direction::Mixed), <span class="comment">// return Mixed if no strong character found
+            </span>(<span class="string">"123[]-+\u{2019}\u{2060}\u{00bf}?"</span>, Direction::Mixed),
+            (<span class="string">"3.14\npi"</span>, Direction::Ltr), <span class="comment">// direction taken from the second paragraph
+            </span>(<span class="string">"3.14\n\u{05D0}"</span>, Direction::Rtl), <span class="comment">// direction taken from the second paragraph
+            </span>(<span class="string">"[123 'abc']"</span>, Direction::Ltr),
+            (<span class="string">"[123 '\u{0628}' abc"</span>, Direction::Rtl),
+            (<span class="string">"[123 '\u{2066}abc\u{2069}'\u{0628}]"</span>, Direction::Rtl), <span class="comment">// embedded isolate is ignored
+            </span>(<span class="string">"[123 '\u{2066}abc\u{2068}'\u{0628}]"</span>, Direction::Mixed),
+            (<span class="string">"[123 '\u{2066}abc\u{2068}'\n\u{0628}]"</span>, Direction::Rtl), <span class="comment">// \n resets embedding level
         </span>];
 
         <span class="kw">for </span>t <span class="kw">in </span>tests {
@@ -4441,14 +4442,14 @@
     }
 }
 
-<span class="attr">#[cfg(all(feature = <span class="string">&quot;serde&quot;</span>, feature = <span class="string">&quot;hardcoded-data&quot;</span>, test))]
+<span class="attr">#[cfg(all(feature = <span class="string">"serde"</span>, feature = <span class="string">"hardcoded-data"</span>, test))]
 </span><span class="kw">mod </span>serde_tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span>serde_test::{assert_tokens, Token};
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_levels() {
-        <span class="kw">let </span>text = <span class="string">&quot;abc אבג&quot;</span>;
+        <span class="kw">let </span>text = <span class="string">"abc אבג"</span>;
         <span class="kw">let </span>bidi_info = BidiInfo::new(text, <span class="prelude-val">None</span>);
         <span class="kw">let </span>levels = bidi_info.levels;
         <span class="macro">assert_eq!</span>(text.as_bytes().len(), <span class="number">10</span>);
@@ -4457,25 +4458,25 @@
             <span class="kw-2">&amp;</span>levels,
             <span class="kw-2">&amp;</span>[
                 Token::Seq { len: <span class="prelude-val">Some</span>(<span class="number">10</span>) },
-                Token::NewtypeStruct { name: <span class="string">&quot;Level&quot; </span>},
+                Token::NewtypeStruct { name: <span class="string">"Level" </span>},
                 Token::U8(<span class="number">0</span>),
-                Token::NewtypeStruct { name: <span class="string">&quot;Level&quot; </span>},
+                Token::NewtypeStruct { name: <span class="string">"Level" </span>},
                 Token::U8(<span class="number">0</span>),
-                Token::NewtypeStruct { name: <span class="string">&quot;Level&quot; </span>},
+                Token::NewtypeStruct { name: <span class="string">"Level" </span>},
                 Token::U8(<span class="number">0</span>),
-                Token::NewtypeStruct { name: <span class="string">&quot;Level&quot; </span>},
+                Token::NewtypeStruct { name: <span class="string">"Level" </span>},
                 Token::U8(<span class="number">0</span>),
-                Token::NewtypeStruct { name: <span class="string">&quot;Level&quot; </span>},
+                Token::NewtypeStruct { name: <span class="string">"Level" </span>},
                 Token::U8(<span class="number">1</span>),
-                Token::NewtypeStruct { name: <span class="string">&quot;Level&quot; </span>},
+                Token::NewtypeStruct { name: <span class="string">"Level" </span>},
                 Token::U8(<span class="number">1</span>),
-                Token::NewtypeStruct { name: <span class="string">&quot;Level&quot; </span>},
+                Token::NewtypeStruct { name: <span class="string">"Level" </span>},
                 Token::U8(<span class="number">1</span>),
-                Token::NewtypeStruct { name: <span class="string">&quot;Level&quot; </span>},
+                Token::NewtypeStruct { name: <span class="string">"Level" </span>},
                 Token::U8(<span class="number">1</span>),
-                Token::NewtypeStruct { name: <span class="string">&quot;Level&quot; </span>},
+                Token::NewtypeStruct { name: <span class="string">"Level" </span>},
                 Token::U8(<span class="number">1</span>),
-                Token::NewtypeStruct { name: <span class="string">&quot;Level&quot; </span>},
+                Token::NewtypeStruct { name: <span class="string">"Level" </span>},
                 Token::U8(<span class="number">1</span>),
                 Token::SeqEnd,
             ],

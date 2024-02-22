@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/unicode-bidi-0.3.15/src/char_data/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="unicode_bidi" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/unicode-bidi-0.3.15/src/char_data/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="unicode_bidi" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -185,24 +186,24 @@
 </span><span class="kw">mod </span>tables;
 
 <span class="kw">pub use </span><span class="self">self</span>::tables::{BidiClass, UNICODE_VERSION};
-<span class="attr">#[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"hardcoded-data"</span>)]
 </span><span class="kw">use </span>core::char;
-<span class="attr">#[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"hardcoded-data"</span>)]
 </span><span class="kw">use </span>core::cmp::Ordering::{Equal, Greater, Less};
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"hardcoded-data"</span>)]
 </span><span class="kw">use </span><span class="self">self</span>::tables::bidi_class_table;
 <span class="kw">use </span><span class="kw">crate</span>::data_source::BidiMatchedOpeningBracket;
 <span class="kw">use </span><span class="kw">crate</span>::BidiClass::<span class="kw-2">*</span>;
-<span class="attr">#[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"hardcoded-data"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::BidiDataSource;
 <span class="doccomment">/// Hardcoded Bidi data that ships with the unicode-bidi crate.
 ///
 /// This can be enabled with the default `hardcoded-data` Cargo feature.
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"hardcoded-data"</span>)]
 </span><span class="kw">pub struct </span>HardcodedBidiData;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"hardcoded-data"</span>)]
 </span><span class="kw">impl </span>BidiDataSource <span class="kw">for </span>HardcodedBidiData {
     <span class="kw">fn </span>bidi_class(<span class="kw-2">&amp;</span><span class="self">self</span>, c: char) -&gt; BidiClass {
         bsearch_range_value_table(c, bidi_class_table)
@@ -210,7 +211,7 @@
 }
 
 <span class="doccomment">/// Find the `BidiClass` of a single char.
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"hardcoded-data"</span>)]
 </span><span class="kw">pub fn </span>bidi_class(c: char) -&gt; BidiClass {
     bsearch_range_value_table(c, bidi_class_table)
 }
@@ -238,8 +239,8 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;hardcoded-data&quot;</span>)]
-</span><span class="kw">fn </span>bsearch_range_value_table(c: char, r: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[(char, char, BidiClass)]) -&gt; BidiClass {
+<span class="attr">#[cfg(feature = <span class="string">"hardcoded-data"</span>)]
+</span><span class="kw">fn </span>bsearch_range_value_table(c: char, r: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[(char, char, BidiClass)]) -&gt; BidiClass {
     <span class="kw">match </span>r.binary_search_by(|<span class="kw-2">&amp;</span>(lo, hi, <span class="kw">_</span>)| {
         <span class="kw">if </span>lo &lt;= c &amp;&amp; c &lt;= hi {
             Equal
@@ -253,95 +254,95 @@
             <span class="kw">let </span>(<span class="kw">_</span>, <span class="kw">_</span>, cat) = r[idx];
             cat
         }
-        <span class="comment">// UCD/extracted/DerivedBidiClass.txt: &quot;All code points not explicitly listed
-        // for Bidi_Class have the value Left_To_Right (L).&quot;
+        <span class="comment">// UCD/extracted/DerivedBidiClass.txt: "All code points not explicitly listed
+        // for Bidi_Class have the value Left_To_Right (L)."
         </span><span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; L,
     }
 }
 
-<span class="attr">#[cfg(all(test, feature = <span class="string">&quot;hardcoded-data&quot;</span>))]
+<span class="attr">#[cfg(all(test, feature = <span class="string">"hardcoded-data"</span>))]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_ascii() {
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{0000}&#39;</span>), BN);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{0040}&#39;</span>), ON);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{0041}&#39;</span>), L);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{0062}&#39;</span>), L);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{007F}&#39;</span>), BN);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{0000}'</span>), BN);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{0040}'</span>), ON);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{0041}'</span>), L);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{0062}'</span>), L);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{007F}'</span>), BN);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_bmp() {
         <span class="comment">// Hebrew
-        </span><span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{0590}&#39;</span>), R);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{05D0}&#39;</span>), R);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{05D1}&#39;</span>), R);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{05FF}&#39;</span>), R);
+        </span><span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{0590}'</span>), R);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{05D0}'</span>), R);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{05D1}'</span>), R);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{05FF}'</span>), R);
 
         <span class="comment">// Arabic
-        </span><span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{0600}&#39;</span>), AN);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{0627}&#39;</span>), AL);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{07BF}&#39;</span>), AL);
+        </span><span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{0600}'</span>), AN);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{0627}'</span>), AL);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{07BF}'</span>), AL);
 
         <span class="comment">// Default R + Arabic Extras
-        </span><span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{07C0}&#39;</span>), R);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{085F}&#39;</span>), R);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{0860}&#39;</span>), AL);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{0870}&#39;</span>), AL);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{089F}&#39;</span>), NSM);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{08A0}&#39;</span>), AL);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{089F}&#39;</span>), NSM);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{08FF}&#39;</span>), NSM);
+        </span><span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{07C0}'</span>), R);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{085F}'</span>), R);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{0860}'</span>), AL);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{0870}'</span>), AL);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{089F}'</span>), NSM);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{08A0}'</span>), AL);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{089F}'</span>), NSM);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{08FF}'</span>), NSM);
 
         <span class="comment">// Default ET
-        </span><span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{20A0}&#39;</span>), ET);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{20CF}&#39;</span>), ET);
+        </span><span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{20A0}'</span>), ET);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{20CF}'</span>), ET);
 
         <span class="comment">// Arabic Presentation Forms
-        </span><span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{FB1D}&#39;</span>), R);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{FB4F}&#39;</span>), R);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{FB50}&#39;</span>), AL);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{FDCF}&#39;</span>), ON);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{FDF0}&#39;</span>), AL);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{FDFF}&#39;</span>), ON);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{FE70}&#39;</span>), AL);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{FEFE}&#39;</span>), AL);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{FEFF}&#39;</span>), BN);
+        </span><span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{FB1D}'</span>), R);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{FB4F}'</span>), R);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{FB50}'</span>), AL);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{FDCF}'</span>), ON);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{FDF0}'</span>), AL);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{FDFF}'</span>), ON);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{FE70}'</span>), AL);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{FEFE}'</span>), AL);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{FEFF}'</span>), BN);
 
         <span class="comment">// noncharacters
-        </span><span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{FDD0}&#39;</span>), L);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{FDD1}&#39;</span>), L);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{FDEE}&#39;</span>), L);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{FDEF}&#39;</span>), L);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{FFFE}&#39;</span>), L);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{FFFF}&#39;</span>), L);
+        </span><span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{FDD0}'</span>), L);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{FDD1}'</span>), L);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{FDEE}'</span>), L);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{FDEF}'</span>), L);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{FFFE}'</span>), L);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{FFFF}'</span>), L);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_smp() {
         <span class="comment">// Default AL + R
-        </span><span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{10800}&#39;</span>), R);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{10FFF}&#39;</span>), R);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{1E800}&#39;</span>), R);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{1EDFF}&#39;</span>), R);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{1EE00}&#39;</span>), AL);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{1EEFF}&#39;</span>), AL);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{1EF00}&#39;</span>), R);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{1EFFF}&#39;</span>), R);
+        </span><span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{10800}'</span>), R);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{10FFF}'</span>), R);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{1E800}'</span>), R);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{1EDFF}'</span>), R);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{1EE00}'</span>), AL);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{1EEFF}'</span>), AL);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{1EF00}'</span>), R);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{1EFFF}'</span>), R);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_unassigned_planes() {
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{30000}&#39;</span>), L);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{40000}&#39;</span>), L);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{50000}&#39;</span>), L);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{60000}&#39;</span>), L);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{70000}&#39;</span>), L);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{80000}&#39;</span>), L);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{90000}&#39;</span>), L);
-        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">&#39;\u{a0000}&#39;</span>), L);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{30000}'</span>), L);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{40000}'</span>), L);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{50000}'</span>), L);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{60000}'</span>), L);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{70000}'</span>), L);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{80000}'</span>), L);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{90000}'</span>), L);
+        <span class="macro">assert_eq!</span>(bidi_class(<span class="string">'\u{a0000}'</span>), L);
     }
 }
 </code></pre></div></section></main></body></html>
