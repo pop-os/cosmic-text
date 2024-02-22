@@ -281,8 +281,8 @@ impl AttrsList {
 
     /// Add an attribute span, removes any previous matching parts of spans
     pub fn add_span(&mut self, range: Range<usize>, attrs: Attrs) {
-        //do not support 1..1 even if by accident.
-        if range.start == range.end {
+        //do not support 1..1 or 2..1 even if by accident.
+        if range.is_empty() {
             return;
         }
 
