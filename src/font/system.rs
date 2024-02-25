@@ -16,6 +16,65 @@ pub struct FontMatchKey {
     pub(crate) id: fontdb::ID,
 }
 
+struct FontCachedCodepointSupportInfo {
+    supported: Vec<u32>,
+    not_supported: Vec<u32>,
+}
+
+impl FontCachedCodepointSupportInfo {
+    const SUPPORTED_MAX_SZ: usize = 512;
+    const NOT_SUPPORTED_MAX_SZ: usize = 1024;
+
+    fn new() -> Self {
+        Self {
+            supported: Vec::with_capacity(Self::SUPPORTED_MAX_SZ),
+            not_supported: Vec::with_capacity(Self::NOT_SUPPORTED_MAX_SZ),
+        }
+    }
+
+    #[inline(always)]
+    fn unknown_has_codepoint(
+        &mut self,
+        font_codepoints: &[u32],
+        codepoint: u32,
+        supported_insert_pos: usize,
+        not_supported_insert_pos: usize,
+    ) -> bool {
+        let ret = font_codepoints.contains(&codepoint);
+        if ret {
+            // don't bother inserting if we are going to truncate the entry away
+            if supported_insert_pos != Self::SUPPORTED_MAX_SZ {
+                self.supported.insert(supported_insert_pos, codepoint);
+                self.supported.truncate(Self::SUPPORTED_MAX_SZ);
+            }
+        } else {
+            // don't bother inserting if we are going to truncate the entry away
+            if not_supported_insert_pos != Self::NOT_SUPPORTED_MAX_SZ {
+                self.not_supported
+                    .insert(not_supported_insert_pos, codepoint);
+                self.not_supported.truncate(Self::NOT_SUPPORTED_MAX_SZ);
+            }
+        }
+        ret
+    }
+
+    #[inline(always)]
+    fn has_codepoint(&mut self, font_codepoints: &[u32], codepoint: u32) -> bool {
+        match self.supported.binary_search(&codepoint) {
+            Ok(_) => true,
+            Err(supported_insert_pos) => match self.not_supported.binary_search(&codepoint) {
+                Ok(_) => false,
+                Err(not_supported_insert_pos) => self.unknown_has_codepoint(
+                    font_codepoints,
+                    codepoint,
+                    supported_insert_pos,
+                    not_supported_insert_pos,
+                ),
+            },
+        }
+    }
+}
+
 /// Access to the system fonts.
 pub struct FontSystem {
     /// The locale of the system.
@@ -26,6 +85,9 @@ pub struct FontSystem {
 
     /// Cache for loaded fonts from the database.
     font_cache: HashMap<fontdb::ID, Option<Arc<Font>>>,
+
+    /// Cache for font codepoint support info
+    font_codepoint_support_info_cache: HashMap<fontdb::ID, FontCachedCodepointSupportInfo>,
 
     /// Cache for font matches.
     font_matches_cache: HashMap<FontMatchAttrs, Arc<Vec<FontMatchKey>>>,
@@ -84,6 +146,7 @@ impl FontSystem {
             db,
             font_cache: Default::default(),
             font_matches_cache: Default::default(),
+            font_codepoint_support_info_cache: Default::default(),
             shape_plan_cache: ShapePlanCache::default(),
             #[cfg(feature = "shape-run-cache")]
             shape_run_cache: crate::ShapeRunCache::default(),
@@ -137,6 +200,24 @@ impl FontSystem {
                 }
             })
             .clone()
+    }
+
+    #[inline(always)]
+    pub fn get_font_supported_codepoints_in_word(
+        &mut self,
+        id: fontdb::ID,
+        word: &str,
+    ) -> Option<usize> {
+        self.get_font(id).map(|font| {
+            let code_points = font.unicode_codepoints();
+            let cache = self
+                .font_codepoint_support_info_cache
+                .entry(id)
+                .or_insert_with(FontCachedCodepointSupportInfo::new);
+            word.chars()
+                .filter(|ch| cache.has_codepoint(code_points, u32::from(*ch)))
+                .count()
+        })
     }
 
     pub fn get_font_matches(&mut self, attrs: Attrs<'_>) -> Arc<Vec<FontMatchKey>> {

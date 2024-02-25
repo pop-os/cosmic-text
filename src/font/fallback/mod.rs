@@ -176,15 +176,12 @@ impl<'a> Iterator for FontFallbackIter<'a> {
                     if let Some(face_info) = self.font_system.db().face(m_key.id) {
                         // Don't use emoji fonts as Monospace
                         if face_info.monospaced && !face_info.post_script_name.contains("Emoji") {
-                            if let Some(font) = self.font_system.get_font(m_key.id) {
-                                let codepoint_non_matches = self.word.chars().count()
-                                    - self
-                                        .word
-                                        .chars()
-                                        .filter(|ch| {
-                                            font.unicode_codepoints().contains(&u32::from(*ch))
-                                        })
-                                        .count();
+                            let supported_cp_count_opt = self
+                                .font_system
+                                .get_font_supported_codepoints_in_word(m_key.id, self.word);
+                            if let Some(supported_cp_count) = supported_cp_count_opt {
+                                let codepoint_non_matches =
+                                    self.word.chars().count() - supported_cp_count;
 
                                 let fallback_info = MonospaceFallbackInfo {
                                     font_weight_diff: Some(m_key.font_weight_diff),
