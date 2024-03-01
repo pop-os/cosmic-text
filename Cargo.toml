@@ -66,3 +66,6 @@ criterion = { version = "0.5.1", default-features = false, features = [
 
 [profile.test]
 opt-level = 1
+
+[package.metadata.docs.rs]
+features = ["vi"]
