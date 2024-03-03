@@ -29,6 +29,7 @@ fn main() {
 
     let mut display_scale = window.scale_factor() as f32;
 
+    let scrollbar_width = 12.0;
     let font_sizes = [
         Metrics::new(10.0, 14.0), // Caption
         Metrics::new(14.0, 20.0), // Body
@@ -39,8 +40,6 @@ fn main() {
     ];
     let font_size_default = 1; // Body
     let mut font_size_i = font_size_default;
-
-    let line_x = 8.0 * (window.scale_factor() as f32);
 
     let mut editor = SyntaxEditor::new(
         Buffer::new(
@@ -110,8 +109,10 @@ fn main() {
                             pixmap.fill(tiny_skia::Color::from_rgba8(0, 0, 0, 0xFF));
 
                             editor.with_buffer_mut(|buffer| {
-                                buffer
-                                    .set_size(width as f32 - line_x * display_scale, height as f32)
+                                buffer.set_size(
+                                    width as f32 - scrollbar_width * display_scale,
+                                    height as f32,
+                                )
                             });
 
                             let mut paint = Paint::default();
@@ -151,9 +152,9 @@ fn main() {
                                 if end_y > start_y {
                                     pixmap.fill_rect(
                                         Rect::from_xywh(
-                                            width as f32 - line_x * display_scale,
+                                            width as f32 - scrollbar_width * display_scale,
                                             start_y as f32,
-                                            line_x * display_scale,
+                                            scrollbar_width * display_scale,
                                             (end_y - start_y) as f32,
                                         )
                                         .unwrap(),
@@ -296,7 +297,7 @@ fn main() {
                                     && mouse_left == ElementState::Released
                                 {
                                     editor.action(Action::Click {
-                                        x: mouse_x /*- line_x*/ as i32,
+                                        x: mouse_x as i32,
                                         y: mouse_y as i32,
                                     });
                                     window.request_redraw();
