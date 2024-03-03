@@ -1,49 +1,25 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+use cosmic_text::BorrowedWithFontSystem;
+use cosmic_text::CacheKeyFlags;
+use cosmic_text::Color;
+use cosmic_text::Editor;
+use cosmic_text::Shaping;
+use cosmic_text::Style;
 use cosmic_text::{
-    Action, Attrs, Buffer, CacheKeyFlags, Color, Edit, Editor, Family, FontSystem, Metrics, Motion,
-    Shaping, Style, SwashCache, Weight,
+    Action, Attrs, Buffer, Edit, Family, FontSystem, Metrics, Motion, SwashCache, Weight,
 };
-use orbclient::{EventOption, Renderer, Window, WindowFlag};
-use std::{
-    process, thread,
-    time::{Duration, Instant},
+use std::{num::NonZeroU32, rc::Rc, slice};
+use tiny_skia::{Paint, PixmapMut, Rect, Transform};
+use winit::{
+    dpi::PhysicalPosition,
+    event::{ElementState, Event, KeyEvent, MouseButton, MouseScrollDelta, WindowEvent},
+    event_loop::{ControlFlow, EventLoop},
+    keyboard::{Key, NamedKey},
+    window::WindowBuilder,
 };
 
-fn main() {
-    env_logger::init();
-
-    let mut font_system = FontSystem::new();
-
-    let display_scale = match orbclient::get_display_size() {
-        Ok((w, h)) => {
-            log::info!("Display size: {}, {}", w, h);
-            (h as f32 / 1600.0) + 1.0
-        }
-        Err(err) => {
-            log::warn!("Failed to get display size: {}", err);
-            1.0
-        }
-    };
-
-    let mut window = Window::new_flags(
-        -1,
-        -1,
-        1024 * display_scale as u32,
-        768 * display_scale as u32,
-        &format!("COSMIC TEXT - {}", font_system.locale()),
-        &[WindowFlag::Resizable],
-    )
-    .unwrap();
-
-    let mut editor = Editor::new(Buffer::new_empty(
-        Metrics::new(32.0, 44.0).scale(display_scale),
-    ));
-
-    let mut editor = editor.borrow_with(&mut font_system);
-
-    editor.with_buffer_mut(|buffer| buffer.set_size(window.width() as f32, window.height() as f32));
-
+fn set_buffer_text<'a>(buffer: &mut BorrowedWithFontSystem<'a, Buffer>) {
     let attrs = Attrs::new();
     let serif_attrs = attrs.family(Family::Serif);
     let mono_attrs = attrs.family(Family::Monospace);
@@ -119,104 +95,248 @@ fn main() {
         ),
     ];
 
-    editor.with_buffer_mut(|buffer| {
-        buffer.set_rich_text(spans.iter().copied(), attrs, Shaping::Advanced)
-    });
+    buffer.set_rich_text(spans.iter().copied(), attrs, Shaping::Advanced);
+}
 
+fn main() {
+    env_logger::init();
+
+    let event_loop = EventLoop::new().unwrap();
+    let window = Rc::new(WindowBuilder::new().build(&event_loop).unwrap());
+    let context = softbuffer::Context::new(window.clone()).unwrap();
+    let mut surface = softbuffer::Surface::new(&context, window.clone()).unwrap();
+    let mut font_system = FontSystem::new();
     let mut swash_cache = SwashCache::new();
 
-    //TODO: make window not async?
-    let mut mouse_x = -1;
-    let mut mouse_y = -1;
-    let mut mouse_left = false;
-    loop {
-        let bg_color = orbclient::Color::rgb(0x34, 0x34, 0x34);
-        let font_color = Color::rgb(0xFF, 0xFF, 0xFF);
-        let cursor_color = Color::rgb(0xFF, 0xFF, 0xFF);
-        let selection_color = Color::rgba(0xFF, 0xFF, 0xFF, 0x33);
+    let mut display_scale = window.scale_factor() as f32;
+    let metrics = Metrics::new(32.0, 44.0);
+    let mut editor = Editor::new(Buffer::new_empty(metrics.scale(display_scale)));
+    let mut editor = editor.borrow_with(&mut font_system);
+    editor.with_buffer_mut(|buffer| {
+        buffer.set_size(
+            window.inner_size().width as f32,
+            window.inner_size().height as f32,
+        )
+    });
+    editor.with_buffer_mut(|buffer| set_buffer_text(buffer));
 
-        editor.shape_as_needed(true);
-        if editor.redraw() {
-            let instant = Instant::now();
+    let mut ctrl_pressed = false;
+    let mut mouse_x = 0.0;
+    let mut mouse_y = 0.0;
+    let mut mouse_left = ElementState::Released;
+    let mut unapplied_scroll_delta = 0.0;
 
-            window.set(bg_color);
+    let bg_color = tiny_skia::Color::from_rgba8(0x34, 0x34, 0x34, 0xFF);
+    let font_color = Color::rgb(0xFF, 0xFF, 0xFF);
+    let cursor_color = Color::rgb(0xFF, 0xFF, 0xFF);
+    let selection_color = Color::rgba(0xFF, 0xFF, 0xFF, 0x33);
 
-            editor.draw(
-                &mut swash_cache,
-                font_color,
-                cursor_color,
-                selection_color,
-                |x, y, w, h, color| {
-                    window.rect(x, y, w, h, orbclient::Color { data: color.0 });
-                },
-            );
+    event_loop
+        .run(|event, elwt| {
+            elwt.set_control_flow(ControlFlow::Wait);
 
-            window.sync();
+            match event {
+                Event::WindowEvent { window_id, event } => {
+                    match event {
+                        WindowEvent::ScaleFactorChanged { scale_factor, .. } => {
+                            log::info!("Updated scale factor for {window_id:?}");
 
-            editor.set_redraw(false);
+                            display_scale = scale_factor as f32;
+                            editor.with_buffer_mut(|buffer| {
+                                buffer.set_metrics(metrics.scale(display_scale))
+                            });
 
-            let duration = instant.elapsed();
-            log::debug!("redraw: {:?}", duration);
-        }
+                            window.request_redraw();
+                        }
+                        WindowEvent::RedrawRequested => {
+                            let (width, height) = {
+                                let size = window.inner_size();
+                                (size.width, size.height)
+                            };
 
-        for event in window.events() {
-            match event.to_option() {
-                EventOption::Key(event) => match event.scancode {
-                    orbclient::K_LEFT if event.pressed => {
-                        editor.action(Action::Motion(Motion::Left))
-                    }
-                    orbclient::K_RIGHT if event.pressed => {
-                        editor.action(Action::Motion(Motion::Right))
-                    }
-                    orbclient::K_UP if event.pressed => editor.action(Action::Motion(Motion::Up)),
-                    orbclient::K_DOWN if event.pressed => {
-                        editor.action(Action::Motion(Motion::Down))
-                    }
-                    orbclient::K_HOME if event.pressed => {
-                        editor.action(Action::Motion(Motion::Home))
-                    }
-                    orbclient::K_END if event.pressed => editor.action(Action::Motion(Motion::End)),
-                    orbclient::K_PGUP if event.pressed => {
-                        editor.action(Action::Motion(Motion::PageUp))
-                    }
-                    orbclient::K_PGDN if event.pressed => {
-                        editor.action(Action::Motion(Motion::PageDown))
-                    }
-                    orbclient::K_ENTER if event.pressed => editor.action(Action::Enter),
-                    orbclient::K_BKSP if event.pressed => editor.action(Action::Backspace),
-                    orbclient::K_DEL if event.pressed => editor.action(Action::Delete),
-                    _ => (),
-                },
-                EventOption::TextInput(event) => editor.action(Action::Insert(event.character)),
-                EventOption::Mouse(mouse) => {
-                    mouse_x = mouse.x;
-                    mouse_y = mouse.y;
-                    if mouse_left {
-                        editor.action(Action::Drag {
-                            x: mouse_x,
-                            y: mouse_y,
-                        });
+                            surface
+                                .resize(
+                                    NonZeroU32::new(width).unwrap(),
+                                    NonZeroU32::new(height).unwrap(),
+                                )
+                                .unwrap();
+
+                            let mut surface_buffer = surface.buffer_mut().unwrap();
+                            let surface_buffer_u8 = unsafe {
+                                slice::from_raw_parts_mut(
+                                    surface_buffer.as_mut_ptr() as *mut u8,
+                                    surface_buffer.len() * 4,
+                                )
+                            };
+                            let mut pixmap =
+                                PixmapMut::from_bytes(surface_buffer_u8, width, height).unwrap();
+                            pixmap.fill(bg_color);
+
+                            editor.with_buffer_mut(|buffer| {
+                                buffer.set_size(width as f32, height as f32)
+                            });
+
+                            let mut paint = Paint::default();
+                            paint.anti_alias = false;
+                            editor.shape_as_needed(true);
+
+                            editor.draw(
+                                &mut swash_cache,
+                                font_color,
+                                cursor_color,
+                                selection_color,
+                                |x, y, w, h, color| {
+                                    // Note: due to softbuffer and tiny_skia having incompatible internal color representations we swap
+                                    // the red and blue channels here
+                                    paint.set_color_rgba8(
+                                        color.b(),
+                                        color.g(),
+                                        color.r(),
+                                        color.a(),
+                                    );
+                                    pixmap.fill_rect(
+                                        Rect::from_xywh(x as f32, y as f32, w as f32, h as f32)
+                                            .unwrap(),
+                                        &paint,
+                                        Transform::identity(),
+                                        None,
+                                    );
+                                },
+                            );
+
+                            surface_buffer.present().unwrap();
+                        }
+                        WindowEvent::ModifiersChanged(modifiers) => {
+                            ctrl_pressed = modifiers.state().control_key()
+                        }
+                        WindowEvent::KeyboardInput { event, .. } => {
+                            let KeyEvent {
+                                logical_key, state, ..
+                            } = event;
+
+                            if state.is_pressed() {
+                                match logical_key {
+                                    Key::Named(NamedKey::ArrowLeft) => {
+                                        editor.action(Action::Motion(Motion::Left))
+                                    }
+                                    Key::Named(NamedKey::ArrowRight) => {
+                                        editor.action(Action::Motion(Motion::Right))
+                                    }
+                                    Key::Named(NamedKey::ArrowUp) => {
+                                        editor.action(Action::Motion(Motion::Up))
+                                    }
+                                    Key::Named(NamedKey::ArrowDown) => {
+                                        editor.action(Action::Motion(Motion::Down))
+                                    }
+                                    Key::Named(NamedKey::Home) => {
+                                        editor.action(Action::Motion(Motion::Home))
+                                    }
+                                    Key::Named(NamedKey::End) => {
+                                        editor.action(Action::Motion(Motion::End))
+                                    }
+                                    Key::Named(NamedKey::PageUp) => {
+                                        editor.action(Action::Motion(Motion::PageUp))
+                                    }
+                                    Key::Named(NamedKey::PageDown) => {
+                                        editor.action(Action::Motion(Motion::PageDown))
+                                    }
+                                    Key::Named(NamedKey::Escape) => editor.action(Action::Escape),
+                                    Key::Named(NamedKey::Enter) => editor.action(Action::Enter),
+                                    Key::Named(NamedKey::Backspace) => {
+                                        editor.action(Action::Backspace)
+                                    }
+                                    Key::Named(NamedKey::Delete) => editor.action(Action::Delete),
+                                    Key::Named(key) => {
+                                        if let Some(text) = key.to_text() {
+                                            for c in text.chars() {
+                                                editor.action(Action::Insert(c));
+                                            }
+                                        }
+                                    }
+                                    Key::Character(text) => {
+                                        if !ctrl_pressed {
+                                            for c in text.chars() {
+                                                editor.action(Action::Insert(c));
+                                            }
+                                        }
+                                    }
+                                    _ => {}
+                                }
+                                window.request_redraw();
+                            }
+                        }
+                        WindowEvent::CursorMoved {
+                            device_id: _,
+                            position,
+                        } => {
+                            // Update saved mouse position for use when handling click events
+                            mouse_x = position.x;
+                            mouse_y = position.y;
+
+                            // Implement dragging
+                            if mouse_left.is_pressed() {
+                                // Execute Drag editor action (update selection)
+                                editor.action(Action::Drag {
+                                    x: position.x as i32,
+                                    y: position.y as i32,
+                                });
+
+                                // Scroll if cursor is near edge of window while dragging
+                                if mouse_y <= 5.0 {
+                                    editor.action(Action::Scroll { lines: -1 });
+                                } else if mouse_y - 5.0 >= window.inner_size().height as f64 {
+                                    editor.action(Action::Scroll { lines: 1 });
+                                }
+
+                                window.request_redraw();
+                            }
+                        }
+                        WindowEvent::MouseInput {
+                            device_id: _,
+                            state,
+                            button,
+                        } => {
+                            if button == MouseButton::Left {
+                                if state == ElementState::Pressed
+                                    && mouse_left == ElementState::Released
+                                {
+                                    editor.action(Action::Click {
+                                        x: mouse_x /*- line_x*/ as i32,
+                                        y: mouse_y as i32,
+                                    });
+                                    window.request_redraw();
+                                }
+                                mouse_left = state;
+                            }
+                        }
+                        WindowEvent::MouseWheel {
+                            device_id: _,
+                            delta,
+                            phase: _,
+                        } => {
+                            let line_delta = match delta {
+                                MouseScrollDelta::LineDelta(_x, y) => y as i32,
+                                MouseScrollDelta::PixelDelta(PhysicalPosition { x: _, y }) => {
+                                    unapplied_scroll_delta += y;
+                                    let line_delta = (unapplied_scroll_delta / 20.0).floor();
+                                    unapplied_scroll_delta -= line_delta * 20.0;
+                                    line_delta as i32
+                                }
+                            };
+                            if line_delta != 0 {
+                                editor.action(Action::Scroll { lines: -line_delta });
+                            }
+                            window.request_redraw();
+                        }
+                        WindowEvent::CloseRequested => {
+                            //TODO: just close one window
+                            elwt.exit();
+                        }
+                        _ => {}
                     }
                 }
-                EventOption::Button(button) => {
-                    mouse_left = button.left;
-                    if mouse_left {
-                        editor.action(Action::Click {
-                            x: mouse_x,
-                            y: mouse_y,
-                        });
-                    }
-                }
-                EventOption::Resize(resize) => {
-                    editor.with_buffer_mut(|buffer| {
-                        buffer.set_size(resize.width as f32, resize.height as f32)
-                    });
-                }
-                EventOption::Quit(_) => process::exit(0),
-                _ => (),
+                _ => {}
             }
-        }
-
-        thread::sleep(Duration::from_millis(1));
-    }
+        })
+        .unwrap();
 }
