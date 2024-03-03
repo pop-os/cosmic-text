@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic_text::{
-    Action, Attrs, Buffer, Edit, Family, FontSystem, Metrics, Motion, SwashCache, SyntaxEditor,
+    Action, Attrs, Buffer, Edit, Family, FontSystem, LineHeight, Motion, SwashCache, SyntaxEditor,
     SyntaxSystem,
 };
 use std::{env, num::NonZeroU32, rc::Rc, slice};
@@ -31,28 +31,28 @@ fn main() {
 
     let scrollbar_width = 12.0;
     let font_sizes = [
-        Metrics::new(10.0, 14.0), // Caption
-        Metrics::new(14.0, 20.0), // Body
-        Metrics::new(20.0, 28.0), // Title 4
-        Metrics::new(24.0, 32.0), // Title 3
-        Metrics::new(28.0, 36.0), // Title 2
-        Metrics::new(32.0, 44.0), // Title 1
+        10.0, // Metrics::new(10.0, 14.0).scale(display_scale), // Caption
+        14.0, // Metrics::new(14.0, 20.0).scale(display_scale), // Body
+        20.0, // Metrics::new(20.0, 28.0).scale(display_scale), // Title 4
+        24.0, // Metrics::new(24.0, 32.0).scale(display_scale), // Title 3
+        28.0, // Metrics::new(28.0, 36.0).scale(display_scale), // Title 2
+        32.0, // Metrics::new(32.0, 44.0).scale(display_scale), // Title 1
     ];
     let font_size_default = 1; // Body
     let mut font_size_i = font_size_default;
 
     let mut editor = SyntaxEditor::new(
-        Buffer::new(
-            &mut font_system,
-            font_sizes[font_size_i].scale(display_scale),
-        ),
+        Buffer::new(&mut font_system),
         &syntax_system,
         "base16-eighties.dark",
     )
     .unwrap();
     let mut editor = editor.borrow_with(&mut font_system);
 
-    let attrs = Attrs::new().family(Family::Monospace);
+    let attrs = Attrs::new()
+        .size(font_sizes[font_size_i] * display_scale)
+        .line_height(LineHeight::Proportional(1.2))
+        .family(Family::Monospace);
 
     match editor.load_text(&path, attrs) {
         Ok(()) => (),
@@ -78,9 +78,9 @@ fn main() {
                             log::info!("Updated scale factor for {window_id:?}");
 
                             display_scale = scale_factor as f32;
-                            editor.with_buffer_mut(|buffer| {
-                                buffer.set_metrics(font_sizes[font_size_i].scale(display_scale))
-                            });
+                            // editor.with_buffer_mut(|buffer| {
+                            //     buffer.set_metrics(font_sizes[font_size_i].scale(display_scale))
+                            // });
 
                             window.request_redraw();
                         }
@@ -219,33 +219,33 @@ fn main() {
                                             match &*text {
                                                 "0" => {
                                                     font_size_i = font_size_default;
-                                                    editor.with_buffer_mut(|buffer| {
-                                                        buffer.set_metrics(
-                                                            font_sizes[font_size_i]
-                                                                .scale(display_scale),
-                                                        )
-                                                    });
+                                                    // editor.with_buffer_mut(|buffer| {
+                                                    //     buffer.set_metrics(
+                                                    //         font_sizes[font_size_i]
+                                                    //             .scale(display_scale),
+                                                    //     )
+                                                    // });
                                                 }
                                                 "-" => {
                                                     if font_size_i > 0 {
                                                         font_size_i -= 1;
-                                                        editor.with_buffer_mut(|buffer| {
-                                                            buffer.set_metrics(
-                                                                font_sizes[font_size_i]
-                                                                    .scale(display_scale),
-                                                            )
-                                                        });
+                                                        // editor.with_buffer_mut(|buffer| {
+                                                        //     buffer.set_metrics(
+                                                        //         font_sizes[font_size_i]
+                                                        //             .scale(display_scale),
+                                                        //     )
+                                                        // });
                                                     }
                                                 }
                                                 "=" => {
                                                     if font_size_i + 1 < font_sizes.len() {
                                                         font_size_i += 1;
-                                                        editor.with_buffer_mut(|buffer| {
-                                                            buffer.set_metrics(
-                                                                font_sizes[font_size_i]
-                                                                    .scale(display_scale),
-                                                            )
-                                                        });
+                                                        // editor.with_buffer_mut(|buffer| {
+                                                        //     buffer.set_metrics(
+                                                        //         font_sizes[font_size_i]
+                                                        //             .scale(display_scale),
+                                                        //     )
+                                                        // });
                                                     }
                                                 }
                                                 _ => {}
