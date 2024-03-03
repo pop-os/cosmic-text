@@ -7,7 +7,7 @@ use cosmic_text::Editor;
 use cosmic_text::Shaping;
 use cosmic_text::Style;
 use cosmic_text::{
-    Action, Attrs, Buffer, Edit, Family, FontSystem, Metrics, Motion, SwashCache, Weight,
+    Action, Attrs, Buffer, Edit, Family, FontSystem, LineHeight, Motion, SwashCache, Weight,
 };
 use std::{num::NonZeroU32, rc::Rc, slice};
 use tiny_skia::{Paint, PixmapMut, Rect, Transform};
@@ -19,8 +19,11 @@ use winit::{
     window::WindowBuilder,
 };
 
-fn set_buffer_text<'a>(buffer: &mut BorrowedWithFontSystem<'a, Buffer>) {
-    let attrs = Attrs::new();
+fn set_buffer_text<'a>(buffer: &mut BorrowedWithFontSystem<'a, Buffer>, scale_factor: f32) {
+    let attrs = Attrs::new()
+        .size(32.0)
+        .line_height(LineHeight::Absolute(44.0))
+        .scale(scale_factor);
     let serif_attrs = attrs.family(Family::Serif);
     let mono_attrs = attrs.family(Family::Monospace);
     let comic_attrs = attrs.family(Family::Name("Comic Neue"));
@@ -109,8 +112,7 @@ fn main() {
     let mut swash_cache = SwashCache::new();
 
     let mut display_scale = window.scale_factor() as f32;
-    let metrics = Metrics::new(32.0, 44.0);
-    let mut editor = Editor::new(Buffer::new_empty(metrics.scale(display_scale)));
+    let mut editor = Editor::new(Buffer::new_empty());
     let mut editor = editor.borrow_with(&mut font_system);
     editor.with_buffer_mut(|buffer| {
         buffer.set_size(
@@ -118,7 +120,7 @@ fn main() {
             window.inner_size().height as f32,
         )
     });
-    editor.with_buffer_mut(|buffer| set_buffer_text(buffer));
+    editor.with_buffer_mut(|buffer| set_buffer_text(buffer, display_scale));
 
     let mut ctrl_pressed = false;
     let mut mouse_x = 0.0;
@@ -142,9 +144,7 @@ fn main() {
                             log::info!("Updated scale factor for {window_id:?}");
 
                             display_scale = scale_factor as f32;
-                            editor.with_buffer_mut(|buffer| {
-                                buffer.set_metrics(metrics.scale(display_scale))
-                            });
+                            editor.with_buffer_mut(|buffer| set_buffer_text(buffer, display_scale));
 
                             window.request_redraw();
                         }
