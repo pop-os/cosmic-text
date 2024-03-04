@@ -55,6 +55,10 @@ warn_on_missing_glyphs = []
 name = "layout"
 harness = false
 
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
 [workspace]
 members = ["examples/*"]
 
