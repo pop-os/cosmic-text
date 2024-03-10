@@ -144,6 +144,21 @@
 <a href="#143" id="143">143</a>
 <a href="#144" id="144">144</a>
 <a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
 </pre></div><pre class="rust"><code><span class="comment">// SPDX-License-Identifier: MIT OR Apache-2.0
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>fallback;
 
@@ -176,6 +191,7 @@
     data: Arc&lt;<span class="kw">dyn </span>AsRef&lt;[u8]&gt; + Send + Sync&gt;,
     id: fontdb::ID,
     monospace_em_width: <span class="prelude-ty">Option</span>&lt;f32&gt;,
+    scripts: Vec&lt;[u8; <span class="number">4</span>]&gt;,
     unicode_codepoints: Vec&lt;u32&gt;,
 }
 
@@ -194,6 +210,10 @@
 
     <span class="kw">pub fn </span>monospace_em_width(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;f32&gt; {
         <span class="self">self</span>.monospace_em_width
+    }
+
+    <span class="kw">pub fn </span>scripts(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[[u8; <span class="number">4</span>]] {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.scripts
     }
 
     <span class="kw">pub fn </span>unicode_codepoints(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[u32] {
@@ -223,7 +243,7 @@
     <span class="kw">pub fn </span>new(db: <span class="kw-2">&amp;</span>fontdb::Database, id: fontdb::ID) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>info = db.face(id)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>(monospace_em_width, unicode_codepoints) = {
+        <span class="kw">let </span>(monospace_em_width, scripts, unicode_codepoints) = {
             db.with_face_data(id, |font_data, face_index| {
                 <span class="kw">let </span>face = ttf_parser::Face::parse(font_data, face_index).ok()<span class="question-mark">?</span>;
                 <span class="kw">let </span>monospace_em_width = info
@@ -238,6 +258,15 @@
                 <span class="kw">if </span>info.monospaced &amp;&amp; monospace_em_width.is_none() {
                     <span class="prelude-val">None</span><span class="question-mark">?</span>;
                 }
+
+                <span class="kw">let </span>scripts = face
+                    .tables()
+                    .gpos
+                    .into_iter()
+                    .chain(face.tables().gsub)
+                    .flat_map(|table| table.scripts)
+                    .map(|script| script.tag.to_bytes())
+                    .collect();
 
                 <span class="kw">let </span><span class="kw-2">mut </span>unicode_codepoints = Vec::new();
 
@@ -257,7 +286,7 @@
 
                 unicode_codepoints.shrink_to_fit();
 
-                <span class="prelude-val">Some</span>((monospace_em_width, unicode_codepoints))
+                <span class="prelude-val">Some</span>((monospace_em_width, scripts, unicode_codepoints))
             })<span class="question-mark">?
         </span>}<span class="question-mark">?</span>;
 
@@ -275,6 +304,7 @@
         <span class="prelude-val">Some</span>(<span class="self">Self </span>{
             id: info.id,
             monospace_em_width,
+            scripts,
             unicode_codepoints,
             <span class="attr">#[cfg(feature = <span class="string">"swash"</span>)]
             </span>swash: {
