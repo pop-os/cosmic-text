@@ -89,6 +89,11 @@ pub struct FontSystem {
     /// Sorted unique ID's of all Monospace fonts in DB
     monospace_font_ids: Vec<fontdb::ID>,
 
+    /// Sorted unique ID's of all Monospace fonts in DB per script.
+    /// A font may support multiple scripts of course, so the same ID
+    /// may appear in multiple map value vecs.
+    per_script_monospace_font_ids: HashMap<[u8; 4], Vec<fontdb::ID>>,
+
     /// Cache for font codepoint support info
     font_codepoint_support_info_cache: HashMap<fontdb::ID, FontCachedCodepointSupportInfo>,
 
@@ -153,17 +158,32 @@ impl FontSystem {
             .collect::<Vec<_>>();
         monospace_font_ids.sort();
 
-        Self {
+        let cloned_monospace_font_ids = monospace_font_ids.clone();
+
+        let mut ret = Self {
             locale,
             db,
             monospace_font_ids,
+            per_script_monospace_font_ids: Default::default(),
             font_cache: Default::default(),
             font_matches_cache: Default::default(),
             font_codepoint_support_info_cache: Default::default(),
             shape_plan_cache: ShapePlanCache::default(),
             #[cfg(feature = "shape-run-cache")]
             shape_run_cache: crate::ShapeRunCache::default(),
-        }
+        };
+
+        cloned_monospace_font_ids.into_iter().for_each(|id| {
+            if let Some(font) = ret.get_font(id) {
+                font.scripts().iter().copied().for_each(|script| {
+                    ret.per_script_monospace_font_ids
+                        .entry(script)
+                        .or_default()
+                        .push(font.id);
+                });
+            }
+        });
+        ret
     }
 
     /// Get the locale.
@@ -217,6 +237,19 @@ impl FontSystem {
 
     pub fn is_monospace(&self, id: fontdb::ID) -> bool {
         self.monospace_font_ids.binary_search(&id).is_ok()
+    }
+
+    pub fn get_monospace_ids_for_scripts(
+        &self,
+        scripts: impl Iterator<Item = [u8; 4]>,
+    ) -> Vec<fontdb::ID> {
+        let mut ret = scripts
+            .filter_map(|script| self.per_script_monospace_font_ids.get(&script))
+            .flat_map(|ids| ids.iter().copied())
+            .collect::<Vec<_>>();
+        ret.sort();
+        ret.dedup();
+        ret
     }
 
     #[inline(always)]

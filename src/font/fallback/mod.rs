@@ -2,6 +2,7 @@
 
 use alloc::collections::BTreeSet;
 use alloc::sync::Arc;
+use alloc::vec::Vec;
 use fontdb::Family;
 use unicode_script::Script;
 
@@ -150,6 +151,16 @@ impl<'a> Iterator for FontFallbackIter<'a> {
             self.default_i += 1;
             let is_mono = self.default_families[self.default_i - 1] == &Family::Monospace;
 
+            let mono_ids_for_scripts = if is_mono && !self.scripts.is_empty() {
+                let scripts = self.scripts.iter().filter_map(|script| {
+                    let script_as_lower = script.short_name().to_lowercase();
+                    <[u8; 4]>::try_from(script_as_lower.as_bytes()).ok()
+                });
+                self.font_system.get_monospace_ids_for_scripts(scripts)
+            } else {
+                Vec::new()
+            };
+
             for m_key in font_match_keys_iter(is_mono) {
                 let default_family = self
                     .font_system
@@ -173,7 +184,13 @@ impl<'a> Iterator for FontFallbackIter<'a> {
                 }
                 // Set a monospace fallback if Monospace family is not found
                 if is_mono {
-                    if self.font_system.is_monospace(m_key.id) {
+                    let include_mono_id = if mono_ids_for_scripts.is_empty() {
+                        self.font_system.is_monospace(m_key.id)
+                    } else {
+                        mono_ids_for_scripts.binary_search(&m_key.id).is_ok()
+                    };
+
+                    if include_mono_id {
                         let supported_cp_count_opt = self
                             .font_system
                             .get_font_supported_codepoints_in_word(m_key.id, self.word);
