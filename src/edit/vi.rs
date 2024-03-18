@@ -322,7 +322,7 @@ impl<'syntax_system, 'buffer> ViEditor<'syntax_system, 'buffer> {
                     None
                 };
 
-                // Highlight selection (TODO: HIGHLIGHT COLOR!)
+                // Highlight selection
                 if let Some((start, end)) = self.selection_bounds() {
                     if line_i >= start.line && line_i <= end.line {
                         let mut range_opt = None;
