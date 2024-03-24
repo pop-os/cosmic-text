@@ -53,7 +53,7 @@ fn eval_changed(commands: &cosmic_undo_2::Commands<Change>, pivot: Pivot) -> boo
         .current_command_index()
         .map(|current| match pivot {
             Pivot::Unsaved => true,
-            Pivot::Exact(i) => current == i,
+            Pivot::Exact(i) => current != i,
             Pivot::Saved => false,
         })
         .unwrap_or(true)
@@ -279,6 +279,7 @@ impl<'syntax_system, 'buffer> ViEditor<'syntax_system, 'buffer> {
             Pivot::Saved => Pivot::Exact(self.commands.current_command_index().unwrap_or_default()),
             _ => pivot,
         };
+        self.changed = eval_changed(&self.commands, pivot);
     }
 
     /// Set passthrough mode (true will turn off vi features)
