@@ -31,18 +31,32 @@ fn finish_change<'buffer, E: Edit<'buffer>>(
     editor: &mut E,
     commands: &mut cosmic_undo_2::Commands<Change>,
     changed: &mut bool,
+    pivot: Pivot,
 ) -> Option<Change> {
     //TODO: join changes together
     match editor.finish_change() {
         Some(change) => {
             if !change.items.is_empty() {
                 commands.push(change.clone());
-                *changed = true;
+                *changed = eval_changed(commands, pivot);
             }
             Some(change)
         }
         None => None,
     }
+}
+
+fn eval_changed(commands: &cosmic_undo_2::Commands<Change>, pivot: Pivot) -> bool {
+    // Editors are considered modified if the current change index is unequal to the last
+    // saved index
+    commands
+        .current_command_index()
+        .map(|current| match pivot {
+            Pivot::Unsaved => true,
+            Pivot::Exact(i) => current == i,
+            Pivot::Saved => false,
+        })
+        .unwrap_or(true)
 }
 
 fn search<'buffer, E: Edit<'buffer>>(editor: &mut E, value: &str, forwards: bool) -> bool {
@@ -167,6 +181,7 @@ pub struct ViEditor<'syntax_system, 'buffer> {
     search_opt: Option<(String, bool)>,
     commands: cosmic_undo_2::Commands<Change>,
     changed: bool,
+    save_pivot: Pivot,
 }
 
 impl<'syntax_system, 'buffer> ViEditor<'syntax_system, 'buffer> {
@@ -179,6 +194,7 @@ impl<'syntax_system, 'buffer> ViEditor<'syntax_system, 'buffer> {
             search_opt: None,
             commands: cosmic_undo_2::Commands::new(),
             changed: false,
+            save_pivot: Pivot::Unsaved,
         }
     }
 
@@ -233,6 +249,38 @@ impl<'syntax_system, 'buffer> ViEditor<'syntax_system, 'buffer> {
         self.changed = changed;
     }
 
+    /// Get current save pivot point
+    ///
+    /// See [`ViEditor::set_save_pivot`] for more details.
+    pub fn save_pivot(&self) -> Pivot {
+        match self.save_pivot {
+            Pivot::Exact(i) => {
+                if Some(i) == self.commands.current_command_index() {
+                    Pivot::Saved
+                } else {
+                    self.save_pivot
+                }
+            }
+            _ => self.save_pivot,
+        }
+    }
+
+    /// Set last saved pivot point
+    ///
+    /// A pivot point is the last saved index. Anything before or after the pivot indicates that
+    /// the editor has been changed or is unsaved.
+    ///
+    /// The pivot point for an unsaved editor is `0`. In other words, all changes are unsaved.
+    /// The pivot point for a saved editor is the index of the last change - 1.
+    ///
+    /// Undoing changes down to the pivot point means that the editor is unchanged.
+    pub fn set_save_pivot(&mut self, pivot: Pivot) {
+        self.save_pivot = match pivot {
+            Pivot::Saved => Pivot::Exact(self.commands.current_command_index().unwrap_or_default()),
+            _ => pivot,
+        };
+    }
+
     /// Set passthrough mode (true will turn off vi features)
     pub fn set_passthrough(&mut self, passthrough: bool) {
         if passthrough != self.passthrough {
@@ -251,9 +299,8 @@ impl<'syntax_system, 'buffer> ViEditor<'syntax_system, 'buffer> {
         log::debug!("Redo");
         for action in self.commands.redo() {
             undo_2_action(&mut self.editor, action);
-            //TODO: clear changed flag when back to last saved state?
-            self.changed = true;
         }
+        self.changed = eval_changed(&self.commands, self.save_pivot);
     }
 
     /// Undo a change
@@ -261,9 +308,8 @@ impl<'syntax_system, 'buffer> ViEditor<'syntax_system, 'buffer> {
         log::debug!("Undo");
         for action in self.commands.undo() {
             undo_2_action(&mut self.editor, action);
-            //TODO: clear changed flag when back to last saved state?
-            self.changed = true;
         }
+        self.changed = eval_changed(&self.commands, self.save_pivot);
     }
 
     #[cfg(feature = "swash")]
@@ -550,7 +596,12 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for ViEditor<'syntax_system, 'buffer
     }
 
     fn finish_change(&mut self) -> Option<Change> {
-        finish_change(&mut self.editor, &mut self.commands, &mut self.changed)
+        finish_change(
+            &mut self.editor,
+            &mut self.commands,
+            &mut self.changed,
+            self.save_pivot,
+        )
     }
 
     fn action(&mut self, font_system: &mut FontSystem, action: Action) {
@@ -564,7 +615,12 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for ViEditor<'syntax_system, 'buffer
         if self.passthrough {
             editor.action(font_system, action);
             // Always finish change when passing through (TODO: group changes)
-            finish_change(editor, &mut self.commands, &mut self.changed);
+            finish_change(
+                editor,
+                &mut self.commands,
+                &mut self.changed,
+                self.save_pivot,
+            );
             return;
         }
 
@@ -589,7 +645,12 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for ViEditor<'syntax_system, 'buffer
                 log::debug!("Pass through action {:?}", action);
                 editor.action(font_system, action);
                 // Always finish change when passing through (TODO: group changes)
-                finish_change(editor, &mut self.commands, &mut self.changed);
+                finish_change(
+                    editor,
+                    &mut self.commands,
+                    &mut self.changed,
+                    self.save_pivot,
+                );
                 return;
             }
         };
@@ -620,7 +681,12 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for ViEditor<'syntax_system, 'buffer
                     return;
                 }
                 Event::ChangeFinish => {
-                    finish_change(editor, &mut self.commands, &mut self.changed);
+                    finish_change(
+                        editor,
+                        &mut self.commands,
+                        &mut self.changed,
+                        self.save_pivot,
+                    );
                     return;
                 }
                 Event::Delete => Action::Delete,
@@ -687,7 +753,12 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for ViEditor<'syntax_system, 'buffer
                                 }
                             }
                         }
-                        finish_change(editor, &mut self.commands, &mut self.changed);
+                        finish_change(
+                            editor,
+                            &mut self.commands,
+                            &mut self.changed,
+                            self.save_pivot,
+                        );
                     }
                     return;
                 }
@@ -1121,4 +1192,11 @@ impl<'font_system, 'syntax_system, 'buffer>
     {
         self.inner.draw(self.font_system, cache, f);
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Pivot {
+    Unsaved,
+    Exact(usize),
+    Saved,
 }
