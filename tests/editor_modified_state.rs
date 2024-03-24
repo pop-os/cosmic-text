@@ -1,8 +1,6 @@
 use std::sync::OnceLock;
 
-use cosmic_text::{
-    Buffer, Change, Cursor, Edit, Metrics, Pivot, SyntaxEditor, SyntaxSystem, ViEditor,
-};
+use cosmic_text::{Buffer, Change, Cursor, Edit, Metrics, SyntaxEditor, SyntaxSystem, ViEditor};
 
 static SYNTAX_SYSTEM: OnceLock<SyntaxSystem> = OnceLock::new();
 
@@ -23,6 +21,18 @@ fn editor() -> ViEditor<'static, 'static> {
     ViEditor::new(editor)
 }
 
+// Tests that inserting into an empty editor correctly sets the editor as modified.
+#[test]
+fn insert_in_empty_editor_sets_changed() {
+    let mut editor = editor();
+
+    assert!(!editor.changed());
+    editor.start_change();
+    editor.insert_at(Cursor::new(0, 0), "Robert'); DROP TABLE Students;--", None);
+    editor.finish_change();
+    assert!(editor.changed());
+}
+
 #[test]
 fn undo_to_last_save() {
     let mut editor = editor();
@@ -32,8 +42,8 @@ fn undo_to_last_save() {
     let cursor = editor.insert_at(Cursor::new(0, 0), "Ferris is Rust's ", None);
     editor.finish_change();
     assert!(editor.changed());
-    editor.set_save_pivot(Pivot::Saved);
-    assert_eq!(Pivot::Saved, editor.save_pivot());
+    editor.save_point();
+    // assert_eq!(Pivot::Saved, editor.save_pivot());
     assert!(!editor.changed());
 
     // A new insert should set the editor as modified and the pivot should still be on the first
@@ -41,13 +51,13 @@ fn undo_to_last_save() {
     editor.start_change();
     editor.insert_at(cursor, "mascot", None);
     editor.finish_change();
-    assert_eq!(Pivot::Exact(0), editor.save_pivot());
+    // assert_eq!(Pivot::Exact(0), editor.save_pivot());
     assert!(editor.changed());
 
     // Undoing the latest change should set the editor to unmodified again
     editor.start_change();
     editor.undo();
     editor.finish_change();
-    assert_eq!(Pivot::Saved, editor.save_pivot());
+    // assert_eq!(Pivot::Saved, editor.save_pivot());
     assert!(!editor.changed());
 }
