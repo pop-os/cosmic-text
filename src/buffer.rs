@@ -1,8 +1,21 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+//! This module contains the [`Buffer`] type which is the entry point for shaping and layout of text.
+//!
+//! A [`Buffer`] contains a list of [`BufferLine`]s and is used to compute the [`LayoutRun`]s.
+//!
+//! [`BufferLine`]s correspond to the paragraphs of text in the [`Buffer`].
+//! Each [`BufferLine`] contains a list of [`LayoutLine`]s, which represent the visual lines.
+//! `Buffer::line_heights` is a computed list of visual line heights.
+//!
+//! [`LayoutRun`]s represent the actually-visible visual lines,
+//! based on the [`Buffer`]'s scroll position, width, height and wrapping mode.
+
 #[cfg(not(feature = "std"))]
-use alloc::{string::String, vec::Vec};
-use core::{cmp, fmt};
+use alloc::{
+    string::{String, ToString},
+    vec::Vec,
+};
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
@@ -14,9 +27,9 @@ use crate::{
 /// A line of visible text for rendering
 #[derive(Debug)]
 pub struct LayoutRun<'a> {
-    /// The index of the original text line
+    /// The index of the original [`BufferLine`] (or paragraph) in the [`Buffer`]
     pub line_i: usize,
-    /// The original text line
+    /// The text of the original [`BufferLine`] (or paragraph)
     pub text: &'a str,
     /// True if the original paragraph direction is RTL
     pub rtl: bool,
@@ -28,6 +41,8 @@ pub struct LayoutRun<'a> {
     pub line_top: f32,
     /// Width of line
     pub line_w: f32,
+    /// The height of the line
+    pub line_height: f32,
 }
 
 impl<'a> LayoutRun<'a> {
@@ -89,46 +104,41 @@ impl<'a> LayoutRun<'a> {
 /// An iterator of visible text lines, see [`LayoutRun`]
 #[derive(Debug)]
 pub struct LayoutRunIter<'b> {
+    /// The buffer we are iterating over
     buffer: &'b Buffer,
+    /// The paragraph we are up to in the iteration
     line_i: usize,
+    /// The line within the paragraph we are up to in the iteration
     layout_i: usize,
+    /// The total line height already iterated over
+    height_seen: f32,
+    /// How many items the iterator will still yield (for size hint)
     remaining_len: usize,
-    total_layout: i32,
 }
 
 impl<'b> LayoutRunIter<'b> {
     pub fn new(buffer: &'b Buffer) -> Self {
-        let total_layout_lines: usize = buffer
+        // Compute how many lines there will be in the iterator for the size hint. This involves iterating
+        // through the entire iterator but should be relatively cheap.
+        let mut remaining_height = buffer.height;
+        let remaining_len: usize = buffer
             .lines
             .iter()
             .skip(buffer.scroll.line)
-            .map(|line| {
-                line.layout_opt()
-                    .as_ref()
-                    .map(|layout| layout.len())
-                    .unwrap_or_default()
+            .flat_map(|line| line.line_heights().unwrap_or(&[]))
+            .skip(buffer.scroll.layout as usize)
+            .take_while(|line_height| {
+                remaining_height -= **line_height;
+                remaining_height > 0.0
             })
-            .sum();
-        let top_cropped_layout_lines =
-            total_layout_lines.saturating_sub(buffer.scroll.layout.try_into().unwrap_or_default());
-        let maximum_lines = if buffer.metrics.line_height == 0.0 {
-            0
-        } else {
-            (buffer.height / buffer.metrics.line_height) as i32
-        };
-        let bottom_cropped_layout_lines =
-            if top_cropped_layout_lines > maximum_lines.try_into().unwrap_or_default() {
-                maximum_lines.try_into().unwrap_or_default()
-            } else {
-                top_cropped_layout_lines
-            };
+            .count();
 
         Self {
             buffer,
             line_i: buffer.scroll.line,
-            layout_i: 0,
-            remaining_len: bottom_cropped_layout_lines,
-            total_layout: 0,
+            layout_i: buffer.scroll.layout as usize,
+            height_seen: 0.0,
+            remaining_len,
         }
     }
 }
@@ -141,42 +151,39 @@ impl<'b> Iterator for LayoutRunIter<'b> {
     }
 
     fn next(&mut self) -> Option<Self::Item> {
+        if self.remaining_len == 0 {
+            return None;
+        }
+
         while let Some(line) = self.buffer.lines.get(self.line_i) {
             let shape = line.shape_opt().as_ref()?;
-            let layout = line.layout_opt().as_ref()?;
-            while let Some(layout_line) = layout.get(self.layout_i) {
+            let layout = line.layout_opt()?;
+            let line_heights = line.line_heights()?;
+            while let (Some(layout_line), Some(line_height)) =
+                (layout.get(self.layout_i), line_heights.get(self.layout_i))
+            {
+                let line_top = self.height_seen;
+                self.height_seen += line_height;
                 self.layout_i += 1;
 
-                let scrolled = self.total_layout < self.buffer.scroll.layout;
-                self.total_layout += 1;
-                if scrolled {
-                    continue;
-                }
-
-                let line_top = self
-                    .total_layout
-                    .saturating_sub(self.buffer.scroll.layout)
-                    .saturating_sub(1) as f32
-                    * self.buffer.metrics.line_height;
                 let glyph_height = layout_line.max_ascent + layout_line.max_descent;
-                let centering_offset = (self.buffer.metrics.line_height - glyph_height) / 2.0;
+                let centering_offset = (line_height - glyph_height) / 2.0;
                 let line_y = line_top + centering_offset + layout_line.max_ascent;
 
                 if line_top + centering_offset > self.buffer.height {
                     return None;
                 }
 
-                return self.remaining_len.checked_sub(1).map(|num| {
-                    self.remaining_len = num;
-                    LayoutRun {
-                        line_i: self.line_i,
-                        text: line.text(),
-                        rtl: shape.rtl,
-                        glyphs: &layout_line.glyphs,
-                        line_y,
-                        line_top,
-                        line_w: layout_line.w,
-                    }
+                self.remaining_len -= 1;
+                return Some(LayoutRun {
+                    line_i: self.line_i,
+                    text: line.text(),
+                    rtl: shape.rtl,
+                    glyphs: &layout_line.glyphs,
+                    line_y,
+                    line_top,
+                    line_w: layout_line.w,
+                    line_height: *line_height,
                 });
             }
             self.line_i += 1;
@@ -189,48 +196,21 @@ impl<'b> Iterator for LayoutRunIter<'b> {
 
 impl<'b> ExactSizeIterator for LayoutRunIter<'b> {}
 
-/// Metrics of text
-#[derive(Clone, Copy, Debug, Default, PartialEq)]
-pub struct Metrics {
-    /// Font size in pixels
-    pub font_size: f32,
-    /// Line height in pixels
-    pub line_height: f32,
-}
-
-impl Metrics {
-    pub const fn new(font_size: f32, line_height: f32) -> Self {
-        Self {
-            font_size,
-            line_height,
-        }
-    }
-
-    pub fn scale(self, scale: f32) -> Self {
-        Self {
-            font_size: self.font_size * scale,
-            line_height: self.line_height * scale,
-        }
-    }
-}
-
-impl fmt::Display for Metrics {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}px / {}px", self.font_size, self.line_height)
-    }
-}
-
 /// A buffer of text that is shaped and laid out
 #[derive(Debug)]
 pub struct Buffer {
-    /// [BufferLine]s (or paragraphs) of text in the buffer
+    /// [BufferLine]s (or paragraphs) of text in the buffer.
     pub lines: Vec<BufferLine>,
-    metrics: Metrics,
+    /// The cached heights of visual lines. Compute using [`Buffer::update_line_heights`].
+    line_heights: Vec<f32>,
+    /// The text bounding box width.
     width: f32,
+    /// The text bounding box height.
     height: f32,
     scroll: Scroll,
     /// True if a redraw is requires. Set to false after processing
     redraw: bool,
+    /// The wrapping mode
     wrap: Wrap,
     monospace_width: Option<f32>,
 
@@ -242,7 +222,8 @@ impl Clone for Buffer {
     fn clone(&self) -> Self {
         Self {
             lines: self.lines.clone(),
-            metrics: self.metrics,
+            // metrics: self.metrics,
+            line_heights: self.line_heights.clone(),
             width: self.width,
             height: self.height,
             scroll: self.scroll,
@@ -262,15 +243,10 @@ impl Buffer {
     /// for example by calling [`Buffer::set_text`].
     ///
     /// If you have a [`FontSystem`] in scope, you should use [`Buffer::new`] instead.
-    ///
-    /// # Panics
-    ///
-    /// Will panic if `metrics.line_height` is zero.
-    pub fn new_empty(metrics: Metrics) -> Self {
-        assert_ne!(metrics.line_height, 0.0, "line height cannot be 0");
+    pub fn new_empty() -> Self {
         Self {
             lines: Vec::new(),
-            metrics,
+            line_heights: Vec::new(),
             width: 0.0,
             height: 0.0,
             scroll: Scroll::default(),
@@ -282,12 +258,8 @@ impl Buffer {
     }
 
     /// Create a new [`Buffer`] with the provided [`FontSystem`] and [`Metrics`]
-    ///
-    /// # Panics
-    ///
-    /// Will panic if `metrics.line_height` is zero.
-    pub fn new(font_system: &mut FontSystem, metrics: Metrics) -> Self {
-        let mut buffer = Self::new_empty(metrics);
+    pub fn new(font_system: &mut FontSystem) -> Self {
+        let mut buffer = Self::new_empty();
         buffer.set_text(font_system, "", Attrs::new(), Shaping::Advanced);
         buffer
     }
@@ -313,7 +285,7 @@ impl Buffer {
                 line.layout_in_buffer(
                     &mut self.scratch,
                     font_system,
-                    self.metrics.font_size,
+                    // self.metrics.font_size,
                     self.width,
                     self.wrap,
                     self.monospace_width,
@@ -321,10 +293,37 @@ impl Buffer {
             }
         }
 
+        self.update_line_heights();
         self.redraw = true;
 
         #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
         log::debug!("relayout: {:?}", instant.elapsed());
+    }
+
+    /// Get the cached heights of visual lines
+    pub fn line_heights(&self) -> &[f32] {
+        self.line_heights.as_slice()
+    }
+
+    /// Update the cached heights of visual lines
+    pub fn update_line_heights(&mut self) {
+        #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
+        let instant = std::time::Instant::now();
+
+        self.line_heights.clear();
+        let iter = self
+            .lines
+            .iter()
+            .flat_map(|line| line.line_heights())
+            .flat_map(|lines| lines.iter().copied());
+        self.line_heights.extend(iter);
+
+        #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
+        log::debug!(
+            "update_line_heights {}: {:?}",
+            self.line_heights.len(),
+            instant.elapsed()
+        );
     }
 
     /// Shape lines until cursor, also scrolling to include cursor in view
@@ -374,6 +373,109 @@ impl Buffer {
 
         self.shape_until_scroll(font_system, prune);
     }
+
+    // REMOVEME (line-heights)
+    //         let mut reshaped = 0;
+    //         let mut layout_i = 0;
+    //         let mut should_update_line_heights = false;
+    //         for (line_i, line) in self.lines.iter_mut().enumerate() {
+    //             if line_i > cursor.line {
+    //                 break;
+    //             }
+
+    //             if line.shape_opt().is_none() {
+    //                 reshaped += 1;
+    //             }
+
+    //             if line.layout_opt().is_none() {
+    //                 should_update_line_heights = true;
+    //             }
+
+    //             let layout =
+    //                 line.layout_in_buffer(&mut self.scratch, font_system, self.width, self.wrap);
+    //             if line_i == cursor.line {
+    //                 let layout_cursor = self.layout_cursor(&cursor);
+    //                 layout_i += layout_cursor.layout as i32;
+    //                 break;
+    //             } else {
+    //                 layout_i += layout.len() as i32;
+    //             }
+    //         }
+
+    //         if should_update_line_heights {
+    //             self.update_line_heights();
+    //         }
+
+    //         if reshaped > 0 {
+    //             #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
+    //             log::debug!("shape_until_cursor {}: {:?}", reshaped, instant.elapsed());
+    //             self.redraw = true;
+    //         }
+
+    //         // the first visible line is index = self.scroll
+    //         // the last visible line is index = self.scroll + lines
+    //         let lines = self.visible_lines();
+    //         if layout_i < self.scroll {
+    //             self.scroll = layout_i;
+    //         } else if layout_i >= self.scroll + lines {
+    //             // need to work backwards from layout_i using the line heights
+    //             let lines = self.visible_lines_to(layout_i as usize);
+    //             self.scroll = layout_i - (lines - 1);
+    //         }
+
+    //         self.shape_until_scroll(font_system);
+    //     }
+    // =======
+
+    //     /// Pre-shape lines in the buffer, up to `lines`, return actual number of layout lines
+    //     pub fn shape_until(&mut self, font_system: &mut FontSystem, lines: i32) -> i32 {
+    //         #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
+    //         let instant = std::time::Instant::now();
+
+    //         let mut reshaped = 0;
+    //         let mut total_layout = 0;
+    //         let mut should_update_line_heights = false;
+    //         for line in &mut self.lines {
+    //             if total_layout >= lines {
+    //                 break;
+    //             }
+
+    //             if line.shape_opt().is_none() {
+    //                 reshaped += 1;
+    //             }
+
+    //             if line.layout_opt().is_none() {
+    //                 should_update_line_heights = true;
+    //             }
+
+    //             let layout =
+    //                 line.layout_in_buffer(&mut self.scratch, font_system, self.width, self.wrap);
+    //             total_layout += layout.len() as i32;
+    //         }
+
+    //         if should_update_line_heights {
+    //             self.update_line_heights();
+    //         }
+
+    //         if reshaped > 0 {
+    //             #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
+    //             log::debug!("shape_until {}: {:?}", reshaped, instant.elapsed());
+    //             self.redraw = true;
+    //         }
+
+    //         total_layout
+    //     }
+
+    //     /// Shape lines until scroll
+    //     pub fn shape_until_scroll(&mut self, font_system: &mut FontSystem) {
+    //         self.layout_lines(font_system);
+
+    //         let lines = self.visible_lines();
+
+    //         let scroll_end = self.scroll + lines;
+    //         let total_layout = self.shape_until(font_system, scroll_end);
+    //         self.scroll = (total_layout - (lines - 1)).clamp(0, self.scroll);
+    //     }
 
     /// Shape lines until scroll
     pub fn shape_until_scroll(&mut self, font_system: &mut FontSystem, prune: bool) {
@@ -447,6 +549,11 @@ impl Buffer {
         font_system: &mut FontSystem,
         cursor: Cursor,
     ) -> Option<LayoutCursor> {
+        // REMOVEME (line-heights)
+        // let line = &self.lines[cursor.line];
+        // //TODO: ensure layout is done?
+        // let layout = line.layout_opt().expect("layout not found");
+
         let layout = self.line_layout(font_system, cursor.line)?;
         for (layout_i, layout_line) in layout.iter().enumerate() {
             for (glyph_i, glyph) in layout_line.glyphs.iter().enumerate() {
@@ -489,29 +596,46 @@ impl Buffer {
         font_system: &mut FontSystem,
         line_i: usize,
     ) -> Option<&[LayoutLine]> {
+        let should_update_line_heights = {
+            let line = self.lines.get_mut(line_i)?;
+            // check if the line needs to be laid out
+            if line.layout_opt().is_none() {
+                // update the layout (result will be cached)
+                let _ = line.layout(font_system, self.width, self.wrap, self.monospace_width);
+                true
+            } else {
+                false
+            }
+        };
+
+        if should_update_line_heights {
+            self.update_line_heights();
+        }
+
         let line = self.lines.get_mut(line_i)?;
         Some(line.layout_in_buffer(
             &mut self.scratch,
             font_system,
-            self.metrics.font_size,
+            // self.metrics.font_size,
             self.width,
             self.wrap,
             self.monospace_width,
         ))
     }
 
-    /// Get the current [`Metrics`]
-    pub fn metrics(&self) -> Metrics {
-        self.metrics
-    }
+    /// Lay out all lines without shaping
+    pub fn layout_lines(&mut self, font_system: &mut FontSystem) {
+        let mut should_update_line_heights = false;
+        for line in self.lines.iter_mut() {
+            if line.layout_opt().is_none() {
+                should_update_line_heights = true;
+                let _ = line.layout(font_system, self.width, self.wrap, self.monospace_width);
+            }
+        }
 
-    /// Set the current [`Metrics`]
-    ///
-    /// # Panics
-    ///
-    /// Will panic if `metrics.font_size` is zero.
-    pub fn set_metrics(&mut self, font_system: &mut FontSystem, metrics: Metrics) {
-        self.set_metrics_and_size(font_system, metrics, self.width, self.height);
+        if should_update_line_heights {
+            self.update_line_heights();
+        }
     }
 
     /// Get the current [`Wrap`]
@@ -553,27 +677,9 @@ impl Buffer {
 
     /// Set the current buffer dimensions
     pub fn set_size(&mut self, font_system: &mut FontSystem, width: f32, height: f32) {
-        self.set_metrics_and_size(font_system, self.metrics, width, height);
-    }
-
-    /// Set the current [`Metrics`] and buffer dimensions at the same time
-    ///
-    /// # Panics
-    ///
-    /// Will panic if `metrics.font_size` is zero.
-    pub fn set_metrics_and_size(
-        &mut self,
-        font_system: &mut FontSystem,
-        metrics: Metrics,
-        width: f32,
-        height: f32,
-    ) {
         let clamped_width = width.max(0.0);
         let clamped_height = height.max(0.0);
-
-        if metrics != self.metrics || clamped_width != self.width || clamped_height != self.height {
-            assert_ne!(metrics.font_size, 0.0, "font size cannot be 0");
-            self.metrics = metrics;
+        if clamped_width != self.width || clamped_height != self.height {
             self.width = clamped_width;
             self.height = clamped_height;
             self.relayout(font_system);
@@ -594,9 +700,67 @@ impl Buffer {
         }
     }
 
-    /// Get the number of lines that can be viewed in the buffer
+    /// Get the number of lines that can be viewed in the buffer, from a starting point
+    pub fn visible_lines_from(&self, from: Scroll) -> i32 {
+        let mut height = self.height;
+        // let line_heights = self.line_heights();
+        // if line_heights.is_empty() {
+        //     // this has never been laid out, so we can't know the height yet
+        //     return i32::MAX;
+        // }
+        let mut i = 0;
+        let mut para_iter = self.lines.iter().skip(from.line);
+
+        // Iterate over first paragraph (skipping from.layout visible lines)
+        let Some(first_para_line_heights) = para_iter.next().and_then(|para| para.line_heights())
+        else {
+            return i32::MAX;
+        };
+        let mut line_iter = first_para_line_heights.iter().skip(from.layout as usize);
+        while let Some(line_height) = line_iter.next() {
+            height -= line_height;
+            if height <= 0.0 {
+                break;
+            }
+            i += 1;
+        }
+
+        // Iterate over all lines of remaining paragraph
+        let mut iter = para_iter.flat_map(|para| para.line_heights().unwrap_or(&[]).iter());
+        while let Some(line_height) = iter.next() {
+            height -= line_height;
+            if height <= 0.0 {
+                break;
+            }
+            i += 1;
+        }
+
+        i
+    }
+
+    /// Get the number of lines that can be viewed in the buffer, to an ending point
+    pub fn visible_lines_to(&self, to: usize) -> i32 {
+        let mut height = self.height;
+        let line_heights = self.line_heights();
+        if line_heights.is_empty() {
+            // this has never been laid out, so we can't know the height yet
+            return i32::MAX;
+        }
+        let mut i = 0;
+        let mut iter = line_heights.iter().rev().skip(line_heights.len() - to - 1);
+        while let Some(line_height) = iter.next() {
+            height -= line_height;
+            if height <= 0.0 {
+                break;
+            }
+            i += 1;
+        }
+        i
+    }
+
+    /// Get the number of visual lines that can be viewed in the buffer
     pub fn visible_lines(&self) -> i32 {
-        (self.height / self.metrics.line_height) as i32
+        self.visible_lines_from(self.scroll)
     }
 
     /// Set text of buffer, using provided attributes for each line by default
@@ -613,10 +777,10 @@ impl Buffer {
     /// Set text of buffer, using an iterator of styled spans (pairs of text and attributes)
     ///
     /// ```
-    /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, Metrics, Shaping};
+    /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, LineHeight, Shaping};
     /// # let mut font_system = FontSystem::new();
-    /// let mut buffer = Buffer::new_empty(Metrics::new(32.0, 44.0));
-    /// let attrs = Attrs::new().family(Family::Serif);
+    /// let mut buffer = Buffer::new_empty();
+    /// let attrs = Attrs::new().size(32.0).line_height(LineHeight::Absolute(44.0)).family(Family::Serif);
     /// buffer.set_rich_text(
     ///     &mut font_system,
     ///     [
@@ -733,104 +897,148 @@ impl Buffer {
     }
 
     /// Convert x, y position to Cursor (hit detection)
-    pub fn hit(&self, x: f32, y: f32) -> Option<Cursor> {
+    pub fn hit(&self, strike_x: f32, strike_y: f32) -> Option<Cursor> {
         #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
         let instant = std::time::Instant::now();
 
-        let font_size = self.metrics.font_size;
-        let line_height = self.metrics.line_height;
+        // below,
+        // - `first`, `last` refers to iterator indices (usize)
+        // - `start`, `end` refers to byte indices (usize)
+        // - `left`, `top`, `right`, `bot`, `mid` refers to spatial coordinates (f32)
 
-        let mut new_cursor_opt = None;
+        let Some(last_run_index) = self.layout_runs().count().checked_sub(1) else {
+            return None;
+        };
 
-        let mut runs = self.layout_runs().peekable();
-        let mut first_run = true;
-        while let Some(run) = runs.next() {
-            let line_y = run.line_y;
+        let mut runs = self.layout_runs().enumerate();
 
-            if first_run && y < line_y - font_size {
-                first_run = false;
-                let new_cursor = Cursor::new(run.line_i, 0);
-                new_cursor_opt = Some(new_cursor);
-            } else if y >= line_y - font_size && y < line_y - font_size + line_height {
-                let mut new_cursor_glyph = run.glyphs.len();
-                let mut new_cursor_char = 0;
-                let mut new_cursor_affinity = Affinity::After;
+        // TODO: consider caching line_top and line_bot on LayoutRun
 
-                let mut first_glyph = true;
+        // 1. within the buffer, find the layout run (line) that contains the strike point
+        // 2. within the layout run (line), find the glyph that contains the strike point
+        // 3. within the glyph, find the approximate extended grapheme cluster (egc) that contains the strike point
+        // the boundary (top/bot, left/right) cases in each step are special
+        let mut line_top = 0.0;
+        let cursor = 'hit: loop {
+            let Some((run_index, run)) = runs.next() else {
+                // no hit found
+                break 'hit None;
+            };
 
-                'hit: for (glyph_i, glyph) in run.glyphs.iter().enumerate() {
-                    if first_glyph {
-                        first_glyph = false;
-                        if (run.rtl && x > glyph.x) || (!run.rtl && x < 0.0) {
-                            new_cursor_glyph = 0;
-                            new_cursor_char = 0;
-                        }
-                    }
-                    if x >= glyph.x && x <= glyph.x + glyph.w {
-                        new_cursor_glyph = glyph_i;
-
-                        let cluster = &run.text[glyph.start..glyph.end];
-                        let total = cluster.grapheme_indices(true).count();
-                        let mut egc_x = glyph.x;
-                        let egc_w = glyph.w / (total as f32);
-                        for (egc_i, egc) in cluster.grapheme_indices(true) {
-                            if x >= egc_x && x <= egc_x + egc_w {
-                                new_cursor_char = egc_i;
-
-                                let right_half = x >= egc_x + egc_w / 2.0;
-                                if right_half != glyph.level.is_rtl() {
-                                    // If clicking on last half of glyph, move cursor past glyph
-                                    new_cursor_char += egc.len();
-                                    new_cursor_affinity = Affinity::Before;
-                                }
-                                break 'hit;
-                            }
-                            egc_x += egc_w;
-                        }
-
-                        let right_half = x >= glyph.x + glyph.w / 2.0;
-                        if right_half != glyph.level.is_rtl() {
-                            // If clicking on last half of glyph, move cursor past glyph
-                            new_cursor_char = cluster.len();
-                            new_cursor_affinity = Affinity::Before;
-                        }
-                        break 'hit;
-                    }
-                }
-
-                let mut new_cursor = Cursor::new(run.line_i, 0);
-
-                match run.glyphs.get(new_cursor_glyph) {
-                    Some(glyph) => {
-                        // Position at glyph
-                        new_cursor.index = glyph.start + new_cursor_char;
-                        new_cursor.affinity = new_cursor_affinity;
-                    }
-                    None => {
-                        if let Some(glyph) = run.glyphs.last() {
-                            // Position at end of line
-                            new_cursor.index = glyph.end;
-                            new_cursor.affinity = Affinity::Before;
-                        }
-                    }
-                }
-
-                new_cursor_opt = Some(new_cursor);
-
-                break;
-            } else if runs.peek().is_none() && y > run.line_y {
-                let mut new_cursor = Cursor::new(run.line_i, 0);
-                if let Some(glyph) = run.glyphs.last() {
-                    new_cursor = run.cursor_from_glyph_right(glyph);
-                }
-                new_cursor_opt = Some(new_cursor);
+            if run_index == 0 && strike_y < line_top {
+                // hit above top line
+                break 'hit Some(Cursor::new(run.line_i, 0));
             }
-        }
+
+            let line_bot = line_top + run.line_height;
+
+            if run_index == last_run_index && strike_y >= line_bot {
+                // hit below bottom line
+                match run.glyphs.last() {
+                    Some(glyph) => break 'hit Some(run.cursor_from_glyph_right(glyph)),
+                    None => break 'hit Some(Cursor::new(run.line_i, 0)),
+                }
+            }
+
+            if (line_top..line_bot).contains(&strike_y) {
+                let last_glyph_index = run.glyphs.len() - 1;
+
+                // TODO: is this assumption correct with rtl?
+                let (left_glyph_index, right_glyph_index) = if run.rtl {
+                    (last_glyph_index, 0)
+                } else {
+                    (0, last_glyph_index)
+                };
+
+                for (glyph_index, glyph) in run.glyphs.iter().enumerate() {
+                    let glyph_left = glyph.x;
+
+                    if glyph_index == left_glyph_index && strike_x < glyph_left {
+                        // hit left of left-most glyph in line
+                        break 'hit Some(Cursor::new(run.line_i, 0));
+                    }
+
+                    let glyph_right = glyph_left + glyph.w;
+
+                    if glyph_index == right_glyph_index && strike_x >= glyph_right {
+                        // hit right of right-most glyph in line
+                        break 'hit Some(run.cursor_from_glyph_right(glyph));
+                    }
+
+                    if (glyph_left..glyph_right).contains(&strike_x) {
+                        let cluster = &run.text[glyph.start..glyph.end];
+
+                        let total = cluster.graphemes(true).count();
+                        let last_egc_index = total - 1;
+                        let egc_w = glyph.w / (total as f32);
+                        let mut egc_left = glyph_left;
+
+                        // TODO: is this assumption correct with rtl?
+                        let (left_egc_index, right_egc_index) = if glyph.level.is_rtl() {
+                            (last_egc_index, 0)
+                        } else {
+                            (0, last_egc_index)
+                        };
+
+                        for (egc_index, (egc_start, egc)) in
+                            cluster.grapheme_indices(true).enumerate()
+                        {
+                            let egc_end = egc_start + egc.len();
+
+                            let (left_egc_byte, right_egc_byte) = if glyph.level.is_rtl() {
+                                (glyph.start + egc_end, glyph.start + egc_start)
+                            } else {
+                                (glyph.start + egc_start, glyph.start + egc_end)
+                            };
+
+                            if egc_index == left_egc_index && strike_x < egc_left {
+                                // hit left of left-most egc in cluster
+                                break 'hit Some(Cursor::new(run.line_i, left_egc_byte));
+                            }
+
+                            let egc_right = egc_left + egc_w;
+
+                            if egc_index == right_egc_index && strike_x >= egc_right {
+                                // hit right of right-most egc in cluster
+                                break 'hit Some(Cursor::new(run.line_i, right_egc_byte));
+                            }
+
+                            let egc_mid = egc_left + egc_w / 2.0;
+
+                            let hit_egc = if (egc_left..egc_mid).contains(&strike_x) {
+                                // hit left half of egc
+                                Some(true)
+                            } else if (egc_mid..egc_right).contains(&strike_x) {
+                                // hit right half of egc
+                                Some(false)
+                            } else {
+                                None
+                            };
+
+                            if let Some(egc_left_half) = hit_egc {
+                                break 'hit Some(Cursor::new(
+                                    run.line_i,
+                                    if egc_left_half {
+                                        left_egc_byte
+                                    } else {
+                                        right_egc_byte
+                                    },
+                                ));
+                            }
+
+                            egc_left = egc_right;
+                        }
+                    }
+                }
+            }
+
+            line_top = line_bot;
+        };
 
         #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
-        log::trace!("click({}, {}): {:?}", x, y, instant.elapsed());
+        log::trace!("click({}, {}): {:?}", strike_x, strike_y, instant.elapsed());
 
-        new_cursor_opt
+        cursor
     }
 
     /// Apply a [`Motion`] to a [`Cursor`]
@@ -1066,28 +1274,79 @@ impl Buffer {
                     Motion::Vertical(self.size().1 as i32),
                 )?;
             }
-            Motion::Vertical(px) => {
+            // REMOVEME (main)
+            // Motion::Vertical(px) => {
+            //     // TODO more efficient
+            //     let lines = px / self.metrics().line_height as i32;
+            //     match lines.cmp(&0) {
+            //         cmp::Ordering::Less => {
+            //             for _ in 0..-lines {
+            //                 (cursor, cursor_x_opt) =
+            //                     self.cursor_motion(font_system, cursor, cursor_x_opt, Motion::Up)?;
+            //             }
+            //         }
+            //         cmp::Ordering::Greater => {
+            //             for _ in 0..lines {
+            //                 (cursor, cursor_x_opt) = self.cursor_motion(
+            //                     font_system,
+            //                     cursor,
+            //                     cursor_x_opt,
+            //                     Motion::Down,
+            //                 )?;
+            //             }
+            //         }
+            //         cmp::Ordering::Equal => {}
+            //     }
+            // }
+            Motion::Vertical(mut px) => {
                 // TODO more efficient
-                let lines = px / self.metrics().line_height as i32;
-                match lines.cmp(&0) {
-                    cmp::Ordering::Less => {
-                        for _ in 0..-lines {
-                            (cursor, cursor_x_opt) =
-                                self.cursor_motion(font_system, cursor, cursor_x_opt, Motion::Up)?;
-                        }
+                // let cursor = self.layout_cursor(&mut font_system, cursor);
+                let mut current_line = cursor.line as i32;
+                let direction = px.signum();
+                loop {
+                    current_line += direction;
+                    if current_line < 0 || current_line >= self.line_heights().len() as i32 {
+                        break;
                     }
-                    cmp::Ordering::Greater => {
-                        for _ in 0..lines {
-                            (cursor, cursor_x_opt) = self.cursor_motion(
-                                font_system,
-                                cursor,
-                                cursor_x_opt,
-                                Motion::Down,
-                            )?;
+
+                    let current_line_height = self.line_heights()[current_line as usize];
+
+                    match direction {
+                        -1 => {
+                            self.cursor_motion(font_system, cursor, cursor_x_opt, Motion::Up);
+                            px -= current_line_height as i32;
+                            if px >= self.size().1 as i32 {
+                                break;
+                            }
                         }
+                        1 => {
+                            self.cursor_motion(font_system, cursor, cursor_x_opt, Motion::Down);
+                            px += current_line_height as i32;
+
+                            if px <= 0 as i32 {
+                                break;
+                            }
+                        }
+                        _ => break,
                     }
-                    cmp::Ordering::Equal => {}
                 }
+                // let lines = px / self.buffer.metrics().line_height as i32;
+                // match lines.cmp(&0) {
+                //     Ordering::Less => {
+                //         for _ in 0..-lines {
+                //             self.action(font_system, Action::Up);
+                //         }
+                //     }
+                //     Ordering::Greater => {
+                //         for _ in 0..lines {
+                //             self.action(font_system, Action::Down);
+                //         }
+                //     }
+                //     Ordering::Equal => {}
+                // }
+
+                // TODO: is this necessary?
+                self.set_redraw(true);
             }
             Motion::PreviousWord => {
                 let line = self.lines.get(cursor.line)?;
@@ -1249,15 +1508,6 @@ impl<'a> BorrowedWithFontSystem<'a, Buffer> {
         self.inner.line_layout(self.font_system, line_i)
     }
 
-    /// Set the current [`Metrics`]
-    ///
-    /// # Panics
-    ///
-    /// Will panic if `metrics.font_size` is zero.
-    pub fn set_metrics(&mut self, metrics: Metrics) {
-        self.inner.set_metrics(self.font_system, metrics);
-    }
-
     /// Set the current [`Wrap`]
     pub fn set_wrap(&mut self, wrap: Wrap) {
         self.inner.set_wrap(self.font_system, wrap);
@@ -1268,16 +1518,6 @@ impl<'a> BorrowedWithFontSystem<'a, Buffer> {
         self.inner.set_size(self.font_system, width, height);
     }
 
-    /// Set the current [`Metrics`] and buffer dimensions at the same time
-    ///
-    /// # Panics
-    ///
-    /// Will panic if `metrics.font_size` is zero.
-    pub fn set_metrics_and_size(&mut self, metrics: Metrics, width: f32, height: f32) {
-        self.inner
-            .set_metrics_and_size(self.font_system, metrics, width, height);
-    }
-
     /// Set text of buffer, using provided attributes for each line by default
     pub fn set_text(&mut self, text: &str, attrs: Attrs, shaping: Shaping) {
         self.inner.set_text(self.font_system, text, attrs, shaping);
@@ -1286,11 +1526,11 @@ impl<'a> BorrowedWithFontSystem<'a, Buffer> {
     /// Set text of buffer, using an iterator of styled spans (pairs of text and attributes)
     ///
     /// ```
-    /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, Metrics, Shaping};
+    /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, LineHeight, Shaping};
     /// # let mut font_system = FontSystem::new();
-    /// let mut buffer = Buffer::new_empty(Metrics::new(32.0, 44.0));
+    /// let mut buffer = Buffer::new_empty();
     /// let mut buffer = buffer.borrow_with(&mut font_system);
-    /// let attrs = Attrs::new().family(Family::Serif);
+    /// let attrs = Attrs::new().size(32.0).line_height(LineHeight::Absolute(44.0)).family(Family::Serif);
     /// buffer.set_rich_text(
     ///     [
     ///         ("hello, ", attrs),

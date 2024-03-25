@@ -11,7 +11,7 @@ pub struct BufferLine {
     attrs_list: AttrsList,
     align: Option<Align>,
     shape_opt: Option<ShapeLine>,
-    layout_opt: Option<Vec<LayoutLine>>,
+    layout_opt: Option<LayoutLines>,
     shaping: Shaping,
     metadata: Option<usize>,
 }
@@ -178,10 +178,11 @@ impl BufferLine {
     }
 
     /// Layout line, will cache results
+    ///
+    /// Ensure that if this buffer line was laid out, you call [`Buffer::update_line_heights`] afterwards
     pub fn layout(
         &mut self,
         font_system: &mut FontSystem,
-        font_size: f32,
         width: f32,
         wrap: Wrap,
         match_mono_width: Option<f32>,
@@ -189,19 +190,20 @@ impl BufferLine {
         self.layout_in_buffer(
             &mut ShapeBuffer::default(),
             font_system,
-            font_size,
+            // font_size,
             width,
             wrap,
             match_mono_width,
         )
     }
 
-    /// Layout a line using a pre-existing shape buffer, will cache results
+    /// Layout a line using a pre-existing shape buffer.
+    ///
+    /// Ensure that if this buffer line was laid out, you call [`Buffer::update_line_heights`] afterwards
     pub fn layout_in_buffer(
         &mut self,
         scratch: &mut ShapeBuffer,
         font_system: &mut FontSystem,
-        font_size: f32,
         width: f32,
         wrap: Wrap,
         match_mono_width: Option<f32>,
@@ -209,24 +211,42 @@ impl BufferLine {
         if self.layout_opt.is_none() {
             let align = self.align;
             let shape = self.shape_in_buffer(scratch, font_system);
+
             let mut layout = Vec::with_capacity(1);
             shape.layout_to_buffer(
                 scratch,
-                font_size,
+                // font_size,
                 width,
                 wrap,
                 align,
                 &mut layout,
                 match_mono_width,
             );
-            self.layout_opt = Some(layout);
+            let line_heights = layout.iter().map(|line| line.line_height()).collect();
+            self.layout_opt = Some(LayoutLines {
+                layout,
+                line_heights,
+            });
         }
-        self.layout_opt.as_ref().expect("layout not found")
+        self.layout_opt
+            .as_ref()
+            .map(|l| l.layout.as_ref())
+            .expect("layout not found")
     }
 
     /// Get line layout cache
-    pub fn layout_opt(&self) -> &Option<Vec<LayoutLine>> {
-        &self.layout_opt
+    pub fn layout_opt(&self) -> Option<&[LayoutLine]> {
+        self.layout_opt.as_ref().map(|l| l.layout.as_ref())
+    }
+
+    /// Get line height cache
+    pub fn line_heights(&self) -> Option<&[f32]> {
+        self.layout_opt.as_ref().map(|l| l.line_heights.as_ref())
+    }
+
+    /// Get the number of lines (after line-breaking has occurred)
+    pub fn broken_line_count(&self) -> Option<usize> {
+        self.layout_opt.as_ref().map(|l| l.line_heights.len())
     }
 
     /// Get line metadata. This will be None if [`BufferLine::set_metadata`] has not been called
@@ -239,4 +259,11 @@ impl BufferLine {
     pub fn set_metadata(&mut self, metadata: usize) {
         self.metadata = Some(metadata);
     }
+}
+
+/// A list of [`LayoutLine`] in a [`BufferLine`] alongside their line heights
+#[derive(Clone, Debug)]
+struct LayoutLines {
+    layout: Vec<LayoutLine>,
+    line_heights: Vec<f32>,
 }

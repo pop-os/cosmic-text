@@ -101,17 +101,63 @@ impl FamilyOwned {
     }
 }
 
+/// Determines the line height and strategy.
+/// The actual height of a line will be determined by the largest logical line height in a line.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum LineHeight {
+    /// Represents a line height that is proportional to the font size.
+    Proportional(f32),
+    /// Represents an absolute line height, independent of the font size.
+    Absolute(f32),
+}
+
+impl core::hash::Hash for LineHeight {
+    fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
+        match self {
+            LineHeight::Proportional(height) => {
+                state.write_u8(1);
+                height.to_bits().hash(state);
+            }
+            LineHeight::Absolute(height) => {
+                state.write_u8(2);
+                height.to_bits().hash(state);
+            }
+        }
+    }
+}
+
+impl LineHeight {
+    pub fn height(&self, font_size: f32) -> f32 {
+        match self {
+            LineHeight::Proportional(height) => *height * font_size,
+            LineHeight::Absolute(height) => *height,
+        }
+    }
+}
+
+impl Default for LineHeight {
+    fn default() -> Self {
+        Self::Proportional(1.2)
+    }
+}
+
 /// Text attributes
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Attrs<'a> {
-    //TODO: should this be an option?
+    // TODO: should this be an option?
+    // TODO: extract
     pub color_opt: Option<Color>,
     pub family: Family<'a>,
     pub stretch: Stretch,
     pub style: Style,
     pub weight: Weight,
+    // TODO: extract
     pub metadata: usize,
     pub cache_key_flags: CacheKeyFlags,
+    // TODO: extract
+    pub font_size: f32,
+    // TODO: extract
+    pub line_height: LineHeight,
 }
 
 impl<'a> Attrs<'a> {
@@ -125,6 +171,8 @@ impl<'a> Attrs<'a> {
             stretch: Stretch::Normal,
             style: Style::Normal,
             weight: Weight::NORMAL,
+            font_size: 16.0,
+            line_height: LineHeight::Proportional(1.2),
             metadata: 0,
             cache_key_flags: CacheKeyFlags::empty(),
         }
@@ -133,6 +181,31 @@ impl<'a> Attrs<'a> {
     /// Set [Color]
     pub fn color(mut self, color: Color) -> Self {
         self.color_opt = Some(color);
+        self
+    }
+
+    /// Set font size
+    ///
+    /// # Panics
+    ///
+    /// Will panic if font size is zero.
+    pub fn size(mut self, size: f32) -> Self {
+        assert_ne!(size, 0.0, "font size cannot be 0");
+        self.font_size = size;
+        self
+    }
+
+    /// Set line height
+    ///
+    /// # Panics
+    ///
+    /// Will panic if line height is zero.
+    pub fn line_height(mut self, line_height: LineHeight) -> Self {
+        let inner = match line_height {
+            LineHeight::Absolute(inner) | LineHeight::Proportional(inner) => inner,
+        };
+        assert_ne!(inner, 0.0, "line height cannot be 0");
+        self.line_height = line_height;
         self
     }
 
@@ -186,6 +259,35 @@ impl<'a> Attrs<'a> {
             && self.style == other.style
             && self.weight == other.weight
     }
+
+    /// Scale the font size and line height
+    ///
+    /// # Panics
+    ///
+    /// Will panic if scale is zero.
+    pub fn scale(mut self, scale: f32) -> Self {
+        assert_ne!(scale, 0.0, "scale cannot be 0");
+        self.font_size = self.font_size * scale;
+        if let LineHeight::Absolute(height) = self.line_height {
+            self.line_height = LineHeight::Absolute(height * scale);
+        }
+        self
+    }
+}
+
+impl<'a> Eq for Attrs<'a> {}
+
+impl<'a> core::hash::Hash for Attrs<'a> {
+    fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
+        self.color_opt.hash(state);
+        self.family.hash(state);
+        self.stretch.hash(state);
+        self.style.hash(state);
+        self.weight.hash(state);
+        self.metadata.hash(state);
+        self.font_size.to_bits().hash(state);
+        self.line_height.hash(state);
+    }
 }
 
 /// Font-specific part of [`Attrs`] to be used for matching
@@ -209,16 +311,22 @@ impl<'a> From<Attrs<'a>> for FontMatchAttrs {
 }
 
 /// An owned version of [`Attrs`]
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct AttrsOwned {
-    //TODO: should this be an option?
+    // TODO: should this be an option?
+    // TODO: extract
     pub color_opt: Option<Color>,
     pub family_owned: FamilyOwned,
     pub stretch: Stretch,
     pub style: Style,
     pub weight: Weight,
+    // TODO: extract
     pub metadata: usize,
     pub cache_key_flags: CacheKeyFlags,
+    // TODO: extract
+    pub font_size: f32,
+    // TODO: extract
+    pub line_height: LineHeight,
 }
 
 impl AttrsOwned {
@@ -231,6 +339,8 @@ impl AttrsOwned {
             weight: attrs.weight,
             metadata: attrs.metadata,
             cache_key_flags: attrs.cache_key_flags,
+            font_size: attrs.font_size,
+            line_height: attrs.line_height,
         }
     }
 
@@ -243,7 +353,24 @@ impl AttrsOwned {
             weight: self.weight,
             metadata: self.metadata,
             cache_key_flags: self.cache_key_flags,
+            font_size: self.font_size,
+            line_height: self.line_height,
         }
+    }
+}
+
+impl Eq for AttrsOwned {}
+
+impl core::hash::Hash for AttrsOwned {
+    fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
+        self.color_opt.hash(state);
+        self.family_owned.hash(state);
+        self.stretch.hash(state);
+        self.style.hash(state);
+        self.weight.hash(state);
+        self.metadata.hash(state);
+        self.font_size.to_bits().hash(state);
+        self.line_height.hash(state);
     }
 }
 

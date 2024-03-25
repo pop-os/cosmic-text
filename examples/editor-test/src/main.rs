@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic_text::{
-    Action, BidiParagraphs, BorrowedWithFontSystem, Buffer, Color, Edit, Editor, FontSystem,
-    Metrics, Motion, SwashCache,
+    Action, Attrs, BidiParagraphs, BorrowedWithFontSystem, Buffer, Color, Edit, Editor, FontSystem,
+    LineHeight, Motion, SwashCache,
 };
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{env, fs, process, time::Instant};
@@ -60,16 +60,16 @@ fn main() {
     .unwrap();
 
     let font_sizes = [
-        Metrics::new(10.0, 14.0).scale(display_scale), // Caption
-        Metrics::new(14.0, 20.0).scale(display_scale), // Body
-        Metrics::new(20.0, 28.0).scale(display_scale), // Title 4
-        Metrics::new(24.0, 32.0).scale(display_scale), // Title 3
-        Metrics::new(28.0, 36.0).scale(display_scale), // Title 2
-        Metrics::new(32.0, 44.0).scale(display_scale), // Title 1
+        10.0, // Metrics::new(10.0, 14.0).scale(display_scale), // Caption
+        14.0, // Metrics::new(14.0, 20.0).scale(display_scale), // Body
+        20.0, // Metrics::new(20.0, 28.0).scale(display_scale), // Title 4
+        24.0, // Metrics::new(24.0, 32.0).scale(display_scale), // Title 3
+        28.0, // Metrics::new(28.0, 36.0).scale(display_scale), // Title 2
+        32.0, // Metrics::new(32.0, 44.0).scale(display_scale), // Title 1
     ];
     let font_size_default = 1; // Body
 
-    let mut buffer = Buffer::new(&mut font_system, font_sizes[font_size_default]);
+    let mut buffer = Buffer::new(&mut font_system);
     buffer
         .borrow_with(&mut font_system)
         .set_size(window.width() as f32, window.height() as f32);
@@ -89,6 +89,11 @@ fn main() {
         let default_text = include_str!("../../../sample/proportional.txt");
         default_text.to_string()
     };
+
+    let attrs = Attrs::new()
+        .size(font_sizes[font_size_default])
+        .line_height(LineHeight::Proportional(1.2))
+        .scale(display_scale);
 
     let test_start = Instant::now();
 
