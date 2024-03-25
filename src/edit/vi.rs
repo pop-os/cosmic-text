@@ -46,6 +46,7 @@ fn finish_change<'buffer, E: Edit<'buffer>>(
     }
 }
 
+/// Evaluate if an [`ViEditor`] changed based on its last saved state.
 fn eval_changed(commands: &cosmic_undo_2::Commands<Change>, pivot: Option<usize>) -> bool {
     // Editors are considered modified if the current change index is unequal to the last
     // saved index or if `pivot` is None.
@@ -250,15 +251,15 @@ impl<'syntax_system, 'buffer> ViEditor<'syntax_system, 'buffer> {
         self.changed = changed;
     }
 
-    /// Set last saved pivot point
+    /// Set current change as the save (or pivot) point.
     ///
     /// A pivot point is the last saved index. Anything before or after the pivot indicates that
     /// the editor has been changed or is unsaved.
     ///
-    /// The pivot point for an unsaved editor is `0`. In other words, all changes are unsaved.
-    /// The pivot point for a saved editor is the index of the last change - 1.
+    /// Undoing changes down to the pivot point sets the editor as unchanged.
+    /// Redoing changes up to the pivot point sets the editor as unchanged.
     ///
-    /// Undoing changes down to the pivot point means that the editor is unchanged.
+    /// Undoing or redoing changes beyond the pivot point sets the editor to changed.
     pub fn save_point(&mut self) {
         self.save_pivot = Some(self.commands.current_command_index().unwrap_or_default());
         self.changed = false;

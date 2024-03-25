@@ -34,6 +34,23 @@ fn insert_in_empty_editor_sets_changed() {
 }
 
 #[test]
+fn insert_and_undo_in_unsaved_editor_is_unchanged() {
+    let mut editor = editor();
+
+    assert!(!editor.changed());
+    editor.start_change();
+    editor.insert_at(Cursor::new(0, 0), "loop {}", None);
+    editor.finish_change();
+    assert!(editor.changed());
+
+    // Undoing the above change should set the editor as unchanged even if the save state is unset
+    editor.start_change();
+    editor.undo();
+    editor.finish_change();
+    assert!(!editor.changed());
+}
+
+#[test]
 fn undo_to_last_save() {
     let mut editor = editor();
 
@@ -60,4 +77,62 @@ fn undo_to_last_save() {
     editor.finish_change();
     // assert_eq!(Pivot::Saved, editor.save_pivot());
     assert!(!editor.changed());
+}
+
+#[test]
+fn redoing_to_save_point_sets_editor_as_unchanged() {
+    let mut editor = editor();
+
+    // Initial change
+    assert!(
+        !editor.changed(),
+        "Editor should start in an unchanged state"
+    );
+    editor.start_change();
+    editor.insert_at(Cursor::new(0, 0), "editor.start_change();", None);
+    editor.finish_change();
+    assert!(
+        editor.changed(),
+        "Editor should be set as modified after insert() and finish_change()"
+    );
+    editor.save_point();
+    assert!(
+        !editor.changed(),
+        "Editor should be unchanged after setting a save point"
+    );
+
+    // Change to undo then redo
+    editor.start_change();
+    editor.insert_at(Cursor::new(1, 0), "editor.finish_change()", None);
+    editor.finish_change();
+    assert!(
+        editor.changed(),
+        "Editor should be set as modified after insert() and finish_change()"
+    );
+    editor.save_point();
+    assert!(
+        !editor.changed(),
+        "Editor should be unchanged after setting a save point"
+    );
+
+    editor.undo();
+    assert!(
+        editor.changed(),
+        "Undoing past save point should set editor as changed"
+    );
+    editor.redo();
+    assert!(
+        !editor.changed(),
+        "Redoing to save point should set editor as unchanged"
+    );
+}
+
+#[test]
+fn redoing_past_save_point_sets_editor_as_changed() {
+    unimplemented!()
+}
+
+#[test]
+fn undo_all_changes() {
+    unimplemented!()
 }
