@@ -50,15 +50,18 @@ fn finish_change<'buffer, E: Edit<'buffer>>(
 fn eval_changed(commands: &cosmic_undo_2::Commands<Change>, pivot: Option<usize>) -> bool {
     // Editors are considered modified if the current change index is unequal to the last
     // saved index or if `pivot` is None.
-    // The latter case handles a never saved editor with a current command index of 0.
+    // The latter case handles a never saved editor with a current command index of None.
     // Check the unit tests for an example.
-    commands
-        .current_command_index()
-        .zip(pivot)
-        .map(|(current, pivot)| current != pivot)
+    match (commands.current_command_index(), pivot) {
+        (Some(current), Some(pivot)) => current != pivot,
+        // Edge case for an editor with neither a save point nor any changes.
+        // This could be a new editor or an editor without a save point where undo() is called
+        // until the editor is fresh.
+        (None, None) => false,
         // Default to true because it's safer to assume a buffer has been modified so as to not
         // lose changes
-        .unwrap_or(true)
+        _ => true,
+    }
 }
 
 fn search<'buffer, E: Edit<'buffer>>(editor: &mut E, value: &str, forwards: bool) -> bool {
