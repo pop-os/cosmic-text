@@ -234,6 +234,10 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for SyntaxEditor<'syntax_system, 'bu
         self.editor.selection()
     }
 
+    fn set_cursor_hidden(&mut self, hidden: bool) {
+        self.editor.set_cursor_hidden(hidden);
+    }
+
     fn set_selection(&mut self, selection: Selection) {
         self.editor.set_selection(selection);
     }
