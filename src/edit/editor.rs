@@ -125,10 +125,12 @@ impl<'buffer> Editor<'buffer> {
         text_color: Color,
         cursor_color: Color,
         selection_color: Color,
+        selected_text_color: Color,
         mut f: F,
     ) where
         F: FnMut(i32, i32, u32, u32, Color),
     {
+        let selection_bounds = self.selection_bounds();
         self.with_buffer(|buffer| {
             let line_height = buffer.metrics().line_height;
             for run in buffer.layout_runs() {
@@ -137,7 +139,7 @@ impl<'buffer> Editor<'buffer> {
                 let line_top = run.line_top;
 
                 // Highlight selection
-                if let Some((start, end)) = self.selection_bounds() {
+                if let Some((start, end)) = selection_bounds {
                     if line_i >= start.line && line_i <= end.line {
                         let mut range_opt = None;
                         for glyph in run.glyphs.iter() {
@@ -211,10 +213,21 @@ impl<'buffer> Editor<'buffer> {
                 for glyph in run.glyphs.iter() {
                     let physical_glyph = glyph.physical((0., 0.), 1.0);
 
-                    let glyph_color = match glyph.color_opt {
+                    let mut glyph_color = match glyph.color_opt {
                         Some(some) => some,
                         None => text_color,
                     };
+                    if text_color != selected_text_color {
+                        if let Some((start, end)) = selection_bounds {
+                            if line_i >= start.line
+                                && line_i <= end.line
+                                && (start.line != line_i || glyph.end > start.index)
+                                && (end.line != line_i || glyph.start < end.index)
+                            {
+                                glyph_color = selected_text_color;
+                            }
+                        }
+                    }
 
                     cache.with_pixels(
                         font_system,
@@ -970,6 +983,7 @@ impl<'font_system, 'buffer> BorrowedWithFontSystem<'font_system, Editor<'buffer>
         text_color: Color,
         cursor_color: Color,
         selection_color: Color,
+        selected_text_color: Color,
         f: F,
     ) where
         F: FnMut(i32, i32, u32, u32, Color),
@@ -980,6 +994,7 @@ impl<'font_system, 'buffer> BorrowedWithFontSystem<'font_system, Editor<'buffer>
             text_color,
             cursor_color,
             selection_color,
+            selected_text_color,
             f,
         );
     }
