@@ -17,6 +17,7 @@ fn redraw(
     let font_color = Color::rgb(0xFF, 0xFF, 0xFF);
     let cursor_color = Color::rgb(0xFF, 0xFF, 0xFF);
     let selection_color = Color::rgba(0xFF, 0xFF, 0xFF, 0x33);
+    let selected_text_color = Color::rgb(0xF0, 0xF0, 0xFF);
 
     editor.shape_as_needed(true);
     if editor.redraw() {
@@ -29,6 +30,7 @@ fn redraw(
             font_color,
             cursor_color,
             selection_color,
+            selected_text_color,
             |x, y, w, h, color| {
                 window.rect(x, y, w, h, orbclient::Color { data: color.0 });
             },
