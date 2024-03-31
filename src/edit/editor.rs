@@ -26,6 +26,11 @@ pub struct Editor<'buffer> {
     auto_indent: bool,
     tab_width: u16,
     change: Option<Change>,
+    // A preedit was specified with non-empty text but with empty cursor,
+    // indicating that the cursor should be hidden
+    has_preedit_without_cursor: bool,
+    // Set with `set_cursor_hidden`
+    cursor_hidden_by_setting: bool,
 }
 
 fn cursor_glyph_opt(cursor: &Cursor, run: &LayoutRun) -> Option<(usize, f32)> {
@@ -106,6 +111,8 @@ impl<'buffer> Editor<'buffer> {
             auto_indent: false,
             tab_width: 4,
             change: None,
+            has_preedit_without_cursor: false,
+            cursor_hidden_by_setting: false,
         }
     }
 
@@ -191,8 +198,14 @@ impl<'buffer> Editor<'buffer> {
                 }
 
                 // Draw cursor
-                if let Some((x, y)) = cursor_position(&self.cursor, &run) {
-                    f(x, y, 1, line_height as u32, cursor_color);
+                let cursor_hidden = self.cursor_hidden_by_setting
+                    || self.has_preedit_without_cursor
+                    || self.has_selection();
+
+                if !cursor_hidden {
+                    if let Some((x, y)) = cursor_position(&self.cursor, &run) {
+                        f(x, y, 1, line_height as u32, cursor_color);
+                    }
                 }
 
                 for glyph in run.glyphs.iter() {
@@ -242,6 +255,11 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
             self.cursor_moved = true;
             self.with_buffer_mut(|buffer| buffer.set_redraw(true));
         }
+    }
+
+    fn set_cursor_hidden(&mut self, hidden: bool) {
+        self.cursor_hidden_by_setting = hidden;
+        self.set_redraw(true);
     }
 
     fn selection(&self) -> Selection {
@@ -906,10 +924,9 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                             select.index = select.index.saturating_sub(start_delta);
                             self.selection = Selection::Normal(select);
                         }
-                    } else {
-                        // TODO: hide cursor
                     }
                 }
+                self.has_preedit_without_cursor = !preedit.is_empty() && cursor.is_none();
                 self.set_redraw(true);
             }
         }

@@ -1169,6 +1169,10 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for ViEditor<'syntax_system, 'buffer
     fn cursor_position(&self) -> Option<(i32, i32)> {
         self.editor.cursor_position()
     }
+
+    fn set_cursor_hidden(&mut self, hidden: bool) {
+        self.editor.set_cursor_hidden(hidden);
+    }
 }
 
 impl<'font_system, 'syntax_system, 'buffer>

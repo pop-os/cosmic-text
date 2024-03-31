@@ -209,8 +209,32 @@ pub trait Edit<'buffer> {
     /// Get the current cursor
     fn cursor(&self) -> Cursor;
 
+    /// Hide or show the cursor
+    ///
+    /// This should be used to hide the cursor, for example,
+    /// when the editor is unfocused, when the text is not editable,
+    /// or to implement cursor blinking.
+    ///
+    /// Note that even after `set_cursor_hidden(false)`, the editor may
+    /// choose to hide the cursor based on internal state, for example,
+    /// when there is a selection or when there is a preedit without a cursor.
+    fn set_cursor_hidden(&mut self, hidden: bool);
+
     /// Set the current cursor
     fn set_cursor(&mut self, cursor: Cursor);
+
+    /// Returns true if some text is selected
+    fn has_selection(&self) -> bool {
+        match self.selection() {
+            Selection::None => false,
+            Selection::Normal(selection) => {
+                let cursor = self.cursor();
+                selection.line != cursor.line || selection.index != cursor.index
+            }
+            Selection::Line(selection) => selection.line != self.cursor().line,
+            Selection::Word(_) => true,
+        }
+    }
 
     /// Get the current selection position
     fn selection(&self) -> Selection;
