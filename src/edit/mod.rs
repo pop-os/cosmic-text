@@ -1,10 +1,12 @@
 use alloc::sync::Arc;
+use core::ops::Range;
+
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, vec::Vec};
 use core::cmp;
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::{AttrsList, BorrowedWithFontSystem, Buffer, Cursor, FontSystem, Motion};
+use crate::{AttrsList, AttrsOwned, BorrowedWithFontSystem, Buffer, Cursor, FontSystem, Motion};
 
 pub use self::editor::*;
 mod editor;
@@ -20,7 +22,7 @@ pub use self::vi::*;
 mod vi;
 
 /// An action to perform on an [`Editor`]
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Action {
     /// Move the cursor with some motion
     Motion(Motion),
@@ -61,6 +63,20 @@ pub enum Action {
     /// Scroll specified number of lines
     Scroll {
         lines: i32,
+    },
+    /// Set preedit text, replacing any previous preedit text
+    ///
+    /// If `cursor` is specified, it contains a start and end cursor byte positions
+    /// within the preedit. If no cursor is specified for a non-empty preedit,
+    /// the cursor should be hidden.
+    ///
+    /// If `attrs` is specified, these attributes will be assigned to the preedit's span.
+    /// However, regardless of `attrs` setting, the preedit's span will always have
+    /// `is_preedit` set to `true`.
+    SetPreedit {
+        preedit: String,
+        cursor: Option<(usize, usize)>,
+        attrs: Option<AttrsOwned>,
     },
 }
 
@@ -317,8 +333,18 @@ pub trait Edit<'buffer> {
     /// Get completed change
     fn finish_change(&mut self) -> Option<Change>;
 
+    /// Returns the range of byte indices of the text corresponding
+    /// to the preedit
+    fn preedit_range(&self) -> Option<Range<usize>>;
+
+    /// Get current preedit text
+    fn preedit_text(&self) -> Option<String>;
+
     /// Perform an [Action] on the editor
     fn action(&mut self, font_system: &mut FontSystem, action: Action);
+
+    /// Get X and Y position of the top left corner of the cursor
+    fn cursor_position(&self) -> Option<(i32, i32)>;
 }
 
 impl<'font_system, 'buffer, E: Edit<'buffer>> BorrowedWithFontSystem<'font_system, E> {

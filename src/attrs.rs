@@ -112,6 +112,7 @@ pub struct Attrs<'a> {
     pub weight: Weight,
     pub metadata: usize,
     pub cache_key_flags: CacheKeyFlags,
+    pub is_preedit: bool,
 }
 
 impl<'a> Attrs<'a> {
@@ -127,6 +128,7 @@ impl<'a> Attrs<'a> {
             weight: Weight::NORMAL,
             metadata: 0,
             cache_key_flags: CacheKeyFlags::empty(),
+            is_preedit: false,
         }
     }
 
@@ -169,6 +171,12 @@ impl<'a> Attrs<'a> {
     /// Set [`CacheKeyFlags`]
     pub fn cache_key_flags(mut self, cache_key_flags: CacheKeyFlags) -> Self {
         self.cache_key_flags = cache_key_flags;
+        self
+    }
+
+    /// Set preedit
+    pub fn preedit(mut self, is_preedit: bool) -> Self {
+        self.is_preedit = is_preedit;
         self
     }
 
@@ -219,6 +227,7 @@ pub struct AttrsOwned {
     pub weight: Weight,
     pub metadata: usize,
     pub cache_key_flags: CacheKeyFlags,
+    pub is_preedit: bool,
 }
 
 impl AttrsOwned {
@@ -231,6 +240,7 @@ impl AttrsOwned {
             weight: attrs.weight,
             metadata: attrs.metadata,
             cache_key_flags: attrs.cache_key_flags,
+            is_preedit: attrs.is_preedit,
         }
     }
 
@@ -243,6 +253,7 @@ impl AttrsOwned {
             weight: self.weight,
             metadata: self.metadata,
             cache_key_flags: self.cache_key_flags,
+            is_preedit: self.is_preedit,
         }
     }
 }

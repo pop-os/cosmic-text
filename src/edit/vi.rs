@@ -1157,6 +1157,18 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for ViEditor<'syntax_system, 'buffer
             editor.action(font_system, action);
         });
     }
+
+    fn preedit_range(&self) -> Option<core::ops::Range<usize>> {
+        self.editor.preedit_range()
+    }
+
+    fn preedit_text(&self) -> Option<String> {
+        self.editor.preedit_text()
+    }
+
+    fn cursor_position(&self) -> Option<(i32, i32)> {
+        self.editor.cursor_position()
+    }
 }
 
 impl<'font_system, 'syntax_system, 'buffer>
