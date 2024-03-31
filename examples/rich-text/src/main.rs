@@ -138,6 +138,7 @@ fn main() {
     let font_color = Color::rgb(0xFF, 0xFF, 0xFF);
     let cursor_color = Color::rgb(0xFF, 0xFF, 0xFF);
     let selection_color = Color::rgba(0xFF, 0xFF, 0xFF, 0x33);
+    let selected_text_color = Color::rgb(0xA0, 0xA0, 0xFF);
 
     event_loop
         .run(|event, elwt| {
@@ -193,6 +194,7 @@ fn main() {
                                 font_color,
                                 cursor_color,
                                 selection_color,
+                                selected_text_color,
                                 |x, y, w, h, color| {
                                     // Note: due to softbuffer and tiny_skia having incompatible internal color representations we swap
                                     // the red and blue channels here

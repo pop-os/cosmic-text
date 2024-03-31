@@ -208,6 +208,7 @@ impl<'syntax_system, 'buffer> SyntaxEditor<'syntax_system, 'buffer> {
             self.foreground_color(),
             self.cursor_color(),
             self.selection_color(),
+            self.foreground_color(),
             f,
         );
     }
