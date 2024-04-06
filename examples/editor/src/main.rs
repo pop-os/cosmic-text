@@ -63,6 +63,7 @@ fn main() {
     }
 
     let mut ctrl_pressed = false;
+    let mut shift_pressed = false;
     let mut mouse_x = 0.0;
     let mut mouse_y = 0.0;
     let mut mouse_left = ElementState::Released;
@@ -175,7 +176,8 @@ fn main() {
                             surface_buffer.present().unwrap();
                         }
                         WindowEvent::ModifiersChanged(modifiers) => {
-                            ctrl_pressed = modifiers.state().control_key()
+                            ctrl_pressed = modifiers.state().control_key();
+                            shift_pressed = modifiers.state().shift_key();
                         }
                         WindowEvent::KeyboardInput { event, .. } => {
                             let KeyEvent {
@@ -185,28 +187,46 @@ fn main() {
                             if state.is_pressed() {
                                 match logical_key {
                                     Key::Named(NamedKey::ArrowLeft) => {
-                                        editor.action(Action::Motion(Motion::Left))
+                                        editor.action(Action::Motion {
+                                            motion: Motion::Left,
+                                            select: shift_pressed,
+                                        })
                                     }
                                     Key::Named(NamedKey::ArrowRight) => {
-                                        editor.action(Action::Motion(Motion::Right))
+                                        editor.action(Action::Motion {
+                                            motion: Motion::Right,
+                                            select: shift_pressed,
+                                        })
                                     }
                                     Key::Named(NamedKey::ArrowUp) => {
-                                        editor.action(Action::Motion(Motion::Up))
+                                        editor.action(Action::Motion {
+                                            motion: Motion::Up,
+                                            select: shift_pressed,
+                                        })
                                     }
                                     Key::Named(NamedKey::ArrowDown) => {
-                                        editor.action(Action::Motion(Motion::Down))
+                                        editor.action(Action::Motion {
+                                            motion: Motion::Down,
+                                            select: shift_pressed,
+                                        })
                                     }
-                                    Key::Named(NamedKey::Home) => {
-                                        editor.action(Action::Motion(Motion::Home))
-                                    }
-                                    Key::Named(NamedKey::End) => {
-                                        editor.action(Action::Motion(Motion::End))
-                                    }
-                                    Key::Named(NamedKey::PageUp) => {
-                                        editor.action(Action::Motion(Motion::PageUp))
-                                    }
+                                    Key::Named(NamedKey::Home) => editor.action(Action::Motion {
+                                        motion: Motion::Home,
+                                        select: shift_pressed,
+                                    }),
+                                    Key::Named(NamedKey::End) => editor.action(Action::Motion {
+                                        motion: Motion::End,
+                                        select: shift_pressed,
+                                    }),
+                                    Key::Named(NamedKey::PageUp) => editor.action(Action::Motion {
+                                        motion: Motion::PageUp,
+                                        select: shift_pressed,
+                                    }),
                                     Key::Named(NamedKey::PageDown) => {
-                                        editor.action(Action::Motion(Motion::PageDown))
+                                        editor.action(Action::Motion {
+                                            motion: Motion::PageDown,
+                                            select: shift_pressed,
+                                        })
                                     }
                                     Key::Named(NamedKey::Escape) => editor.action(Action::Escape),
                                     Key::Named(NamedKey::Enter) => editor.action(Action::Enter),
@@ -321,6 +341,7 @@ fn main() {
                                     editor.action(Action::Click {
                                         x: mouse_x as i32,
                                         y: mouse_y as i32,
+                                        select: shift_pressed,
                                     });
                                     window.request_redraw();
                                 }

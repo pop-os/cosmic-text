@@ -25,7 +25,10 @@ mod vi;
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Action {
     /// Move the cursor with some motion
-    Motion(Motion),
+    Motion {
+        motion: Motion,
+        select: bool,
+    },
     /// Escape, clears selection
     Escape,
     /// Insert character at cursor
@@ -44,6 +47,7 @@ pub enum Action {
     Click {
         x: i32,
         y: i32,
+        select: bool,
     },
     /// Mouse double click at specified position
     DoubleClick {
