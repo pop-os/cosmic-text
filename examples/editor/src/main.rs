@@ -188,13 +188,21 @@ fn main() {
                                 match logical_key {
                                     Key::Named(NamedKey::ArrowLeft) => {
                                         editor.action(Action::Motion {
-                                            motion: Motion::Left,
+                                            motion: if ctrl_pressed {
+                                                Motion::PreviousWord
+                                            } else {
+                                                Motion::Left
+                                            },
                                             select: shift_pressed,
                                         })
                                     }
                                     Key::Named(NamedKey::ArrowRight) => {
                                         editor.action(Action::Motion {
-                                            motion: Motion::Right,
+                                            motion: if ctrl_pressed {
+                                                Motion::NextWord
+                                            } else {
+                                                Motion::Right
+                                            },
                                             select: shift_pressed,
                                         })
                                     }
