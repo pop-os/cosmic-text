@@ -615,19 +615,42 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for ViEditor<'syntax_system, 'buffer
             //TODO: this leaves lots of room for issues in translation, should we directly accept Key?
             Action::Backspace => Key::Backspace,
             Action::Delete => Key::Delete,
-            Action::Motion(Motion::Down) => Key::Down,
-            Action::Motion(Motion::End) => Key::End,
+            Action::Motion {
+                motion: Motion::Down,
+                ..
+            } => Key::Down,
+            Action::Motion {
+                motion: Motion::End,
+                ..
+            } => Key::End,
             Action::Enter => Key::Enter,
             Action::Escape => Key::Escape,
-            Action::Motion(Motion::Home) => Key::Home,
+            Action::Motion {
+                motion: Motion::Home,
+                ..
+            } => Key::Home,
             Action::Indent => Key::Tab,
             Action::Insert(c) => Key::Char(c),
-            Action::Motion(Motion::Left) => Key::Left,
-            Action::Motion(Motion::PageDown) => Key::PageDown,
-            Action::Motion(Motion::PageUp) => Key::PageUp,
-            Action::Motion(Motion::Right) => Key::Right,
+            Action::Motion {
+                motion: Motion::Left,
+                ..
+            } => Key::Left,
+            Action::Motion {
+                motion: Motion::PageDown,
+                ..
+            } => Key::PageDown,
+            Action::Motion {
+                motion: Motion::PageUp,
+                ..
+            } => Key::PageUp,
+            Action::Motion {
+                motion: Motion::Right,
+                ..
+            } => Key::Right,
             Action::Unindent => Key::Backtab,
-            Action::Motion(Motion::Up) => Key::Up,
+            Action::Motion {
+                motion: Motion::Up, ..
+            } => Key::Up,
             _ => {
                 log::debug!("Pass through action {:?}", action);
                 editor.action(font_system, action);
@@ -733,9 +756,21 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for ViEditor<'syntax_system, 'buffer
 
                                     // Move to inserted line, preserving cursor x position
                                     if after {
-                                        editor.action(font_system, Action::Motion(Motion::Down));
+                                        editor.action(
+                                            font_system,
+                                            Action::Motion {
+                                                motion: Motion::Down,
+                                                select: false,
+                                            },
+                                        );
                                     } else {
-                                        editor.action(font_system, Action::Motion(Motion::Up));
+                                        editor.action(
+                                            font_system,
+                                            Action::Motion {
+                                                motion: Motion::Up,
+                                                select: false,
+                                            },
+                                        );
                                     }
                                 }
                             }
@@ -845,24 +880,43 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for ViEditor<'syntax_system, 'buffer
                             //TODO: what to do for this psuedo-motion?
                             return;
                         }
-                        modit::Motion::Down => Action::Motion(Motion::Down),
-                        modit::Motion::End => Action::Motion(Motion::End),
-                        modit::Motion::GotoLine(line) => {
-                            Action::Motion(Motion::GotoLine(line.saturating_sub(1)))
-                        }
-                        modit::Motion::GotoEof => Action::Motion(Motion::GotoLine(
-                            editor.with_buffer(|buffer| buffer.lines.len().saturating_sub(1)),
-                        )),
-                        modit::Motion::Home => Action::Motion(Motion::Home),
+                        modit::Motion::Down => Action::Motion {
+                            motion: Motion::Down,
+                            select: false,
+                        },
+                        modit::Motion::End => Action::Motion {
+                            motion: Motion::End,
+                            select: false,
+                        },
+                        modit::Motion::GotoLine(line) => Action::Motion {
+                            motion: Motion::GotoLine(line.saturating_sub(1)),
+                            select: false,
+                        },
+                        modit::Motion::GotoEof => Action::Motion {
+                            motion: Motion::GotoLine(
+                                editor.with_buffer(|buffer| buffer.lines.len().saturating_sub(1)),
+                            ),
+                            select: false,
+                        },
+                        modit::Motion::Home => Action::Motion {
+                            motion: Motion::Home,
+                            select: false,
+                        },
                         modit::Motion::Inside => {
                             //TODO: what to do for this psuedo-motion?
                             return;
                         }
-                        modit::Motion::Left => Action::Motion(Motion::Left),
+                        modit::Motion::Left => Action::Motion {
+                            motion: Motion::Left,
+                            select: false,
+                        },
                         modit::Motion::LeftInLine => {
                             let cursor = editor.cursor();
                             if cursor.index > 0 {
-                                Action::Motion(Motion::Left)
+                                Action::Motion {
+                                    motion: Motion::Left,
+                                    select: false,
+                                }
                             } else {
                                 return;
                             }
@@ -975,8 +1029,14 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for ViEditor<'syntax_system, 'buffer
                             editor.set_cursor(cursor);
                             return;
                         }
-                        modit::Motion::PageDown => Action::Motion(Motion::PageDown),
-                        modit::Motion::PageUp => Action::Motion(Motion::PageUp),
+                        modit::Motion::PageDown => Action::Motion {
+                            motion: Motion::PageDown,
+                            select: false,
+                        },
+                        modit::Motion::PageUp => Action::Motion {
+                            motion: Motion::PageUp,
+                            select: false,
+                        },
                         modit::Motion::PreviousChar(find_c) => {
                             let mut cursor = editor.cursor();
                             editor.with_buffer(|buffer| {
@@ -1092,14 +1152,20 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for ViEditor<'syntax_system, 'buffer
                             editor.set_cursor(cursor);
                             return;
                         }
-                        modit::Motion::Right => Action::Motion(Motion::Right),
+                        modit::Motion::Right => Action::Motion {
+                            motion: Motion::Right,
+                            select: false,
+                        },
                         modit::Motion::RightInLine => {
                             let cursor = editor.cursor();
                             if cursor.index
                                 < editor
                                     .with_buffer(|buffer| buffer.lines[cursor.line].text().len())
                             {
-                                Action::Motion(Motion::Right)
+                                Action::Motion {
+                                    motion: Motion::Right,
+                                    select: false,
+                                }
                             } else {
                                 return;
                             }
@@ -1109,7 +1175,10 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for ViEditor<'syntax_system, 'buffer
                             if let Some(line_i) = editor.with_buffer(|buffer| {
                                 buffer.layout_runs().next().map(|first| first.line_i)
                             }) {
-                                Action::Motion(Motion::GotoLine(line_i))
+                                Action::Motion {
+                                    motion: Motion::GotoLine(line_i),
+                                    select: false,
+                                }
                             } else {
                                 return;
                             }
@@ -1119,7 +1188,10 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for ViEditor<'syntax_system, 'buffer
                             if let Some(line_i) = editor.with_buffer(|buffer| {
                                 buffer.layout_runs().last().map(|last| last.line_i)
                             }) {
-                                Action::Motion(Motion::GotoLine(line_i))
+                                Action::Motion {
+                                    motion: Motion::GotoLine(line_i),
+                                    select: false,
+                                }
                             } else {
                                 return;
                             }
@@ -1130,9 +1202,12 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for ViEditor<'syntax_system, 'buffer
                                 let mut layout_runs = buffer.layout_runs();
                                 if let Some(first) = layout_runs.next() {
                                     if let Some(last) = layout_runs.last() {
-                                        Some(Action::Motion(Motion::GotoLine(
-                                            (last.line_i + first.line_i) / 2,
-                                        )))
+                                        Some(Action::Motion {
+                                            motion: Motion::GotoLine(
+                                                (last.line_i + first.line_i) / 2,
+                                            ),
+                                            select: false,
+                                        })
                                     } else {
                                         None
                                     }
@@ -1149,8 +1224,14 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for ViEditor<'syntax_system, 'buffer
                             //TODO: what to do for this psuedo-motion?
                             return;
                         }
-                        modit::Motion::SoftHome => Action::Motion(Motion::SoftHome),
-                        modit::Motion::Up => Action::Motion(Motion::Up),
+                        modit::Motion::SoftHome => Action::Motion {
+                            motion: Motion::SoftHome,
+                            select: false,
+                        },
+                        modit::Motion::Up => Action::Motion {
+                            motion: Motion::Up,
+                            select: false,
+                        },
                     }
                 }
             };
