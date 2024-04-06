@@ -4,7 +4,13 @@ use cosmic_text::{
     Action, Attrs, Buffer, Edit, Family, FontSystem, Metrics, Motion, SwashCache, SyntaxEditor,
     SyntaxSystem,
 };
-use std::{env, num::NonZeroU32, rc::Rc, slice};
+use std::{
+    env,
+    num::NonZeroU32,
+    rc::Rc,
+    slice,
+    time::{Duration, Instant},
+};
 use tiny_skia::{Paint, PixmapMut, Rect, Transform};
 use winit::{
     dpi::{PhysicalPosition, PhysicalSize},
@@ -68,6 +74,10 @@ fn main() {
     let mut mouse_y = 0.0;
     let mut mouse_left = ElementState::Released;
     let mut unapplied_scroll_delta = 0.0;
+
+    let mut num_clicks = 0;
+    let mut last_click_instant = Instant::now();
+    const DOUBLE_CLICK_TIMEOUT: Duration = Duration::from_millis(300);
 
     event_loop
         .run(|event, elwt| {
@@ -346,11 +356,28 @@ fn main() {
                                 if state == ElementState::Pressed
                                     && mouse_left == ElementState::Released
                                 {
-                                    editor.action(Action::Click {
-                                        x: mouse_x as i32,
-                                        y: mouse_y as i32,
-                                        select: shift_pressed,
-                                    });
+                                    if last_click_instant.elapsed() > DOUBLE_CLICK_TIMEOUT {
+                                        num_clicks = 1;
+                                    } else {
+                                        num_clicks += 1;
+                                    }
+                                    last_click_instant = Instant::now();
+                                    let x = mouse_x as i32;
+                                    let y = mouse_y as i32;
+                                    match num_clicks {
+                                        1 => editor.action(Action::Click {
+                                            x,
+                                            y,
+                                            select: shift_pressed,
+                                        }),
+                                        2 => editor.action(Action::DoubleClick { x, y }),
+                                        3 => editor.action(Action::TripleClick { x, y }),
+                                        _ => {}
+                                    };
+                                    if num_clicks >= 3 {
+                                        num_clicks = 0;
+                                    }
+
                                     window.request_redraw();
                                 }
                                 mouse_left = state;
