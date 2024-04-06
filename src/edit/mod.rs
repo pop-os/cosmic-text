@@ -31,14 +31,20 @@ pub enum Action {
     },
     /// Escape, clears selection
     Escape,
+    /// Select text from start to end
+    SelectAll,
     /// Insert character at cursor
     Insert(char),
     /// Create new line
     Enter,
     /// Delete text behind cursor
     Backspace,
+    /// Delete text behind cursor to next word boundary
+    DeleteStartOfWord,
     /// Delete text in front of cursor
     Delete,
+    /// Delete text in front of cursor to next word boundary
+    DeleteEndOfWord,
     // Indent text (typically Tab)
     Indent,
     // Unindent text (typically Shift+Tab)

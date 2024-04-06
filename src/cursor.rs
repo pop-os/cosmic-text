@@ -109,6 +109,10 @@ pub enum Motion {
     ParagraphStart,
     /// Move cursor to end of paragraph
     ParagraphEnd,
+    /// Move cursor to start of document
+    DocumentStart,
+    /// Move cursor to end of document
+    DocumentEnd,
     /// Move cursor up one page
     PageUp,
     /// Move cursor down one page

@@ -229,11 +229,19 @@ fn main() {
                                         })
                                     }
                                     Key::Named(NamedKey::Home) => editor.action(Action::Motion {
-                                        motion: Motion::Home,
+                                        motion: if ctrl_pressed {
+                                            Motion::DocumentStart
+                                        } else {
+                                            Motion::Home
+                                        },
                                         select: shift_pressed,
                                     }),
                                     Key::Named(NamedKey::End) => editor.action(Action::Motion {
-                                        motion: Motion::End,
+                                        motion: if ctrl_pressed {
+                                            Motion::DocumentEnd
+                                        } else {
+                                            Motion::End
+                                        },
                                         select: shift_pressed,
                                     }),
                                     Key::Named(NamedKey::PageUp) => editor.action(Action::Motion {
@@ -249,9 +257,19 @@ fn main() {
                                     Key::Named(NamedKey::Escape) => editor.action(Action::Escape),
                                     Key::Named(NamedKey::Enter) => editor.action(Action::Enter),
                                     Key::Named(NamedKey::Backspace) => {
-                                        editor.action(Action::Backspace)
+                                        editor.action(if ctrl_pressed {
+                                            Action::DeleteStartOfWord
+                                        } else {
+                                            Action::Backspace
+                                        })
                                     }
-                                    Key::Named(NamedKey::Delete) => editor.action(Action::Delete),
+                                    Key::Named(NamedKey::Delete) => {
+                                        editor.action(if ctrl_pressed {
+                                            Action::DeleteEndOfWord
+                                        } else {
+                                            Action::Delete
+                                        })
+                                    }
                                     Key::Named(key) => {
                                         if let Some(text) = key.to_text() {
                                             for c in text.chars() {
@@ -292,6 +310,9 @@ fn main() {
                                                             )
                                                         });
                                                     }
+                                                }
+                                                "a" => {
+                                                    editor.action(Action::SelectAll);
                                                 }
                                                 _ => {}
                                             }

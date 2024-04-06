@@ -648,6 +648,22 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                 }
                 self.selection = Selection::None;
             }
+            Action::SelectAll => {
+                self.action(
+                    font_system,
+                    Action::Motion {
+                        motion: Motion::DocumentStart,
+                        select: false,
+                    },
+                );
+                self.action(
+                    font_system,
+                    Action::Motion {
+                        motion: Motion::DocumentEnd,
+                        select: true,
+                    },
+                );
+            }
             Action::Insert(character) => {
                 if character.is_control() && !['\t', '\n', '\u{92}'].contains(&character) {
                     // Filter out special chars (except for tab), use Action instead
@@ -714,6 +730,20 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                     }
                 }
             }
+            Action::DeleteStartOfWord => {
+                if self.delete_selection() {
+                    // Deleted selection
+                } else {
+                    self.action(
+                        font_system,
+                        Action::Motion {
+                            motion: Motion::PreviousWord,
+                            select: true,
+                        },
+                    );
+                    self.delete_selection();
+                }
+            }
             Action::Delete => {
                 if self.delete_selection() {
                     // Deleted selection
@@ -747,6 +777,20 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                         self.cursor = start;
                         self.delete_range(start, end);
                     }
+                }
+            }
+            Action::DeleteEndOfWord => {
+                if self.delete_selection() {
+                    // Deleted selection
+                } else {
+                    self.action(
+                        font_system,
+                        Action::Motion {
+                            motion: Motion::NextWord,
+                            select: true,
+                        },
+                    );
+                    self.delete_selection();
                 }
             }
             Action::Indent => {

@@ -1059,6 +1059,16 @@ impl Buffer {
                 cursor.index = self.lines.get(cursor.line)?.text().len();
                 cursor_x_opt = None;
             }
+            Motion::DocumentStart => {
+                cursor.line = 0;
+                cursor.index = 0;
+                cursor_x_opt = None;
+            }
+            Motion::DocumentEnd => {
+                cursor.line = self.lines.len() - 1;
+                cursor.index = self.lines.get(cursor.line)?.text().len();
+                cursor_x_opt = None;
+            }
             Motion::PageUp => {
                 (cursor, cursor_x_opt) = self.cursor_motion(
                     font_system,
