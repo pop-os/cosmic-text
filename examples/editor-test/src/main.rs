@@ -116,7 +116,10 @@ fn main() {
             // Test delete of EGC
             {
                 let cursor = editor.cursor();
-                editor.action(Action::Motion(Motion::Previous));
+                editor.action(Action::Motion {
+                    motion: Motion::Previous,
+                    select: false,
+                });
                 editor.action(Action::Delete);
                 for c in grapheme.chars() {
                     editor.action(Action::Insert(c));
@@ -140,7 +143,10 @@ fn main() {
         {
             let cursor = editor.cursor();
             editor.action(Action::Enter);
-            editor.action(Action::Motion(Motion::Previous));
+            editor.action(Action::Motion {
+                motion: Motion::Previous,
+                select: false,
+            });
             editor.action(Action::Delete);
             assert_eq!(cursor, editor.cursor());
         }

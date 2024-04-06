@@ -12,7 +12,7 @@ use unicode_segmentation::UnicodeSegmentation;
 use crate::Color;
 use crate::{
     Action, Attrs, AttrsList, BorrowedWithFontSystem, BufferLine, BufferRef, Change, ChangeItem,
-    Cursor, Edit, FontSystem, LayoutRun, Selection, Shaping,
+    Cursor, Edit, FontSystem, LayoutRun, Motion, Selection, Shaping,
 };
 
 /// A wrapper of [`Buffer`] for easy editing
@@ -565,8 +565,46 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
         let old_cursor = self.cursor;
 
         match action {
-            Action::Motion(motion) => {
+            Action::Motion { motion, select } => {
                 let cursor = self.cursor;
+                if select {
+                    if self.selection == Selection::None {
+                        self.selection = Selection::Normal(self.cursor);
+                    }
+                } else if let Some((start, end)) = self.selection_bounds() {
+                    if start.line != end.line || start.index != end.index {
+                        let new_cursor = match motion {
+                            // These actions have special behavior when there is an active selection.
+                            Motion::Previous => Some(start),
+                            Motion::Next => Some(end),
+                            Motion::Left => self
+                                .with_buffer_mut(|buffer| {
+                                    buffer
+                                        .line_shape(font_system, cursor.line)
+                                        .map(|shape| shape.rtl)
+                                })
+                                .map(|rtl| if rtl { end } else { start }),
+                            Motion::Right => self
+                                .with_buffer_mut(|buffer| {
+                                    buffer
+                                        .line_shape(font_system, cursor.line)
+                                        .map(|shape| shape.rtl)
+                                })
+                                .map(|rtl| if rtl { start } else { end }),
+                            _ => None,
+                        };
+                        if let Some(new_cursor) = new_cursor {
+                            self.cursor = new_cursor;
+                            self.cursor_x_opt = None;
+                            self.cursor_moved = true;
+                            self.selection = Selection::None;
+                            self.set_redraw(true);
+                            return;
+                        }
+                    }
+                    self.selection = Selection::None;
+                }
+
                 let cursor_x_opt = self.cursor_x_opt;
                 if let Some((new_cursor, new_cursor_x_opt)) = self.with_buffer_mut(|buffer| {
                     buffer.cursor_motion(font_system, cursor, cursor_x_opt, motion)
@@ -807,8 +845,14 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                     self.with_buffer_mut(|buffer| buffer.set_redraw(true));
                 }
             }
-            Action::Click { x, y } => {
-                self.set_selection(Selection::None);
+            Action::Click { x, y, select } => {
+                if select {
+                    if self.selection == Selection::None {
+                        self.selection = Selection::Normal(self.cursor);
+                    }
+                } else {
+                    self.selection = Selection::None;
+                }
 
                 if let Some(new_cursor) = self.with_buffer(|buffer| buffer.hit(x as f32, y as f32))
                 {
