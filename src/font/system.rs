@@ -172,7 +172,7 @@ impl FontSystem {
             #[cfg(feature = "shape-run-cache")]
             shape_run_cache: crate::ShapeRunCache::default(),
         };
-
+        ret.cache_fonts(cloned_monospace_font_ids.clone());
         cloned_monospace_font_ids.into_iter().for_each(|id| {
             if let Some(font) = ret.get_font(id) {
                 font.scripts().iter().copied().for_each(|script| {
@@ -210,6 +210,45 @@ impl FontSystem {
     /// Consume this [`FontSystem`] and return the locale and database.
     pub fn into_locale_and_db(self) -> (String, fontdb::Database) {
         (self.locale, self.db)
+    }
+    /// Concurrently cache fonts by id list
+    pub fn cache_fonts(&mut self, mut ids: Vec<fontdb::ID>) {
+        #[cfg(feature = "rayon")]
+        use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+        ids = ids
+            .into_iter()
+            .filter(|id| {
+                let contains = self.font_cache.contains_key(id);
+                #[cfg(feature = "std")]
+                unsafe {
+                    self.db.make_shared_face_data(*id);
+                }
+                !contains
+            })
+            .collect::<_>();
+
+        #[cfg(feature = "rayon")]
+        let fonts = ids.par_iter();
+        #[cfg(not(feature = "rayon"))]
+        let fonts = ids.iter();
+
+        fonts
+            .map(|id| match Font::new(&self.db, *id) {
+                Some(font) => Some(Arc::new(font)),
+                None => {
+                    log::warn!(
+                        "failed to load font '{}'",
+                        self.db.face(*id)?.post_script_name
+                    );
+                    None
+                }
+            })
+            .collect::<Vec<Option<Arc<Font>>>>()
+            .into_iter()
+            .flatten()
+            .for_each(|font| {
+                self.font_cache.insert(font.id, Some(font));
+            });
     }
 
     /// Get a font by its ID.
