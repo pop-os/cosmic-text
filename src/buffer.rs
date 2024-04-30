@@ -7,8 +7,8 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
     Affinity, Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem, BufferLine, Color, Cursor,
-    FontSystem, LayoutCursor, LayoutGlyph, LayoutLine, LineEnding, Motion, Scroll, ShapeBuffer,
-    ShapeLine, Shaping, Wrap,
+    FontSystem, LayoutCursor, LayoutGlyph, LayoutLine, LineEnding, LineIter, Motion, Scroll,
+    ShapeBuffer, ShapeLine, Shaping, Wrap,
 };
 
 /// A line of visible text for rendering
@@ -607,7 +607,17 @@ impl Buffer {
         attrs: Attrs,
         shaping: Shaping,
     ) {
-        self.set_rich_text(font_system, [(text, attrs)], attrs, shaping);
+        self.lines.clear();
+        for (range, ending) in LineIter::new(text) {
+            self.lines.push(BufferLine::new(
+                &text[range],
+                ending,
+                AttrsList::new(attrs),
+                shaping,
+            ));
+        }
+        self.scroll = Scroll::default();
+        self.shape_until_scroll(font_system, false);
     }
 
     /// Set text of buffer, using an iterator of styled spans (pairs of text and attributes)
