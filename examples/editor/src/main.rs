@@ -4,7 +4,7 @@ use cosmic_text::{
     Action, Attrs, Buffer, Edit, Family, FontSystem, Metrics, Motion, SwashCache, SyntaxEditor,
     SyntaxSystem,
 };
-use std::{env, num::NonZeroU32, rc::Rc, slice};
+use std::{env, fs, num::NonZeroU32, rc::Rc, slice};
 use tiny_skia::{Paint, PixmapMut, Rect, Transform};
 use winit::{
     dpi::PhysicalPosition,
@@ -247,6 +247,17 @@ fn main() {
                                                             )
                                                         });
                                                     }
+                                                }
+                                                "s" => {
+                                                    let mut text = String::new();
+                                                    editor.with_buffer(|buffer| {
+                                                        for line in buffer.lines.iter() {
+                                                            text.push_str(line.text());
+                                                            text.push_str(line.ending().as_str());
+                                                        }
+                                                    });
+                                                    fs::write(&path, &text).unwrap();
+                                                    log::info!("saved {:?}", path);
                                                 }
                                                 _ => {}
                                             }
