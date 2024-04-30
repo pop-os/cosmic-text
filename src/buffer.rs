@@ -616,6 +616,14 @@ impl Buffer {
                 shaping,
             ));
         }
+        if self.lines.is_empty() {
+            self.lines.push(BufferLine::new(
+                "",
+                LineEnding::default(),
+                AttrsList::new(attrs),
+                shaping,
+            ));
+        }
         self.scroll = Scroll::default();
         self.shape_until_scroll(font_system, false);
     }
