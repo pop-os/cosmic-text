@@ -1,3 +1,2 @@
 These are two lines
 in a CRLF file
-
