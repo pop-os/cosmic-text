@@ -362,8 +362,14 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
 
             // Ensure there are enough lines in the buffer to handle this cursor
             while cursor.line >= buffer.lines.len() {
+                let ending = buffer
+                    .lines
+                    .last()
+                    .map(|line| line.ending())
+                    .unwrap_or_default();
                 let line = BufferLine::new(
                     String::new(),
+                    ending,
                     AttrsList::new(attrs_list.as_ref().map_or_else(
                         || {
                             buffer
@@ -380,6 +386,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
 
             let line: &mut BufferLine = &mut buffer.lines[cursor.line];
             let insert_line = cursor.line + 1;
+            let ending = line.ending();
 
             // Collect text after insertion as a line
             let after: BufferLine = line.split_off(cursor.index);
@@ -392,6 +399,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
 
             // Append the inserted text, line by line
             // we want to see a blank entry if the string ends with a newline
+            //TODO: adjust this to get line ending from data?
             let addendum = once("").filter(|_| data.ends_with('\n'));
             let mut lines_iter = data.split_inclusive('\n').chain(addendum);
             if let Some(data_line) = lines_iter.next() {
@@ -402,6 +410,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                     data_line
                         .strip_suffix(char::is_control)
                         .unwrap_or(data_line),
+                    ending,
                     these_attrs,
                     Shaping::Advanced,
                 ));
@@ -414,6 +423,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                     data_line
                         .strip_suffix(char::is_control)
                         .unwrap_or(data_line),
+                    ending,
                     final_attrs.split_off(remaining_split_len),
                     Shaping::Advanced,
                 );
@@ -429,6 +439,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                     data_line
                         .strip_suffix(char::is_control)
                         .unwrap_or(data_line),
+                    ending,
                     final_attrs.split_off(remaining_split_len),
                     Shaping::Advanced,
                 );

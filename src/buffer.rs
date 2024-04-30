@@ -7,8 +7,8 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
     Affinity, Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem, BufferLine, Color, Cursor,
-    FontSystem, LayoutCursor, LayoutGlyph, LayoutLine, Motion, Scroll, ShapeBuffer, ShapeLine,
-    Shaping, Wrap,
+    FontSystem, LayoutCursor, LayoutGlyph, LayoutLine, LineEnding, Motion, Scroll, ShapeBuffer,
+    ShapeLine, Shaping, Wrap,
 };
 
 /// A line of visible text for rendering
@@ -661,12 +661,15 @@ impl Buffer {
             start..end
         });
         let mut maybe_line = lines_iter.next();
+        //TODO: set this based on information from spans
+        let line_ending = LineEnding::default();
 
         loop {
             let (Some(line_range), Some((attrs, span_range))) = (&maybe_line, &maybe_span) else {
                 // this is reached only if this text is empty
                 self.lines.push(BufferLine::new(
                     String::new(),
+                    line_ending,
                     AttrsList::new(default_attrs),
                     shaping,
                 ));
@@ -701,11 +704,13 @@ impl Buffer {
                     let prev_attrs_list =
                         core::mem::replace(&mut attrs_list, AttrsList::new(default_attrs));
                     let prev_line_string = core::mem::take(&mut line_string);
-                    let buffer_line = BufferLine::new(prev_line_string, prev_attrs_list, shaping);
+                    let buffer_line =
+                        BufferLine::new(prev_line_string, line_ending, prev_attrs_list, shaping);
                     self.lines.push(buffer_line);
                 } else {
                     // finalize the final line
-                    let buffer_line = BufferLine::new(line_string, attrs_list, shaping);
+                    let buffer_line =
+                        BufferLine::new(line_string, line_ending, attrs_list, shaping);
                     self.lines.push(buffer_line);
                     break;
                 }

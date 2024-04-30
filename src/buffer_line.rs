@@ -1,13 +1,15 @@
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, vec::Vec};
 
-use crate::{Align, AttrsList, FontSystem, LayoutLine, ShapeBuffer, ShapeLine, Shaping, Wrap};
+use crate::{
+    Align, AttrsList, FontSystem, LayoutLine, LineEnding, ShapeBuffer, ShapeLine, Shaping, Wrap,
+};
 
 /// A line (or paragraph) of text that is shaped and laid out
 #[derive(Clone, Debug)]
 pub struct BufferLine {
-    //TODO: make this not pub(crate)
     text: String,
+    ending: LineEnding,
     attrs_list: AttrsList,
     align: Option<Align>,
     shape_opt: Option<ShapeLine>,
@@ -20,9 +22,15 @@ impl BufferLine {
     /// Create a new line with the given text and attributes list
     /// Cached shaping and layout can be done using the [`Self::shape`] and
     /// [`Self::layout`] functions
-    pub fn new<T: Into<String>>(text: T, attrs_list: AttrsList, shaping: Shaping) -> Self {
+    pub fn new<T: Into<String>>(
+        text: T,
+        ending: LineEnding,
+        attrs_list: AttrsList,
+        shaping: Shaping,
+    ) -> Self {
         Self {
             text: text.into(),
+            ending,
             attrs_list,
             align: None,
             shape_opt: None,
@@ -41,11 +49,17 @@ impl BufferLine {
     ///
     /// Will reset shape and layout if it differs from current text and attributes list.
     /// Returns true if the line was reset
-    pub fn set_text<T: AsRef<str>>(&mut self, text: T, attrs_list: AttrsList) -> bool {
+    pub fn set_text<T: AsRef<str>>(
+        &mut self,
+        text: T,
+        ending: LineEnding,
+        attrs_list: AttrsList,
+    ) -> bool {
         let text = text.as_ref();
-        if text != self.text || attrs_list != self.attrs_list {
+        if text != self.text || ending != self.ending || attrs_list != self.attrs_list {
             self.text.clear();
             self.text.push_str(text);
+            self.ending = ending;
             self.attrs_list = attrs_list;
             self.reset();
             true
@@ -57,6 +71,25 @@ impl BufferLine {
     /// Consume this line, returning only its text contents as a String.
     pub fn into_text(self) -> String {
         self.text
+    }
+
+    /// Get line ending
+    pub fn ending(&self) -> LineEnding {
+        self.ending
+    }
+
+    /// Set line ending
+    ///
+    /// Will reset shape and layout if it differs from current line ending.
+    /// Returns true if the line was reset
+    pub fn set_ending(&mut self, ending: LineEnding) -> bool {
+        if ending != self.ending {
+            self.ending = ending;
+            self.reset_shaping();
+            true
+        } else {
+            false
+        }
     }
 
     /// Get attributes list
@@ -126,7 +159,7 @@ impl BufferLine {
         let attrs_list = self.attrs_list.split_off(index);
         self.reset();
 
-        let mut new = Self::new(text, attrs_list, self.shaping);
+        let mut new = Self::new(text, self.ending, attrs_list, self.shaping);
         new.align = self.align;
         new
     }

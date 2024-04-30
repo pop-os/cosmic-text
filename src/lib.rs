@@ -123,6 +123,9 @@ mod font;
 pub use self::layout::*;
 mod layout;
 
+pub use self::line_ending::*;
+mod line_ending;
+
 pub use self::shape::*;
 mod shape;
 
