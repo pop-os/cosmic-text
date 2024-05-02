@@ -220,8 +220,10 @@ impl FontSystem {
             .filter(|id| {
                 let contains = self.font_cache.contains_key(id);
                 #[cfg(feature = "std")]
-                unsafe {
-                    self.db.make_shared_face_data(*id);
+                if !contains {
+                    unsafe {
+                        self.db.make_shared_face_data(*id);
+                    }
                 }
                 !contains
             })
