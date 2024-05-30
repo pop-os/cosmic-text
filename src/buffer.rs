@@ -378,7 +378,11 @@ impl Buffer {
         if let Some(layout_cursor) = self.layout_cursor(font_system, cursor) {
             if let Some(layout_lines) = self.line_layout(font_system, layout_cursor.line) {
                 if let Some(layout_line) = layout_lines.get(layout_cursor.layout) {
-                    if let Some(glyph) = layout_line.glyphs.get(layout_cursor.glyph) {
+                    if let Some(glyph) = layout_line
+                        .glyphs
+                        .get(layout_cursor.glyph)
+                        .or_else(|| layout_line.glyphs.last())
+                    {
                         //TODO: use code from cursor_glyph_opt?
                         let x_a = glyph.x;
                         let x_b = glyph.x + glyph.w;
