@@ -132,7 +132,7 @@ pub enum Motion {
 }
 
 /// Scroll position in [`Buffer`]
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, PartialOrd)]
 pub struct Scroll {
     /// Index of [`BufferLine`] in [`Buffer::lines`]. This will be adjusted as needed if layout is
     /// out of bounds
@@ -140,11 +140,17 @@ pub struct Scroll {
     /// Index of [`LayoutLine`] in [`BufferLine::layout`]. This will be adjusted as needed
     /// if it is negative or exceeds the number of layout lines
     pub layout: i32,
+    /// The horizontal position of scroll in fractional pixels
+    pub horizontal: f32,
 }
 
 impl Scroll {
-    /// Create a new cursor
-    pub const fn new(line: usize, layout: i32) -> Self {
-        Self { line, layout }
+    /// Create a new scroll
+    pub const fn new(line: usize, layout: i32, horizontal: f32) -> Self {
+        Self {
+            line,
+            layout,
+            horizontal,
+        }
     }
 }

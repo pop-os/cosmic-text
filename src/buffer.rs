@@ -373,6 +373,29 @@ impl Buffer {
         }
 
         self.shape_until_scroll(font_system, prune);
+
+        // Adjust horizontal scroll to include cursor
+        if let Some(layout_cursor) = self.layout_cursor(font_system, cursor) {
+            if let Some(layout_lines) = self.line_layout(font_system, layout_cursor.line) {
+                if let Some(layout_line) = layout_lines.get(layout_cursor.layout) {
+                    if let Some(glyph) = layout_line.glyphs.get(layout_cursor.glyph) {
+                        //TODO: use code from cursor_glyph_opt?
+                        let x_a = glyph.x;
+                        let x_b = glyph.x + glyph.w;
+                        let x_min = x_a.min(x_b);
+                        let x_max = x_a.max(x_b);
+                        if x_min < self.scroll.horizontal {
+                            self.scroll.horizontal = x_min;
+                            self.redraw = true;
+                        }
+                        if x_max > self.scroll.horizontal + self.width {
+                            self.scroll.horizontal = x_max - self.width;
+                            self.redraw = true;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /// Shape lines until scroll
