@@ -36,7 +36,7 @@ default-features = false
 features = ["hardcoded-data"]
 
 [features]
-default = ["std", "swash", "fontconfig", "rayon"]
+default = ["std", "swash", "fontconfig"]
 fontconfig = ["fontdb/fontconfig", "std"]
 no_std = ["rustybuzz/libm", "hashbrown"]
 shape-run-cache = []
@@ -47,11 +47,11 @@ std = [
     "sys-locale",
     "ttf-parser/std",
     "unicode-bidi/std",
+    "rayon"
 ]
 vi = ["modit", "syntect", "cosmic_undo_2"]
 wasm-web = ["sys-locale?/js"]
 warn_on_missing_glyphs = []
-rayon = ["dep:rayon"]
 
 [[bench]]
 name = "layout"

@@ -160,9 +160,9 @@ impl Font {
 }
 
 #[cfg(test)]
-mod test{
+mod test {
     #[test]
-    fn test_fonts_load_time(){
+    fn test_fonts_load_time() {
         use crate::FontSystem;
         use sys_locale::get_locale;
 
@@ -175,9 +175,6 @@ mod test{
         FontSystem::new_with_locale_and_db(locale, db);
 
         #[cfg(not(target_arch = "wasm32"))]
-        println!(
-            "Fonts load time {}ms.",
-            now.elapsed().as_millis()
-        )
+        println!("Fonts load time {}ms.", now.elapsed().as_millis())
     }
 }
