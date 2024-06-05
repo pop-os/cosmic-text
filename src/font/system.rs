@@ -216,18 +216,21 @@ impl FontSystem {
     pub fn cache_fonts(&mut self, mut ids: Vec<fontdb::ID>) {
         #[cfg(feature = "std")]
         use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
-        ids = ids
-            .into_iter()
-            .filter(|id| {
-                let contains = self.font_cache.contains_key(id);
-                if !contains {
-                    unsafe {
-                        self.db.make_shared_face_data(*id);
+        #[cfg(feature = "std")]
+        {
+            ids = ids
+                .into_iter()
+                .filter(|id| {
+                    let contains = self.font_cache.contains_key(id);
+                    if !contains {
+                        unsafe {
+                            self.db.make_shared_face_data(*id);
+                        }
                     }
-                }
-                !contains
-            })
-            .collect::<_>();
+                    !contains
+                })
+                .collect::<_>();
+        }
 
         #[cfg(feature = "std")]
         let fonts = ids.par_iter();
