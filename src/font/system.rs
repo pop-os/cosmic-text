@@ -211,15 +211,15 @@ impl FontSystem {
     pub fn into_locale_and_db(self) -> (String, fontdb::Database) {
         (self.locale, self.db)
     }
+
     /// Concurrently cache fonts by id list
     pub fn cache_fonts(&mut self, mut ids: Vec<fontdb::ID>) {
-        #[cfg(feature = "rayon")]
+        #[cfg(feature = "std")]
         use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
         ids = ids
             .into_iter()
             .filter(|id| {
                 let contains = self.font_cache.contains_key(id);
-                #[cfg(feature = "std")]
                 if !contains {
                     unsafe {
                         self.db.make_shared_face_data(*id);
@@ -229,9 +229,9 @@ impl FontSystem {
             })
             .collect::<_>();
 
-        #[cfg(feature = "rayon")]
+        #[cfg(feature = "std")]
         let fonts = ids.par_iter();
-        #[cfg(not(feature = "rayon"))]
+        #[cfg(not(feature = "std"))]
         let fonts = ids.iter();
 
         fonts
