@@ -312,11 +312,11 @@ impl<'syntax_system, 'buffer> ViEditor<'syntax_system, 'buffer> {
             let size = buffer.size();
             f(0, 0, size.0 as u32, size.1 as u32, background_color);
             let font_size = buffer.metrics().font_size;
-            let line_height = buffer.metrics().line_height;
             for run in buffer.layout_runs() {
                 let line_i = run.line_i;
                 let line_y = run.line_y;
                 let line_top = run.line_top;
+                let line_height = run.line_height;
 
                 let cursor_glyph_opt = |cursor: &Cursor| -> Option<(usize, f32, f32)> {
                     //TODO: better calculation of width

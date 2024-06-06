@@ -494,6 +494,7 @@ impl ShapeGlyph {
     fn layout(
         &self,
         font_size: f32,
+        line_height_opt: Option<f32>,
         x: f32,
         y: f32,
         w: f32,
@@ -503,6 +504,7 @@ impl ShapeGlyph {
             start: self.start,
             end: self.end,
             font_size,
+            line_height_opt,
             font_id: self.font_id,
             glyph_id: self.glyph_id,
             x,
@@ -1418,7 +1420,14 @@ impl ShapeLine {
                                 x -= x_advance;
                             }
                             let y_advance = glyph_font_size * glyph.y_advance;
-                            glyphs.push(glyph.layout(glyph_font_size, x, y, x_advance, span.level));
+                            glyphs.push(glyph.layout(
+                                glyph_font_size,
+                                glyph.metrics_opt.map(|x| x.line_height),
+                                x,
+                                y,
+                                x_advance,
+                                span.level,
+                            ));
                             if !self.rtl {
                                 x += x_advance;
                             }
