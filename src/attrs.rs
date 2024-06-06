@@ -105,8 +105,8 @@ impl FamilyOwned {
 //TODO: what are the edge cases of this?
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct CacheMetrics {
-    pub font_size_bits: u32,
-    pub line_height_bits: u32,
+    font_size_bits: u32,
+    line_height_bits: u32,
 }
 
 impl From<Metrics> for CacheMetrics {

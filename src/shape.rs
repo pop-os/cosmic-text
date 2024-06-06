@@ -519,6 +519,8 @@ impl ShapeGlyph {
         }
     }
 
+    /// Get the width of the [`ShapeGlyph`] in pixels, either using the provided font size
+    /// or the [`ShapeGlyph::metrics_opt`] override.
     pub fn width(&self, font_size: f32) -> f32 {
         self.metrics_opt.map_or(font_size, |x| x.font_size) * self.x_advance
     }
@@ -613,6 +615,7 @@ impl ShapeWord {
         Self { blank, glyphs }
     }
 
+    /// Get the width of the [`ShapeWord`] in pixels, using the [`ShapeGlyph::width`] function.
     pub fn width(&self, font_size: f32) -> f32 {
         let mut width = 0.0;
         for glyph in self.glyphs.iter() {
