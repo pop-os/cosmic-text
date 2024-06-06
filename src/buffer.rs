@@ -126,13 +126,17 @@ impl<'b> Iterator for LayoutRunIter<'b> {
                     continue;
                 }
 
-                let mut line_height = self.buffer.metrics.line_height;
+                let mut line_height_opt: Option<f32> = None;
                 for glyph in layout_line.glyphs.iter() {
                     if let Some(glyph_line_height) = glyph.line_height_opt {
-                        line_height = line_height.max(glyph_line_height);
+                        line_height_opt = match line_height_opt {
+                            Some(line_height) => Some(line_height.max(glyph_line_height)),
+                            None => Some(glyph_line_height)
+                        };
                     }
                 }
 
+                let line_height = line_height_opt.unwrap_or(self.buffer.metrics.line_height);
                 let line_top = self.line_top;
                 let glyph_height = layout_line.max_ascent + layout_line.max_descent;
                 let centering_offset = (line_height - glyph_height) / 2.0;
