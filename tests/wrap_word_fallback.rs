@@ -4,7 +4,10 @@ use cosmic_text::{Attrs, Buffer, FontSystem, Metrics, Shaping, Wrap};
 // No line should ever overflow the buffer size.
 #[test]
 fn wrap_word_fallback() {
-    let mut font_system = FontSystem::new();
+    let mut font_system =
+        FontSystem::new_with_locale_and_db("en-US".into(), fontdb::Database::new());
+    let font = std::fs::read("fonts/Inter-Regular.ttf").unwrap();
+    font_system.db_mut().load_font_data(font);
     let metrics = Metrics::new(14.0, 20.0);
 
     let mut buffer = Buffer::new(&mut font_system, metrics);
