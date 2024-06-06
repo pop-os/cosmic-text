@@ -26,6 +26,8 @@ pub struct LayoutRun<'a> {
     pub line_y: f32,
     /// Y offset to top of line
     pub line_top: f32,
+    /// Y offset to next line
+    pub line_height: f32,
     /// Width of line
     pub line_w: f32,
 }
@@ -92,53 +94,24 @@ pub struct LayoutRunIter<'b> {
     buffer: &'b Buffer,
     line_i: usize,
     layout_i: usize,
-    remaining_len: usize,
     total_layout: i32,
+    line_top: f32,
 }
 
 impl<'b> LayoutRunIter<'b> {
     pub fn new(buffer: &'b Buffer) -> Self {
-        let total_layout_lines: usize = buffer
-            .lines
-            .iter()
-            .skip(buffer.scroll.line)
-            .map(|line| {
-                line.layout_opt()
-                    .as_ref()
-                    .map(|layout| layout.len())
-                    .unwrap_or_default()
-            })
-            .sum();
-        let top_cropped_layout_lines =
-            total_layout_lines.saturating_sub(buffer.scroll.layout.try_into().unwrap_or_default());
-        let maximum_lines = if buffer.metrics.line_height == 0.0 {
-            0
-        } else {
-            (buffer.height / buffer.metrics.line_height) as i32
-        };
-        let bottom_cropped_layout_lines =
-            if top_cropped_layout_lines > maximum_lines.try_into().unwrap_or_default() {
-                maximum_lines.try_into().unwrap_or_default()
-            } else {
-                top_cropped_layout_lines
-            };
-
         Self {
             buffer,
             line_i: buffer.scroll.line,
             layout_i: 0,
-            remaining_len: bottom_cropped_layout_lines,
             total_layout: 0,
+            line_top: 0.0,
         }
     }
 }
 
 impl<'b> Iterator for LayoutRunIter<'b> {
     type Item = LayoutRun<'b>;
-
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        (self.remaining_len, Some(self.remaining_len))
-    }
 
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(line) = self.buffer.lines.get(self.line_i) {
@@ -153,30 +126,33 @@ impl<'b> Iterator for LayoutRunIter<'b> {
                     continue;
                 }
 
-                let line_top = self
-                    .total_layout
-                    .saturating_sub(self.buffer.scroll.layout)
-                    .saturating_sub(1) as f32
-                    * self.buffer.metrics.line_height;
+                let mut line_height = self.buffer.metrics.line_height;
+                for glyph in layout_line.glyphs.iter() {
+                    if let Some(glyph_line_height) = glyph.line_height_opt {
+                        line_height = line_height.max(glyph_line_height);
+                    }
+                }
+
+                let line_top = self.line_top;
                 let glyph_height = layout_line.max_ascent + layout_line.max_descent;
-                let centering_offset = (self.buffer.metrics.line_height - glyph_height) / 2.0;
+                let centering_offset = (line_height - glyph_height) / 2.0;
                 let line_y = line_top + centering_offset + layout_line.max_ascent;
 
                 if line_top + centering_offset > self.buffer.height {
                     return None;
                 }
 
-                return self.remaining_len.checked_sub(1).map(|num| {
-                    self.remaining_len = num;
-                    LayoutRun {
-                        line_i: self.line_i,
-                        text: line.text(),
-                        rtl: shape.rtl,
-                        glyphs: &layout_line.glyphs,
-                        line_y,
-                        line_top,
-                        line_w: layout_line.w,
-                    }
+                self.line_top += line_height;
+
+                return Some(LayoutRun {
+                    line_i: self.line_i,
+                    text: line.text(),
+                    rtl: shape.rtl,
+                    glyphs: &layout_line.glyphs,
+                    line_y,
+                    line_top,
+                    line_height,
+                    line_w: layout_line.w,
                 });
             }
             self.line_i += 1;
@@ -186,8 +162,6 @@ impl<'b> Iterator for LayoutRunIter<'b> {
         None
     }
 }
-
-impl<'b> ExactSizeIterator for LayoutRunIter<'b> {}
 
 /// Metrics of text
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
@@ -798,21 +772,19 @@ impl Buffer {
         #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
         let instant = std::time::Instant::now();
 
-        let font_size = self.metrics.font_size;
-        let line_height = self.metrics.line_height;
-
         let mut new_cursor_opt = None;
 
         let mut runs = self.layout_runs().peekable();
         let mut first_run = true;
         while let Some(run) = runs.next() {
-            let line_y = run.line_y;
+            let line_top = run.line_top;
+            let line_height = run.line_height;
 
-            if first_run && y < line_y - font_size {
+            if first_run && y < line_top {
                 first_run = false;
                 let new_cursor = Cursor::new(run.line_i, 0);
                 new_cursor_opt = Some(new_cursor);
-            } else if y >= line_y - font_size && y < line_y - font_size + line_height {
+            } else if y >= line_top && y < line_top + line_height {
                 let mut new_cursor_glyph = run.glyphs.len();
                 let mut new_cursor_char = 0;
                 let mut new_cursor_affinity = Affinity::After;
@@ -1128,7 +1100,7 @@ impl Buffer {
                 )?;
             }
             Motion::Vertical(px) => {
-                // TODO more efficient
+                // TODO more efficient, use layout run line height
                 let lines = px / self.metrics().line_height as i32;
                 match lines.cmp(&0) {
                     cmp::Ordering::Less => {

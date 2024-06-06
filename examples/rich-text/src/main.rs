@@ -26,6 +26,7 @@ fn set_buffer_text<'a>(buffer: &mut BorrowedWithFontSystem<'a, Buffer>) {
     let comic_attrs = attrs.family(Family::Name("Comic Neue"));
 
     let spans: &[(&str, Attrs)] = &[
+        ("Font size 64 ", attrs.metrics(Metrics::relative(64.0, 1.2))),
         ("Font size 8 ", attrs.metrics(Metrics::relative(8.0, 1.2))),
         ("Font size 20 ", attrs.metrics(Metrics::relative(20.0, 1.2))),
         ("Font size 14 ", attrs.metrics(Metrics::relative(14.0, 1.2))),

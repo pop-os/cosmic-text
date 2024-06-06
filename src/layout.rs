@@ -16,6 +16,8 @@ pub struct LayoutGlyph {
     pub end: usize,
     /// Font size of the glyph
     pub font_size: f32,
+    /// Line height of the glyph, will override buffer setting
+    pub line_height_opt: Option<f32>,
     /// Font id of the glyph
     pub font_id: fontdb::ID,
     /// Font id of the glyph
