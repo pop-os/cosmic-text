@@ -8,7 +8,7 @@ use alloc::{
 use core::ops::Range;
 use rangemap::RangeMap;
 
-use crate::CacheKeyFlags;
+use crate::{CacheKeyFlags, Metrics};
 
 pub use fontdb::{Family, Stretch, Style, Weight};
 
@@ -101,6 +101,32 @@ impl FamilyOwned {
     }
 }
 
+/// Metrics, but implementing Eq and Hash using u32 representation of f32
+//TODO: what are the edge cases of this?
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub struct CacheMetrics {
+    pub font_size_bits: u32,
+    pub line_height_bits: u32,
+}
+
+impl From<Metrics> for CacheMetrics {
+    fn from(metrics: Metrics) -> Self {
+        Self {
+            font_size_bits: metrics.font_size.to_bits(),
+            line_height_bits: metrics.line_height.to_bits(),
+        }
+    }
+}
+
+impl From<CacheMetrics> for Metrics {
+    fn from(metrics: CacheMetrics) -> Self {
+        Self {
+            font_size: f32::from_bits(metrics.font_size_bits),
+            line_height: f32::from_bits(metrics.line_height_bits),
+        }
+    }
+}
+
 /// Text attributes
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct Attrs<'a> {
@@ -112,6 +138,7 @@ pub struct Attrs<'a> {
     pub weight: Weight,
     pub metadata: usize,
     pub cache_key_flags: CacheKeyFlags,
+    pub metrics_opt: Option<CacheMetrics>,
 }
 
 impl<'a> Attrs<'a> {
@@ -127,6 +154,7 @@ impl<'a> Attrs<'a> {
             weight: Weight::NORMAL,
             metadata: 0,
             cache_key_flags: CacheKeyFlags::empty(),
+            metrics_opt: None,
         }
     }
 
@@ -169,6 +197,12 @@ impl<'a> Attrs<'a> {
     /// Set [`CacheKeyFlags`]
     pub fn cache_key_flags(mut self, cache_key_flags: CacheKeyFlags) -> Self {
         self.cache_key_flags = cache_key_flags;
+        self
+    }
+
+    /// Set [`Metrics`], overriding values in buffer
+    pub fn metrics(mut self, metrics: Metrics) -> Self {
+        self.metrics_opt = Some(metrics.into());
         self
     }
 
@@ -219,6 +253,7 @@ pub struct AttrsOwned {
     pub weight: Weight,
     pub metadata: usize,
     pub cache_key_flags: CacheKeyFlags,
+    pub metrics_opt: Option<CacheMetrics>,
 }
 
 impl AttrsOwned {
@@ -231,6 +266,7 @@ impl AttrsOwned {
             weight: attrs.weight,
             metadata: attrs.metadata,
             cache_key_flags: attrs.cache_key_flags,
+            metrics_opt: attrs.metrics_opt,
         }
     }
 
@@ -243,6 +279,7 @@ impl AttrsOwned {
             weight: self.weight,
             metadata: self.metadata,
             cache_key_flags: self.cache_key_flags,
+            metrics_opt: self.metrics_opt,
         }
     }
 }

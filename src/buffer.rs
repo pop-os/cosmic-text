@@ -199,6 +199,7 @@ pub struct Metrics {
 }
 
 impl Metrics {
+    /// Create metrics with given font size and line height
     pub const fn new(font_size: f32, line_height: f32) -> Self {
         Self {
             font_size,
@@ -206,6 +207,15 @@ impl Metrics {
         }
     }
 
+    /// Create metrics with given font size and calculate line height using relative scale
+    pub fn relative(font_size: f32, line_height_scale: f32) -> Self {
+        Self {
+            font_size,
+            line_height: font_size * line_height_scale,
+        }
+    }
+
+    /// Scale font size and line height
     pub fn scale(self, scale: f32) -> Self {
         Self {
             font_size: self.font_size * scale,
