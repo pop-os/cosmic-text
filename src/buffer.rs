@@ -131,7 +131,7 @@ impl<'b> Iterator for LayoutRunIter<'b> {
                     if let Some(glyph_line_height) = glyph.line_height_opt {
                         line_height_opt = match line_height_opt {
                             Some(line_height) => Some(line_height.max(glyph_line_height)),
-                            None => Some(glyph_line_height)
+                            None => Some(glyph_line_height),
                         };
                     }
                 }
