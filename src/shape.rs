@@ -14,7 +14,7 @@ use unicode_segmentation::UnicodeSegmentation;
 use crate::fallback::FontFallbackIter;
 use crate::{
     math, Align, AttrsList, CacheKeyFlags, Color, Font, FontSystem, LayoutGlyph, LayoutLine,
-    ShapePlanCache, Wrap,
+    Metrics, ShapePlanCache, Wrap,
 };
 
 /// The shaping strategy of some text.
@@ -163,6 +163,7 @@ fn shape_fallback(
             color_opt: attrs.color_opt,
             metadata: attrs.metadata,
             cache_key_flags: attrs.cache_key_flags,
+            metrics_opt: attrs.metrics_opt.map(|x| x.into()),
         });
     }
 
@@ -463,6 +464,7 @@ fn shape_skip(
                     color_opt: attrs.color_opt,
                     metadata: attrs.metadata,
                     cache_key_flags: attrs.cache_key_flags,
+                    metrics_opt: attrs.metrics_opt.map(|x| x.into()),
                 }
             }),
     );
@@ -485,6 +487,7 @@ pub struct ShapeGlyph {
     pub color_opt: Option<Color>,
     pub metadata: usize,
     pub cache_key_flags: CacheKeyFlags,
+    pub metrics_opt: Option<Metrics>,
 }
 
 impl ShapeGlyph {
@@ -513,6 +516,10 @@ impl ShapeGlyph {
             cache_key_flags: self.cache_key_flags,
         }
     }
+
+    pub fn width(&self, font_size: f32) -> f32 {
+        self.metrics_opt.map_or(font_size, |x| x.font_size) * self.x_advance
+    }
 }
 
 /// A shaped word (for word wrapping)
@@ -520,8 +527,6 @@ impl ShapeGlyph {
 pub struct ShapeWord {
     pub blank: bool,
     pub glyphs: Vec<ShapeGlyph>,
-    pub x_advance: f32,
-    pub y_advance: f32,
 }
 
 impl ShapeWord {
@@ -603,19 +608,15 @@ impl ShapeWord {
             );
         }
 
-        let mut x_advance = 0.0;
-        let mut y_advance = 0.0;
-        for glyph in &glyphs {
-            x_advance += glyph.x_advance;
-            y_advance += glyph.y_advance;
-        }
+        Self { blank, glyphs }
+    }
 
-        Self {
-            blank,
-            glyphs,
-            x_advance,
-            y_advance,
+    pub fn width(&self, font_size: f32) -> f32 {
+        let mut width = 0.0;
+        for glyph in self.glyphs.iter() {
+            width += glyph.width(font_size);
         }
+        width
     }
 }
 
@@ -1025,7 +1026,7 @@ impl ShapeLine {
                 let mut word_range_width = 0.;
                 let mut number_of_blanks: u32 = 0;
                 for word in span.words.iter() {
-                    let word_width = font_size * word.x_advance;
+                    let word_width = word.width(font_size);
                     word_range_width += word_width;
                     if word.blank {
                         number_of_blanks += 1;
@@ -1051,7 +1052,7 @@ impl ShapeLine {
                     // incongruent directions
                     let mut fitting_start = (span.words.len(), 0);
                     for (i, word) in span.words.iter().enumerate().rev() {
-                        let word_width = font_size * word.x_advance;
+                        let word_width = word.width(font_size);
 
                         // Addition in the same order used to compute the final width, so that
                         // relayouts with that width as the `line_width` will produce the same
@@ -1098,7 +1099,7 @@ impl ShapeLine {
                             }
 
                             for (glyph_i, glyph) in word.glyphs.iter().enumerate().rev() {
-                                let glyph_width = font_size * glyph.x_advance;
+                                let glyph_width = glyph.width(font_size);
                                 if current_visual_line.w + (word_range_width + glyph_width)
                                     <= line_width
                                 {
@@ -1179,7 +1180,7 @@ impl ShapeLine {
                     // congruent direction
                     let mut fitting_start = (0, 0);
                     for (i, word) in span.words.iter().enumerate() {
-                        let word_width = font_size * word.x_advance;
+                        let word_width = word.width(font_size);
                         if current_visual_line.w + (word_range_width + word_width)
                             <= line_width
                             // Include one blank word over the width limit since it won't be
@@ -1222,7 +1223,7 @@ impl ShapeLine {
                             }
 
                             for (glyph_i, glyph) in word.glyphs.iter().enumerate() {
-                                let glyph_width = font_size * glyph.x_advance;
+                                let glyph_width = glyph.width(font_size);
                                 if current_visual_line.w + (word_range_width + glyph_width)
                                     <= line_width
                                 {
@@ -1383,9 +1384,12 @@ impl ShapeLine {
                             (true, true) => &word.glyphs[starting_glyph..ending_glyph],
                         };
 
-                        let match_mono_em_width = match_mono_width.map(|w| w / font_size);
-
                         for glyph in included_glyphs {
+                            // Use overridden font size
+                            let font_size = glyph.metrics_opt.map_or(font_size, |x| x.font_size);
+
+                            let match_mono_em_width = match_mono_width.map(|w| w / font_size);
+
                             let glyph_font_size = match (
                                 match_mono_em_width,
                                 glyph.font_monospace_em_width,
@@ -1419,8 +1423,8 @@ impl ShapeLine {
                                 x += x_advance;
                             }
                             y += y_advance;
-                            max_ascent = max_ascent.max(glyph.ascent);
-                            max_descent = max_descent.max(glyph.descent);
+                            max_ascent = max_ascent.max(glyph_font_size * glyph.ascent);
+                            max_descent = max_descent.max(glyph_font_size * glyph.descent);
                         }
                     }
                 }
@@ -1445,8 +1449,8 @@ impl ShapeLine {
                 } else {
                     x
                 },
-                max_ascent: max_ascent * font_size,
-                max_descent: max_descent * font_size,
+                max_ascent,
+                max_descent,
                 glyphs,
             });
         }
