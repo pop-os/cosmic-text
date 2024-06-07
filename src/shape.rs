@@ -741,6 +741,7 @@ impl ShapeSpan {
 pub struct ShapeLine {
     pub rtl: bool,
     pub spans: Vec<ShapeSpan>,
+    pub metrics_opt: Option<Metrics>,
 }
 
 // Visual Line Ranges: (span_index, (first_word_index, first_glyph_index), (last_word_index, last_glyph_index))
@@ -843,7 +844,11 @@ impl ShapeLine {
             ));
         }
 
-        Self { rtl, spans }
+        Self {
+            rtl,
+            spans,
+            metrics_opt: attrs_list.defaults().metrics_opt.map(|x| x.into()),
+        }
     }
 
     // A modified version of first part of unicode_bidi::bidi_info::visual_run
@@ -1484,7 +1489,7 @@ impl ShapeLine {
                 w: 0.0,
                 max_ascent: 0.0,
                 max_descent: 0.0,
-                line_height_opt: None,
+                line_height_opt: self.metrics_opt.map(|x| x.line_height),
                 glyphs: Default::default(),
             });
         }
