@@ -21,7 +21,7 @@ fn stable_wrap() {
     font_system.db_mut().load_font_data(font);
 
     let mut check_wrap = |text: &_, wrap, start_width| {
-        let line = ShapeLine::new(&mut font_system, text, &attrs, Shaping::Advanced);
+        let line = ShapeLine::new(&mut font_system, text, &attrs, Shaping::Advanced, 8);
 
         let layout_unbounded = line.layout(font_size, start_width, wrap, Some(Align::Left), None);
         let max_width = layout_unbounded.iter().map(|l| l.w).fold(0.0, f32::max);

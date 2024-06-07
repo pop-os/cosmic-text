@@ -24,7 +24,6 @@ pub struct Editor<'buffer> {
     selection: Selection,
     cursor_moved: bool,
     auto_indent: bool,
-    tab_width: u16,
     change: Option<Change>,
 }
 
@@ -38,7 +37,6 @@ impl<'buffer> Editor<'buffer> {
             selection: Selection::None,
             cursor_moved: false,
             auto_indent: false,
-            tab_width: 4,
             change: None,
         }
     }
@@ -259,18 +257,11 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
     }
 
     fn tab_width(&self) -> u16 {
-        self.tab_width
+        self.with_buffer(|buffer| buffer.tab_width())
     }
 
-    fn set_tab_width(&mut self, tab_width: u16) {
-        // A tab width of 0 is not allowed
-        if tab_width == 0 {
-            return;
-        }
-        if self.tab_width != tab_width {
-            self.tab_width = tab_width;
-            self.with_buffer_mut(|buffer| buffer.set_redraw(true));
-        }
+    fn set_tab_width(&mut self, font_system: &mut FontSystem, tab_width: u16) {
+        self.with_buffer_mut(|buffer| buffer.set_tab_width(font_system, tab_width));
     }
 
     fn shape_as_needed(&mut self, font_system: &mut FontSystem, prune: bool) {
@@ -682,7 +673,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                 };
 
                 // For every line in selection
-                let tab_width: usize = self.tab_width.into();
+                let tab_width: usize = self.tab_width().into();
                 for line_i in start.line..=end.line {
                     // Determine indexes of last indent and first character after whitespace
                     let mut after_whitespace = 0;
@@ -745,7 +736,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                 };
 
                 // For every line in selection
-                let tab_width: usize = self.tab_width.into();
+                let tab_width: usize = self.tab_width().into();
                 for line_i in start.line..=end.line {
                     // Determine indexes of last indent and first character after whitespace
                     let mut last_indent = 0;

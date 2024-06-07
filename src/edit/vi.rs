@@ -550,8 +550,8 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for ViEditor<'syntax_system, 'buffer
         self.editor.tab_width()
     }
 
-    fn set_tab_width(&mut self, tab_width: u16) {
-        self.editor.set_tab_width(tab_width);
+    fn set_tab_width(&mut self, font_system: &mut FontSystem, tab_width: u16) {
+        self.editor.set_tab_width(font_system, tab_width);
     }
 
     fn shape_as_needed(&mut self, font_system: &mut FontSystem, prune: bool) {

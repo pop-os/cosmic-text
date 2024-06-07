@@ -282,7 +282,7 @@ pub trait Edit<'buffer> {
     fn tab_width(&self) -> u16;
 
     /// Set the current tab width. A `tab_width` of 0 is not allowed, and will be ignored
-    fn set_tab_width(&mut self, tab_width: u16);
+    fn set_tab_width(&mut self, font_system: &mut FontSystem, tab_width: u16);
 
     /// Shape lines until scroll, after adjusting scroll if the cursor moved
     fn shape_as_needed(&mut self, font_system: &mut FontSystem, prune: bool);
@@ -334,6 +334,11 @@ impl<'font_system, 'buffer, E: Edit<'buffer>> BorrowedWithFontSystem<'font_syste
             };
             f(&mut borrowed)
         })
+    }
+
+    /// Set the current tab width. A `tab_width` of 0 is not allowed, and will be ignored
+    pub fn set_tab_width(&mut self, tab_width: u16) {
+        self.inner.set_tab_width(self.font_system, tab_width);
     }
 
     /// Shape lines until scroll, after adjusting scroll if the cursor moved

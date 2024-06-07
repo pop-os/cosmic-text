@@ -763,6 +763,7 @@ impl ShapeLine {
         line: &str,
         attrs_list: &AttrsList,
         shaping: Shaping,
+        tab_width: u16,
     ) -> Self {
         Self::new_in_buffer(
             &mut ShapeBuffer::default(),
@@ -770,6 +771,7 @@ impl ShapeLine {
             line,
             attrs_list,
             shaping,
+            tab_width,
         )
     }
 
@@ -785,6 +787,7 @@ impl ShapeLine {
         line: &str,
         attrs_list: &AttrsList,
         shaping: Shaping,
+        tab_width: u16,
     ) -> Self {
         let mut spans = Vec::new();
 
@@ -842,6 +845,24 @@ impl ShapeLine {
                 run_level,
                 shaping,
             ));
+        }
+
+        // Adjust for tabs
+        let mut x = 0.0;
+        for span in spans.iter_mut() {
+            for word in span.words.iter_mut() {
+                for glyph in word.glyphs.iter_mut() {
+                    if &line[glyph.start..glyph.end] == "\t" {
+                        //TODO: better fallback for width
+                        let space_x_advance =
+                            glyph.font_monospace_em_width.unwrap_or(glyph.x_advance);
+                        let tab_x_advance = (tab_width as f32) * space_x_advance;
+                        let tab_stop = (math::floorf(x / tab_x_advance) + 1.0) * tab_x_advance;
+                        glyph.x_advance = tab_stop - x;
+                    }
+                    x += glyph.x_advance;
+                }
+            }
         }
 
         Self {
