@@ -1453,6 +1453,16 @@ impl ShapeLine {
                 }
             }
 
+            let mut line_height_opt: Option<f32> = None;
+            for glyph in glyphs.iter() {
+                if let Some(glyph_line_height) = glyph.line_height_opt {
+                    line_height_opt = match line_height_opt {
+                        Some(line_height) => Some(line_height.max(glyph_line_height)),
+                        None => Some(glyph_line_height),
+                    };
+                }
+            }
+
             layout_lines.push(LayoutLine {
                 w: if align != Align::Justified {
                     visual_line.w
@@ -1463,6 +1473,7 @@ impl ShapeLine {
                 },
                 max_ascent,
                 max_descent,
+                line_height_opt,
                 glyphs,
             });
         }
@@ -1473,6 +1484,7 @@ impl ShapeLine {
                 w: 0.0,
                 max_ascent: 0.0,
                 max_descent: 0.0,
+                line_height_opt: None,
                 glyphs: Default::default(),
             });
         }

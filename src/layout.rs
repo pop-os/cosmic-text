@@ -95,6 +95,8 @@ pub struct LayoutLine {
     pub max_ascent: f32,
     /// Maximum descent of the glyphs in line
     pub max_descent: f32,
+    /// Maximum line height of any spans in line
+    pub line_height_opt: Option<f32>,
     /// Glyphs in line
     pub glyphs: Vec<LayoutGlyph>,
 }
