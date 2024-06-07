@@ -210,6 +210,7 @@ pub struct Buffer {
     redraw: bool,
     wrap: Wrap,
     monospace_width: Option<f32>,
+    tab_width: u16,
 
     /// Scratch buffer for shaping and laying out.
     scratch: ShapeBuffer,
@@ -226,6 +227,7 @@ impl Clone for Buffer {
             redraw: self.redraw,
             wrap: self.wrap,
             monospace_width: self.monospace_width,
+            tab_width: self.tab_width,
             scratch: ShapeBuffer::default(),
         }
     }
@@ -255,6 +257,7 @@ impl Buffer {
             wrap: Wrap::WordOrGlyph,
             scratch: ShapeBuffer::default(),
             monospace_width: None,
+            tab_width: 8,
         }
     }
 
@@ -294,6 +297,7 @@ impl Buffer {
                     self.width,
                     self.wrap,
                     self.monospace_width,
+                    self.tab_width,
                 );
             }
         }
@@ -510,7 +514,7 @@ impl Buffer {
         line_i: usize,
     ) -> Option<&ShapeLine> {
         let line = self.lines.get_mut(line_i)?;
-        Some(line.shape_in_buffer(&mut self.scratch, font_system))
+        Some(line.shape_in_buffer(&mut self.scratch, font_system, self.tab_width))
     }
 
     /// Lay out the provided line index and return the result
@@ -527,6 +531,7 @@ impl Buffer {
             self.width,
             self.wrap,
             self.monospace_width,
+            self.tab_width,
         ))
     }
 
@@ -572,6 +577,30 @@ impl Buffer {
         if monospace_width != self.monospace_width {
             self.monospace_width = monospace_width;
             self.relayout(font_system);
+            self.shape_until_scroll(font_system, false);
+        }
+    }
+
+    /// Get the current `tab_width`
+    pub fn tab_width(&self) -> u16 {
+        self.tab_width
+    }
+
+    /// Set tab width (number of spaces between tab stops)
+    pub fn set_tab_width(&mut self, font_system: &mut FontSystem, tab_width: u16) {
+        // A tab width of 0 is not allowed
+        if tab_width == 0 {
+            return;
+        }
+        if tab_width != self.tab_width {
+            self.tab_width = tab_width;
+            // Shaping must be reset when tab width is changed
+            for line in self.lines.iter_mut() {
+                if line.text().contains('\t') {
+                    line.reset_shaping();
+                }
+            }
+            self.redraw = true;
             self.shape_until_scroll(font_system, false);
         }
     }

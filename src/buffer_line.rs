@@ -182,8 +182,8 @@ impl BufferLine {
     }
 
     /// Shape line, will cache results
-    pub fn shape(&mut self, font_system: &mut FontSystem) -> &ShapeLine {
-        self.shape_in_buffer(&mut ShapeBuffer::default(), font_system)
+    pub fn shape(&mut self, font_system: &mut FontSystem, tab_width: u16) -> &ShapeLine {
+        self.shape_in_buffer(&mut ShapeBuffer::default(), font_system, tab_width)
     }
 
     /// Shape a line using a pre-existing shape buffer, will cache results
@@ -191,6 +191,7 @@ impl BufferLine {
         &mut self,
         scratch: &mut ShapeBuffer,
         font_system: &mut FontSystem,
+        tab_width: u16,
     ) -> &ShapeLine {
         if self.shape_opt.is_none() {
             self.shape_opt = Some(ShapeLine::new_in_buffer(
@@ -199,6 +200,7 @@ impl BufferLine {
                 &self.text,
                 &self.attrs_list,
                 self.shaping,
+                tab_width,
             ));
             self.layout_opt = None;
         }
@@ -218,6 +220,7 @@ impl BufferLine {
         width: f32,
         wrap: Wrap,
         match_mono_width: Option<f32>,
+        tab_width: u16,
     ) -> &[LayoutLine] {
         self.layout_in_buffer(
             &mut ShapeBuffer::default(),
@@ -226,6 +229,7 @@ impl BufferLine {
             width,
             wrap,
             match_mono_width,
+            tab_width,
         )
     }
 
@@ -238,10 +242,11 @@ impl BufferLine {
         width: f32,
         wrap: Wrap,
         match_mono_width: Option<f32>,
+        tab_width: u16,
     ) -> &[LayoutLine] {
         if self.layout_opt.is_none() {
             let align = self.align;
-            let shape = self.shape_in_buffer(scratch, font_system);
+            let shape = self.shape_in_buffer(scratch, font_system, tab_width);
             let mut layout = Vec::with_capacity(1);
             shape.layout_to_buffer(
                 scratch,
