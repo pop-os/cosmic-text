@@ -5,14 +5,12 @@ use alloc::{
     string::{String, ToString},
     vec::Vec,
 };
-use core::{cmp, iter::once};
+use core::{cmp, iter::once, ops::Range};
 use unicode_segmentation::UnicodeSegmentation;
 
-#[cfg(feature = "swash")]
-use crate::Color;
 use crate::{
     Action, Attrs, AttrsList, BorrowedWithFontSystem, BufferLine, BufferRef, Change, ChangeItem,
-    Cursor, Edit, FontSystem, LayoutRun, Selection, Shaping,
+    Color, Cursor, Edit, FontSystem, LayoutRun, Selection, Shaping,
 };
 
 /// A wrapper of [`Buffer`] for easy editing
@@ -561,6 +559,18 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
         self.change.take()
     }
 
+    fn preedit_range(&self) -> Option<Range<usize>> {
+        self.with_buffer(|buffer| buffer.lines[self.cursor.line].preedit_range())
+    }
+
+    fn preedit_text(&self) -> Option<String> {
+        self.with_buffer(|buffer| {
+            buffer.lines[self.cursor.line]
+                .preedit_text()
+                .map(Into::into)
+        })
+    }
+
     fn action(&mut self, font_system: &mut FontSystem, action: Action) {
         let old_cursor = self.cursor;
 
@@ -864,6 +874,57 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                     scroll.vertical += lines as f32 * buffer.metrics().line_height;
                     buffer.set_scroll(scroll);
                 });
+            }
+            Action::SetPreedit {
+                preedit,
+                cursor,
+                attrs,
+            } => {
+                self.selection = Selection::None;
+                let mut self_cursor = self.cursor;
+
+                // Remove old preedit, if any
+                self.with_buffer_mut(|buffer| {
+                    let line: &mut BufferLine = &mut buffer.lines[self_cursor.line];
+                    if let Some(range) = line.preedit_range() {
+                        let end = line.split_off(range.end);
+                        line.split_off(range.start);
+                        line.append(end);
+                        self_cursor.index = range.start;
+                    }
+                });
+                self.cursor = self_cursor;
+
+                if !preedit.is_empty() {
+                    let new_attrs = if let Some(attrs) = attrs {
+                        AttrsList::new(attrs.as_attrs().preedit(true))
+                    } else {
+                        self.with_buffer(|buffer| {
+                            let attrs_at_cursor = buffer.lines[self_cursor.line]
+                                .attrs_list()
+                                .get_span(self_cursor.index);
+                            AttrsList::new(
+                                attrs_at_cursor
+                                    .preedit(true)
+                                    .color(Color::rgb(128, 128, 128)),
+                            )
+                        })
+                    };
+                    self.insert_string(&preedit, Some(new_attrs));
+                    if let Some((start, end)) = cursor {
+                        let end_delta = preedit.len().saturating_sub(end);
+                        self.cursor.index = self.cursor.index.saturating_sub(end_delta);
+                        if start != end {
+                            let start_delta = preedit.len().saturating_sub(start);
+                            let mut select = self.cursor;
+                            select.index = select.index.saturating_sub(start_delta);
+                            self.selection = Selection::Normal(select);
+                        }
+                    } else {
+                        // TODO: hide cursor
+                    }
+                }
+                self.set_redraw(true);
             }
         }
 
