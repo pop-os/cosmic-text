@@ -406,6 +406,10 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for SyntaxEditor<'syntax_system, 'bu
     fn action(&mut self, font_system: &mut FontSystem, action: Action) {
         self.editor.action(font_system, action);
     }
+
+    fn cursor_position(&self) -> Option<(i32, i32)> {
+        self.editor.cursor_position()
+    }
 }
 
 impl<'font_system, 'syntax_system, 'buffer>

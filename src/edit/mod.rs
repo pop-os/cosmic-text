@@ -319,6 +319,9 @@ pub trait Edit<'buffer> {
 
     /// Perform an [Action] on the editor
     fn action(&mut self, font_system: &mut FontSystem, action: Action);
+
+    /// Get X and Y position of the top left corner of the cursor
+    fn cursor_position(&self) -> Option<(i32, i32)>;
 }
 
 impl<'font_system, 'buffer, E: Edit<'buffer>> BorrowedWithFontSystem<'font_system, E> {

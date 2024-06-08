@@ -7,7 +7,7 @@ use cosmic_text::{
 use std::{env, fs, num::NonZeroU32, rc::Rc, slice};
 use tiny_skia::{Paint, PixmapMut, Rect, Transform};
 use winit::{
-    dpi::PhysicalPosition,
+    dpi::{PhysicalPosition, PhysicalSize},
     event::{ElementState, Event, KeyEvent, MouseButton, MouseScrollDelta, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
     keyboard::{Key, NamedKey},
@@ -130,6 +130,12 @@ fn main() {
                                     None,
                                 );
                             });
+                            if let Some((x, y)) = editor.cursor_position() {
+                                window.set_ime_cursor_area(
+                                    PhysicalPosition::new(x, y),
+                                    PhysicalSize::new(20, 20),
+                                );
+                            }
 
                             // Draw scrollbar
                             {
