@@ -139,6 +139,7 @@ pub struct Attrs<'a> {
     pub metadata: usize,
     pub cache_key_flags: CacheKeyFlags,
     pub metrics_opt: Option<CacheMetrics>,
+    pub is_preedit: bool,
 }
 
 impl<'a> Attrs<'a> {
@@ -155,6 +156,7 @@ impl<'a> Attrs<'a> {
             metadata: 0,
             cache_key_flags: CacheKeyFlags::empty(),
             metrics_opt: None,
+            is_preedit: false,
         }
     }
 
@@ -206,6 +208,12 @@ impl<'a> Attrs<'a> {
         self
     }
 
+    /// Set preedit
+    pub fn preedit(mut self, is_preedit: bool) -> Self {
+        self.is_preedit = is_preedit;
+        self
+    }
+
     /// Check if font matches
     pub fn matches(&self, face: &fontdb::FaceInfo) -> bool {
         //TODO: smarter way of including emoji
@@ -254,6 +262,7 @@ pub struct AttrsOwned {
     pub metadata: usize,
     pub cache_key_flags: CacheKeyFlags,
     pub metrics_opt: Option<CacheMetrics>,
+    pub is_preedit: bool,
 }
 
 impl AttrsOwned {
@@ -267,6 +276,7 @@ impl AttrsOwned {
             metadata: attrs.metadata,
             cache_key_flags: attrs.cache_key_flags,
             metrics_opt: attrs.metrics_opt,
+            is_preedit: attrs.is_preedit,
         }
     }
 
@@ -280,6 +290,7 @@ impl AttrsOwned {
             metadata: self.metadata,
             cache_key_flags: self.cache_key_flags,
             metrics_opt: self.metrics_opt,
+            is_preedit: self.is_preedit,
         }
     }
 }
