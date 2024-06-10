@@ -260,25 +260,28 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for SyntaxEditor<'syntax_system, 'bu
 
         let cursor = self.cursor();
         self.editor.with_buffer_mut(|buffer| {
-            let visible_lines = buffer.visible_lines();
+            let metrics = buffer.metrics();
             let scroll = buffer.scroll();
-            let scroll_end = scroll.layout + visible_lines;
-            let mut total_layout = 0;
+            let scroll_end = scroll.vertical + buffer.size().1;
+            let mut total_height = 0.0;
             let mut highlighted = 0;
             for line_i in 0..buffer.lines.len() {
                 // Break out if we have reached the end of scroll and are past the cursor
-                if total_layout >= scroll_end && line_i > cursor.line {
+                if total_height > scroll_end && line_i > cursor.line {
                     break;
                 }
 
                 let line = &mut buffer.lines[line_i];
                 if line.metadata().is_some() && line_i < self.syntax_cache.len() {
                     //TODO: duplicated code!
-                    if line_i >= scroll.line && total_layout < scroll_end {
+                    if line_i >= scroll.line && total_height < scroll_end {
                         // Perform shaping and layout of this line in order to count if we have reached scroll
                         match buffer.line_layout(font_system, line_i) {
                             Some(layout_lines) => {
-                                total_layout += layout_lines.len() as i32;
+                                for layout_line in layout_lines.iter() {
+                                    total_height +=
+                                        layout_line.line_height_opt.unwrap_or(metrics.line_height);
+                                }
                             }
                             None => {
                                 //TODO: should this be possible?
@@ -336,10 +339,13 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for SyntaxEditor<'syntax_system, 'bu
                 line.set_attrs_list(attrs_list);
 
                 // Perform shaping and layout of this line in order to count if we have reached scroll
-                if line_i >= scroll.line && total_layout < scroll_end {
+                if line_i >= scroll.line && total_height < scroll_end {
                     match buffer.line_layout(font_system, line_i) {
                         Some(layout_lines) => {
-                            total_layout += layout_lines.len() as i32;
+                            for layout_line in layout_lines.iter() {
+                                total_height +=
+                                    layout_line.line_height_opt.unwrap_or(metrics.line_height);
+                            }
                         }
                         None => {
                             //TODO: should this be possible?

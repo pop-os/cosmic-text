@@ -851,7 +851,8 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
             Action::Scroll { lines } => {
                 self.with_buffer_mut(|buffer| {
                     let mut scroll = buffer.scroll();
-                    scroll.layout += lines;
+                    //TODO: align to layout lines
+                    scroll.vertical += lines as f32 * buffer.metrics().line_height;
                     buffer.set_scroll(scroll);
                 });
             }

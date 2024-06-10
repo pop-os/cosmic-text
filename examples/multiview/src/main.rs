@@ -148,16 +148,16 @@ fn main() {
                         if state == ElementState::Pressed {
                             match logical_key {
                                 Key::Named(NamedKey::ArrowDown) => {
-                                    scroll.layout += 1;
+                                    scroll.vertical += buffer.metrics().line_height;
                                 }
                                 Key::Named(NamedKey::ArrowUp) => {
-                                    scroll.layout -= 1;
+                                    scroll.vertical -= buffer.metrics().line_height;
                                 }
                                 Key::Named(NamedKey::PageDown) => {
-                                    scroll.layout += buffer.visible_lines();
+                                    scroll.vertical += buffer.size().1;
                                 }
                                 Key::Named(NamedKey::PageUp) => {
-                                    scroll.layout -= buffer.visible_lines();
+                                    scroll.vertical -= buffer.size().1;
                                 }
                                 _ => {}
                             }
