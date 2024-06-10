@@ -94,7 +94,7 @@ pub struct LayoutRunIter<'b> {
     buffer: &'b Buffer,
     line_i: usize,
     layout_i: usize,
-    total_layout: i32,
+    total_height: f32,
     line_top: f32,
 }
 
@@ -104,7 +104,7 @@ impl<'b> LayoutRunIter<'b> {
             buffer,
             line_i: buffer.scroll.line,
             layout_i: 0,
-            total_layout: 0,
+            total_height: 0.0,
             line_top: 0.0,
         }
     }
@@ -120,25 +120,22 @@ impl<'b> Iterator for LayoutRunIter<'b> {
             while let Some(layout_line) = layout.get(self.layout_i) {
                 self.layout_i += 1;
 
-                let scrolled = self.total_layout < self.buffer.scroll.layout;
-                self.total_layout += 1;
-                if scrolled {
-                    continue;
-                }
-
                 let line_height = layout_line
                     .line_height_opt
                     .unwrap_or(self.buffer.metrics.line_height);
-                let line_top = self.line_top;
+                self.total_height += line_height;
+
+                let line_top = self.line_top - self.buffer.scroll.vertical;
                 let glyph_height = layout_line.max_ascent + layout_line.max_descent;
                 let centering_offset = (line_height - glyph_height) / 2.0;
                 let line_y = line_top + centering_offset + layout_line.max_ascent;
-
                 if line_top + centering_offset > self.buffer.height {
                     return None;
                 }
-
                 self.line_top += line_height;
+                if line_y < 0.0 {
+                    continue;
+                }
 
                 return Some(LayoutRun {
                     line_i: self.line_i,
@@ -314,36 +311,50 @@ impl Buffer {
         cursor: Cursor,
         prune: bool,
     ) {
+        let height = self.height;
+        let metrics = self.metrics;
         let old_scroll = self.scroll;
 
         let layout_cursor = self
             .layout_cursor(font_system, cursor)
             .expect("shape_until_cursor invalid cursor");
 
+        let mut layout_y = 0.0;
+        let mut total_height = {
+            let layout = self
+                .line_layout(font_system, layout_cursor.line)
+                .expect("shape_until_cursor failed to scroll forwards");
+            for layout_i in 0..layout_cursor.layout {
+                layout_y += layout[layout_i]
+                    .line_height_opt
+                    .unwrap_or(metrics.line_height);
+            }
+            layout_y
+                + layout[layout_cursor.layout]
+                    .line_height_opt
+                    .unwrap_or(metrics.line_height)
+        };
+
         if self.scroll.line > layout_cursor.line
-            || (self.scroll.line == layout_cursor.line
-                && self.scroll.layout > layout_cursor.layout as i32)
+            || (self.scroll.line == layout_cursor.line && self.scroll.vertical > layout_y)
         {
             // Adjust scroll backwards if cursor is before it
             self.scroll.line = layout_cursor.line;
-            self.scroll.layout = layout_cursor.layout as i32;
+            self.scroll.vertical = layout_y;
         } else {
             // Adjust scroll forwards if cursor is after it
-            let visible_lines = self.visible_lines();
             let mut line_i = layout_cursor.line;
-            let mut total_layout = layout_cursor.layout as i32 + 1;
             while line_i > self.scroll.line {
                 line_i -= 1;
                 let layout = self
                     .line_layout(font_system, line_i)
                     .expect("shape_until_cursor failed to scroll forwards");
-                for layout_i in (0..layout.len()).rev() {
-                    total_layout += 1;
-                    if total_layout >= visible_lines {
-                        self.scroll.line = line_i;
-                        self.scroll.layout = layout_i as i32;
-                        break;
-                    }
+                for layout_line in layout.iter() {
+                    total_height += layout_line.line_height_opt.unwrap_or(metrics.line_height);
+                }
+                if total_height > height + self.scroll.vertical {
+                    self.scroll.line = line_i;
+                    self.scroll.vertical = total_height - height;
                 }
             }
         }
@@ -385,27 +396,33 @@ impl Buffer {
 
     /// Shape lines until scroll
     pub fn shape_until_scroll(&mut self, font_system: &mut FontSystem, prune: bool) {
+        let metrics = self.metrics;
         let old_scroll = self.scroll;
 
         loop {
             // Adjust scroll.layout to be positive by moving scroll.line backwards
-            while self.scroll.layout < 0 {
+            while self.scroll.vertical < 0.0 {
                 if self.scroll.line > 0 {
-                    self.scroll.line -= 1;
-                    if let Some(layout) = self.line_layout(font_system, self.scroll.line) {
-                        self.scroll.layout += layout.len() as i32;
+                    let line_i = self.scroll.line - 1;
+                    if let Some(layout) = self.line_layout(font_system, line_i) {
+                        let mut layout_height = 0.0;
+                        for layout_line in layout.iter() {
+                            layout_height +=
+                                layout_line.line_height_opt.unwrap_or(metrics.line_height);
+                        }
+                        self.scroll.line = line_i;
+                        self.scroll.vertical += layout_height;
                     }
                 } else {
-                    self.scroll.layout = 0;
+                    self.scroll.vertical = 0.0;
                     break;
                 }
             }
 
-            let visible_lines = self.visible_lines();
-            let scroll_start = self.scroll.layout;
-            let scroll_end = scroll_start + visible_lines;
+            let scroll_start = self.scroll.vertical;
+            let scroll_end = scroll_start + self.height;
 
-            let mut total_layout = 0;
+            let mut total_height = 0.0;
             for line_i in 0..self.lines.len() {
                 if line_i < self.scroll.line {
                     if prune {
@@ -413,7 +430,7 @@ impl Buffer {
                     }
                     continue;
                 }
-                if total_layout >= scroll_end {
+                if total_height > scroll_end {
                     if prune {
                         self.lines[line_i].reset_shaping();
                         continue;
@@ -422,22 +439,27 @@ impl Buffer {
                     }
                 }
 
+                let mut layout_height = 0.0;
                 let layout = self
                     .line_layout(font_system, line_i)
                     .expect("shape_until_scroll invalid line");
-                for layout_i in 0..layout.len() {
-                    if total_layout == scroll_start {
-                        // Adjust scroll.line and scroll.layout
-                        self.scroll.line = line_i;
-                        self.scroll.layout = layout_i as i32;
-                    }
-                    total_layout += 1;
+                for layout_line in layout.iter() {
+                    let line_height = layout_line.line_height_opt.unwrap_or(metrics.line_height);
+                    layout_height += line_height;
+                    total_height += line_height;
+                }
+
+                // Adjust scroll.vertical to be smaller by moving scroll.line forwards
+                //TODO: do we want to adjust it exactly to a layout line?
+                if line_i == self.scroll.line && layout_height < self.scroll.vertical {
+                    self.scroll.line += 1;
+                    self.scroll.vertical -= layout_height;
                 }
             }
 
-            if total_layout < scroll_end && self.scroll.line > 0 {
+            if total_height < scroll_end && self.scroll.line > 0 {
                 // Need to scroll up to stay inside of buffer
-                self.scroll.layout -= scroll_end - total_layout;
+                self.scroll.vertical -= scroll_end - total_height;
             } else {
                 // Done adjusting scroll
                 break;
@@ -600,11 +622,6 @@ impl Buffer {
             self.scroll = scroll;
             self.redraw = true;
         }
-    }
-
-    /// Get the number of lines that can be viewed in the buffer
-    pub fn visible_lines(&self) -> i32 {
-        (self.height / self.metrics.line_height) as i32
     }
 
     /// Set text of buffer, using provided attributes for each line by default

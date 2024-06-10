@@ -137,19 +137,19 @@ pub struct Scroll {
     /// Index of [`BufferLine`] in [`Buffer::lines`]. This will be adjusted as needed if layout is
     /// out of bounds
     pub line: usize,
-    /// Index of [`LayoutLine`] in [`BufferLine::layout`]. This will be adjusted as needed
-    /// if it is negative or exceeds the number of layout lines
-    pub layout: i32,
+    /// Pixel offset from the start of the [`BufferLine`]. This will be adjusted as needed
+    /// if it is negative or exceeds the height of the [`BufferLine::layout`] lines.
+    pub vertical: f32,
     /// The horizontal position of scroll in fractional pixels
     pub horizontal: f32,
 }
 
 impl Scroll {
     /// Create a new scroll
-    pub const fn new(line: usize, layout: i32, horizontal: f32) -> Self {
+    pub const fn new(line: usize, vertical: f32, horizontal: f32) -> Self {
         Self {
             line,
-            layout,
+            vertical,
             horizontal,
         }
     }
