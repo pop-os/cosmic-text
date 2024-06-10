@@ -1157,6 +1157,10 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for ViEditor<'syntax_system, 'buffer
             editor.action(font_system, action);
         });
     }
+
+    fn set_cursor_hidden(&mut self, hidden: bool) {
+        self.editor.set_cursor_hidden(hidden);
+    }
 }
 
 impl<'font_system, 'syntax_system, 'buffer>
