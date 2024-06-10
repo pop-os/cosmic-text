@@ -596,8 +596,10 @@ impl Buffer {
             self.tab_width = tab_width;
             // Shaping must be reset when tab width is changed
             for line in self.lines.iter_mut() {
-                if line.text().contains('\t') {
-                    line.reset_shaping();
+                if line.shape_opt().is_some() {
+                    if line.text().contains('\t') {
+                        line.reset_shaping();
+                    }
                 }
             }
             self.redraw = true;
