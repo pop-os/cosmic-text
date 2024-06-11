@@ -20,14 +20,17 @@ fn stable_wrap() {
     let font = std::fs::read("fonts/FiraMono-Medium.ttf").unwrap();
     font_system.db_mut().load_font_data(font);
 
-    let mut check_wrap = |text: &_, wrap, start_width| {
+    let mut check_wrap = |text: &_, wrap, align_opt, start_width_opt| {
         let line = ShapeLine::new(&mut font_system, text, &attrs, Shaping::Advanced, 8);
 
-        let layout_unbounded = line.layout(font_size, start_width, wrap, Some(Align::Left), None);
+        let layout_unbounded = line.layout(font_size, start_width_opt, wrap, align_opt, None);
         let max_width = layout_unbounded.iter().map(|l| l.w).fold(0.0, f32::max);
-        let new_limit = f32::min(start_width, max_width);
+        let new_limit = match start_width_opt {
+            Some(start_width) => f32::min(start_width, max_width),
+            None => max_width,
+        };
 
-        let layout_bounded = line.layout(font_size, new_limit, wrap, Some(Align::Left), None);
+        let layout_bounded = line.layout(font_size, Some(new_limit), wrap, align_opt, None);
         let bounded_max_width = layout_bounded.iter().map(|l| l.w).fold(0.0, f32::max);
 
         // For debugging:
@@ -37,10 +40,13 @@ fn stable_wrap() {
         assert_eq!(
             (max_width, layout_unbounded.len()),
             (bounded_max_width, layout_bounded.len()),
-            "Wrap \"{wrap:?}\" with text: \"{text}\"",
+            "Wrap \"{wrap:?}\" and align \"{align_opt:?}\" with text: \"{text}\"",
         );
         for (u, b) in layout_unbounded[1..].iter().zip(layout_bounded[1..].iter()) {
-            assert_eq!(u.w, b.w, "Wrap {wrap:?} with text: \"{text}\"",);
+            assert_eq!(
+                u.w, b.w,
+                "Wrap {wrap:?} and align \"{align_opt:?}\" with text: \"{text}\"",
+            );
         }
     };
 
@@ -59,13 +65,30 @@ fn stable_wrap() {
     .chain(BidiParagraphs::new(&hello_sample));
 
     for text in cases {
-        for wrap in [Wrap::Word, Wrap::Glyph] {
-            for start_width in [f32::MAX, 80.0, 198.2132, 20.0, 4.0, 300.0] {
-                check_wrap(text, wrap, start_width);
-                let with_spaces = format!("{text}            ");
-                check_wrap(&with_spaces, wrap, start_width);
-                let with_spaces_2 = format!("{text}    ");
-                check_wrap(&with_spaces_2, wrap, start_width);
+        for wrap in [Wrap::None, Wrap::Glyph, Wrap::Word, Wrap::WordOrGlyph] {
+            for align_opt in [
+                None,
+                Some(Align::Left),
+                Some(Align::Right),
+                Some(Align::Center),
+                //TODO: Align::Justified
+                Some(Align::End),
+            ] {
+                for start_width_opt in [
+                    None,
+                    Some(f32::MAX),
+                    Some(80.0),
+                    Some(198.2132),
+                    Some(20.0),
+                    Some(4.0),
+                    Some(300.0),
+                ] {
+                    check_wrap(text, wrap, align_opt, start_width_opt);
+                    let with_spaces = format!("{text}            ");
+                    check_wrap(&with_spaces, wrap, align_opt, start_width_opt);
+                    let with_spaces_2 = format!("{text}    ");
+                    check_wrap(&with_spaces_2, wrap, align_opt, start_width_opt);
+                }
             }
         }
     }

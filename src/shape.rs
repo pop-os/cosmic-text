@@ -992,7 +992,7 @@ impl ShapeLine {
     pub fn layout(
         &self,
         font_size: f32,
-        line_width: f32,
+        width_opt: Option<f32>,
         wrap: Wrap,
         align: Option<Align>,
         match_mono_width: Option<f32>,
@@ -1001,7 +1001,7 @@ impl ShapeLine {
         self.layout_to_buffer(
             &mut ShapeBuffer::default(),
             font_size,
-            line_width,
+            width_opt,
             wrap,
             align,
             &mut lines,
@@ -1014,7 +1014,7 @@ impl ShapeLine {
         &self,
         scratch: &mut ShapeBuffer,
         font_size: f32,
-        line_width: f32,
+        width_opt: Option<f32>,
         wrap: Wrap,
         align: Option<Align>,
         layout_lines: &mut Vec<LayoutLine>,
@@ -1089,11 +1089,11 @@ impl ShapeLine {
                         // relayouts with that width as the `line_width` will produce the same
                         // wrapping results.
                         if current_visual_line.w + (word_range_width + word_width)
-                            <= line_width
+                            <= width_opt.unwrap_or(f32::INFINITY)
                             // Include one blank word over the width limit since it won't be
                             // counted in the final width
                             || (word.blank
-                                && (current_visual_line.w + word_range_width) <= line_width)
+                                && (current_visual_line.w + word_range_width) <= width_opt.unwrap_or(f32::INFINITY))
                         {
                             // fits
                             if word.blank {
@@ -1104,12 +1104,12 @@ impl ShapeLine {
                             continue;
                         } else if wrap == Wrap::Glyph
                             // Make sure that the word is able to fit on it's own line, if not, fall back to Glyph wrapping.
-                            || (wrap == Wrap::WordOrGlyph && word_width > line_width)
+                            || (wrap == Wrap::WordOrGlyph && word_width > width_opt.unwrap_or(f32::INFINITY))
                         {
                             // Commit the current line so that the word starts on the next line.
                             if word_range_width > 0.
                                 && wrap == Wrap::WordOrGlyph
-                                && word_width > line_width
+                                && word_width > width_opt.unwrap_or(f32::INFINITY)
                             {
                                 add_to_visual_line(
                                     &mut current_visual_line,
@@ -1132,7 +1132,7 @@ impl ShapeLine {
                             for (glyph_i, glyph) in word.glyphs.iter().enumerate().rev() {
                                 let glyph_width = glyph.width(font_size);
                                 if current_visual_line.w + (word_range_width + glyph_width)
-                                    <= line_width
+                                    <= width_opt.unwrap_or(f32::INFINITY)
                                 {
                                     word_range_width += glyph_width;
                                     continue;
@@ -1213,11 +1213,11 @@ impl ShapeLine {
                     for (i, word) in span.words.iter().enumerate() {
                         let word_width = word.width(font_size);
                         if current_visual_line.w + (word_range_width + word_width)
-                            <= line_width
+                            <= width_opt.unwrap_or(f32::INFINITY)
                             // Include one blank word over the width limit since it won't be
                             // counted in the final width.
                             || (word.blank
-                                && (current_visual_line.w + word_range_width) <= line_width)
+                                && (current_visual_line.w + word_range_width) <= width_opt.unwrap_or(f32::INFINITY))
                         {
                             // fits
                             if word.blank {
@@ -1228,12 +1228,12 @@ impl ShapeLine {
                             continue;
                         } else if wrap == Wrap::Glyph
                             // Make sure that the word is able to fit on it's own line, if not, fall back to Glyph wrapping.
-                            || (wrap == Wrap::WordOrGlyph && word_width > line_width)
+                            || (wrap == Wrap::WordOrGlyph && word_width > width_opt.unwrap_or(f32::INFINITY))
                         {
                             // Commit the current line so that the word starts on the next line.
                             if word_range_width > 0.
                                 && wrap == Wrap::WordOrGlyph
-                                && word_width > line_width
+                                && word_width > width_opt.unwrap_or(f32::INFINITY)
                             {
                                 add_to_visual_line(
                                     &mut current_visual_line,
@@ -1256,7 +1256,7 @@ impl ShapeLine {
                             for (glyph_i, glyph) in word.glyphs.iter().enumerate() {
                                 let glyph_width = glyph.width(font_size);
                                 if current_visual_line.w + (word_range_width + glyph_width)
-                                    <= line_width
+                                    <= width_opt.unwrap_or(f32::INFINITY)
                                 {
                                     word_range_width += glyph_width;
                                     continue;
@@ -1345,6 +1345,17 @@ impl ShapeLine {
                 Align::Left
             }
         });
+
+        let line_width = match width_opt {
+            Some(width) => width,
+            None => {
+                let mut width: f32 = 0.0;
+                for visual_line in visual_lines.iter() {
+                    width = width.max(visual_line.w);
+                }
+                width
+            }
+        };
 
         let start_x = if self.rtl { line_width } else { 0.0 };
 
