@@ -120,7 +120,15 @@ fn shape_fallback(
     } else {
         rustybuzz::Direction::LeftToRight
     });
-    buffer.push_str(run);
+    if run.contains('\t') {
+        // Push string to buffer, replacing tabs with spaces
+        //TODO: Find a way to do this with minimal allocating, calling
+        // UnicodeBuffer::push_str multiple times causes issues and
+        // UnicodeBuffer::add resizes the buffer with every character
+        buffer.push_str(&run.replace('\t', " "));
+    } else {
+        buffer.push_str(run);
+    }
     buffer.guess_segment_properties();
 
     let rtl = matches!(buffer.direction(), rustybuzz::Direction::RightToLeft);
@@ -853,10 +861,8 @@ impl ShapeLine {
             for word in span.words.iter_mut() {
                 for glyph in word.glyphs.iter_mut() {
                     if line.get(glyph.start..glyph.end) == Some("\t") {
-                        //TODO: better fallback for width
-                        let space_x_advance =
-                            glyph.font_monospace_em_width.unwrap_or(glyph.x_advance);
-                        let tab_x_advance = (tab_width as f32) * space_x_advance;
+                        // Tabs are shaped as spaces, so they will always have the x_advance of a space.
+                        let tab_x_advance = (tab_width as f32) * glyph.x_advance;
                         let tab_stop = (math::floorf(x / tab_x_advance) + 1.0) * tab_x_advance;
                         glyph.x_advance = tab_stop - x;
                     }
