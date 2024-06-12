@@ -74,7 +74,7 @@ fn main() {
     let mut buffer = Buffer::new(&mut font_system, font_sizes[font_size_default]);
     buffer
         .borrow_with(&mut font_system)
-        .set_size(window.width() as f32, window.height() as f32);
+        .set_size(Some(window.width() as f32), Some(window.height() as f32));
 
     let mut editor = Editor::new(buffer);
 

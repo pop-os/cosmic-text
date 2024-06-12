@@ -852,7 +852,7 @@ impl ShapeLine {
         for span in spans.iter_mut() {
             for word in span.words.iter_mut() {
                 for glyph in word.glyphs.iter_mut() {
-                    if &line[glyph.start..glyph.end] == "\t" {
+                    if line.get(glyph.start..glyph.end) == Some("\t") {
                         //TODO: better fallback for width
                         let space_x_advance =
                             glyph.font_monospace_em_width.unwrap_or(glyph.x_advance);
