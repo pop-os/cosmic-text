@@ -419,6 +419,10 @@ impl Buffer {
                         }
                         self.scroll.line = line_i;
                         self.scroll.vertical += layout_height;
+                    } else {
+                        // If layout is missing, just assume line height
+                        self.scroll.line = line_i;
+                        self.scroll.vertical += metrics.line_height;
                     }
                 } else {
                     self.scroll.vertical = 0.0;
