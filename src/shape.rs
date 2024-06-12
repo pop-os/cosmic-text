@@ -8,6 +8,7 @@ use core::cmp::{max, min};
 use core::fmt;
 use core::mem;
 use core::ops::Range;
+use rustybuzz::{GlyphInfo, GlyphPosition};
 use unicode_script::{Script, UnicodeScript};
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -133,8 +134,56 @@ fn shape_fallback(
 
     let mut missing = Vec::new();
     glyphs.reserve(glyph_infos.len());
-    let glyph_start = glyphs.len();
-    for (info, pos) in glyph_infos.iter().zip(glyph_positions.iter()) {
+
+    // MODYFI: In the cases of multi-character emojis, the entire shaping run is the emoji.
+    // In this case we want to simply return the `ShapeGlyph` with is_emoji set to true and
+    // an x_advance of 1.0 and not add it to the missing list.
+    if emojis::get(run).is_some() {
+        let attrs = attrs_list.get_span(start_run);
+        glyphs.push(ShapeGlyph {
+            start: start_run,
+            end: end_run,
+            x_advance: 1.0,
+            y_advance: 0.0,
+            x_offset: 0.0,
+            y_offset: 0.0,
+            ascent,
+            descent,
+            font_monospace_em_width: font.monospace_em_width(),
+            font_id: font.id(),
+            glyph_id: 0,
+            //TODO: color should not be related to shaping
+            color_opt: None,
+            metadata: 0, // TODO
+            cache_key_flags: attrs.cache_key_flags,
+            metrics_opt: attrs.metrics_opt.map(|x| x.into()),
+            is_emoji: true,
+        });
+
+        // Restore the buffer to save an allocation.
+        scratch.rustybuzz_buffer = Some(glyph_buffer.clear());
+
+        return missing;
+    }
+
+    // MODYFI: Iterate in reverse order in the case of a rtl run
+    let mut iter_a;
+    let mut iter_b;
+
+    let glyph_info_pos_iter: &mut dyn Iterator<Item = (&GlyphInfo, &GlyphPosition)> = match rtl {
+        true => {
+            iter_a = glyph_infos.iter().zip(glyph_positions.iter()).rev();
+            &mut iter_a
+        }
+        false => {
+            iter_b = glyph_infos.iter().zip(glyph_positions.iter());
+            &mut iter_b
+        }
+    };
+
+    let mut glyph_info_pos_iter = glyph_info_pos_iter.peekable();
+
+    while let Some((info, pos)) = glyph_info_pos_iter.next() {
         let x_advance = pos.x_advance as f32 / font_scale;
         let y_advance = pos.y_advance as f32 / font_scale;
         let x_offset = pos.x_offset as f32 / font_scale;
@@ -142,54 +191,66 @@ fn shape_fallback(
 
         let start_glyph = start_run + info.cluster as usize;
 
-        if info.glyph_id == 0 {
-            missing.push(start_glyph);
-        }
+        // MODYFI: Check if this glyph is an emoji. If it is, add a `ShapeGlyph`
+        // with is_emoji set to true and an x_advance of 1.0, and make sure it
+        // doesn't get added to the missing list.
+        let end_glyph = glyph_info_pos_iter
+            .peek()
+            .and_then(|v| Some(start_run + v.0.cluster as usize))
+            .unwrap_or(end_run);
 
-        let attrs = attrs_list.get_span(start_glyph);
-        glyphs.push(ShapeGlyph {
-            start: start_glyph,
-            end: end_run, // Set later
-            x_advance,
-            y_advance,
-            x_offset,
-            y_offset,
-            ascent,
-            descent,
-            font_monospace_em_width: font.monospace_em_width(),
-            font_id: font.id(),
-            glyph_id: info.glyph_id.try_into().expect("failed to cast glyph ID"),
-            //TODO: color should not be related to shaping
-            color_opt: attrs.color_opt,
-            metadata: attrs.metadata,
-            cache_key_flags: attrs.cache_key_flags,
-            metrics_opt: attrs.metrics_opt.map(|x| x.into()),
-        });
+        if emojis::get(&line[start_glyph..end_glyph]).is_some() {
+            let attrs = attrs_list.get_span(start_run);
+            glyphs.push(ShapeGlyph {
+                start: start_glyph,
+                end: end_run, // Set later
+                x_advance: 1.0,
+                y_advance: 0.0,
+                x_offset: 0.0,
+                y_offset: 0.0,
+                ascent,
+                descent,
+                font_monospace_em_width: font.monospace_em_width(),
+                font_id: font.id(),
+                glyph_id: 0, // TODO
+                //TODO: color should not be related to shaping
+                color_opt: None,
+                metadata: 0, // TODO
+                cache_key_flags: attrs.cache_key_flags,
+                metrics_opt: attrs.metrics_opt.map(|x| x.into()),
+                is_emoji: true,
+            });
+        } else {
+            if info.glyph_id == 0 {
+                missing.push(start_glyph);
+            }
+
+            let attrs = attrs_list.get_span(start_glyph);
+
+            glyphs.push(ShapeGlyph {
+                start: start_glyph,
+                end: end_run, // Set later
+                x_advance,
+                y_advance,
+                x_offset,
+                y_offset,
+                ascent,
+                descent,
+                font_monospace_em_width: font.monospace_em_width(),
+                font_id: font.id(),
+                glyph_id: info.glyph_id.try_into().expect("failed to cast glyph ID"),
+                //TODO: color should not be related to shaping
+                color_opt: attrs.color_opt,
+                metadata: attrs.metadata,
+                cache_key_flags: attrs.cache_key_flags,
+                metrics_opt: attrs.metrics_opt.map(|x| x.into()),
+                is_emoji: false,
+            });
+        }
     }
 
-    // Adjust end of glyphs
     if rtl {
-        for i in glyph_start + 1..glyphs.len() {
-            let next_start = glyphs[i - 1].start;
-            let next_end = glyphs[i - 1].end;
-            let prev = &mut glyphs[i];
-            if prev.start == next_start {
-                prev.end = next_end;
-            } else {
-                prev.end = next_start;
-            }
-        }
-    } else {
-        for i in (glyph_start + 1..glyphs.len()).rev() {
-            let next_start = glyphs[i].start;
-            let next_end = glyphs[i].end;
-            let prev = &mut glyphs[i - 1];
-            if prev.start == next_start {
-                prev.end = next_end;
-            } else {
-                prev.end = next_start;
-            }
-        }
+        glyphs.reverse();
     }
 
     // Restore the buffer to save an allocation.
@@ -224,8 +285,6 @@ fn shape_run(
             }
         }
     }
-
-    log::trace!("      Run {:?}: '{}'", &scripts, &line[start_run..end_run],);
 
     let attrs = attrs_list.get_span(start_run);
 
@@ -262,10 +321,6 @@ fn shape_run(
             None => break,
         };
 
-        log::trace!(
-            "Evaluating fallback with font '{}'",
-            font_iter.face_name(font.id())
-        );
         let mut fb_glyphs = Vec::new();
         let fb_missing = shape_fallback(
             scratch,
@@ -315,7 +370,6 @@ fn shape_run(
             while i < glyphs.len() {
                 if glyphs[i].start >= start && glyphs[i].end <= end {
                     let _glyph = glyphs.remove(i);
-                    // log::trace!("Removed {},{} from {}", _glyph.start, _glyph.end, i);
                 } else {
                     break;
                 }
@@ -324,7 +378,6 @@ fn shape_run(
             while fb_i < fb_glyphs.len() {
                 if fb_glyphs[fb_i].start >= start && fb_glyphs[fb_i].end <= end {
                     let fb_glyph = fb_glyphs.remove(fb_i);
-                    // log::trace!("Insert {},{} from font {} at {}", fb_glyph.start, fb_glyph.end, font_i, i);
                     glyphs.insert(i, fb_glyph);
                     i += 1;
                 } else {
@@ -335,13 +388,7 @@ fn shape_run(
     }
 
     // Debug missing font fallbacks
-    font_iter.check_missing(&line[start_run..end_run]);
-
-    /*
-    for glyph in glyphs.iter() {
-        log::trace!("'{}': {}, {}, {}, {}", &line[glyph.start..glyph.end], glyph.x_advance, glyph.y_advance, glyph.x_offset, glyph.y_offset);
-    }
-    */
+    // font_iter.check_missing(&line[start_run..end_run]);
 
     // Restore the scripts buffer.
     scratch.scripts = scripts;
@@ -465,6 +512,7 @@ fn shape_skip(
                     metadata: attrs.metadata,
                     cache_key_flags: attrs.cache_key_flags,
                     metrics_opt: attrs.metrics_opt.map(|x| x.into()),
+                    is_emoji: false,
                 }
             }),
     );
@@ -488,6 +536,7 @@ pub struct ShapeGlyph {
     pub metadata: usize,
     pub cache_key_flags: CacheKeyFlags,
     pub metrics_opt: Option<Metrics>,
+    pub is_emoji: bool,
 }
 
 impl ShapeGlyph {
@@ -516,6 +565,7 @@ impl ShapeGlyph {
             color_opt: self.color_opt,
             metadata: self.metadata,
             cache_key_flags: self.cache_key_flags,
+            is_emoji: self.is_emoji,
         }
     }
 
@@ -568,13 +618,6 @@ impl ShapeWord {
         shaping: Shaping,
     ) -> Self {
         let word = &line[word_range.clone()];
-
-        log::trace!(
-            "      Word{}: '{}'",
-            if blank { " BLANK" } else { "" },
-            word
-        );
-
         let mut glyphs = Vec::new();
         let span_rtl = level.is_rtl();
 
@@ -666,13 +709,6 @@ impl ShapeSpan {
         shaping: Shaping,
     ) -> Self {
         let span = &line[span_range.start..span_range.end];
-
-        log::trace!(
-            "  Span {}: '{}'",
-            if level.is_rtl() { "RTL" } else { "LTR" },
-            span
-        );
-
         let mut words = Vec::new();
 
         let mut start_word = 0;
@@ -797,8 +833,6 @@ impl ShapeLine {
         } else {
             bidi.paragraphs[0].level.is_rtl()
         };
-
-        log::trace!("Line {}: '{}'", if rtl { "RTL" } else { "LTR" }, line);
 
         for para_info in bidi.paragraphs.iter() {
             let line_rtl = para_info.level.is_rtl();

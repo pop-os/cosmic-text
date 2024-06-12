@@ -54,6 +54,7 @@ pub struct LayoutGlyph {
     pub metadata: usize,
     /// [`CacheKeyFlags`]
     pub cache_key_flags: CacheKeyFlags,
+    pub is_emoji: bool,
 }
 
 #[derive(Clone, Debug)]
