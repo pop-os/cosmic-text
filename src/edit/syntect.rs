@@ -147,6 +147,23 @@ impl<'syntax_system, 'buffer> SyntaxEditor<'syntax_system, 'buffer> {
         Ok(())
     }
 
+    /// Set syntax highlighting by file extension
+    pub fn syntax_by_extension(&mut self, extension: &str) {
+        self.syntax = match self
+            .syntax_system
+            .syntax_set
+            .find_syntax_by_extension(extension)
+        {
+            Some(some) => some,
+            None => {
+                log::warn!("no syntax found for {}", extension);
+                self.syntax_system.syntax_set.find_syntax_plain_text()
+            }
+        };
+
+        self.syntax_cache.clear();
+    }
+
     /// Get the default background color
     pub fn background_color(&self) -> Color {
         if let Some(background) = self.theme.settings.background {
