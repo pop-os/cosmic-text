@@ -167,7 +167,7 @@ impl<'buffer> Editor<'buffer> {
 
                         if run.glyphs.is_empty() && end.line > line_i {
                             // Highlight all of internal empty lines
-                            range_opt = Some((0, buffer.size().0 as i32));
+                            range_opt = Some((0, buffer.size().0.unwrap_or(0.0) as i32));
                         }
 
                         if let Some((mut min, mut max)) = range_opt.take() {
@@ -176,7 +176,7 @@ impl<'buffer> Editor<'buffer> {
                                 if run.rtl {
                                     min = 0;
                                 } else {
-                                    max = buffer.size().0 as i32;
+                                    max = buffer.size().0.unwrap_or(0.0) as i32;
                                 }
                             }
                             f(

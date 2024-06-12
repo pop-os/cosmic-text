@@ -89,8 +89,8 @@ impl DrawTestCfg {
         let mut buffer = buffer.borrow_with(&mut font_system);
         let margins = 5;
         buffer.set_size(
-            (self.canvas_width - margins * 2) as f32,
-            (self.canvas_height - margins * 2) as f32,
+            Some((self.canvas_width - margins * 2) as f32),
+            Some((self.canvas_height - margins * 2) as f32),
         );
         buffer.set_text(&self.text, self.font.as_attrs(), Shaping::Advanced);
         buffer.shape_until_scroll(true);

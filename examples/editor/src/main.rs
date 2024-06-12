@@ -110,8 +110,8 @@ fn main() {
 
                             editor.with_buffer_mut(|buffer| {
                                 buffer.set_size(
-                                    width as f32 - scrollbar_width * display_scale,
-                                    height as f32,
+                                    Some(width as f32 - scrollbar_width * display_scale),
+                                    Some(height as f32),
                                 )
                             });
 

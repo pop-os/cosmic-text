@@ -108,7 +108,7 @@ fn wrap_extra_line() {
     buffer.set_text("Lorem ipsum dolor sit amet, qui minim labore adipisicing\n\nweeewoooo minim sint cillum sint consectetur cupidatat.", Attrs::new().family(cosmic_text::Family::Name("Inter")), Shaping::Advanced);
 
     // Set a size for the text buffer, in pixels
-    buffer.set_size(50.0, 1000.0);
+    buffer.set_size(Some(50.0), Some(1000.0));
 
     // Perform shaping as desired
     buffer.shape_until_scroll(false);

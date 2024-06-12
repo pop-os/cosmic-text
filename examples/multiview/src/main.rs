@@ -102,7 +102,7 @@ fn main() {
                         // Set scroll to view scroll
                         buffer.set_scroll(*scroll);
                         // Set size, will relayout and shape until scroll if changed
-                        buffer.set_size(width as f32, height as f32);
+                        buffer.set_size(Some(width as f32), Some(height as f32));
                         // Shape until scroll, ensures scroll is clamped
                         //TODO: ability to prune with multiple views?
                         buffer.shape_until_scroll(true);
@@ -154,10 +154,10 @@ fn main() {
                                     scroll.vertical -= buffer.metrics().line_height;
                                 }
                                 Key::Named(NamedKey::PageDown) => {
-                                    scroll.vertical += buffer.size().1;
+                                    scroll.vertical += buffer.size().1.unwrap_or(0.0);
                                 }
                                 Key::Named(NamedKey::PageUp) => {
-                                    scroll.vertical -= buffer.size().1;
+                                    scroll.vertical -= buffer.size().1.unwrap_or(0.0);
                                 }
                                 _ => {}
                             }
