@@ -299,7 +299,10 @@ fn shape_run(
         &line[start_run..end_run],
     );
 
-    let font = font_iter.next().expect("no default font found");
+    let Some(font) = font_iter.next() else {
+        log::warn!("Could not find any font to use while shaping.");
+        return;
+    };
 
     let glyph_start = glyphs.len();
     let mut missing = shape_fallback(
