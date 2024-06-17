@@ -8,11 +8,9 @@ pub fn common_fallback() -> &'static [&'static str] {
     &[
         /* Sans-serif fallbacks */
         "Noto Sans",
-        "FreeSans",
-        /* Emoji fallbacks*/
-        "Noto Color Emoji",
         /* More sans-serif fallbacks */
         "DejaVu Sans",
+        "FreeSans",
         /* Mono fallbacks */
         "Noto Sans Mono",
         "DejaVu Sans Mono",
@@ -20,6 +18,8 @@ pub fn common_fallback() -> &'static [&'static str] {
         /* Symbols fallbacks */
         "Noto Sans Symbols",
         "Noto Sans Symbols2",
+        /* Emoji fallbacks*/
+        "Noto Color Emoji",
         //TODO: Add CJK script here for doublewides?
     ]
 }
