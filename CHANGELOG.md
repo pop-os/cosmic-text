@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 2024-06-18
+
+### Added
+
+- Cache codepoint support info for monospace fonts
+- Store a sorted list of monospace font ids in font system
+- Add line ending abstraction
+- Horizontal scroll support in Buffer
+- Concurrently load and parse fonts
+- Add metrics to attributes
+- Support expanding tabs
+- Add an option to set selected text color
+- Add Edit::cursor_position
+- Allow layout to be calculated without specifying width
+- Allow for undefined buffer width and/or height
+- Add method to set syntax highlighting by file extension
+
+### Fixed
+
+- Fix no_std build
+- Handle inverted Ranges in add_span
+- Fix undo and redo updating editor modified status
+- Ensure at least one line is in Buffer
+
+### Changed
+
+- Enable vi feature for docs.rs build
+- Convert editor example to winit
+- Refactor scrollbar width handling for editor example
+- Convert rich-text example to winit
+- Only try monospace fonts that support at least one requested script
+- Skip trying monospace fallbacks if default font supports all codepoints
+- Make vertical scroll by pixels instead of layout lines
+- Upgrade dependencies and re-export ttf-parser
+
 ## [0.11.2] - 2024-02-08
 
 ### Fixed
