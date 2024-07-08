@@ -147,6 +147,23 @@ impl<'syntax_system, 'buffer> SyntaxEditor<'syntax_system, 'buffer> {
         Ok(())
     }
 
+    /// Set syntax highlighting by file extension
+    pub fn syntax_by_extension(&mut self, extension: &str) {
+        self.syntax = match self
+            .syntax_system
+            .syntax_set
+            .find_syntax_by_extension(extension)
+        {
+            Some(some) => some,
+            None => {
+                log::warn!("no syntax found for {}", extension);
+                self.syntax_system.syntax_set.find_syntax_plain_text()
+            }
+        };
+
+        self.syntax_cache.clear();
+    }
+
     /// Get the default background color
     pub fn background_color(&self) -> Color {
         if let Some(background) = self.theme.settings.background {
@@ -201,7 +218,11 @@ impl<'syntax_system, 'buffer> SyntaxEditor<'syntax_system, 'buffer> {
         F: FnMut(i32, i32, u32, u32, Color),
     {
         let size = self.with_buffer(|buffer| buffer.size());
-        f(0, 0, size.0 as u32, size.1 as u32, self.background_color());
+        if let Some(width) = size.0 {
+            if let Some(height) = size.1 {
+                f(0, 0, width as u32, height as u32, self.background_color());
+            }
+        }
         self.editor.draw(
             font_system,
             cache,
@@ -263,7 +284,7 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for SyntaxEditor<'syntax_system, 'bu
         self.editor.with_buffer_mut(|buffer| {
             let metrics = buffer.metrics();
             let scroll = buffer.scroll();
-            let scroll_end = scroll.vertical + buffer.size().1;
+            let scroll_end = scroll.vertical + buffer.size().1.unwrap_or(f32::INFINITY);
             let mut total_height = 0.0;
             let mut highlighted = 0;
             for line_i in 0..buffer.lines.len() {

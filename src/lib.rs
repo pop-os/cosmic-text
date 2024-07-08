@@ -30,7 +30,7 @@
 //! let mut buffer = buffer.borrow_with(&mut font_system);
 //!
 //! // Set a size for the text buffer, in pixels
-//! buffer.set_size(80.0, 25.0);
+//! buffer.set_size(Some(80.0), Some(25.0));
 //!
 //! // Attributes indicate what font to choose
 //! let attrs = Attrs::new();

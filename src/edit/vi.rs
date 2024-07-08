@@ -310,7 +310,11 @@ impl<'syntax_system, 'buffer> ViEditor<'syntax_system, 'buffer> {
         let selection_color = self.selection_color();
         self.with_buffer(|buffer| {
             let size = buffer.size();
-            f(0, 0, size.0 as u32, size.1 as u32, background_color);
+            if let Some(width) = size.0 {
+                if let Some(height) = size.1 {
+                    f(0, 0, width as u32, height as u32, background_color);
+                }
+            }
             let font_size = buffer.metrics().font_size;
             for run in buffer.layout_runs() {
                 let line_i = run.line_i;
@@ -393,7 +397,7 @@ impl<'syntax_system, 'buffer> ViEditor<'syntax_system, 'buffer> {
 
                         if run.glyphs.is_empty() && end.line > line_i {
                             // Highlight all of internal empty lines
-                            range_opt = Some((0, buffer.size().0 as i32));
+                            range_opt = Some((0, buffer.size().0.unwrap_or(0.0) as i32));
                         }
 
                         if let Some((mut min, mut max)) = range_opt.take() {
@@ -402,7 +406,7 @@ impl<'syntax_system, 'buffer> ViEditor<'syntax_system, 'buffer> {
                                 if run.rtl {
                                     min = 0;
                                 } else {
-                                    max = buffer.size().0 as i32;
+                                    max = buffer.size().0.unwrap_or(0.0) as i32;
                                 }
                             }
                             f(

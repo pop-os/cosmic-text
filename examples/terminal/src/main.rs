@@ -26,8 +26,8 @@ fn main() {
 
     // Set a size for the text buffer, in pixels
     let width = 80.0;
-    let height = f32::MAX; // The height is unbounded
-    buffer.set_size(width, height);
+    // The height is unbounded
+    buffer.set_size(Some(width), None);
 
     // Attributes indicate what font to choose
     let attrs = Attrs::new();
@@ -45,7 +45,6 @@ fn main() {
     const TEXT_COLOR: Color = Color::rgb(0xFF, 0xFF, 0xFF);
 
     // Set up the canvas
-    let width = buffer.size().0;
     let height = LINE_HEIGHT * buffer.layout_runs().count() as f32;
     let mut canvas = vec![vec![None; width as usize]; height as usize];
 

@@ -129,8 +129,10 @@ impl<'b> Iterator for LayoutRunIter<'b> {
                 let glyph_height = layout_line.max_ascent + layout_line.max_descent;
                 let centering_offset = (line_height - glyph_height) / 2.0;
                 let line_y = line_top + centering_offset + layout_line.max_ascent;
-                if line_top + centering_offset > self.buffer.height {
-                    return None;
+                if let Some(height) = self.buffer.height_opt {
+                    if line_top + centering_offset > height {
+                        return None;
+                    }
                 }
                 self.line_top += line_height;
                 if line_y < 0.0 {
@@ -203,8 +205,8 @@ pub struct Buffer {
     /// [BufferLine]s (or paragraphs) of text in the buffer
     pub lines: Vec<BufferLine>,
     metrics: Metrics,
-    width: f32,
-    height: f32,
+    width_opt: Option<f32>,
+    height_opt: Option<f32>,
     scroll: Scroll,
     /// True if a redraw is requires. Set to false after processing
     redraw: bool,
@@ -221,8 +223,8 @@ impl Clone for Buffer {
         Self {
             lines: self.lines.clone(),
             metrics: self.metrics,
-            width: self.width,
-            height: self.height,
+            width_opt: self.width_opt,
+            height_opt: self.height_opt,
             scroll: self.scroll,
             redraw: self.redraw,
             wrap: self.wrap,
@@ -250,8 +252,8 @@ impl Buffer {
         Self {
             lines: Vec::new(),
             metrics,
-            width: 0.0,
-            height: 0.0,
+            width_opt: None,
+            height_opt: None,
             scroll: Scroll::default(),
             redraw: false,
             wrap: Wrap::WordOrGlyph,
@@ -294,7 +296,7 @@ impl Buffer {
                     &mut self.scratch,
                     font_system,
                     self.metrics.font_size,
-                    self.width,
+                    self.width_opt,
                     self.wrap,
                     self.monospace_width,
                     self.tab_width,
@@ -315,7 +317,6 @@ impl Buffer {
         cursor: Cursor,
         prune: bool,
     ) {
-        let height = self.height;
         let metrics = self.metrics;
         let old_scroll = self.scroll;
 
@@ -345,7 +346,7 @@ impl Buffer {
             // Adjust scroll backwards if cursor is before it
             self.scroll.line = layout_cursor.line;
             self.scroll.vertical = layout_y;
-        } else {
+        } else if let Some(height) = self.height_opt {
             // Adjust scroll forwards if cursor is after it
             let mut line_i = layout_cursor.line;
             while line_i > self.scroll.line {
@@ -389,9 +390,11 @@ impl Buffer {
                         self.scroll.horizontal = x_min;
                         self.redraw = true;
                     }
-                    if x_max > self.scroll.horizontal + self.width {
-                        self.scroll.horizontal = x_max - self.width;
-                        self.redraw = true;
+                    if let Some(width) = self.width_opt {
+                        if x_max > self.scroll.horizontal + width {
+                            self.scroll.horizontal = x_max - width;
+                            self.redraw = true;
+                        }
                     }
                 }
             }
@@ -416,6 +419,10 @@ impl Buffer {
                         }
                         self.scroll.line = line_i;
                         self.scroll.vertical += layout_height;
+                    } else {
+                        // If layout is missing, just assume line height
+                        self.scroll.line = line_i;
+                        self.scroll.vertical += metrics.line_height;
                     }
                 } else {
                     self.scroll.vertical = 0.0;
@@ -424,7 +431,7 @@ impl Buffer {
             }
 
             let scroll_start = self.scroll.vertical;
-            let scroll_end = scroll_start + self.height;
+            let scroll_end = scroll_start + self.height_opt.unwrap_or(f32::INFINITY);
 
             let mut total_height = 0.0;
             for line_i in 0..self.lines.len() {
@@ -528,7 +535,7 @@ impl Buffer {
             &mut self.scratch,
             font_system,
             self.metrics.font_size,
-            self.width,
+            self.width_opt,
             self.wrap,
             self.monospace_width,
             self.tab_width,
@@ -546,7 +553,7 @@ impl Buffer {
     ///
     /// Will panic if `metrics.font_size` is zero.
     pub fn set_metrics(&mut self, font_system: &mut FontSystem, metrics: Metrics) {
-        self.set_metrics_and_size(font_system, metrics, self.width, self.height);
+        self.set_metrics_and_size(font_system, metrics, self.width_opt, self.height_opt);
     }
 
     /// Get the current [`Wrap`]
@@ -608,13 +615,18 @@ impl Buffer {
     }
 
     /// Get the current buffer dimensions (width, height)
-    pub fn size(&self) -> (f32, f32) {
-        (self.width, self.height)
+    pub fn size(&self) -> (Option<f32>, Option<f32>) {
+        (self.width_opt, self.height_opt)
     }
 
     /// Set the current buffer dimensions
-    pub fn set_size(&mut self, font_system: &mut FontSystem, width: f32, height: f32) {
-        self.set_metrics_and_size(font_system, self.metrics, width, height);
+    pub fn set_size(
+        &mut self,
+        font_system: &mut FontSystem,
+        width_opt: Option<f32>,
+        height_opt: Option<f32>,
+    ) {
+        self.set_metrics_and_size(font_system, self.metrics, width_opt, height_opt);
     }
 
     /// Set the current [`Metrics`] and buffer dimensions at the same time
@@ -626,17 +638,20 @@ impl Buffer {
         &mut self,
         font_system: &mut FontSystem,
         metrics: Metrics,
-        width: f32,
-        height: f32,
+        width_opt: Option<f32>,
+        height_opt: Option<f32>,
     ) {
-        let clamped_width = width.max(0.0);
-        let clamped_height = height.max(0.0);
+        let clamped_width_opt = width_opt.map(|width| width.max(0.0));
+        let clamped_height_opt = height_opt.map(|height| height.max(0.0));
 
-        if metrics != self.metrics || clamped_width != self.width || clamped_height != self.height {
+        if metrics != self.metrics
+            || clamped_width_opt != self.width_opt
+            || clamped_height_opt != self.height_opt
+        {
             assert_ne!(metrics.font_size, 0.0, "font size cannot be 0");
             self.metrics = metrics;
-            self.width = clamped_width;
-            self.height = clamped_height;
+            self.width_opt = clamped_width_opt;
+            self.height_opt = clamped_height_opt;
             self.relayout(font_system);
             self.shape_until_scroll(font_system, false);
         }
@@ -1128,20 +1143,24 @@ impl Buffer {
                 cursor_x_opt = None;
             }
             Motion::PageUp => {
-                (cursor, cursor_x_opt) = self.cursor_motion(
-                    font_system,
-                    cursor,
-                    cursor_x_opt,
-                    Motion::Vertical(-self.size().1 as i32),
-                )?;
+                if let Some(height) = self.height_opt {
+                    (cursor, cursor_x_opt) = self.cursor_motion(
+                        font_system,
+                        cursor,
+                        cursor_x_opt,
+                        Motion::Vertical(-height as i32),
+                    )?;
+                }
             }
             Motion::PageDown => {
-                (cursor, cursor_x_opt) = self.cursor_motion(
-                    font_system,
-                    cursor,
-                    cursor_x_opt,
-                    Motion::Vertical(self.size().1 as i32),
-                )?;
+                if let Some(height) = self.height_opt {
+                    (cursor, cursor_x_opt) = self.cursor_motion(
+                        font_system,
+                        cursor,
+                        cursor_x_opt,
+                        Motion::Vertical(height as i32),
+                    )?;
+                }
             }
             Motion::Vertical(px) => {
                 // TODO more efficient, use layout run line height
@@ -1341,8 +1360,8 @@ impl<'a> BorrowedWithFontSystem<'a, Buffer> {
     }
 
     /// Set the current buffer dimensions
-    pub fn set_size(&mut self, width: f32, height: f32) {
-        self.inner.set_size(self.font_system, width, height);
+    pub fn set_size(&mut self, width_opt: Option<f32>, height_opt: Option<f32>) {
+        self.inner.set_size(self.font_system, width_opt, height_opt);
     }
 
     /// Set the current [`Metrics`] and buffer dimensions at the same time
@@ -1350,9 +1369,14 @@ impl<'a> BorrowedWithFontSystem<'a, Buffer> {
     /// # Panics
     ///
     /// Will panic if `metrics.font_size` is zero.
-    pub fn set_metrics_and_size(&mut self, metrics: Metrics, width: f32, height: f32) {
+    pub fn set_metrics_and_size(
+        &mut self,
+        metrics: Metrics,
+        width_opt: Option<f32>,
+        height_opt: Option<f32>,
+    ) {
         self.inner
-            .set_metrics_and_size(self.font_system, metrics, width, height);
+            .set_metrics_and_size(self.font_system, metrics, width_opt, height_opt);
     }
 
     /// Set text of buffer, using provided attributes for each line by default

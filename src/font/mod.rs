@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pub(crate) mod fallback;
 
+// re-export ttf_parser
+pub use ttf_parser;
+
 use core::fmt;
 
 use alloc::sync::Arc;

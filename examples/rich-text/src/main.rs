@@ -122,8 +122,8 @@ fn main() {
     let mut editor = editor.borrow_with(&mut font_system);
     editor.with_buffer_mut(|buffer| {
         buffer.set_size(
-            window.inner_size().width as f32,
-            window.inner_size().height as f32,
+            Some(window.inner_size().width as f32),
+            Some(window.inner_size().height as f32),
         )
     });
     editor.with_buffer_mut(|buffer| set_buffer_text(buffer));
@@ -182,7 +182,7 @@ fn main() {
                             pixmap.fill(bg_color);
 
                             editor.with_buffer_mut(|buffer| {
-                                buffer.set_size(width as f32, height as f32)
+                                buffer.set_size(Some(width as f32), Some(height as f32))
                             });
 
                             let mut paint = Paint::default();
