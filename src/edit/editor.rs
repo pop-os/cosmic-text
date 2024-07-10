@@ -16,7 +16,7 @@ use crate::{
 };
 
 /// A wrapper of [`Buffer`] for easy editing
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Editor<'buffer> {
     buffer_ref: BufferRef<'buffer>,
     cursor: Cursor,

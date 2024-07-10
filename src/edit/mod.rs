@@ -71,6 +71,16 @@ pub enum BufferRef<'buffer> {
     Arc(Arc<Buffer>),
 }
 
+impl<'buffer> Clone for BufferRef<'buffer> {
+    fn clone(&self) -> Self {
+        match self {
+            Self::Owned(buffer) => Self::Owned(buffer.clone()),
+            Self::Borrowed(buffer) => Self::Owned((*buffer).to_owned()),
+            Self::Arc(buffer) => Self::Arc(buffer.clone()),
+        }
+    }
+}
+
 impl<'buffer> From<Buffer> for BufferRef<'buffer> {
     fn from(buffer: Buffer) -> Self {
         Self::Owned(buffer)
