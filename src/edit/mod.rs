@@ -75,7 +75,7 @@ impl<'buffer> Clone for BufferRef<'buffer> {
     fn clone(&self) -> Self {
         match self {
             Self::Owned(buffer) => Self::Owned(buffer.clone()),
-            Self::Borrowed(buffer) => Self::Owned((*buffer).to_owned()),
+            Self::Borrowed(buffer) => Self::Owned((*buffer).clone()),
             Self::Arc(buffer) => Self::Arc(buffer.clone()),
         }
     }
