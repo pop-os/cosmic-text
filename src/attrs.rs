@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+use crate::{CacheKeyFlags, Metrics};
 #[cfg(not(feature = "std"))]
 use alloc::{
     string::{String, ToString},
     vec::Vec,
 };
 use core::ops::Range;
+use ordered_float::OrderedFloat;
 use rangemap::RangeMap;
-
-use crate::{CacheKeyFlags, Metrics};
+use rustybuzz::Variation;
+use std::hash::{Hash, Hasher};
 
 pub use fontdb::{Family, Stretch, Style, Weight};
 
@@ -128,7 +130,7 @@ impl From<CacheMetrics> for Metrics {
 }
 
 /// Text attributes
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Attrs<'a> {
     //TODO: should this be an option?
     pub color_opt: Option<Color>,
@@ -139,6 +141,26 @@ pub struct Attrs<'a> {
     pub metadata: usize,
     pub cache_key_flags: CacheKeyFlags,
     pub metrics_opt: Option<CacheMetrics>,
+    pub variations_opt: Option<&'a [Variation]>,
+}
+
+impl<'a> Hash for Attrs<'a> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.color_opt.hash(state);
+        self.family.hash(state);
+        self.stretch.hash(state);
+        self.style.hash(state);
+        self.weight.hash(state);
+        self.metadata.hash(state);
+        self.cache_key_flags.hash(state);
+        self.metrics_opt.hash(state);
+        if let Some(variations) = self.variations_opt {
+            for v in variations {
+                v.tag.hash(state);
+                OrderedFloat(v.value).hash(state);
+            }
+        }
+    }
 }
 
 impl<'a> Attrs<'a> {
@@ -155,6 +177,7 @@ impl<'a> Attrs<'a> {
             metadata: 0,
             cache_key_flags: CacheKeyFlags::empty(),
             metrics_opt: None,
+            variations_opt: None,
         }
     }
 
@@ -206,6 +229,13 @@ impl<'a> Attrs<'a> {
         self
     }
 
+    /// Set [`Variation`]s
+    pub fn variations(mut self, variations: &'a [Variation]) -> Self {
+        log::info!("Setting variations to Some");
+        self.variations_opt = Some(variations);
+        self
+    }
+
     /// Check if font matches
     pub fn matches(&self, face: &fontdb::FaceInfo) -> bool {
         //TODO: smarter way of including emoji
@@ -215,10 +245,13 @@ impl<'a> Attrs<'a> {
 
     /// Check if this set of attributes can be shaped with another
     pub fn compatible(&self, other: &Self) -> bool {
+        log::info!("Self  var {:?}", self.variations_opt);
+        log::info!("Other var {:?}", other.variations_opt);
         self.family == other.family
             && self.stretch == other.stretch
             && self.style == other.style
             && self.weight == other.weight
+            && self.variations_opt == other.variations_opt
     }
 }
 
@@ -243,7 +276,7 @@ impl<'a> From<Attrs<'a>> for FontMatchAttrs {
 }
 
 /// An owned version of [`Attrs`]
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct AttrsOwned {
     //TODO: should this be an option?
     pub color_opt: Option<Color>,
@@ -254,7 +287,29 @@ pub struct AttrsOwned {
     pub metadata: usize,
     pub cache_key_flags: CacheKeyFlags,
     pub metrics_opt: Option<CacheMetrics>,
+    pub variations_opt: Option<Vec<Variation>>,
 }
+
+impl Hash for AttrsOwned {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.color_opt.hash(state);
+        self.family_owned.hash(state);
+        self.stretch.hash(state);
+        self.style.hash(state);
+        self.weight.hash(state);
+        self.metadata.hash(state);
+        self.cache_key_flags.hash(state);
+        self.metrics_opt.hash(state);
+        if let Some(variations) = &self.variations_opt {
+            for v in variations {
+                v.tag.hash(state);
+                OrderedFloat(v.value).hash(state);
+            }
+        }
+    }
+}
+
+impl Eq for AttrsOwned {}
 
 impl AttrsOwned {
     pub fn new(attrs: Attrs) -> Self {
@@ -267,6 +322,7 @@ impl AttrsOwned {
             metadata: attrs.metadata,
             cache_key_flags: attrs.cache_key_flags,
             metrics_opt: attrs.metrics_opt,
+            variations_opt: attrs.variations_opt.map(|v| v.to_vec()),
         }
     }
 
@@ -280,6 +336,7 @@ impl AttrsOwned {
             metadata: self.metadata,
             cache_key_flags: self.cache_key_flags,
             metrics_opt: self.metrics_opt,
+            variations_opt: self.variations_opt.as_ref().map(|v| v.as_slice()),
         }
     }
 }

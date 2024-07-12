@@ -1,16 +1,17 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pub(crate) mod fallback;
 
+use fontdb::FaceInfo;
 // re-export ttf_parser
 pub use ttf_parser;
 
-use core::fmt;
+use core::{borrow::BorrowMut, fmt};
 
 use alloc::sync::Arc;
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 
-use rustybuzz::Face as RustybuzzFace;
+use rustybuzz::{Face as RustybuzzFace, Variation};
 use self_cell::self_cell;
 
 pub use self::system::*;
@@ -70,6 +71,11 @@ impl Font {
         self.rustybuzz.borrow_dependent()
     }
 
+    pub fn set_variations(&mut self, variations: &[Variation]) {
+        self.rustybuzz
+            .with_dependent_mut(|_, v| v.set_variations(variations));
+    }
+
     #[cfg(feature = "swash")]
     pub fn as_swash(&self) -> swash::FontRef<'_> {
         let swash = &self.swash;
@@ -82,6 +88,86 @@ impl Font {
 }
 
 impl Font {
+    pub fn new_first(db: &fontdb::Database) -> Option<Self> {
+        let id = db.faces().next()?.id;
+        let info = db.face(id)?;
+
+        let (monospace_em_width, scripts, unicode_codepoints) = {
+            db.with_face_data(id, |font_data, face_index| {
+                let face = ttf_parser::Face::parse(font_data, face_index).ok()?;
+                let monospace_em_width = info
+                    .monospaced
+                    .then(|| {
+                        let hor_advance = face.glyph_hor_advance(face.glyph_index(' ')?)? as f32;
+                        let upem = face.units_per_em() as f32;
+                        Some(hor_advance / upem)
+                    })
+                    .flatten();
+
+                if info.monospaced && monospace_em_width.is_none() {
+                    None?;
+                }
+
+                let scripts = face
+                    .tables()
+                    .gpos
+                    .into_iter()
+                    .chain(face.tables().gsub)
+                    .flat_map(|table| table.scripts)
+                    .map(|script| script.tag.to_bytes())
+                    .collect();
+
+                let mut unicode_codepoints = Vec::new();
+
+                face.tables()
+                    .cmap?
+                    .subtables
+                    .into_iter()
+                    .filter(|subtable| subtable.is_unicode())
+                    .for_each(|subtable| {
+                        unicode_codepoints.reserve(1024);
+                        subtable.codepoints(|code_point| {
+                            if subtable.glyph_index(code_point).is_some() {
+                                unicode_codepoints.push(code_point);
+                            }
+                        });
+                    });
+
+                unicode_codepoints.shrink_to_fit();
+
+                Some((monospace_em_width, scripts, unicode_codepoints))
+            })?
+        }?;
+
+        let data = match &info.source {
+            fontdb::Source::Binary(data) => Arc::clone(data),
+            #[cfg(feature = "std")]
+            fontdb::Source::File(path) => {
+                log::warn!("Unsupported fontdb Source::File('{}')", path.display());
+                return None;
+            }
+            #[cfg(feature = "std")]
+            fontdb::Source::SharedFile(_path, data) => Arc::clone(data),
+        };
+
+        Some(Self {
+            id: info.id,
+            monospace_em_width,
+            scripts,
+            unicode_codepoints,
+            #[cfg(feature = "swash")]
+            swash: {
+                let swash = swash::FontRef::from_index((*data).as_ref(), info.index as usize)?;
+                (swash.offset, swash.key)
+            },
+            rustybuzz: OwnedFace::try_new(Arc::clone(&data), |data| {
+                RustybuzzFace::from_slice((**data).as_ref(), info.index).ok_or(())
+            })
+            .ok()?,
+            data,
+        })
+    }
+
     pub fn new(db: &fontdb::Database, id: fontdb::ID) -> Option<Self> {
         let info = db.face(id)?;
 

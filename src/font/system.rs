@@ -256,6 +256,10 @@ impl FontSystem {
             });
     }
 
+    pub fn get_font_owned(&mut self) -> Option<Font> {
+        Font::new_first(&self.db)
+    }
+
     /// Get a font by its ID.
     pub fn get_font(&mut self, id: fontdb::ID) -> Option<Arc<Font>> {
         self.font_cache

@@ -2,8 +2,10 @@
 
 #![allow(clippy::too_many_arguments)]
 
+use alloc::sync::Arc;
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
+use core::borrow::Borrow;
 use core::cmp::{max, min};
 use core::fmt;
 use core::mem;
@@ -296,6 +298,15 @@ fn shape_run(
 
     let attrs = attrs_list.get_span(start_run);
 
+    let Some(mut font) = font_system.get_font_owned() else {
+        log::warn!("Could not find any font to use while shaping.");
+        return;
+    };
+
+    if let Some(v) = attrs.variations_opt {
+        font.set_variations(v);
+    }
+
     let fonts = font_system.get_font_matches(attrs);
 
     let default_families = [&attrs.family];
@@ -307,7 +318,7 @@ fn shape_run(
         &line[start_run..end_run],
     );
 
-    let Some(font) = font_iter.next() else {
+    let Some(font_lol) = font_iter.next() else {
         log::warn!("Could not find any font to use while shaping.");
         return;
     };
