@@ -123,6 +123,7 @@ impl<'a> LayoutRun<'a> {
         None
     }
 
+    /// Get X and Y position of the top left corner of the cursor
     pub fn cursor_position(&self, cursor: &Cursor) -> Option<(f32, f32)> {
         let (cursor_glyph, cursor_glyph_offset) = self.cursor_glyph_opt(cursor)?;
         let x = match self.glyphs.get(cursor_glyph) {
