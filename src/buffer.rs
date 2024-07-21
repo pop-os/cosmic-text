@@ -86,6 +86,72 @@ impl<'a> LayoutRun<'a> {
             Cursor::new_with_affinity(self.line_i, glyph.end, Affinity::Before)
         }
     }
+
+    fn cursor_glyph_opt(&self, cursor: &Cursor) -> Option<(usize, f32)> {
+        if cursor.line == self.line_i {
+            for (glyph_i, glyph) in self.glyphs.iter().enumerate() {
+                if cursor.index == glyph.start {
+                    return Some((glyph_i, 0.0));
+                } else if cursor.index > glyph.start && cursor.index < glyph.end {
+                    // Guess x offset based on characters
+                    let mut before = 0;
+                    let mut total = 0;
+
+                    let cluster = &self.text[glyph.start..glyph.end];
+                    for (i, _) in cluster.grapheme_indices(true) {
+                        if glyph.start + i < cursor.index {
+                            before += 1;
+                        }
+                        total += 1;
+                    }
+
+                    let offset = glyph.w * (before as f32) / (total as f32);
+                    return Some((glyph_i, offset));
+                }
+            }
+            match self.glyphs.last() {
+                Some(glyph) => {
+                    if cursor.index == glyph.end {
+                        return Some((self.glyphs.len(), 0.0));
+                    }
+                }
+                None => {
+                    return Some((0, 0.0));
+                }
+            }
+        }
+        None
+    }
+
+    pub fn cursor_position(&self, cursor: &Cursor) -> Option<(f32, f32)> {
+        let (cursor_glyph, cursor_glyph_offset) = self.cursor_glyph_opt(cursor)?;
+        let x = match self.glyphs.get(cursor_glyph) {
+            Some(glyph) => {
+                // Start of detected glyph
+                if glyph.level.is_rtl() {
+                    glyph.x + glyph.w - cursor_glyph_offset
+                } else {
+                    glyph.x + cursor_glyph_offset
+                }
+            }
+            None => match self.glyphs.last() {
+                Some(glyph) => {
+                    // End of last glyph
+                    if glyph.level.is_rtl() {
+                        glyph.x
+                    } else {
+                        glyph.x + glyph.w
+                    }
+                }
+                None => {
+                    // Start of empty line
+                    0.0
+                }
+            },
+        };
+
+        Some((x, self.line_top))
+    }
 }
 
 /// An iterator of visible text lines, see [`LayoutRun`]
