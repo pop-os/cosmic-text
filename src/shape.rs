@@ -213,7 +213,7 @@ fn shape_fallback(
             let attrs = attrs_list.get_span(start_run);
             glyphs.push(ShapeGlyph {
                 start: start_glyph,
-                end: end_run, // Set later
+                end: end_glyph,
                 x_advance: 1.0,
                 y_advance: 0.0,
                 x_offset: 0.0,
@@ -239,7 +239,7 @@ fn shape_fallback(
 
             glyphs.push(ShapeGlyph {
                 start: start_glyph,
-                end: end_run, // Set later
+                end: end_glyph,
                 x_advance,
                 y_advance,
                 x_offset,

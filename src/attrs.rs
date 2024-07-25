@@ -231,7 +231,6 @@ impl<'a> Attrs<'a> {
 
     /// Set [`Variation`]s
     pub fn variations(mut self, variations: &'a [Variation]) -> Self {
-        log::info!("Setting variations to Some");
         self.variations_opt = Some(variations);
         self
     }
@@ -245,8 +244,6 @@ impl<'a> Attrs<'a> {
 
     /// Check if this set of attributes can be shaped with another
     pub fn compatible(&self, other: &Self) -> bool {
-        log::info!("Self  var {:?}", self.variations_opt);
-        log::info!("Other var {:?}", other.variations_opt);
         self.family == other.family
             && self.stretch == other.stretch
             && self.style == other.style
