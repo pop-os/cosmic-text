@@ -25,6 +25,12 @@ self_cell!(
     }
 );
 
+struct FontMonospaceFallback {
+    monospace_em_width: Option<f32>,
+    scripts: Vec<[u8; 4]>,
+    unicode_codepoints: Vec<u32>,
+}
+
 /// A font
 pub struct Font {
     #[cfg(feature = "swash")]
@@ -32,9 +38,7 @@ pub struct Font {
     rustybuzz: OwnedFace,
     data: Arc<dyn AsRef<[u8]> + Send + Sync>,
     id: fontdb::ID,
-    monospace_em_width: Option<f32>,
-    scripts: Vec<[u8; 4]>,
-    unicode_codepoints: Vec<u32>,
+    monospace_fallback: Option<FontMonospaceFallback>,
 }
 
 impl fmt::Debug for Font {
@@ -51,15 +55,19 @@ impl Font {
     }
 
     pub fn monospace_em_width(&self) -> Option<f32> {
-        self.monospace_em_width
+        self.monospace_fallback
+            .as_ref()
+            .and_then(|x| x.monospace_em_width)
     }
 
     pub fn scripts(&self) -> &[[u8; 4]] {
-        &self.scripts
+        self.monospace_fallback.as_ref().map_or(&[], |x| &x.scripts)
     }
 
     pub fn unicode_codepoints(&self) -> &[u32] {
-        &self.unicode_codepoints
+        self.monospace_fallback
+            .as_ref()
+            .map_or(&[], |x| &x.unicode_codepoints)
     }
 
     pub fn data(&self) -> &[u8] {
@@ -85,7 +93,7 @@ impl Font {
     pub fn new(db: &fontdb::Database, id: fontdb::ID) -> Option<Self> {
         let info = db.face(id)?;
 
-        let (monospace_em_width, scripts, unicode_codepoints) = {
+        let monospace_fallback = if cfg!(feature = "monospace_fallback") {
             db.with_face_data(id, |font_data, face_index| {
                 let face = ttf_parser::Face::parse(font_data, face_index).ok()?;
                 let monospace_em_width = info
@@ -128,9 +136,15 @@ impl Font {
 
                 unicode_codepoints.shrink_to_fit();
 
-                Some((monospace_em_width, scripts, unicode_codepoints))
+                Some(FontMonospaceFallback {
+                    monospace_em_width,
+                    scripts,
+                    unicode_codepoints,
+                })
             })?
-        }?;
+        } else {
+            None
+        };
 
         let data = match &info.source {
             fontdb::Source::Binary(data) => Arc::clone(data),
@@ -145,9 +159,7 @@ impl Font {
 
         Some(Self {
             id: info.id,
-            monospace_em_width,
-            scripts,
-            unicode_codepoints,
+            monospace_fallback,
             #[cfg(feature = "swash")]
             swash: {
                 let swash = swash::FontRef::from_index((*data).as_ref(), info.index as usize)?;
