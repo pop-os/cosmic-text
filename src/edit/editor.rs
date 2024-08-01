@@ -12,7 +12,7 @@ use unicode_segmentation::UnicodeSegmentation;
 use crate::Color;
 use crate::{
     Action, Attrs, AttrsList, BorrowedWithFontSystem, BufferLine, BufferRef, Change, ChangeItem,
-    Cursor, Edit, FontSystem, LayoutRun, Selection, Shaping,
+    Cursor, Edit, FontSystem, Selection, Shaping,
 };
 
 /// A wrapper of [`Buffer`] for easy editing
@@ -25,72 +25,6 @@ pub struct Editor<'buffer> {
     cursor_moved: bool,
     auto_indent: bool,
     change: Option<Change>,
-}
-
-fn cursor_glyph_opt(cursor: &Cursor, run: &LayoutRun) -> Option<(usize, f32)> {
-    if cursor.line == run.line_i {
-        for (glyph_i, glyph) in run.glyphs.iter().enumerate() {
-            if cursor.index == glyph.start {
-                return Some((glyph_i, 0.0));
-            } else if cursor.index > glyph.start && cursor.index < glyph.end {
-                // Guess x offset based on characters
-                let mut before = 0;
-                let mut total = 0;
-
-                let cluster = &run.text[glyph.start..glyph.end];
-                for (i, _) in cluster.grapheme_indices(true) {
-                    if glyph.start + i < cursor.index {
-                        before += 1;
-                    }
-                    total += 1;
-                }
-
-                let offset = glyph.w * (before as f32) / (total as f32);
-                return Some((glyph_i, offset));
-            }
-        }
-        match run.glyphs.last() {
-            Some(glyph) => {
-                if cursor.index == glyph.end {
-                    return Some((run.glyphs.len(), 0.0));
-                }
-            }
-            None => {
-                return Some((0, 0.0));
-            }
-        }
-    }
-    None
-}
-
-fn cursor_position(cursor: &Cursor, run: &LayoutRun) -> Option<(i32, i32)> {
-    let (cursor_glyph, cursor_glyph_offset) = cursor_glyph_opt(cursor, run)?;
-    let x = match run.glyphs.get(cursor_glyph) {
-        Some(glyph) => {
-            // Start of detected glyph
-            if glyph.level.is_rtl() {
-                (glyph.x + glyph.w - cursor_glyph_offset) as i32
-            } else {
-                (glyph.x + cursor_glyph_offset) as i32
-            }
-        }
-        None => match run.glyphs.last() {
-            Some(glyph) => {
-                // End of last glyph
-                if glyph.level.is_rtl() {
-                    glyph.x as i32
-                } else {
-                    (glyph.x + glyph.w) as i32
-                }
-            }
-            None => {
-                // Start of empty line
-                0
-            }
-        },
-    };
-
-    Some((x, run.line_top as i32))
 }
 
 impl<'buffer> Editor<'buffer> {
@@ -191,8 +125,8 @@ impl<'buffer> Editor<'buffer> {
                 }
 
                 // Draw cursor
-                if let Some((x, y)) = cursor_position(&self.cursor, &run) {
-                    f(x, y, 1, line_height as u32, cursor_color);
+                if let Some((x, y)) = run.cursor_position(&self.cursor) {
+                    f(x as i32, y as i32, 1, line_height as u32, cursor_color);
                 }
 
                 for glyph in run.glyphs.iter() {
@@ -891,9 +825,10 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
 
     fn cursor_position(&self) -> Option<(i32, i32)> {
         self.with_buffer(|buffer| {
-            buffer
-                .layout_runs()
-                .find_map(|run| cursor_position(&self.cursor, &run))
+            buffer.layout_runs().find_map(|run| {
+                run.cursor_position(&self.cursor)
+                    .map(|(x, y)| (x as i32, y as i32))
+            })
         })
     }
 }
