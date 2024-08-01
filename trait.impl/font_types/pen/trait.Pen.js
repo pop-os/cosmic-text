@@ -1,0 +1,3 @@
+(function() {var implementors = {
+"swash":[["impl <a class=\"trait\" href=\"font_types/pen/trait.Pen.html\" title=\"trait font_types::pen::Pen\">Pen</a> for <a class=\"struct\" href=\"swash/scale/outline/struct.Outline.html\" title=\"struct swash::scale::outline::Outline\">Outline</a>"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
