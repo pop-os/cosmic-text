@@ -36,8 +36,7 @@ impl ShapeRunCache {
         self.cache.get_mut(key).map(|(age, glyphs)| {
             if *age != self.age {
                 // remove the key from the old age registry
-                let diff = self.age - *age;
-                let index = self.age_regitries.len() - diff as usize;
+                let index = (self.age - *age) as usize;
                 self.age_regitries[index].remove(key);
 
                 // update age
