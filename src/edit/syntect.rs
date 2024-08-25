@@ -294,6 +294,9 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for SyntaxEditor<'syntax_system, 'bu
                 }
 
                 let line = &mut buffer.lines[line_i];
+                if line.preedit_range().is_some() {
+                    continue;
+                }
                 if line.metadata().is_some() && line_i < self.syntax_cache.len() {
                     //TODO: duplicated code!
                     if line_i >= scroll.line && total_height < scroll_end {
@@ -425,6 +428,14 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for SyntaxEditor<'syntax_system, 'bu
 
     fn start_change(&mut self) {
         self.editor.start_change();
+    }
+
+    fn preedit_range(&self) -> Option<core::ops::Range<usize>> {
+        self.editor.preedit_range()
+    }
+
+    fn preedit_text(&self) -> Option<String> {
+        self.editor.preedit_text()
     }
 
     fn finish_change(&mut self) -> Option<Change> {

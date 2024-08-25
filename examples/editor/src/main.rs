@@ -8,7 +8,7 @@ use std::{env, fs, num::NonZeroU32, rc::Rc, slice};
 use tiny_skia::{Paint, PixmapMut, Rect, Transform};
 use winit::{
     dpi::{PhysicalPosition, PhysicalSize},
-    event::{ElementState, Event, KeyEvent, MouseButton, MouseScrollDelta, WindowEvent},
+    event::{ElementState, Event, Ime, KeyEvent, MouseButton, MouseScrollDelta, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
     keyboard::{Key, NamedKey},
     window::WindowBuilder,
@@ -28,6 +28,7 @@ fn main() {
     let mut swash_cache = SwashCache::new();
 
     let mut display_scale = window.scale_factor() as f32;
+    window.set_ime_allowed(true);
 
     let scrollbar_width = 12.0;
     let font_sizes = [
@@ -278,6 +279,21 @@ fn main() {
                                 window.request_redraw();
                             }
                         }
+                        WindowEvent::Ime(ime) => match ime {
+                            Ime::Enabled | Ime::Disabled => {}
+                            Ime::Preedit(preedit, cursor) => {
+                                editor.action(Action::SetPreedit {
+                                    preedit,
+                                    cursor,
+                                    attrs: None,
+                                });
+                                window.request_redraw();
+                            }
+                            Ime::Commit(text) => {
+                                editor.insert_string(&text, None);
+                                window.request_redraw();
+                            }
+                        },
                         WindowEvent::CursorMoved {
                             device_id: _,
                             position,

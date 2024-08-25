@@ -811,6 +811,23 @@ impl Buffer {
         self.shape_until_scroll(font_system, false);
     }
 
+    /// Returns text of the buffer, excluding preedit (if any)
+    pub fn text_without_preedit(&self) -> String {
+        let mut output = String::new();
+        let mut iter = self
+            .lines
+            .iter()
+            .map(|line| line.text_without_preedit())
+            .peekable();
+        while let Some(text) = iter.next() {
+            output.push_str(&text);
+            if iter.peek().is_some() {
+                output.push('\n');
+            }
+        }
+        output
+    }
+
     /// True if a redraw is needed
     pub fn redraw(&self) -> bool {
         self.redraw
