@@ -766,7 +766,7 @@ impl Buffer {
         loop {
             let (Some(line_range), Some((attrs, span_range))) = (&maybe_line, &maybe_span) else {
                 // this is reached only if this text is empty
-                if self.lines.len() <= line_count {
+                if self.lines.len() == line_count {
                     self.lines.push(BufferLine::empty());
                 }
                 self.lines[line_count].reset_new(
@@ -817,7 +817,7 @@ impl Buffer {
                         .unwrap_or_default();
                     let prev_attrs_list = core::mem::replace(&mut attrs_list, next_attrs_list);
                     let prev_line_string = core::mem::replace(&mut line_string, next_line_string);
-                    if self.lines.len() <= line_count {
+                    if self.lines.len() == line_count {
                         self.lines.push(BufferLine::empty());
                     }
                     self.lines[line_count].reset_new(
@@ -829,7 +829,7 @@ impl Buffer {
                     line_count += 1;
                 } else {
                     // finalize the final line
-                    if self.lines.len() <= line_count {
+                    if self.lines.len() == line_count {
                         self.lines.push(BufferLine::empty());
                     }
                     self.lines[line_count].reset_new(line_string, line_ending, attrs_list, shaping);
