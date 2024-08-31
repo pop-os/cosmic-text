@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 #[cfg(not(feature = "std"))]
-use alloc::{
-    string::{String, ToString},
-    vec::Vec,
-};
+use alloc::vec::Vec;
 use core::ops::Range;
 use rangemap::RangeMap;
+use smol_str::SmolStr;
 
 use crate::{CacheKeyFlags, Metrics};
 
@@ -69,7 +67,7 @@ impl Color {
 /// An owned version of [`Family`]
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum FamilyOwned {
-    Name(String),
+    Name(SmolStr),
     Serif,
     SansSerif,
     Cursive,
@@ -80,7 +78,7 @@ pub enum FamilyOwned {
 impl FamilyOwned {
     pub fn new(family: Family) -> Self {
         match family {
-            Family::Name(name) => FamilyOwned::Name(name.to_string()),
+            Family::Name(name) => FamilyOwned::Name(SmolStr::from(name)),
             Family::Serif => FamilyOwned::Serif,
             Family::SansSerif => FamilyOwned::SansSerif,
             Family::Cursive => FamilyOwned::Cursive,
