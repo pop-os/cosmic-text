@@ -103,7 +103,7 @@ fn set_buffer_text<'a>(buffer: &mut BorrowedWithFontSystem<'a, Buffer>) {
         ),
     ];
 
-    buffer.set_rich_text(spans.iter().copied(), attrs, Shaping::Advanced);
+    buffer.set_rich_text(spans.iter().copied(), attrs, Shaping::Advanced, None);
 }
 
 fn main() {

@@ -6,9 +6,9 @@ use core::{cmp, fmt};
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
-    Affinity, Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem, BufferLine, Color, Cursor,
-    FontSystem, LayoutCursor, LayoutGlyph, LayoutLine, LineEnding, LineIter, Motion, Scroll,
-    ShapeBuffer, ShapeLine, Shaping, Wrap,
+    Affinity, Align, Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem, BufferLine, Color,
+    Cursor, FontSystem, LayoutCursor, LayoutGlyph, LayoutLine, LineEnding, LineIter, Motion,
+    Scroll, ShapeBuffer, ShapeLine, Shaping, Wrap,
 };
 
 /// A line of visible text for rendering
@@ -714,6 +714,7 @@ impl Buffer {
     ///     ],
     ///     attrs,
     ///     Shaping::Advanced,
+    ///     None,
     /// );
     /// ```
     pub fn set_rich_text<'r, 's, I>(
@@ -722,6 +723,7 @@ impl Buffer {
         spans: I,
         default_attrs: Attrs,
         shaping: Shaping,
+        alignment: Option<Align>,
     ) where
         I: IntoIterator<Item = (&'s str, Attrs<'r>)>,
     {
@@ -841,6 +843,10 @@ impl Buffer {
 
         // Discard excess lines now that we have reused as much of the existing allocations as possible.
         self.lines.truncate(line_count);
+
+        self.lines.iter_mut().for_each(|line| {
+            line.set_align(alignment);
+        });
 
         self.scroll = Scroll::default();
 
@@ -1440,14 +1446,20 @@ impl<'a> BorrowedWithFontSystem<'a, Buffer> {
     ///     ],
     ///     attrs,
     ///     Shaping::Advanced,
+    ///     None,
     /// );
     /// ```
-    pub fn set_rich_text<'r, 's, I>(&mut self, spans: I, default_attrs: Attrs, shaping: Shaping)
-    where
+    pub fn set_rich_text<'r, 's, I>(
+        &mut self,
+        spans: I,
+        default_attrs: Attrs,
+        shaping: Shaping,
+        alignment: Option<Align>,
+    ) where
         I: IntoIterator<Item = (&'s str, Attrs<'r>)>,
     {
         self.inner
-            .set_rich_text(self.font_system, spans, default_attrs, shaping);
+            .set_rich_text(self.font_system, spans, default_attrs, shaping, alignment);
     }
 
     /// Apply a [`Motion`] to a [`Cursor`]
