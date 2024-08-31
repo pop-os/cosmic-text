@@ -115,8 +115,8 @@ impl<'b> Iterator for LayoutRunIter<'b> {
 
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(line) = self.buffer.lines.get(self.line_i) {
-            let shape = line.shape_opt().as_ref()?;
-            let layout = line.layout_opt().as_ref()?;
+            let shape = line.shape_opt()?;
+            let layout = line.layout_opt()?;
             while let Some(layout_line) = layout.get(self.layout_i) {
                 self.layout_i += 1;
 
@@ -725,11 +725,8 @@ impl Buffer {
     ) where
         I: IntoIterator<Item = (&'s str, Attrs<'r>)>,
     {
-        self.lines.clear();
-
-        let mut attrs_list = AttrsList::new(default_attrs);
-        let mut line_string = String::new();
         let mut end = 0;
+        // TODO: find a way to cache this string and vec for reuse
         let (string, spans_data): (String, Vec<_>) = spans
             .into_iter()
             .map(|(s, attrs)| {
@@ -753,15 +750,32 @@ impl Buffer {
         //TODO: set this based on information from spans
         let line_ending = LineEnding::default();
 
+        let mut line_count = 0;
+        let mut attrs_list = self
+            .lines
+            .get_mut(line_count)
+            .map(BufferLine::reclaim_attrs)
+            .unwrap_or_else(|| AttrsList::new(Attrs::new()))
+            .reset(default_attrs);
+        let mut line_string = self
+            .lines
+            .get_mut(line_count)
+            .map(BufferLine::reclaim_text)
+            .unwrap_or_default();
+
         loop {
             let (Some(line_range), Some((attrs, span_range))) = (&maybe_line, &maybe_span) else {
                 // this is reached only if this text is empty
-                self.lines.push(BufferLine::new(
+                if self.lines.len() <= line_count {
+                    self.lines.push(BufferLine::empty());
+                }
+                self.lines[line_count].reset_new(
                     String::new(),
                     line_ending,
                     AttrsList::new(default_attrs),
                     shaping,
-                ));
+                );
+                line_count += 1;
                 break;
             };
 
@@ -790,21 +804,43 @@ impl Buffer {
                 maybe_line = lines_iter.next();
                 if maybe_line.is_some() {
                     // finalize this line and start a new line
-                    let prev_attrs_list =
-                        core::mem::replace(&mut attrs_list, AttrsList::new(default_attrs));
-                    let prev_line_string = core::mem::take(&mut line_string);
-                    let buffer_line =
-                        BufferLine::new(prev_line_string, line_ending, prev_attrs_list, shaping);
-                    self.lines.push(buffer_line);
+                    let next_attrs_list = self
+                        .lines
+                        .get_mut(line_count + 1)
+                        .map(BufferLine::reclaim_attrs)
+                        .unwrap_or_else(|| AttrsList::new(Attrs::new()))
+                        .reset(default_attrs);
+                    let next_line_string = self
+                        .lines
+                        .get_mut(line_count + 1)
+                        .map(BufferLine::reclaim_text)
+                        .unwrap_or_default();
+                    let prev_attrs_list = core::mem::replace(&mut attrs_list, next_attrs_list);
+                    let prev_line_string = core::mem::replace(&mut line_string, next_line_string);
+                    if self.lines.len() <= line_count {
+                        self.lines.push(BufferLine::empty());
+                    }
+                    self.lines[line_count].reset_new(
+                        prev_line_string,
+                        line_ending,
+                        prev_attrs_list,
+                        shaping,
+                    );
+                    line_count += 1;
                 } else {
                     // finalize the final line
-                    let buffer_line =
-                        BufferLine::new(line_string, line_ending, attrs_list, shaping);
-                    self.lines.push(buffer_line);
+                    if self.lines.len() <= line_count {
+                        self.lines.push(BufferLine::empty());
+                    }
+                    self.lines[line_count].reset_new(line_string, line_ending, attrs_list, shaping);
+                    line_count += 1;
                     break;
                 }
             }
         }
+
+        // Discard excess lines now that we have reused as much of the existing allocations as possible.
+        self.lines.truncate(line_count);
 
         self.scroll = Scroll::default();
 

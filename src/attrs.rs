@@ -370,4 +370,11 @@ impl AttrsList {
         }
         new
     }
+
+    /// Resets the attributes with new defaults.
+    pub(crate) fn reset(mut self, default: Attrs) -> Self {
+        self.defaults = AttrsOwned::new(default);
+        self.spans.clear();
+        self
+    }
 }
