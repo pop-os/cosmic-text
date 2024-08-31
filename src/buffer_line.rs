@@ -309,7 +309,7 @@ impl BufferLine {
 
     /// Makes an empty buffer line.
     ///
-    /// The buffer line is in an invalid state after this is called. See [`Self::reclaim_new`].
+    /// The buffer line is in an invalid state after this is called. See [`Self::reset_new`].
     pub(crate) fn empty() -> Self {
         Self {
             text: String::default(),
@@ -325,14 +325,14 @@ impl BufferLine {
 
     /// Reclaim attributes list memory that isn't needed any longer.
     ///
-    /// The buffer line is in an invalid state after this is called. See [`Self::reclaim_new`].
+    /// The buffer line is in an invalid state after this is called. See [`Self::reset_new`].
     pub(crate) fn reclaim_attrs(&mut self) -> AttrsList {
         std::mem::replace(&mut self.attrs_list, AttrsList::new(Attrs::new()))
     }
 
     /// Reclaim text memory that isn't needed any longer.
     ///
-    /// The buffer line is in an invalid state after this is called. See [`Self::reclaim_new`].
+    /// The buffer line is in an invalid state after this is called. See [`Self::reset_new`].
     pub(crate) fn reclaim_text(&mut self) -> String {
         let mut text = std::mem::take(&mut self.text);
         text.clear();
