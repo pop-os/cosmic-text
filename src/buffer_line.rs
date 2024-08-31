@@ -144,7 +144,7 @@ impl BufferLine {
                 .add_span(len..len + other.text().len(), other.attrs_list.defaults());
         }
 
-        for (other_range, attrs) in other.attrs_list.spans() {
+        for (other_range, attrs) in other.attrs_list.spans_iter() {
             // Add previous attrs spans
             let range = other_range.start + len..other_range.end + len;
             self.attrs_list.add_span(range, attrs.as_attrs());
