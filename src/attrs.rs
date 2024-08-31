@@ -306,7 +306,12 @@ impl AttrsList {
 
     /// Get the current attribute spans
     pub fn spans(&self) -> Vec<(&Range<usize>, &AttrsOwned)> {
-        self.spans.iter().collect()
+        self.spans_iter().collect()
+    }
+
+    /// Get an iterator over the current attribute spans
+    pub fn spans_iter(&self) -> impl Iterator<Item = (&Range<usize>, &AttrsOwned)> + '_ {
+        self.spans.iter()
     }
 
     /// Clear the current attribute spans
