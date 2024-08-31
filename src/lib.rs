@@ -108,6 +108,9 @@ mod buffer;
 pub use self::buffer_line::*;
 mod buffer_line;
 
+pub use self::cached::*;
+mod cached;
+
 pub use self::glyph_cache::*;
 mod glyph_cache;
 

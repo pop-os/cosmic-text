@@ -2,7 +2,8 @@
 use alloc::{string::String, vec::Vec};
 
 use crate::{
-    Align, AttrsList, FontSystem, LayoutLine, LineEnding, ShapeBuffer, ShapeLine, Shaping, Wrap,
+    Align, Attrs, AttrsList, Cached, FontSystem, LayoutLine, LineEnding, ShapeBuffer, ShapeLine,
+    Shaping, Wrap,
 };
 
 /// A line (or paragraph) of text that is shaped and laid out
@@ -12,8 +13,8 @@ pub struct BufferLine {
     ending: LineEnding,
     attrs_list: AttrsList,
     align: Option<Align>,
-    shape_opt: Option<ShapeLine>,
-    layout_opt: Option<Vec<LayoutLine>>,
+    shape_opt: Cached<ShapeLine>,
+    layout_opt: Cached<Vec<LayoutLine>>,
     shaping: Shaping,
     metadata: Option<usize>,
 }
@@ -33,11 +34,31 @@ impl BufferLine {
             ending,
             attrs_list,
             align: None,
-            shape_opt: None,
-            layout_opt: None,
+            shape_opt: Cached::Empty,
+            layout_opt: Cached::Empty,
             shaping,
             metadata: None,
         }
+    }
+
+    /// Resets the current line with new internal values.
+    ///
+    /// Avoids deallocating internal caches so they can be reused.
+    pub fn reset_new<T: Into<String>>(
+        &mut self,
+        text: T,
+        ending: LineEnding,
+        attrs_list: AttrsList,
+        shaping: Shaping,
+    ) {
+        self.text = text.into();
+        self.ending = ending;
+        self.attrs_list = attrs_list;
+        self.align = None;
+        self.shape_opt.set_unused();
+        self.layout_opt.set_unused();
+        self.shaping = shaping;
+        self.metadata = None;
     }
 
     /// Get current text
@@ -172,13 +193,13 @@ impl BufferLine {
 
     /// Reset shaping and layout caches
     pub fn reset_shaping(&mut self) {
-        self.shape_opt = None;
+        self.shape_opt.set_unused();
         self.reset_layout();
     }
 
     /// Reset only layout cache
     pub fn reset_layout(&mut self) {
-        self.layout_opt = None;
+        self.layout_opt.set_unused();
     }
 
     /// Shape line, will cache results
@@ -193,23 +214,28 @@ impl BufferLine {
         font_system: &mut FontSystem,
         tab_width: u16,
     ) -> &ShapeLine {
-        if self.shape_opt.is_none() {
-            self.shape_opt = Some(ShapeLine::new_in_buffer(
+        if self.shape_opt.is_unused() {
+            let mut line = self
+                .shape_opt
+                .take_unused()
+                .unwrap_or_else(ShapeLine::empty);
+            line.build_in_buffer(
                 scratch,
                 font_system,
                 &self.text,
                 &self.attrs_list,
                 self.shaping,
                 tab_width,
-            ));
-            self.layout_opt = None;
+            );
+            self.shape_opt.set_used(line);
+            self.layout_opt.set_unused();
         }
-        self.shape_opt.as_ref().expect("shape not found")
+        self.shape_opt.get().expect("shape not found")
     }
 
     /// Get line shaping cache
-    pub fn shape_opt(&self) -> &Option<ShapeLine> {
-        &self.shape_opt
+    pub fn shape_opt(&self) -> Option<&ShapeLine> {
+        self.shape_opt.get()
     }
 
     /// Layout line, will cache results
@@ -244,10 +270,13 @@ impl BufferLine {
         match_mono_width: Option<f32>,
         tab_width: u16,
     ) -> &[LayoutLine] {
-        if self.layout_opt.is_none() {
+        if self.layout_opt.is_unused() {
             let align = self.align;
+            let mut layout = self
+                .layout_opt
+                .take_unused()
+                .unwrap_or_else(|| Vec::with_capacity(1));
             let shape = self.shape_in_buffer(scratch, font_system, tab_width);
-            let mut layout = Vec::with_capacity(1);
             shape.layout_to_buffer(
                 scratch,
                 font_size,
@@ -257,14 +286,14 @@ impl BufferLine {
                 &mut layout,
                 match_mono_width,
             );
-            self.layout_opt = Some(layout);
+            self.layout_opt.set_used(layout);
         }
-        self.layout_opt.as_ref().expect("layout not found")
+        self.layout_opt.get().expect("layout not found")
     }
 
     /// Get line layout cache
-    pub fn layout_opt(&self) -> &Option<Vec<LayoutLine>> {
-        &self.layout_opt
+    pub fn layout_opt(&self) -> Option<&Vec<LayoutLine>> {
+        self.layout_opt.get()
     }
 
     /// Get line metadata. This will be None if [`BufferLine::set_metadata`] has not been called
@@ -276,5 +305,37 @@ impl BufferLine {
     /// Set line metadata. This is stored until the next line reset
     pub fn set_metadata(&mut self, metadata: usize) {
         self.metadata = Some(metadata);
+    }
+
+    /// Makes an empty buffer line.
+    ///
+    /// The buffer line is in an invalid state after this is called. See [`Self::reclaim_new`].
+    pub(crate) fn empty() -> Self {
+        Self {
+            text: String::default(),
+            ending: LineEnding::default(),
+            attrs_list: AttrsList::new(Attrs::new()),
+            align: None,
+            shape_opt: Cached::Empty,
+            layout_opt: Cached::Empty,
+            shaping: Shaping::Advanced,
+            metadata: None,
+        }
+    }
+
+    /// Reclaim attributes list memory that isn't needed any longer.
+    ///
+    /// The buffer line is in an invalid state after this is called. See [`Self::reclaim_new`].
+    pub(crate) fn reclaim_attrs(&mut self) -> AttrsList {
+        std::mem::replace(&mut self.attrs_list, AttrsList::new(Attrs::new()))
+    }
+
+    /// Reclaim text memory that isn't needed any longer.
+    ///
+    /// The buffer line is in an invalid state after this is called. See [`Self::reclaim_new`].
+    pub(crate) fn reclaim_text(&mut self) -> String {
+        let mut text = std::mem::take(&mut self.text);
+        text.clear();
+        text
     }
 }
