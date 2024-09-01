@@ -632,7 +632,7 @@ impl ShapeWord {
             word
         );
 
-        let mut glyphs = std::mem::take(&mut self.glyphs);
+        let mut glyphs = mem::take(&mut self.glyphs);
         glyphs.clear();
 
         let span_rtl = level.is_rtl();
@@ -771,10 +771,10 @@ impl ShapeSpan {
             span
         );
 
-        let mut words = std::mem::take(&mut self.words);
+        let mut words = mem::take(&mut self.words);
 
         // Cache the shape words in reverse order so they can be popped for reuse in the same order.
-        let mut cached_words = std::mem::take(&mut scratch.words);
+        let mut cached_words = mem::take(&mut scratch.words);
         cached_words.clear();
         if line_rtl != level.is_rtl() {
             // Un-reverse previous words so the internal glyph counts match accurately when rewriting memory.
@@ -941,10 +941,10 @@ impl ShapeLine {
         shaping: Shaping,
         tab_width: u16,
     ) {
-        let mut spans = std::mem::take(&mut self.spans);
+        let mut spans = mem::take(&mut self.spans);
 
         // Cache the shape spans in reverse order so they can be popped for reuse in the same order.
-        let mut cached_spans = std::mem::take(&mut scratch.spans);
+        let mut cached_spans = mem::take(&mut scratch.spans);
         cached_spans.clear();
         cached_spans.extend(spans.drain(..).rev());
 

@@ -1,5 +1,6 @@
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, vec::Vec};
+use core::mem;
 
 use crate::{
     Align, Attrs, AttrsList, Cached, FontSystem, LayoutLine, LineEnding, ShapeBuffer, ShapeLine,
@@ -327,14 +328,14 @@ impl BufferLine {
     ///
     /// The buffer line is in an invalid state after this is called. See [`Self::reset_new`].
     pub(crate) fn reclaim_attrs(&mut self) -> AttrsList {
-        std::mem::replace(&mut self.attrs_list, AttrsList::new(Attrs::new()))
+        mem::replace(&mut self.attrs_list, AttrsList::new(Attrs::new()))
     }
 
     /// Reclaim text memory that isn't needed any longer.
     ///
     /// The buffer line is in an invalid state after this is called. See [`Self::reset_new`].
     pub(crate) fn reclaim_text(&mut self) -> String {
-        let mut text = std::mem::take(&mut self.text);
+        let mut text = mem::take(&mut self.text);
         text.clear();
         text
     }
