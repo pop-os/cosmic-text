@@ -1379,6 +1379,11 @@ impl<'a> BorrowedWithFontSystem<'a, Buffer> {
             .set_metrics_and_size(self.font_system, metrics, width_opt, height_opt);
     }
 
+    /// Set tab width (number of spaces between tab stops)
+    pub fn set_tab_width(&mut self, tab_width: u16) {
+        self.inner.set_tab_width(self.font_system, tab_width);
+    }
+
     /// Set text of buffer, using provided attributes for each line by default
     pub fn set_text(&mut self, text: &str, attrs: Attrs, shaping: Shaping) {
         self.inner.set_text(self.font_system, text, attrs, shaping);
