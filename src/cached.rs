@@ -1,4 +1,5 @@
 use core::fmt::Debug;
+use core::mem;
 
 /// Helper for caching a value when the value is optionally present in the 'unused' state.
 #[derive(Clone, Debug)]
@@ -44,7 +45,7 @@ impl<T: Clone + Debug> Cached<T> {
     /// Takes the buffered value if in state `Self::Unused`.
     pub fn take_unused(&mut self) -> Option<T> {
         if matches!(*self, Self::Unused(_)) {
-            let Self::Unused(val) = std::mem::replace(self, Self::Empty) else {
+            let Self::Unused(val) = mem::replace(self, Self::Empty) else {
                 unreachable!()
             };
             Some(val)
@@ -56,7 +57,7 @@ impl<T: Clone + Debug> Cached<T> {
     /// Takes the cached value if in state `Self::Used`.
     pub fn take_used(&mut self) -> Option<T> {
         if matches!(*self, Self::Used(_)) {
-            let Self::Used(val) = std::mem::replace(self, Self::Empty) else {
+            let Self::Used(val) = mem::replace(self, Self::Empty) else {
                 unreachable!()
             };
             Some(val)
