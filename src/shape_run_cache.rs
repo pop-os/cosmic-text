@@ -17,7 +17,7 @@ pub struct ShapeRunKey {
 pub struct ShapeRunCache {
     age: u64,
     cache: HashMap<ShapeRunKey, (u64, Vec<ShapeGlyph>)>,
-    age_regitries: Vec<HashSet<ShapeRunKey>>,
+    age_registries: Vec<HashSet<ShapeRunKey>>,
 }
 
 impl Default for ShapeRunCache {
@@ -25,7 +25,7 @@ impl Default for ShapeRunCache {
         Self {
             age: 0,
             cache: Default::default(),
-            age_regitries: vec![HashSet::default()],
+            age_registries: vec![HashSet::default()],
         }
     }
 }
@@ -37,12 +37,12 @@ impl ShapeRunCache {
             if *age != self.age {
                 // remove the key from the old age registry
                 let index = (self.age - *age) as usize;
-                self.age_regitries[index].remove(key);
+                self.age_registries[index].remove(key);
 
                 // update age
                 *age = self.age;
                 // register the key to the new age registry
-                if let Some(keys) = self.age_regitries.first_mut() {
+                if let Some(keys) = self.age_registries.first_mut() {
                     keys.insert(key.clone());
                 }
             }
@@ -52,7 +52,7 @@ impl ShapeRunCache {
 
     /// Insert cache item with current age
     pub fn insert(&mut self, key: ShapeRunKey, glyphs: Vec<ShapeGlyph>) {
-        if let Some(keys) = self.age_regitries.first_mut() {
+        if let Some(keys) = self.age_registries.first_mut() {
             // register the key to the current age
             keys.insert(key.clone());
         }
@@ -63,8 +63,8 @@ impl ShapeRunCache {
     pub fn trim(&mut self, keep_ages: u64) {
         // remove the age registries that's greater than kept ages
         // and remove the keys from cache saved in the registries
-        while self.age_regitries.len() as u64 > keep_ages {
-            if let Some(keys) = self.age_regitries.pop() {
+        while self.age_registries.len() as u64 > keep_ages {
+            if let Some(keys) = self.age_registries.pop() {
                 for key in keys {
                     self.cache.remove(&key);
                 }
@@ -74,7 +74,7 @@ impl ShapeRunCache {
         self.age += 1;
         // insert a new registry to the front of the Vec
         // to keep keys for the current age
-        self.age_regitries.insert(0, HashSet::default());
+        self.age_registries.insert(0, HashSet::default());
     }
 }
 
@@ -124,30 +124,30 @@ mod test {
         cache.trim(1);
         // all was just inserted so all kept
         assert_eq!(cache.cache.len(), 3);
-        assert_eq!(cache.age_regitries.len(), 2);
+        assert_eq!(cache.age_registries.len(), 2);
 
         cache.get(&key1);
         cache.get(&key2);
         cache.trim(1);
         // only key1 and key2 was refreshed, so key3 was trimed
         assert_eq!(cache.cache.len(), 2);
-        assert_eq!(cache.age_regitries.len(), 2);
+        assert_eq!(cache.age_registries.len(), 2);
 
         cache.get(&key1);
         cache.trim(1);
         // only key1 was refreshed, so key2 was trimed
         assert_eq!(cache.cache.len(), 1);
-        assert_eq!(cache.age_regitries.len(), 2);
+        assert_eq!(cache.age_registries.len(), 2);
 
         cache.trim(2);
         // keep 2 ages, so even key1 wasn't refreshed,
         // it was still kept
         assert_eq!(cache.cache.len(), 1);
-        assert_eq!(cache.age_regitries.len(), 3);
+        assert_eq!(cache.age_registries.len(), 3);
 
         cache.trim(2);
         // key1 is now too old for 2 ages, so it was trimed
         assert_eq!(cache.cache.len(), 0);
-        assert_eq!(cache.age_regitries.len(), 3);
+        assert_eq!(cache.age_registries.len(), 3);
     }
 }
