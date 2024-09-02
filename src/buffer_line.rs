@@ -1,10 +1,10 @@
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, vec::Vec};
 use core::mem;
-use smallvec::SmallVec;
 
 use crate::{
-    Align, Attrs, AttrsList, Cached, FontSystem, LayoutLine, LineEnding, ShapeLine, Shaping, Wrap,
+    Align, Attrs, AttrsList, BufferVec, Cached, FontSystem, LayoutLine, LineEnding,
+    ShapeLine, Shaping, Wrap,
 };
 
 /// A line (or paragraph) of text that is shaped and laid out
@@ -15,7 +15,7 @@ pub struct BufferLine {
     attrs_list: AttrsList,
     align: Option<Align>,
     shape_opt: Cached<ShapeLine>,
-    layout_opt: Cached<SmallVec<[LayoutLine; 1]>>,
+    layout_opt: Cached<BufferVec<LayoutLine>>,
     shaping: Shaping,
     metadata: Option<usize>,
 }
@@ -243,7 +243,7 @@ impl BufferLine {
             let mut layout = self
                 .layout_opt
                 .take_unused()
-                .unwrap_or_else(|| SmallVec::default());
+                .unwrap_or_else(|| BufferVec::with_capacity(1));
             let shape = self.shape(font_system, tab_width);
             shape.layout_to_buffer(
                 &mut font_system.shape_buffer,
@@ -260,7 +260,7 @@ impl BufferLine {
     }
 
     /// Get line layout cache
-    pub fn layout_opt(&self) -> Option<&SmallVec<[LayoutLine; 1]>> {
+    pub fn layout_opt(&self) -> Option<&BufferVec<LayoutLine>> {
         self.layout_opt.get()
     }
 

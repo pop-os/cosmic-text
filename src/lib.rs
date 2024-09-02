@@ -151,3 +151,10 @@ type BuildHasher = core::hash::BuildHasherDefault<rustc_hash::FxHasher>;
 type HashMap<K, V> = std::collections::HashMap<K, V, BuildHasher>;
 #[cfg(not(feature = "std"))]
 type HashMap<K, V> = hashbrown::HashMap<K, V, BuildHasher>;
+
+#[cfg(all(not(feature = "small-buffer-opt"), feature = "std"))]
+type BufferVec<T> = Vec<T>;
+#[cfg(all(not(feature = "small-buffer-opt"), not(feature = "std")))]
+type BufferVec<T> = alloc::vec::Vec<T>;
+#[cfg(feature = "small-buffer-opt")]
+type BufferVec<T> = smallvec::SmallVec<[T; 1]>;

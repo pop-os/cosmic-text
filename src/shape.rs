@@ -8,14 +8,13 @@ use core::cmp::{max, min};
 use core::fmt;
 use core::mem;
 use core::ops::Range;
-use smallvec::SmallVec;
 use unicode_script::{Script, UnicodeScript};
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::fallback::FontFallbackIter;
 use crate::{
-    math, Align, AttrsList, CacheKeyFlags, Color, Font, FontSystem, LayoutGlyph, LayoutLine,
-    Metrics, ShapePlanCache, Wrap,
+    math, Align, AttrsList, BufferVec, CacheKeyFlags, Color, Font, FontSystem, LayoutGlyph,
+    LayoutLine, Metrics, ShapePlanCache, Wrap,
 };
 
 /// The shaping strategy of some text.
@@ -662,7 +661,7 @@ impl ShapeWord {
 #[derive(Clone, Debug)]
 pub struct ShapeSpan {
     pub level: unicode_bidi::Level,
-    pub words: SmallVec<[ShapeWord; 1]>,
+    pub words: BufferVec<ShapeWord>,
 }
 
 impl ShapeSpan {
@@ -672,7 +671,7 @@ impl ShapeSpan {
     pub(crate) fn empty() -> Self {
         Self {
             level: unicode_bidi::Level::ltr(),
-            words: SmallVec::default(),
+            words: BufferVec::default(),
         }
     }
 
@@ -803,7 +802,7 @@ impl ShapeSpan {
 #[derive(Clone, Debug)]
 pub struct ShapeLine {
     pub rtl: bool,
-    pub spans: SmallVec<[ShapeSpan; 1]>,
+    pub spans: BufferVec<ShapeSpan>,
     pub metrics_opt: Option<Metrics>,
 }
 
@@ -832,7 +831,7 @@ impl ShapeLine {
     pub(crate) fn empty() -> Self {
         Self {
             rtl: false,
-            spans: SmallVec::default(),
+            spans: BufferVec::default(),
             metrics_opt: None,
         }
     }
@@ -1083,8 +1082,8 @@ impl ShapeLine {
         wrap: Wrap,
         align: Option<Align>,
         match_mono_width: Option<f32>,
-    ) -> SmallVec<[LayoutLine; 1]> {
-        let mut lines = SmallVec::default();
+    ) -> BufferVec<LayoutLine> {
+        let mut lines = BufferVec::with_capacity(1);
         self.layout_to_buffer(
             &mut ShapeBuffer::default(),
             font_size,
@@ -1104,7 +1103,7 @@ impl ShapeLine {
         width_opt: Option<f32>,
         wrap: Wrap,
         align: Option<Align>,
-        layout_lines: &mut SmallVec<[LayoutLine; 1]>,
+        layout_lines: &mut BufferVec<LayoutLine>,
         match_mono_width: Option<f32>,
     ) {
         // For each visual line a list of  (span index,  and range of words in that span)
