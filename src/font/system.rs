@@ -1,4 +1,5 @@
 use crate::{Attrs, Font, FontMatchAttrs, HashMap, ShapeBuffer, ShapePlanCache};
+use alloc::collections::BTreeSet;
 use alloc::string::String;
 use alloc::sync::Arc;
 use alloc::vec::Vec;
@@ -8,6 +9,8 @@ use core::ops::{Deref, DerefMut};
 // re-export fontdb and rustybuzz
 pub use fontdb;
 pub use rustybuzz;
+
+use super::fallback::MonospaceFallbackInfo;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FontMatchKey {
@@ -106,6 +109,9 @@ pub struct FontSystem {
     /// Scratch buffer for shaping and laying out.
     pub(crate) shape_buffer: ShapeBuffer,
 
+    /// Buffer for use in FontFallbackIter.
+    pub(crate) monospace_fallbacks_buffer: BTreeSet<MonospaceFallbackInfo>,
+
     /// Cache for shaped runs
     #[cfg(feature = "shape-run-cache")]
     pub shape_run_cache: crate::ShapeRunCache,
@@ -172,6 +178,7 @@ impl FontSystem {
             font_matches_cache: Default::default(),
             font_codepoint_support_info_cache: Default::default(),
             shape_plan_cache: ShapePlanCache::default(),
+            monospace_fallbacks_buffer: BTreeSet::default(),
             #[cfg(feature = "shape-run-cache")]
             shape_run_cache: crate::ShapeRunCache::default(),
             shape_buffer: ShapeBuffer::default(),

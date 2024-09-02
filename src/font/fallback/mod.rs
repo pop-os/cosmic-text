@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use alloc::collections::BTreeSet;
 use alloc::sync::Arc;
 use alloc::vec::Vec;
 use fontdb::Family;
@@ -35,7 +34,7 @@ use log::warn as missing_warn;
 // Default font gets None for both `weight_offset` and `script_non_matches`, and thus, it is
 // always the first to be popped from the set.
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
-struct MonospaceFallbackInfo {
+pub(crate) struct MonospaceFallbackInfo {
     font_weight_diff: Option<u16>,
     codepoint_non_matches: Option<usize>,
     font_weight: u16,
@@ -46,7 +45,6 @@ pub struct FontFallbackIter<'a> {
     font_system: &'a mut FontSystem,
     font_match_keys: &'a [FontMatchKey],
     default_families: &'a [&'a Family<'a>],
-    monospace_fallbacks: BTreeSet<MonospaceFallbackInfo>,
     default_i: usize,
     scripts: &'a [Script],
     word: &'a str,
@@ -64,11 +62,11 @@ impl<'a> FontFallbackIter<'a> {
         scripts: &'a [Script],
         word: &'a str,
     ) -> Self {
+        font_system.monospace_fallbacks_buffer.clear();
         Self {
             font_system,
             font_match_keys,
             default_families,
-            monospace_fallbacks: BTreeSet::new(),
             default_i: 0,
             scripts,
             word,
@@ -148,7 +146,7 @@ impl<'a> FontFallbackIter<'a> {
 impl<'a> Iterator for FontFallbackIter<'a> {
     type Item = Arc<Font>;
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(fallback_info) = self.monospace_fallbacks.pop_first() {
+        if let Some(fallback_info) = self.font_system.monospace_fallbacks_buffer.pop_first() {
             if let Some(font) = self.font_system.get_font(fallback_info.id) {
                 return Some(font);
             }
@@ -207,7 +205,10 @@ impl<'a> Iterator for FontFallbackIter<'a> {
                                 return Some(font);
                             }
                         } else {
-                            assert!(self.monospace_fallbacks.insert(fallback_info));
+                            assert!(self
+                                .font_system
+                                .monospace_fallbacks_buffer
+                                .insert(fallback_info));
                         }
                     }
                 }
@@ -245,13 +246,16 @@ impl<'a> Iterator for FontFallbackIter<'a> {
                                 font_weight: m_key.font_weight,
                                 id: m_key.id,
                             };
-                            assert!(self.monospace_fallbacks.insert(fallback_info));
+                            assert!(self
+                                .font_system
+                                .monospace_fallbacks_buffer
+                                .insert(fallback_info));
                         }
                     }
                 }
             }
             // If default family is Monospace fallback to first monospaced font
-            if let Some(fallback_info) = self.monospace_fallbacks.pop_first() {
+            if let Some(fallback_info) = self.font_system.monospace_fallbacks_buffer.pop_first() {
                 if let Some(font) = self.font_system.get_font(fallback_info.id) {
                     return Some(font);
                 }
