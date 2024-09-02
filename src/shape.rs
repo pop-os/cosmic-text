@@ -40,7 +40,6 @@ pub enum Shaping {
 impl Shaping {
     fn run(
         self,
-        scratch: &mut ShapeBuffer,
         glyphs: &mut Vec<ShapeGlyph>,
         font_system: &mut FontSystem,
         line: &str,
@@ -54,7 +53,6 @@ impl Shaping {
             Self::Basic => shape_skip(font_system, glyphs, line, attrs_list, start_run, end_run),
             #[cfg(not(feature = "shape-run-cache"))]
             Self::Advanced => shape_run(
-                scratch,
                 glyphs,
                 font_system,
                 line,
@@ -65,7 +63,6 @@ impl Shaping {
             ),
             #[cfg(feature = "shape-run-cache")]
             Self::Advanced => shape_run_cached(
-                scratch,
                 glyphs,
                 font_system,
                 line,
@@ -109,8 +106,8 @@ impl fmt::Debug for ShapeBuffer {
 
 fn shape_fallback(
     scratch: &mut ShapeBuffer,
-    glyphs: &mut Vec<ShapeGlyph>,
     shape_plan_cache: &mut ShapePlanCache,
+    glyphs: &mut Vec<ShapeGlyph>,
     font: &Font,
     line: &str,
     attrs_list: &AttrsList,
@@ -217,7 +214,6 @@ fn shape_fallback(
 }
 
 fn shape_run(
-    scratch: &mut ShapeBuffer,
     glyphs: &mut Vec<ShapeGlyph>,
     font_system: &mut FontSystem,
     line: &str,
@@ -228,7 +224,7 @@ fn shape_run(
 ) {
     // Re-use the previous script buffer if possible.
     let mut scripts = {
-        let mut scripts = mem::take(&mut scratch.scripts);
+        let mut scripts = mem::take(&mut font_system.shape_buffer.scripts);
         scripts.clear();
         scripts
     };
@@ -261,17 +257,20 @@ fn shape_run(
     let font = font_iter.next().expect("no default font found");
 
     let glyph_start = glyphs.len();
-    let mut missing = shape_fallback(
-        scratch,
-        glyphs,
-        font_iter.shape_plan_cache(),
-        &font,
-        line,
-        attrs_list,
-        start_run,
-        end_run,
-        span_rtl,
-    );
+    let mut missing = {
+        let (scratch, shape_plan_cache) = font_iter.shape_caches();
+        shape_fallback(
+            scratch,
+            shape_plan_cache,
+            glyphs,
+            &font,
+            line,
+            attrs_list,
+            start_run,
+            end_run,
+            span_rtl,
+        )
+    };
 
     //TODO: improve performance!
     while !missing.is_empty() {
@@ -285,10 +284,11 @@ fn shape_run(
             font_iter.face_name(font.id())
         );
         let mut fb_glyphs = Vec::new();
+        let (scratch, shape_plan_cache) = font_iter.shape_caches();
         let fb_missing = shape_fallback(
             scratch,
+            shape_plan_cache,
             &mut fb_glyphs,
-            font_iter.shape_plan_cache(),
             &font,
             line,
             attrs_list,
@@ -362,12 +362,11 @@ fn shape_run(
     */
 
     // Restore the scripts buffer.
-    scratch.scripts = scripts;
+    font_system.shape_buffer.scripts = scripts;
 }
 
 #[cfg(feature = "shape-run-cache")]
 fn shape_run_cached(
-    scratch: &mut ShapeBuffer,
     glyphs: &mut Vec<ShapeGlyph>,
     font_system: &mut FontSystem,
     line: &str,
@@ -413,7 +412,6 @@ fn shape_run_cached(
     // Fill in cache if not already set
     let mut cache_glyphs = Vec::new();
     shape_run(
-        scratch,
         &mut cache_glyphs,
         font_system,
         line,
@@ -562,6 +560,8 @@ impl ShapeWord {
         }
     }
 
+    /// Shape a word into a set of glyphs.
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         font_system: &mut FontSystem,
         line: &str,
@@ -571,33 +571,8 @@ impl ShapeWord {
         blank: bool,
         shaping: Shaping,
     ) -> Self {
-        Self::new_in_buffer(
-            &mut ShapeBuffer::default(),
-            font_system,
-            line,
-            attrs_list,
-            word_range,
-            level,
-            blank,
-            shaping,
-        )
-    }
-
-    /// Shape a word into a set of glyphs, using a scratch buffer.
-    #[allow(clippy::too_many_arguments)]
-    pub fn new_in_buffer(
-        scratch: &mut ShapeBuffer,
-        font_system: &mut FontSystem,
-        line: &str,
-        attrs_list: &AttrsList,
-        word_range: Range<usize>,
-        level: unicode_bidi::Level,
-        blank: bool,
-        shaping: Shaping,
-    ) -> Self {
         let mut empty = Self::empty();
-        empty.build_in_buffer(
-            scratch,
+        empty.build(
             font_system,
             line,
             attrs_list,
@@ -609,13 +584,12 @@ impl ShapeWord {
         empty
     }
 
-    /// See [`Self::new_in_buffer`].
+    /// See [`Self::new`].
     ///
     /// Reuses as much of the pre-existing internal allocations as possible.
     #[allow(clippy::too_many_arguments)]
-    pub fn build_in_buffer(
+    pub fn build(
         &mut self,
-        scratch: &mut ShapeBuffer,
         font_system: &mut FontSystem,
         line: &str,
         attrs_list: &AttrsList,
@@ -644,7 +618,6 @@ impl ShapeWord {
             let attrs_egc = attrs_list.get_span(start_egc);
             if !attrs.compatible(&attrs_egc) {
                 shaping.run(
-                    scratch,
                     &mut glyphs,
                     font_system,
                     line,
@@ -660,7 +633,6 @@ impl ShapeWord {
         }
         if start_run < word_range.end {
             shaping.run(
-                scratch,
                 &mut glyphs,
                 font_system,
                 line,
@@ -703,6 +675,7 @@ impl ShapeSpan {
         }
     }
 
+    /// Shape a span into a set of words.
     pub fn new(
         font_system: &mut FontSystem,
         line: &str,
@@ -712,32 +685,8 @@ impl ShapeSpan {
         level: unicode_bidi::Level,
         shaping: Shaping,
     ) -> Self {
-        Self::new_in_buffer(
-            &mut ShapeBuffer::default(),
-            font_system,
-            line,
-            attrs_list,
-            span_range,
-            line_rtl,
-            level,
-            shaping,
-        )
-    }
-
-    /// Shape a span into a set of words, using a scratch buffer.
-    pub fn new_in_buffer(
-        scratch: &mut ShapeBuffer,
-        font_system: &mut FontSystem,
-        line: &str,
-        attrs_list: &AttrsList,
-        span_range: Range<usize>,
-        line_rtl: bool,
-        level: unicode_bidi::Level,
-        shaping: Shaping,
-    ) -> Self {
         let mut empty = Self::empty();
-        empty.build_in_buffer(
-            scratch,
+        empty.build(
             font_system,
             line,
             attrs_list,
@@ -749,12 +698,11 @@ impl ShapeSpan {
         empty
     }
 
-    /// See [`Self::new_in_buffer`].
+    /// See [`Self::new`].
     ///
     /// Reuses as much of the pre-existing internal allocations as possible.
-    pub fn build_in_buffer(
+    pub fn build(
         &mut self,
-        scratch: &mut ShapeBuffer,
         font_system: &mut FontSystem,
         line: &str,
         attrs_list: &AttrsList,
@@ -774,11 +722,11 @@ impl ShapeSpan {
         let mut words = mem::take(&mut self.words);
 
         // Cache the shape words in reverse order so they can be popped for reuse in the same order.
-        let mut cached_words = mem::take(&mut scratch.words);
+        let mut cached_words = mem::take(&mut font_system.shape_buffer.words);
         cached_words.clear();
         if line_rtl != level.is_rtl() {
             // Un-reverse previous words so the internal glyph counts match accurately when rewriting memory.
-            cached_words.extend(words.drain(..));
+            cached_words.append(&mut words);
         } else {
             cached_words.extend(words.drain(..).rev());
         }
@@ -799,8 +747,7 @@ impl ShapeSpan {
             }
             if start_word < start_lb {
                 let mut word = cached_words.pop().unwrap_or_else(ShapeWord::empty);
-                word.build_in_buffer(
-                    scratch,
+                word.build(
                     font_system,
                     line,
                     attrs_list,
@@ -815,8 +762,7 @@ impl ShapeSpan {
                 for (i, c) in span[start_lb..end_lb].char_indices() {
                     // assert!(c.is_whitespace());
                     let mut word = cached_words.pop().unwrap_or_else(ShapeWord::empty);
-                    word.build_in_buffer(
-                        scratch,
+                    word.build(
                         font_system,
                         line,
                         attrs_list,
@@ -848,7 +794,7 @@ impl ShapeSpan {
         self.words = words;
 
         // Cache buffer for future reuse.
-        scratch.words = cached_words;
+        font_system.shape_buffer.words = cached_words;
     }
 }
 
@@ -890,9 +836,12 @@ impl ShapeLine {
         }
     }
 
+    /// Shape a line into a set of spans, using a scratch buffer. If [`unicode_bidi::BidiInfo`]
+    /// detects multiple paragraphs, they will be joined.
+    ///
     /// # Panics
     ///
-    /// Will panic if `line` contains more than one paragraph.
+    /// Will panic if `line` contains multiple paragraphs that do not have matching direction
     pub fn new(
         font_system: &mut FontSystem,
         line: &str,
@@ -900,41 +849,20 @@ impl ShapeLine {
         shaping: Shaping,
         tab_width: u16,
     ) -> Self {
-        Self::new_in_buffer(
-            &mut ShapeBuffer::default(),
-            font_system,
-            line,
-            attrs_list,
-            shaping,
-            tab_width,
-        )
+        let mut empty = Self::empty();
+        empty.build(font_system, line, attrs_list, shaping, tab_width);
+        empty
     }
 
-    /// Shape a line into a set of spans, using a scratch buffer. If [`unicode_bidi::BidiInfo`]
-    /// detects multiple paragraphs, they will be joined.
+    /// See [`Self::new`].
+    ///
+    /// Reuses as much of the pre-existing internal allocations as possible.
     ///
     /// # Panics
     ///
     /// Will panic if `line` contains multiple paragraphs that do not have matching direction
-    pub fn new_in_buffer(
-        scratch: &mut ShapeBuffer,
-        font_system: &mut FontSystem,
-        line: &str,
-        attrs_list: &AttrsList,
-        shaping: Shaping,
-        tab_width: u16,
-    ) -> Self {
-        let mut empty = Self::empty();
-        empty.build_in_buffer(scratch, font_system, line, attrs_list, shaping, tab_width);
-        empty
-    }
-
-    /// See [`Self::new_in_buffer`].
-    ///
-    /// Reuses as much of the pre-existing internal allocations as possible.
-    pub fn build_in_buffer(
+    pub fn build(
         &mut self,
-        scratch: &mut ShapeBuffer,
         font_system: &mut FontSystem,
         line: &str,
         attrs_list: &AttrsList,
@@ -944,7 +872,7 @@ impl ShapeLine {
         let mut spans = mem::take(&mut self.spans);
 
         // Cache the shape spans in reverse order so they can be popped for reuse in the same order.
-        let mut cached_spans = mem::take(&mut scratch.spans);
+        let mut cached_spans = mem::take(&mut font_system.shape_buffer.spans);
         cached_spans.clear();
         cached_spans.extend(spans.drain(..).rev());
 
@@ -979,8 +907,7 @@ impl ShapeLine {
                 if new_level != run_level {
                     // End of the previous run, start of a new one.
                     let mut span = cached_spans.pop().unwrap_or_else(ShapeSpan::empty);
-                    span.build_in_buffer(
-                        scratch,
+                    span.build(
                         font_system,
                         line,
                         attrs_list,
@@ -995,8 +922,7 @@ impl ShapeLine {
                 }
             }
             let mut span = cached_spans.pop().unwrap_or_else(ShapeSpan::empty);
-            span.build_in_buffer(
-                scratch,
+            span.build(
                 font_system,
                 line,
                 attrs_list,
@@ -1029,7 +955,7 @@ impl ShapeLine {
         self.metrics_opt = attrs_list.defaults().metrics_opt.map(|x| x.into());
 
         // Return the buffer for later reuse.
-        scratch.spans = cached_spans;
+        font_system.shape_buffer.spans = cached_spans;
     }
 
     // A modified version of first part of unicode_bidi::bidi_info::visual_run
@@ -1705,7 +1631,7 @@ impl ShapeLine {
 
         // Restore the buffer to the scratch set to prevent reallocations.
         scratch.visual_lines = visual_lines;
-        scratch.visual_lines.extend(cached_visual_lines.drain(..));
+        scratch.visual_lines.append(&mut cached_visual_lines);
         scratch.cached_visual_lines = cached_visual_lines;
         scratch.glyph_sets = cached_glyph_sets;
     }

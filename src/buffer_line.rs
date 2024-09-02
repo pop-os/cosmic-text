@@ -1,10 +1,7 @@
-#[cfg(not(feature = "std"))]
-use alloc::{string::String, vec::Vec};
 use core::mem;
 
 use crate::{
-    Align, Attrs, AttrsList, Cached, FontSystem, LayoutLine, LineEnding, ShapeBuffer, ShapeLine,
-    Shaping, Wrap,
+    Align, Attrs, AttrsList, Cached, FontSystem, LayoutLine, LineEnding, ShapeLine, Shaping, Wrap,
 };
 
 /// A line (or paragraph) of text that is shaped and laid out
@@ -205,23 +202,12 @@ impl BufferLine {
 
     /// Shape line, will cache results
     pub fn shape(&mut self, font_system: &mut FontSystem, tab_width: u16) -> &ShapeLine {
-        self.shape_in_buffer(&mut ShapeBuffer::default(), font_system, tab_width)
-    }
-
-    /// Shape a line using a pre-existing shape buffer, will cache results
-    pub fn shape_in_buffer(
-        &mut self,
-        scratch: &mut ShapeBuffer,
-        font_system: &mut FontSystem,
-        tab_width: u16,
-    ) -> &ShapeLine {
         if self.shape_opt.is_unused() {
             let mut line = self
                 .shape_opt
                 .take_unused()
                 .unwrap_or_else(ShapeLine::empty);
-            line.build_in_buffer(
-                scratch,
+            line.build(
                 font_system,
                 &self.text,
                 &self.attrs_list,
@@ -249,37 +235,15 @@ impl BufferLine {
         match_mono_width: Option<f32>,
         tab_width: u16,
     ) -> &[LayoutLine] {
-        self.layout_in_buffer(
-            &mut ShapeBuffer::default(),
-            font_system,
-            font_size,
-            width_opt,
-            wrap,
-            match_mono_width,
-            tab_width,
-        )
-    }
-
-    /// Layout a line using a pre-existing shape buffer, will cache results
-    pub fn layout_in_buffer(
-        &mut self,
-        scratch: &mut ShapeBuffer,
-        font_system: &mut FontSystem,
-        font_size: f32,
-        width_opt: Option<f32>,
-        wrap: Wrap,
-        match_mono_width: Option<f32>,
-        tab_width: u16,
-    ) -> &[LayoutLine] {
         if self.layout_opt.is_unused() {
             let align = self.align;
             let mut layout = self
                 .layout_opt
                 .take_unused()
                 .unwrap_or_else(|| Vec::with_capacity(1));
-            let shape = self.shape_in_buffer(scratch, font_system, tab_width);
+            let shape = self.shape(font_system, tab_width);
             shape.layout_to_buffer(
-                scratch,
+                &mut font_system.shape_buffer,
                 font_size,
                 width_opt,
                 wrap,

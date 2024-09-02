@@ -1,4 +1,4 @@
-use crate::{Attrs, Font, FontMatchAttrs, HashMap, ShapePlanCache};
+use crate::{Attrs, Font, FontMatchAttrs, HashMap, ShapeBuffer, ShapePlanCache};
 use alloc::string::String;
 use alloc::sync::Arc;
 use alloc::vec::Vec;
@@ -101,7 +101,10 @@ pub struct FontSystem {
     font_matches_cache: HashMap<FontMatchAttrs, Arc<Vec<FontMatchKey>>>,
 
     /// Cache for rustybuzz shape plans.
-    shape_plan_cache: ShapePlanCache,
+    pub(crate) shape_plan_cache: ShapePlanCache,
+
+    /// Scratch buffer for shaping and laying out.
+    pub(crate) shape_buffer: ShapeBuffer,
 
     /// Cache for shaped runs
     #[cfg(feature = "shape-run-cache")]
@@ -171,6 +174,7 @@ impl FontSystem {
             shape_plan_cache: ShapePlanCache::default(),
             #[cfg(feature = "shape-run-cache")]
             shape_run_cache: crate::ShapeRunCache::default(),
+            shape_buffer: ShapeBuffer::default(),
         };
         ret.cache_fonts(cloned_monospace_font_ids.clone());
         cloned_monospace_font_ids.into_iter().for_each(|id| {
@@ -194,11 +198,6 @@ impl FontSystem {
     /// Get the database.
     pub fn db(&self) -> &fontdb::Database {
         &self.db
-    }
-
-    /// Get the shape plan cache.
-    pub(crate) fn shape_plan_cache(&mut self) -> &mut ShapePlanCache {
-        &mut self.shape_plan_cache
     }
 
     /// Get a mutable reference to the database.

@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-#[cfg(not(feature = "std"))]
-use alloc::{string::String, vec::Vec};
 use core::{cmp, fmt};
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
     Affinity, Align, Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem, BufferLine, Color,
     Cursor, FontSystem, LayoutCursor, LayoutGlyph, LayoutLine, LineEnding, LineIter, Motion,
-    Scroll, ShapeBuffer, ShapeLine, Shaping, Wrap,
+    Scroll, ShapeLine, Shaping, Wrap,
 };
 
 /// A line of visible text for rendering
@@ -213,9 +211,6 @@ pub struct Buffer {
     wrap: Wrap,
     monospace_width: Option<f32>,
     tab_width: u16,
-
-    /// Scratch buffer for shaping and laying out.
-    scratch: ShapeBuffer,
 }
 
 impl Clone for Buffer {
@@ -230,7 +225,6 @@ impl Clone for Buffer {
             wrap: self.wrap,
             monospace_width: self.monospace_width,
             tab_width: self.tab_width,
-            scratch: ShapeBuffer::default(),
         }
     }
 }
@@ -257,7 +251,6 @@ impl Buffer {
             scroll: Scroll::default(),
             redraw: false,
             wrap: Wrap::WordOrGlyph,
-            scratch: ShapeBuffer::default(),
             monospace_width: None,
             tab_width: 8,
         }
@@ -292,8 +285,7 @@ impl Buffer {
         for line in &mut self.lines {
             if line.shape_opt().is_some() {
                 line.reset_layout();
-                line.layout_in_buffer(
-                    &mut self.scratch,
+                line.layout(
                     font_system,
                     self.metrics.font_size,
                     self.width_opt,
@@ -521,7 +513,7 @@ impl Buffer {
         line_i: usize,
     ) -> Option<&ShapeLine> {
         let line = self.lines.get_mut(line_i)?;
-        Some(line.shape_in_buffer(&mut self.scratch, font_system, self.tab_width))
+        Some(line.shape(font_system, self.tab_width))
     }
 
     /// Lay out the provided line index and return the result
@@ -531,8 +523,7 @@ impl Buffer {
         line_i: usize,
     ) -> Option<&[LayoutLine]> {
         let line = self.lines.get_mut(line_i)?;
-        Some(line.layout_in_buffer(
-            &mut self.scratch,
+        Some(line.layout(
             font_system,
             self.metrics.font_size,
             self.width_opt,
