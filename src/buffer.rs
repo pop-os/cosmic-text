@@ -3,6 +3,7 @@
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, vec::Vec};
 use core::{cmp, fmt};
+use smallvec::SmallVec;
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
@@ -203,7 +204,7 @@ impl fmt::Display for Metrics {
 #[derive(Debug)]
 pub struct Buffer {
     /// [BufferLine]s (or paragraphs) of text in the buffer
-    pub lines: Vec<BufferLine>,
+    pub lines: SmallVec<[BufferLine; 1]>,
     metrics: Metrics,
     width_opt: Option<f32>,
     height_opt: Option<f32>,
@@ -246,7 +247,7 @@ impl Buffer {
     pub fn new_empty(metrics: Metrics) -> Self {
         assert_ne!(metrics.line_height, 0.0, "line height cannot be 0");
         Self {
-            lines: Vec::new(),
+            lines: SmallVec::new(),
             metrics,
             width_opt: None,
             height_opt: None,
