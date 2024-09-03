@@ -3,8 +3,8 @@ use alloc::{string::String, vec::Vec};
 use core::mem;
 
 use crate::{
-    Align, Attrs, AttrsList, BufferVec, Cached, FontSystem, LayoutLine, LineEnding,
-    ShapeLine, Shaping, Wrap,
+    Align, Attrs, AttrsList, BufferVec, Cached, FontSystem, LayoutLine, LineEnding, ShapeLine,
+    Shaping, Wrap,
 };
 
 /// A line (or paragraph) of text that is shaped and laid out
