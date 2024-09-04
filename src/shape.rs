@@ -726,7 +726,7 @@ impl ShapeSpan {
         cached_words.clear();
         if line_rtl != level.is_rtl() {
             // Un-reverse previous words so the internal glyph counts match accurately when rewriting memory.
-            cached_words.append(&mut words);
+            cached_words.extend(words.drain(..));
         } else {
             cached_words.extend(words.drain(..).rev());
         }
