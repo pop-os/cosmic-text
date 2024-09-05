@@ -13,11 +13,25 @@ pub struct ShapeRunKey {
 }
 
 /// A helper structure for caching shape runs.
-#[derive(Clone, Default)]
+#[derive(Clone)]
 pub struct ShapeRunCache {
     age: u64,
     cache: HashMap<ShapeRunKey, (u64, Vec<ShapeGlyph>)>,
     age_registries: Vec<HashSet<ShapeRunKey>>,
+}
+
+impl Default for ShapeRunCache {
+    #[allow(clippy::vec_init_then_push)]
+    fn default() -> Self {
+        let mut age_registries = Vec::new();
+        age_registries.push(HashSet::default());
+
+        Self {
+            age: 0,
+            cache: Default::default(),
+            age_registries,
+        }
+    }
 }
 
 impl ShapeRunCache {
