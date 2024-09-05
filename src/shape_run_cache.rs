@@ -13,21 +13,11 @@ pub struct ShapeRunKey {
 }
 
 /// A helper structure for caching shape runs.
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct ShapeRunCache {
     age: u64,
     cache: HashMap<ShapeRunKey, (u64, Vec<ShapeGlyph>)>,
     age_registries: Vec<HashSet<ShapeRunKey>>,
-}
-
-impl Default for ShapeRunCache {
-    fn default() -> Self {
-        Self {
-            age: 0,
-            cache: Default::default(),
-            age_registries: vec![HashSet::default()],
-        }
-    }
 }
 
 impl ShapeRunCache {
