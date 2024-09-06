@@ -21,7 +21,6 @@ pub struct ShapeRunCache {
 }
 
 impl Default for ShapeRunCache {
-    #[allow(clippy::vec_init_then_push)]
     fn default() -> Self {
         Self {
             age: 0,
