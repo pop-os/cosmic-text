@@ -23,13 +23,13 @@ pub struct ShapeRunCache {
 impl Default for ShapeRunCache {
     #[allow(clippy::vec_init_then_push)]
     fn default() -> Self {
-        let mut age_registries = Vec::new();
-        age_registries.push(HashSet::default());
-
         Self {
             age: 0,
             cache: Default::default(),
-            age_registries,
+            #[cfg(not(feature = "std"))]
+            age_registries: alloc::vec![HashSet::default()],
+            #[cfg(feature = "std")]
+            age_registries: vec![HashSet::default()],
         }
     }
 }
