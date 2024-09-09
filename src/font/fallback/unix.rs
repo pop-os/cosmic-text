@@ -32,7 +32,7 @@ pub fn forbidden_fallback() -> &'static [&'static str] {
 fn han_unification(locale: &str) -> &'static [&'static str] {
     match locale {
         // Japan
-        "ja" => &["Noto Sans CJK JA"],
+        "ja" => &["Noto Sans CJK JP"],
         // Korea
         "ko" => &["Noto Sans CJK KR"],
         // Hong Kong
