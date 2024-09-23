@@ -450,12 +450,12 @@ fn shape_skip(
 
     glyphs.extend(
         line[start_run..end_run]
-            .chars()
+            .char_indices()
             .enumerate()
-            .map(|(i, codepoint)| {
+            .map(|(i, (chr_idx, codepoint))| {
                 let glyph_id = charmap.map(codepoint);
                 let x_advance = glyph_metrics.advance_width(glyph_id);
-                let attrs = attrs_list.get_span(i);
+                let attrs = attrs_list.get_span(start_run + chr_idx);
 
                 ShapeGlyph {
                     start: i,
