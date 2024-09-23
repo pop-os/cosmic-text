@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["SelectionFlags"],"type":["Os2"]};

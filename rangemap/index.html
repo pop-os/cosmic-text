@@ -1,0 +1,98 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="`RangeMap` and `RangeInclusiveMap` are map data structures whose keys are stored as ranges. Contiguous and overlapping ranges that map to the same value are coalesced into a single range."><title>rangemap - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../static.files/rustdoc-c5d6553a23f1e5a6.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="rangemap" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0 (eeb90cda1 2024-09-04)" data-channel="1.81.0" data-search-js="search-d234aafac6c221dd.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-d2fab2bf619172d3.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../rangemap/index.html">rangemap</a><span class="version">1.5.1</span></h2></div><div class="sidebar-elems"><ul class="block"><li><a id="all-types" href="all.html">All Items</a></li></ul><section><ul class="block"><li><a href="#reexports">Re-exports</a></li><li><a href="#modules">Modules</a></li><li><a href="#macros">Macros</a></li><li><a href="#traits">Traits</a></li></ul></section></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1>Crate <a class="mod" href="#">rangemap</a><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><span class="out-of-band"><a class="src" href="../src/rangemap/lib.rs.html#1-153">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p><a href="map/struct.RangeMap.html" title="struct rangemap::map::RangeMap"><code>RangeMap</code></a> and <a href="inclusive_map/struct.RangeInclusiveMap.html" title="struct rangemap::inclusive_map::RangeInclusiveMap"><code>RangeInclusiveMap</code></a> are map data structures whose keys
+are stored as ranges. Contiguous and overlapping ranges that map to the same
+value are coalesced into a single range.</p>
+<p>Corresponding <a href="set/struct.RangeSet.html" title="struct rangemap::set::RangeSet"><code>RangeSet</code></a> and <a href="inclusive_set/struct.RangeInclusiveSet.html" title="struct rangemap::inclusive_set::RangeInclusiveSet"><code>RangeInclusiveSet</code></a> structures are also provided.</p>
+<h2 id="different-kinds-of-ranges"><a class="doc-anchor" href="#different-kinds-of-ranges">§</a>Different kinds of ranges</h2>
+<p><code>RangeMap</code> and <code>RangeInclusiveMap</code> correspond to the <a href="https://doc.rust-lang.org/1.81.0/core/ops/range/struct.Range.html" title="struct core::ops::range::Range"><code>Range</code></a>
+and <a href="https://doc.rust-lang.org/1.81.0/core/ops/range/struct.RangeInclusive.html" title="struct core::ops::range::RangeInclusive"><code>RangeInclusive</code></a> types from the standard library respectively.
+For some applications the choice of range type may be obvious,
+or even be dictated by pre-existing design decisions. For other applications
+the choice may seem arbitrary, and be guided instead by convenience or
+aesthetic preference.</p>
+<p>If the choice is not obvious in your case, consider these differences:</p>
+<ul>
+<li>If your key type <code>K</code> represents points on a continuum (e.g. <code>f64</code>),
+and the choice of which of two adjacent ranges “owns” the value
+where they touch is largely arbitrary, then it may be more natural
+to work with half-open <code>Range</code>s like <code>0.0..1.0</code> and <code>1.0..2.0</code>. If you
+were to use closed <code>RangeInclusive</code>s here instead, then to represent two such adjacent
+ranges you would need to subtract some infinitesimal (which may depend,
+as it does in the case of <code>f64</code>, on the specific value of <code>K</code>)
+from the end of the earlier range. (See the last point below for more
+on this problem.)</li>
+<li>If you need to represent ranges that <em>include</em> the maximum
+value in the key domain (e.g. <code>255u8</code>) then you will
+probably want to use <code>RangeInclusive</code>s like <code>128u8..=255u8</code>. Sometimes
+it may be possible to instead work around this by using a wider key
+type than the values you are actually trying to represent (<code>K=u16</code>
+even though you are only trying to represent ranges covering <code>u8</code>)
+but in these cases the key domain often represents discrete objects
+rather than points on a continuum, and so <code>RangeInclusive</code> may
+be a more natural way to express these ranges anyway.</li>
+<li>If you are using <code>RangeInclusive</code>, then it must be possible to define
+<em>successor</em> and <em>predecessor</em> functions for your key type <code>K</code>,
+because adjacent ranges can not be detected (and thereby coalesced)
+simply by testing their ends for equality. For key types that represent
+points on a continuum, defining these functions may be awkward and error-prone.
+For key types that represent discrete objects, this is usually much
+more straightforward.</li>
+</ul>
+<h2 id="example-use-with-chrono"><a class="doc-anchor" href="#example-use-with-chrono">§</a>Example: use with Chrono</h2>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>chrono::offset::TimeZone;
+<span class="kw">use </span>chrono::{Duration, Utc};
+<span class="kw">use </span>rangemap::RangeMap;
+
+<span class="kw">let </span>people = [<span class="string">"Alice"</span>, <span class="string">"Bob"</span>, <span class="string">"Carol"</span>];
+<span class="kw">let </span><span class="kw-2">mut </span>roster = RangeMap::new();
+
+<span class="comment">// Set up initial roster.
+</span><span class="kw">let </span>start_of_roster = Utc.ymd(<span class="number">2019</span>, <span class="number">1</span>, <span class="number">7</span>);
+<span class="kw">let </span><span class="kw-2">mut </span>week_start = start_of_roster;
+<span class="kw">for _ in </span><span class="number">0</span>..<span class="number">3 </span>{
+    <span class="kw">for </span>person <span class="kw">in </span><span class="kw-2">&amp;</span>people {
+        <span class="kw">let </span>next_week = week_start + Duration::weeks(<span class="number">1</span>);
+        roster.insert(week_start..next_week, person);
+        week_start = next_week;
+    }
+}
+
+<span class="comment">// Bob is covering Alice's second shift (the fourth shift overall).
+</span><span class="kw">let </span>fourth_shift_start = start_of_roster + Duration::weeks(<span class="number">3</span>);
+<span class="kw">let </span>fourth_shift_end = fourth_shift_start + Duration::weeks(<span class="number">1</span>);
+roster.insert(fourth_shift_start..fourth_shift_end, <span class="kw-2">&amp;</span><span class="string">"Bob"</span>);
+
+<span class="kw">for </span>(range, person) <span class="kw">in </span>roster.iter() {
+    <span class="macro">println!</span>(<span class="string">"{} ({}): {}"</span>, range.start, range.end - range.start, person);
+}
+
+<span class="comment">// Output:
+// 2019-01-07UTC (P7D): Alice
+// 2019-01-14UTC (P7D): Bob
+// 2019-01-21UTC (P7D): Carol
+// 2019-01-28UTC (P14D): Bob
+// 2019-02-11UTC (P7D): Carol
+// 2019-02-18UTC (P7D): Alice
+// 2019-02-25UTC (P7D): Bob
+// 2019-03-04UTC (P7D): Carol</span></code></pre></div>
+<h3 id="crate-features"><a class="doc-anchor" href="#crate-features">§</a>Crate features</h3>
+<p>By default this crate has no dependencies on other crates.</p>
+<p>If you enable the <strong>serde1</strong> feature it will introduce a dependency on
+the <em>serde</em> crate and provide <code>Serialize</code> and <code>Deserialize</code>
+implementations for all map and set types in this crate.</p>
+<p>You can enable the <strong>serde1</strong> feature in your <em>Cargo.toml</em> file like so:</p>
+<div class="example-wrap"><pre class="language-toml"><code>[dependencies]
+rangemap = { version = &quot;1&quot;, features = [&quot;serde1&quot;] }
+</code></pre></div><h3 id="building-without-the-rust-standard-library"><a class="doc-anchor" href="#building-without-the-rust-standard-library">§</a>Building without the Rust standard library</h3>
+<p>This crate can work without the full standard library available
+(e.g. when running on bare metal without an operating system)
+but relies on the presence of a global allocator —
+i.e. it links the <code>core</code> and <code>alloc</code> crates, but not <code>std</code>.</p>
+<p>Presently there is no functionality in the crate that require
+the standard library. Such functionality will likely be
+introduced in the future, and will be gated behind a default-on
+<code>std</code> feature.</p>
+<p>See <a href="https://doc.rust-lang.org/1.7.0/book/no-stdlib.html">The Rust Programming Language</a>
+book for general information about operating without the standard library.</p>
+</div></details><h2 id="reexports" class="section-header">Re-exports<a href="#reexports" class="anchor">§</a></h2><ul class="item-table"><li><div class="item-name" id="reexport.RangeInclusiveMap"><code>pub use inclusive_map::<a class="struct" href="inclusive_map/struct.RangeInclusiveMap.html" title="struct rangemap::inclusive_map::RangeInclusiveMap">RangeInclusiveMap</a>;</code></div></li><li><div class="item-name" id="reexport.RangeInclusiveSet"><code>pub use inclusive_set::<a class="struct" href="inclusive_set/struct.RangeInclusiveSet.html" title="struct rangemap::inclusive_set::RangeInclusiveSet">RangeInclusiveSet</a>;</code></div></li><li><div class="item-name" id="reexport.RangeMap"><code>pub use map::<a class="struct" href="map/struct.RangeMap.html" title="struct rangemap::map::RangeMap">RangeMap</a>;</code></div></li><li><div class="item-name" id="reexport.RangeSet"><code>pub use set::<a class="struct" href="set/struct.RangeSet.html" title="struct rangemap::set::RangeSet">RangeSet</a>;</code></div></li></ul><h2 id="modules" class="section-header">Modules<a href="#modules" class="anchor">§</a></h2><ul class="item-table"><li><div class="item-name"><a class="mod" href="inclusive_map/index.html" title="mod rangemap::inclusive_map">inclusive_map</a></div></li><li><div class="item-name"><a class="mod" href="inclusive_set/index.html" title="mod rangemap::inclusive_set">inclusive_set</a></div></li><li><div class="item-name"><a class="mod" href="map/index.html" title="mod rangemap::map">map</a></div></li><li><div class="item-name"><a class="mod" href="set/index.html" title="mod rangemap::set">set</a></div></li></ul><h2 id="macros" class="section-header">Macros<a href="#macros" class="anchor">§</a></h2><ul class="item-table"><li><div class="item-name"><a class="macro" href="macro.range_inclusive_map.html" title="macro rangemap::range_inclusive_map">range_inclusive_map</a></div><div class="desc docblock-short">Create a <a href="inclusive_map/struct.RangeInclusiveMap.html" title="struct rangemap::inclusive_map::RangeInclusiveMap"><code>RangeInclusiveMap</code></a> from key-value pairs.</div></li><li><div class="item-name"><a class="macro" href="macro.range_inclusive_set.html" title="macro rangemap::range_inclusive_set">range_inclusive_set</a></div><div class="desc docblock-short">Create a <a href="inclusive_set/struct.RangeInclusiveSet.html" title="struct rangemap::inclusive_set::RangeInclusiveSet"><code>RangeInclusiveSet</code></a> from a list of ranges.</div></li><li><div class="item-name"><a class="macro" href="macro.range_map.html" title="macro rangemap::range_map">range_map</a></div><div class="desc docblock-short">Create a <a href="map/struct.RangeMap.html" title="struct rangemap::map::RangeMap"><code>RangeMap</code></a> from key-value pairs.</div></li><li><div class="item-name"><a class="macro" href="macro.range_set.html" title="macro rangemap::range_set">range_set</a></div><div class="desc docblock-short">Create a <a href="set/struct.RangeSet.html" title="struct rangemap::set::RangeSet"><code>RangeSet</code></a> from a list of ranges.</div></li></ul><h2 id="traits" class="section-header">Traits<a href="#traits" class="anchor">§</a></h2><ul class="item-table"><li><div class="item-name"><a class="trait" href="trait.StepFns.html" title="trait rangemap::StepFns">StepFns</a></div><div class="desc docblock-short">Successor and predecessor functions defined for <code>T</code>,
+but as free functions rather than methods on <code>T</code> itself.</div></li><li><div class="item-name"><a class="trait" href="trait.StepLite.html" title="trait rangemap::StepLite">StepLite</a></div><div class="desc docblock-short">Minimal version of unstable <a href="https://doc.rust-lang.org/1.81.0/core/iter/range/trait.Step.html" title="trait core::iter::range::Step"><code>Step</code></a> trait
+from the Rust standard library.</div></li></ul></section></div></main></body></html>

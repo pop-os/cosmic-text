@@ -1,0 +1,199 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Yet another zlib implementation."><title>yazi - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../static.files/rustdoc-c5d6553a23f1e5a6.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="yazi" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0 (eeb90cda1 2024-09-04)" data-channel="1.81.0" data-search-js="search-d234aafac6c221dd.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-d2fab2bf619172d3.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../yazi/index.html">yazi</a><span class="version">0.1.6</span></h2></div><div class="sidebar-elems"><ul class="block"><li><a id="all-types" href="all.html">All Items</a></li></ul><section><ul class="block"><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#functions">Functions</a></li></ul></section></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1>Crate <a class="mod" href="#">yazi</a><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><span class="out-of-band"><a class="src" href="../src/yazi/lib.rs.html#1-443">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Yet another zlib implementation.</p>
+<p>This crate is an implementation of the RFC 1950 DEFLATE specification with
+support for the zlib wrapper. There are many fine options for such in the
+Rust ecosystem, but I was looking for one that was small and relatively
+simple with reasonable performance/compression ratio and support for heap-free
+compression/decompression scenarios. This crate aims to tick those boxes
+while also providing composable streaming support based on the standard I/O
+mechanisms.</p>
+<p>See the quick start guide below for basic usage or jump to the <a href="#compression">compression</a>
+or <a href="#decompression">decompression</a> section for more detail.</p>
+<h2 id="quick-start"><a class="doc-anchor" href="#quick-start">§</a>Quick Start</h2>
+<p>So you’ve got some bytes, they all fit in memory, you don’t need to reuse allocations,
+and you just want to compress or decompress them. This section is for you.</p>
+<p>Cargo.toml:</p>
+<div class="example-wrap"><pre class="language-toml"><code>[dependencies]
+yazi = &quot;0.1.4&quot;
+</code></pre></div>
+<p>The <a href="fn.compress.html"><code>compress</code></a> and <a href="fn.decompress.html"><code>decompress</code></a> functions
+are provided for the most common use cases:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>yazi::<span class="kw-2">*</span>;
+<span class="comment">// Your source data.
+</span><span class="kw">let </span>data = <span class="kw-2">&amp;</span>(<span class="number">0</span>..=<span class="number">255</span>).cycle().take(<span class="number">8192</span>).collect::&lt;Vec&lt;u8&gt;&gt;()[..];
+<span class="comment">// Compress it into a Vec&lt;u8&gt; with a zlib wrapper using the default compression level.
+</span><span class="kw">let </span>compressed = compress(data, Format::Zlib, CompressionLevel::Default).unwrap();
+<span class="comment">// Decompress it into a Vec&lt;u8&gt;.
+</span><span class="kw">let </span>(decompressed, checksum) = decompress(<span class="kw-2">&amp;</span>compressed, Format::Zlib).unwrap();
+<span class="comment">// Verify the checksum.
+</span><span class="macro">assert_eq!</span>(Adler32::from_buf(<span class="kw-2">&amp;</span>decompressed).finish(), checksum.unwrap());
+<span class="comment">// Verify that the decompressed data matches the original.
+</span><span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>decompressed[..], data);</code></pre></div>
+<p>Read on for more detailed usage.</p>
+<h2 id="compression"><a class="doc-anchor" href="#compression">§</a>Compression</h2>
+<p>To compress data, you’ll need to create an instance of the
+<a href="struct.Encoder.html"><code>Encoder</code></a> struct. The <a href="struct.Encoder.html#method.new"><code>new</code></a>
+method can
+be used to construct an encoder on the stack, but the internal buffers are large
+(~300k) and may cause a stack overflow so it is advisable to use the
+<a href="struct.Encoder.html#method.boxed"><code>boxed</code></a> method to allocate the encoder on the heap.</p>
+<p>Newly constructed encoders are configured to output a raw DEFLATE bitstream using a
+medium compression level and a default strategy. Call
+<a href="struct.Encoder.html#method.set_format"><code>set_format</code></a> to change the output
+<a href="enum.Format.html"><code>Format</code></a>. Raw DEFLATE and zlib are supported. The
+<a href="struct.Encoder.html#method.set_level"><code>set_level</code></a> method allows you to choose the
+preferred <a href="enum.CompressionLevel.html"><code>CompressionLevel</code></a> from a set of basic
+options or a specific level between 1 and 10. The
+<a href="enum.CompressionStrategy.html"><code>CompressionStrategy</code></a> can be changed with the
+<a href="struct.Encoder.html#method.set_strategy"><code>set_strategy</code></a> method. This allows you
+to, for example, force the encoder to output only static blocks.</p>
+<p>To create an encoder that outputs a zlib bitstream and spends some extra time to potentially
+produce a result with a higher compression ratio:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>yazi::{CompressionLevel, Encoder, Format};
+<span class="kw">let </span><span class="kw-2">mut </span>encoder = Encoder::boxed();
+encoder.set_format(Format::Zlib);
+encoder.set_level(CompressionLevel::BestSize);</code></pre></div>
+<p>The encoder itself does not provide any functionality. It simply stores state and
+configuration. To actually compress data, you’ll need an
+<a href="struct.EncoderStream.html"><code>EncoderStream</code></a>. A stream is a binding between an
+encoder and some specific output that will receive the compressed data. This
+design allows an encoder to be reused with different types of outputs without paying the
+allocation and initialization cost each time.</p>
+<p>Streaming supports outputs of the following forms:</p>
+<ul>
+<li>Fixed buffers, created with the <a href="struct.Encoder.html#method.stream_into_buf"><code>stream_into_buf</code></a> method.</li>
+<li>Vectors, created with the <a href="struct.Encoder.html#method.stream_into_vec"><code>stream_into_vec</code></a> method.</li>
+<li>Any type that implements <a href="https://doc.rust-lang.org/std/io/trait.Write.html"><code>std::io::Write</code></a>,
+created with the generic <a href="struct.Encoder.html#method.stream"><code>stream</code></a> method.</li>
+</ul>
+<p>Once you have an <a href="struct.EncoderStream.html"><code>EncoderStream</code></a>, simply call
+<a href="struct.EncoderStream.html#method.write"><code>write</code></a> one or more times, feeding your raw
+data into the stream. If available, you can submit the entire input buffer at once, or
+in arbitrarily sized chunks down to a single byte. After all data has been written,
+call <a href="struct.EncoderStream.html#method.finish"><code>finish</code></a> on the stream which will
+consume it, flush all remaining input and output, and finalize the operation. The finish
+method returns a <a href="https://doc.rust-lang.org/std/result/enum.Result.html"><code>Result</code></a>
+containing the total number of compressed bytes written to the output on success, or an
+<a href="enum.Error.html"><code>Error</code></a> describing the problem on failure.</p>
+<p>Let’s write a function that compresses some arbitrary bytes into a vector:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">fn </span>compress_bytes(buf: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, yazi::Error&gt; {
+    <span class="kw">use </span>yazi::Encoder;
+    <span class="kw">let </span><span class="kw-2">mut </span>encoder = Encoder::boxed();
+    <span class="kw">let </span><span class="kw-2">mut </span>vec = Vec::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>stream = encoder.stream_into_vec(<span class="kw-2">&amp;mut </span>vec);
+    stream.write(buf)<span class="question-mark">?</span>;
+    stream.finish()<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(vec)
+}</code></pre></div>
+<p>Now let’s do something a bit more interesting, and given two paths, compress
+one file into another:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">fn </span>compress_file(source: <span class="kw-2">&amp;</span>str, dest: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;u64, yazi::Error&gt; {
+    <span class="kw">use </span>yazi::Encoder;
+    <span class="kw">use </span>std::fs::File;
+    <span class="kw">use </span>std::io::{copy, BufWriter};
+    <span class="kw">let </span><span class="kw-2">mut </span>encoder = Encoder::boxed();
+    <span class="comment">// yazi does not perform any internal buffering beyond what is necessary
+    // for correctness.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>target = BufWriter::new(File::create(dest)<span class="question-mark">?</span>);
+    <span class="kw">let </span><span class="kw-2">mut </span>stream = encoder.stream(<span class="kw-2">&amp;mut </span>target);
+    copy(<span class="kw-2">&amp;mut </span>File::open(source)<span class="question-mark">?</span>, <span class="kw-2">&amp;mut </span>stream)<span class="question-mark">?</span>;
+    stream.finish()
+}</code></pre></div>
+<p>Here, we can see that <a href="struct.EncoderStream.html"><code>EncoderStream</code></a> also implements
+<a href="https://doc.rust-lang.org/std/io/trait.Write.html"><code>Write</code></a>, so we can
+pass it directly to <a href="https://doc.rust-lang.org/std/io/fn.copy.html"><code>std::io::copy</code></a>.
+This allows streams to be composable with the standard I/O facilities and other
+libraries that support those interfaces.</p>
+<h2 id="decompression"><a class="doc-anchor" href="#decompression">§</a>Decompression</h2>
+<p>If you’ve already read the section on compression, the API for decompression
+is essentially identical with the types replaced by <a href="struct.Decoder.html"><code>Decoder</code></a>
+and <a href="struct.DecoderStream.html"><code>DecoderStream</code></a>. The documentation is copied here
+almost verbatim for the sake of completeness and for those who might have skipped
+directly to this section.</p>
+<p>To decompress data, you’ll need to create an instance of the
+<a href="struct.Decoder.html"><code>Decoder</code></a> struct. The <a href="struct.Decoder.html#method.new"><code>new</code></a>
+method can be used to construct a decoder on the stack, and unlike encoders, the
+decoder struct is relatively small (~10k) and generally safe to stack allocate. You can
+create a decoder on the heap with the <a href="struct.Decoder.html#method.boxed"><code>boxed</code></a>
+method if you prefer.</p>
+<p>Newly constructed decoders are configured to decompress a raw DEFLATE bitstream. Call
+<a href="struct.Decoder.html#method.set_format"><code>set_format</code></a> to change the input
+<a href="enum.Format.html"><code>Format</code></a>. Raw DEFLATE and zlib are supported. No other configuration
+is necessary for decompression.</p>
+<p>To create a decoder that decompresses a zlib bitstream:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>yazi::{Decoder, Format};
+<span class="kw">let </span><span class="kw-2">mut </span>decoder = Decoder::new();
+decoder.set_format(Format::Zlib);</code></pre></div>
+<p>The decoder itself does not provide any functionality. It simply stores state and
+configuration. To actually decompress data, you’ll need a
+<a href="struct.DecoderStream.html"><code>DecoderStream</code></a>. A stream is a binding between a
+decoder and some specific output that will receive the decompressed data. This
+design allows a decoder to be reused with different types of outputs without paying the
+allocation and initialization cost each time.</p>
+<p>Streaming supports outputs of the following forms:</p>
+<ul>
+<li>Fixed buffers, created with the <a href="struct.Decoder.html#method.stream_into_buf"><code>stream_into_buf</code></a> method.</li>
+<li>Vectors, created with the <a href="struct.Decoder.html#method.stream_into_vec"><code>stream_into_vec</code></a> method.</li>
+<li>Any type that implements <a href="https://doc.rust-lang.org/std/io/trait.Write.html"><code>std::io::Write</code></a>,
+created with the generic <a href="struct.Decoder.html#method.stream"><code>stream</code></a> method.</li>
+</ul>
+<p>Once you have a <a href="struct.DecoderStream.html"><code>DecoderStream</code></a>, simply call
+<a href="struct.DecoderStream.html#method.write"><code>write</code></a> one or more times, feeding your compressed
+data into the stream. If available, you can submit the entire input buffer at once, or
+in arbitrarily sized chunks down to a single byte. After all data has been written,
+call <a href="struct.DecoderStream.html#method.finish"><code>finish</code></a> on the stream which will
+consume it, flush all remaining input and output, and finalize the operation. The finish
+method returns a <a href="https://doc.rust-lang.org/std/result/enum.Result.html"><code>Result</code></a>
+containing the total number of decompressed bytes written to the output along with an optional
+Adler-32 checksum (if the stream was zlib-encoded) on success, or an
+<a href="enum.Error.html"><code>Error</code></a> describing the problem on failure.</p>
+<p>Let’s write a function that decompresses a zlib bitstream into a vector and verifies
+the checksum:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">fn </span>decompress_zlib(buf: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, yazi::Error&gt; {
+    <span class="kw">use </span>yazi::{Adler32, Decoder, Error, Format};
+    <span class="kw">let </span><span class="kw-2">mut </span>decoder = Decoder::new();
+    decoder.set_format(Format::Zlib);
+    <span class="kw">let </span><span class="kw-2">mut </span>vec = Vec::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>stream = decoder.stream_into_vec(<span class="kw-2">&amp;mut </span>vec);
+    stream.write(buf)<span class="question-mark">?</span>;
+    <span class="comment">// checksum is an Option&lt;u32&gt;
+    </span><span class="kw">let </span>(<span class="kw">_</span>, checksum) = stream.finish()<span class="question-mark">?</span>;
+    <span class="kw">if </span>Adler32::from_buf(<span class="kw-2">&amp;</span>vec).finish() != checksum.unwrap() {
+        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidBitstream);
+    }
+    <span class="prelude-val">Ok</span>(vec)
+}</code></pre></div>
+<p>Now let’s do something a bit more interesting, and given two paths, decompress
+one file into another:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">fn </span>decompress_file(source: <span class="kw-2">&amp;</span>str, dest: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;(u64, <span class="prelude-ty">Option</span>&lt;u32&gt;), yazi::Error&gt; {
+    <span class="kw">use </span>yazi::Decoder;
+    <span class="kw">use </span>std::fs::File;
+    <span class="kw">use </span>std::io::{copy, BufWriter};
+    <span class="kw">let </span><span class="kw-2">mut </span>decoder = Decoder::new();
+    <span class="comment">// yazi does not perform any internal buffering beyond what is necessary
+    // for correctness.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>target = BufWriter::new(File::create(dest)<span class="question-mark">?</span>);
+    <span class="kw">let </span><span class="kw-2">mut </span>stream = decoder.stream(<span class="kw-2">&amp;mut </span>target);
+    copy(<span class="kw-2">&amp;mut </span>File::open(source)<span class="question-mark">?</span>, <span class="kw-2">&amp;mut </span>stream)<span class="question-mark">?</span>;
+    stream.finish()
+}</code></pre></div>
+<p>Here, we can see that <a href="struct.DecoderStream.html"><code>DecoderStream</code></a> also implements
+<a href="https://doc.rust-lang.org/std/io/trait.Write.html"><code>Write</code></a>, so we can
+pass it directly to <a href="https://doc.rust-lang.org/std/io/fn.copy.html"><code>std::io::copy</code></a>.
+This allows streams to be composable with the standard I/O facilities and other
+libraries that support those interfaces.</p>
+<h2 id="implementation-notes"><a class="doc-anchor" href="#implementation-notes">§</a>Implementation Notes</h2>
+<p>The compressor is based heavily on both miniz (<a href="https://github.com/richgel999/miniz">https://github.com/richgel999/miniz</a>)
+by Rich Geldreich and miniz_oxide (<a href="https://github.com/Frommi/miniz_oxide">https://github.com/Frommi/miniz_oxide</a>)
+by Frommi. The available compression levels and strategies are the same and
+it should produce an identical bitstream for a given set of options. The
+decompressor is based on the techniques in libdeflate (<a href="https://github.com/ebiggers/libdeflate">https://github.com/ebiggers/libdeflate</a>)
+by Eric Biggers.</p>
+</div></details><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><ul class="item-table"><li><div class="item-name"><a class="struct" href="struct.Adler32.html" title="struct yazi::Adler32">Adler32</a></div><div class="desc docblock-short">Rolling Adler-32 checksum.</div></li><li><div class="item-name"><a class="struct" href="struct.Decoder.html" title="struct yazi::Decoder">Decoder</a></div><div class="desc docblock-short">Stateful context for decompression.</div></li><li><div class="item-name"><a class="struct" href="struct.DecoderStream.html" title="struct yazi::DecoderStream">DecoderStream</a></div><div class="desc docblock-short">Decompression stream combining a decoder context with an output.</div></li><li><div class="item-name"><a class="struct" href="struct.Encoder.html" title="struct yazi::Encoder">Encoder</a></div><div class="desc docblock-short">Stateful context for compression.</div></li><li><div class="item-name"><a class="struct" href="struct.EncoderStream.html" title="struct yazi::EncoderStream">EncoderStream</a></div><div class="desc docblock-short">Compression stream combining an encoder context with an output.</div></li></ul><h2 id="enums" class="section-header">Enums<a href="#enums" class="anchor">§</a></h2><ul class="item-table"><li><div class="item-name"><a class="enum" href="enum.CompressionLevel.html" title="enum yazi::CompressionLevel">CompressionLevel</a></div><div class="desc docblock-short">The level of compression– a compromise between speed and size.</div></li><li><div class="item-name"><a class="enum" href="enum.CompressionStrategy.html" title="enum yazi::CompressionStrategy">CompressionStrategy</a></div><div class="desc docblock-short">Selects between various specialized compressor modes.</div></li><li><div class="item-name"><a class="enum" href="enum.Error.html" title="enum yazi::Error">Error</a></div><div class="desc docblock-short">Errors that may occur during compression or decompression.</div></li><li><div class="item-name"><a class="enum" href="enum.Format.html" title="enum yazi::Format">Format</a></div><div class="desc docblock-short">Defines the format for a compressed bitstream.</div></li></ul><h2 id="functions" class="section-header">Functions<a href="#functions" class="anchor">§</a></h2><ul class="item-table"><li><div class="item-name"><a class="fn" href="fn.compress.html" title="fn yazi::compress">compress</a></div><div class="desc docblock-short">Compresses a buffer into a vector with the specified format and
+compression level.</div></li><li><div class="item-name"><a class="fn" href="fn.decompress.html" title="fn yazi::decompress">decompress</a></div><div class="desc docblock-short">Decompresses a buffer of the specified format into a vector.</div></li></ul></section></div></main></body></html>

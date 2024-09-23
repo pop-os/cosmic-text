@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["aat","avar","base","bitmap","cbdt","cblc","cff","cff2","cmap","colr","cpal","cvar","ebdt","eblc","fvar","gasp","gdef","glyf","gpos","gsub","gvar","head","hhea","hmtx","hvar","layout","loca","maxp","mvar","name","os2","post","postscript","sbix","stat","varc","variations","vhea","vmtx","vvar"]};
