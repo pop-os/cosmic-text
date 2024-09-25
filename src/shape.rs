@@ -13,8 +13,8 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use crate::fallback::FontFallbackIter;
 use crate::{
-    math, Align, AttrsList, CacheKeyFlags, Color, Font, FontSystem, LayoutGlyph, LayoutLine,
-    Metrics, ShapePlanCache, Wrap,
+    math, Align, AttrsList, BufferVec, CacheKeyFlags, Color, Font, FontSystem, LayoutGlyph,
+    LayoutLine, Metrics, ShapePlanCache, Wrap,
 };
 
 /// The shaping strategy of some text.
@@ -661,7 +661,7 @@ impl ShapeWord {
 #[derive(Clone, Debug)]
 pub struct ShapeSpan {
     pub level: unicode_bidi::Level,
-    pub words: Vec<ShapeWord>,
+    pub words: BufferVec<ShapeWord>,
 }
 
 impl ShapeSpan {
@@ -671,7 +671,7 @@ impl ShapeSpan {
     pub(crate) fn empty() -> Self {
         Self {
             level: unicode_bidi::Level::ltr(),
-            words: Vec::default(),
+            words: BufferVec::default(),
         }
     }
 
@@ -726,7 +726,7 @@ impl ShapeSpan {
         cached_words.clear();
         if line_rtl != level.is_rtl() {
             // Un-reverse previous words so the internal glyph counts match accurately when rewriting memory.
-            cached_words.append(&mut words);
+            cached_words.extend(words.drain(..));
         } else {
             cached_words.extend(words.drain(..).rev());
         }
@@ -802,7 +802,7 @@ impl ShapeSpan {
 #[derive(Clone, Debug)]
 pub struct ShapeLine {
     pub rtl: bool,
-    pub spans: Vec<ShapeSpan>,
+    pub spans: BufferVec<ShapeSpan>,
     pub metrics_opt: Option<Metrics>,
 }
 
@@ -831,7 +831,7 @@ impl ShapeLine {
     pub(crate) fn empty() -> Self {
         Self {
             rtl: false,
-            spans: Vec::default(),
+            spans: BufferVec::default(),
             metrics_opt: None,
         }
     }
@@ -1082,8 +1082,8 @@ impl ShapeLine {
         wrap: Wrap,
         align: Option<Align>,
         match_mono_width: Option<f32>,
-    ) -> Vec<LayoutLine> {
-        let mut lines = Vec::with_capacity(1);
+    ) -> BufferVec<LayoutLine> {
+        let mut lines = BufferVec::with_capacity(1);
         self.layout_to_buffer(
             &mut ShapeBuffer::default(),
             font_size,
@@ -1103,7 +1103,7 @@ impl ShapeLine {
         width_opt: Option<f32>,
         wrap: Wrap,
         align: Option<Align>,
-        layout_lines: &mut Vec<LayoutLine>,
+        layout_lines: &mut BufferVec<LayoutLine>,
         match_mono_width: Option<f32>,
     ) {
         // For each visual line a list of  (span index,  and range of words in that span)

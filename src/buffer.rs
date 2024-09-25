@@ -6,9 +6,9 @@ use core::{cmp, fmt};
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
-    Affinity, Align, Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem, BufferLine, Color,
-    Cursor, FontSystem, LayoutCursor, LayoutGlyph, LayoutLine, LineEnding, LineIter, Motion,
-    Scroll, ShapeLine, Shaping, Wrap,
+    Affinity, Align, Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem, BufferLine,
+    BufferVec, Color, Cursor, FontSystem, LayoutCursor, LayoutGlyph, LayoutLine, LineEnding,
+    LineIter, Motion, Scroll, ShapeLine, Shaping, Wrap,
 };
 
 /// A line of visible text for rendering
@@ -203,7 +203,7 @@ impl fmt::Display for Metrics {
 #[derive(Debug)]
 pub struct Buffer {
     /// [BufferLine]s (or paragraphs) of text in the buffer
-    pub lines: Vec<BufferLine>,
+    pub lines: BufferVec<BufferLine>,
     metrics: Metrics,
     width_opt: Option<f32>,
     height_opt: Option<f32>,
@@ -246,7 +246,7 @@ impl Buffer {
     pub fn new_empty(metrics: Metrics) -> Self {
         assert_ne!(metrics.line_height, 0.0, "line height cannot be 0");
         Self {
-            lines: Vec::new(),
+            lines: BufferVec::new(),
             metrics,
             width_opt: None,
             height_opt: None,
