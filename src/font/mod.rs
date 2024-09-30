@@ -90,24 +90,78 @@ impl Font {
 }
 
 impl Font {
-    pub fn new(db: &fontdb::Database, id: fontdb::ID) -> Option<Self> {
+    #[cfg(feature = "monospace_fallback")]
+    fn proportional_monospaced(face: &ttf_parser::Face) -> Option<bool> {
+        use ttf_parser::cmap::{Format, Subtable};
+        use ttf_parser::Face;
+
+        // Pick a unicode cmap subtable to check against its glyphs
+        let cmap = face.tables().cmap.as_ref()?;
+        let subtable12 = cmap.subtables.into_iter().find(|subtable| {
+            subtable.is_unicode() && matches!(subtable.format, Format::SegmentedCoverage(_))
+        });
+        let subtable4_fn = || {
+            cmap.subtables.into_iter().find(|subtable| {
+                subtable.is_unicode()
+                    && matches!(subtable.format, Format::SegmentMappingToDeltaValues(_))
+            })
+        };
+        let unicode_subtable = subtable12.or_else(subtable4_fn)?;
+
+        fn is_proportional(
+            face: &Face,
+            unicode_subtable: Subtable,
+            code_point_iter: impl Iterator<Item = u32>,
+        ) -> Option<bool> {
+            // Fonts like "Noto Sans Mono" have single, double, AND triple width glyphs.
+            // So we check proportionality up to 3x width, and assume non-proportionality
+            // once a forth non-zero advance value is encountered.
+            const MAX_ADVANCES: usize = 3;
+
+            let mut advances = Vec::with_capacity(MAX_ADVANCES);
+
+            for code_point in code_point_iter {
+                if let Some(glyph_id) = unicode_subtable.glyph_index(code_point) {
+                    match face.glyph_hor_advance(glyph_id) {
+                        Some(advance) if advance != 0 => match advances.binary_search(&advance) {
+                            Err(_) if advances.len() == MAX_ADVANCES => return Some(false),
+                            Err(i) => advances.insert(i, advance),
+                            Ok(_) => (),
+                        },
+                        _ => (),
+                    }
+                }
+            }
+
+            let mut advances = advances.into_iter();
+            let smallest = advances.next()?;
+            Some(advances.find(|advance| advance % smallest > 0).is_none())
+        }
+
+        match unicode_subtable.format {
+            Format::SegmentedCoverage(subtable12) => {
+                is_proportional(face, unicode_subtable, subtable12.codepoints_iter())
+            }
+            Format::SegmentMappingToDeltaValues(subtable4) => {
+                is_proportional(face, unicode_subtable, subtable4.codepoints_iter())
+            }
+            _ => unreachable!(),
+        }
+    }
+
+    pub fn new(db: &fontdb::Database, id: fontdb::ID, is_monospace: bool) -> Option<Self> {
         let info = db.face(id)?;
 
-        let monospace_fallback = if cfg!(feature = "monospace_fallback") {
+        let monospace_fallback = if cfg!(feature = "monospace_fallback") && is_monospace {
             db.with_face_data(id, |font_data, face_index| {
                 let face = ttf_parser::Face::parse(font_data, face_index).ok()?;
-                let monospace_em_width = info
-                    .monospaced
-                    .then(|| {
+                let monospace_em_width = {
+                    || {
                         let hor_advance = face.glyph_hor_advance(face.glyph_index(' ')?)? as f32;
                         let upem = face.units_per_em() as f32;
                         Some(hor_advance / upem)
-                    })
-                    .flatten();
-
-                if info.monospaced && monospace_em_width.is_none() {
-                    None?;
-                }
+                    }
+                }();
 
                 let scripts = face
                     .tables()

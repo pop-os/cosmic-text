@@ -25,7 +25,7 @@ smol_str = { version = "0.2.2", default-features = false }
 swash = { version = "0.1.17", optional = true }
 syntect = { version = "5.1.0", optional = true }
 sys-locale = { version = "0.3.1", optional = true }
-ttf-parser = { version = "0.21", default-features = false }
+ttf-parser = { version = "0.25", default-features = false, features = [ "opentype-layout" ] }
 unicode-linebreak = "0.1.5"
 unicode-script = "0.5.5"
 unicode-segmentation = "1.10.1"
@@ -40,7 +40,7 @@ features = ["hardcoded-data"]
 default = ["std", "swash", "fontconfig"]
 fontconfig = ["fontdb/fontconfig", "std"]
 monospace_fallback = []
-no_std = ["rustybuzz/libm", "hashbrown", "dep:libm"]
+no_std = ["rustybuzz/libm", "ttf-parser/no-std-float", "hashbrown", "dep:libm"]
 shape-run-cache = []
 std = [
     "fontdb/memmap",
@@ -73,3 +73,6 @@ opt-level = 1
 
 [package.metadata.docs.rs]
 features = ["vi"]
+
+[patch.crates-io]
+ttf-parser = { git = "https://github.com/MoSal/ttf-parser", branch = "codepoints_iter" }
