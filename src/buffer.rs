@@ -1328,7 +1328,7 @@ impl Buffer {
         color: Color,
         mut f: F,
     ) where
-        F: FnMut(i32, i32, u32, u32, Color),
+        F: FnMut(i32, i32, u32, u32, Color, Option<Color>),
     {
         for run in self.layout_runs() {
             for glyph in run.glyphs.iter() {
@@ -1343,13 +1343,14 @@ impl Buffer {
                     font_system,
                     physical_glyph.cache_key,
                     glyph_color,
-                    |x, y, color| {
+                    |x, y, color, subpixel_mask| {
                         f(
                             physical_glyph.x + x,
                             run.line_y as i32 + physical_glyph.y + y,
                             1,
                             1,
                             color,
+                            subpixel_mask,
                         );
                     },
                 );
@@ -1470,7 +1471,7 @@ impl<'a> BorrowedWithFontSystem<'a, Buffer> {
     #[cfg(feature = "swash")]
     pub fn draw<F>(&mut self, cache: &mut crate::SwashCache, color: Color, f: F)
     where
-        F: FnMut(i32, i32, u32, u32, Color),
+        F: FnMut(i32, i32, u32, u32, Color, Option<Color>),
     {
         self.inner.draw(self.font_system, cache, color, f);
     }

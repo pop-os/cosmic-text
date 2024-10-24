@@ -215,12 +215,19 @@ impl<'syntax_system, 'buffer> SyntaxEditor<'syntax_system, 'buffer> {
     #[cfg(feature = "swash")]
     pub fn draw<F>(&self, font_system: &mut FontSystem, cache: &mut crate::SwashCache, mut f: F)
     where
-        F: FnMut(i32, i32, u32, u32, Color),
+        F: FnMut(i32, i32, u32, u32, Color, Option<Color>),
     {
         let size = self.with_buffer(|buffer| buffer.size());
         if let Some(width) = size.0 {
             if let Some(height) = size.1 {
-                f(0, 0, width as u32, height as u32, self.background_color());
+                f(
+                    0,
+                    0,
+                    width as u32,
+                    height as u32,
+                    self.background_color(),
+                    None,
+                );
             }
         }
         self.editor.draw(
@@ -456,7 +463,7 @@ impl<'font_system, 'syntax_system, 'buffer>
     #[cfg(feature = "swash")]
     pub fn draw<F>(&mut self, cache: &mut crate::SwashCache, f: F)
     where
-        F: FnMut(i32, i32, u32, u32, Color),
+        F: FnMut(i32, i32, u32, u32, Color, Option<Color>),
     {
         self.inner.draw(self.font_system, cache, f);
     }

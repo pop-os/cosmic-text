@@ -195,22 +195,75 @@ fn main() {
                                 cursor_color,
                                 selection_color,
                                 selected_text_color,
-                                |x, y, w, h, color| {
-                                    // Note: due to softbuffer and tiny_skia having incompatible internal color representations we swap
-                                    // the red and blue channels here
-                                    paint.set_color_rgba8(
-                                        color.b(),
-                                        color.g(),
-                                        color.r(),
-                                        color.a(),
-                                    );
-                                    pixmap.fill_rect(
-                                        Rect::from_xywh(x as f32, y as f32, w as f32, h as f32)
-                                            .unwrap(),
-                                        &paint,
-                                        Transform::identity(),
-                                        None,
-                                    );
+                                |x, y, w, h, color, subpixel_mask| {
+                                    if let Some(mask) = subpixel_mask {
+                                        // Subpixel mask must be manually applied
+                                        //TODO: just clamp x, y, w, and h?
+                                        if x < 0 || y < 0 {
+                                            return;
+                                        }
+                                        let width = pixmap.width();
+                                        if x as u32 + w > width {
+                                            return;
+                                        }
+                                        let height = pixmap.height();
+                                        if y as u32 + h > height {
+                                            return;
+                                        }
+                                        //TODO: simd?
+                                        let color_r = color.r() as u32;
+                                        let color_g = color.g() as u32;
+                                        let color_b = color.b() as u32;
+                                        let color_a = color.a() as u32;
+                                        let mask_r = ((mask.r() as u32) * color_a) >> 8;
+                                        let mask_g = ((mask.g() as u32) * color_a) >> 8;
+                                        let mask_b = ((mask.b() as u32) * color_a) >> 8;
+                                        let pixels = pixmap.pixels_mut();
+                                        for row in 0..h {
+                                            let row_i = (y as u32 + row) * width;
+                                            for col in 0..w {
+                                                let i = (row_i + x as u32 + col) as usize;
+                                                let pixel = &mut pixels[i];
+                                                // Note: due to softbuffer and tiny_skia having incompatible internal color representations we swap
+                                                // the red and blue channels here
+                                                let pixel_r = pixel.blue() as u32;
+                                                let pixel_g = pixel.green() as u32;
+                                                let pixel_b = pixel.red() as u32;
+                                                let r = ((pixel_r * (255 - mask_r))
+                                                    + (color_r * mask_r))
+                                                    >> 8;
+                                                let g = ((pixel_g * (255 - mask_g))
+                                                    + (color_g * mask_g))
+                                                    >> 8;
+                                                let b = ((pixel_b * (255 - mask_b))
+                                                    + (color_b * mask_b))
+                                                    >> 8;
+                                                // Note: due to softbuffer and tiny_skia having incompatible internal color representations we swap
+                                                // the red and blue channels here
+                                                *pixel =
+                                                    tiny_skia::PremultipliedColorU8::from_rgba(
+                                                        b as u8, g as u8, r as u8, 0xFF,
+                                                    )
+                                                    .unwrap();
+                                            }
+                                        }
+                                    } else {
+                                        // Note: due to softbuffer and tiny_skia having incompatible internal color representations we swap
+                                        // the red and blue channels here
+                                        paint.set_color_rgba8(
+                                            color.b(),
+                                            color.g(),
+                                            color.r(),
+                                            color.a(),
+                                        );
+                                        pixmap.fill_rect(
+                                            Rect::from_xywh(x as f32, y as f32, w as f32, h as f32)
+                                                .unwrap(),
+                                            &paint,
+                                            Transform::identity(),
+                                            None,
+                                        );
+                                    }
                                 },
                             );
 

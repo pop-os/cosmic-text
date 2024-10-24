@@ -49,21 +49,34 @@ fn main() {
     let mut canvas = vec![vec![None; width as usize]; height as usize];
 
     // Draw to the canvas
-    buffer.draw(&mut swash_cache, TEXT_COLOR, |x, y, w, h, color| {
-        let a = color.a();
-        if a == 0 || x < 0 || x >= width as i32 || y < 0 || y >= height as i32 || w != 1 || h != 1 {
-            // Ignore alphas of 0, or invalid x, y coordinates, or unimplemented sizes
-            return;
-        }
+    buffer.draw(
+        &mut swash_cache,
+        TEXT_COLOR,
+        |x, y, w, h, color, subpixel_mask| {
+            assert!(subpixel_mask.is_none());
 
-        // Scale by alpha (mimics blending with black)
-        let scale = |c: u8| (c as i32 * a as i32 / 255).clamp(0, 255) as u8;
+            let a = color.a();
+            if a == 0
+                || x < 0
+                || x >= width as i32
+                || y < 0
+                || y >= height as i32
+                || w != 1
+                || h != 1
+            {
+                // Ignore alphas of 0, or invalid x, y coordinates, or unimplemented sizes
+                return;
+            }
 
-        let r = scale(color.r());
-        let g = scale(color.g());
-        let b = scale(color.b());
-        canvas[y as usize][x as usize] = Some((r, g, b));
-    });
+            // Scale by alpha (mimics blending with black)
+            let scale = |c: u8| (c as i32 * a as i32 / 255).clamp(0, 255) as u8;
+
+            let r = scale(color.r());
+            let g = scale(color.g());
+            let b = scale(color.b());
+            canvas[y as usize][x as usize] = Some((r, g, b));
+        },
+    );
 
     // Render the canvas
     let mut output = String::new();

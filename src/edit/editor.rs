@@ -119,7 +119,7 @@ impl<'buffer> Editor<'buffer> {
         selected_text_color: Color,
         mut f: F,
     ) where
-        F: FnMut(i32, i32, u32, u32, Color),
+        F: FnMut(i32, i32, u32, u32, Color, Option<Color>),
     {
         let selection_bounds = self.selection_bounds();
         self.with_buffer(|buffer| {
@@ -159,6 +159,7 @@ impl<'buffer> Editor<'buffer> {
                                         cmp::max(0, max - min) as u32,
                                         line_height as u32,
                                         selection_color,
+                                        None,
                                     );
                                 }
                                 c_x += c_w;
@@ -185,6 +186,7 @@ impl<'buffer> Editor<'buffer> {
                                 cmp::max(0, max - min) as u32,
                                 line_height as u32,
                                 selection_color,
+                                None,
                             );
                         }
                     }
@@ -192,7 +194,7 @@ impl<'buffer> Editor<'buffer> {
 
                 // Draw cursor
                 if let Some((x, y)) = cursor_position(&self.cursor, &run) {
-                    f(x, y, 1, line_height as u32, cursor_color);
+                    f(x, y, 1, line_height as u32, cursor_color, None);
                 }
 
                 for glyph in run.glyphs.iter() {
@@ -218,13 +220,14 @@ impl<'buffer> Editor<'buffer> {
                         font_system,
                         physical_glyph.cache_key,
                         glyph_color,
-                        |x, y, color| {
+                        |x, y, color, subpixel_mask| {
                             f(
                                 physical_glyph.x + x,
                                 line_y as i32 + physical_glyph.y + y,
                                 1,
                                 1,
                                 color,
+                                subpixel_mask,
                             );
                         },
                     );
@@ -909,7 +912,7 @@ impl<'font_system, 'buffer> BorrowedWithFontSystem<'font_system, Editor<'buffer>
         selected_text_color: Color,
         f: F,
     ) where
-        F: FnMut(i32, i32, u32, u32, Color),
+        F: FnMut(i32, i32, u32, u32, Color, Option<Color>),
     {
         self.inner.draw(
             self.font_system,

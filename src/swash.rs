@@ -46,7 +46,8 @@ fn swash_image(
         Source::Outline,
     ])
     // Select a subpixel format
-    .format(Format::Alpha)
+    //TODO: support custom format
+    .format(Format::subpixel_bgra())
     // Apply the fractional offset
     .offset(offset)
     .transform(if cache_key.flags.contains(CacheKeyFlags::FAKE_ITALIC) {
@@ -148,8 +149,8 @@ impl SwashCache {
             .as_deref()
     }
 
-    /// Enumerate pixels in an Image, use `with_image` for better performance
-    pub fn with_pixels<F: FnMut(i32, i32, Color)>(
+    /// Enumerate pixels in an Image, use `get_image` for better performance
+    pub fn with_pixels<F: FnMut(i32, i32, Color, Option<Color>)>(
         &mut self,
         font_system: &mut FontSystem,
         cache_key: CacheKey,
@@ -170,6 +171,7 @@ impl SwashCache {
                                 x + off_x,
                                 y + off_y,
                                 Color(((image.data[i] as u32) << 24) | base.0 & 0xFF_FF_FF),
+                                None,
                             );
                             i += 1;
                         }
@@ -189,13 +191,30 @@ impl SwashCache {
                                     image.data[i + 2],
                                     image.data[i + 3],
                                 ),
+                                None,
                             );
                             i += 4;
                         }
                     }
                 }
                 Content::SubpixelMask => {
-                    log::warn!("TODO: SubpixelMask");
+                    let mut i = 0;
+                    for off_y in 0..image.placement.height as i32 {
+                        for off_x in 0..image.placement.width as i32 {
+                            f(
+                                x + off_x,
+                                y + off_y,
+                                base,
+                                Some(Color::rgba(
+                                    image.data[i],
+                                    image.data[i + 1],
+                                    image.data[i + 2],
+                                    image.data[i + 3],
+                                )),
+                            );
+                            i += 4;
+                        }
+                    }
                 }
             }
         }
