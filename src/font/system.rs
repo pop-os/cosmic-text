@@ -226,7 +226,7 @@ impl FontSystemBuilder {
     ///
     /// FontSystem::builder()
     ///     .load_font(Source::Binary(Arc::new(include_bytes!("Roboto-Regular.ttf"))))
-    ///     .load_font(Source::File("./Roboto.ttf".into()))
+    ///     .load_font(Source::File("./Roboto-Bold.ttf".into()))
     ///     .build();
     /// ```
     pub fn load_font(mut self, source: fontdb::Source) -> Self {
@@ -247,7 +247,7 @@ impl FontSystemBuilder {
     /// FontSystem::builder()
     ///     .load_fonts([
     ///         Source::Binary(Arc::new(include_bytes!("Roboto-Regular.ttf"))),
-    ///         Source::File("./Roboto.ttf".into())
+    ///         Source::File("./Roboto-Bold.ttf".into())
     ///     ])
     ///     .build();
     /// ```
