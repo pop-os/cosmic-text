@@ -31,7 +31,8 @@ fn redraw(
             cursor_color,
             selection_color,
             selected_text_color,
-            |x, y, w, h, color| {
+            |x, y, w, h, color, subpixel_mask| {
+                assert!(subpixel_mask.is_none());
                 window.rect(x, y, w, h, orbclient::Color { data: color.0 });
             },
         );

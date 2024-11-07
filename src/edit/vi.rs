@@ -302,7 +302,7 @@ impl<'syntax_system, 'buffer> ViEditor<'syntax_system, 'buffer> {
     #[cfg(feature = "swash")]
     pub fn draw<F>(&self, font_system: &mut FontSystem, cache: &mut crate::SwashCache, mut f: F)
     where
-        F: FnMut(i32, i32, u32, u32, Color),
+        F: FnMut(i32, i32, u32, u32, Color, Option<Color>),
     {
         let background_color = self.background_color();
         let foreground_color = self.foreground_color();
@@ -312,7 +312,7 @@ impl<'syntax_system, 'buffer> ViEditor<'syntax_system, 'buffer> {
             let size = buffer.size();
             if let Some(width) = size.0 {
                 if let Some(height) = size.1 {
-                    f(0, 0, width as u32, height as u32, background_color);
+                    f(0, 0, width as u32, height as u32, background_color, None);
                 }
             }
             let font_size = buffer.metrics().font_size;
@@ -389,6 +389,7 @@ impl<'syntax_system, 'buffer> ViEditor<'syntax_system, 'buffer> {
                                         cmp::max(0, max - min) as u32,
                                         line_height as u32,
                                         selection_color,
+                                        None,
                                     );
                                 }
                                 c_x += c_w;
@@ -415,6 +416,7 @@ impl<'syntax_system, 'buffer> ViEditor<'syntax_system, 'buffer> {
                                 cmp::max(0, max - min) as u32,
                                 line_height as u32,
                                 selection_color,
+                                None,
                             );
                         }
                     }
@@ -477,6 +479,7 @@ impl<'syntax_system, 'buffer> ViEditor<'syntax_system, 'buffer> {
                             (right_x - left_x) as u32,
                             line_height as u32,
                             selection_color,
+                            None,
                         );
                     } else {
                         f(
@@ -485,6 +488,7 @@ impl<'syntax_system, 'buffer> ViEditor<'syntax_system, 'buffer> {
                             1,
                             line_height as u32,
                             cursor_color,
+                            None,
                         );
                     }
                 }
@@ -501,13 +505,14 @@ impl<'syntax_system, 'buffer> ViEditor<'syntax_system, 'buffer> {
                         font_system,
                         physical_glyph.cache_key,
                         glyph_color,
-                        |x, y, color| {
+                        |x, y, color, subpixel_mask| {
                             f(
                                 physical_glyph.x + x,
                                 line_y as i32 + physical_glyph.y + y,
                                 1,
                                 1,
                                 color,
+                                subpixel_mask,
                             );
                         },
                     );
@@ -1183,7 +1188,7 @@ impl<'font_system, 'syntax_system, 'buffer>
     #[cfg(feature = "swash")]
     pub fn draw<F>(&mut self, cache: &mut crate::SwashCache, f: F)
     where
-        F: FnMut(i32, i32, u32, u32, Color),
+        F: FnMut(i32, i32, u32, u32, Color, Option<Color>),
     {
         self.inner.draw(self.font_system, cache, f);
     }
