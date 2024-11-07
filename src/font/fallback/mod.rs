@@ -5,7 +5,7 @@ use alloc::vec::Vec;
 use fontdb::Family;
 use unicode_script::Script;
 
-use crate::{Font, FontMatchKey, FontSystem, ShapeBuffer, ShapePlanCache};
+use crate::{Font, FontMatchKey, FontSystem, ShapeBuffer};
 
 use self::platform::*;
 
@@ -117,11 +117,8 @@ impl<'a> FontFallbackIter<'a> {
         }
     }
 
-    pub fn shape_caches(&mut self) -> (&mut ShapeBuffer, &mut ShapePlanCache) {
-        (
-            &mut self.font_system.shape_buffer,
-            &mut self.font_system.shape_plan_cache,
-        )
+    pub fn shape_caches(&mut self) -> &mut ShapeBuffer {
+        &mut self.font_system.shape_buffer
     }
 
     fn face_contains_family(&self, id: fontdb::ID, family_name: &str) -> bool {

@@ -1,4 +1,4 @@
-use crate::{Attrs, Font, FontMatchAttrs, HashMap, ShapeBuffer, ShapePlanCache};
+use crate::{Attrs, Font, FontMatchAttrs, HashMap, ShapeBuffer};
 use alloc::collections::BTreeSet;
 use alloc::string::String;
 use alloc::sync::Arc;
@@ -103,9 +103,6 @@ pub struct FontSystem {
     /// Cache for font matches.
     font_matches_cache: HashMap<FontMatchAttrs, Arc<Vec<FontMatchKey>>>,
 
-    /// Cache for rustybuzz shape plans.
-    pub(crate) shape_plan_cache: ShapePlanCache,
-
     /// Scratch buffer for shaping and laying out.
     pub(crate) shape_buffer: ShapeBuffer,
 
@@ -177,7 +174,6 @@ impl FontSystem {
             font_cache: Default::default(),
             font_matches_cache: Default::default(),
             font_codepoint_support_info_cache: Default::default(),
-            shape_plan_cache: ShapePlanCache::default(),
             monospace_fallbacks_buffer: BTreeSet::default(),
             #[cfg(feature = "shape-run-cache")]
             shape_run_cache: crate::ShapeRunCache::default(),

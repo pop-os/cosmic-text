@@ -14,7 +14,7 @@ use unicode_segmentation::UnicodeSegmentation;
 use crate::fallback::FontFallbackIter;
 use crate::{
     math, Align, AttrsList, CacheKeyFlags, Color, Font, FontSystem, LayoutGlyph, LayoutLine,
-    Metrics, ShapePlanCache, Wrap,
+    Metrics, Wrap,
 };
 
 /// The shaping strategy of some text.
@@ -106,7 +106,6 @@ impl fmt::Debug for ShapeBuffer {
 
 fn shape_fallback(
     scratch: &mut ShapeBuffer,
-    shape_plan_cache: &mut ShapePlanCache,
     glyphs: &mut Vec<ShapeGlyph>,
     font: &Font,
     line: &str,
@@ -141,8 +140,14 @@ fn shape_fallback(
     let rtl = matches!(buffer.direction(), rustybuzz::Direction::RightToLeft);
     assert_eq!(rtl, span_rtl);
 
-    let shape_plan = shape_plan_cache.get(font, &buffer);
-    let glyph_buffer = rustybuzz::shape_with_plan(font.rustybuzz(), shape_plan, buffer);
+    let shape_plan = rustybuzz::ShapePlan::new(
+        font.rustybuzz(),
+        buffer.direction(),
+        Some(buffer.script()),
+        buffer.language().as_ref(),
+        &[],
+    );
+    let glyph_buffer = rustybuzz::shape_with_plan(font.rustybuzz(), &shape_plan, buffer);
     let glyph_infos = glyph_buffer.glyph_infos();
     let glyph_positions = glyph_buffer.glyph_positions();
 
@@ -258,17 +263,9 @@ fn shape_run(
 
     let glyph_start = glyphs.len();
     let mut missing = {
-        let (scratch, shape_plan_cache) = font_iter.shape_caches();
+        let scratch = font_iter.shape_caches();
         shape_fallback(
-            scratch,
-            shape_plan_cache,
-            glyphs,
-            &font,
-            line,
-            attrs_list,
-            start_run,
-            end_run,
-            span_rtl,
+            scratch, glyphs, &font, line, attrs_list, start_run, end_run, span_rtl,
         )
     };
 
@@ -284,10 +281,9 @@ fn shape_run(
             font_iter.face_name(font.id())
         );
         let mut fb_glyphs = Vec::new();
-        let (scratch, shape_plan_cache) = font_iter.shape_caches();
+        let scratch = font_iter.shape_caches();
         let fb_missing = shape_fallback(
             scratch,
-            shape_plan_cache,
             &mut fb_glyphs,
             &font,
             line,
@@ -456,34 +452,31 @@ fn shape_skip(
     let ascent = metrics.ascent / f32::from(metrics.units_per_em);
     let descent = metrics.descent / f32::from(metrics.units_per_em);
 
-    glyphs.extend(
-        line[start_run..end_run]
-            .char_indices()
-            .enumerate()
-            .map(|(i, (chr_idx, codepoint))| {
-                let glyph_id = charmap.map(codepoint);
-                let x_advance = glyph_metrics.advance_width(glyph_id);
-                let attrs = attrs_list.get_span(start_run + chr_idx);
+    glyphs.extend(line[start_run..end_run].char_indices().enumerate().map(
+        |(i, (chr_idx, codepoint))| {
+            let glyph_id = charmap.map(codepoint);
+            let x_advance = glyph_metrics.advance_width(glyph_id);
+            let attrs = attrs_list.get_span(start_run + chr_idx);
 
-                ShapeGlyph {
-                    start: i,
-                    end: i + 1,
-                    x_advance,
-                    y_advance: 0.0,
-                    x_offset: 0.0,
-                    y_offset: 0.0,
-                    ascent,
-                    descent,
-                    font_monospace_em_width,
-                    font_id,
-                    glyph_id,
-                    color_opt: attrs.color_opt,
-                    metadata: attrs.metadata,
-                    cache_key_flags: attrs.cache_key_flags,
-                    metrics_opt: attrs.metrics_opt.map(|x| x.into()),
-                }
-            }),
-    );
+            ShapeGlyph {
+                start: i,
+                end: i + 1,
+                x_advance,
+                y_advance: 0.0,
+                x_offset: 0.0,
+                y_offset: 0.0,
+                ascent,
+                descent,
+                font_monospace_em_width,
+                font_id,
+                glyph_id,
+                color_opt: attrs.color_opt,
+                metadata: attrs.metadata,
+                cache_key_flags: attrs.cache_key_flags,
+                metrics_opt: attrs.metrics_opt.map(|x| x.into()),
+            }
+        },
+    ));
 }
 
 /// A shaped glyph
