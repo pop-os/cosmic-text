@@ -155,11 +155,25 @@ impl FontSystem {
 
     /// Create a new [`FontSystem`] with a pre-specified locale and font database.
     pub fn new_with_locale_and_db(locale: String, db: fontdb::Database) -> Self {
-        let mut monospace_font_ids = db
-            .faces()
-            .filter(|face_info| {
-                face_info.monospaced && !face_info.post_script_name.contains("Emoji")
-            })
+        #[cfg(feature = "std")]
+        use rayon::iter::{IntoParallelIterator, ParallelIterator};
+
+        let faces = db.faces();
+        #[cfg(feature = "std")]
+        let faces = faces.collect::<Vec<_>>();
+        #[cfg(feature = "std")]
+        let faces = faces.into_par_iter();
+
+        let mono_filter_fn = |face_info: &&crate::fontdb::FaceInfo| {
+            let monospaced = face_info.monospaced;
+            let proportional_monospaced =
+                || Self::proportional_monospaced(&db, face_info.id).unwrap_or(false);
+            (monospaced || proportional_monospaced())
+                && !face_info.post_script_name.contains("Emoji")
+        };
+
+        let mut monospace_font_ids = faces
+            .filter(mono_filter_fn)
             .map(|face_info| face_info.id)
             .collect::<Vec<_>>();
         monospace_font_ids.sort();
@@ -191,6 +205,21 @@ impl FontSystem {
             }
         });
         ret
+    }
+
+    fn proportional_monospaced(db: &fontdb::Database, id: fontdb::ID) -> Option<bool> {
+        #[cfg(feature = "monospace_fallback")]
+        {
+            db.with_face_data(id, |font_data, face_index| {
+                let face = ttf_parser::Face::parse(font_data, face_index).ok()?;
+                Font::proportional_monospaced(&face)
+            })?
+        }
+        #[cfg(not(feature = "monospace_fallback"))]
+        {
+            let (_, _) = (db, id);
+            None
+        }
     }
 
     /// Get the locale.
@@ -240,16 +269,18 @@ impl FontSystem {
         let fonts = ids.iter();
 
         fonts
-            .map(|id| match Font::new(&self.db, *id) {
-                Some(font) => Some(Arc::new(font)),
-                None => {
-                    log::warn!(
-                        "failed to load font '{}'",
-                        self.db.face(*id)?.post_script_name
-                    );
-                    None
-                }
-            })
+            .map(
+                |id| match Font::new(&self.db, *id, self.is_monospace(*id)) {
+                    Some(font) => Some(Arc::new(font)),
+                    None => {
+                        log::warn!(
+                            "failed to load font '{}'",
+                            self.db.face(*id)?.post_script_name
+                        );
+                        None
+                    }
+                },
+            )
             .collect::<Vec<Option<Arc<Font>>>>()
             .into_iter()
             .flatten()
@@ -260,6 +291,7 @@ impl FontSystem {
 
     /// Get a font by its ID.
     pub fn get_font(&mut self, id: fontdb::ID) -> Option<Arc<Font>> {
+        let is_monospace = self.is_monospace(id);
         self.font_cache
             .entry(id)
             .or_insert_with(|| {
@@ -267,7 +299,7 @@ impl FontSystem {
                 unsafe {
                     self.db.make_shared_face_data(id);
                 }
-                match Font::new(&self.db, id) {
+                match Font::new(&self.db, id, is_monospace) {
                     Some(font) => Some(Arc::new(font)),
                     None => {
                         log::warn!(
