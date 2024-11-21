@@ -343,17 +343,24 @@ impl Buffer {
         } else if let Some(height) = self.height_opt {
             // Adjust scroll forwards if cursor is after it
             let mut line_i = layout_cursor.line;
-            while line_i > self.scroll.line {
-                line_i -= 1;
-                let layout = self
-                    .line_layout(font_system, line_i)
-                    .expect("shape_until_cursor failed to scroll forwards");
-                for layout_line in layout.iter() {
-                    total_height += layout_line.line_height_opt.unwrap_or(metrics.line_height);
-                }
+            if line_i <= self.scroll.line {
+                // This is a single line that may wrap
                 if total_height > height + self.scroll.vertical {
-                    self.scroll.line = line_i;
                     self.scroll.vertical = total_height - height;
+                }
+            } else {
+                while line_i > self.scroll.line {
+                    line_i -= 1;
+                    let layout = self
+                        .line_layout(font_system, line_i)
+                        .expect("shape_until_cursor failed to scroll forwards");
+                    for layout_line in layout.iter() {
+                        total_height += layout_line.line_height_opt.unwrap_or(metrics.line_height);
+                    }
+                    if total_height > height + self.scroll.vertical {
+                        self.scroll.line = line_i;
+                        self.scroll.vertical = total_height - height;
+                    }
                 }
             }
         }
