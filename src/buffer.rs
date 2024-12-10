@@ -1301,7 +1301,7 @@ impl Buffer {
                 cursor_x_opt = None;
             }
             Motion::BufferEnd => {
-                cursor.line = self.lines.len() - 1;
+                cursor.line = self.lines.len().saturating_sub(1);
                 cursor.index = self.lines.get(cursor.line)?.text().len();
                 cursor_x_opt = None;
             }
