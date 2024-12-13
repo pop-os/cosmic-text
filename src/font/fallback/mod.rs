@@ -9,7 +9,7 @@ use crate::{Font, FontMatchKey, FontSystem, ShapeBuffer};
 
 use self::platform::*;
 
-#[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "windows",)))]
+#[cfg(not(any(unix, target_os = "windows")))]
 #[path = "other.rs"]
 mod platform;
 
@@ -17,7 +17,7 @@ mod platform;
 #[path = "macos.rs"]
 mod platform;
 
-#[cfg(target_os = "linux")]
+#[cfg(all(unix, not(any(target_os = "android", target_os = "macos"))))]
 #[path = "unix.rs"]
 mod platform;
 
