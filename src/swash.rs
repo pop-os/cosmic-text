@@ -80,6 +80,7 @@ fn swash_outline_commands(
     let mut scaler = context
         .builder(font.as_swash())
         .size(f32::from_bits(cache_key.font_size_bits))
+        .hint(true)
         .build();
 
     // Scale the outline
