@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["IFTX_TAG","IFT_TAG"],"enum":["Ift"],"struct":["DesignSpaceSegment","EntryFormatFlags","EntryMapRecord","FeatureRecord","IdDeltaOrLength","U8Or16"],"type":["EntryData","FeatureMap","GlyphMap","IdStringData","MappingEntries","PatchMapFormat1","PatchMapFormat2"]};

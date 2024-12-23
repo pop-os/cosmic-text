@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["PatchEncoding"],"fn":["intersecting_patches"],"struct":["PatchUri","SubsetDefinition"]};
