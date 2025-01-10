@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["BitmapContent","BitmapDataFormat","BitmapMetrics","IndexSubtable"],"struct":["BdtComponent","BigGlyphMetrics","BitmapData","BitmapFlags","BitmapLocation","BitmapSize","GlyphIdOffsetPair","SbitLineMetrics","SmallGlyphMetrics"],"type":["IndexSubtable1","IndexSubtable2","IndexSubtable3","IndexSubtable4","IndexSubtable5","IndexSubtableArray"]};
