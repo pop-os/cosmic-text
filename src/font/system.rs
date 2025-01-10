@@ -164,13 +164,41 @@ impl FontSystem {
             .collect::<Vec<_>>();
         monospace_font_ids.sort();
 
-        let cloned_monospace_font_ids = monospace_font_ids.clone();
+        let mut per_script_monospace_font_ids: HashMap<
+            [u8; 4],
+            std::collections::BTreeSet<fontdb::ID>,
+        > = HashMap::default();
 
-        let mut ret = Self {
+        if cfg!(feature = "monospace_fallback") {
+            monospace_font_ids.iter().for_each(|&id| {
+                db.with_face_data(id, |font_data, face_index| {
+                    let _ = ttf_parser::Face::parse(font_data, face_index).map(|face| {
+                        face.tables()
+                            .gpos
+                            .into_iter()
+                            .chain(face.tables().gsub)
+                            .flat_map(|table| table.scripts)
+                            .inspect(|script| {
+                                per_script_monospace_font_ids
+                                    .entry(script.tag.to_bytes())
+                                    .or_default()
+                                    .insert(id);
+                            })
+                    });
+                });
+            });
+        }
+
+        let per_script_monospace_font_ids = per_script_monospace_font_ids
+            .into_iter()
+            .map(|(k, v)| (k, Vec::from_iter(v)))
+            .collect();
+
+        Self {
             locale,
             db,
             monospace_font_ids,
-            per_script_monospace_font_ids: Default::default(),
+            per_script_monospace_font_ids,
             font_cache: Default::default(),
             font_matches_cache: Default::default(),
             font_codepoint_support_info_cache: Default::default(),
@@ -178,19 +206,7 @@ impl FontSystem {
             #[cfg(feature = "shape-run-cache")]
             shape_run_cache: crate::ShapeRunCache::default(),
             shape_buffer: ShapeBuffer::default(),
-        };
-        ret.cache_fonts(cloned_monospace_font_ids.clone());
-        cloned_monospace_font_ids.into_iter().for_each(|id| {
-            if let Some(font) = ret.get_font(id) {
-                font.scripts().iter().copied().for_each(|script| {
-                    ret.per_script_monospace_font_ids
-                        .entry(script)
-                        .or_default()
-                        .push(font.id);
-                });
-            }
-        });
-        ret
+        }
     }
 
     /// Get the locale.
@@ -212,50 +228,6 @@ impl FontSystem {
     /// Consume this [`FontSystem`] and return the locale and database.
     pub fn into_locale_and_db(self) -> (String, fontdb::Database) {
         (self.locale, self.db)
-    }
-
-    /// Concurrently cache fonts by id list
-    pub fn cache_fonts(&mut self, mut ids: Vec<fontdb::ID>) {
-        #[cfg(feature = "std")]
-        use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
-        #[cfg(feature = "std")]
-        {
-            ids = ids
-                .into_iter()
-                .filter(|id| {
-                    let contains = self.font_cache.contains_key(id);
-                    if !contains {
-                        unsafe {
-                            self.db.make_shared_face_data(*id);
-                        }
-                    }
-                    !contains
-                })
-                .collect::<_>();
-        }
-
-        #[cfg(feature = "std")]
-        let fonts = ids.par_iter();
-        #[cfg(not(feature = "std"))]
-        let fonts = ids.iter();
-
-        fonts
-            .map(|id| match Font::new(&self.db, *id) {
-                Some(font) => Some(Arc::new(font)),
-                None => {
-                    log::warn!(
-                        "failed to load font '{}'",
-                        self.db.face(*id)?.post_script_name
-                    );
-                    None
-                }
-            })
-            .collect::<Vec<Option<Arc<Font>>>>()
-            .into_iter()
-            .flatten()
-            .for_each(|font| {
-                self.font_cache.insert(font.id, Some(font));
-            });
     }
 
     /// Get a font by its ID.
