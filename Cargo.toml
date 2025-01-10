@@ -28,7 +28,6 @@ ttf-parser = { version = "0.21", default-features = false }
 unicode-linebreak = "0.1.5"
 unicode-script = "0.5.5"
 unicode-segmentation = "1.10.1"
-rayon = { version = "1", optional = true }
 
 [dependencies.swash]
 version = "0.2.0"
@@ -55,7 +54,6 @@ std = [
     "sys-locale",
     "ttf-parser/std",
     "unicode-bidi/std",
-    "rayon"
 ]
 vi = ["modit", "syntect", "cosmic_undo_2"]
 wasm-web = ["sys-locale?/js"]
