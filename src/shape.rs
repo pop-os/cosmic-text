@@ -384,12 +384,8 @@ fn shape_run_cached(
             // Skip if attrs matches default attrs
             continue;
         }
-        let start = max(attrs_range.start, start_run)
-            .checked_sub(start_run)
-            .unwrap_or(0);
-        let end = min(attrs_range.end, end_run)
-            .checked_sub(start_run)
-            .unwrap_or(0);
+        let start = max(attrs_range.start, start_run).saturating_sub(start_run);
+        let end = min(attrs_range.end, end_run).saturating_sub(start_run);
         if end > start {
             let range = start..end;
             key.attrs_spans.push((range, attrs.clone()));

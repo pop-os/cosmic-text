@@ -340,6 +340,7 @@ impl AttrsList {
     }
 
     /// Split attributes list at an offset
+    #[allow(clippy::missing_panics_doc)]
     pub fn split_off(&mut self, index: usize) -> Self {
         let mut new = Self::new(self.defaults.as_attrs());
         let mut removes = Vec::new();

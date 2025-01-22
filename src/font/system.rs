@@ -106,7 +106,7 @@ pub struct FontSystem {
     /// Scratch buffer for shaping and laying out.
     pub(crate) shape_buffer: ShapeBuffer,
 
-    /// Buffer for use in FontFallbackIter.
+    /// Buffer for use in `FontFallbackIter`.
     pub(crate) monospace_fallbacks_buffer: BTreeSet<MonospaceFallbackInfo>,
 
     /// Cache for shaped runs
@@ -372,7 +372,7 @@ pub struct BorrowedWithFontSystem<'a, T> {
     pub(crate) font_system: &'a mut FontSystem,
 }
 
-impl<'a, T> Deref for BorrowedWithFontSystem<'a, T> {
+impl<T> Deref for BorrowedWithFontSystem<'_, T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
@@ -380,7 +380,7 @@ impl<'a, T> Deref for BorrowedWithFontSystem<'a, T> {
     }
 }
 
-impl<'a, T> DerefMut for BorrowedWithFontSystem<'a, T> {
+impl<T> DerefMut for BorrowedWithFontSystem<'_, T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.inner
     }

@@ -140,7 +140,7 @@ impl<'a> FontFallbackIter<'a> {
     }
 }
 
-impl<'a> Iterator for FontFallbackIter<'a> {
+impl Iterator for FontFallbackIter<'_> {
     type Item = Arc<Font>;
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(fallback_info) = self.font_system.monospace_fallbacks_buffer.pop_first() {

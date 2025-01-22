@@ -67,6 +67,7 @@ impl<T: Clone + Debug> Cached<T> {
     }
 
     /// Moves the value from `Self::Used` to `Self::Unused`.
+    #[allow(clippy::missing_panics_doc)]
     pub fn set_unused(&mut self) {
         if matches!(*self, Self::Used(_)) {
             *self = Self::Unused(self.take_used().expect("cached value should be used"));
