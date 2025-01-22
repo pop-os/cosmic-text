@@ -1249,7 +1249,8 @@ impl ShapeLine {
                                 let trailing_blank = span
                                     .words
                                     .get(i + 1)
-                                    .map_or(false, |previous_word| previous_word.blank);
+                                    .is_some_and(|previous_word| previous_word.blank);
+
                                 if trailing_blank {
                                     number_of_blanks = number_of_blanks.saturating_sub(1);
                                     add_to_visual_line(
