@@ -203,6 +203,7 @@ impl BufferLine {
     }
 
     /// Shape line, will cache results
+    #[allow(clippy::missing_panics_doc)]
     pub fn shape(&mut self, font_system: &mut FontSystem, tab_width: u16) -> &ShapeLine {
         if self.shape_opt.is_unused() {
             let mut line = self
@@ -228,6 +229,7 @@ impl BufferLine {
     }
 
     /// Layout line, will cache results
+    #[allow(clippy::missing_panics_doc)]
     pub fn layout(
         &mut self,
         font_system: &mut FontSystem,

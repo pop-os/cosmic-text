@@ -71,7 +71,7 @@ pub enum BufferRef<'buffer> {
     Arc(Arc<Buffer>),
 }
 
-impl<'buffer> Clone for BufferRef<'buffer> {
+impl Clone for BufferRef<'_> {
     fn clone(&self) -> Self {
         match self {
             Self::Owned(buffer) => Self::Owned(buffer.clone()),
@@ -81,7 +81,7 @@ impl<'buffer> Clone for BufferRef<'buffer> {
     }
 }
 
-impl<'buffer> From<Buffer> for BufferRef<'buffer> {
+impl From<Buffer> for BufferRef<'_> {
     fn from(buffer: Buffer) -> Self {
         Self::Owned(buffer)
     }
@@ -93,7 +93,7 @@ impl<'buffer> From<&'buffer mut Buffer> for BufferRef<'buffer> {
     }
 }
 
-impl<'buffer> From<Arc<Buffer>> for BufferRef<'buffer> {
+impl From<Arc<Buffer>> for BufferRef<'_> {
     fn from(arc: Arc<Buffer>) -> Self {
         Self::Arc(arc)
     }
@@ -197,7 +197,7 @@ pub trait Edit<'buffer> {
 
     /// Set the [`Buffer`] redraw flag
     fn set_redraw(&mut self, redraw: bool) {
-        self.with_buffer_mut(|buffer| buffer.set_redraw(redraw))
+        self.with_buffer_mut(|buffer| buffer.set_redraw(redraw));
     }
 
     /// Get the current cursor
@@ -300,7 +300,7 @@ pub trait Edit<'buffer> {
     /// Delete text starting at start Cursor and ending at end Cursor
     fn delete_range(&mut self, start: Cursor, end: Cursor);
 
-    /// Insert text at specified cursor with specified attrs_list
+    /// Insert text at specified cursor with specified `attrs_list`
     fn insert_at(&mut self, cursor: Cursor, data: &str, attrs_list: Option<AttrsList>) -> Cursor;
 
     /// Copy selection
@@ -334,7 +334,7 @@ pub trait Edit<'buffer> {
     fn cursor_position(&self) -> Option<(i32, i32)>;
 }
 
-impl<'font_system, 'buffer, E: Edit<'buffer>> BorrowedWithFontSystem<'font_system, E> {
+impl<'buffer, E: Edit<'buffer>> BorrowedWithFontSystem<'_, E> {
     /// Get the internal [`Buffer`], mutably
     pub fn with_buffer_mut<F: FnOnce(&mut BorrowedWithFontSystem<Buffer>) -> T, T>(
         &mut self,

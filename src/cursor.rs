@@ -87,9 +87,9 @@ impl LayoutCursor {
 pub enum Motion {
     /// Apply specific [`LayoutCursor`]
     LayoutCursor(LayoutCursor),
-    /// Move cursor to previous character ([Self::Left] in LTR, [Self::Right] in RTL)
+    /// Move cursor to previous character ([`Self::Left`] in LTR, [`Self::Right`] in RTL)
     Previous,
-    /// Move cursor to next character ([Self::Right] in LTR, [Self::Left] in RTL)
+    /// Move cursor to next character ([`Self::Right`] in LTR, [`Self::Left`] in RTL)
     Next,
     /// Move cursor left
     Left,

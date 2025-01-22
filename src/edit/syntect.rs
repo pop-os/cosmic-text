@@ -125,7 +125,7 @@ impl<'syntax_system, 'buffer> SyntaxEditor<'syntax_system, 'buffer> {
 
         let text = fs::read_to_string(path)?;
         self.editor.with_buffer_mut(|buffer| {
-            buffer.set_text(font_system, &text, attrs, Shaping::Advanced)
+            buffer.set_text(font_system, &text, attrs, Shaping::Advanced);
         });
 
         //TODO: re-use text
@@ -235,7 +235,7 @@ impl<'syntax_system, 'buffer> SyntaxEditor<'syntax_system, 'buffer> {
     }
 }
 
-impl<'syntax_system, 'buffer> Edit<'buffer> for SyntaxEditor<'syntax_system, 'buffer> {
+impl<'buffer> Edit<'buffer> for SyntaxEditor<'_, 'buffer> {
     fn buffer_ref(&self) -> &BufferRef<'buffer> {
         self.editor.buffer_ref()
     }
@@ -440,9 +440,7 @@ impl<'syntax_system, 'buffer> Edit<'buffer> for SyntaxEditor<'syntax_system, 'bu
     }
 }
 
-impl<'font_system, 'syntax_system, 'buffer>
-    BorrowedWithFontSystem<'font_system, SyntaxEditor<'syntax_system, 'buffer>>
-{
+impl BorrowedWithFontSystem<'_, SyntaxEditor<'_, '_>> {
     /// Load text from a file, and also set syntax to the best option
     ///
     /// ## Errors
