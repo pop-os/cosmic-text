@@ -53,6 +53,10 @@ pub fn script_fallback(script: Script, locale: &str) -> &'static [&'static str] 
         Script::Armenian => &["Noto Sans Armenian"],
         Script::Bengali => &["Noto Sans Bengali"],
         Script::Bopomofo => han_unification(locale),
+        //TODO: DejaVu Sans would typically be selected for braille characters,
+        // but this breaks alignment when used alongside monospaced text.
+        // By requesting the use of FreeMono first, this issue can be avoided.
+        Script::Braille => &["FreeMono"],
         Script::Buhid => &["Noto Sans Buhid"],
         Script::Chakma => &["Noto Sans Chakma"],
         Script::Cherokee => &["Noto Sans Cherokee"],
