@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Encoding"],"struct":["CharIter","LangTagRecord","MacRomanMapping","NameId","NameRecord","NameString"],"type":["Name"]};
