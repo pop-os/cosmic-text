@@ -455,8 +455,8 @@ fn shape_skip(
             let attrs = attrs_list.get_span(start_run + chr_idx);
 
             ShapeGlyph {
-                start: i,
-                end: i + 1,
+                start: i + start_run,
+                end: i + start_run + 1,
                 x_advance,
                 y_advance: 0.0,
                 x_offset: 0.0,
