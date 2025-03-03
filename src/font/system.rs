@@ -1,4 +1,5 @@
 use crate::{Attrs, Font, FontMatchAttrs, HashMap, ShapeBuffer};
+use alloc::boxed::Box;
 use alloc::collections::BTreeSet;
 use alloc::string::String;
 use alloc::sync::Arc;
@@ -10,7 +11,7 @@ use core::ops::{Deref, DerefMut};
 pub use fontdb;
 pub use rustybuzz;
 
-use super::fallback::MonospaceFallbackInfo;
+use super::fallback::{Fallback, MonospaceFallbackInfo, PlatformFallback};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FontMatchKey {
@@ -112,6 +113,9 @@ pub struct FontSystem {
     /// Cache for shaped runs
     #[cfg(feature = "shape-run-cache")]
     pub shape_run_cache: crate::ShapeRunCache,
+
+    /// List of fallbacks
+    pub(crate) fallbacks: Box<dyn Fallback>,
 }
 
 impl fmt::Debug for FontSystem {
@@ -150,11 +154,15 @@ impl FontSystem {
         db.set_sans_serif_family("Open Sans");
         db.set_serif_family("DejaVu Serif");
 
-        Self::new_with_locale_and_db(locale, db)
+        Self::new_with_locale_and_db_and_fallback(locale, db, PlatformFallback)
     }
 
-    /// Create a new [`FontSystem`] with a pre-specified locale and font database.
-    pub fn new_with_locale_and_db(locale: String, db: fontdb::Database) -> Self {
+    /// Create a new [`FontSystem`] with a pre-specified locale, font database and font fallback list.
+    pub fn new_with_locale_and_db_and_fallback(
+        locale: String,
+        db: fontdb::Database,
+        fallbacks: impl Fallback + 'static,
+    ) -> Self {
         let mut monospace_font_ids = db
             .faces()
             .filter(|face_info| {
@@ -204,7 +212,13 @@ impl FontSystem {
             #[cfg(feature = "shape-run-cache")]
             shape_run_cache: crate::ShapeRunCache::default(),
             shape_buffer: ShapeBuffer::default(),
+            fallbacks: Box::new(fallbacks),
         }
+    }
+
+    /// Create a new [`FontSystem`] with a pre-specified locale and font database.
+    pub fn new_with_locale_and_db(locale: String, db: fontdb::Database) -> Self {
+        Self::new_with_locale_and_db_and_fallback(locale, db, PlatformFallback)
     }
 
     /// Get the locale.

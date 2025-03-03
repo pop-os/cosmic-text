@@ -25,6 +25,19 @@ mod platform;
 #[path = "windows.rs"]
 mod platform;
 
+pub trait Fallback {
+    /// Fallbacks to use after any script specific fallbacks
+    fn common_fallback(&self) -> &'static [&'static str];
+
+    /// Fallbacks to never use
+    fn forbidden_fallback(&self) -> &'static [&'static str];
+
+    /// Fallbacks to use per script
+    fn script_fallback(&self, script: Script, locale: &str) -> &'static [&'static str];
+}
+
+pub use platform::PlatformFallback;
+
 #[cfg(not(feature = "warn_on_missing_glyphs"))]
 use log::debug as missing_warn;
 #[cfg(feature = "warn_on_missing_glyphs")]
@@ -94,7 +107,7 @@ impl<'a> FontFallbackIter<'a> {
                 word
             );
         } else if !self.scripts.is_empty() && self.common_i > 0 {
-            let family = common_fallback()[self.common_i - 1];
+            let family = self.font_system.fallbacks.common_fallback()[self.common_i - 1];
             missing_warn!(
                 "Failed to find script fallback for {:?} locale '{}', used '{}': '{}'",
                 self.scripts,
@@ -262,7 +275,10 @@ impl Iterator for FontFallbackIter<'_> {
         while self.script_i.0 < self.scripts.len() {
             let script = self.scripts[self.script_i.0];
 
-            let script_families = script_fallback(script, self.font_system.locale());
+            let script_families = self
+                .font_system
+                .fallbacks
+                .script_fallback(script, self.font_system.locale());
             while self.script_i.1 < script_families.len() {
                 let script_family = script_families[self.script_i.1];
                 self.script_i.1 += 1;
@@ -285,7 +301,7 @@ impl Iterator for FontFallbackIter<'_> {
             self.script_i.1 = 0;
         }
 
-        let common_families = common_fallback();
+        let common_families = self.font_system.fallbacks.common_fallback();
         while self.common_i < common_families.len() {
             let common_family = common_families[self.common_i];
             self.common_i += 1;
@@ -301,7 +317,7 @@ impl Iterator for FontFallbackIter<'_> {
 
         //TODO: do we need to do this?
         //TODO: do not evaluate fonts more than once!
-        let forbidden_families = forbidden_fallback();
+        let forbidden_families = self.font_system.fallbacks.forbidden_fallback();
         while self.other_i < self.font_match_keys.len() {
             let id = self.font_match_keys[self.other_i].id;
             self.other_i += 1;
