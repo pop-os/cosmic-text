@@ -448,31 +448,33 @@ fn shape_skip(
     let ascent = metrics.ascent / f32::from(metrics.units_per_em);
     let descent = metrics.descent / f32::from(metrics.units_per_em);
 
-    glyphs.extend(line[start_run..end_run].char_indices().enumerate().map(
-        |(i, (chr_idx, codepoint))| {
-            let glyph_id = charmap.map(codepoint);
-            let x_advance = glyph_metrics.advance_width(glyph_id);
-            let attrs = attrs_list.get_span(start_run + chr_idx);
+    glyphs.extend(
+        line[start_run..end_run]
+            .char_indices()
+            .map(|(chr_idx, codepoint)| {
+                let glyph_id = charmap.map(codepoint);
+                let x_advance = glyph_metrics.advance_width(glyph_id);
+                let attrs = attrs_list.get_span(start_run + chr_idx);
 
-            ShapeGlyph {
-                start: i + start_run,
-                end: i + start_run + 1,
-                x_advance,
-                y_advance: 0.0,
-                x_offset: 0.0,
-                y_offset: 0.0,
-                ascent,
-                descent,
-                font_monospace_em_width,
-                font_id,
-                glyph_id,
-                color_opt: attrs.color_opt,
-                metadata: attrs.metadata,
-                cache_key_flags: attrs.cache_key_flags,
-                metrics_opt: attrs.metrics_opt.map(|x| x.into()),
-            }
-        },
-    ));
+                ShapeGlyph {
+                    start: chr_idx + start_run,
+                    end: chr_idx + start_run + codepoint.len_utf8(),
+                    x_advance,
+                    y_advance: 0.0,
+                    x_offset: 0.0,
+                    y_offset: 0.0,
+                    ascent,
+                    descent,
+                    font_monospace_em_width,
+                    font_id,
+                    glyph_id,
+                    color_opt: attrs.color_opt,
+                    metadata: attrs.metadata,
+                    cache_key_flags: attrs.cache_key_flags,
+                    metrics_opt: attrs.metrics_opt.map(|x| x.into()),
+                }
+            }),
+    );
 }
 
 /// A shaped glyph
