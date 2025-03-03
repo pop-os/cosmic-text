@@ -5,6 +5,7 @@ use unicode_script::Script;
 use super::Fallback;
 
 /// A platform-specific font fallback list, for MacOS.
+#[derive(Debug)]
 pub struct PlatformFallback;
 
 impl Fallback for PlatformFallback {
