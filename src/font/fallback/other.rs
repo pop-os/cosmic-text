@@ -5,6 +5,7 @@ use unicode_script::Script;
 use super::Fallback;
 
 /// An empty platform-specific font fallback list.
+#[derive(Debug)]
 pub struct PlatformFallback;
 
 impl Fallback for PlatformFallback {
