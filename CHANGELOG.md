@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.0] - 2025-03-10
+
+### Added
+
+- Add `Buffer::set_tab_width` function
+- Add `AttrsList::spans_iter` and use it in `Buffer::append`
+- Add alignment option to `Buffer::set_rich_text`
+- Add `SwashCache::get_outline_commands_uncached`
+
+### Fixed
+
+- Fix typo in fallback font name `Noto Sans CJK JP`
+- Fix the character index used for getting a glyph attribute in basic shaping
+- Avoid debug assertion when handling `Motion::BufferEnd`
+- Handle single wrapped line scrolling
+- Reduce memory usage and loading time of FontSystem
+- Resolve lints
+- Use FreeMono as Braille script fallback
+- Load fonts prior to setting defaults
+
+### Changed
+
+- Use `smol_str` for family name in `FamilyOwned`
+- Optimize `Buffer::set_rich_text` for when the buffer is reconstructed
+- Move `ShapeBuffer` to `FontSystem`
+- Cache the monospace fallbacks buffer in `FontSystem`
+- Apply fallback font to more Unix-like operating systems
+- Use hinting for `swash_outline_commands`
+- Update swash to `0.2.0` and hook up `std` feature
+- Update minimum supported Rust version to `1.75`
+- Update default fonts (for COSMIC, users should set their own as desired)
+
+### Removed
+
+- Drop `ShapePlanCache`
+
 ## [0.12.1] - 2024-06-31
 
 ### Changed
