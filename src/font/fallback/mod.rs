@@ -9,7 +9,7 @@ use crate::{Font, FontMatchKey, FontSystem, ShapeBuffer};
 
 use self::platform::*;
 
-#[cfg(not(any(unix, target_os = "windows")))]
+#[cfg(not(any(all(unix, not(target_os = "android")), target_os = "windows")))]
 #[path = "other.rs"]
 mod platform;
 
