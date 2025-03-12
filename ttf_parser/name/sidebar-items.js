@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["PlatformId"],"mod":["name_id"],"struct":["Name","Names","NamesIter","Table"]};
