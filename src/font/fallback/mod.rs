@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+use core::mem;
+
 use alloc::sync::Arc;
 use alloc::vec::Vec;
 use fontdb::Family;
@@ -27,13 +29,13 @@ mod platform;
 
 pub trait Fallback {
     /// Fallbacks to use after any script specific fallbacks
-    fn common_fallback(&self) -> &'static [&'static str];
+    fn common_fallback(&self) -> &[&'static str];
 
     /// Fallbacks to never use
-    fn forbidden_fallback(&self) -> &'static [&'static str];
+    fn forbidden_fallback(&self) -> &[&'static str];
 
     /// Fallbacks to use per script
-    fn script_fallback(&self, script: Script, locale: &str) -> &'static [&'static str];
+    fn script_fallback(&self, script: Script, locale: &str) -> &[&'static str];
 }
 
 pub use platform::PlatformFallback;
@@ -279,12 +281,22 @@ impl Iterator for FontFallbackIter<'_> {
                 .font_system
                 .fallbacks
                 .script_fallback(script, self.font_system.locale());
+            self.font_system.scratch_fallbacks.clear();
+            self.font_system
+                .scratch_fallbacks
+                .extend_from_slice(script_families);
+            let mut script_families = mem::take(&mut self.font_system.scratch_fallbacks);
+
             while self.script_i.1 < script_families.len() {
                 let script_family = script_families[self.script_i.1];
                 self.script_i.1 += 1;
                 for m_key in font_match_keys_iter(false) {
                     if self.face_contains_family(m_key.id, script_family) {
                         if let Some(font) = self.font_system.get_font(m_key.id) {
+                            mem::swap(
+                                &mut script_families,
+                                &mut self.font_system.scratch_fallbacks,
+                            );
                             return Some(font);
                         }
                     }
@@ -296,28 +308,50 @@ impl Iterator for FontFallbackIter<'_> {
                     self.font_system.locale(),
                 );
             }
+            mem::swap(
+                &mut script_families,
+                &mut self.font_system.scratch_fallbacks,
+            );
 
             self.script_i.0 += 1;
             self.script_i.1 = 0;
         }
 
         let common_families = self.font_system.fallbacks.common_fallback();
+        self.font_system.scratch_fallbacks.clear();
+        self.font_system
+            .scratch_fallbacks
+            .extend_from_slice(common_families);
+        let mut common_families = mem::take(&mut self.font_system.scratch_fallbacks);
         while self.common_i < common_families.len() {
             let common_family = common_families[self.common_i];
             self.common_i += 1;
             for m_key in font_match_keys_iter(false) {
                 if self.face_contains_family(m_key.id, common_family) {
                     if let Some(font) = self.font_system.get_font(m_key.id) {
+                        mem::swap(
+                            &mut common_families,
+                            &mut self.font_system.scratch_fallbacks,
+                        );
                         return Some(font);
                     }
                 }
             }
             log::debug!("failed to find family '{}'", common_family);
         }
+        mem::swap(
+            &mut common_families,
+            &mut self.font_system.scratch_fallbacks,
+        );
 
         //TODO: do we need to do this?
         //TODO: do not evaluate fonts more than once!
         let forbidden_families = self.font_system.fallbacks.forbidden_fallback();
+        self.font_system.scratch_fallbacks.clear();
+        self.font_system
+            .scratch_fallbacks
+            .extend_from_slice(forbidden_families);
+        let mut forbidden_families = mem::take(&mut self.font_system.scratch_fallbacks);
         while self.other_i < self.font_match_keys.len() {
             let id = self.font_match_keys[self.other_i].id;
             self.other_i += 1;
@@ -326,10 +360,18 @@ impl Iterator for FontFallbackIter<'_> {
                 .all(|family_name| !self.face_contains_family(id, family_name))
             {
                 if let Some(font) = self.font_system.get_font(id) {
+                    mem::swap(
+                        &mut forbidden_families,
+                        &mut self.font_system.scratch_fallbacks,
+                    );
                     return Some(font);
                 }
             }
         }
+        mem::swap(
+            &mut forbidden_families,
+            &mut self.font_system.scratch_fallbacks,
+        );
 
         self.end = true;
         None
