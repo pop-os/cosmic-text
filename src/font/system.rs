@@ -116,6 +116,9 @@ pub struct FontSystem {
 
     /// List of fallbacks
     pub(crate) fallbacks: Box<dyn Fallback>,
+
+    /// Scratch buffer for fallback list
+    pub(crate) scratch_fallbacks: Vec<&'static str>,
 }
 
 impl fmt::Debug for FontSystem {
@@ -213,6 +216,7 @@ impl FontSystem {
             shape_run_cache: crate::ShapeRunCache::default(),
             shape_buffer: ShapeBuffer::default(),
             fallbacks: Box::new(fallbacks),
+            scratch_fallbacks: Vec::new(),
         }
     }
 
