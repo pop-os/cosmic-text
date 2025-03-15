@@ -11,7 +11,7 @@ use core::ops::{Deref, DerefMut};
 pub use fontdb;
 pub use rustybuzz;
 
-use super::fallback::{Fallback, MonospaceFallbackInfo, PlatformFallback};
+use super::fallback::{Fallback, Fallbacks, MonospaceFallbackInfo, PlatformFallback};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FontMatchKey {
@@ -115,7 +115,10 @@ pub struct FontSystem {
     pub shape_run_cache: crate::ShapeRunCache,
 
     /// List of fallbacks
-    pub(crate) fallbacks: Box<dyn Fallback>,
+    pub(crate) dyn_fallback: Box<dyn Fallback>,
+
+    /// List of fallbacks
+    pub(crate) fallbacks: Fallbacks,
 }
 
 impl fmt::Debug for FontSystem {
@@ -161,7 +164,7 @@ impl FontSystem {
     pub fn new_with_locale_and_db_and_fallback(
         locale: String,
         db: fontdb::Database,
-        fallbacks: impl Fallback + 'static,
+        impl_fallback: impl Fallback + 'static,
     ) -> Self {
         let mut monospace_font_ids = db
             .faces()
@@ -200,6 +203,8 @@ impl FontSystem {
             .map(|(k, v)| (k, Vec::from_iter(v)))
             .collect();
 
+        let fallbacks = Fallbacks::new(&impl_fallback, &[], &locale);
+
         Self {
             locale,
             db,
@@ -212,7 +217,8 @@ impl FontSystem {
             #[cfg(feature = "shape-run-cache")]
             shape_run_cache: crate::ShapeRunCache::default(),
             shape_buffer: ShapeBuffer::default(),
-            fallbacks: Box::new(fallbacks),
+            dyn_fallback: Box::new(impl_fallback),
+            fallbacks,
         }
     }
 
