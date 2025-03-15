@@ -24,6 +24,45 @@ mod platform;
 #[path = "windows.rs"]
 mod platform;
 
+/// The `Fallback` trait allows for configurable font fallback lists to be set during construction of the [`FontSystem`].
+///
+/// A custom fallback list can be added via the [`FontSystem::new_with_locale_and_db_and_fallback`] constructor.
+///
+/// A default implementation is provided by the [`PlatformFallback`] struct, which encapsulates the target platform's pre-configured fallback lists.
+///
+/// ```rust
+/// # use unicode_script::Script;
+/// # use cosmic_text::{Fallback, FontSystem};
+/// struct MyFallback;
+/// impl Fallback for MyFallback {
+///     fn common_fallback(&self) -> &[&'static str] {
+///         &[
+///             "Segoe UI",
+///             "Segoe UI Emoji",
+///             "Segoe UI Symbol",
+///             "Segoe UI Historic",
+///         ]
+///     }
+///
+///     fn forbidden_fallback(&self) -> &[&'static str] {
+///         &[]
+///     }
+///
+///     fn script_fallback(&self, script: Script, locale: &str) -> &[&'static str] {
+///         match script {
+///             Script::Adlam => &["Ebrima"],
+///             Script::Bengali => &["Nirmala UI"],
+///             Script::Canadian_Aboriginal => &["Gadugi"],
+///             // ...
+///             _ => &[],
+///        }
+///     }
+/// }
+///
+/// let locale = "en-US".to_string();
+/// let db = fontdb::Database::new();
+/// let font_system = FontSystem::new_with_locale_and_db_and_fallback(locale, db, MyFallback);
+/// ```
 pub trait Fallback {
     /// Fallbacks to use after any script specific fallbacks
     fn common_fallback(&self) -> &[&'static str];
