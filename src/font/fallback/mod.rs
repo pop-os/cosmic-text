@@ -36,7 +36,7 @@ pub trait Fallback {
 }
 
 #[derive(Debug, Default)]
-pub struct Fallbacks {
+pub(crate) struct Fallbacks {
     lists: Vec<&'static str>,
     common_fallback_range: Range<usize>,
     forbidden_fallback_range: Range<usize>,
