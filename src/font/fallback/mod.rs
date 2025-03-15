@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use core::mem;
-
 use alloc::sync::Arc;
 use alloc::vec::Vec;
+use core::ops::Range;
 use fontdb::Family;
 use unicode_script::Script;
 
-use crate::{Font, FontMatchKey, FontSystem, ShapeBuffer};
+use crate::{BuildHasher, Font, FontMatchKey, FontSystem, HashMap, ShapeBuffer};
 
 use self::platform::*;
 
@@ -38,6 +37,69 @@ pub trait Fallback {
     fn script_fallback(&self, script: Script, locale: &str) -> &[&'static str];
 }
 
+#[derive(Debug)]
+pub struct Fallbacks {
+    lists: Vec<&'static str>,
+    common_fallback_range: Range<usize>,
+    forbidden_fallback_range: Range<usize>,
+    // PERF: Consider using NoHashHasher since Script is just an integer
+    script_fallback_ranges: HashMap<Script, Range<usize>>,
+}
+
+impl Fallbacks {
+    pub(crate) fn new(fallbacks: &dyn Fallback, scripts: &[Script], locale: &str) -> Self {
+        let mut index = 0;
+        let mut new_range = |lists: &Vec<&str>| {
+            let old_index = index;
+            index = lists.len();
+            old_index..index
+        };
+
+        let common_fallback = fallbacks.common_fallback();
+
+        let forbidden_fallback = fallbacks.forbidden_fallback();
+
+        let mut lists =
+            Vec::with_capacity(common_fallback.len() + forbidden_fallback.len() + scripts.len());
+
+        lists.extend_from_slice(common_fallback);
+        let common_fallback_range = new_range(&lists);
+
+        lists.extend_from_slice(forbidden_fallback);
+        let forbidden_fallback_range = new_range(&lists);
+
+        let mut script_fallback_ranges =
+            HashMap::with_capacity_and_hasher(scripts.len(), BuildHasher::new());
+        for &script in scripts {
+            let script_fallback = fallbacks.script_fallback(script, locale);
+            lists.extend_from_slice(script_fallback);
+            let script_fallback_range = new_range(&lists);
+            script_fallback_ranges.insert(script, script_fallback_range);
+        }
+
+        Self {
+            lists,
+            common_fallback_range,
+            forbidden_fallback_range,
+            script_fallback_ranges,
+        }
+    }
+
+    pub(crate) fn common_fallback(&self) -> &[&'static str] {
+        &self.lists[self.common_fallback_range.clone()]
+    }
+
+    pub(crate) fn forbidden_fallback(&self) -> &[&'static str] {
+        &self.lists[self.forbidden_fallback_range.clone()]
+    }
+
+    pub(crate) fn script_fallback(&self, script: Script) -> &[&'static str] {
+        self.script_fallback_ranges
+            .get(&script)
+            .map_or(&[], |range| &self.lists[range.clone()])
+    }
+}
+
 pub use platform::PlatformFallback;
 
 #[cfg(not(feature = "warn_on_missing_glyphs"))]
@@ -58,6 +120,7 @@ pub(crate) struct MonospaceFallbackInfo {
 
 pub struct FontFallbackIter<'a> {
     font_system: &'a mut FontSystem,
+    fallbacks: Fallbacks,
     font_match_keys: &'a [FontMatchKey],
     default_families: &'a [&'a Family<'a>],
     default_i: usize,
@@ -77,9 +140,15 @@ impl<'a> FontFallbackIter<'a> {
         scripts: &'a [Script],
         word: &'a str,
     ) -> Self {
+        let fallbacks = Fallbacks::new(
+            font_system.fallbacks.as_ref(),
+            scripts,
+            font_system.locale(),
+        );
         font_system.monospace_fallbacks_buffer.clear();
         Self {
             font_system,
+            fallbacks,
             font_match_keys,
             default_families,
             default_i: 0,
@@ -109,7 +178,7 @@ impl<'a> FontFallbackIter<'a> {
                 word
             );
         } else if !self.scripts.is_empty() && self.common_i > 0 {
-            let family = self.font_system.fallbacks.common_fallback()[self.common_i - 1];
+            let family = self.fallbacks.common_fallback()[self.common_i - 1];
             missing_warn!(
                 "Failed to find script fallback for {:?} locale '{}', used '{}': '{}'",
                 self.scripts,
@@ -277,15 +346,7 @@ impl Iterator for FontFallbackIter<'_> {
         while self.script_i.0 < self.scripts.len() {
             let script = self.scripts[self.script_i.0];
 
-            let script_families = self
-                .font_system
-                .fallbacks
-                .script_fallback(script, self.font_system.locale());
-            self.font_system.scratch_fallbacks.clear();
-            self.font_system
-                .scratch_fallbacks
-                .extend_from_slice(script_families);
-            let mut script_families = mem::take(&mut self.font_system.scratch_fallbacks);
+            let script_families = self.fallbacks.script_fallback(script);
 
             while self.script_i.1 < script_families.len() {
                 let script_family = script_families[self.script_i.1];
@@ -293,10 +354,6 @@ impl Iterator for FontFallbackIter<'_> {
                 for m_key in font_match_keys_iter(false) {
                     if self.face_contains_family(m_key.id, script_family) {
                         if let Some(font) = self.font_system.get_font(m_key.id) {
-                            mem::swap(
-                                &mut script_families,
-                                &mut self.font_system.scratch_fallbacks,
-                            );
                             return Some(font);
                         }
                     }
@@ -308,50 +365,28 @@ impl Iterator for FontFallbackIter<'_> {
                     self.font_system.locale(),
                 );
             }
-            mem::swap(
-                &mut script_families,
-                &mut self.font_system.scratch_fallbacks,
-            );
 
             self.script_i.0 += 1;
             self.script_i.1 = 0;
         }
 
-        let common_families = self.font_system.fallbacks.common_fallback();
-        self.font_system.scratch_fallbacks.clear();
-        self.font_system
-            .scratch_fallbacks
-            .extend_from_slice(common_families);
-        let mut common_families = mem::take(&mut self.font_system.scratch_fallbacks);
+        let common_families = self.fallbacks.common_fallback();
         while self.common_i < common_families.len() {
             let common_family = common_families[self.common_i];
             self.common_i += 1;
             for m_key in font_match_keys_iter(false) {
                 if self.face_contains_family(m_key.id, common_family) {
                     if let Some(font) = self.font_system.get_font(m_key.id) {
-                        mem::swap(
-                            &mut common_families,
-                            &mut self.font_system.scratch_fallbacks,
-                        );
                         return Some(font);
                     }
                 }
             }
             log::debug!("failed to find family '{}'", common_family);
         }
-        mem::swap(
-            &mut common_families,
-            &mut self.font_system.scratch_fallbacks,
-        );
 
         //TODO: do we need to do this?
         //TODO: do not evaluate fonts more than once!
-        let forbidden_families = self.font_system.fallbacks.forbidden_fallback();
-        self.font_system.scratch_fallbacks.clear();
-        self.font_system
-            .scratch_fallbacks
-            .extend_from_slice(forbidden_families);
-        let mut forbidden_families = mem::take(&mut self.font_system.scratch_fallbacks);
+        let forbidden_families = self.fallbacks.forbidden_fallback();
         while self.other_i < self.font_match_keys.len() {
             let id = self.font_match_keys[self.other_i].id;
             self.other_i += 1;
@@ -360,18 +395,10 @@ impl Iterator for FontFallbackIter<'_> {
                 .all(|family_name| !self.face_contains_family(id, family_name))
             {
                 if let Some(font) = self.font_system.get_font(id) {
-                    mem::swap(
-                        &mut forbidden_families,
-                        &mut self.font_system.scratch_fallbacks,
-                    );
                     return Some(font);
                 }
             }
         }
-        mem::swap(
-            &mut forbidden_families,
-            &mut self.font_system.scratch_fallbacks,
-        );
 
         self.end = true;
         None
