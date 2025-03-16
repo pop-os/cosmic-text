@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
-pub(crate) mod fallback;
 
 // re-export ttf_parser
 pub use ttf_parser;
@@ -12,6 +11,9 @@ use alloc::vec::Vec;
 
 use rustybuzz::Face as RustybuzzFace;
 use self_cell::self_cell;
+
+pub(crate) mod fallback;
+pub use fallback::{Fallback, PlatformFallback};
 
 pub use self::system::*;
 mod system;
