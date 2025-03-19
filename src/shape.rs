@@ -140,12 +140,48 @@ fn shape_fallback(
     let rtl = matches!(buffer.direction(), rustybuzz::Direction::RightToLeft);
     assert_eq!(rtl, span_rtl);
 
+    let attrs = attrs_list.get_span(start_run);
+
+    let mut features = Vec::new();
+
+    if attrs.font_features.kerning {
+        features.push(rustybuzz::Feature::new(
+            rustybuzz::ttf_parser::Tag::from_bytes(b"kern"),
+            1,
+            0..usize::MAX,
+        ));
+    }
+
+    if attrs.font_features.standard_ligatures {
+        features.push(rustybuzz::Feature::new(
+            rustybuzz::ttf_parser::Tag::from_bytes(b"liga"),
+            1,
+            0..usize::MAX,
+        ));
+    }
+
+    if attrs.font_features.contextual_ligatures {
+        features.push(rustybuzz::Feature::new(
+            rustybuzz::ttf_parser::Tag::from_bytes(b"clig"),
+            1,
+            0..usize::MAX,
+        ));
+    }
+
+    if attrs.font_features.discretionary_ligatures {
+        features.push(rustybuzz::Feature::new(
+            rustybuzz::ttf_parser::Tag::from_bytes(b"dlig"),
+            1,
+            0..usize::MAX,
+        ));
+    }
+
     let shape_plan = rustybuzz::ShapePlan::new(
         font.rustybuzz(),
         buffer.direction(),
         Some(buffer.script()),
         buffer.language().as_ref(),
-        &[],
+        &features,
     );
     let glyph_buffer = rustybuzz::shape_with_plan(font.rustybuzz(), &shape_plan, buffer);
     let glyph_infos = glyph_buffer.glyph_infos();

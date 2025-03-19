@@ -125,6 +125,31 @@ impl From<CacheMetrics> for Metrics {
     }
 }
 
+/// Font features for controlling typographic behavior
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub struct FontFeatures {
+    /// Kerning adjusts spacing between specific character pairs
+    pub kerning: bool,
+    /// Standard ligatures (fi, fl, etc.)
+    pub standard_ligatures: bool,
+    /// Contextual ligatures (context-dependent ligatures)
+    pub contextual_ligatures: bool,
+    /// Discretionary ligatures (optional stylistic ligatures)
+    pub discretionary_ligatures: bool,
+}
+
+impl FontFeatures {
+    /// Create new font features with default settings
+    pub fn new() -> Self {
+        Self {
+            kerning: true,
+            standard_ligatures: true,
+            contextual_ligatures: false,
+            discretionary_ligatures: false,
+        }
+    }
+}
+
 /// Text attributes
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct Attrs<'a> {
@@ -137,6 +162,7 @@ pub struct Attrs<'a> {
     pub metadata: usize,
     pub cache_key_flags: CacheKeyFlags,
     pub metrics_opt: Option<CacheMetrics>,
+    pub font_features: FontFeatures,
 }
 
 impl<'a> Attrs<'a> {
@@ -153,6 +179,7 @@ impl<'a> Attrs<'a> {
             metadata: 0,
             cache_key_flags: CacheKeyFlags::empty(),
             metrics_opt: None,
+            font_features: FontFeatures::new(),
         }
     }
 
@@ -204,6 +231,12 @@ impl<'a> Attrs<'a> {
         self
     }
 
+    /// Set [FontFeatures]
+    pub fn font_features(mut self, font_features: FontFeatures) -> Self {
+        self.font_features = font_features;
+        self
+    }
+
     /// Check if font matches
     pub fn matches(&self, face: &fontdb::FaceInfo) -> bool {
         //TODO: smarter way of including emoji
@@ -252,6 +285,7 @@ pub struct AttrsOwned {
     pub metadata: usize,
     pub cache_key_flags: CacheKeyFlags,
     pub metrics_opt: Option<CacheMetrics>,
+    pub font_features: FontFeatures,
 }
 
 impl AttrsOwned {
@@ -265,6 +299,7 @@ impl AttrsOwned {
             metadata: attrs.metadata,
             cache_key_flags: attrs.cache_key_flags,
             metrics_opt: attrs.metrics_opt,
+            font_features: attrs.font_features,
         }
     }
 
@@ -278,6 +313,7 @@ impl AttrsOwned {
             metadata: self.metadata,
             cache_key_flags: self.cache_key_flags,
             metrics_opt: self.metrics_opt,
+            font_features: self.font_features,
         }
     }
 }
