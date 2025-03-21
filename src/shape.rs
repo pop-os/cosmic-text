@@ -144,37 +144,29 @@ fn shape_fallback(
 
     let mut features = Vec::new();
 
-    if attrs.font_features.kerning {
-        features.push(rustybuzz::Feature::new(
-            rustybuzz::ttf_parser::Tag::from_bytes(b"kern"),
-            1,
-            0..usize::MAX,
-        ));
-    }
+    features.push(rustybuzz::Feature::new(
+        rustybuzz::ttf_parser::Tag::from_bytes(b"kern"),
+        if attrs.font_features.kerning { 1 } else { 0 },
+        0..usize::MAX,
+    ));
 
-    if attrs.font_features.standard_ligatures {
-        features.push(rustybuzz::Feature::new(
-            rustybuzz::ttf_parser::Tag::from_bytes(b"liga"),
-            1,
-            0..usize::MAX,
-        ));
-    }
+    features.push(rustybuzz::Feature::new(
+        rustybuzz::ttf_parser::Tag::from_bytes(b"liga"),
+        if attrs.font_features.standard_ligatures { 1 } else { 0 },
+        0..usize::MAX,
+    ));
 
-    if attrs.font_features.contextual_ligatures {
-        features.push(rustybuzz::Feature::new(
-            rustybuzz::ttf_parser::Tag::from_bytes(b"clig"),
-            1,
-            0..usize::MAX,
-        ));
-    }
+    features.push(rustybuzz::Feature::new(
+        rustybuzz::ttf_parser::Tag::from_bytes(b"clig"),
+        if attrs.font_features.contextual_ligatures { 1 } else { 0 },
+        0..usize::MAX,
+    ));
 
-    if attrs.font_features.discretionary_ligatures {
-        features.push(rustybuzz::Feature::new(
-            rustybuzz::ttf_parser::Tag::from_bytes(b"dlig"),
-            1,
-            0..usize::MAX,
-        ));
-    }
+    features.push(rustybuzz::Feature::new(
+        rustybuzz::ttf_parser::Tag::from_bytes(b"dlig"),
+        if attrs.font_features.discretionary_ligatures { 1 } else { 0 },
+        0..usize::MAX,
+    ));
 
     let shape_plan = rustybuzz::ShapePlan::new(
         font.rustybuzz(),
