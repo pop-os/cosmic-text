@@ -159,6 +159,11 @@ fn shape_fallback(
         0..usize::MAX,
     ));
     features.push(rustybuzz::Feature::new(
+        rustybuzz::ttf_parser::Tag::from_bytes(b"calt"),
+        attrs.font_features.contextual_alternates as u32,
+        0..usize::MAX,
+    ));
+    features.push(rustybuzz::Feature::new(
         rustybuzz::ttf_parser::Tag::from_bytes(b"dlig"),
         attrs.font_features.discretionary_ligatures as u32,
         0..usize::MAX,

@@ -134,6 +134,8 @@ pub struct FontFeatures {
     pub standard_ligatures: bool,
     /// Contextual ligatures (context-dependent ligatures)
     pub contextual_ligatures: bool,
+    /// Contextual alternates (glyph substitutions based on context)
+    pub contextual_alternates: bool,
     /// Discretionary ligatures (optional stylistic ligatures)
     pub discretionary_ligatures: bool,
 }
@@ -145,6 +147,7 @@ impl FontFeatures {
             kerning: true,
             standard_ligatures: true,
             contextual_ligatures: true,
+            contextual_alternates: true,
             discretionary_ligatures: true,
         }
     }
