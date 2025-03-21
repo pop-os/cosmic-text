@@ -144,8 +144,8 @@ impl FontFeatures {
         Self {
             kerning: true,
             standard_ligatures: true,
-            contextual_ligatures: false,
-            discretionary_ligatures: false,
+            contextual_ligatures: true,
+            discretionary_ligatures: true,
         }
     }
 }
