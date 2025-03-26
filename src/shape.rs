@@ -141,17 +141,18 @@ fn shape_fallback(
     assert_eq!(rtl, span_rtl);
 
     let attrs = attrs_list.get_span(start_run);
+    let mut rb_features = Vec::new();
 
     // Convert attrs::Feature to rustybuzz::Feature
-    let font_features = attrs.get_font_features();
-    let mut rb_features = Vec::with_capacity(font_features.features.len());
-    for feature in &font_features.features {
-        rb_features.push(rustybuzz::Feature::new(
-            rustybuzz::ttf_parser::Tag::from_bytes(&feature.tag.as_bytes()),
-            feature.value,
-            0..usize::MAX,
-        ));
-    }
+    if let Some(font_features) = attrs.font_features {
+        for feature in font_features.features {
+            rb_features.push(rustybuzz::Feature::new(
+                rustybuzz::ttf_parser::Tag::from_bytes(&feature.tag.as_bytes()),
+                feature.value,
+                0..usize::MAX,
+            ));
+        }
+    };
 
     let shape_plan = rustybuzz::ShapePlan::new(
         font.rustybuzz(),
@@ -261,7 +262,7 @@ fn shape_run(
 
     let attrs = attrs_list.get_span(start_run);
 
-    let fonts = font_system.get_font_matches(attrs);
+    let fonts = font_system.get_font_matches(&attrs);
 
     let default_families = [&attrs.family];
     let mut font_iter = FontFallbackIter::new(
@@ -444,7 +445,7 @@ fn shape_skip(
     end_run: usize,
 ) {
     let attrs = attrs_list.get_span(start_run);
-    let fonts = font_system.get_font_matches(attrs);
+    let fonts = font_system.get_font_matches(&attrs);
 
     let default_families = [&attrs.family];
     let mut font_iter = FontFallbackIter::new(font_system, &fonts, &default_families, &[], "");

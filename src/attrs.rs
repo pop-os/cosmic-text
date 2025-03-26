@@ -5,8 +5,6 @@ use alloc::vec::Vec;
 use core::ops::Range;
 use rangemap::RangeMap;
 use smol_str::SmolStr;
-use std::collections::HashMap;
-use std::rc::Rc;
 
 use crate::{CacheKeyFlags, Metrics};
 
@@ -148,6 +146,10 @@ impl FeatureTag {
     pub const STYLISTIC_SET_1: Self = Self::new(b"ss01");
     pub const STYLISTIC_SET_2: Self = Self::new(b"ss02");
     // Add more common features as needed
+    
+    pub fn as_bytes(&self) -> &[u8; 4] {
+        &self.0
+    }
 }
 
 /// Font feature with tag and value
@@ -194,7 +196,7 @@ impl FontFeatures {
 }
 
 /// Text attributes
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Attrs<'a> {
     //TODO: should this be an option?
     pub color_opt: Option<Color>,
@@ -205,7 +207,7 @@ pub struct Attrs<'a> {
     pub metadata: usize,
     pub cache_key_flags: CacheKeyFlags,
     pub metrics_opt: Option<CacheMetrics>,
-    pub font_features: Option<Rc<FontFeatures>>,
+    pub font_features: Option<FontFeatures>,
 }
 
 impl<'a> Attrs<'a> {
@@ -276,7 +278,7 @@ impl<'a> Attrs<'a> {
 
     /// Set [FontFeatures]
     pub fn font_features(mut self, font_features: FontFeatures) -> Self {
-        self.font_features = Some(Rc::new(font_features));
+        self.font_features = Some(font_features);
         self
     }
 
@@ -328,7 +330,7 @@ pub struct AttrsOwned {
     pub metadata: usize,
     pub cache_key_flags: CacheKeyFlags,
     pub metrics_opt: Option<CacheMetrics>,
-    pub font_features: Option<Rc<FontFeatures>>,
+    pub font_features: Option<FontFeatures>,
 }
 
 impl AttrsOwned {
@@ -371,9 +373,9 @@ pub struct AttrsList {
 
 impl AttrsList {
     /// Create a new attributes list with a set of default [Attrs]
-    pub fn new(defaults: Attrs) -> Self {
+    pub fn new(defaults: &Attrs) -> Self {
         Self {
-            defaults: AttrsOwned::new(defaults),
+            defaults: AttrsOwned::new(defaults.clone()),
             spans: RangeMap::new(),
         }
     }
@@ -399,13 +401,13 @@ impl AttrsList {
     }
 
     /// Add an attribute span, removes any previous matching parts of spans
-    pub fn add_span(&mut self, range: Range<usize>, attrs: Attrs) {
+    pub fn add_span(&mut self, range: Range<usize>, attrs: &Attrs) {
         //do not support 1..1 or 2..1 even if by accident.
         if range.is_empty() {
             return;
         }
 
-        self.spans.insert(range, AttrsOwned::new(attrs));
+        self.spans.insert(range, AttrsOwned::new(attrs.clone()));
     }
 
     /// Get the attribute span for an index
@@ -455,8 +457,8 @@ impl AttrsList {
     }
 
     /// Resets the attributes with new defaults.
-    pub(crate) fn reset(mut self, default: Attrs) -> Self {
-        self.defaults = AttrsOwned::new(default);
+    pub(crate) fn reset(mut self, default: &Attrs) -> Self {
+        self.defaults = AttrsOwned::new(default.clone());
         self.spans.clear();
         self
     }
