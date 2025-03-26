@@ -5,6 +5,8 @@ use alloc::vec::Vec;
 use core::ops::Range;
 use rangemap::RangeMap;
 use smol_str::SmolStr;
+use std::collections::HashMap;
+use std::rc::Rc;
 
 use crate::{CacheKeyFlags, Metrics};
 
@@ -125,31 +127,69 @@ impl From<CacheMetrics> for Metrics {
     }
 }
 
-/// Font features for controlling typographic behavior
+/// OpenType feature tag
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub struct FeatureTag([u8; 4]);
+
+impl FeatureTag {
+    /// Create a new feature tag from a 4-character string
+    pub const fn new(tag: &[u8; 4]) -> Self {
+        Self(*tag)
+    }
+    
+    // Common OpenType features as constants
+    pub const KERNING: Self = Self::new(b"kern");
+    pub const STANDARD_LIGATURES: Self = Self::new(b"liga");
+    pub const CONTEXTUAL_LIGATURES: Self = Self::new(b"clig");
+    pub const CONTEXTUAL_ALTERNATES: Self = Self::new(b"calt");
+    pub const DISCRETIONARY_LIGATURES: Self = Self::new(b"dlig");
+    pub const SMALL_CAPS: Self = Self::new(b"smcp");
+    pub const ALL_SMALL_CAPS: Self = Self::new(b"c2sc");
+    pub const STYLISTIC_SET_1: Self = Self::new(b"ss01");
+    pub const STYLISTIC_SET_2: Self = Self::new(b"ss02");
+    // Add more common features as needed
+}
+
+/// Font feature with tag and value
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub struct Feature {
+    pub tag: FeatureTag,
+    pub value: u32,
+}
+
+/// Font features for text shaping
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct FontFeatures {
-    /// Kerning adjusts spacing between specific character pairs
-    pub kerning: bool,
-    /// Standard ligatures (fi, fl, etc.)
-    pub standard_ligatures: bool,
-    /// Contextual ligatures (context-dependent ligatures)
-    pub contextual_ligatures: bool,
-    /// Contextual alternates (glyph substitutions based on context)
-    pub contextual_alternates: bool,
-    /// Discretionary ligatures (optional stylistic ligatures)
-    pub discretionary_ligatures: bool,
+    /// List of OpenType features with their values (0 = disabled, 1 = enabled)
+    pub features: Vec<Feature>,
 }
 
 impl FontFeatures {
     /// Create new font features with default settings
     pub fn new() -> Self {
-        Self {
-            kerning: true,
-            standard_ligatures: true,
-            contextual_ligatures: true,
-            contextual_alternates: true,
-            discretionary_ligatures: true,
-        }
+        let mut features = Vec::new();
+        // Enable kerning by default
+        features.push(Feature { tag: FeatureTag::KERNING, value: 1 });
+        // Enable standard ligatures by default
+        features.push(Feature { tag: FeatureTag::STANDARD_LIGATURES, value: 1 });
+        
+        Self { features }
+    }
+    
+    /// Set a feature value
+    pub fn set(&mut self, tag: FeatureTag, value: u32) -> &mut Self {
+        self.features.push(Feature { tag, value });
+        self
+    }
+    
+    /// Enable a feature (set to 1)
+    pub fn enable(&mut self, tag: FeatureTag) -> &mut Self {
+        self.set(tag, 1)
+    }
+    
+    /// Disable a feature (set to 0)
+    pub fn disable(&mut self, tag: FeatureTag) -> &mut Self {
+        self.set(tag, 0)
     }
 }
 
@@ -165,7 +205,7 @@ pub struct Attrs<'a> {
     pub metadata: usize,
     pub cache_key_flags: CacheKeyFlags,
     pub metrics_opt: Option<CacheMetrics>,
-    pub font_features: FontFeatures,
+    pub font_features: Option<Rc<FontFeatures>>,
 }
 
 impl<'a> Attrs<'a> {
@@ -182,7 +222,7 @@ impl<'a> Attrs<'a> {
             metadata: 0,
             cache_key_flags: CacheKeyFlags::empty(),
             metrics_opt: None,
-            font_features: FontFeatures::new(),
+            font_features: None,  // Use default features
         }
     }
 
@@ -236,7 +276,7 @@ impl<'a> Attrs<'a> {
 
     /// Set [FontFeatures]
     pub fn font_features(mut self, font_features: FontFeatures) -> Self {
-        self.font_features = font_features;
+        self.font_features = Some(Rc::new(font_features));
         self
     }
 
@@ -288,7 +328,7 @@ pub struct AttrsOwned {
     pub metadata: usize,
     pub cache_key_flags: CacheKeyFlags,
     pub metrics_opt: Option<CacheMetrics>,
-    pub font_features: FontFeatures,
+    pub font_features: Option<Rc<FontFeatures>>,
 }
 
 impl AttrsOwned {
@@ -302,7 +342,7 @@ impl AttrsOwned {
             metadata: attrs.metadata,
             cache_key_flags: attrs.cache_key_flags,
             metrics_opt: attrs.metrics_opt,
-            font_features: attrs.font_features,
+            font_features: attrs.font_features.clone(),
         }
     }
 
@@ -316,7 +356,7 @@ impl AttrsOwned {
             metadata: self.metadata,
             cache_key_flags: self.cache_key_flags,
             metrics_opt: self.metrics_opt,
-            font_features: self.font_features,
+            font_features: self.font_features.clone(),
         }
     }
 }

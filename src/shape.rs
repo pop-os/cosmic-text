@@ -142,39 +142,23 @@ fn shape_fallback(
 
     let attrs = attrs_list.get_span(start_run);
 
-    let mut features = Vec::new();
-    features.push(rustybuzz::Feature::new(
-        rustybuzz::ttf_parser::Tag::from_bytes(b"kern"),
-        attrs.font_features.kerning as u32,
-        0..usize::MAX,
-    ));
-    features.push(rustybuzz::Feature::new(
-        rustybuzz::ttf_parser::Tag::from_bytes(b"liga"),
-        attrs.font_features.standard_ligatures as u32,
-        0..usize::MAX,
-    ));
-    features.push(rustybuzz::Feature::new(
-        rustybuzz::ttf_parser::Tag::from_bytes(b"clig"),
-        attrs.font_features.contextual_ligatures as u32,
-        0..usize::MAX,
-    ));
-    features.push(rustybuzz::Feature::new(
-        rustybuzz::ttf_parser::Tag::from_bytes(b"calt"),
-        attrs.font_features.contextual_alternates as u32,
-        0..usize::MAX,
-    ));
-    features.push(rustybuzz::Feature::new(
-        rustybuzz::ttf_parser::Tag::from_bytes(b"dlig"),
-        attrs.font_features.discretionary_ligatures as u32,
-        0..usize::MAX,
-    ));
+    // Convert attrs::Feature to rustybuzz::Feature
+    let font_features = attrs.get_font_features();
+    let mut rb_features = Vec::with_capacity(font_features.features.len());
+    for feature in &font_features.features {
+        rb_features.push(rustybuzz::Feature::new(
+            rustybuzz::ttf_parser::Tag::from_bytes(&feature.tag.as_bytes()),
+            feature.value,
+            0..usize::MAX,
+        ));
+    }
 
     let shape_plan = rustybuzz::ShapePlan::new(
         font.rustybuzz(),
         buffer.direction(),
         Some(buffer.script()),
         buffer.language().as_ref(),
-        &features,
+        &rb_features,
     );
     let glyph_buffer = rustybuzz::shape_with_plan(font.rustybuzz(), &shape_plan, buffer);
     let glyph_infos = glyph_buffer.glyph_infos();
