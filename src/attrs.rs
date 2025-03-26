@@ -134,7 +134,7 @@ impl FeatureTag {
     pub const fn new(tag: &[u8; 4]) -> Self {
         Self(*tag)
     }
-    
+
     // Common OpenType features as constants
     pub const KERNING: Self = Self::new(b"kern");
     pub const STANDARD_LIGATURES: Self = Self::new(b"liga");
@@ -146,7 +146,7 @@ impl FeatureTag {
     pub const STYLISTIC_SET_1: Self = Self::new(b"ss01");
     pub const STYLISTIC_SET_2: Self = Self::new(b"ss02");
     // Add more common features as needed
-    
+
     pub fn as_bytes(&self) -> &[u8; 4] {
         &self.0
     }
@@ -169,26 +169,20 @@ pub struct FontFeatures {
 impl FontFeatures {
     /// Create new font features with default settings
     pub fn new() -> Self {
-        let mut features = Vec::new();
-        // Enable kerning by default
-        features.push(Feature { tag: FeatureTag::KERNING, value: 1 });
-        // Enable standard ligatures by default
-        features.push(Feature { tag: FeatureTag::STANDARD_LIGATURES, value: 1 });
-        
-        Self { features }
+        Self { features: Vec::new() }
     }
-    
+
     /// Set a feature value
     pub fn set(&mut self, tag: FeatureTag, value: u32) -> &mut Self {
         self.features.push(Feature { tag, value });
         self
     }
-    
+
     /// Enable a feature (set to 1)
     pub fn enable(&mut self, tag: FeatureTag) -> &mut Self {
         self.set(tag, 1)
     }
-    
+
     /// Disable a feature (set to 0)
     pub fn disable(&mut self, tag: FeatureTag) -> &mut Self {
         self.set(tag, 0)
@@ -207,7 +201,7 @@ pub struct Attrs<'a> {
     pub metadata: usize,
     pub cache_key_flags: CacheKeyFlags,
     pub metrics_opt: Option<CacheMetrics>,
-    pub font_features: Option<FontFeatures>,
+    pub font_features: FontFeatures,
 }
 
 impl<'a> Attrs<'a> {
@@ -224,7 +218,7 @@ impl<'a> Attrs<'a> {
             metadata: 0,
             cache_key_flags: CacheKeyFlags::empty(),
             metrics_opt: None,
-            font_features: None,  // Use default features
+            font_features: FontFeatures::new(),
         }
     }
 
@@ -278,7 +272,7 @@ impl<'a> Attrs<'a> {
 
     /// Set [FontFeatures]
     pub fn font_features(mut self, font_features: FontFeatures) -> Self {
-        self.font_features = Some(font_features);
+        self.font_features = font_features;
         self
     }
 
@@ -330,7 +324,7 @@ pub struct AttrsOwned {
     pub metadata: usize,
     pub cache_key_flags: CacheKeyFlags,
     pub metrics_opt: Option<CacheMetrics>,
-    pub font_features: Option<FontFeatures>,
+    pub font_features: FontFeatures,
 }
 
 impl AttrsOwned {
@@ -373,9 +367,9 @@ pub struct AttrsList {
 
 impl AttrsList {
     /// Create a new attributes list with a set of default [Attrs]
-    pub fn new(defaults: &Attrs) -> Self {
+    pub fn new(defaults: Attrs) -> Self {
         Self {
-            defaults: AttrsOwned::new(defaults.clone()),
+            defaults: AttrsOwned::new(defaults),
             spans: RangeMap::new(),
         }
     }
@@ -401,13 +395,13 @@ impl AttrsList {
     }
 
     /// Add an attribute span, removes any previous matching parts of spans
-    pub fn add_span(&mut self, range: Range<usize>, attrs: &Attrs) {
+    pub fn add_span(&mut self, range: Range<usize>, attrs: Attrs) {
         //do not support 1..1 or 2..1 even if by accident.
         if range.is_empty() {
             return;
         }
 
-        self.spans.insert(range, AttrsOwned::new(attrs.clone()));
+        self.spans.insert(range, AttrsOwned::new(attrs));
     }
 
     /// Get the attribute span for an index
@@ -457,8 +451,8 @@ impl AttrsList {
     }
 
     /// Resets the attributes with new defaults.
-    pub(crate) fn reset(mut self, default: &Attrs) -> Self {
-        self.defaults = AttrsOwned::new(default.clone());
+    pub(crate) fn reset(mut self, default: Attrs) -> Self {
+        self.defaults = AttrsOwned::new(default);
         self.spans.clear();
         self
     }
