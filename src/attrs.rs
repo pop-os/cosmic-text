@@ -124,28 +124,33 @@ impl From<CacheMetrics> for Metrics {
         }
     }
 }
-
-/// OpenType feature tag
+/// A 4-byte OpenType feature tag identifier
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct FeatureTag([u8; 4]);
 
 impl FeatureTag {
-    /// Create a new feature tag from a 4-character string
     pub const fn new(tag: &[u8; 4]) -> Self {
         Self(*tag)
     }
 
-    // Common OpenType features as constants
+    /// Kerning adjusts spacing between specific character pairs
     pub const KERNING: Self = Self::new(b"kern");
+    /// Standard ligatures (fi, fl, etc.)
     pub const STANDARD_LIGATURES: Self = Self::new(b"liga");
+    /// Contextual ligatures (context-dependent ligatures)
     pub const CONTEXTUAL_LIGATURES: Self = Self::new(b"clig");
+    /// Contextual alternates (glyph substitutions based on context)
     pub const CONTEXTUAL_ALTERNATES: Self = Self::new(b"calt");
+    /// Discretionary ligatures (optional stylistic ligatures)
     pub const DISCRETIONARY_LIGATURES: Self = Self::new(b"dlig");
+    /// Small caps (lowercase to small capitals)
     pub const SMALL_CAPS: Self = Self::new(b"smcp");
+    /// All small caps (uppercase and lowercase to small capitals)
     pub const ALL_SMALL_CAPS: Self = Self::new(b"c2sc");
+    /// Stylistic Set 1 (font-specific alternate glyphs)
     pub const STYLISTIC_SET_1: Self = Self::new(b"ss01");
+    /// Stylistic Set 2 (font-specific alternate glyphs)
     pub const STYLISTIC_SET_2: Self = Self::new(b"ss02");
-    // Add more common features as needed
 
     pub fn as_bytes(&self) -> &[u8; 4] {
         &self.0
