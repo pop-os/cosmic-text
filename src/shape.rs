@@ -140,12 +140,24 @@ fn shape_fallback(
     let rtl = matches!(buffer.direction(), rustybuzz::Direction::RightToLeft);
     assert_eq!(rtl, span_rtl);
 
+    let attrs = attrs_list.get_span(start_run);
+    let mut rb_font_features = Vec::new();
+
+    // Convert attrs::Feature to rustybuzz::Feature
+    for feature in attrs.font_features.features {
+        rb_font_features.push(rustybuzz::Feature::new(
+            rustybuzz::ttf_parser::Tag::from_bytes(&feature.tag.as_bytes()),
+            feature.value,
+            0..usize::MAX,
+        ));
+    }
+
     let shape_plan = rustybuzz::ShapePlan::new(
         font.rustybuzz(),
         buffer.direction(),
         Some(buffer.script()),
         buffer.language().as_ref(),
-        &[],
+        &rb_font_features,
     );
     let glyph_buffer = rustybuzz::shape_with_plan(font.rustybuzz(), &shape_plan, buffer);
     let glyph_infos = glyph_buffer.glyph_infos();
