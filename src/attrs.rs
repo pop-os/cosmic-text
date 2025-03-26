@@ -157,27 +157,22 @@ impl FeatureTag {
     }
 }
 
-/// Font feature with tag and value
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct Feature {
     pub tag: FeatureTag,
     pub value: u32,
 }
 
-/// Font features for text shaping
 #[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct FontFeatures {
-    /// List of OpenType features with their values (0 = disabled, 1 = enabled)
     pub features: Vec<Feature>,
 }
 
 impl FontFeatures {
-    /// Create new font features with default settings
     pub fn new() -> Self {
         Self { features: Vec::new() }
     }
 
-    /// Set a feature value
     pub fn set(&mut self, tag: FeatureTag, value: u32) -> &mut Self {
         self.features.push(Feature { tag, value });
         self
