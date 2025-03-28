@@ -155,11 +155,6 @@ fn shape_fallback(
     glyphs.reserve(glyph_infos.len());
     let glyph_start = glyphs.len();
     for (info, pos) in glyph_infos.iter().zip(glyph_positions.iter()) {
-        let x_advance = pos.x_advance as f32 / font_scale;
-        let y_advance = pos.y_advance as f32 / font_scale;
-        let x_offset = pos.x_offset as f32 / font_scale;
-        let y_offset = pos.y_offset as f32 / font_scale;
-
         let start_glyph = start_run + info.cluster as usize;
 
         if info.glyph_id == 0 {
@@ -167,6 +162,12 @@ fn shape_fallback(
         }
 
         let attrs = attrs_list.get_span(start_glyph);
+        let x_advance = pos.x_advance as f32 / font_scale
+            + attrs.letter_spacing_opt.map_or(0.0, |spacing| spacing.0);
+        let y_advance = pos.y_advance as f32 / font_scale;
+        let x_offset = pos.x_offset as f32 / font_scale;
+        let y_offset = pos.y_offset as f32 / font_scale;
+
         glyphs.push(ShapeGlyph {
             start: start_glyph,
             end: end_run, // Set later
@@ -453,7 +454,8 @@ fn shape_skip(
             .char_indices()
             .map(|(chr_idx, codepoint)| {
                 let glyph_id = charmap.map(codepoint);
-                let x_advance = glyph_metrics.advance_width(glyph_id);
+                let x_advance = glyph_metrics.advance_width(glyph_id)
+                    + attrs.letter_spacing_opt.map_or(0.0, |spacing| spacing.0);
                 let attrs = attrs_list.get_span(start_run + chr_idx);
 
                 ShapeGlyph {
