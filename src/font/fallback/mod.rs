@@ -65,7 +65,7 @@ mod platform;
 /// let db = fontdb::Database::new();
 /// let font_system = FontSystem::new_with_locale_and_db_and_fallback(locale, db, MyFallback);
 /// ```
-pub trait Fallback {
+pub trait Fallback: Send + Sync {
     /// Fallbacks to use after any script specific fallbacks
     fn common_fallback(&self) -> &[&'static str];
 
