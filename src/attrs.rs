@@ -2,10 +2,10 @@
 
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
+use core::hash::{Hash, Hasher};
 use core::ops::Range;
 use rangemap::RangeMap;
 use smol_str::SmolStr;
-use std::hash::{Hash, Hasher};
 
 use crate::{CacheKeyFlags, Metrics};
 
@@ -169,7 +169,7 @@ pub struct Attrs<'a> {
     pub metadata: usize,
     pub cache_key_flags: CacheKeyFlags,
     pub metrics_opt: Option<CacheMetrics>,
-    /// Letter spacing (tracking) in pixels
+    /// Letter spacing (tracking) in EM
     pub letter_spacing_opt: Option<LetterSpacing>,
 }
 
