@@ -380,7 +380,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                 let line = BufferLine::new(
                     String::new(),
                     ending,
-                    AttrsList::new(attrs_list.as_ref().map_or_else(
+                    AttrsList::new(&attrs_list.as_ref().map_or_else(
                         || {
                             buffer
                                 .lines
@@ -404,7 +404,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
 
             // Collect attributes
             let mut final_attrs = attrs_list.unwrap_or_else(|| {
-                AttrsList::new(line.attrs_list().get_span(cursor.index.saturating_sub(1)))
+                AttrsList::new(&line.attrs_list().get_span(cursor.index.saturating_sub(1)))
             });
 
             // Append the inserted text, line by line

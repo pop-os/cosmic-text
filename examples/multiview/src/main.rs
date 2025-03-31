@@ -31,7 +31,7 @@ fn main() {
 
     let attrs = Attrs::new().family(Family::Monospace);
     match fs::read_to_string(&path) {
-        Ok(text) => buffer.set_text(&text, attrs, Shaping::Advanced),
+        Ok(text) => buffer.set_text(&text, &attrs, Shaping::Advanced),
         Err(err) => {
             log::error!("failed to load {:?}: {}", path, err);
         }

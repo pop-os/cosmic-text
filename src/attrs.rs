@@ -125,6 +125,72 @@ impl From<CacheMetrics> for Metrics {
         }
     }
 }
+/// A 4-byte `OpenType` feature tag identifier
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub struct FeatureTag([u8; 4]);
+
+impl FeatureTag {
+    pub const fn new(tag: &[u8; 4]) -> Self {
+        Self(*tag)
+    }
+
+    /// Kerning adjusts spacing between specific character pairs
+    pub const KERNING: Self = Self::new(b"kern");
+    /// Standard ligatures (fi, fl, etc.)
+    pub const STANDARD_LIGATURES: Self = Self::new(b"liga");
+    /// Contextual ligatures (context-dependent ligatures)
+    pub const CONTEXTUAL_LIGATURES: Self = Self::new(b"clig");
+    /// Contextual alternates (glyph substitutions based on context)
+    pub const CONTEXTUAL_ALTERNATES: Self = Self::new(b"calt");
+    /// Discretionary ligatures (optional stylistic ligatures)
+    pub const DISCRETIONARY_LIGATURES: Self = Self::new(b"dlig");
+    /// Small caps (lowercase to small capitals)
+    pub const SMALL_CAPS: Self = Self::new(b"smcp");
+    /// All small caps (uppercase and lowercase to small capitals)
+    pub const ALL_SMALL_CAPS: Self = Self::new(b"c2sc");
+    /// Stylistic Set 1 (font-specific alternate glyphs)
+    pub const STYLISTIC_SET_1: Self = Self::new(b"ss01");
+    /// Stylistic Set 2 (font-specific alternate glyphs)
+    pub const STYLISTIC_SET_2: Self = Self::new(b"ss02");
+
+    pub fn as_bytes(&self) -> &[u8; 4] {
+        &self.0
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub struct Feature {
+    pub tag: FeatureTag,
+    pub value: u32,
+}
+
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
+pub struct FontFeatures {
+    pub features: Vec<Feature>,
+}
+
+impl FontFeatures {
+    pub fn new() -> Self {
+        Self {
+            features: Vec::new(),
+        }
+    }
+
+    pub fn set(&mut self, tag: FeatureTag, value: u32) -> &mut Self {
+        self.features.push(Feature { tag, value });
+        self
+    }
+
+    /// Enable a feature (set to 1)
+    pub fn enable(&mut self, tag: FeatureTag) -> &mut Self {
+        self.set(tag, 1)
+    }
+
+    /// Disable a feature (set to 0)
+    pub fn disable(&mut self, tag: FeatureTag) -> &mut Self {
+        self.set(tag, 0)
+    }
+}
 
 /// A wrapper for letter spacing to get around that f32 doesn't implement Eq and Hash
 #[derive(Clone, Copy, Debug)]
@@ -158,7 +224,7 @@ impl Hash for LetterSpacing {
 }
 
 /// Text attributes
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Attrs<'a> {
     //TODO: should this be an option?
     pub color_opt: Option<Color>,
@@ -171,6 +237,7 @@ pub struct Attrs<'a> {
     pub metrics_opt: Option<CacheMetrics>,
     /// Letter spacing (tracking) in EM
     pub letter_spacing_opt: Option<LetterSpacing>,
+    pub font_features: FontFeatures,
 }
 
 impl<'a> Attrs<'a> {
@@ -188,6 +255,7 @@ impl<'a> Attrs<'a> {
             cache_key_flags: CacheKeyFlags::empty(),
             metrics_opt: None,
             letter_spacing_opt: None,
+            font_features: FontFeatures::new(),
         }
     }
 
@@ -245,6 +313,12 @@ impl<'a> Attrs<'a> {
         self
     }
 
+    /// Set [`FontFeatures`]
+    pub fn font_features(mut self, font_features: FontFeatures) -> Self {
+        self.font_features = font_features;
+        self
+    }
+
     /// Check if font matches
     pub fn matches(&self, face: &fontdb::FaceInfo) -> bool {
         //TODO: smarter way of including emoji
@@ -270,8 +344,8 @@ pub struct FontMatchAttrs {
     weight: Weight,
 }
 
-impl<'a> From<Attrs<'a>> for FontMatchAttrs {
-    fn from(attrs: Attrs<'a>) -> Self {
+impl<'a> From<&Attrs<'a>> for FontMatchAttrs {
+    fn from(attrs: &Attrs<'a>) -> Self {
         Self {
             family: FamilyOwned::new(attrs.family),
             stretch: attrs.stretch,
@@ -295,10 +369,11 @@ pub struct AttrsOwned {
     pub metrics_opt: Option<CacheMetrics>,
     /// Letter spacing (tracking) in EM
     pub letter_spacing_opt: Option<LetterSpacing>,
+    pub font_features: FontFeatures,
 }
 
 impl AttrsOwned {
-    pub fn new(attrs: Attrs) -> Self {
+    pub fn new(attrs: &Attrs) -> Self {
         Self {
             color_opt: attrs.color_opt,
             family_owned: FamilyOwned::new(attrs.family),
@@ -309,6 +384,7 @@ impl AttrsOwned {
             cache_key_flags: attrs.cache_key_flags,
             metrics_opt: attrs.metrics_opt,
             letter_spacing_opt: attrs.letter_spacing_opt,
+            font_features: attrs.font_features.clone(),
         }
     }
 
@@ -323,6 +399,7 @@ impl AttrsOwned {
             cache_key_flags: self.cache_key_flags,
             metrics_opt: self.metrics_opt,
             letter_spacing_opt: self.letter_spacing_opt,
+            font_features: self.font_features.clone(),
         }
     }
 }
@@ -337,7 +414,7 @@ pub struct AttrsList {
 
 impl AttrsList {
     /// Create a new attributes list with a set of default [Attrs]
-    pub fn new(defaults: Attrs) -> Self {
+    pub fn new(defaults: &Attrs) -> Self {
         Self {
             defaults: AttrsOwned::new(defaults),
             spans: RangeMap::new(),
@@ -365,7 +442,7 @@ impl AttrsList {
     }
 
     /// Add an attribute span, removes any previous matching parts of spans
-    pub fn add_span(&mut self, range: Range<usize>, attrs: Attrs) {
+    pub fn add_span(&mut self, range: Range<usize>, attrs: &Attrs) {
         //do not support 1..1 or 2..1 even if by accident.
         if range.is_empty() {
             return;
@@ -387,7 +464,7 @@ impl AttrsList {
     /// Split attributes list at an offset
     #[allow(clippy::missing_panics_doc)]
     pub fn split_off(&mut self, index: usize) -> Self {
-        let mut new = Self::new(self.defaults.as_attrs());
+        let mut new = Self::new(&self.defaults.as_attrs());
         let mut removes = Vec::new();
 
         //get the keys we need to remove or fix.
@@ -421,7 +498,7 @@ impl AttrsList {
     }
 
     /// Resets the attributes with new defaults.
-    pub(crate) fn reset(mut self, default: Attrs) -> Self {
+    pub(crate) fn reset(mut self, default: &Attrs) -> Self {
         self.defaults = AttrsOwned::new(default);
         self.spans.clear();
         self

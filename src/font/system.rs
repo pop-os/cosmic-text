@@ -306,7 +306,7 @@ impl FontSystem {
         })
     }
 
-    pub fn get_font_matches(&mut self, attrs: Attrs<'_>) -> Arc<Vec<FontMatchKey>> {
+    pub fn get_font_matches(&mut self, attrs: &Attrs<'_>) -> Arc<Vec<FontMatchKey>> {
         // Clear the cache first if it reached the size limit
         if self.font_matches_cache.len() >= Self::FONT_MATCHES_CACHE_SIZE_LIMIT {
             log::trace!("clear font mache cache");

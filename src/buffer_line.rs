@@ -162,13 +162,13 @@ impl BufferLine {
         if other.attrs_list.defaults() != self.attrs_list.defaults() {
             // If default formatting does not match, make a new span for it
             self.attrs_list
-                .add_span(len..len + other.text().len(), other.attrs_list.defaults());
+                .add_span(len..len + other.text().len(), &other.attrs_list.defaults());
         }
 
         for (other_range, attrs) in other.attrs_list.spans_iter() {
             // Add previous attrs spans
             let range = other_range.start + len..other_range.end + len;
-            self.attrs_list.add_span(range, attrs.as_attrs());
+            self.attrs_list.add_span(range, &attrs.as_attrs());
         }
 
         self.reset();
@@ -283,7 +283,7 @@ impl BufferLine {
         Self {
             text: String::default(),
             ending: LineEnding::default(),
-            attrs_list: AttrsList::new(Attrs::new()),
+            attrs_list: AttrsList::new(&Attrs::new()),
             align: None,
             shape_opt: Cached::Empty,
             layout_opt: Cached::Empty,
@@ -296,7 +296,7 @@ impl BufferLine {
     ///
     /// The buffer line is in an invalid state after this is called. See [`Self::reset_new`].
     pub(crate) fn reclaim_attrs(&mut self) -> AttrsList {
-        mem::replace(&mut self.attrs_list, AttrsList::new(Attrs::new()))
+        mem::replace(&mut self.attrs_list, AttrsList::new(&Attrs::new()))
     }
 
     /// Reclaim text memory that isn't needed any longer.
