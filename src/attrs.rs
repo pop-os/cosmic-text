@@ -125,7 +125,7 @@ impl From<CacheMetrics> for Metrics {
         }
     }
 }
-/// A 4-byte OpenType feature tag identifier
+/// A 4-byte `OpenType` feature tag identifier
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct FeatureTag([u8; 4]);
 
@@ -171,7 +171,9 @@ pub struct FontFeatures {
 
 impl FontFeatures {
     pub fn new() -> Self {
-        Self { features: Vec::new() }
+        Self {
+            features: Vec::new(),
+        }
     }
 
     pub fn set(&mut self, tag: FeatureTag, value: u32) -> &mut Self {
@@ -311,7 +313,7 @@ impl<'a> Attrs<'a> {
         self
     }
 
-    /// Set [FontFeatures]
+    /// Set [`FontFeatures`]
     pub fn font_features(mut self, font_features: FontFeatures) -> Self {
         self.font_features = font_features;
         self
@@ -342,8 +344,8 @@ pub struct FontMatchAttrs {
     weight: Weight,
 }
 
-impl<'a> From<Attrs<'a>> for FontMatchAttrs {
-    fn from(attrs: Attrs<'a>) -> Self {
+impl<'a> From<&Attrs<'a>> for FontMatchAttrs {
+    fn from(attrs: &Attrs<'a>) -> Self {
         Self {
             family: FamilyOwned::new(attrs.family),
             stretch: attrs.stretch,
@@ -371,7 +373,7 @@ pub struct AttrsOwned {
 }
 
 impl AttrsOwned {
-    pub fn new(attrs: Attrs) -> Self {
+    pub fn new(attrs: &Attrs) -> Self {
         Self {
             color_opt: attrs.color_opt,
             family_owned: FamilyOwned::new(attrs.family),
@@ -412,7 +414,7 @@ pub struct AttrsList {
 
 impl AttrsList {
     /// Create a new attributes list with a set of default [Attrs]
-    pub fn new(defaults: Attrs) -> Self {
+    pub fn new(defaults: &Attrs) -> Self {
         Self {
             defaults: AttrsOwned::new(defaults),
             spans: RangeMap::new(),
@@ -440,7 +442,7 @@ impl AttrsList {
     }
 
     /// Add an attribute span, removes any previous matching parts of spans
-    pub fn add_span(&mut self, range: Range<usize>, attrs: Attrs) {
+    pub fn add_span(&mut self, range: Range<usize>, attrs: &Attrs) {
         //do not support 1..1 or 2..1 even if by accident.
         if range.is_empty() {
             return;
@@ -462,7 +464,7 @@ impl AttrsList {
     /// Split attributes list at an offset
     #[allow(clippy::missing_panics_doc)]
     pub fn split_off(&mut self, index: usize) -> Self {
-        let mut new = Self::new(self.defaults.as_attrs());
+        let mut new = Self::new(&self.defaults.as_attrs());
         let mut removes = Vec::new();
 
         //get the keys we need to remove or fix.
@@ -496,7 +498,7 @@ impl AttrsList {
     }
 
     /// Resets the attributes with new defaults.
-    pub(crate) fn reset(mut self, default: Attrs) -> Self {
+    pub(crate) fn reset(mut self, default: &Attrs) -> Self {
         self.defaults = AttrsOwned::new(default);
         self.spans.clear();
         self

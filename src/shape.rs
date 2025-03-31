@@ -146,7 +146,7 @@ fn shape_fallback(
     // Convert attrs::Feature to rustybuzz::Feature
     for feature in attrs.font_features.features {
         rb_font_features.push(rustybuzz::Feature::new(
-            rustybuzz::ttf_parser::Tag::from_bytes(&feature.tag.as_bytes()),
+            rustybuzz::ttf_parser::Tag::from_bytes(feature.tag.as_bytes()),
             feature.value,
             0..usize::MAX,
         ));
@@ -261,7 +261,7 @@ fn shape_run(
 
     let attrs = attrs_list.get_span(start_run);
 
-    let fonts = font_system.get_font_matches(attrs);
+    let fonts = font_system.get_font_matches(&attrs);
 
     let default_families = [&attrs.family];
     let mut font_iter = FontFallbackIter::new(
@@ -389,7 +389,7 @@ fn shape_run_cached(
     let run_range = start_run..end_run;
     let mut key = ShapeRunKey {
         text: line[run_range.clone()].to_string(),
-        default_attrs: AttrsOwned::new(attrs_list.defaults()),
+        default_attrs: AttrsOwned::new(&attrs_list.defaults()),
         attrs_spans: Vec::new(),
     };
     for (attrs_range, attrs) in attrs_list.spans.overlapping(&run_range) {
@@ -444,7 +444,7 @@ fn shape_skip(
     end_run: usize,
 ) {
     let attrs = attrs_list.get_span(start_run);
-    let fonts = font_system.get_font_matches(attrs);
+    let fonts = font_system.get_font_matches(&attrs);
 
     let default_families = [&attrs.family];
     let mut font_iter = FontFallbackIter::new(font_system, &fonts, &default_families, &[], "");

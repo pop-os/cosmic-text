@@ -266,7 +266,7 @@ impl Buffer {
     /// Will panic if `metrics.line_height` is zero.
     pub fn new(font_system: &mut FontSystem, metrics: Metrics) -> Self {
         let mut buffer = Self::new_empty(metrics);
-        buffer.set_text(font_system, "", Attrs::new(), Shaping::Advanced);
+        buffer.set_text(font_system, "", &Attrs::new(), Shaping::Advanced);
         buffer
     }
 
@@ -676,7 +676,7 @@ impl Buffer {
         &mut self,
         font_system: &mut FontSystem,
         text: &str,
-        attrs: Attrs,
+        attrs: &Attrs,
         shaping: Shaping,
     ) {
         self.lines.clear();
@@ -710,10 +710,10 @@ impl Buffer {
     /// buffer.set_rich_text(
     ///     &mut font_system,
     ///     [
-    ///         ("hello, ", attrs),
-    ///         ("cosmic\ntext", attrs.family(Family::Monospace)),
+    ///         ("hello, ", attrs.clone()),
+    ///         ("cosmic\ntext", attrs.clone().family(Family::Monospace)),
     ///     ],
-    ///     attrs,
+    ///     &attrs,
     ///     Shaping::Advanced,
     ///     None,
     /// );
@@ -722,7 +722,7 @@ impl Buffer {
         &mut self,
         font_system: &mut FontSystem,
         spans: I,
-        default_attrs: Attrs,
+        default_attrs: &Attrs,
         shaping: Shaping,
         alignment: Option<Align>,
     ) where
@@ -758,7 +758,7 @@ impl Buffer {
             .lines
             .get_mut(line_count)
             .map(BufferLine::reclaim_attrs)
-            .unwrap_or_else(|| AttrsList::new(Attrs::new()))
+            .unwrap_or_else(|| AttrsList::new(&Attrs::new()))
             .reset(default_attrs);
         let mut line_string = self
             .lines
@@ -792,7 +792,7 @@ impl Buffer {
                 let text_end = line_string.len();
                 // Only add attrs if they don't match the defaults
                 if *attrs != attrs_list.defaults() {
-                    attrs_list.add_span(text_start..text_end, *attrs);
+                    attrs_list.add_span(text_start..text_end, attrs);
                 }
             }
 
@@ -811,7 +811,7 @@ impl Buffer {
                         .lines
                         .get_mut(line_count + 1)
                         .map(BufferLine::reclaim_attrs)
-                        .unwrap_or_else(|| AttrsList::new(Attrs::new()))
+                        .unwrap_or_else(|| AttrsList::new(&Attrs::new()))
                         .reset(default_attrs);
                     let next_line_string = self
                         .lines
@@ -1428,7 +1428,7 @@ impl BorrowedWithFontSystem<'_, Buffer> {
     }
 
     /// Set text of buffer, using provided attributes for each line by default
-    pub fn set_text(&mut self, text: &str, attrs: Attrs, shaping: Shaping) {
+    pub fn set_text(&mut self, text: &str, attrs: &Attrs, shaping: Shaping) {
         self.inner.set_text(self.font_system, text, attrs, shaping);
     }
 
@@ -1438,14 +1438,14 @@ impl BorrowedWithFontSystem<'_, Buffer> {
     /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, Metrics, Shaping};
     /// # let mut font_system = FontSystem::new();
     /// let mut buffer = Buffer::new_empty(Metrics::new(32.0, 44.0));
-    /// let mut buffer = buffer.borrow_with(&mut font_system);
     /// let attrs = Attrs::new().family(Family::Serif);
     /// buffer.set_rich_text(
+    ///     &mut font_system,
     ///     [
-    ///         ("hello, ", attrs),
-    ///         ("cosmic\ntext", attrs.family(Family::Monospace)),
+    ///         ("hello, ", attrs.clone()),
+    ///         ("cosmic\ntext", attrs.clone().family(Family::Monospace)),
     ///     ],
-    ///     attrs,
+    ///     &attrs,
     ///     Shaping::Advanced,
     ///     None,
     /// );
@@ -1453,7 +1453,7 @@ impl BorrowedWithFontSystem<'_, Buffer> {
     pub fn set_rich_text<'r, 's, I>(
         &mut self,
         spans: I,
-        default_attrs: Attrs,
+        default_attrs: &Attrs,
         shaping: Shaping,
         alignment: Option<Align>,
     ) where

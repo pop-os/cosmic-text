@@ -88,7 +88,7 @@ impl<'syntax_system, 'buffer> SyntaxEditor<'syntax_system, 'buffer> {
                                 foreground.a,
                             ));
                         }
-                        line.set_attrs_list(AttrsList::new(attrs));
+                        line.set_attrs_list(AttrsList::new(&attrs));
                     }
                 });
             }
@@ -125,7 +125,7 @@ impl<'syntax_system, 'buffer> SyntaxEditor<'syntax_system, 'buffer> {
 
         let text = fs::read_to_string(path)?;
         self.editor.with_buffer_mut(|buffer| {
-            buffer.set_text(font_system, &text, attrs, Shaping::Advanced);
+            buffer.set_text(font_system, &text, &attrs, Shaping::Advanced);
         });
 
         //TODO: re-use text
@@ -332,9 +332,11 @@ impl<'buffer> Edit<'buffer> for SyntaxEditor<'_, 'buffer> {
                 );
 
                 let attrs = line.attrs_list().defaults();
-                let mut attrs_list = AttrsList::new(attrs);
+                let mut attrs_list = AttrsList::new(&attrs);
+                let original_attrs = attrs.clone(); // Store a clone for comparison
                 for (style, _, range) in ranges {
                     let span_attrs = attrs
+                        .clone() // Clone attrs for modification
                         .color(Color::rgba(
                             style.foreground.r,
                             style.foreground.g,
@@ -352,8 +354,8 @@ impl<'buffer> Edit<'buffer> for SyntaxEditor<'_, 'buffer> {
                         } else {
                             Weight::NORMAL
                         }); //TODO: underline
-                    if span_attrs != attrs {
-                        attrs_list.add_span(range, span_attrs);
+                    if span_attrs != original_attrs {
+                        attrs_list.add_span(range, &span_attrs);
                     }
                 }
 
