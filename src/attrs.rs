@@ -2,6 +2,7 @@
 
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
+use core::hash::{Hash, Hasher};
 use core::ops::Range;
 use rangemap::RangeMap;
 use smol_str::SmolStr;
@@ -189,6 +190,37 @@ impl FontFeatures {
     }
 }
 
+/// A wrapper for letter spacing to get around that f32 doesn't implement Eq and Hash
+#[derive(Clone, Copy, Debug)]
+pub struct LetterSpacing(pub f32);
+
+impl PartialEq for LetterSpacing {
+    fn eq(&self, other: &Self) -> bool {
+        if self.0.is_nan() {
+            other.0.is_nan()
+        } else {
+            self.0 == other.0
+        }
+    }
+}
+
+impl Eq for LetterSpacing {}
+
+impl Hash for LetterSpacing {
+    fn hash<H: Hasher>(&self, hasher: &mut H) {
+        const CANONICAL_NAN_BITS: u32 = 0x7fc0_0000;
+
+        let bits = if self.0.is_nan() {
+            CANONICAL_NAN_BITS
+        } else {
+            // Add +0.0 to canonicalize -0.0 to +0.0
+            (self.0 + 0.0).to_bits()
+        };
+
+        bits.hash(hasher);
+    }
+}
+
 /// Text attributes
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Attrs<'a> {
@@ -201,6 +233,8 @@ pub struct Attrs<'a> {
     pub metadata: usize,
     pub cache_key_flags: CacheKeyFlags,
     pub metrics_opt: Option<CacheMetrics>,
+    /// Letter spacing (tracking) in EM
+    pub letter_spacing_opt: Option<LetterSpacing>,
     pub font_features: FontFeatures,
 }
 
@@ -218,6 +252,7 @@ impl<'a> Attrs<'a> {
             metadata: 0,
             cache_key_flags: CacheKeyFlags::empty(),
             metrics_opt: None,
+            letter_spacing_opt: None,
             font_features: FontFeatures::new(),
         }
     }
@@ -267,6 +302,12 @@ impl<'a> Attrs<'a> {
     /// Set [`Metrics`], overriding values in buffer
     pub fn metrics(mut self, metrics: Metrics) -> Self {
         self.metrics_opt = Some(metrics.into());
+        self
+    }
+
+    /// Set letter spacing (tracking) in EM
+    pub fn letter_spacing(mut self, letter_spacing: f32) -> Self {
+        self.letter_spacing_opt = Some(LetterSpacing(letter_spacing));
         self
     }
 
@@ -324,6 +365,8 @@ pub struct AttrsOwned {
     pub metadata: usize,
     pub cache_key_flags: CacheKeyFlags,
     pub metrics_opt: Option<CacheMetrics>,
+    /// Letter spacing (tracking) in EM
+    pub letter_spacing_opt: Option<LetterSpacing>,
     pub font_features: FontFeatures,
 }
 
@@ -338,6 +381,7 @@ impl AttrsOwned {
             metadata: attrs.metadata,
             cache_key_flags: attrs.cache_key_flags,
             metrics_opt: attrs.metrics_opt,
+            letter_spacing_opt: attrs.letter_spacing_opt,
             font_features: attrs.font_features.clone(),
         }
     }
@@ -352,6 +396,7 @@ impl AttrsOwned {
             metadata: self.metadata,
             cache_key_flags: self.cache_key_flags,
             metrics_opt: self.metrics_opt,
+            letter_spacing_opt: self.letter_spacing_opt,
             font_features: self.font_features.clone(),
         }
     }

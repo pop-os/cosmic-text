@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+use alloc::borrow::ToOwned;
+use alloc::string::String;
 use alloc::sync::Arc;
 use alloc::vec::Vec;
+use core::{mem, ops::Range};
 use fontdb::Family;
 use unicode_script::Script;
 
-use crate::{Font, FontMatchKey, FontSystem, ShapeBuffer};
-
-use self::platform::*;
+use crate::{BuildHasher, Font, FontMatchKey, FontSystem, HashMap, ShapeBuffer};
 
 #[cfg(not(any(all(unix, not(target_os = "android")), target_os = "windows")))]
 #[path = "other.rs"]
@@ -24,6 +25,145 @@ mod platform;
 #[cfg(target_os = "windows")]
 #[path = "windows.rs"]
 mod platform;
+
+/// The `Fallback` trait allows for configurable font fallback lists to be set during construction of the [`FontSystem`].
+///
+/// A custom fallback list can be added via the [`FontSystem::new_with_locale_and_db_and_fallback`] constructor.
+///
+/// A default implementation is provided by the [`PlatformFallback`] struct, which encapsulates the target platform's pre-configured fallback lists.
+///
+/// ```rust
+/// # use unicode_script::Script;
+/// # use cosmic_text::{Fallback, FontSystem};
+/// struct MyFallback;
+/// impl Fallback for MyFallback {
+///     fn common_fallback(&self) -> &[&'static str] {
+///         &[
+///             "Segoe UI",
+///             "Segoe UI Emoji",
+///             "Segoe UI Symbol",
+///             "Segoe UI Historic",
+///         ]
+///     }
+///
+///     fn forbidden_fallback(&self) -> &[&'static str] {
+///         &[]
+///     }
+///
+///     fn script_fallback(&self, script: Script, locale: &str) -> &[&'static str] {
+///         match script {
+///             Script::Adlam => &["Ebrima"],
+///             Script::Bengali => &["Nirmala UI"],
+///             Script::Canadian_Aboriginal => &["Gadugi"],
+///             // ...
+///             _ => &[],
+///        }
+///     }
+/// }
+///
+/// let locale = "en-US".to_string();
+/// let db = fontdb::Database::new();
+/// let font_system = FontSystem::new_with_locale_and_db_and_fallback(locale, db, MyFallback);
+/// ```
+pub trait Fallback: Send + Sync {
+    /// Fallbacks to use after any script specific fallbacks
+    fn common_fallback(&self) -> &[&'static str];
+
+    /// Fallbacks to never use
+    fn forbidden_fallback(&self) -> &[&'static str];
+
+    /// Fallbacks to use per script
+    fn script_fallback(&self, script: Script, locale: &str) -> &[&'static str];
+}
+
+#[derive(Debug, Default)]
+pub(crate) struct Fallbacks {
+    lists: Vec<&'static str>,
+    common_fallback_range: Range<usize>,
+    forbidden_fallback_range: Range<usize>,
+    // PERF: Consider using NoHashHasher since Script is just an integer
+    script_fallback_ranges: HashMap<Script, Range<usize>>,
+    locale: String,
+}
+
+impl Fallbacks {
+    pub(crate) fn new(fallbacks: &dyn Fallback, scripts: &[Script], locale: &str) -> Self {
+        let common_fallback = fallbacks.common_fallback();
+
+        let forbidden_fallback = fallbacks.forbidden_fallback();
+
+        let mut lists =
+            Vec::with_capacity(common_fallback.len() + forbidden_fallback.len() + scripts.len());
+
+        let mut index = lists.len();
+        let mut new_range = |lists: &Vec<&str>| {
+            let old_index = index;
+            index = lists.len();
+            old_index..index
+        };
+
+        lists.extend_from_slice(common_fallback);
+        let common_fallback_range = new_range(&lists);
+
+        lists.extend_from_slice(forbidden_fallback);
+        let forbidden_fallback_range = new_range(&lists);
+
+        let mut script_fallback_ranges =
+            HashMap::with_capacity_and_hasher(scripts.len(), BuildHasher::new());
+        for &script in scripts {
+            let script_fallback = fallbacks.script_fallback(script, locale);
+            lists.extend_from_slice(script_fallback);
+            let script_fallback_range = new_range(&lists);
+            script_fallback_ranges.insert(script, script_fallback_range);
+        }
+
+        let locale = locale.to_owned();
+        Self {
+            lists,
+            common_fallback_range,
+            forbidden_fallback_range,
+            script_fallback_ranges,
+            locale,
+        }
+    }
+
+    pub(crate) fn extend(&mut self, fallbacks: &dyn Fallback, scripts: &[Script]) {
+        self.lists.reserve(scripts.len());
+
+        let mut index = self.lists.len();
+        let mut new_range = |lists: &Vec<&str>| {
+            let old_index = index;
+            index = lists.len();
+            old_index..index
+        };
+
+        for &script in scripts {
+            self.script_fallback_ranges
+                .entry(script)
+                .or_insert_with_key(|&script| {
+                    let script_fallback = fallbacks.script_fallback(script, &self.locale);
+                    self.lists.extend_from_slice(script_fallback);
+                    new_range(&self.lists)
+                });
+        }
+    }
+
+    pub(crate) fn common_fallback(&self) -> &[&'static str] {
+        &self.lists[self.common_fallback_range.clone()]
+    }
+
+    pub(crate) fn forbidden_fallback(&self) -> &[&'static str] {
+        &self.lists[self.forbidden_fallback_range.clone()]
+    }
+
+    pub(crate) fn script_fallback(&self, script: Script) -> &[&'static str] {
+        self.script_fallback_ranges
+            .get(&script)
+            .map_or(&[], |range| &self.lists[range.clone()])
+    }
+}
+
+pub use platform::PlatformFallback;
 
 #[cfg(not(feature = "warn_on_missing_glyphs"))]
 use log::debug as missing_warn;
@@ -62,6 +202,9 @@ impl<'a> FontFallbackIter<'a> {
         scripts: &'a [Script],
         word: &'a str,
     ) -> Self {
+        font_system
+            .fallbacks
+            .extend(font_system.dyn_fallback.as_ref(), scripts);
         font_system.monospace_fallbacks_buffer.clear();
         Self {
             font_system,
@@ -94,7 +237,7 @@ impl<'a> FontFallbackIter<'a> {
                 word
             );
         } else if !self.scripts.is_empty() && self.common_i > 0 {
-            let family = common_fallback()[self.common_i - 1];
+            let family = self.font_system.fallbacks.common_fallback()[self.common_i - 1];
             missing_warn!(
                 "Failed to find script fallback for {:?} locale '{}', used '{}': '{}'",
                 self.scripts,
@@ -138,11 +281,8 @@ impl<'a> FontFallbackIter<'a> {
             .filter(|m_key| m_key.font_weight_diff == 0)
             .find(|m_key| self.face_contains_family(m_key.id, default_family_name))
     }
-}
 
-impl Iterator for FontFallbackIter<'_> {
-    type Item = Arc<Font>;
-    fn next(&mut self) -> Option<Self::Item> {
+    fn next_item(&mut self, fallbacks: &Fallbacks) -> Option<<Self as Iterator>::Item> {
         if let Some(fallback_info) = self.font_system.monospace_fallbacks_buffer.pop_first() {
             if let Some(font) = self.font_system.get_font(fallback_info.id) {
                 return Some(font);
@@ -262,7 +402,8 @@ impl Iterator for FontFallbackIter<'_> {
         while self.script_i.0 < self.scripts.len() {
             let script = self.scripts[self.script_i.0];
 
-            let script_families = script_fallback(script, self.font_system.locale());
+            let script_families = fallbacks.script_fallback(script);
+
             while self.script_i.1 < script_families.len() {
                 let script_family = script_families[self.script_i.1];
                 self.script_i.1 += 1;
@@ -285,7 +426,7 @@ impl Iterator for FontFallbackIter<'_> {
             self.script_i.1 = 0;
         }
 
-        let common_families = common_fallback();
+        let common_families = fallbacks.common_fallback();
         while self.common_i < common_families.len() {
             let common_family = common_families[self.common_i];
             self.common_i += 1;
@@ -301,7 +442,7 @@ impl Iterator for FontFallbackIter<'_> {
 
         //TODO: do we need to do this?
         //TODO: do not evaluate fonts more than once!
-        let forbidden_families = forbidden_fallback();
+        let forbidden_families = fallbacks.forbidden_fallback();
         while self.other_i < self.font_match_keys.len() {
             let id = self.font_match_keys[self.other_i].id;
             self.other_i += 1;
@@ -317,5 +458,15 @@ impl Iterator for FontFallbackIter<'_> {
 
         self.end = true;
         None
+    }
+}
+
+impl Iterator for FontFallbackIter<'_> {
+    type Item = Arc<Font>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let mut fallbacks = mem::take(&mut self.font_system.fallbacks);
+        let item = self.next_item(&fallbacks);
+        mem::swap(&mut fallbacks, &mut self.font_system.fallbacks);
+        item
     }
 }
