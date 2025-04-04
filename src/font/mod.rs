@@ -189,7 +189,7 @@ impl Font {
             #[cfg(not(feature = "peniko"))]
             data,
             #[cfg(feature = "peniko")]
-            data: peniko::Font::new(peniko::Blob::new(data), info.index)
+            data: peniko::Font::new(peniko::Blob::new(data), info.index),
         })
     }
 }
