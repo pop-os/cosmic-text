@@ -91,8 +91,8 @@ impl Font {
     }
 
     #[cfg(feature = "peniko")]
-    pub fn peniko(&self) -> &peniko::Font {
-        &self.data
+    pub fn as_peniko(&self) -> peniko::Font {
+        self.data.clone()
     }
 
     #[cfg(feature = "swash")]
