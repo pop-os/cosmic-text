@@ -40,11 +40,16 @@ version = "0.3.13"
 default-features = false
 features = ["hardcoded-data"]
 
+[dependencies.peniko]
+version = "0.3.1"
+optional = true
+
 [features]
 default = ["std", "swash", "fontconfig"]
 fontconfig = ["fontdb/fontconfig", "std"]
 monospace_fallback = []
 no_std = ["rustybuzz/libm", "hashbrown", "dep:libm"]
+peniko = ["dep:peniko"]
 shape-run-cache = []
 std = [
     "fontdb/memmap",

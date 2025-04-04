@@ -38,7 +38,10 @@ pub struct Font {
     #[cfg(feature = "swash")]
     swash: (u32, swash::CacheKey),
     rustybuzz: OwnedFace,
+    #[cfg(not(feature = "peniko"))]
     data: Arc<dyn AsRef<[u8]> + Send + Sync>,
+    #[cfg(feature = "peniko")]
+    data: peniko::Font,
     id: fontdb::ID,
     monospace_fallback: Option<FontMonospaceFallback>,
 }
@@ -73,11 +76,23 @@ impl Font {
     }
 
     pub fn data(&self) -> &[u8] {
-        (*self.data).as_ref()
+        #[cfg(not(feature = "peniko"))]
+        {
+            (*self.data).as_ref()
+        }
+        #[cfg(feature = "peniko")]
+        {
+            self.data.data.data()
+        }
     }
 
     pub fn rustybuzz(&self) -> &RustybuzzFace<'_> {
         self.rustybuzz.borrow_dependent()
+    }
+
+    #[cfg(feature = "peniko")]
+    pub fn as_peniko(&self) -> &peniko::Font {
+        &self.data
     }
 
     #[cfg(feature = "swash")]
@@ -171,7 +186,10 @@ impl Font {
                 RustybuzzFace::from_slice((**data).as_ref(), info.index).ok_or(())
             })
             .ok()?,
+            #[cfg(not(feature = "peniko"))]
             data,
+            #[cfg(feature = "peniko")]
+            data: peniko::Font::new(peniko::Blob::new(data), info.index)
         })
     }
 }
