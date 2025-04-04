@@ -91,7 +91,7 @@ impl Font {
     }
 
     #[cfg(feature = "peniko")]
-    pub fn as_peniko(&self) -> &peniko::Font {
+    pub fn peniko(&self) -> &peniko::Font {
         &self.data
     }
 
