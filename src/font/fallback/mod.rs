@@ -109,7 +109,7 @@ impl Fallbacks {
         let forbidden_fallback_range = new_range(&lists);
 
         let mut script_fallback_ranges =
-            HashMap::with_capacity_and_hasher(scripts.len(), BuildHasher::new());
+            HashMap::with_capacity_and_hasher(scripts.len(), BuildHasher::default());
         for &script in scripts {
             let script_fallback = fallbacks.script_fallback(script, locale);
             lists.extend_from_slice(script_fallback);
