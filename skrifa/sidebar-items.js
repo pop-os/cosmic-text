@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"externcrate":["raw"],"mod":["attribute","charmap","color","font","instance","metrics","outline","prelude","setting","string"],"struct":["Axis","AxisCollection","FontRef","GlyphId","GlyphId16","NamedInstance","NamedInstanceCollection","OutlineGlyph","OutlineGlyphCollection","Tag"],"trait":["MetadataProvider"]};
