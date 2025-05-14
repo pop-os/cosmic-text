@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["UNICODE_VERSION"],"enum":["CanonicalCombiningClass"],"fn":["get_canonical_combining_class"]};
