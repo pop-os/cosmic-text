@@ -1,4 +1,5 @@
 use crate::{Attrs, Font, FontMatchAttrs, HashMap, ShapeBuffer};
+use alloc::boxed::Box;
 use alloc::collections::BTreeSet;
 use alloc::string::String;
 use alloc::sync::Arc;
@@ -133,9 +134,10 @@ impl fmt::Debug for FontSystem {
 ///
 /// * Use the system locale on `std` or `en-US` on `no_std`
 /// * Load system fonts
-/// * Use `Fira Mono` as the monospace family
-/// * Use `Fira Sans` as the sans-serif family
+/// * Use `Noto Sans Mono` as the monospace family
+/// * Use `Open Sans` as the sans-serif family
 /// * Use `DejaVu Serif` as the serif family
+/// * Use a platform-specific font fallback
 ///
 /// # Timing
 ///
@@ -174,14 +176,14 @@ pub struct FontSystemBuilder {
 impl Debug for FontSystemBuilder {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("FontSystemBuilder")
-        .field("locale", &self.locale)
-        .field("load_system_fonts", &self.load_system_fonts)
-        .field("database", &self.database)
-        .field("fonts", &self.fonts)
-        .field("monospace_family", &self.monospace_family)
-        .field("sans_serif_family", &self.sans_serif_family)
-        .field("serif_family", &self.serif_family)
-        .finish()
+            .field("locale", &self.locale)
+            .field("load_system_fonts", &self.load_system_fonts)
+            .field("database", &self.database)
+            .field("fonts", &self.fonts)
+            .field("monospace_family", &self.monospace_family)
+            .field("sans_serif_family", &self.sans_serif_family)
+            .field("serif_family", &self.serif_family)
+            .finish()
     }
 }
 
@@ -300,11 +302,17 @@ impl FontSystemBuilder {
         self
     }
 
+    /// Sets the font fallback implementation
+    ///
+    /// Default: [PlatformFallback]
     pub fn dyn_fallback(mut self, fallback: Option<Box<dyn Fallback>>) -> Self {
         self.dyn_fallback = fallback;
         self
     }
 
+    /// Sets the font fallback implementation
+    ///
+    /// Default: [PlatformFallback]
     pub fn fallback(self, fallback: impl Fallback + 'static) -> Self {
         self.dyn_fallback(Some(Box::new(fallback)))
     }
@@ -333,9 +341,7 @@ impl FontSystem {
     /// while debug builds can take up to ten times longer. For this reason, it should only be
     /// called once, and the resulting [`FontSystem`] should be shared.
     pub fn new_with_fonts(fonts: impl IntoIterator<Item = fontdb::Source>) -> Self {
-        Self::builder()
-            .load_fonts(fonts)
-            .build()
+        Self::builder().load_fonts(fonts).build()
     }
 
     fn new_with_locale_and_db_and_dyn_fallback(
@@ -471,7 +477,9 @@ impl FontSystem {
         db.set_sans_serif_family(builder.sans_serif_family);
         db.set_serif_family(builder.serif_family);
 
-        let dyn_fallback = builder.dyn_fallback.unwrap_or_else(||Box::new(PlatformFallback));
+        let dyn_fallback = builder
+            .dyn_fallback
+            .unwrap_or_else(|| Box::new(PlatformFallback));
 
         Self::new_with_locale_and_db_and_dyn_fallback(locale, db, dyn_fallback)
     }
