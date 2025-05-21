@@ -36,7 +36,7 @@
 //! let attrs = Attrs::new();
 //!
 //! // Add some text!
-//! buffer.set_text("Hello, Rust! 🦀\n", attrs, Shaping::Advanced);
+//! buffer.set_text("Hello, Rust! 🦀\n", &attrs, Shaping::Advanced);
 //!
 //! // Perform shaping as desired
 //! buffer.shape_until_scroll(true);
@@ -131,9 +131,6 @@ mod line_ending;
 
 pub use self::shape::*;
 mod shape;
-
-use self::shape_plan_cache::*;
-mod shape_plan_cache;
 
 pub use self::shape_run_cache::*;
 mod shape_run_cache;

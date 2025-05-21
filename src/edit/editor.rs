@@ -109,6 +109,7 @@ impl<'buffer> Editor<'buffer> {
 
     /// Draw the editor
     #[cfg(feature = "swash")]
+    #[allow(clippy::too_many_arguments)]
     pub fn draw<F>(
         &self,
         font_system: &mut FontSystem,
@@ -379,7 +380,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                 let line = BufferLine::new(
                     String::new(),
                     ending,
-                    AttrsList::new(attrs_list.as_ref().map_or_else(
+                    AttrsList::new(&attrs_list.as_ref().map_or_else(
                         || {
                             buffer
                                 .lines
@@ -403,7 +404,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
 
             // Collect attributes
             let mut final_attrs = attrs_list.unwrap_or_else(|| {
-                AttrsList::new(line.attrs_list().get_span(cursor.index.saturating_sub(1)))
+                AttrsList::new(&line.attrs_list().get_span(cursor.index.saturating_sub(1)))
             });
 
             // Append the inserted text, line by line
@@ -527,16 +528,13 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
 
     fn apply_change(&mut self, change: &Change) -> bool {
         // Cannot apply changes if there is a pending change
-        match self.change.take() {
-            Some(pending) => {
-                if !pending.items.is_empty() {
-                    //TODO: is this a good idea?
-                    log::warn!("pending change caused apply_change to be ignored!");
-                    self.change = Some(pending);
-                    return false;
-                }
+        if let Some(pending) = self.change.take() {
+            if !pending.items.is_empty() {
+                //TODO: is this a good idea?
+                log::warn!("pending change caused apply_change to be ignored!");
+                self.change = Some(pending);
+                return false;
             }
-            None => {}
         }
 
         for item in change.items.iter() {
@@ -898,7 +896,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
     }
 }
 
-impl<'font_system, 'buffer> BorrowedWithFontSystem<'font_system, Editor<'buffer>> {
+impl BorrowedWithFontSystem<'_, Editor<'_>> {
     #[cfg(feature = "swash")]
     pub fn draw<F>(
         &mut self,

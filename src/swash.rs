@@ -65,7 +65,7 @@ fn swash_outline_commands(
     font_system: &mut FontSystem,
     context: &mut ScaleContext,
     cache_key: CacheKey,
-) -> Option<Vec<swash::zeno::Command>> {
+) -> Option<Box<[swash::zeno::Command]>> {
     use swash::zeno::PathData as _;
 
     let font = match font_system.get_font(cache_key.font_id) {
@@ -80,6 +80,7 @@ fn swash_outline_commands(
     let mut scaler = context
         .builder(font.as_swash())
         .size(f32::from_bits(cache_key.font_size_bits))
+        .hint(true)
         .build();
 
     // Scale the outline
@@ -98,7 +99,7 @@ fn swash_outline_commands(
 pub struct SwashCache {
     context: ScaleContext,
     pub image_cache: HashMap<CacheKey, Option<SwashImage>>,
-    pub outline_command_cache: HashMap<CacheKey, Option<Vec<swash::zeno::Command>>>,
+    pub outline_command_cache: HashMap<CacheKey, Option<Box<[swash::zeno::Command]>>>,
 }
 
 impl fmt::Debug for SwashCache {
@@ -137,6 +138,7 @@ impl SwashCache {
             .or_insert_with(|| swash_image(font_system, &mut self.context, cache_key))
     }
 
+    /// Creates outline commands
     pub fn get_outline_commands(
         &mut self,
         font_system: &mut FontSystem,
@@ -146,6 +148,15 @@ impl SwashCache {
             .entry(cache_key)
             .or_insert_with(|| swash_outline_commands(font_system, &mut self.context, cache_key))
             .as_deref()
+    }
+
+    /// Creates outline commands, without caching results
+    pub fn get_outline_commands_uncached(
+        &mut self,
+        font_system: &mut FontSystem,
+        cache_key: CacheKey,
+    ) -> Option<Box<[swash::zeno::Command]>> {
+        swash_outline_commands(font_system, &mut self.context, cache_key)
     }
 
     /// Enumerate pixels in an Image, use `with_image` for better performance

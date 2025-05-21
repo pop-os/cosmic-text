@@ -19,91 +19,114 @@ use winit::{
     window::WindowBuilder,
 };
 
-fn set_buffer_text<'a>(buffer: &mut BorrowedWithFontSystem<'a, Buffer>) {
+fn set_buffer_text(buffer: &mut BorrowedWithFontSystem<'_, Buffer>) {
     let attrs = Attrs::new();
-    let serif_attrs = attrs.family(Family::Serif);
-    let mono_attrs = attrs.family(Family::Monospace);
-    let comic_attrs = attrs.family(Family::Name("Comic Neue"));
+    let serif_attrs = attrs.clone().family(Family::Serif);
+    let mono_attrs = attrs.clone().family(Family::Monospace);
+    let comic_attrs = attrs.clone().family(Family::Name("Comic Neue"));
 
     let spans: &[(&str, Attrs)] = &[
-        ("Font size 64 ", attrs.metrics(Metrics::relative(64.0, 1.2))),
-        ("Font size 8 ", attrs.metrics(Metrics::relative(8.0, 1.2))),
-        ("Font size 20 ", attrs.metrics(Metrics::relative(20.0, 1.2))),
-        ("Font size 14 ", attrs.metrics(Metrics::relative(14.0, 1.2))),
+        (
+            "Font size 64 ",
+            attrs.clone().metrics(Metrics::relative(64.0, 1.2)),
+        ),
+        (
+            "Font size 8 ",
+            attrs.clone().metrics(Metrics::relative(8.0, 1.2)),
+        ),
+        (
+            "Font size 20 ",
+            attrs.clone().metrics(Metrics::relative(20.0, 1.2)),
+        ),
+        (
+            "Font size 14 ",
+            attrs.clone().metrics(Metrics::relative(14.0, 1.2)),
+        ),
         (
             "Font size 48\n",
-            attrs.metrics(Metrics::relative(48.0, 1.2)),
+            attrs.clone().metrics(Metrics::relative(48.0, 1.2)),
         ),
-        ("B", attrs.weight(Weight::BOLD)),
-        ("old ", attrs),
-        ("I", attrs.style(Style::Italic)),
-        ("talic ", attrs),
-        ("f", attrs),
-        ("i ", attrs),
-        ("f", attrs.weight(Weight::BOLD)),
-        ("i ", attrs),
-        ("f", attrs.style(Style::Italic)),
-        ("i \n", attrs),
-        ("Sans-Serif Normal ", attrs),
-        ("Sans-Serif Bold ", attrs.weight(Weight::BOLD)),
-        ("Sans-Serif Italic ", attrs.style(Style::Italic)),
+        ("B", attrs.clone().weight(Weight::BOLD)),
+        ("old ", attrs.clone()),
+        ("I", attrs.clone().style(Style::Italic)),
+        ("talic ", attrs.clone()),
+        ("f", attrs.clone()),
+        ("i ", attrs.clone()),
+        ("f", attrs.clone().weight(Weight::BOLD)),
+        ("i ", attrs.clone()),
+        ("f", attrs.clone().style(Style::Italic)),
+        ("i \n", attrs.clone()),
+        ("Sans-Serif Normal ", attrs.clone()),
+        ("Sans-Serif Bold ", attrs.clone().weight(Weight::BOLD)),
+        ("Sans-Serif Italic ", attrs.clone().style(Style::Italic)),
         (
             "Sans-Serif Fake Italic ",
-            attrs.cache_key_flags(CacheKeyFlags::FAKE_ITALIC),
+            attrs.clone().cache_key_flags(CacheKeyFlags::FAKE_ITALIC),
         ),
         (
             "Sans-Serif Bold Italic\n",
-            attrs.weight(Weight::BOLD).style(Style::Italic),
+            attrs.clone().weight(Weight::BOLD).style(Style::Italic),
         ),
-        ("Serif Normal ", serif_attrs),
-        ("Serif Bold ", serif_attrs.weight(Weight::BOLD)),
-        ("Serif Italic ", serif_attrs.style(Style::Italic)),
+        ("Serif Normal ", serif_attrs.clone()),
+        ("Serif Bold ", serif_attrs.clone().weight(Weight::BOLD)),
+        ("Serif Italic ", serif_attrs.clone().style(Style::Italic)),
         (
             "Serif Bold Italic\n",
-            serif_attrs.weight(Weight::BOLD).style(Style::Italic),
+            serif_attrs
+                .clone()
+                .weight(Weight::BOLD)
+                .style(Style::Italic),
         ),
-        ("Mono Normal ", mono_attrs),
-        ("Mono Bold ", mono_attrs.weight(Weight::BOLD)),
-        ("Mono Italic ", mono_attrs.style(Style::Italic)),
+        ("Mono Normal ", mono_attrs.clone()),
+        ("Mono Bold ", mono_attrs.clone().weight(Weight::BOLD)),
+        ("Mono Italic ", mono_attrs.clone().style(Style::Italic)),
         (
             "Mono Bold Italic\n",
-            mono_attrs.weight(Weight::BOLD).style(Style::Italic),
+            mono_attrs.clone().weight(Weight::BOLD).style(Style::Italic),
         ),
-        ("Comic Normal ", comic_attrs),
-        ("Comic Bold ", comic_attrs.weight(Weight::BOLD)),
-        ("Comic Italic ", comic_attrs.style(Style::Italic)),
+        ("Comic Normal ", comic_attrs.clone()),
+        ("Comic Bold ", comic_attrs.clone().weight(Weight::BOLD)),
+        ("Comic Italic ", comic_attrs.clone().style(Style::Italic)),
         (
             "Comic Bold Italic\n",
-            comic_attrs.weight(Weight::BOLD).style(Style::Italic),
+            comic_attrs
+                .clone()
+                .weight(Weight::BOLD)
+                .style(Style::Italic),
         ),
-        ("R", attrs.color(Color::rgb(0xFF, 0x00, 0x00))),
-        ("A", attrs.color(Color::rgb(0xFF, 0x7F, 0x00))),
-        ("I", attrs.color(Color::rgb(0xFF, 0xFF, 0x00))),
-        ("N", attrs.color(Color::rgb(0x00, 0xFF, 0x00))),
-        ("B", attrs.color(Color::rgb(0x00, 0x00, 0xFF))),
-        ("O", attrs.color(Color::rgb(0x4B, 0x00, 0x82))),
-        ("W ", attrs.color(Color::rgb(0x94, 0x00, 0xD3))),
-        ("Red ", attrs.color(Color::rgb(0xFF, 0x00, 0x00))),
-        ("Orange ", attrs.color(Color::rgb(0xFF, 0x7F, 0x00))),
-        ("Yellow ", attrs.color(Color::rgb(0xFF, 0xFF, 0x00))),
-        ("Green ", attrs.color(Color::rgb(0x00, 0xFF, 0x00))),
-        ("Blue ", attrs.color(Color::rgb(0x00, 0x00, 0xFF))),
-        ("Indigo ", attrs.color(Color::rgb(0x4B, 0x00, 0x82))),
-        ("Violet ", attrs.color(Color::rgb(0x94, 0x00, 0xD3))),
-        ("U", attrs.color(Color::rgb(0x94, 0x00, 0xD3))),
-        ("N", attrs.color(Color::rgb(0x4B, 0x00, 0x82))),
-        ("I", attrs.color(Color::rgb(0x00, 0x00, 0xFF))),
-        ("C", attrs.color(Color::rgb(0x00, 0xFF, 0x00))),
-        ("O", attrs.color(Color::rgb(0xFF, 0xFF, 0x00))),
-        ("R", attrs.color(Color::rgb(0xFF, 0x7F, 0x00))),
-        ("N\n", attrs.color(Color::rgb(0xFF, 0x00, 0x00))),
+        ("R", attrs.clone().color(Color::rgb(0xFF, 0x00, 0x00))),
+        ("A", attrs.clone().color(Color::rgb(0xFF, 0x7F, 0x00))),
+        ("I", attrs.clone().color(Color::rgb(0xFF, 0xFF, 0x00))),
+        ("N", attrs.clone().color(Color::rgb(0x00, 0xFF, 0x00))),
+        ("B", attrs.clone().color(Color::rgb(0x00, 0x00, 0xFF))),
+        ("O", attrs.clone().color(Color::rgb(0x4B, 0x00, 0x82))),
+        ("W ", attrs.clone().color(Color::rgb(0x94, 0x00, 0xD3))),
+        ("Red ", attrs.clone().color(Color::rgb(0xFF, 0x00, 0x00))),
+        ("Orange ", attrs.clone().color(Color::rgb(0xFF, 0x7F, 0x00))),
+        ("Yellow ", attrs.clone().color(Color::rgb(0xFF, 0xFF, 0x00))),
+        ("Green ", attrs.clone().color(Color::rgb(0x00, 0xFF, 0x00))),
+        ("Blue ", attrs.clone().color(Color::rgb(0x00, 0x00, 0xFF))),
+        ("Indigo ", attrs.clone().color(Color::rgb(0x4B, 0x00, 0x82))),
+        ("Violet ", attrs.clone().color(Color::rgb(0x94, 0x00, 0xD3))),
+        ("U", attrs.clone().color(Color::rgb(0x94, 0x00, 0xD3))),
+        ("N", attrs.clone().color(Color::rgb(0x4B, 0x00, 0x82))),
+        ("I", attrs.clone().color(Color::rgb(0x00, 0x00, 0xFF))),
+        ("C", attrs.clone().color(Color::rgb(0x00, 0xFF, 0x00))),
+        ("O", attrs.clone().color(Color::rgb(0xFF, 0xFF, 0x00))),
+        ("R", attrs.clone().color(Color::rgb(0xFF, 0x7F, 0x00))),
+        ("N\n", attrs.clone().color(Color::rgb(0xFF, 0x00, 0x00))),
         (
             "生活,삶,जिंदगी 😀 FPS\n",
-            attrs.color(Color::rgb(0xFF, 0x00, 0x00)),
+            attrs.clone().color(Color::rgb(0xFF, 0x00, 0x00)),
         ),
     ];
 
-    buffer.set_rich_text(spans.iter().copied(), attrs, Shaping::Advanced, None);
+    buffer.set_rich_text(
+        spans.iter().map(|(text, attrs)| (*text, attrs.clone())),
+        &attrs,
+        Shaping::Advanced,
+        None,
+    );
 }
 
 fn main() {
@@ -126,7 +149,7 @@ fn main() {
             Some(window.inner_size().height as f32),
         )
     });
-    editor.with_buffer_mut(|buffer| set_buffer_text(buffer));
+    editor.with_buffer_mut(set_buffer_text);
 
     let mut ctrl_pressed = false;
     let mut mouse_x = 0.0;
@@ -144,206 +167,194 @@ fn main() {
         .run(|event, elwt| {
             elwt.set_control_flow(ControlFlow::Wait);
 
+            let Event::WindowEvent { window_id, event } = event else {
+                return;
+            };
+
             match event {
-                Event::WindowEvent { window_id, event } => {
-                    match event {
-                        WindowEvent::ScaleFactorChanged { scale_factor, .. } => {
-                            log::info!("Updated scale factor for {window_id:?}");
+                WindowEvent::ScaleFactorChanged { scale_factor, .. } => {
+                    log::info!("Updated scale factor for {window_id:?}");
 
-                            display_scale = scale_factor as f32;
-                            editor.with_buffer_mut(|buffer| {
-                                buffer.set_metrics(metrics.scale(display_scale))
-                            });
+                    display_scale = scale_factor as f32;
+                    editor
+                        .with_buffer_mut(|buffer| buffer.set_metrics(metrics.scale(display_scale)));
 
-                            window.request_redraw();
-                        }
-                        WindowEvent::RedrawRequested => {
-                            let (width, height) = {
-                                let size = window.inner_size();
-                                (size.width, size.height)
-                            };
+                    window.request_redraw();
+                }
+                WindowEvent::RedrawRequested => {
+                    let (width, height) = {
+                        let size = window.inner_size();
+                        (size.width, size.height)
+                    };
 
-                            surface
-                                .resize(
-                                    NonZeroU32::new(width).unwrap(),
-                                    NonZeroU32::new(height).unwrap(),
-                                )
-                                .unwrap();
+                    surface
+                        .resize(
+                            NonZeroU32::new(width).unwrap(),
+                            NonZeroU32::new(height).unwrap(),
+                        )
+                        .unwrap();
 
-                            let mut surface_buffer = surface.buffer_mut().unwrap();
-                            let surface_buffer_u8 = unsafe {
-                                slice::from_raw_parts_mut(
-                                    surface_buffer.as_mut_ptr() as *mut u8,
-                                    surface_buffer.len() * 4,
-                                )
-                            };
-                            let mut pixmap =
-                                PixmapMut::from_bytes(surface_buffer_u8, width, height).unwrap();
-                            pixmap.fill(bg_color);
+                    let mut surface_buffer = surface.buffer_mut().unwrap();
+                    let surface_buffer_u8 = unsafe {
+                        slice::from_raw_parts_mut(
+                            surface_buffer.as_mut_ptr() as *mut u8,
+                            surface_buffer.len() * 4,
+                        )
+                    };
+                    let mut pixmap =
+                        PixmapMut::from_bytes(surface_buffer_u8, width, height).unwrap();
+                    pixmap.fill(bg_color);
 
-                            editor.with_buffer_mut(|buffer| {
-                                buffer.set_size(Some(width as f32), Some(height as f32))
-                            });
+                    editor.with_buffer_mut(|buffer| {
+                        buffer.set_size(Some(width as f32), Some(height as f32))
+                    });
 
-                            let mut paint = Paint::default();
-                            paint.anti_alias = false;
-                            editor.shape_as_needed(true);
+                    let mut paint = Paint {
+                        anti_alias: false,
+                        ..Default::default()
+                    };
+                    editor.shape_as_needed(true);
 
-                            editor.draw(
-                                &mut swash_cache,
-                                font_color,
-                                cursor_color,
-                                selection_color,
-                                selected_text_color,
-                                |x, y, w, h, color| {
-                                    // Note: due to softbuffer and tiny_skia having incompatible internal color representations we swap
-                                    // the red and blue channels here
-                                    paint.set_color_rgba8(
-                                        color.b(),
-                                        color.g(),
-                                        color.r(),
-                                        color.a(),
-                                    );
-                                    pixmap.fill_rect(
-                                        Rect::from_xywh(x as f32, y as f32, w as f32, h as f32)
-                                            .unwrap(),
-                                        &paint,
-                                        Transform::identity(),
-                                        None,
-                                    );
-                                },
+                    editor.draw(
+                        &mut swash_cache,
+                        font_color,
+                        cursor_color,
+                        selection_color,
+                        selected_text_color,
+                        |x, y, w, h, color| {
+                            // Note: due to softbuffer and tiny_skia having incompatible internal color representations we swap
+                            // the red and blue channels here
+                            paint.set_color_rgba8(color.b(), color.g(), color.r(), color.a());
+                            pixmap.fill_rect(
+                                Rect::from_xywh(x as f32, y as f32, w as f32, h as f32).unwrap(),
+                                &paint,
+                                Transform::identity(),
+                                None,
                             );
+                        },
+                    );
 
-                            surface_buffer.present().unwrap();
-                        }
-                        WindowEvent::ModifiersChanged(modifiers) => {
-                            ctrl_pressed = modifiers.state().control_key()
-                        }
-                        WindowEvent::KeyboardInput { event, .. } => {
-                            let KeyEvent {
-                                logical_key, state, ..
-                            } = event;
+                    surface_buffer.present().unwrap();
+                }
+                WindowEvent::ModifiersChanged(modifiers) => {
+                    ctrl_pressed = modifiers.state().control_key()
+                }
+                WindowEvent::KeyboardInput { event, .. } => {
+                    let KeyEvent {
+                        logical_key, state, ..
+                    } = event;
 
-                            if state.is_pressed() {
-                                match logical_key {
-                                    Key::Named(NamedKey::ArrowLeft) => {
-                                        editor.action(Action::Motion(Motion::Left))
-                                    }
-                                    Key::Named(NamedKey::ArrowRight) => {
-                                        editor.action(Action::Motion(Motion::Right))
-                                    }
-                                    Key::Named(NamedKey::ArrowUp) => {
-                                        editor.action(Action::Motion(Motion::Up))
-                                    }
-                                    Key::Named(NamedKey::ArrowDown) => {
-                                        editor.action(Action::Motion(Motion::Down))
-                                    }
-                                    Key::Named(NamedKey::Home) => {
-                                        editor.action(Action::Motion(Motion::Home))
-                                    }
-                                    Key::Named(NamedKey::End) => {
-                                        editor.action(Action::Motion(Motion::End))
-                                    }
-                                    Key::Named(NamedKey::PageUp) => {
-                                        editor.action(Action::Motion(Motion::PageUp))
-                                    }
-                                    Key::Named(NamedKey::PageDown) => {
-                                        editor.action(Action::Motion(Motion::PageDown))
-                                    }
-                                    Key::Named(NamedKey::Escape) => editor.action(Action::Escape),
-                                    Key::Named(NamedKey::Enter) => editor.action(Action::Enter),
-                                    Key::Named(NamedKey::Backspace) => {
-                                        editor.action(Action::Backspace)
-                                    }
-                                    Key::Named(NamedKey::Delete) => editor.action(Action::Delete),
-                                    Key::Named(key) => {
-                                        if let Some(text) = key.to_text() {
-                                            for c in text.chars() {
-                                                editor.action(Action::Insert(c));
-                                            }
-                                        }
-                                    }
-                                    Key::Character(text) => {
-                                        if !ctrl_pressed {
-                                            for c in text.chars() {
-                                                editor.action(Action::Insert(c));
-                                            }
-                                        }
-                                    }
-                                    _ => {}
-                                }
-                                window.request_redraw();
+                    if state.is_pressed() {
+                        match logical_key {
+                            Key::Named(NamedKey::ArrowLeft) => {
+                                editor.action(Action::Motion(Motion::Left))
                             }
-                        }
-                        WindowEvent::CursorMoved {
-                            device_id: _,
-                            position,
-                        } => {
-                            // Update saved mouse position for use when handling click events
-                            mouse_x = position.x;
-                            mouse_y = position.y;
-
-                            // Implement dragging
-                            if mouse_left.is_pressed() {
-                                // Execute Drag editor action (update selection)
-                                editor.action(Action::Drag {
-                                    x: position.x as i32,
-                                    y: position.y as i32,
-                                });
-
-                                // Scroll if cursor is near edge of window while dragging
-                                if mouse_y <= 5.0 {
-                                    editor.action(Action::Scroll { lines: -1 });
-                                } else if mouse_y - 5.0 >= window.inner_size().height as f64 {
-                                    editor.action(Action::Scroll { lines: 1 });
-                                }
-
-                                window.request_redraw();
+                            Key::Named(NamedKey::ArrowRight) => {
+                                editor.action(Action::Motion(Motion::Right))
                             }
-                        }
-                        WindowEvent::MouseInput {
-                            device_id: _,
-                            state,
-                            button,
-                        } => {
-                            if button == MouseButton::Left {
-                                if state == ElementState::Pressed
-                                    && mouse_left == ElementState::Released
-                                {
-                                    editor.action(Action::Click {
-                                        x: mouse_x /*- line_x*/ as i32,
-                                        y: mouse_y as i32,
-                                    });
-                                    window.request_redraw();
-                                }
-                                mouse_left = state;
+                            Key::Named(NamedKey::ArrowUp) => {
+                                editor.action(Action::Motion(Motion::Up))
                             }
-                        }
-                        WindowEvent::MouseWheel {
-                            device_id: _,
-                            delta,
-                            phase: _,
-                        } => {
-                            let line_delta = match delta {
-                                MouseScrollDelta::LineDelta(_x, y) => y as i32,
-                                MouseScrollDelta::PixelDelta(PhysicalPosition { x: _, y }) => {
-                                    unapplied_scroll_delta += y;
-                                    let line_delta = (unapplied_scroll_delta / 20.0).floor();
-                                    unapplied_scroll_delta -= line_delta * 20.0;
-                                    line_delta as i32
-                                }
-                            };
-                            if line_delta != 0 {
-                                editor.action(Action::Scroll { lines: -line_delta });
+                            Key::Named(NamedKey::ArrowDown) => {
+                                editor.action(Action::Motion(Motion::Down))
                             }
+                            Key::Named(NamedKey::Home) => {
+                                editor.action(Action::Motion(Motion::Home))
+                            }
+                            Key::Named(NamedKey::End) => editor.action(Action::Motion(Motion::End)),
+                            Key::Named(NamedKey::PageUp) => {
+                                editor.action(Action::Motion(Motion::PageUp))
+                            }
+                            Key::Named(NamedKey::PageDown) => {
+                                editor.action(Action::Motion(Motion::PageDown))
+                            }
+                            Key::Named(NamedKey::Escape) => editor.action(Action::Escape),
+                            Key::Named(NamedKey::Enter) => editor.action(Action::Enter),
+                            Key::Named(NamedKey::Backspace) => editor.action(Action::Backspace),
+                            Key::Named(NamedKey::Delete) => editor.action(Action::Delete),
+                            Key::Named(key) => {
+                                if let Some(text) = key.to_text() {
+                                    for c in text.chars() {
+                                        editor.action(Action::Insert(c));
+                                    }
+                                }
+                            }
+                            Key::Character(text) => {
+                                if !ctrl_pressed {
+                                    for c in text.chars() {
+                                        editor.action(Action::Insert(c));
+                                    }
+                                }
+                            }
+                            _ => {}
+                        }
+                        window.request_redraw();
+                    }
+                }
+                WindowEvent::CursorMoved {
+                    device_id: _,
+                    position,
+                } => {
+                    // Update saved mouse position for use when handling click events
+                    mouse_x = position.x;
+                    mouse_y = position.y;
+
+                    // Implement dragging
+                    if mouse_left.is_pressed() {
+                        // Execute Drag editor action (update selection)
+                        editor.action(Action::Drag {
+                            x: position.x as i32,
+                            y: position.y as i32,
+                        });
+
+                        // Scroll if cursor is near edge of window while dragging
+                        if mouse_y <= 5.0 {
+                            editor.action(Action::Scroll { lines: -1 });
+                        } else if mouse_y - 5.0 >= window.inner_size().height as f64 {
+                            editor.action(Action::Scroll { lines: 1 });
+                        }
+
+                        window.request_redraw();
+                    }
+                }
+                WindowEvent::MouseInput {
+                    device_id: _,
+                    state,
+                    button,
+                } => {
+                    if button == MouseButton::Left {
+                        if state == ElementState::Pressed && mouse_left == ElementState::Released {
+                            editor.action(Action::Click {
+                                x: mouse_x /*- line_x*/ as i32,
+                                y: mouse_y as i32,
+                            });
                             window.request_redraw();
                         }
-                        WindowEvent::CloseRequested => {
-                            //TODO: just close one window
-                            elwt.exit();
-                        }
-                        _ => {}
+                        mouse_left = state;
                     }
+                }
+                WindowEvent::MouseWheel {
+                    device_id: _,
+                    delta,
+                    phase: _,
+                } => {
+                    let line_delta = match delta {
+                        MouseScrollDelta::LineDelta(_x, y) => y as i32,
+                        MouseScrollDelta::PixelDelta(PhysicalPosition { x: _, y }) => {
+                            unapplied_scroll_delta += y;
+                            let line_delta = (unapplied_scroll_delta / 20.0).floor();
+                            unapplied_scroll_delta -= line_delta * 20.0;
+                            line_delta as i32
+                        }
+                    };
+                    if line_delta != 0 {
+                        editor.action(Action::Scroll { lines: -line_delta });
+                    }
+                    window.request_redraw();
+                }
+                WindowEvent::CloseRequested => {
+                    //TODO: just close one window
+                    elwt.exit();
                 }
                 _ => {}
             }

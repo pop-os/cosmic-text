@@ -28,7 +28,7 @@ pub struct LayoutGlyph {
     pub y: f32,
     /// Width of hitbox
     pub w: f32,
-    /// Unicode BiDi embedding level, character is left-to-right if `level` is divisible by 2
+    /// Unicode `BiDi` embedding level, character is left-to-right if `level` is divisible by 2
     pub level: unicode_bidi::Level,
     /// X offset in line
     ///
@@ -58,7 +58,7 @@ pub struct LayoutGlyph {
 
 #[derive(Clone, Debug)]
 pub struct PhysicalGlyph {
-    /// Cache key, see [CacheKey]
+    /// Cache key, see [`CacheKey`]
     pub cache_key: CacheKey,
     /// Integer component of X offset in line
     pub x: i32,

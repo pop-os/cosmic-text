@@ -33,7 +33,7 @@ impl ShapeRunCache {
         self.cache.insert(key, (self.age, glyphs));
     }
 
-    /// Remove anything in the cache with an age older than keep_ages
+    /// Remove anything in the cache with an age older than `keep_ages`
     pub fn trim(&mut self, keep_ages: u64) {
         self.cache
             .retain(|_key, (age, _glyphs)| *age + keep_ages >= self.age);

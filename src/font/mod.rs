@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
-pub(crate) mod fallback;
 
 // re-export ttf_parser
 pub use ttf_parser;
+// re-export peniko::Font;
+#[cfg(feature = "peniko")]
+pub use peniko::Font as PenikoFont;
 
 use core::fmt;
 
@@ -12,6 +14,9 @@ use alloc::vec::Vec;
 
 use rustybuzz::Face as RustybuzzFace;
 use self_cell::self_cell;
+
+pub(crate) mod fallback;
+pub use fallback::{Fallback, PlatformFallback};
 
 pub use self::system::*;
 mod system;
@@ -36,7 +41,10 @@ pub struct Font {
     #[cfg(feature = "swash")]
     swash: (u32, swash::CacheKey),
     rustybuzz: OwnedFace,
+    #[cfg(not(feature = "peniko"))]
     data: Arc<dyn AsRef<[u8]> + Send + Sync>,
+    #[cfg(feature = "peniko")]
+    data: peniko::Font,
     id: fontdb::ID,
     monospace_fallback: Option<FontMonospaceFallback>,
 }
@@ -71,11 +79,23 @@ impl Font {
     }
 
     pub fn data(&self) -> &[u8] {
-        (*self.data).as_ref()
+        #[cfg(not(feature = "peniko"))]
+        {
+            (*self.data).as_ref()
+        }
+        #[cfg(feature = "peniko")]
+        {
+            self.data.data.data()
+        }
     }
 
     pub fn rustybuzz(&self) -> &RustybuzzFace<'_> {
         self.rustybuzz.borrow_dependent()
+    }
+
+    #[cfg(feature = "peniko")]
+    pub fn as_peniko(&self) -> PenikoFont {
+        self.data.clone()
     }
 
     #[cfg(feature = "swash")]
@@ -169,7 +189,10 @@ impl Font {
                 RustybuzzFace::from_slice((**data).as_ref(), info.index).ok_or(())
             })
             .ok()?,
+            #[cfg(not(feature = "peniko"))]
             data,
+            #[cfg(feature = "peniko")]
+            data: peniko::Font::new(peniko::Blob::new(data), info.index),
         })
     }
 }
@@ -185,11 +208,11 @@ mod test {
         let now = std::time::Instant::now();
 
         let mut db = fontdb::Database::new();
-        let locale = get_locale().unwrap();
+        let locale = get_locale().expect("Local available");
         db.load_system_fonts();
         FontSystem::new_with_locale_and_db(locale, db);
 
         #[cfg(not(target_arch = "wasm32"))]
-        println!("Fonts load time {}ms.", now.elapsed().as_millis())
+        println!("Fonts load time {}ms.", now.elapsed().as_millis());
     }
 }

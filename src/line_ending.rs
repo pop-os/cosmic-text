@@ -48,11 +48,11 @@ impl<'a> LineIter<'a> {
     }
 }
 
-impl<'a> Iterator for LineIter<'a> {
+impl Iterator for LineIter<'_> {
     type Item = (Range<usize>, LineEnding);
     fn next(&mut self) -> Option<Self::Item> {
         let start = self.start;
-        match self.string[start..self.end].find(&['\r', '\n']) {
+        match self.string[start..self.end].find(['\r', '\n']) {
             Some(i) => {
                 let end = start + i;
                 self.start = end;

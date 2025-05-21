@@ -14,7 +14,7 @@ use unicode_segmentation::UnicodeSegmentation;
 use crate::fallback::FontFallbackIter;
 use crate::{
     math, Align, AttrsList, CacheKeyFlags, Color, Font, FontSystem, LayoutGlyph, LayoutLine,
-    Metrics, ShapePlanCache, Wrap,
+    Metrics, Wrap,
 };
 
 /// The shaping strategy of some text.
@@ -106,7 +106,6 @@ impl fmt::Debug for ShapeBuffer {
 
 fn shape_fallback(
     scratch: &mut ShapeBuffer,
-    shape_plan_cache: &mut ShapePlanCache,
     glyphs: &mut Vec<ShapeGlyph>,
     font: &Font,
     line: &str,
@@ -141,8 +140,26 @@ fn shape_fallback(
     let rtl = matches!(buffer.direction(), rustybuzz::Direction::RightToLeft);
     assert_eq!(rtl, span_rtl);
 
-    let shape_plan = shape_plan_cache.get(font, &buffer);
-    let glyph_buffer = rustybuzz::shape_with_plan(font.rustybuzz(), shape_plan, buffer);
+    let attrs = attrs_list.get_span(start_run);
+    let mut rb_font_features = Vec::new();
+
+    // Convert attrs::Feature to rustybuzz::Feature
+    for feature in attrs.font_features.features {
+        rb_font_features.push(rustybuzz::Feature::new(
+            rustybuzz::ttf_parser::Tag::from_bytes(feature.tag.as_bytes()),
+            feature.value,
+            0..usize::MAX,
+        ));
+    }
+
+    let shape_plan = rustybuzz::ShapePlan::new(
+        font.rustybuzz(),
+        buffer.direction(),
+        Some(buffer.script()),
+        buffer.language().as_ref(),
+        &rb_font_features,
+    );
+    let glyph_buffer = rustybuzz::shape_with_plan(font.rustybuzz(), &shape_plan, buffer);
     let glyph_infos = glyph_buffer.glyph_infos();
     let glyph_positions = glyph_buffer.glyph_positions();
 
@@ -150,11 +167,6 @@ fn shape_fallback(
     glyphs.reserve(glyph_infos.len());
     let glyph_start = glyphs.len();
     for (info, pos) in glyph_infos.iter().zip(glyph_positions.iter()) {
-        let x_advance = pos.x_advance as f32 / font_scale;
-        let y_advance = pos.y_advance as f32 / font_scale;
-        let x_offset = pos.x_offset as f32 / font_scale;
-        let y_offset = pos.y_offset as f32 / font_scale;
-
         let start_glyph = start_run + info.cluster as usize;
 
         if info.glyph_id == 0 {
@@ -162,6 +174,12 @@ fn shape_fallback(
         }
 
         let attrs = attrs_list.get_span(start_glyph);
+        let x_advance = pos.x_advance as f32 / font_scale
+            + attrs.letter_spacing_opt.map_or(0.0, |spacing| spacing.0);
+        let y_advance = pos.y_advance as f32 / font_scale;
+        let x_offset = pos.x_offset as f32 / font_scale;
+        let y_offset = pos.y_offset as f32 / font_scale;
+
         glyphs.push(ShapeGlyph {
             start: start_glyph,
             end: end_run, // Set later
@@ -243,7 +261,7 @@ fn shape_run(
 
     let attrs = attrs_list.get_span(start_run);
 
-    let fonts = font_system.get_font_matches(attrs);
+    let fonts = font_system.get_font_matches(&attrs);
 
     let default_families = [&attrs.family];
     let mut font_iter = FontFallbackIter::new(
@@ -258,17 +276,9 @@ fn shape_run(
 
     let glyph_start = glyphs.len();
     let mut missing = {
-        let (scratch, shape_plan_cache) = font_iter.shape_caches();
+        let scratch = font_iter.shape_caches();
         shape_fallback(
-            scratch,
-            shape_plan_cache,
-            glyphs,
-            &font,
-            line,
-            attrs_list,
-            start_run,
-            end_run,
-            span_rtl,
+            scratch, glyphs, &font, line, attrs_list, start_run, end_run, span_rtl,
         )
     };
 
@@ -284,10 +294,9 @@ fn shape_run(
             font_iter.face_name(font.id())
         );
         let mut fb_glyphs = Vec::new();
-        let (scratch, shape_plan_cache) = font_iter.shape_caches();
+        let scratch = font_iter.shape_caches();
         let fb_missing = shape_fallback(
             scratch,
-            shape_plan_cache,
             &mut fb_glyphs,
             &font,
             line,
@@ -380,7 +389,7 @@ fn shape_run_cached(
     let run_range = start_run..end_run;
     let mut key = ShapeRunKey {
         text: line[run_range.clone()].to_string(),
-        default_attrs: AttrsOwned::new(attrs_list.defaults()),
+        default_attrs: AttrsOwned::new(&attrs_list.defaults()),
         attrs_spans: Vec::new(),
     };
     for (attrs_range, attrs) in attrs_list.spans.overlapping(&run_range) {
@@ -388,12 +397,8 @@ fn shape_run_cached(
             // Skip if attrs matches default attrs
             continue;
         }
-        let start = max(attrs_range.start, start_run)
-            .checked_sub(start_run)
-            .unwrap_or(0);
-        let end = min(attrs_range.end, end_run)
-            .checked_sub(start_run)
-            .unwrap_or(0);
+        let start = max(attrs_range.start, start_run).saturating_sub(start_run);
+        let end = min(attrs_range.end, end_run).saturating_sub(start_run);
         if end > start {
             let range = start..end;
             key.attrs_spans.push((range, attrs.clone()));
@@ -439,7 +444,7 @@ fn shape_skip(
     end_run: usize,
 ) {
     let attrs = attrs_list.get_span(start_run);
-    let fonts = font_system.get_font_matches(attrs);
+    let fonts = font_system.get_font_matches(&attrs);
 
     let default_families = [&attrs.family];
     let mut font_iter = FontFallbackIter::new(font_system, &fonts, &default_families, &[], "");
@@ -459,15 +464,15 @@ fn shape_skip(
     glyphs.extend(
         line[start_run..end_run]
             .char_indices()
-            .enumerate()
-            .map(|(i, (chr_idx, codepoint))| {
+            .map(|(chr_idx, codepoint)| {
                 let glyph_id = charmap.map(codepoint);
-                let x_advance = glyph_metrics.advance_width(glyph_id);
+                let x_advance = glyph_metrics.advance_width(glyph_id)
+                    + attrs.letter_spacing_opt.map_or(0.0, |spacing| spacing.0);
                 let attrs = attrs_list.get_span(start_run + chr_idx);
 
                 ShapeGlyph {
-                    start: i,
-                    end: i + 1,
+                    start: chr_idx + start_run,
+                    end: chr_idx + start_run + codepoint.len_utf8(),
                     x_advance,
                     y_advance: 0.0,
                     x_offset: 0.0,
@@ -1260,7 +1265,8 @@ impl ShapeLine {
                                 let trailing_blank = span
                                     .words
                                     .get(i + 1)
-                                    .map_or(false, |previous_word| previous_word.blank);
+                                    .is_some_and(|previous_word| previous_word.blank);
+
                                 if trailing_blank {
                                     number_of_blanks = number_of_blanks.saturating_sub(1);
                                     add_to_visual_line(
@@ -1553,12 +1559,13 @@ impl ShapeLine {
                                 _ => font_size,
                             };
 
-                            let x_advance = glyph_font_size * glyph.x_advance
+                            let mut x_advance = glyph_font_size * glyph.x_advance
                                 + if word.blank {
                                     justification_expansion
                                 } else {
                                     0.0
                                 };
+                            x_advance = x_advance.round();
                             if self.rtl {
                                 x -= x_advance;
                             }

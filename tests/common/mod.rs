@@ -36,7 +36,7 @@ impl Default for DrawTestCfg {
         let font = Attrs::new().family(Family::Serif);
         Self {
             name: "default".into(),
-            font: AttrsOwned::new(font),
+            font: AttrsOwned::new(&font),
             text: "".into(),
             font_size: 16.0,
             line_height: 20.0,
@@ -60,7 +60,7 @@ impl DrawTestCfg {
     }
 
     pub fn font_attrs(mut self, attrs: Attrs) -> Self {
-        self.font = AttrsOwned::new(attrs);
+        self.font = AttrsOwned::new(&attrs);
         self
     }
 
@@ -92,7 +92,7 @@ impl DrawTestCfg {
             Some((self.canvas_width - margins * 2) as f32),
             Some((self.canvas_height - margins * 2) as f32),
         );
-        buffer.set_text(&self.text, self.font.as_attrs(), Shaping::Advanced);
+        buffer.set_text(&self.text, &self.font.as_attrs(), Shaping::Advanced);
         buffer.shape_until_scroll(true);
 
         // Black
