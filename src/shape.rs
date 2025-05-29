@@ -1565,7 +1565,7 @@ impl ShapeLine {
                                 } else {
                                     0.0
                                 };
-                            x_advance = x_advance.round();
+                            x_advance = math::roundf(x_advance);
                             if self.rtl {
                                 x -= x_advance;
                             }
