@@ -1,0 +1,1 @@
+searchState.loadedDescShard("unicode_ccc", 0, "This library implements Unicode Canonical Combining Class …\nCharacter Canonical Combining Class.\nThe Unicode version.\nReturns the argument unchanged.\nReturns a Canonical Combining Class of a character.\nCalls <code>U::from(self)</code>.")
