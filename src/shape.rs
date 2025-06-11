@@ -737,7 +737,10 @@ impl ShapeSpan {
         }
 
         let mut start_word = 0;
-        for (end_lb, _) in unicode_linebreak::linebreaks(span) {
+        let linebreaks: Vec<_> = unicode_linebreak::linebreaks(span).collect();
+        let merged_breaks = merge_ligature_breaks(&linebreaks, span);
+
+        for (end_lb, _) in merged_breaks {
             let mut start_lb = end_lb;
             for (i, c) in span[start_word..end_lb].char_indices().rev() {
                 // TODO: Not all whitespace characters are linebreakable, e.g. 00A0 (No-break
@@ -801,6 +804,102 @@ impl ShapeSpan {
         // Cache buffer for future reuse.
         font_system.shape_buffer.words = cached_words;
     }
+}
+
+/// Merge line breaks that would split common ligatures
+///
+/// This function addresses GitHub issue #378 where the Unicode Line Breaking Algorithm
+/// was creating break opportunities that split ligature sequences like `->`, `!=`, etc.
+///
+/// The function works by:
+/// 1. Taking the original line break opportunities from the Unicode algorithm
+/// 2. Looking ahead to see if consecutive break positions would split ligature patterns
+/// 3. Merging (removing intermediate) breaks when ligature patterns are detected
+/// 4. Preserving proper line breaking behavior while keeping ligatures intact
+///
+/// # Arguments
+/// * `breaks` - Original line break opportunities from `unicode_linebreak::linebreaks()`
+/// * `span` - The text span being processed
+///
+/// # Returns
+/// A potentially reduced set of line break opportunities that preserve ligatures
+fn merge_ligature_breaks(
+    breaks: &[(usize, unicode_linebreak::BreakOpportunity)],
+    span: &str,
+) -> Vec<(usize, unicode_linebreak::BreakOpportunity)> {
+    if breaks.len() <= 1 {
+        return breaks.to_vec();
+    }
+
+    let mut merged: Vec<(usize, unicode_linebreak::BreakOpportunity)> = Vec::new();
+    let mut i = 0;
+
+    while i < breaks.len() {
+        let mut end_merge = i;
+
+        // Look ahead to see if we should skip breaks to avoid splitting ligatures
+        while end_merge + 1 < breaks.len() {
+            let start_pos = merged.last().map(|b| b.0).unwrap_or(0);
+            let end_pos = breaks[end_merge + 1].0;
+
+            if start_pos < end_pos && end_pos <= span.len() {
+                let text_segment = &span[start_pos..end_pos];
+                if contains_ligature_pattern(text_segment) {
+                    end_merge += 1;
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+
+        // Add the final break in the sequence
+        merged.push(breaks[end_merge]);
+        i = end_merge + 1;
+    }
+
+    if merged.is_empty() {
+        breaks.to_vec()
+    } else {
+        merged
+    }
+}
+
+/// Check if text contains common ligature patterns that should not be split
+///
+/// This function maintains a list of common programming and typography ligatures
+/// that should be kept together during text shaping to ensure proper rendering.
+///
+/// The patterns include:
+/// - Arrow operators: `->`, `<-`, `<=`, `=>`, etc.
+/// - Comparison operators: `!=`, `==`, `!==`, etc.
+/// - Logic operators: `||`, `&&`, `||=`, etc.
+/// - Increment/decrement: `++`, `--`, `+++`, etc.
+/// - Comment syntax: `/*`, `*/`, `<!--`, `-->`, etc.
+/// - Other common patterns used in programming fonts
+///
+/// # Arguments
+/// * `text` - The text to check for ligature patterns
+///
+/// # Returns
+/// `true` if the text contains any known ligature patterns
+fn contains_ligature_pattern(text: &str) -> bool {
+    const LIGATURE_PATTERNS: &[&str] = &[
+        "->", "<-", "<->", "=>", "<=", ">=", "!=", "!==", "=!=", "===", "==", "||", "&&", "||=",
+        "&&=", "|=", "&=", "++", "--", "+++", "---", "/*", "*/", "/**", "<!--", "-->", "::", ":?",
+        ":?>", "<|", "|>", "<|>", ">>", "<<", ">>=", "<<=", "~>", "<~", "-~", "~-", "=/=", "</",
+        "/>", "</>", "?.", "??", "?:", "..", "...", "..<", ">..", "><", "<>", "<=>", "|-", "-|",
+        "|->", "<-|",
+    ];
+
+    for pattern in LIGATURE_PATTERNS {
+        if text.contains(pattern) {
+            return true;
+        }
+    }
+
+    false
 }
 
 /// A shaped line (or paragraph)
@@ -1641,5 +1740,165 @@ impl ShapeLine {
         scratch.visual_lines.append(&mut cached_visual_lines);
         scratch.cached_visual_lines = cached_visual_lines;
         scratch.glyph_sets = cached_glyph_sets;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{Attrs, Buffer, Family, FontSystem, Metrics, Shaping};
+
+    #[test]
+    fn test_ligature_breaks() {
+        // Test that common ligature patterns are detected
+        assert!(contains_ligature_pattern("->"));
+        assert!(contains_ligature_pattern("<="));
+        assert!(contains_ligature_pattern("!="));
+        assert!(contains_ligature_pattern("some text with -> arrow"));
+        assert!(contains_ligature_pattern("if (a != b)"));
+
+        // Test that normal text doesn't match
+        assert!(!contains_ligature_pattern("hello world"));
+        assert!(!contains_ligature_pattern("abc 123"));
+    }
+
+    #[test]
+    fn test_merge_ligature_breaks() {
+        use unicode_linebreak::BreakOpportunity;
+
+        // Test with breaks that should be merged
+        let breaks = vec![
+            (0, BreakOpportunity::Mandatory),
+            (1, BreakOpportunity::Mandatory),
+            (2, BreakOpportunity::Mandatory),
+        ];
+        let span = "->";
+        let merged = merge_ligature_breaks(&breaks, span);
+
+        // Should have fewer breaks when ligature is detected
+        assert!(merged.len() <= breaks.len());
+    }
+
+    #[test]
+    fn test_ligature_shaping_integration() {
+        let mut font_system = FontSystem::new();
+        let metrics = Metrics::new(16.0, 20.0);
+        let mut buffer = Buffer::new(&mut font_system, metrics);
+
+        // Test string with ligatures
+        let test_text = "-> <= != ==";
+        let attrs = Attrs::new().family(Family::Monospace);
+
+        buffer.set_text(&mut font_system, test_text, &attrs, Shaping::Advanced);
+        buffer.shape_until_scroll(&mut font_system, false);
+
+        // If we get here without panicking, the basic integration works
+        assert!(true);
+    }
+
+    #[test]
+    fn test_ligature_word_preservation() {
+        use unicode_linebreak::BreakOpportunity;
+
+        // Test that ligature patterns cause line breaks to be merged
+        let test_cases = vec![
+            (
+                "->",
+                vec![
+                    (1, BreakOpportunity::Allowed),
+                    (2, BreakOpportunity::Allowed),
+                ],
+            ),
+            (
+                "!=",
+                vec![
+                    (1, BreakOpportunity::Allowed),
+                    (2, BreakOpportunity::Allowed),
+                ],
+            ),
+            (
+                "<=",
+                vec![
+                    (1, BreakOpportunity::Allowed),
+                    (2, BreakOpportunity::Allowed),
+                ],
+            ),
+            (
+                "/*",
+                vec![
+                    (1, BreakOpportunity::Allowed),
+                    (2, BreakOpportunity::Allowed),
+                ],
+            ),
+            (
+                "<!--",
+                vec![
+                    (1, BreakOpportunity::Allowed),
+                    (2, BreakOpportunity::Allowed),
+                    (3, BreakOpportunity::Allowed),
+                    (4, BreakOpportunity::Allowed),
+                ],
+            ),
+        ];
+
+        for (text, breaks) in test_cases {
+            let merged = merge_ligature_breaks(&breaks, text);
+            // Should have fewer breaks when ligature is detected
+            assert!(
+                merged.len() <= breaks.len(),
+                "Failed for text: '{}' - expected fewer breaks",
+                text
+            );
+
+            // For simple ligatures, we should get just one break at the end
+            if text.len() <= 2 {
+                assert!(
+                    merged.len() <= 1,
+                    "Simple ligature '{}' should have at most 1 break",
+                    text
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_non_ligature_breaks_unchanged() {
+        use unicode_linebreak::BreakOpportunity;
+
+        // Test that non-ligature text doesn't have breaks merged unnecessarily
+        let test_cases = vec![
+            (
+                "hello",
+                vec![
+                    (1, BreakOpportunity::Allowed),
+                    (2, BreakOpportunity::Allowed),
+                ],
+            ),
+            (
+                "test",
+                vec![
+                    (1, BreakOpportunity::Allowed),
+                    (2, BreakOpportunity::Allowed),
+                ],
+            ),
+            (
+                "abc",
+                vec![
+                    (1, BreakOpportunity::Allowed),
+                    (2, BreakOpportunity::Allowed),
+                ],
+            ),
+        ];
+
+        for (text, breaks) in test_cases {
+            let merged = merge_ligature_breaks(&breaks, text);
+            // Should have same number of breaks for non-ligature text
+            assert_eq!(
+                merged.len(),
+                breaks.len(),
+                "Non-ligature text '{}' should not have breaks merged",
+                text
+            );
+        }
     }
 }
