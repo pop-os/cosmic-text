@@ -13,8 +13,8 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use crate::fallback::FontFallbackIter;
 use crate::{
-    math, Align, AttrsList, CacheKeyFlags, Color, Font, FontSystem, LayoutGlyph, LayoutLine,
-    Metrics, Wrap,
+    Align, AttrsList, CacheKeyFlags, Color, Font, FontSystem, LayoutGlyph, LayoutLine, Metrics,
+    Wrap, math,
 };
 
 /// The shaping strategy of some text.
@@ -191,6 +191,7 @@ fn shape_fallback(
             descent,
             font_monospace_em_width: font.monospace_em_width(),
             font_id: font.id(),
+            font_weight: attrs.weight,
             glyph_id: info.glyph_id.try_into().expect("failed to cast glyph ID"),
             //TODO: color should not be related to shaping
             color_opt: attrs.color_opt,
@@ -270,6 +271,7 @@ fn shape_run(
         &default_families,
         &scripts,
         &line[start_run..end_run],
+        attrs.weight,
     );
 
     let font = font_iter.next().expect("no default font found");
@@ -447,7 +449,14 @@ fn shape_skip(
     let fonts = font_system.get_font_matches(&attrs);
 
     let default_families = [&attrs.family];
-    let mut font_iter = FontFallbackIter::new(font_system, &fonts, &default_families, &[], "");
+    let mut font_iter = FontFallbackIter::new(
+        font_system,
+        &fonts,
+        &default_families,
+        &[],
+        "",
+        attrs.weight,
+    );
 
     let font = font_iter.next().expect("no default font found");
     let font_id = font.id();
@@ -481,6 +490,7 @@ fn shape_skip(
                     descent,
                     font_monospace_em_width,
                     font_id,
+                    font_weight: attrs.weight,
                     glyph_id,
                     color_opt: attrs.color_opt,
                     metadata: attrs.metadata,
@@ -504,6 +514,7 @@ pub struct ShapeGlyph {
     pub descent: f32,
     pub font_monospace_em_width: Option<f32>,
     pub font_id: fontdb::ID,
+    pub font_weight: fontdb::Weight,
     pub glyph_id: u16,
     pub color_opt: Option<Color>,
     pub metadata: usize,
@@ -527,6 +538,7 @@ impl ShapeGlyph {
             font_size,
             line_height_opt,
             font_id: self.font_id,
+            font_weight: self.font_weight,
             glyph_id: self.glyph_id,
             x,
             y,
@@ -1445,13 +1457,7 @@ impl ShapeLine {
         }
 
         // Create the LayoutLines using the ranges inside visual lines
-        let align = align.unwrap_or({
-            if self.rtl {
-                Align::Right
-            } else {
-                Align::Left
-            }
-        });
+        let align = align.unwrap_or(if self.rtl { Align::Right } else { Align::Left });
 
         let line_width = match width_opt {
             Some(width) => width,
@@ -1553,7 +1559,9 @@ impl ShapeLine {
                                         .max(1.0)
                                         / glyph_to_match_factor
                                         * font_size;
-                                    log::trace!("Adjusted glyph font size ({font_size} => {glyph_font_size})");
+                                    log::trace!(
+                                        "Adjusted glyph font size ({font_size} => {glyph_font_size})"
+                                    );
                                     glyph_font_size
                                 }
                                 _ => font_size,

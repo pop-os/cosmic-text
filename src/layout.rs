@@ -5,7 +5,7 @@ use core::fmt::Display;
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 
-use crate::{math, CacheKey, CacheKeyFlags, Color};
+use crate::{CacheKey, CacheKeyFlags, Color, math};
 
 /// A laid out glyph
 #[derive(Clone, Debug)]
@@ -16,6 +16,8 @@ pub struct LayoutGlyph {
     pub end: usize,
     /// Font size of the glyph
     pub font_size: f32,
+    /// Font weight of the glyph
+    pub font_weight: fontdb::Weight,
     /// Line height of the glyph, will override buffer setting
     pub line_height_opt: Option<f32>,
     /// Font id of the glyph
@@ -79,6 +81,7 @@ impl LayoutGlyph {
                 (self.x + x_offset) * scale + offset.0,
                 math::truncf((self.y - y_offset) * scale + offset.1), // Hinting in Y axis
             ),
+            self.font_weight,
             self.cache_key_flags,
         );
 
