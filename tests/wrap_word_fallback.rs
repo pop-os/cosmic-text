@@ -17,9 +17,6 @@ fn wrap_word_fallback() {
     buffer.set_wrap(Wrap::WordOrGlyph);
     buffer.set_text("Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.", &Attrs::new().family(cosmic_text::Family::Name("Inter")), Shaping::Advanced);
     buffer.set_size(Some(50.0), Some(1000.0));
-
-    buffer.set_size(Some(50.0), Some(1000.0));
-
     buffer.shape_until_scroll(false);
 
     let measured_size = measure(&buffer);
