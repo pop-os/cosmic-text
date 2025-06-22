@@ -1559,13 +1559,12 @@ impl ShapeLine {
                                 _ => font_size,
                             };
 
-                            let mut x_advance = glyph_font_size * glyph.x_advance
+                            let x_advance = glyph_font_size * glyph.x_advance
                                 + if word.blank {
                                     justification_expansion
                                 } else {
                                     0.0
                                 };
-                            x_advance = math::roundf(x_advance);
                             if self.rtl {
                                 x -= x_advance;
                             }
