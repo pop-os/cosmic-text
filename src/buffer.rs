@@ -131,12 +131,12 @@ impl<'b> Iterator for LayoutRunIter<'b> {
                 let centering_offset = (line_height - glyph_height) / 2.0;
                 let line_y = line_top + centering_offset + layout_line.max_ascent;
                 if let Some(height) = self.buffer.height_opt {
-                    if line_y > height {
+                    if line_y - layout_line.max_ascent > height {
                         return None;
                     }
                 }
                 self.line_top += line_height;
-                if line_y < 0.0 {
+                if line_y + layout_line.max_descent < 0.0 {
                     continue;
                 }
 
