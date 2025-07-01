@@ -6,6 +6,7 @@ use alloc::sync::Arc;
 use alloc::vec::Vec;
 use core::fmt;
 use core::ops::{Deref, DerefMut};
+use fontdb::Query;
 
 // re-export fontdb and rustybuzz
 pub use fontdb;
@@ -333,6 +334,37 @@ impl FontSystem {
 
                 // Sort so we get the keys with weight_offset=0 first
                 font_match_keys.sort();
+
+                // db.query is better than above, but returns just one font
+                let query = Query {
+                    families: &[attrs.family],
+                    weight: attrs.weight,
+                    stretch: attrs.stretch,
+                    style: attrs.style,
+                };
+
+                if let Some(id) = self.db.query(&query) {
+                    if let Some(i) = font_match_keys
+                        .iter()
+                        .enumerate()
+                        .find(|(_i, key)| key.id == id)
+                        .map(|(i, _)| i)
+                    {
+                        // if exists move to front
+                        let match_key = font_match_keys.remove(i);
+                        font_match_keys.insert(0, match_key);
+                    } else if let Some(face) = self.db.face(id) {
+                        // else insert in front
+                        let match_key = FontMatchKey {
+                            font_weight_diff: attrs.weight.0.abs_diff(face.weight.0),
+                            font_weight: face.weight.0,
+                            id,
+                        };
+                        font_match_keys.insert(0, match_key);
+                    } else {
+                        log::error!("Could not get face from db, that should've been there.");
+                    }
+                }
 
                 #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
                 {
