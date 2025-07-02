@@ -94,6 +94,7 @@ fn set_buffer_text(buffer: &mut BorrowedWithFontSystem<'_, Buffer>) {
                 .weight(Weight::BOLD)
                 .style(Style::Italic),
         ),
+        ("🌈", attrs.clone()),
         ("R", attrs.clone().color(Color::rgb(0xFF, 0x00, 0x00))),
         ("A", attrs.clone().color(Color::rgb(0xFF, 0x7F, 0x00))),
         ("I", attrs.clone().color(Color::rgb(0xFF, 0xFF, 0x00))),
@@ -114,10 +115,19 @@ fn set_buffer_text(buffer: &mut BorrowedWithFontSystem<'_, Buffer>) {
         ("C", attrs.clone().color(Color::rgb(0x00, 0xFF, 0x00))),
         ("O", attrs.clone().color(Color::rgb(0xFF, 0xFF, 0x00))),
         ("R", attrs.clone().color(Color::rgb(0xFF, 0x7F, 0x00))),
-        ("N\n", attrs.clone().color(Color::rgb(0xFF, 0x00, 0x00))),
+        ("N", attrs.clone().color(Color::rgb(0xFF, 0x00, 0x00))),
+        ("🦄\n", attrs.clone()),
         (
-            "生活,삶,जिंदगी 😀 FPS\n",
+            "生活,삶,जिंदगी 😀\n",
             attrs.clone().color(Color::rgb(0xFF, 0x00, 0x00)),
+        ),
+        (
+            "Hinting enabled, ",
+            attrs.clone()
+        ),
+        (
+            "Hinting disabled\n",
+            attrs.clone().cache_key_flags(CacheKeyFlags::DISABLE_HINTING),
         ),
     ];
 
