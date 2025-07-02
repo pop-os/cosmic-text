@@ -121,13 +121,12 @@ fn set_buffer_text(buffer: &mut BorrowedWithFontSystem<'_, Buffer>) {
             "生活,삶,जिंदगी 😀\n",
             attrs.clone().color(Color::rgb(0xFF, 0x00, 0x00)),
         ),
-        (
-            "Hinting enabled, ",
-            attrs.clone()
-        ),
+        ("Hinting enabled, ", attrs.clone()),
         (
             "Hinting disabled\n",
-            attrs.clone().cache_key_flags(CacheKeyFlags::DISABLE_HINTING),
+            attrs
+                .clone()
+                .cache_key_flags(CacheKeyFlags::DISABLE_HINTING),
         ),
     ];
 

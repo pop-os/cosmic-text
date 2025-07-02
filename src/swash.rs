@@ -87,7 +87,7 @@ fn swash_outline_commands(
     let mut outline = scaler
         .scale_outline(cache_key.glyph_id)
         .or_else(|| scaler.scale_color_outline(cache_key.glyph_id))?;
-    
+
     if cache_key.flags.contains(CacheKeyFlags::FAKE_ITALIC) {
         outline.transform(&Transform::skew(
             Angle::from_degrees(14.0),
