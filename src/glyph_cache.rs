@@ -7,7 +7,7 @@ bitflags::bitflags! {
     pub struct CacheKeyFlags: u32 {
         /// Skew by 14 degrees to synthesize italic
         const FAKE_ITALIC = 1;
-        // Disable hinting
+        /// Disable hinting
         const DISABLE_HINTING = 2;
     }
 }
