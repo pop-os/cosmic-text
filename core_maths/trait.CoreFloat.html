@@ -1,0 +1,518 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="See `crate`."><title>CoreFloat in core_maths - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-916cea96.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="core_maths" data-themes="" data-resource-suffix="" data-rustdoc-version="1.87.0 (17067e9ac 2025-05-09)" data-channel="1.87.0" data-search-js="search-e7298875.js" data-settings-js="settings-d72f25bb.js" ><script src="../static.files/storage-82c7156e.js"></script><script defer src="sidebar-items.js"></script><script defer src="../static.files/main-fb8c74a8.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc trait"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../core_maths/index.html">core_<wbr>maths</a><span class="version">0.1.1</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Core<wbr>Float</a></h2><h3><a href="#required-methods">Required Methods</a></h3><ul class="block"><li><a href="#tymethod.abs" title="abs">abs</a></li><li><a href="#tymethod.acos" title="acos">acos</a></li><li><a href="#tymethod.acosh" title="acosh">acosh</a></li><li><a href="#tymethod.asin" title="asin">asin</a></li><li><a href="#tymethod.asinh" title="asinh">asinh</a></li><li><a href="#tymethod.atan" title="atan">atan</a></li><li><a href="#tymethod.atan2" title="atan2">atan2</a></li><li><a href="#tymethod.atanh" title="atanh">atanh</a></li><li><a href="#tymethod.cbrt" title="cbrt">cbrt</a></li><li><a href="#tymethod.ceil" title="ceil">ceil</a></li><li><a href="#tymethod.copysign" title="copysign">copysign</a></li><li><a href="#tymethod.cos" title="cos">cos</a></li><li><a href="#tymethod.cosh" title="cosh">cosh</a></li><li><a href="#tymethod.div_euclid" title="div_euclid">div_euclid</a></li><li><a href="#tymethod.exp" title="exp">exp</a></li><li><a href="#tymethod.exp2" title="exp2">exp2</a></li><li><a href="#tymethod.exp_m1" title="exp_m1">exp_m1</a></li><li><a href="#tymethod.floor" title="floor">floor</a></li><li><a href="#tymethod.fract" title="fract">fract</a></li><li><a href="#tymethod.hypot" title="hypot">hypot</a></li><li><a href="#tymethod.ln" title="ln">ln</a></li><li><a href="#tymethod.ln_1p" title="ln_1p">ln_1p</a></li><li><a href="#tymethod.log" title="log">log</a></li><li><a href="#tymethod.log2" title="log2">log2</a></li><li><a href="#tymethod.log10" title="log10">log10</a></li><li><a href="#tymethod.mul_add" title="mul_add">mul_add</a></li><li><a href="#tymethod.powf" title="powf">powf</a></li><li><a href="#tymethod.powi" title="powi">powi</a></li><li><a href="#tymethod.rem_euclid" title="rem_euclid">rem_euclid</a></li><li><a href="#tymethod.round" title="round">round</a></li><li><a href="#tymethod.signum" title="signum">signum</a></li><li><a href="#tymethod.sin" title="sin">sin</a></li><li><a href="#tymethod.sinh" title="sinh">sinh</a></li><li><a href="#tymethod.sqrt" title="sqrt">sqrt</a></li><li><a href="#tymethod.tan" title="tan">tan</a></li><li><a href="#tymethod.tanh" title="tanh">tanh</a></li><li><a href="#tymethod.trunc" title="trunc">trunc</a></li></ul><h3><a href="#provided-methods">Provided Methods</a></h3><ul class="block"><li><a href="#method.sin_cos" title="sin_cos">sin_cos</a></li></ul><h3><a href="#foreign-impls">Implementations on Foreign Types</a></h3><ul class="block"><li><a href="#impl-CoreFloat-for-f32" title="f32">f32</a></li><li><a href="#impl-CoreFloat-for-f64" title="f64">f64</a></li></ul><h3><a href="#dyn-compatibility">Dyn Compatibility</a></h3><h3><a href="#implementors">Implementors</a></h3></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="index.html">In crate core_<wbr>maths</a></h2></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="index.html">core_maths</a></div><h1>Trait <span class="trait">CoreFloat</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/core_maths/lib.rs.html#18-765">Source</a> </span></div><pre class="rust item-decl"><code>pub trait CoreFloat: <a class="trait" href="https://doc.rust-lang.org/1.87.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a> + <a class="trait" href="https://doc.rust-lang.org/1.87.0/core/marker/trait.Copy.html" title="trait core::marker::Copy">Copy</a> {
+<details class="toggle type-contents-toggle"><summary class="hideme"><span>Show 38 methods</span></summary>    // Required methods
+    fn <a href="#tymethod.floor" class="fn">floor</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.ceil" class="fn">ceil</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.round" class="fn">round</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.trunc" class="fn">trunc</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.fract" class="fn">fract</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.abs" class="fn">abs</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.signum" class="fn">signum</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.copysign" class="fn">copysign</a>(self, sign: Self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.mul_add" class="fn">mul_add</a>(self, a: Self, b: Self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.div_euclid" class="fn">div_euclid</a>(self, rhs: Self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.rem_euclid" class="fn">rem_euclid</a>(self, rhs: Self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.powi" class="fn">powi</a>(self, n: <a class="primitive" href="https://doc.rust-lang.org/1.87.0/core/primitive.i32.html">i32</a>) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.powf" class="fn">powf</a>(self, n: Self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.sqrt" class="fn">sqrt</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.exp" class="fn">exp</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.exp2" class="fn">exp2</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.ln" class="fn">ln</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.log" class="fn">log</a>(self, base: Self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.log2" class="fn">log2</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.log10" class="fn">log10</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.cbrt" class="fn">cbrt</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.hypot" class="fn">hypot</a>(self, other: Self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.sin" class="fn">sin</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.cos" class="fn">cos</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.tan" class="fn">tan</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.asin" class="fn">asin</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.acos" class="fn">acos</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.atan" class="fn">atan</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.atan2" class="fn">atan2</a>(self, other: Self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.exp_m1" class="fn">exp_m1</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.ln_1p" class="fn">ln_1p</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.sinh" class="fn">sinh</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.cosh" class="fn">cosh</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.tanh" class="fn">tanh</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.asinh" class="fn">asinh</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.acosh" class="fn">acosh</a>(self) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.atanh" class="fn">atanh</a>(self) -&gt; Self;
+
+    // Provided method
+    fn <a href="#method.sin_cos" class="fn">sin_cos</a>(self) -&gt; (Self, Self) { ... }
+</details>}</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>See <a href="index.html" title="mod core_maths"><code>crate</code></a>.</p>
+</div></details><h2 id="required-methods" class="section-header">Required Methods<a href="#required-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="tymethod.floor" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#35">Source</a><h4 class="code-header">fn <a href="#tymethod.floor" class="fn">floor</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Returns the largest integer less than or equal to <code>self</code>.</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>f = <span class="number">3.7_f64</span>;
+<span class="kw">let </span>g = <span class="number">3.0_f64</span>;
+<span class="kw">let </span>h = -<span class="number">3.7_f64</span>;
+
+<span class="macro">assert_eq!</span>(CoreFloat::floor(f), <span class="number">3.0</span>);
+<span class="macro">assert_eq!</span>(CoreFloat::floor(g), <span class="number">3.0</span>);
+<span class="macro">assert_eq!</span>(CoreFloat::floor(h), -<span class="number">4.0</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.ceil" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#51">Source</a><h4 class="code-header">fn <a href="#tymethod.ceil" class="fn">ceil</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Returns the smallest integer greater than or equal to <code>self</code>.</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-1"><a class="doc-anchor" href="#examples-1">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>f = <span class="number">3.01_f64</span>;
+<span class="kw">let </span>g = <span class="number">4.0_f64</span>;
+
+<span class="macro">assert_eq!</span>(CoreFloat::ceil(f), <span class="number">4.0</span>);
+<span class="macro">assert_eq!</span>(CoreFloat::ceil(g), <span class="number">4.0</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.round" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#74">Source</a><h4 class="code-header">fn <a href="#tymethod.round" class="fn">round</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Returns the nearest integer to <code>self</code>. If a value is half-way between two
+integers, round away from <code>0.0</code>.</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-2"><a class="doc-anchor" href="#examples-2">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>f = <span class="number">3.3_f64</span>;
+<span class="kw">let </span>g = -<span class="number">3.3_f64</span>;
+<span class="kw">let </span>h = -<span class="number">3.7_f64</span>;
+<span class="kw">let </span>i = <span class="number">3.5_f64</span>;
+<span class="kw">let </span>j = <span class="number">4.5_f64</span>;
+
+<span class="macro">assert_eq!</span>(CoreFloat::round(f), <span class="number">3.0</span>);
+<span class="macro">assert_eq!</span>(CoreFloat::round(g), -<span class="number">3.0</span>);
+<span class="macro">assert_eq!</span>(CoreFloat::round(h), -<span class="number">4.0</span>);
+<span class="macro">assert_eq!</span>(CoreFloat::round(i), <span class="number">4.0</span>);
+<span class="macro">assert_eq!</span>(CoreFloat::round(j), <span class="number">5.0</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.trunc" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#93">Source</a><h4 class="code-header">fn <a href="#tymethod.trunc" class="fn">trunc</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Returns the integer part of <code>self</code>.
+This means that non-integer numbers are always truncated towards zero.</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-3"><a class="doc-anchor" href="#examples-3">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>f = <span class="number">3.7_f64</span>;
+<span class="kw">let </span>g = <span class="number">3.0_f64</span>;
+<span class="kw">let </span>h = -<span class="number">3.7_f64</span>;
+
+<span class="macro">assert_eq!</span>(CoreFloat::trunc(f), <span class="number">3.0</span>);
+<span class="macro">assert_eq!</span>(CoreFloat::trunc(g), <span class="number">3.0</span>);
+<span class="macro">assert_eq!</span>(CoreFloat::trunc(h), -<span class="number">3.0</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.fract" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#111">Source</a><h4 class="code-header">fn <a href="#tymethod.fract" class="fn">fract</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Returns the fractional part of <code>self</code>.</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-4"><a class="doc-anchor" href="#examples-4">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>x = <span class="number">3.6_f64</span>;
+<span class="kw">let </span>y = -<span class="number">3.6_f64</span>;
+<span class="kw">let </span>abs_difference_x = (CoreFloat::fract(x) - CoreFloat::abs(<span class="number">0.6</span>));
+<span class="kw">let </span>abs_difference_y = (CoreFloat::fract(y) - CoreFloat::abs(-<span class="number">0.6</span>));
+
+<span class="macro">assert!</span>(abs_difference_x &lt; <span class="number">1e-10</span>);
+<span class="macro">assert!</span>(abs_difference_y &lt; <span class="number">1e-10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.abs" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#132">Source</a><h4 class="code-header">fn <a href="#tymethod.abs" class="fn">abs</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Computes the absolute value of <code>self</code>.</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-5"><a class="doc-anchor" href="#examples-5">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>x = <span class="number">3.5_f64</span>;
+<span class="kw">let </span>y = -<span class="number">3.5_f64</span>;
+
+<span class="kw">let </span>abs_difference_x = (CoreFloat::abs(x) - CoreFloat::abs(x));
+<span class="kw">let </span>abs_difference_y = (CoreFloat::abs(y) - (CoreFloat::abs(-y)));
+
+<span class="macro">assert!</span>(abs_difference_x &lt; <span class="number">1e-10</span>);
+<span class="macro">assert!</span>(abs_difference_y &lt; <span class="number">1e-10</span>);
+
+<span class="macro">assert!</span>(f64::NAN.abs().is_nan());</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.signum" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#153">Source</a><h4 class="code-header">fn <a href="#tymethod.signum" class="fn">signum</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Returns a number that represents the sign of <code>self</code>.</p>
+<ul>
+<li><code>1.0</code> if the number is positive, <code>+0.0</code> or <code>INFINITY</code></li>
+<li><code>-1.0</code> if the number is negative, <code>-0.0</code> or <code>NEG_INFINITY</code></li>
+<li>NaN if the number is NaN</li>
+</ul>
+<p>This method does not use an intrinsic in <code>std</code>, so its code is copied.</p>
+<h5 id="examples-6"><a class="doc-anchor" href="#examples-6">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>f = <span class="number">3.5_f64</span>;
+
+<span class="macro">assert_eq!</span>(CoreFloat::signum(f), <span class="number">1.0</span>);
+<span class="macro">assert_eq!</span>(CoreFloat::signum(f64::NEG_INFINITY), -<span class="number">1.0</span>);
+
+<span class="macro">assert!</span>(CoreFloat::signum(f64::NAN).is_nan());</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.copysign" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#179">Source</a><h4 class="code-header">fn <a href="#tymethod.copysign" class="fn">copysign</a>(self, sign: Self) -&gt; Self</h4></section></summary><div class="docblock"><p>Returns a number composed of the magnitude of <code>self</code> and the sign of
+<code>sign</code>.</p>
+<p>Equal to <code>self</code> if the sign of <code>self</code> and <code>sign</code> are the same, otherwise
+equal to <code>-self</code>. If <code>self</code> is a NaN, then a NaN with the sign bit of
+<code>sign</code> is returned. Note, however, that conserving the sign bit on NaN
+across arithmetical operations is not generally guaranteed.
+See <a href="https://doc.rust-lang.org/1.87.0/core/primitive.f32.html" title="primitive f32">explanation of NaN as a special value</a> for more info.</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-7"><a class="doc-anchor" href="#examples-7">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>f = <span class="number">3.5_f64</span>;
+
+<span class="macro">assert_eq!</span>(CoreFloat::copysign(f, <span class="number">0.42</span>), <span class="number">3.5_f64</span>);
+<span class="macro">assert_eq!</span>(CoreFloat::copysign(f, -<span class="number">0.42</span>), -<span class="number">3.5_f64</span>);
+<span class="macro">assert_eq!</span>(CoreFloat::copysign(-f, <span class="number">0.42</span>), <span class="number">3.5_f64</span>);
+<span class="macro">assert_eq!</span>(CoreFloat::copysign(-f, -<span class="number">0.42</span>), -<span class="number">3.5_f64</span>);
+
+<span class="macro">assert!</span>(CoreFloat::copysign(f64::NAN, <span class="number">1.0</span>).is_nan());</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.mul_add" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#204">Source</a><h4 class="code-header">fn <a href="#tymethod.mul_add" class="fn">mul_add</a>(self, a: Self, b: Self) -&gt; Self</h4></section></summary><div class="docblock"><p>Fused multiply-add. Computes <code>(self * a) + b</code> with only one rounding
+error, yielding a more accurate result than an unfused multiply-add.</p>
+<p>Using <code>mul_add</code> <em>may</em> be more performant than an unfused multiply-add if
+the target architecture has a dedicated <code>fma</code> CPU instruction. However,
+this is not always true, and will be heavily dependant on designing
+algorithms with specific target hardware in mind.</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-8"><a class="doc-anchor" href="#examples-8">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>m = <span class="number">10.0_f64</span>;
+<span class="kw">let </span>x = <span class="number">4.0_f64</span>;
+<span class="kw">let </span>b = <span class="number">60.0_f64</span>;
+
+<span class="comment">// 100.0
+</span><span class="kw">let </span>abs_difference = (CoreFloat::mul_add(m, x, b) - ((m * x) + b)).abs();
+
+<span class="macro">assert!</span>(abs_difference &lt; <span class="number">1e-10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.div_euclid" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#226">Source</a><h4 class="code-header">fn <a href="#tymethod.div_euclid" class="fn">div_euclid</a>(self, rhs: Self) -&gt; Self</h4></section></summary><div class="docblock"><p>Calculates Euclidean division, the matching method for <code>rem_euclid</code>.</p>
+<p>This computes the integer <code>n</code> such that
+<code>self = n * rhs + self.rem_euclid(rhs)</code>.
+In other words, the result is <code>self / rhs</code> rounded to the integer <code>n</code>
+such that <code>self &gt;= n * rhs</code>.</p>
+<p>This method does not use an intrinsic in <code>std</code>, so its code is copied.</p>
+<h5 id="examples-9"><a class="doc-anchor" href="#examples-9">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>a: f64 = <span class="number">7.0</span>;
+<span class="kw">let </span>b = <span class="number">4.0</span>;
+<span class="macro">assert_eq!</span>(CoreFloat::div_euclid(a, b), <span class="number">1.0</span>); <span class="comment">// 7.0 &gt; 4.0 * 1.0
+</span><span class="macro">assert_eq!</span>(CoreFloat::div_euclid(-a, b), -<span class="number">2.0</span>); <span class="comment">// -7.0 &gt;= 4.0 * -2.0
+</span><span class="macro">assert_eq!</span>(CoreFloat::div_euclid(a, -b), -<span class="number">1.0</span>); <span class="comment">// 7.0 &gt;= -4.0 * -1.0
+</span><span class="macro">assert_eq!</span>(CoreFloat::div_euclid(-a, -b), <span class="number">2.0</span>); <span class="comment">// -7.0 &gt;= -4.0 * 2.0</span></code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.rem_euclid" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#254">Source</a><h4 class="code-header">fn <a href="#tymethod.rem_euclid" class="fn">rem_euclid</a>(self, rhs: Self) -&gt; Self</h4></section></summary><div class="docblock"><p>Calculates the least nonnegative remainder of <code>self (mod rhs)</code>.</p>
+<p>In particular, the return value <code>r</code> satisfies <code>0.0 &lt;= r &lt; rhs.abs()</code> in
+most cases. However, due to a floating point round-off error it can
+result in <code>r == rhs.abs()</code>, violating the mathematical definition, if
+<code>self</code> is much smaller than <code>rhs.abs()</code> in magnitude and <code>self &lt; 0.0</code>.
+This result is not an element of the function’s codomain, but it is the
+closest floating point number in the real numbers and thus fulfills the
+property <code>self == self.div_euclid(rhs) * rhs + self.rem_euclid(rhs)</code>
+approximately.</p>
+<p>This method does not use an intrinsic in <code>std</code>, so its code is copied.</p>
+<h5 id="examples-10"><a class="doc-anchor" href="#examples-10">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>a: f64 = <span class="number">7.0</span>;
+<span class="kw">let </span>b = <span class="number">4.0</span>;
+<span class="macro">assert_eq!</span>(CoreFloat::rem_euclid(a, b), <span class="number">3.0</span>);
+<span class="macro">assert_eq!</span>(CoreFloat::rem_euclid(-a, b), <span class="number">1.0</span>);
+<span class="macro">assert_eq!</span>(CoreFloat::rem_euclid(a, -b), <span class="number">3.0</span>);
+<span class="macro">assert_eq!</span>(CoreFloat::rem_euclid(-a, -b), <span class="number">1.0</span>);
+<span class="comment">// limitation due to round-off error
+</span><span class="macro">assert!</span>(CoreFloat::rem_euclid(-f64::EPSILON, <span class="number">3.0</span>) != <span class="number">0.0</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.powi" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#273">Source</a><h4 class="code-header">fn <a href="#tymethod.powi" class="fn">powi</a>(self, n: <a class="primitive" href="https://doc.rust-lang.org/1.87.0/core/primitive.i32.html">i32</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Raises a number to an integer power.</p>
+<p>Using this function is generally faster than using <code>powf</code>.
+It might have a different sequence of rounding operations than <code>powf</code>,
+so the results are not guaranteed to agree.</p>
+<p>This method is not available in <code>libm</code>, so it uses a custom implementation.</p>
+<h5 id="examples-11"><a class="doc-anchor" href="#examples-11">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>x = <span class="number">2.0_f64</span>;
+<span class="kw">let </span>abs_difference = (CoreFloat::powi(x, <span class="number">2</span>) - (x * x)).abs();
+
+<span class="macro">assert!</span>(abs_difference &lt; <span class="number">1e-10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.powf" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#288">Source</a><h4 class="code-header">fn <a href="#tymethod.powf" class="fn">powf</a>(self, n: Self) -&gt; Self</h4></section></summary><div class="docblock"><p>Raises a number to a floating point power.</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-12"><a class="doc-anchor" href="#examples-12">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>x = <span class="number">2.0_f64</span>;
+<span class="kw">let </span>abs_difference = (CoreFloat::powf(x, <span class="number">2.0</span>) - (x * x)).abs();
+
+<span class="macro">assert!</span>(abs_difference &lt; <span class="number">1e-10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.sqrt" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#310">Source</a><h4 class="code-header">fn <a href="#tymethod.sqrt" class="fn">sqrt</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Returns the square root of a number.</p>
+<p>Returns NaN if <code>self</code> is a negative number other than <code>-0.0</code>.</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-13"><a class="doc-anchor" href="#examples-13">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>positive = <span class="number">4.0_f64</span>;
+<span class="kw">let </span>negative = -<span class="number">4.0_f64</span>;
+<span class="kw">let </span>negative_zero = -<span class="number">0.0_f64</span>;
+
+<span class="kw">let </span>abs_difference = (CoreFloat::sqrt(positive) - <span class="number">2.0</span>).abs();
+
+<span class="macro">assert!</span>(abs_difference &lt; <span class="number">1e-10</span>);
+<span class="macro">assert!</span>(CoreFloat::sqrt(negative).is_nan());
+<span class="macro">assert!</span>(CoreFloat::sqrt(negative_zero) == negative_zero);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.exp" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#329">Source</a><h4 class="code-header">fn <a href="#tymethod.exp" class="fn">exp</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Returns <code>e^(self)</code>, (the exponential function).</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-14"><a class="doc-anchor" href="#examples-14">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>one = <span class="number">1.0_f64</span>;
+<span class="comment">// e^1
+</span><span class="kw">let </span>e = CoreFloat::exp(one);
+
+<span class="comment">// ln(e) - 1 == 0
+</span><span class="kw">let </span>abs_difference = (e.ln() - <span class="number">1.0</span>).abs();
+
+<span class="macro">assert!</span>(abs_difference &lt; <span class="number">1e-10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.exp2" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#346">Source</a><h4 class="code-header">fn <a href="#tymethod.exp2" class="fn">exp2</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Returns <code>2^(self)</code>.</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-15"><a class="doc-anchor" href="#examples-15">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>f = <span class="number">2.0_f64</span>;
+
+<span class="comment">// 2^2 - 4 == 0
+</span><span class="kw">let </span>abs_difference = (CoreFloat::exp2(f) - <span class="number">4.0</span>).abs();
+
+<span class="macro">assert!</span>(abs_difference &lt; <span class="number">1e-10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.ln" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#365">Source</a><h4 class="code-header">fn <a href="#tymethod.ln" class="fn">ln</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Returns the natural logarithm of the number.</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-16"><a class="doc-anchor" href="#examples-16">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>one = <span class="number">1.0_f64</span>;
+<span class="comment">// e^1
+</span><span class="kw">let </span>e = one.exp();
+
+<span class="comment">// ln(e) - 1 == 0
+</span><span class="kw">let </span>abs_difference = (CoreFloat::ln(e) - <span class="number">1.0</span>).abs();
+
+<span class="macro">assert!</span>(abs_difference &lt; <span class="number">1e-10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.log" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#386">Source</a><h4 class="code-header">fn <a href="#tymethod.log" class="fn">log</a>(self, base: Self) -&gt; Self</h4></section></summary><div class="docblock"><p>Returns the logarithm of the number with respect to an arbitrary base.</p>
+<p>The result might not be correctly rounded owing to implementation details;
+<code>self.log2()</code> can produce more accurate results for base 2, and
+<code>self.log10()</code> can produce more accurate results for base 10.</p>
+<p>This method does not use an intrinsic in <code>std</code>, so its code is copied.</p>
+<h5 id="examples-17"><a class="doc-anchor" href="#examples-17">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>twenty_five = <span class="number">25.0_f64</span>;
+
+<span class="comment">// log5(25) - 2 == 0
+</span><span class="kw">let </span>abs_difference = (CoreFloat::log(twenty_five, <span class="number">5.0</span>) - <span class="number">2.0</span>).abs();
+
+<span class="macro">assert!</span>(abs_difference &lt; <span class="number">1e-10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.log2" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#403">Source</a><h4 class="code-header">fn <a href="#tymethod.log2" class="fn">log2</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Returns the base 2 logarithm of the number.</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-18"><a class="doc-anchor" href="#examples-18">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>four = <span class="number">4.0_f64</span>;
+
+<span class="comment">// log2(4) - 2 == 0
+</span><span class="kw">let </span>abs_difference = (CoreFloat::log2(four) - <span class="number">2.0</span>).abs();
+
+<span class="macro">assert!</span>(abs_difference &lt; <span class="number">1e-10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.log10" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#420">Source</a><h4 class="code-header">fn <a href="#tymethod.log10" class="fn">log10</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Returns the base 10 logarithm of the number.</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-19"><a class="doc-anchor" href="#examples-19">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>hundred = <span class="number">100.0_f64</span>;
+
+<span class="comment">// log10(100) - 2 == 0
+</span><span class="kw">let </span>abs_difference = (CoreFloat::log10(hundred) - <span class="number">2.0</span>).abs();
+
+<span class="macro">assert!</span>(abs_difference &lt; <span class="number">1e-10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.cbrt" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#437">Source</a><h4 class="code-header">fn <a href="#tymethod.cbrt" class="fn">cbrt</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Returns the cube root of a number.</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-20"><a class="doc-anchor" href="#examples-20">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>x = <span class="number">8.0_f64</span>;
+
+<span class="comment">// x^(1/3) - 2 == 0
+</span><span class="kw">let </span>abs_difference = (CoreFloat::cbrt(x) - <span class="number">2.0</span>).abs();
+
+<span class="macro">assert!</span>(abs_difference &lt; <span class="number">1e-10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.hypot" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#458">Source</a><h4 class="code-header">fn <a href="#tymethod.hypot" class="fn">hypot</a>(self, other: Self) -&gt; Self</h4></section></summary><div class="docblock"><p>Compute the distance between the origin and a point (<code>x</code>, <code>y</code>) on the
+Euclidean plane. Equivalently, compute the length of the hypotenuse of a
+right-angle triangle with other sides having length <code>x.abs()</code> and
+<code>y.abs()</code>.</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-21"><a class="doc-anchor" href="#examples-21">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>x = <span class="number">2.0_f64</span>;
+<span class="kw">let </span>y = <span class="number">3.0_f64</span>;
+
+<span class="comment">// sqrt(x^2 + y^2)
+</span><span class="kw">let </span>abs_difference = (CoreFloat::hypot(x, y) - (x.powi(<span class="number">2</span>) + y.powi(<span class="number">2</span>)).sqrt()).abs();
+
+<span class="macro">assert!</span>(abs_difference &lt; <span class="number">1e-10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.sin" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#474">Source</a><h4 class="code-header">fn <a href="#tymethod.sin" class="fn">sin</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Computes the sine of a number (in radians).</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-22"><a class="doc-anchor" href="#examples-22">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>x = std::f64::consts::FRAC_PI_2;
+
+<span class="kw">let </span>abs_difference = (CoreFloat::sin(x) - <span class="number">1.0</span>).abs();
+
+<span class="macro">assert!</span>(abs_difference &lt; <span class="number">1e-10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.cos" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#490">Source</a><h4 class="code-header">fn <a href="#tymethod.cos" class="fn">cos</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Computes the cosine of a number (in radians).</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-23"><a class="doc-anchor" href="#examples-23">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>x = <span class="number">2.0 </span>* std::f64::consts::PI;
+
+<span class="kw">let </span>abs_difference = (CoreFloat::cos(x) - <span class="number">1.0</span>).abs();
+
+<span class="macro">assert!</span>(abs_difference &lt; <span class="number">1e-10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.tan" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#506">Source</a><h4 class="code-header">fn <a href="#tymethod.tan" class="fn">tan</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Computes the tangent of a number (in radians).</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-24"><a class="doc-anchor" href="#examples-24">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>x = std::f64::consts::FRAC_PI_4;
+
+<span class="kw">let </span>abs_difference = (CoreFloat::tan(x) - <span class="number">1.0</span>).abs();
+
+<span class="macro">assert!</span>(abs_difference &lt; <span class="number">1e-14</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.asin" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#525">Source</a><h4 class="code-header">fn <a href="#tymethod.asin" class="fn">asin</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Computes the arcsine of a number. Return value is in radians in
+the range [-pi/2, pi/2] or NaN if the number is outside the range
+[-1, 1].</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-25"><a class="doc-anchor" href="#examples-25">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>f = std::f64::consts::FRAC_PI_2;
+
+<span class="comment">// asin(sin(pi/2))
+</span><span class="kw">let </span>abs_difference = (CoreFloat::asin(f.sin()) - std::f64::consts::FRAC_PI_2).abs();
+
+<span class="macro">assert!</span>(abs_difference &lt; <span class="number">1e-10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.acos" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#544">Source</a><h4 class="code-header">fn <a href="#tymethod.acos" class="fn">acos</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Computes the arccosine of a number. Return value is in radians in
+the range [0, pi] or NaN if the number is outside the range
+[-1, 1].</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-26"><a class="doc-anchor" href="#examples-26">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>f = std::f64::consts::FRAC_PI_4;
+
+<span class="comment">// acos(cos(pi/4))
+</span><span class="kw">let </span>abs_difference = (CoreFloat::acos(f.cos()) - std::f64::consts::FRAC_PI_4).abs();
+
+<span class="macro">assert!</span>(abs_difference &lt; <span class="number">1e-10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.atan" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#562">Source</a><h4 class="code-header">fn <a href="#tymethod.atan" class="fn">atan</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Computes the arctangent of a number. Return value is in radians in the
+range [-pi/2, pi/2];</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-27"><a class="doc-anchor" href="#examples-27">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>f = <span class="number">1.0_f64</span>;
+
+<span class="comment">// atan(tan(1))
+</span><span class="kw">let </span>abs_difference = (CoreFloat::atan(f.tan()) - <span class="number">1.0</span>).abs();
+
+<span class="macro">assert!</span>(abs_difference &lt; <span class="number">1e-10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.atan2" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#593">Source</a><h4 class="code-header">fn <a href="#tymethod.atan2" class="fn">atan2</a>(self, other: Self) -&gt; Self</h4></section></summary><div class="docblock"><p>Computes the four quadrant arctangent of <code>self</code> (<code>y</code>) and <code>other</code> (<code>x</code>) in radians.</p>
+<ul>
+<li><code>x = 0</code>, <code>y = 0</code>: <code>0</code></li>
+<li><code>x &gt;= 0</code>: <code>arctan(y/x)</code> -&gt; <code>[-pi/2, pi/2]</code></li>
+<li><code>y &gt;= 0</code>: <code>arctan(y/x) + pi</code> -&gt; <code>(pi/2, pi]</code></li>
+<li><code>y &lt; 0</code>: <code>arctan(y/x) - pi</code> -&gt; <code>(-pi, -pi/2)</code></li>
+</ul>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-28"><a class="doc-anchor" href="#examples-28">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="comment">// Positive angles measured counter-clockwise
+// from positive x axis
+// -pi/4 radians (45 deg clockwise)
+</span><span class="kw">let </span>x1 = <span class="number">3.0_f64</span>;
+<span class="kw">let </span>y1 = -<span class="number">3.0_f64</span>;
+
+<span class="comment">// 3pi/4 radians (135 deg counter-clockwise)
+</span><span class="kw">let </span>x2 = -<span class="number">3.0_f64</span>;
+<span class="kw">let </span>y2 = <span class="number">3.0_f64</span>;
+
+<span class="kw">let </span>abs_difference_1 = (CoreFloat::atan2(y1, x1) - (-std::f64::consts::FRAC_PI_4)).abs();
+<span class="kw">let </span>abs_difference_2 = (CoreFloat::atan2(y2, x2) - (<span class="number">3.0 </span>* std::f64::consts::FRAC_PI_4)).abs();
+
+<span class="macro">assert!</span>(abs_difference_1 &lt; <span class="number">1e-10</span>);
+<span class="macro">assert!</span>(abs_difference_2 &lt; <span class="number">1e-10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.exp_m1" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#634">Source</a><h4 class="code-header">fn <a href="#tymethod.exp_m1" class="fn">exp_m1</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Returns <code>e^(self) - 1</code> in a way that is accurate even if the
+number is close to zero.</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-29"><a class="doc-anchor" href="#examples-29">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>x = <span class="number">1e-16_f64</span>;
+
+<span class="comment">// for very small x, e^x is approximately 1 + x + x^2 / 2
+</span><span class="kw">let </span>approx = x + x * x / <span class="number">2.0</span>;
+<span class="kw">let </span>abs_difference = (CoreFloat::exp_m1(x) - approx).abs();
+
+<span class="macro">assert!</span>(abs_difference &lt; <span class="number">1e-20</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.ln_1p" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#653">Source</a><h4 class="code-header">fn <a href="#tymethod.ln_1p" class="fn">ln_1p</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Returns <code>ln(1+n)</code> (natural logarithm) more accurately than if
+the operations were performed separately.</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-30"><a class="doc-anchor" href="#examples-30">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>x = <span class="number">1e-16_f64</span>;
+
+<span class="comment">// for very small x, ln(1 + x) is approximately x - x^2 / 2
+</span><span class="kw">let </span>approx = x - x * x / <span class="number">2.0</span>;
+<span class="kw">let </span>abs_difference = (CoreFloat::ln_1p(x) - approx).abs();
+
+<span class="macro">assert!</span>(abs_difference &lt; <span class="number">1e-20</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.sinh" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#673">Source</a><h4 class="code-header">fn <a href="#tymethod.sinh" class="fn">sinh</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Hyperbolic sine function.</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-31"><a class="doc-anchor" href="#examples-31">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>e = std::f64::consts::E;
+<span class="kw">let </span>x = <span class="number">1.0_f64</span>;
+
+<span class="kw">let </span>f = CoreFloat::sinh(x);
+<span class="comment">// Solving sinh() at 1 gives `(e^2-1)/(2e)`
+</span><span class="kw">let </span>g = ((e * e) - <span class="number">1.0</span>) / (<span class="number">2.0 </span>* e);
+<span class="kw">let </span>abs_difference = (f - g).abs();
+
+<span class="macro">assert!</span>(abs_difference &lt; <span class="number">1e-10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.cosh" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#693">Source</a><h4 class="code-header">fn <a href="#tymethod.cosh" class="fn">cosh</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Hyperbolic cosine function.</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-32"><a class="doc-anchor" href="#examples-32">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>e = std::f64::consts::E;
+<span class="kw">let </span>x = <span class="number">1.0_f64</span>;
+<span class="kw">let </span>f = CoreFloat::cosh(x);
+<span class="comment">// Solving cosh() at 1 gives this result
+</span><span class="kw">let </span>g = ((e * e) + <span class="number">1.0</span>) / (<span class="number">2.0 </span>* e);
+<span class="kw">let </span>abs_difference = (f - g).abs();
+
+<span class="comment">// Same result
+</span><span class="macro">assert!</span>(abs_difference &lt; <span class="number">1.0e-10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.tanh" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#713">Source</a><h4 class="code-header">fn <a href="#tymethod.tanh" class="fn">tanh</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Hyperbolic tangent function.</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-33"><a class="doc-anchor" href="#examples-33">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>e = std::f64::consts::E;
+<span class="kw">let </span>x = <span class="number">1.0_f64</span>;
+
+<span class="kw">let </span>f = CoreFloat::tanh(x);
+<span class="comment">// Solving tanh() at 1 gives `(1 - e^(-2))/(1 + e^(-2))`
+</span><span class="kw">let </span>g = (<span class="number">1.0 </span>- e.powi(-<span class="number">2</span>)) / (<span class="number">1.0 </span>+ e.powi(-<span class="number">2</span>));
+<span class="kw">let </span>abs_difference = (f - g).abs();
+
+<span class="macro">assert!</span>(abs_difference &lt; <span class="number">1.0e-10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.asinh" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#730">Source</a><h4 class="code-header">fn <a href="#tymethod.asinh" class="fn">asinh</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Inverse hyperbolic sine function.</p>
+<p>This method does not use an intrinsic in <code>std</code>, so its code is copied.</p>
+<h5 id="examples-34"><a class="doc-anchor" href="#examples-34">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>x = <span class="number">1.0_f64</span>;
+<span class="kw">let </span>f = CoreFloat::asinh(x.sinh());
+
+<span class="kw">let </span>abs_difference = (f - x).abs();
+
+<span class="macro">assert!</span>(abs_difference &lt; <span class="number">1.0e-10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.acosh" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#747">Source</a><h4 class="code-header">fn <a href="#tymethod.acosh" class="fn">acosh</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Inverse hyperbolic cosine function.</p>
+<p>This method does not use an intrinsic in <code>std</code>, so its code is copied.</p>
+<h5 id="examples-35"><a class="doc-anchor" href="#examples-35">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>x = <span class="number">1.0_f64</span>;
+<span class="kw">let </span>f = CoreFloat::acosh(x.cosh());
+
+<span class="kw">let </span>abs_difference = (f - x).abs();
+
+<span class="macro">assert!</span>(abs_difference &lt; <span class="number">1.0e-10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.atanh" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#764">Source</a><h4 class="code-header">fn <a href="#tymethod.atanh" class="fn">atanh</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Inverse hyperbolic tangent function.</p>
+<p>This method does not use an intrinsic in <code>std</code>, so its code is copied.</p>
+<h5 id="examples-36"><a class="doc-anchor" href="#examples-36">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>e = std::f64::consts::E;
+<span class="kw">let </span>f = CoreFloat::atanh(e.tanh());
+
+<span class="kw">let </span>abs_difference = (f - e).abs();
+
+<span class="macro">assert!</span>(abs_difference &lt; <span class="number">1.0e-10</span>);</code></pre></div>
+</div></details></div><h2 id="provided-methods" class="section-header">Provided Methods<a href="#provided-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="method.sin_cos" class="method"><a class="src rightside" href="../src/core_maths/lib.rs.html#613-615">Source</a><h4 class="code-header">fn <a href="#method.sin_cos" class="fn">sin_cos</a>(self) -&gt; (Self, Self)</h4></section></summary><div class="docblock"><p>Simultaneously computes the sine and cosine of the number, <code>x</code>. Returns
+<code>(sin(x), cos(x))</code>.</p>
+<p>This implementation uses <code>libm</code> instead of the Rust intrinsic.</p>
+<h5 id="examples-37"><a class="doc-anchor" href="#examples-37">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core_maths::<span class="kw-2">*</span>;
+<span class="kw">let </span>x = std::f64::consts::FRAC_PI_4;
+<span class="kw">let </span>f = CoreFloat::sin_cos(x);
+
+<span class="kw">let </span>abs_difference_0 = (f.<span class="number">0 </span>- x.sin()).abs();
+<span class="kw">let </span>abs_difference_1 = (f.<span class="number">1 </span>- x.cos()).abs();
+
+<span class="macro">assert!</span>(abs_difference_0 &lt; <span class="number">1e-10</span>);
+<span class="macro">assert!</span>(abs_difference_1 &lt; <span class="number">1e-10</span>);</code></pre></div>
+</div></details></div><h2 id="dyn-compatibility" class="section-header">Dyn Compatibility<a href="#dyn-compatibility" class="anchor">§</a></h2><div class="dyn-compatibility-info"><p>This trait is <b>not</b> <a href="https://doc.rust-lang.org/1.87.0/reference/items/traits.html#dyn-compatibility">dyn compatible</a>.</p><p><i>In older versions of Rust, dyn compatibility was called "object safety", so this trait is not object safe.</i></p></div><h2 id="foreign-impls" class="section-header">Implementations on Foreign Types<a href="#foreign-impls" class="anchor">§</a></h2><details class="toggle implementors-toggle"><summary><section id="impl-CoreFloat-for-f32" class="impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#767-993">Source</a><a href="#impl-CoreFloat-for-f32" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="trait.CoreFloat.html" title="trait core_maths::CoreFloat">CoreFloat</a> for <a class="primitive" href="https://doc.rust-lang.org/1.87.0/core/primitive.f32.html">f32</a></h3></section></summary><div class="impl-items"><section id="method.floor" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#769-771">Source</a><a href="#method.floor" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.floor" class="fn">floor</a>(self) -&gt; Self</h4></section><section id="method.ceil" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#774-776">Source</a><a href="#method.ceil" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.ceil" class="fn">ceil</a>(self) -&gt; Self</h4></section><section id="method.round" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#779-781">Source</a><a href="#method.round" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.round" class="fn">round</a>(self) -&gt; Self</h4></section><section id="method.trunc" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#784-786">Source</a><a href="#method.trunc" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.trunc" class="fn">trunc</a>(self) -&gt; Self</h4></section><section id="method.fract" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#789-791">Source</a><a href="#method.fract" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.fract" class="fn">fract</a>(self) -&gt; Self</h4></section><section id="method.abs" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#794-796">Source</a><a href="#method.abs" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.abs" class="fn">abs</a>(self) -&gt; Self</h4></section><section id="method.signum" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#799-805">Source</a><a href="#method.signum" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.signum" class="fn">signum</a>(self) -&gt; Self</h4></section><section id="method.copysign" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#808-810">Source</a><a href="#method.copysign" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.copysign" class="fn">copysign</a>(self, sign: Self) -&gt; Self</h4></section><section id="method.mul_add" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#813-815">Source</a><a href="#method.mul_add" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.mul_add" class="fn">mul_add</a>(self, a: Self, b: Self) -&gt; Self</h4></section><section id="method.div_euclid" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#818-824">Source</a><a href="#method.div_euclid" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.div_euclid" class="fn">div_euclid</a>(self, rhs: Self) -&gt; Self</h4></section><section id="method.rem_euclid" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#827-834">Source</a><a href="#method.rem_euclid" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.rem_euclid" class="fn">rem_euclid</a>(self, rhs: Self) -&gt; Self</h4></section><section id="method.powi" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#837-859">Source</a><a href="#method.powi" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.powi" class="fn">powi</a>(self, exp: <a class="primitive" href="https://doc.rust-lang.org/1.87.0/core/primitive.i32.html">i32</a>) -&gt; Self</h4></section><section id="method.powf" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#862-864">Source</a><a href="#method.powf" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.powf" class="fn">powf</a>(self, n: Self) -&gt; Self</h4></section><section id="method.sqrt" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#867-869">Source</a><a href="#method.sqrt" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.sqrt" class="fn">sqrt</a>(self) -&gt; Self</h4></section><section id="method.exp" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#872-874">Source</a><a href="#method.exp" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.exp" class="fn">exp</a>(self) -&gt; Self</h4></section><section id="method.exp2" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#877-879">Source</a><a href="#method.exp2" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.exp2" class="fn">exp2</a>(self) -&gt; Self</h4></section><section id="method.ln" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#882-884">Source</a><a href="#method.ln" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.ln" class="fn">ln</a>(self) -&gt; Self</h4></section><section id="method.log" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#887-889">Source</a><a href="#method.log" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.log" class="fn">log</a>(self, base: Self) -&gt; Self</h4></section><section id="method.log2" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#892-894">Source</a><a href="#method.log2" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.log2" class="fn">log2</a>(self) -&gt; Self</h4></section><section id="method.log10" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#897-899">Source</a><a href="#method.log10" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.log10" class="fn">log10</a>(self) -&gt; Self</h4></section><section id="method.cbrt" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#902-904">Source</a><a href="#method.cbrt" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.cbrt" class="fn">cbrt</a>(self) -&gt; Self</h4></section><section id="method.hypot" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#907-909">Source</a><a href="#method.hypot" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.hypot" class="fn">hypot</a>(self, other: Self) -&gt; Self</h4></section><section id="method.sin" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#912-914">Source</a><a href="#method.sin" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.sin" class="fn">sin</a>(self) -&gt; Self</h4></section><section id="method.cos" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#917-919">Source</a><a href="#method.cos" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.cos" class="fn">cos</a>(self) -&gt; Self</h4></section><section id="method.tan" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#922-924">Source</a><a href="#method.tan" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.tan" class="fn">tan</a>(self) -&gt; Self</h4></section><section id="method.asin" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#927-929">Source</a><a href="#method.asin" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.asin" class="fn">asin</a>(self) -&gt; Self</h4></section><section id="method.acos" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#932-934">Source</a><a href="#method.acos" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.acos" class="fn">acos</a>(self) -&gt; Self</h4></section><section id="method.atan" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#937-939">Source</a><a href="#method.atan" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.atan" class="fn">atan</a>(self) -&gt; Self</h4></section><section id="method.atan2" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#942-944">Source</a><a href="#method.atan2" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.atan2" class="fn">atan2</a>(self, other: Self) -&gt; Self</h4></section><section id="method.exp_m1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#947-949">Source</a><a href="#method.exp_m1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.exp_m1" class="fn">exp_m1</a>(self) -&gt; Self</h4></section><section id="method.ln_1p" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#952-954">Source</a><a href="#method.ln_1p" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.ln_1p" class="fn">ln_1p</a>(self) -&gt; Self</h4></section><section id="method.sinh" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#957-959">Source</a><a href="#method.sinh" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.sinh" class="fn">sinh</a>(self) -&gt; Self</h4></section><section id="method.cosh" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#962-964">Source</a><a href="#method.cosh" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.cosh" class="fn">cosh</a>(self) -&gt; Self</h4></section><section id="method.tanh" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#967-969">Source</a><a href="#method.tanh" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.tanh" class="fn">tanh</a>(self) -&gt; Self</h4></section><section id="method.asinh" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#972-978">Source</a><a href="#method.asinh" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.asinh" class="fn">asinh</a>(self) -&gt; Self</h4></section><section id="method.acosh" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#981-987">Source</a><a href="#method.acosh" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.acosh" class="fn">acosh</a>(self) -&gt; Self</h4></section><section id="method.atanh" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#990-992">Source</a><a href="#method.atanh" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.atanh" class="fn">atanh</a>(self) -&gt; Self</h4></section></div></details><details class="toggle implementors-toggle"><summary><section id="impl-CoreFloat-for-f64" class="impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#995-1221">Source</a><a href="#impl-CoreFloat-for-f64" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="trait.CoreFloat.html" title="trait core_maths::CoreFloat">CoreFloat</a> for <a class="primitive" href="https://doc.rust-lang.org/1.87.0/core/primitive.f64.html">f64</a></h3></section></summary><div class="impl-items"><section id="method.floor-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#997-999">Source</a><a href="#method.floor-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.floor" class="fn">floor</a>(self) -&gt; Self</h4></section><section id="method.ceil-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1002-1004">Source</a><a href="#method.ceil-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.ceil" class="fn">ceil</a>(self) -&gt; Self</h4></section><section id="method.round-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1007-1009">Source</a><a href="#method.round-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.round" class="fn">round</a>(self) -&gt; Self</h4></section><section id="method.trunc-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1012-1014">Source</a><a href="#method.trunc-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.trunc" class="fn">trunc</a>(self) -&gt; Self</h4></section><section id="method.fract-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1017-1019">Source</a><a href="#method.fract-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.fract" class="fn">fract</a>(self) -&gt; Self</h4></section><section id="method.abs-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1022-1024">Source</a><a href="#method.abs-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.abs" class="fn">abs</a>(self) -&gt; Self</h4></section><section id="method.signum-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1027-1033">Source</a><a href="#method.signum-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.signum" class="fn">signum</a>(self) -&gt; Self</h4></section><section id="method.copysign-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1036-1038">Source</a><a href="#method.copysign-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.copysign" class="fn">copysign</a>(self, sign: Self) -&gt; Self</h4></section><section id="method.mul_add-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1041-1043">Source</a><a href="#method.mul_add-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.mul_add" class="fn">mul_add</a>(self, a: Self, b: Self) -&gt; Self</h4></section><section id="method.div_euclid-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1046-1052">Source</a><a href="#method.div_euclid-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.div_euclid" class="fn">div_euclid</a>(self, rhs: Self) -&gt; Self</h4></section><section id="method.rem_euclid-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1055-1062">Source</a><a href="#method.rem_euclid-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.rem_euclid" class="fn">rem_euclid</a>(self, rhs: Self) -&gt; Self</h4></section><section id="method.powi-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1065-1087">Source</a><a href="#method.powi-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.powi" class="fn">powi</a>(self, exp: <a class="primitive" href="https://doc.rust-lang.org/1.87.0/core/primitive.i32.html">i32</a>) -&gt; Self</h4></section><section id="method.powf-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1090-1092">Source</a><a href="#method.powf-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.powf" class="fn">powf</a>(self, n: Self) -&gt; Self</h4></section><section id="method.sqrt-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1095-1097">Source</a><a href="#method.sqrt-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.sqrt" class="fn">sqrt</a>(self) -&gt; Self</h4></section><section id="method.exp-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1100-1102">Source</a><a href="#method.exp-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.exp" class="fn">exp</a>(self) -&gt; Self</h4></section><section id="method.exp2-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1105-1107">Source</a><a href="#method.exp2-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.exp2" class="fn">exp2</a>(self) -&gt; Self</h4></section><section id="method.ln-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1110-1112">Source</a><a href="#method.ln-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.ln" class="fn">ln</a>(self) -&gt; Self</h4></section><section id="method.log-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1115-1117">Source</a><a href="#method.log-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.log" class="fn">log</a>(self, base: Self) -&gt; Self</h4></section><section id="method.log2-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1120-1122">Source</a><a href="#method.log2-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.log2" class="fn">log2</a>(self) -&gt; Self</h4></section><section id="method.log10-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1125-1127">Source</a><a href="#method.log10-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.log10" class="fn">log10</a>(self) -&gt; Self</h4></section><section id="method.cbrt-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1130-1132">Source</a><a href="#method.cbrt-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.cbrt" class="fn">cbrt</a>(self) -&gt; Self</h4></section><section id="method.hypot-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1135-1137">Source</a><a href="#method.hypot-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.hypot" class="fn">hypot</a>(self, other: Self) -&gt; Self</h4></section><section id="method.sin-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1140-1142">Source</a><a href="#method.sin-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.sin" class="fn">sin</a>(self) -&gt; Self</h4></section><section id="method.cos-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1145-1147">Source</a><a href="#method.cos-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.cos" class="fn">cos</a>(self) -&gt; Self</h4></section><section id="method.tan-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1150-1152">Source</a><a href="#method.tan-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.tan" class="fn">tan</a>(self) -&gt; Self</h4></section><section id="method.asin-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1155-1157">Source</a><a href="#method.asin-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.asin" class="fn">asin</a>(self) -&gt; Self</h4></section><section id="method.acos-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1160-1162">Source</a><a href="#method.acos-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.acos" class="fn">acos</a>(self) -&gt; Self</h4></section><section id="method.atan-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1165-1167">Source</a><a href="#method.atan-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.atan" class="fn">atan</a>(self) -&gt; Self</h4></section><section id="method.atan2-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1170-1172">Source</a><a href="#method.atan2-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.atan2" class="fn">atan2</a>(self, other: Self) -&gt; Self</h4></section><section id="method.exp_m1-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1175-1177">Source</a><a href="#method.exp_m1-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.exp_m1" class="fn">exp_m1</a>(self) -&gt; Self</h4></section><section id="method.ln_1p-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1180-1182">Source</a><a href="#method.ln_1p-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.ln_1p" class="fn">ln_1p</a>(self) -&gt; Self</h4></section><section id="method.sinh-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1185-1187">Source</a><a href="#method.sinh-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.sinh" class="fn">sinh</a>(self) -&gt; Self</h4></section><section id="method.cosh-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1190-1192">Source</a><a href="#method.cosh-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.cosh" class="fn">cosh</a>(self) -&gt; Self</h4></section><section id="method.tanh-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1195-1197">Source</a><a href="#method.tanh-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.tanh" class="fn">tanh</a>(self) -&gt; Self</h4></section><section id="method.asinh-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1200-1206">Source</a><a href="#method.asinh-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.asinh" class="fn">asinh</a>(self) -&gt; Self</h4></section><section id="method.acosh-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1209-1215">Source</a><a href="#method.acosh-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.acosh" class="fn">acosh</a>(self) -&gt; Self</h4></section><section id="method.atanh-1" class="method trait-impl"><a class="src rightside" href="../src/core_maths/lib.rs.html#1218-1220">Source</a><a href="#method.atanh-1" class="anchor">§</a><h4 class="code-header">fn <a href="#tymethod.atanh" class="fn">atanh</a>(self) -&gt; Self</h4></section></div></details><h2 id="implementors" class="section-header">Implementors<a href="#implementors" class="anchor">§</a></h2><div id="implementors-list"></div><script src="../trait.impl/core_maths/trait.CoreFloat.js" data-ignore-extern-crates="core" async></script></section></div></main></body></html>

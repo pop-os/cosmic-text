@@ -1,0 +1,199 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Mapping complex text to a sequence of positioned glyphs."><title>swash::shape - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-916cea96.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.87.0 (17067e9ac 2025-05-09)" data-channel="1.87.0" data-search-js="search-e7298875.js" data-settings-js="settings-d72f25bb.js" ><script src="../../static.files/storage-82c7156e.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../static.files/main-fb8c74a8.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../../swash/index.html">swash</a><span class="version">0.2.5</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Module shape</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#building-the-shaper" title="Building the shaper">Building the shaper</a></li><li><a href="#feeding-the-shaper" title="Feeding the shaper">Feeding the shaper</a></li><li><a href="#collecting-the-prize" title="Collecting the prize">Collecting the prize</a></li></ul><h3><a href="#modules">Module Items</a></h3><ul class="block"><li><a href="#modules" title="Modules">Modules</a></li><li><a href="#structs" title="Structs">Structs</a></li><li><a href="#enums" title="Enums">Enums</a></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="../index.html">In crate swash</a></h2></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">swash</a></div><h1>Module <span>shape</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/swash/shape/mod.rs.html#1-936">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Mapping complex text to a sequence of positioned glyphs.</p>
+<p>Shaping is the process of converting a sequence of
+<a href="../text/cluster/struct.CharCluster.html" title="struct swash::text::cluster::CharCluster">character clusters</a> into a sequence of
+<a href="cluster/struct.GlyphCluster.html" title="struct swash::shape::cluster::GlyphCluster">glyph clusters</a> with respect to the rules of a particular
+writing system and the typographic features available in a font. The shaper
+operates on one <em>item</em> at a time where an item is a run of text with
+a single script, language, direction, font, font size, and set of variation/feature
+settings. The process of producing these runs is called <em>itemization</em>
+and is out of scope for this crate.</p>
+<h2 id="building-the-shaper"><a class="doc-anchor" href="#building-the-shaper">§</a>Building the shaper</h2>
+<p>All shaping in this crate takes place within the purview of a
+<a href="struct.ShapeContext.html" title="struct swash::shape::ShapeContext"><code>ShapeContext</code></a>. This opaque struct manages internal LRU caches and scratch
+buffers that are necessary for the shaping process. Generally, you’ll
+want to keep an instance that persists for more than one layout pass as
+this amortizes the cost of allocations, reduces contention for the global
+heap and increases the hit rate for the internal acceleration structures. If
+you’re doing multithreaded layout, you should keep a context per thread.</p>
+<p>The only method available on the context is <a href="struct.ShapeContext.html#method.builder" title="method swash::shape::ShapeContext::builder"><code>builder</code></a>
+which takes a type that can be converted into a <a href="../struct.FontRef.html" title="struct swash::FontRef"><code>FontRef</code></a> as an argument
+and produces a <a href="struct.ShaperBuilder.html" title="struct swash::shape::ShaperBuilder"><code>ShaperBuilder</code></a> that provides options for configuring and
+building a <a href="struct.Shaper.html" title="struct swash::shape::Shaper"><code>Shaper</code></a>.</p>
+<p>Here, we’ll create a context and build a shaper for Arabic text at 16px:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// let font = ...;
+</span><span class="kw">let </span><span class="kw-2">mut </span>context = ShapeContext::new();
+<span class="kw">let </span><span class="kw-2">mut </span>shaper = context.builder(font)
+    .script(Script::Arabic)
+    .direction(Direction::RightToLeft)
+    .size(<span class="number">16.</span>)
+    .build();</code></pre></div>
+<p>You can specify feature settings by calling the <a href="struct.ShaperBuilder.html#method.features" title="method swash::shape::ShaperBuilder::features"><code>features</code></a>
+method with an iterator that yields a sequence of values that are convertible
+to <a href="../struct.Setting.html" title="struct swash::Setting"><code>Setting&lt;u16&gt;</code></a>. Tuples of (&amp;str, u16) will work in a pinch. For example,
+you can enable discretionary ligatures like this:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// let font = ...;
+</span><span class="kw">let </span><span class="kw-2">mut </span>context = ShapeContext::new();
+<span class="kw">let </span><span class="kw-2">mut </span>shaper = context.builder(font)
+    .script(Script::Latin)
+    .size(<span class="number">14.</span>)
+    .features(<span class="kw-2">&amp;</span>[(<span class="string">"dlig"</span>, <span class="number">1</span>)])
+    .build();</code></pre></div>
+<p>A value of <code>0</code> will disable a feature while a non-zero value will enable it.
+Some features use non-zero values as an argument. The stylistic alternates
+feature, for example, often offers a collection of choices per glyph. The argument
+is used as an index to select among them. If a requested feature is not present
+in a font, the setting is ignored.</p>
+<p>Font variation settings are specified in a similar manner with the
+<a href="struct.ShaperBuilder.html#method.variations" title="method swash::shape::ShaperBuilder::variations"><code>variations</code></a> method but take an <code>f32</code>
+to define the value within the variation space for the requested axis:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// let font = ...;
+</span><span class="kw">let </span><span class="kw-2">mut </span>context = ShapeContext::new();
+<span class="kw">let </span><span class="kw-2">mut </span>shaper = context.builder(font)
+    .script(Script::Latin)
+    .size(<span class="number">14.</span>)
+    .variations(<span class="kw-2">&amp;</span>[(<span class="string">"wght"</span>, <span class="number">520.5</span>)])
+    .build();</code></pre></div>
+<p>See <a href="struct.ShaperBuilder.html" title="struct swash::shape::ShaperBuilder"><code>ShaperBuilder</code></a> for available options and default values.</p>
+<h2 id="feeding-the-shaper"><a class="doc-anchor" href="#feeding-the-shaper">§</a>Feeding the shaper</h2>
+<p>Once we have a properly configured shaper, we need to feed it some
+clusters. The simplest approach is to call the <a href="struct.Shaper.html#method.add_str" title="method swash::shape::Shaper::add_str"><code>add_str</code></a>
+method with a string:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>shaper.add_str(<span class="string">"a quick brown fox?"</span>);</code></pre></div>
+<p>You can call <a href="struct.Shaper.html#method.add_str" title="method swash::shape::Shaper::add_str"><code>add_str</code></a> multiple times to add a sequence
+of text fragments to the shaper.</p>
+<p>This simple approach is certainly reasonable when dealing with text consisting
+of a single run on one line with a font that is known to contain all the
+necessary glyphs. A small text label in a UI is a good example.</p>
+<p>For more complex scenarios, the shaper can be fed a single cluster at a time.
+This method allows you to provide:</p>
+<ul>
+<li>accurate source ranges per character even if your runs
+and items span multiple non-contiguous fragments</li>
+<li>user data per character (a single <code>u32</code>) that can be used, for
+example, to associate each resulting glyph with a style span</li>
+<li>boundary analysis per character, carrying word boundaries and
+line break opportunities through the shaper.</li>
+</ul>
+<p>This also provides a junction point for inserting a font fallback
+mechanism.</p>
+<p>All of this is served by the functionality in the
+<a href="../text/cluster/index.html" title="mod swash::text::cluster"><code>text::cluster</code></a> module.</p>
+<p>Let’s see a somewhat contrived example that demonstrates the process:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>swash::text::cluster::{CharCluster, CharInfo, Parser, Token};
+<span class="kw">let </span><span class="kw-2">mut </span>shaper = context.builder(font)
+    .script(Script::Latin)
+    .build();
+<span class="comment">// We'll need the character map for our font
+</span><span class="kw">let </span>charmap = font.charmap();
+<span class="comment">// And some storage for the cluster we're working with
+</span><span class="kw">let </span><span class="kw-2">mut </span>cluster = CharCluster::new();
+<span class="comment">// Now we build a cluster parser which takes a script and
+// an iterator that yields a Token per character
+</span><span class="kw">let </span><span class="kw-2">mut </span>parser = Parser::new(
+    Script::Latin,
+    <span class="string">"a quick brown fox?"</span>.char_indices().map(|(i, ch)| Token {
+        <span class="comment">// The character
+        </span>ch,
+        <span class="comment">// Offset of the character in code units
+        </span>offset: i <span class="kw">as </span>u32,
+        <span class="comment">// Length of the character in code units
+        </span>len: ch.len_utf8() <span class="kw">as </span>u8,
+        <span class="comment">// Character information
+        </span>info: ch.into(),
+        <span class="comment">// Pass through user data
+        </span>data: <span class="number">0</span>,
+    })
+);
+<span class="comment">// Loop over all of the clusters
+</span><span class="kw">while </span>parser.next(<span class="kw-2">&amp;mut </span>cluster) {
+    <span class="comment">// Map all of the characters in the cluster
+    // to nominal glyph identifiers
+    </span>cluster.map(|ch| charmap.map(ch));
+    <span class="comment">// Add the cluster to the shaper
+    </span>shaper.add_cluster(<span class="kw-2">&amp;</span>cluster);
+}</code></pre></div>
+<p>Phew! That’s quite a lot of work. It also happens to be exactly what
+<a href="struct.Shaper.html#method.add_str" title="method swash::shape::Shaper::add_str"><code>add_str</code></a> does internally.</p>
+<p>So why bother? As mentioned earlier, this method allows you to customize
+the per-character data that passes through the shaper. Is your source text in
+UTF-16 instead of UTF-8? No problem. Set the <a href="../text/cluster/struct.Token.html#structfield.offset" title="field swash::text::cluster::Token::offset"><code>offset</code></a> and
+<a href="../text/cluster/struct.Token.html#structfield.len" title="field swash::text::cluster::Token::len"><code>len</code></a> fields of your <a href="../text/cluster/struct.Token.html" title="struct swash::text::cluster::Token"><code>Token</code></a>s to appropriate values. Are you shaping
+across style spans? Set the <a href="../text/cluster/struct.Token.html#structfield.data" title="field swash::text::cluster::Token::data"><code>data</code></a> field to the index of your span so
+it can be recovered. Have you used the
+<a href="../text/struct.Analyze.html" title="struct swash::text::Analyze"><code>Analyze</code></a> iterator to generate
+<a href="../text/cluster/struct.CharInfo.html" title="struct swash::text::cluster::CharInfo"><code>CharInfo</code></a>s containing boundary analysis? This
+is where you apply them to the <a href="../text/cluster/struct.Token.html#structfield.info" title="field swash::text::cluster::Token::info"><code>info</code></a> fields of your <a href="../text/cluster/struct.Token.html" title="struct swash::text::cluster::Token"><code>Token</code></a>s.</p>
+<p>That last one deserves a quick example, showing how you might build a cluster
+parser with boundary analysis:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>swash::text::{analyze, Script};
+<span class="kw">use </span>swash::text::cluster::{CharInfo, Parser, Token};
+<span class="kw">let </span>text = <span class="string">"a quick brown fox?"</span>;
+<span class="kw">let </span><span class="kw-2">mut </span>parser = Parser::new(
+    Script::Latin,
+    text.char_indices()
+        <span class="comment">// Call analyze passing the same text and zip
+        // the results
+        </span>.zip(analyze(text.chars()))
+        <span class="comment">// Analyze yields the tuple (Properties, Boundary)
+        </span>.map(|((i, ch), (props, boundary))| Token {
+            ch,
+            offset: i <span class="kw">as </span>u32,
+            len: ch.len_utf8() <span class="kw">as </span>u8,
+            <span class="comment">// Create character information from properties and boundary
+            </span>info: CharInfo::new(props, boundary),
+            data: <span class="number">0</span>,
+        }),
+);</code></pre></div>
+<p>That leaves us with font fallback. This crate does not provide the infrastructure
+for such, but a small example can demonstrate the idea. The key is in
+the return value of the <a href="../text/cluster/struct.CharCluster.html#method.map" title="method swash::text::cluster::CharCluster::map"><code>CharCluster::map</code></a> method which describes the
+<a href="../text/cluster/enum.Status.html" title="enum swash::text::cluster::Status"><code>Status</code></a> of the mapping operation. This function
+will return the index of the best matching font:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>swash::FontRef;
+<span class="kw">use </span>swash::text::cluster::{CharCluster, Status};
+
+<span class="kw">fn </span>select_font&lt;<span class="lifetime">'a</span>&gt;(fonts: <span class="kw-2">&amp;</span>[FontRef&lt;<span class="lifetime">'a</span>&gt;], cluster: <span class="kw-2">&amp;mut </span>CharCluster) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>best = <span class="prelude-val">None</span>;
+    <span class="kw">for </span>(i, font) <span class="kw">in </span>fonts.iter().enumerate() {
+        <span class="kw">let </span>charmap = font.charmap();
+        <span class="kw">match </span>cluster.map(|ch| charmap.map(ch)) {
+            <span class="comment">// This font provided a glyph for every character
+            </span>Status::Complete =&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(i),
+            <span class="comment">// This font provided the most complete mapping so far
+            </span>Status::Keep =&gt; best = <span class="prelude-val">Some</span>(i),
+            <span class="comment">// A previous mapping was more complete
+            </span>Status::Discard =&gt; {}
+        }
+    }
+    best
+}</code></pre></div>
+<p>Note that <a href="../text/cluster/struct.CharCluster.html" title="struct swash::text::cluster::CharCluster"><code>CharCluster</code></a> maintains internal composed and decomposed sequences
+of the characters in the cluster so that it can select the best form for each
+candidate font.</p>
+<p>Since this process is done during shaping, upon return we compare the selected
+font with our current font and if they’re different, we complete shaping for the
+clusters submitted so far and continue the process by building a new shaper with
+the selected font. By doing manual cluster parsing and nominal glyph mapping
+<em>outside</em> the shaper, we can implement per-cluster font fallback without the costly
+technique of heuristically shaping runs.</p>
+<h2 id="collecting-the-prize"><a class="doc-anchor" href="#collecting-the-prize">§</a>Collecting the prize</h2>
+<p>Finish up shaping by calling <a href="struct.Shaper.html#method.shape_with" title="method swash::shape::Shaper::shape_with"><code>Shaper::shape_with</code></a> with a closure that will be
+invoked with each resulting <a href="cluster/struct.GlyphCluster.html" title="struct swash::shape::cluster::GlyphCluster"><code>GlyphCluster</code></a>. This structure contains borrowed data
+and thus cannot be stored directly. The data you extract from each cluster and the
+method in which you store it will depend entirely on the design of your text layout
+system.</p>
+<p>Please note that, unlike HarfBuzz, this shaper does <em>not</em> reverse runs that are in
+right-to-left order. The reasoning is that, for correctness, line breaking must be
+done in logical order and reversing runs should occur during bidi reordering.</p>
+<p>Also pertinent to right-to-left runs: you’ll need to ensure that you reverse
+<em>clusters</em> and not <em>glyphs</em>. Intra-cluster glyphs must remain in logical order
+for proper mark placement.</p>
+</div></details><h2 id="modules" class="section-header">Modules<a href="#modules" class="anchor">§</a></h2><dl class="item-table"><dt><a class="mod" href="cluster/index.html" title="mod swash::shape::cluster">cluster</a></dt><dd>Glyph cluster modeling– output from the shaper.</dd></dl><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><dl class="item-table"><dt><a class="struct" href="struct.ShapeContext.html" title="struct swash::shape::ShapeContext">Shape<wbr>Context</a></dt><dd>Context that manages caches and transient buffers for shaping.</dd><dt><a class="struct" href="struct.Shaper.html" title="struct swash::shape::Shaper">Shaper</a></dt><dd>Maps character clusters to positioned glyph clusters according to
+typographic rules and features.</dd><dt><a class="struct" href="struct.ShaperBuilder.html" title="struct swash::shape::ShaperBuilder">Shaper<wbr>Builder</a></dt><dd>Builder for configuring a shaper.</dd></dl><h2 id="enums" class="section-header">Enums<a href="#enums" class="anchor">§</a></h2><dl class="item-table"><dt><a class="enum" href="enum.Direction.html" title="enum swash::shape::Direction">Direction</a></dt><dd>Text direction.</dd></dl></section></div></main></body></html>

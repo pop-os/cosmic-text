@@ -1,0 +1,179 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/skrifa-0.31.3/src/outline/glyf/outline.rs`."><title>outline.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-916cea96.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="skrifa" data-themes="" data-resource-suffix="" data-rustdoc-version="1.87.0 (17067e9ac 2025-05-09)" data-channel="1.87.0" data-search-js="search-e7298875.js" data-settings-js="settings-d72f25bb.js" ><script src="../../../../static.files/storage-82c7156e.js"></script><script defer src="../../../../static.files/src-script-63605ae7.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-fb8c74a8.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">skrifa/outline/glyf/</div>outline.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="doccomment">//! TrueType outline types.
+<a href=#2 id=2 data-nosnippet>2</a>
+<a href=#3 id=3 data-nosnippet>3</a></span><span class="kw">use </span>std::mem::size_of;
+<a href=#4 id=4 data-nosnippet>4</a>
+<a href=#5 id=5 data-nosnippet>5</a><span class="kw">use </span><span class="kw">super</span>::<span class="kw">super</span>::{
+<a href=#6 id=6 data-nosnippet>6</a>    path::{to_path, ToPathError},
+<a href=#7 id=7 data-nosnippet>7</a>    pen::PathStyle,
+<a href=#8 id=8 data-nosnippet>8</a>    DrawError, Hinting, OutlinePen,
+<a href=#9 id=9 data-nosnippet>9</a>};
+<a href=#10 id=10 data-nosnippet>10</a><span class="kw">use </span>raw::tables::glyf::PointCoord;
+<a href=#11 id=11 data-nosnippet>11</a><span class="kw">use </span>read_fonts::{
+<a href=#12 id=12 data-nosnippet>12</a>    tables::glyf::{Glyph, PointFlags},
+<a href=#13 id=13 data-nosnippet>13</a>    types::{F26Dot6, Fixed, GlyphId, Point},
+<a href=#14 id=14 data-nosnippet>14</a>};
+<a href=#15 id=15 data-nosnippet>15</a>
+<a href=#16 id=16 data-nosnippet>16</a><span class="doccomment">/// Maximum number of points we support in a single outline including
+<a href=#17 id=17 data-nosnippet>17</a>/// composites.
+<a href=#18 id=18 data-nosnippet>18</a>///
+<a href=#19 id=19 data-nosnippet>19</a>/// TrueType uses a 16 bit integer to store contour end points so
+<a href=#20 id=20 data-nosnippet>20</a>/// we must keep the total count within this value.
+<a href=#21 id=21 data-nosnippet>21</a>///
+<a href=#22 id=22 data-nosnippet>22</a>/// The maxp &lt;https://learn.microsoft.com/en-us/typography/opentype/spec/maxp&gt;
+<a href=#23 id=23 data-nosnippet>23</a>/// table encodes `maxCompositePoints` as a `uint16` so the spec enforces
+<a href=#24 id=24 data-nosnippet>24</a>/// this limit.
+<a href=#25 id=25 data-nosnippet>25</a></span><span class="kw">const </span>MAX_POINTS: usize = u16::MAX <span class="kw">as </span>usize;
+<a href=#26 id=26 data-nosnippet>26</a>
+<a href=#27 id=27 data-nosnippet>27</a><span class="doccomment">/// Represents the information necessary to scale a glyph outline.
+<a href=#28 id=28 data-nosnippet>28</a>///
+<a href=#29 id=29 data-nosnippet>29</a>/// Contains a reference to the glyph data itself as well as metrics that
+<a href=#30 id=30 data-nosnippet>30</a>/// can be used to compute the memory requirements for scaling the glyph.
+<a href=#31 id=31 data-nosnippet>31</a></span><span class="attr">#[derive(Clone, Default)]
+<a href=#32 id=32 data-nosnippet>32</a></span><span class="kw">pub struct </span>Outline&lt;<span class="lifetime">'a</span>&gt; {
+<a href=#33 id=33 data-nosnippet>33</a>    <span class="kw">pub </span>glyph_id: GlyphId,
+<a href=#34 id=34 data-nosnippet>34</a>    <span class="doccomment">/// The associated top-level glyph for the outline.
+<a href=#35 id=35 data-nosnippet>35</a>    </span><span class="kw">pub </span>glyph: <span class="prelude-ty">Option</span>&lt;Glyph&lt;<span class="lifetime">'a</span>&gt;&gt;,
+<a href=#36 id=36 data-nosnippet>36</a>    <span class="doccomment">/// Sum of the point counts of all simple glyphs in an outline.
+<a href=#37 id=37 data-nosnippet>37</a>    </span><span class="kw">pub </span>points: usize,
+<a href=#38 id=38 data-nosnippet>38</a>    <span class="doccomment">/// Sum of the contour counts of all simple glyphs in an outline.
+<a href=#39 id=39 data-nosnippet>39</a>    </span><span class="kw">pub </span>contours: usize,
+<a href=#40 id=40 data-nosnippet>40</a>    <span class="doccomment">/// Maximum number of points in a single simple glyph.
+<a href=#41 id=41 data-nosnippet>41</a>    </span><span class="kw">pub </span>max_simple_points: usize,
+<a href=#42 id=42 data-nosnippet>42</a>    <span class="doccomment">/// "Other" points are the unscaled or original scaled points.
+<a href=#43 id=43 data-nosnippet>43</a>    ///
+<a href=#44 id=44 data-nosnippet>44</a>    /// The size of these buffer is the same and this value tracks the size
+<a href=#45 id=45 data-nosnippet>45</a>    /// for one (not both) of the buffers. This is the maximum of
+<a href=#46 id=46 data-nosnippet>46</a>    /// `max_simple_points` and the total number of points for all component
+<a href=#47 id=47 data-nosnippet>47</a>    /// glyphs in a single composite glyph.
+<a href=#48 id=48 data-nosnippet>48</a>    </span><span class="kw">pub </span>max_other_points: usize,
+<a href=#49 id=49 data-nosnippet>49</a>    <span class="doccomment">/// Maximum size of the component delta stack.
+<a href=#50 id=50 data-nosnippet>50</a>    ///
+<a href=#51 id=51 data-nosnippet>51</a>    /// For composite glyphs in variable fonts, delta values are computed
+<a href=#52 id=52 data-nosnippet>52</a>    /// for each component. This tracks the maximum stack depth necessary
+<a href=#53 id=53 data-nosnippet>53</a>    /// to store those values during processing.
+<a href=#54 id=54 data-nosnippet>54</a>    </span><span class="kw">pub </span>max_component_delta_stack: usize,
+<a href=#55 id=55 data-nosnippet>55</a>    <span class="doccomment">/// Number of entries in the hinting value stack.
+<a href=#56 id=56 data-nosnippet>56</a>    </span><span class="kw">pub </span>max_stack: usize,
+<a href=#57 id=57 data-nosnippet>57</a>    <span class="doccomment">/// Number of CVT entries for copy-on-write support.
+<a href=#58 id=58 data-nosnippet>58</a>    </span><span class="kw">pub </span>cvt_count: usize,
+<a href=#59 id=59 data-nosnippet>59</a>    <span class="doccomment">/// Number of storage area entries for copy-on-write support.
+<a href=#60 id=60 data-nosnippet>60</a>    </span><span class="kw">pub </span>storage_count: usize,
+<a href=#61 id=61 data-nosnippet>61</a>    <span class="doccomment">/// Maximum number of points in the twilight zone for hinting.
+<a href=#62 id=62 data-nosnippet>62</a>    </span><span class="kw">pub </span>max_twilight_points: usize,
+<a href=#63 id=63 data-nosnippet>63</a>    <span class="doccomment">/// True if any component of a glyph has bytecode instructions.
+<a href=#64 id=64 data-nosnippet>64</a>    </span><span class="kw">pub </span>has_hinting: bool,
+<a href=#65 id=65 data-nosnippet>65</a>    <span class="doccomment">/// True if the glyph requires variation delta processing.
+<a href=#66 id=66 data-nosnippet>66</a>    </span><span class="kw">pub </span>has_variations: bool,
+<a href=#67 id=67 data-nosnippet>67</a>    <span class="doccomment">/// True if the glyph contains any simple or compound overlap flags.
+<a href=#68 id=68 data-nosnippet>68</a>    </span><span class="kw">pub </span>has_overlaps: bool,
+<a href=#69 id=69 data-nosnippet>69</a>}
+<a href=#70 id=70 data-nosnippet>70</a>
+<a href=#71 id=71 data-nosnippet>71</a><span class="kw">impl </span>Outline&lt;<span class="lifetime">'_</span>&gt; {
+<a href=#72 id=72 data-nosnippet>72</a>    <span class="doccomment">/// Returns the minimum size in bytes required to scale an outline based
+<a href=#73 id=73 data-nosnippet>73</a>    /// on the computed sizes.
+<a href=#74 id=74 data-nosnippet>74</a>    </span><span class="kw">pub fn </span>required_buffer_size(<span class="kw-2">&amp;</span><span class="self">self</span>, hinting: Hinting) -&gt; usize {
+<a href=#75 id=75 data-nosnippet>75</a>        <span class="kw">let </span><span class="kw-2">mut </span>size = <span class="number">0</span>;
+<a href=#76 id=76 data-nosnippet>76</a>        <span class="kw">let </span>hinting = <span class="self">self</span>.has_hinting &amp;&amp; hinting == Hinting::Embedded;
+<a href=#77 id=77 data-nosnippet>77</a>        <span class="comment">// Scaled, unscaled and (for hinting) original scaled points
+<a href=#78 id=78 data-nosnippet>78</a>        </span>size += <span class="self">self</span>.points * size_of::&lt;Point&lt;F26Dot6&gt;&gt;();
+<a href=#79 id=79 data-nosnippet>79</a>        <span class="comment">// Unscaled and (if hinted) original scaled points
+<a href=#80 id=80 data-nosnippet>80</a>        </span>size += <span class="self">self</span>.max_other_points * size_of::&lt;Point&lt;i32&gt;&gt;() * <span class="kw">if </span>hinting { <span class="number">2 </span>} <span class="kw">else </span>{ <span class="number">1 </span>};
+<a href=#81 id=81 data-nosnippet>81</a>        <span class="comment">// Contour end points
+<a href=#82 id=82 data-nosnippet>82</a>        </span>size += <span class="self">self</span>.contours * size_of::&lt;u16&gt;();
+<a href=#83 id=83 data-nosnippet>83</a>        <span class="comment">// Point flags
+<a href=#84 id=84 data-nosnippet>84</a>        </span>size += <span class="self">self</span>.points * size_of::&lt;PointFlags&gt;();
+<a href=#85 id=85 data-nosnippet>85</a>        <span class="kw">if </span><span class="self">self</span>.has_variations {
+<a href=#86 id=86 data-nosnippet>86</a>            <span class="comment">// Interpolation buffer for delta IUP
+<a href=#87 id=87 data-nosnippet>87</a>            </span>size += <span class="self">self</span>.max_simple_points * size_of::&lt;Point&lt;Fixed&gt;&gt;();
+<a href=#88 id=88 data-nosnippet>88</a>            <span class="comment">// Delta buffer for points
+<a href=#89 id=89 data-nosnippet>89</a>            </span>size += <span class="self">self</span>.max_simple_points * size_of::&lt;Point&lt;Fixed&gt;&gt;();
+<a href=#90 id=90 data-nosnippet>90</a>            <span class="comment">// Delta buffer for composite components
+<a href=#91 id=91 data-nosnippet>91</a>            </span>size += <span class="self">self</span>.max_component_delta_stack * size_of::&lt;Point&lt;Fixed&gt;&gt;();
+<a href=#92 id=92 data-nosnippet>92</a>        }
+<a href=#93 id=93 data-nosnippet>93</a>        <span class="kw">if </span>hinting {
+<a href=#94 id=94 data-nosnippet>94</a>            <span class="comment">// Hinting value stack
+<a href=#95 id=95 data-nosnippet>95</a>            </span>size += <span class="self">self</span>.max_stack * size_of::&lt;i32&gt;();
+<a href=#96 id=96 data-nosnippet>96</a>            <span class="comment">// CVT and storage area copy-on-write buffers
+<a href=#97 id=97 data-nosnippet>97</a>            </span>size += (<span class="self">self</span>.cvt_count + <span class="self">self</span>.storage_count) * size_of::&lt;i32&gt;();
+<a href=#98 id=98 data-nosnippet>98</a>            <span class="comment">// Twilight zone storage. Two point buffers plus one point flags buffer
+<a href=#99 id=99 data-nosnippet>99</a>            </span>size += <span class="self">self</span>.max_twilight_points
+<a href=#100 id=100 data-nosnippet>100</a>                * (size_of::&lt;Point&lt;F26Dot6&gt;&gt;() * <span class="number">2 </span>+ size_of::&lt;PointFlags&gt;());
+<a href=#101 id=101 data-nosnippet>101</a>        }
+<a href=#102 id=102 data-nosnippet>102</a>        <span class="kw">if </span>size != <span class="number">0 </span>{
+<a href=#103 id=103 data-nosnippet>103</a>            <span class="comment">// If we're given a buffer that is not aligned, we'll need to
+<a href=#104 id=104 data-nosnippet>104</a>            // adjust, so add our maximum alignment requirement in bytes.
+<a href=#105 id=105 data-nosnippet>105</a>            </span>size += std::mem::align_of::&lt;i32&gt;();
+<a href=#106 id=106 data-nosnippet>106</a>        }
+<a href=#107 id=107 data-nosnippet>107</a>        size
+<a href=#108 id=108 data-nosnippet>108</a>    }
+<a href=#109 id=109 data-nosnippet>109</a>
+<a href=#110 id=110 data-nosnippet>110</a>    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>ensure_point_count_limit(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), DrawError&gt; {
+<a href=#111 id=111 data-nosnippet>111</a>        <span class="kw">if </span><span class="self">self</span>.points &gt; MAX_POINTS {
+<a href=#112 id=112 data-nosnippet>112</a>            <span class="prelude-val">Err</span>(DrawError::TooManyPoints(<span class="self">self</span>.glyph_id))
+<a href=#113 id=113 data-nosnippet>113</a>        } <span class="kw">else </span>{
+<a href=#114 id=114 data-nosnippet>114</a>            <span class="prelude-val">Ok</span>(())
+<a href=#115 id=115 data-nosnippet>115</a>        }
+<a href=#116 id=116 data-nosnippet>116</a>    }
+<a href=#117 id=117 data-nosnippet>117</a>}
+<a href=#118 id=118 data-nosnippet>118</a>
+<a href=#119 id=119 data-nosnippet>119</a><span class="attr">#[derive(Debug)]
+<a href=#120 id=120 data-nosnippet>120</a></span><span class="kw">pub struct </span>ScaledOutline&lt;<span class="lifetime">'a</span>, C&gt;
+<a href=#121 id=121 data-nosnippet>121</a><span class="kw">where
+<a href=#122 id=122 data-nosnippet>122</a>    </span>C: PointCoord,
+<a href=#123 id=123 data-nosnippet>123</a>{
+<a href=#124 id=124 data-nosnippet>124</a>    <span class="kw">pub </span>points: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[Point&lt;C&gt;],
+<a href=#125 id=125 data-nosnippet>125</a>    <span class="kw">pub </span>flags: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[PointFlags],
+<a href=#126 id=126 data-nosnippet>126</a>    <span class="kw">pub </span>contours: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[u16],
+<a href=#127 id=127 data-nosnippet>127</a>    <span class="kw">pub </span>phantom_points: [Point&lt;C&gt;; <span class="number">4</span>],
+<a href=#128 id=128 data-nosnippet>128</a>    <span class="kw">pub </span>hdmx_width: <span class="prelude-ty">Option</span>&lt;u8&gt;,
+<a href=#129 id=129 data-nosnippet>129</a>}
+<a href=#130 id=130 data-nosnippet>130</a>
+<a href=#131 id=131 data-nosnippet>131</a><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, C&gt; ScaledOutline&lt;<span class="lifetime">'a</span>, C&gt;
+<a href=#132 id=132 data-nosnippet>132</a><span class="kw">where
+<a href=#133 id=133 data-nosnippet>133</a>    </span>C: PointCoord,
+<a href=#134 id=134 data-nosnippet>134</a>{
+<a href=#135 id=135 data-nosnippet>135</a>    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(
+<a href=#136 id=136 data-nosnippet>136</a>        points: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[Point&lt;C&gt;],
+<a href=#137 id=137 data-nosnippet>137</a>        phantom_points: [Point&lt;C&gt;; <span class="number">4</span>],
+<a href=#138 id=138 data-nosnippet>138</a>        flags: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[PointFlags],
+<a href=#139 id=139 data-nosnippet>139</a>        contours: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[u16],
+<a href=#140 id=140 data-nosnippet>140</a>        hdmx_width: <span class="prelude-ty">Option</span>&lt;u8&gt;,
+<a href=#141 id=141 data-nosnippet>141</a>    ) -&gt; <span class="self">Self </span>{
+<a href=#142 id=142 data-nosnippet>142</a>        <span class="kw">let </span>x_shift = phantom_points[<span class="number">0</span>].x;
+<a href=#143 id=143 data-nosnippet>143</a>        <span class="kw">if </span>x_shift != C::zeroed() {
+<a href=#144 id=144 data-nosnippet>144</a>            <span class="kw">for </span>point <span class="kw">in </span>points.iter_mut() {
+<a href=#145 id=145 data-nosnippet>145</a>                point.x = point.x - x_shift;
+<a href=#146 id=146 data-nosnippet>146</a>            }
+<a href=#147 id=147 data-nosnippet>147</a>        }
+<a href=#148 id=148 data-nosnippet>148</a>        <span class="self">Self </span>{
+<a href=#149 id=149 data-nosnippet>149</a>            points,
+<a href=#150 id=150 data-nosnippet>150</a>            flags,
+<a href=#151 id=151 data-nosnippet>151</a>            contours,
+<a href=#152 id=152 data-nosnippet>152</a>            phantom_points,
+<a href=#153 id=153 data-nosnippet>153</a>            hdmx_width,
+<a href=#154 id=154 data-nosnippet>154</a>        }
+<a href=#155 id=155 data-nosnippet>155</a>    }
+<a href=#156 id=156 data-nosnippet>156</a>
+<a href=#157 id=157 data-nosnippet>157</a>    <span class="kw">pub fn </span>adjusted_lsb(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; C {
+<a href=#158 id=158 data-nosnippet>158</a>        <span class="self">self</span>.phantom_points[<span class="number">0</span>].x
+<a href=#159 id=159 data-nosnippet>159</a>    }
+<a href=#160 id=160 data-nosnippet>160</a>
+<a href=#161 id=161 data-nosnippet>161</a>    <span class="kw">pub fn </span>adjusted_advance_width(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; C {
+<a href=#162 id=162 data-nosnippet>162</a>        <span class="comment">// Prefer widths from hdmx, otherwise take difference between first
+<a href=#163 id=163 data-nosnippet>163</a>        // two phantom points
+<a href=#164 id=164 data-nosnippet>164</a>        // &lt;https://gitlab.freedesktop.org/freetype/freetype/-/blob/57617782464411201ce7bbc93b086c1b4d7d84a5/src/truetype/ttgload.c#L1996&gt;
+<a href=#165 id=165 data-nosnippet>165</a>        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(hdmx_width) = <span class="self">self</span>.hdmx_width {
+<a href=#166 id=166 data-nosnippet>166</a>            C::from_i32(hdmx_width <span class="kw">as </span>i32)
+<a href=#167 id=167 data-nosnippet>167</a>        } <span class="kw">else </span>{
+<a href=#168 id=168 data-nosnippet>168</a>            <span class="self">self</span>.phantom_points[<span class="number">1</span>].x - <span class="self">self</span>.phantom_points[<span class="number">0</span>].x
+<a href=#169 id=169 data-nosnippet>169</a>        }
+<a href=#170 id=170 data-nosnippet>170</a>    }
+<a href=#171 id=171 data-nosnippet>171</a>
+<a href=#172 id=172 data-nosnippet>172</a>    <span class="kw">pub fn </span>to_path(
+<a href=#173 id=173 data-nosnippet>173</a>        <span class="kw-2">&amp;</span><span class="self">self</span>,
+<a href=#174 id=174 data-nosnippet>174</a>        path_style: PathStyle,
+<a href=#175 id=175 data-nosnippet>175</a>        pen: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>OutlinePen,
+<a href=#176 id=176 data-nosnippet>176</a>    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), ToPathError&gt; {
+<a href=#177 id=177 data-nosnippet>177</a>        to_path(<span class="self">self</span>.points, <span class="self">self</span>.flags, <span class="self">self</span>.contours, path_style, pen)
+<a href=#178 id=178 data-nosnippet>178</a>    }
+<a href=#179 id=179 data-nosnippet>179</a>}</code></pre></div></section></main></body></html>

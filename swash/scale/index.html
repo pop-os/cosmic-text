@@ -1,0 +1,170 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Scaling, hinting and rasterization of visual glyph representations."><title>swash::scale - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-916cea96.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="swash" data-themes="" data-resource-suffix="" data-rustdoc-version="1.87.0 (17067e9ac 2025-05-09)" data-channel="1.87.0" data-search-js="search-e7298875.js" data-settings-js="settings-d72f25bb.js" ><script src="../../static.files/storage-82c7156e.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../static.files/main-fb8c74a8.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../../swash/index.html">swash</a><span class="version">0.2.5</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Module scale</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#building-the-scaler" title="Building the scaler">Building the scaler</a></li><li><a href="#outlines-and-bitmaps" title="Outlines and bitmaps">Outlines and bitmaps</a></li><li><a href="#rendering" title="Rendering">Rendering</a></li></ul><h3><a href="#modules">Module Items</a></h3><ul class="block"><li><a href="#modules" title="Modules">Modules</a></li><li><a href="#structs" title="Structs">Structs</a></li><li><a href="#enums" title="Enums">Enums</a></li><li><a href="#types" title="Type Aliases">Type Aliases</a></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="../index.html">In crate swash</a></h2></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">swash</a></div><h1>Module <span>scale</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/swash/scale/mod.rs.html#1-993">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Scaling, hinting and rasterization of visual glyph representations.</p>
+<p>Scaling is the process of generating an appropriately sized visual
+representation of a glyph. The scaler can produce rendered glyph
+<a href="image/struct.Image.html" title="struct swash::scale::image::Image">images</a> from outlines, layered color outlines and embedded
+bitmaps. Alternatively, you can request raw, optionally hinted
+<a href="outline/struct.Outline.html" title="struct swash::scale::outline::Outline">outlines</a> that can then be further processed by <a href="../../zeno/index.html" title="mod zeno">zeno</a> or
+fed into other crates like <a href="https://github.com/nical/lyon">lyon</a> or
+<a href="https://github.com/servo/pathfinder">pathfinder</a> for tessellation and
+GPU rendering.</p>
+<h2 id="building-the-scaler"><a class="doc-anchor" href="#building-the-scaler">§</a>Building the scaler</h2>
+<p>All scaling in this crate takes place within the purview of a
+<a href="struct.ScaleContext.html" title="struct swash::scale::ScaleContext"><code>ScaleContext</code></a>. This opaque struct manages internal LRU caches and scratch
+buffers that are necessary for the scaling process. Generally, you’ll
+want to keep an instance with your glyph cache, or if doing multithreaded
+glyph rasterization, one instance per thread.</p>
+<p>The only method available on the context is <a href="struct.ScaleContext.html#method.builder" title="method swash::scale::ScaleContext::builder"><code>builder</code></a>
+which takes a type that can be converted into a <a href="../struct.FontRef.html" title="struct swash::FontRef"><code>FontRef</code></a> as an argument
+and produces a <a href="struct.ScalerBuilder.html" title="struct swash::scale::ScalerBuilder"><code>ScalerBuilder</code></a> that provides options for configuring and
+building a <a href="struct.Scaler.html" title="struct swash::scale::Scaler"><code>Scaler</code></a>.</p>
+<p>Here, we’ll create a context and build a scaler for a size of 14px with
+hinting enabled:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// let font = ...;
+</span><span class="kw">let </span><span class="kw-2">mut </span>context = ScaleContext::new();
+<span class="kw">let </span><span class="kw-2">mut </span>scaler = context.builder(font)
+    .size(<span class="number">14.</span>)
+    .hint(<span class="bool-val">true</span>)
+    .build();</code></pre></div>
+<p>You can specify variation settings by calling the <a href="struct.ScalerBuilder.html#method.variations" title="method swash::scale::ScalerBuilder::variations"><code>variations</code></a>
+method with an iterator that yields a sequence of values that are convertible
+to <a href="../struct.Setting.html" title="struct swash::Setting"><code>Setting&lt;f32&gt;</code></a>. Tuples of (&amp;str, f32) will work in a pinch. For example,
+you can request a variation of the weight axis like this:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// let font = ...;
+</span><span class="kw">let </span><span class="kw-2">mut </span>context = ScaleContext::new();
+<span class="kw">let </span><span class="kw-2">mut </span>scaler = context.builder(font)
+    .size(<span class="number">14.</span>)
+    .hint(<span class="bool-val">true</span>)
+    .variations(<span class="kw-2">&amp;</span>[(<span class="string">"wght"</span>, <span class="number">520.5</span>)])
+    .build();</code></pre></div>
+<p>Alternatively, you can specify variations using the
+<a href="struct.ScalerBuilder.html#method.normalized_coords" title="method swash::scale::ScalerBuilder::normalized_coords"><code>normalized_coords</code></a> method which takes an iterator
+that yields <a href="../type.NormalizedCoord.html" title="type swash::NormalizedCoord"><code>NormalizedCoord</code></a>s (a type alias for <code>i16</code> which is a fixed point value
+in 2.14 format). This method is faster than specifying variations by tag and value, but
+the difference is likely negligible outside of microbenchmarks. The real advantage
+is that a sequence of <code>i16</code> is more compact and easier to fold into a key in a glyph
+cache. You can compute these normalized coordinates by using the
+<a href="../struct.Variation.html#method.normalize" title="method swash::Variation::normalize"><code>Variation::normalize</code></a> method for each available axis in
+the font. The best strategy, however, is to simply capture these during shaping with
+the <a href="../shape/struct.Shaper.html#method.normalized_coords" title="method swash::shape::Shaper::normalized_coords"><code>Shaper::normalized_coords</code></a> method which
+will have already computed them for you.</p>
+<p>See <a href="struct.ScalerBuilder.html" title="struct swash::scale::ScalerBuilder"><code>ScalerBuilder</code></a> for available options and default values.</p>
+<h2 id="outlines-and-bitmaps"><a class="doc-anchor" href="#outlines-and-bitmaps">§</a>Outlines and bitmaps</h2>
+<p>The <a href="struct.Scaler.html" title="struct swash::scale::Scaler"><code>Scaler</code></a> struct essentially provides direct access to the outlines and embedded
+bitmaps that are available in the font. In the case of outlines, it can produce the
+raw outline in font units or an optionally hinted, scaled outline. For example, to
+extract the raw outline for the letter ‘Q’:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// let font = ...;
+</span><span class="kw">let </span><span class="kw-2">mut </span>context = ScaleContext::new();
+<span class="kw">let </span><span class="kw-2">mut </span>scaler = context.builder(font).build();
+<span class="kw">let </span>glyph_id = font.charmap().map(<span class="string">'Q'</span>);
+<span class="kw">let </span>outline = scaler.scale_outline(glyph_id);</code></pre></div>
+<p>For the same, but hinted at 12px:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// let font = ...;
+</span><span class="kw">let </span><span class="kw-2">mut </span>context = ScaleContext::new();
+<span class="kw">let </span><span class="kw-2">mut </span>scaler = context.builder(font)
+    .hint(<span class="bool-val">true</span>)
+    .size(<span class="number">12.</span>)
+    .build();
+<span class="kw">let </span>glyph_id = font.charmap().map(<span class="string">'Q'</span>);
+<span class="kw">let </span>outline = scaler.scale_outline(glyph_id);</code></pre></div>
+<p>The <a href="struct.Scaler.html#method.scale_outline" title="method swash::scale::Scaler::scale_outline"><code>scale_outline</code></a> method returns an <a href="outline/struct.Outline.html" title="struct swash::scale::outline::Outline"><code>Outline</code></a> wrapped
+in an option. It will return <code>None</code> if an outline was not available or if there was
+an error during the scaling process. Note that
+<a href="struct.Scaler.html#method.scale_color_outline" title="method swash::scale::Scaler::scale_color_outline"><code>scale_color_outline</code></a> can be used to access layered
+color outlines such as those included in the Microsoft <em>Segoe UI Emoji</em> font. Finally,
+the <code>_into</code> variants of these methods (<a href="struct.Scaler.html#method.scale_outline_into" title="method swash::scale::Scaler::scale_outline_into"><code>scale_outline_into</code></a>
+and <a href="struct.Scaler.html#method.scale_color_outline_into" title="method swash::scale::Scaler::scale_color_outline_into"><code>scale_color_outline_into</code></a>) will return
+their results in a previously allocated outline avoiding the extra allocations.</p>
+<p>Similar to outlines, bitmaps can be retrieved with the <a href="struct.Scaler.html#method.scale_bitmap" title="method swash::scale::Scaler::scale_bitmap"><code>scale_bitmap</code></a>
+and <a href="struct.Scaler.html#method.scale_color_bitmap" title="method swash::scale::Scaler::scale_color_bitmap"><code>scale_color_bitmap</code></a> for alpha and color bitmaps,
+respectively. These methods return an <a href="image/struct.Image.html" title="struct swash::scale::image::Image"><code>Image</code></a> wrapped in an option. The associated
+<code>_into</code> variants are also available.</p>
+<p>Unlike outlines, bitmaps are available in <a href="../struct.BitmapStrike.html" title="struct swash::BitmapStrike"><code>strike</code></a>s of various sizes.
+When requesting a bitmap, you specify the strategy for strike selection using the
+<a href="enum.StrikeWith.html" title="enum swash::scale::StrikeWith"><code>StrikeWith</code></a> enum.</p>
+<p>For example, if we want the largest available unscaled image for the fire emoji:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// let font = ...;
+</span><span class="kw">let </span><span class="kw-2">mut </span>context = ScaleContext::new();
+<span class="kw">let </span><span class="kw-2">mut </span>scaler = context.builder(font).build();
+<span class="kw">let </span>glyph_id = font.charmap().map(<span class="string">'🔥'</span>);
+<span class="kw">let </span>image = scaler.scale_color_bitmap(glyph_id, StrikeWith::LargestSize);</code></pre></div>
+<p>Or, to produce a scaled image for a size of 18px:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// let font = ...;
+</span><span class="kw">let </span><span class="kw-2">mut </span>context = ScaleContext::new();
+<span class="kw">let </span><span class="kw-2">mut </span>scaler = context.builder(font)
+    .size(<span class="number">18.</span>)
+    .build();
+<span class="kw">let </span>glyph_id = font.charmap().map(<span class="string">'🔥'</span>);
+<span class="kw">let </span>image = scaler.scale_color_bitmap(glyph_id, StrikeWith::BestFit);</code></pre></div>
+<p>This will select the best strike for the requested size and return
+a bitmap that is scaled appropriately for an 18px run of text.</p>
+<p>Alpha bitmaps should generally be avoided unless you’re rendering small East
+Asian text where these are sometimes still preferred over scalable outlines. In
+this case, you should only use <a href="enum.StrikeWith.html#variant.ExactSize" title="variant swash::scale::StrikeWith::ExactSize"><code>StrikeWith::ExactSize</code></a> to select the strike,
+falling back to an outline if a bitmap is unavailable.</p>
+<h2 id="rendering"><a class="doc-anchor" href="#rendering">§</a>Rendering</h2>
+<p>In the general case of text rendering, you’ll likely not care about the specific
+details of outlines or bitmaps and will simply want an appropriately sized
+image that represents your glyph. For this purpose, you’ll want to use the
+<a href="struct.Render.html" title="struct swash::scale::Render"><code>Render</code></a> struct which is a builder that provides options for rendering an image.
+This struct is constructed with a slice of <a href="enum.Source.html" title="enum swash::scale::Source"><code>Source</code></a>s in priority order and
+will iterate through them until it finds one that satisfies the request. Typically,
+you’ll want to use the following order:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>Render::new(<span class="kw-2">&amp;</span>[
+    <span class="comment">// Color outline with the first palette
+    </span>Source::ColorOutline(<span class="number">0</span>),
+    <span class="comment">// Color bitmap with best fit selection mode
+    </span>Source::ColorBitmap(StrikeWith::BestFit),
+    <span class="comment">// Standard scalable outline
+    </span>Source::Outline,
+]);</code></pre></div>
+<p>The <a href="struct.Render.html" title="struct swash::scale::Render"><code>Render</code></a> struct offers several options that control rasterization of
+outlines such as <a href="struct.Render.html#method.format" title="method swash::scale::Render::format"><code>format</code></a> for selecting a subpixel rendering mode,
+<a href="struct.Render.html#method.offset" title="method swash::scale::Render::offset"><code>offset</code></a> for applying fractional positioning, and others. See the
+struct documentation for detail.</p>
+<p>After selecting your options, call the <a href="struct.Render.html#method.render" title="method swash::scale::Render::render"><code>render</code></a> method, passing your
+configured <a href="struct.Scaler.html" title="struct swash::scale::Scaler"><code>Scaler</code></a> and the requested glyph identifier to produce an <a href="image/struct.Image.html" title="struct swash::scale::image::Image"><code>Image</code></a>.
+Let’s put it all together by writing a simple function that will render subpixel glyphs
+with fractional positioning:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">fn </span>render_glyph(
+    context: <span class="kw-2">&amp;mut </span>ScaleContext,
+    font: <span class="kw-2">&amp;</span>FontRef,
+    size: f32,
+    hint: bool,
+    glyph_id: GlyphId,
+    x: f32,
+    y: f32,
+) -&gt; <span class="prelude-ty">Option</span>&lt;Image&gt; {
+    <span class="kw">use </span>zeno::{Format, Vector};
+    <span class="comment">// Build the scaler
+    </span><span class="kw">let </span><span class="kw-2">mut </span>scaler = context.builder(<span class="kw-2">*</span>font).size(size).hint(hint).build();
+    <span class="comment">// Compute the fractional offset-- you'll likely want to quantize this
+    // in a real renderer
+    </span><span class="kw">let </span>offset = Vector::new(x.fract(), y.fract());
+    <span class="comment">// Select our source order
+    </span>Render::new(<span class="kw-2">&amp;</span>[
+        Source::ColorOutline(<span class="number">0</span>),
+        Source::ColorBitmap(StrikeWith::BestFit),
+        Source::Outline,
+    ])
+    <span class="comment">// Select a subpixel format
+    </span>.format(Format::Subpixel)
+    <span class="comment">// Apply the fractional offset
+    </span>.offset(offset)
+    <span class="comment">// Render the image
+    </span>.render(<span class="kw-2">&amp;mut </span>scaler, glyph_id)
+}</code></pre></div>
+<p>Note that rendering also takes care of correctly scaling, rasterizing and
+compositing layered color outlines for us.</p>
+<p>There are other options available for emboldening, transforming with an
+affine matrix, and applying path effects. See the methods on <a href="struct.Render.html" title="struct swash::scale::Render"><code>Render</code></a> for
+more detail.</p>
+</div></details><h2 id="modules" class="section-header">Modules<a href="#modules" class="anchor">§</a></h2><dl class="item-table"><dt><a class="mod" href="image/index.html" title="mod swash::scale::image">image</a></dt><dd>Rendered glyph image.</dd><dt><a class="mod" href="outline/index.html" title="mod swash::scale::outline">outline</a></dt><dd>Glyph outline.</dd></dl><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><dl class="item-table"><dt><a class="struct" href="struct.Render.html" title="struct swash::scale::Render">Render</a></dt><dd>Builder type for rendering a glyph into an image.</dd><dt><a class="struct" href="struct.ScaleContext.html" title="struct swash::scale::ScaleContext">Scale<wbr>Context</a></dt><dd>Context that manages caches and scratch buffers for scaling.</dd><dt><a class="struct" href="struct.Scaler.html" title="struct swash::scale::Scaler">Scaler</a></dt><dd>Scales outline and bitmap glyphs.</dd><dt><a class="struct" href="struct.ScalerBuilder.html" title="struct swash::scale::ScalerBuilder">Scaler<wbr>Builder</a></dt><dd>Builder for configuring a scaler.</dd></dl><h2 id="enums" class="section-header">Enums<a href="#enums" class="anchor">§</a></h2><dl class="item-table"><dt><a class="enum" href="enum.Source.html" title="enum swash::scale::Source">Source</a></dt><dd>Glyph sources for the renderer.</dd><dt><a class="enum" href="enum.StrikeWith.html" title="enum swash::scale::StrikeWith">Strike<wbr>With</a></dt><dd>Bitmap strike selection mode.</dd></dl><h2 id="types" class="section-header">Type Aliases<a href="#types" class="anchor">§</a></h2><dl class="item-table"><dt><a class="type" href="type.PaletteIndex.html" title="type swash::scale::PaletteIndex">Palette<wbr>Index</a></dt><dd>Index of a color palette.</dd><dt><a class="type" href="type.StrikeIndex.html" title="type swash::scale::StrikeIndex">Strike<wbr>Index</a></dt><dd>Index of a bitmap strike.</dd></dl></section></div></main></body></html>

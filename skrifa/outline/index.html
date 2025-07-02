@@ -1,0 +1,75 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Loading, scaling and hinting of glyph outlines."><title>skrifa::outline - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-916cea96.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="skrifa" data-themes="" data-resource-suffix="" data-rustdoc-version="1.87.0 (17067e9ac 2025-05-09)" data-channel="1.87.0" data-search-js="search-e7298875.js" data-settings-js="settings-d72f25bb.js" ><script src="../../static.files/storage-82c7156e.js"></script><script defer src="../sidebar-items.js"></script><script defer src="../../static.files/main-fb8c74a8.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../../skrifa/index.html">skrifa</a><span class="version">0.31.3</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Module outline</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#drawing-a-glyph" title="Drawing a glyph">Drawing a glyph</a></li></ul><h3><a href="#modules">Module Items</a></h3><ul class="block"><li><a href="#modules" title="Modules">Modules</a></li><li><a href="#structs" title="Structs">Structs</a></li><li><a href="#enums" title="Enums">Enums</a></li><li><a href="#traits" title="Traits">Traits</a></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="../index.html">In crate skrifa</a></h2></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">skrifa</a></div><h1>Module <span>outline</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/skrifa/outline/mod.rs.html#1-1445">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Loading, scaling and hinting of glyph outlines.</p>
+<p>This module provides support for retrieving (optionally scaled and hinted)
+glyph outlines in the form of vector paths.</p>
+<h2 id="drawing-a-glyph"><a class="doc-anchor" href="#drawing-a-glyph">§</a>Drawing a glyph</h2>
+<p>Generating SVG <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d#path_commands">path commands</a>
+for a character (this assumes a local variable <code>font</code> of type <a href="../struct.FontRef.html" title="struct skrifa::FontRef"><code>FontRef</code></a>):</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>skrifa::{
+    instance::{LocationRef, Size},
+    outline::{DrawSettings, OutlinePen},
+    FontRef, MetadataProvider,
+};
+
+<span class="comment">// First, grab the set of outline glyphs from the font.
+</span><span class="kw">let </span>outlines = font.outline_glyphs();
+
+<span class="comment">// Find the glyph identifier for our character.
+</span><span class="kw">let </span>glyph_id = font.charmap().map(<span class="string">'Q'</span>).unwrap();
+
+<span class="comment">// Grab the outline glyph.
+</span><span class="kw">let </span>glyph = outlines.get(glyph_id).unwrap();
+
+<span class="comment">// Define how we want the glyph to be drawn. This creates
+// settings for an instance without hinting at a size of
+// 16px with no variations applied.
+</span><span class="kw">let </span>settings = DrawSettings::unhinted(Size::new(<span class="number">16.0</span>), LocationRef::default());
+
+<span class="comment">// Alternatively, we can apply variations like so:
+</span><span class="kw">let </span>var_location = font.axes().location(<span class="kw-2">&amp;</span>[(<span class="string">"wght"</span>, <span class="number">650.0</span>), (<span class="string">"wdth"</span>, <span class="number">100.0</span>)]);
+<span class="kw">let </span>settings = DrawSettings::unhinted(Size::new(<span class="number">16.0</span>), <span class="kw-2">&amp;</span>var_location);
+
+<span class="comment">// At this point, we need a "sink" to receive the resulting path. This
+// is done by creating an implementation of the OutlinePen trait.
+
+// Let's make one that generates SVG path data.
+</span><span class="attr">#[derive(Default)]
+</span><span class="kw">struct </span>SvgPath(String);
+
+<span class="comment">// Implement the OutlinePen trait for this type. This emits the appropriate
+// SVG path commands for each element type.
+</span><span class="kw">impl </span>OutlinePen <span class="kw">for </span>SvgPath {
+    <span class="kw">fn </span>move_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, x: f32, y: f32) {
+        <span class="self">self</span>.<span class="number">0</span>.push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"M{x:.1},{y:.1} "</span>));
+    }
+
+    <span class="kw">fn </span>line_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, x: f32, y: f32) {
+        <span class="self">self</span>.<span class="number">0</span>.push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"L{x:.1},{y:.1} "</span>));
+    }
+
+    <span class="kw">fn </span>quad_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx0: f32, cy0: f32, x: f32, y: f32) {
+        <span class="self">self</span>.<span class="number">0
+            </span>.push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"Q{cx0:.1},{cy0:.1} {x:.1},{y:.1} "</span>));
+    }
+
+    <span class="kw">fn </span>curve_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx0: f32, cy0: f32, cx1: f32, cy1: f32, x: f32, y: f32) {
+        <span class="self">self</span>.<span class="number">0</span>.push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
+            <span class="string">"C{cx0:.1},{cy0:.1} {cx1:.1},{cy1:.1} {x:.1},{y:.1} "
+        </span>));
+    }
+
+    <span class="kw">fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.<span class="number">0</span>.push_str(<span class="string">"Z "</span>);
+    }
+}
+<span class="comment">// Now, construct an instance of our pen.
+</span><span class="kw">let </span><span class="kw-2">mut </span>svg_path = SvgPath::default();
+
+<span class="comment">// And draw the glyph!
+</span>glyph.draw(settings, <span class="kw-2">&amp;mut </span>svg_path).unwrap();
+
+<span class="comment">// See what we've drawn.
+</span><span class="macro">println!</span>(<span class="string">"{}"</span>, svg_path.<span class="number">0</span>);</code></pre></div>
+</div></details><h2 id="modules" class="section-header">Modules<a href="#modules" class="anchor">§</a></h2><dl class="item-table"><dt><a class="mod" href="error/index.html" title="mod skrifa::outline::error">error</a></dt><dd>Error types associated with outlines.</dd><dt><a class="mod" href="pen/index.html" title="mod skrifa::outline::pen">pen</a></dt><dd>Types for collecting the output when drawing a glyph outline.</dd></dl><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><dl class="item-table"><dt><a class="struct" href="struct.AdjustedMetrics.html" title="struct skrifa::outline::AdjustedMetrics">Adjusted<wbr>Metrics</a></dt><dd>Information and adjusted metrics generated while drawing an outline glyph.</dd><dt><a class="struct" href="struct.DrawSettings.html" title="struct skrifa::outline::DrawSettings">Draw<wbr>Settings</a></dt><dd>Options that define how a <a href="../struct.OutlineGlyph.html" title="struct skrifa::OutlineGlyph">glyph</a> is drawn to a
+<a href="trait.OutlinePen.html" title="trait skrifa::outline::OutlinePen">pen</a>.</dd><dt><a class="struct" href="struct.GlyphStyles.html" title="struct skrifa::outline::GlyphStyles">Glyph<wbr>Styles</a></dt><dd>Set of derived glyph styles that are used for automatic hinting.</dd><dt><a class="struct" href="struct.HintingInstance.html" title="struct skrifa::outline::HintingInstance">Hinting<wbr>Instance</a></dt><dd>Hinting instance that uses information embedded in the font to perform
+grid-fitting.</dd><dt><a class="struct" href="struct.HintingOptions.html" title="struct skrifa::outline::HintingOptions">Hinting<wbr>Options</a></dt><dd>Configuration settings for a hinting instance.</dd><dt><a class="struct" href="struct.OutlineGlyph.html" title="struct skrifa::outline::OutlineGlyph">Outline<wbr>Glyph</a></dt><dd>A scalable glyph outline.</dd><dt><a class="struct" href="struct.OutlineGlyphCollection.html" title="struct skrifa::outline::OutlineGlyphCollection">Outline<wbr>Glyph<wbr>Collection</a></dt><dd>Collection of scalable glyph outlines.</dd></dl><h2 id="enums" class="section-header">Enums<a href="#enums" class="anchor">§</a></h2><dl class="item-table"><dt><a class="enum" href="enum.DrawError.html" title="enum skrifa::outline::DrawError">Draw<wbr>Error</a></dt><dd>Errors that may occur when drawing glyphs.</dd><dt><a class="enum" href="enum.Engine.html" title="enum skrifa::outline::Engine">Engine</a></dt><dd>Specifies the backend to use when applying hints.</dd><dt><a class="enum" href="enum.Hinting.html" title="enum skrifa::outline::Hinting">Hinting</a></dt><dd>Specifies the hinting strategy for memory size calculations.</dd><dt><a class="enum" href="enum.OutlineGlyphFormat.html" title="enum skrifa::outline::OutlineGlyphFormat">Outline<wbr>Glyph<wbr>Format</a></dt><dd>Source format for an outline glyph.</dd><dt><a class="enum" href="enum.SmoothMode.html" title="enum skrifa::outline::SmoothMode">Smooth<wbr>Mode</a></dt><dd>Mode selector for a smooth hinting target.</dd><dt><a class="enum" href="enum.Target.html" title="enum skrifa::outline::Target">Target</a></dt><dd>Defines the target settings for hinting.</dd></dl><h2 id="traits" class="section-header">Traits<a href="#traits" class="anchor">§</a></h2><dl class="item-table"><dt><a class="trait" href="trait.OutlinePen.html" title="trait skrifa::outline::OutlinePen">Outline<wbr>Pen</a></dt><dd>Interface for accepting a sequence of path commands.</dd></dl></section></div></main></body></html>

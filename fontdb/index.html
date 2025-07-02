@@ -1,0 +1,49 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="`fontdb` is a simple, in-memory font database with CSS-like queries."><title>fontdb - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-916cea96.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="fontdb" data-themes="" data-resource-suffix="" data-rustdoc-version="1.87.0 (17067e9ac 2025-05-09)" data-channel="1.87.0" data-search-js="search-e7298875.js" data-settings-js="settings-d72f25bb.js" ><script src="../static.files/storage-82c7156e.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-fb8c74a8.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../fontdb/index.html">fontdb</a><span class="version">0.23.0</span></h2></div><div class="sidebar-elems"><ul class="block"><li><a id="all-types" href="all.html">All Items</a></li></ul><section id="rustdoc-toc"><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#features" title="Features">Features</a></li><li><a href="#non-goals" title="Non-goals">Non-goals</a></li><li><a href="#font-vs-face" title="Font vs Face">Font vs Face</a></li><li><a href="#performance" title="Performance">Performance</a></li><li><a href="#safety" title="Safety">Safety</a></li></ul><h3><a href="#structs">Crate Items</a></h3><ul class="block"><li><a href="#structs" title="Structs">Structs</a></li><li><a href="#enums" title="Enums">Enums</a></li></ul></section><div id="rustdoc-modnav"></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1>Crate <span>fontdb</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/fontdb/lib.rs.html#1-1381">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p><code>fontdb</code> is a simple, in-memory font database with CSS-like queries.</p>
+<h2 id="features"><a class="doc-anchor" href="#features">§</a>Features</h2>
+<ul>
+<li>The database can load fonts from files, directories and raw data (<code>Vec&lt;u8&gt;</code>).</li>
+<li>The database can match a font using CSS-like queries. See <code>Database::query</code>.</li>
+<li>The database can try to load system fonts.
+Currently, this is implemented by scanning predefined directories.
+The library does not interact with the system API.</li>
+<li>Provides a unique ID for each font face.</li>
+</ul>
+<h2 id="non-goals"><a class="doc-anchor" href="#non-goals">§</a>Non-goals</h2>
+<ul>
+<li>
+<p>Advanced font properties querying.<br>
+The database provides only storage and matching capabilities.
+For font properties querying you can use <a href="https://github.com/RazrFalcon/ttf-parser">ttf-parser</a>.</p>
+</li>
+<li>
+<p>A font fallback mechanism.<br>
+This library can be used to implement a font fallback mechanism, but it doesn’t implement one.</p>
+</li>
+<li>
+<p>Application’s global database.<br>
+The database doesn’t use <code>static</code>, therefore it’s up to the caller where it should be stored.</p>
+</li>
+<li>
+<p>Font types support other than TrueType.</p>
+</li>
+</ul>
+<h2 id="font-vs-face"><a class="doc-anchor" href="#font-vs-face">§</a>Font vs Face</h2>
+<p>A font is a collection of font faces. Therefore, a font face is a subset of a font.
+A simple font (*.ttf/*.otf) usually contains a single font face,
+but a font collection (*.ttc) can contain multiple font faces.</p>
+<p><code>fontdb</code> stores and matches font faces, not fonts.
+Therefore, after loading a font collection with 5 faces (for example), the database will be populated
+with 5 <code>FaceInfo</code> objects, all of which will be pointing to the same file or binary data.</p>
+<h2 id="performance"><a class="doc-anchor" href="#performance">§</a>Performance</h2>
+<p>The database performance is largely limited by the storage itself.
+We are using <a href="https://github.com/RazrFalcon/ttf-parser">ttf-parser</a>, so the parsing should not be a bottleneck.</p>
+<p>On my machine with Samsung SSD 860 and Gentoo Linux, it takes ~20ms
+to load 1906 font faces (most of them are from Google Noto collection)
+with a hot disk cache and ~860ms with a cold one.</p>
+<p>On Mac Mini M1 it takes just 9ms to load 898 fonts.</p>
+<h2 id="safety"><a class="doc-anchor" href="#safety">§</a>Safety</h2>
+<p>The library relies on memory-mapped files, which is inherently unsafe.
+But since we do not keep the files open it should be perfectly safe.</p>
+<p>If you would like to use a persistent memory mapping of the font files,
+then you can use the unsafe <a href="struct.Database.html#method.make_shared_face_data" title="method fontdb::Database::make_shared_face_data"><code>Database::make_shared_face_data</code></a> function.</p>
+</div></details><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><dl class="item-table"><dt><a class="struct" href="struct.Database.html" title="struct fontdb::Database">Database</a></dt><dd>A font database.</dd><dt><a class="struct" href="struct.FaceInfo.html" title="struct fontdb::FaceInfo">Face<wbr>Info</a></dt><dd>A single font face info.</dd><dt><a class="struct" href="struct.ID.html" title="struct fontdb::ID">ID</a></dt><dd>A unique per database face ID.</dd><dt><a class="struct" href="struct.Query.html" title="struct fontdb::Query">Query</a></dt><dd>A database query.</dd><dt><a class="struct" href="struct.Weight.html" title="struct fontdb::Weight">Weight</a></dt><dd>Specifies the weight of glyphs in the font, their degree of blackness or stroke thickness.</dd></dl><h2 id="enums" class="section-header">Enums<a href="#enums" class="anchor">§</a></h2><dl class="item-table"><dt><a class="enum" href="enum.Family.html" title="enum fontdb::Family">Family</a></dt><dd>A <a href="https://www.w3.org/TR/2018/REC-css-fonts-3-20180920/#propdef-font-family">font family</a>.</dd><dt><a class="enum" href="enum.Language.html" title="enum fontdb::Language">Language</a></dt><dd>A <a href="../ttf_parser/tables/name/struct.Name.html" title="struct ttf_parser::tables::name::Name"><code>Name</code></a> language.</dd><dt><a class="enum" href="enum.Source.html" title="enum fontdb::Source">Source</a></dt><dd>A font source.</dd><dt><a class="enum" href="enum.Stretch.html" title="enum fontdb::Stretch">Stretch</a></dt><dd>A face <a href="https://docs.microsoft.com/en-us/typography/opentype/spec/os2#uswidthclass">width</a>.</dd><dt><a class="enum" href="enum.Style.html" title="enum fontdb::Style">Style</a></dt><dd>Allows italic or oblique faces to be selected.</dd></dl></section></div></main></body></html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/skrifa-0.31.3/src/outline/glyf/hint/engine/dispatch.rs`."><title>dispatch.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../../../static.files/rustdoc-916cea96.css"><meta name="rustdoc-vars" data-root-path="../../../../../../" data-static-root-path="../../../../../../static.files/" data-current-crate="skrifa" data-themes="" data-resource-suffix="" data-rustdoc-version="1.87.0 (17067e9ac 2025-05-09)" data-channel="1.87.0" data-search-js="search-e7298875.js" data-settings-js="settings-d72f25bb.js" ><script src="../../../../../../static.files/storage-82c7156e.js"></script><script defer src="../../../../../../static.files/src-script-63605ae7.js"></script><script defer src="../../../../../../src-files.js"></script><script defer src="../../../../../../static.files/main-fb8c74a8.js"></script><noscript><link rel="stylesheet" href="../../../../../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../../../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">skrifa/outline/glyf/hint/engine/</div>dispatch.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="doccomment">//! Instruction decoding and dispatch.
+<a href=#2 id=2 data-nosnippet>2</a>
+<a href=#3 id=3 data-nosnippet>3</a></span><span class="kw">use </span>read_fonts::tables::glyf::bytecode::Opcode;
+<a href=#4 id=4 data-nosnippet>4</a>
+<a href=#5 id=5 data-nosnippet>5</a><span class="kw">use super</span>::{<span class="kw">super</span>::program::Program, Engine, HintError, HintErrorKind, Instruction};
+<a href=#6 id=6 data-nosnippet>6</a>
+<a href=#7 id=7 data-nosnippet>7</a><span class="doccomment">/// Maximum number of instructions we will execute in `Engine::run()`. This
+<a href=#8 id=8 data-nosnippet>8</a>/// is used to ensure termination of a hinting program.
+<a href=#9 id=9 data-nosnippet>9</a>/// See &lt;https://gitlab.freedesktop.org/freetype/freetype/-/blob/57617782464411201ce7bbc93b086c1b4d7d84a5/include/freetype/config/ftoption.h#L744&gt;
+<a href=#10 id=10 data-nosnippet>10</a></span><span class="kw">const </span>MAX_RUN_INSTRUCTIONS: usize = <span class="number">1_000_000</span>;
+<a href=#11 id=11 data-nosnippet>11</a>
+<a href=#12 id=12 data-nosnippet>12</a><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Engine&lt;<span class="lifetime">'a</span>&gt; {
+<a href=#13 id=13 data-nosnippet>13</a>    <span class="doccomment">/// Resets state for the specified program and executes all instructions.
+<a href=#14 id=14 data-nosnippet>14</a>    </span><span class="kw">pub fn </span>run_program(<span class="kw-2">&amp;mut </span><span class="self">self</span>, program: Program, is_pedantic: bool) -&gt; <span class="prelude-ty">Result</span>&lt;(), HintError&gt; {
+<a href=#15 id=15 data-nosnippet>15</a>        <span class="self">self</span>.reset(program, is_pedantic);
+<a href=#16 id=16 data-nosnippet>16</a>        <span class="self">self</span>.run()
+<a href=#17 id=17 data-nosnippet>17</a>    }
+<a href=#18 id=18 data-nosnippet>18</a>
+<a href=#19 id=19 data-nosnippet>19</a>    <span class="doccomment">/// Set internal state for running the specified program.
+<a href=#20 id=20 data-nosnippet>20</a>    </span><span class="kw">pub fn </span>reset(<span class="kw-2">&amp;mut </span><span class="self">self</span>, program: Program, is_pedantic: bool) {
+<a href=#21 id=21 data-nosnippet>21</a>        <span class="self">self</span>.program.reset(program);
+<a href=#22 id=22 data-nosnippet>22</a>        <span class="comment">// Reset overall graphics state, keeping the retained bits.
+<a href=#23 id=23 data-nosnippet>23</a>        </span><span class="self">self</span>.graphics.reset();
+<a href=#24 id=24 data-nosnippet>24</a>        <span class="self">self</span>.graphics.is_pedantic = is_pedantic;
+<a href=#25 id=25 data-nosnippet>25</a>        <span class="self">self</span>.loop_budget.reset();
+<a href=#26 id=26 data-nosnippet>26</a>        <span class="comment">// Program specific setup.
+<a href=#27 id=27 data-nosnippet>27</a>        </span><span class="kw">match </span>program {
+<a href=#28 id=28 data-nosnippet>28</a>            Program::Font =&gt; {
+<a href=#29 id=29 data-nosnippet>29</a>                <span class="self">self</span>.definitions.functions.reset();
+<a href=#30 id=30 data-nosnippet>30</a>                <span class="self">self</span>.definitions.instructions.reset();
+<a href=#31 id=31 data-nosnippet>31</a>            }
+<a href=#32 id=32 data-nosnippet>32</a>            Program::ControlValue =&gt; {
+<a href=#33 id=33 data-nosnippet>33</a>                <span class="self">self</span>.graphics.backward_compatibility = <span class="bool-val">false</span>;
+<a href=#34 id=34 data-nosnippet>34</a>            }
+<a href=#35 id=35 data-nosnippet>35</a>            Program::Glyph =&gt; {
+<a href=#36 id=36 data-nosnippet>36</a>                <span class="comment">// Instruct control bit 1 says we reset retained graphics state
+<a href=#37 id=37 data-nosnippet>37</a>                // to default values.
+<a href=#38 id=38 data-nosnippet>38</a>                </span><span class="kw">if </span><span class="self">self</span>.graphics.instruct_control &amp; <span class="number">2 </span>!= <span class="number">0 </span>{
+<a href=#39 id=39 data-nosnippet>39</a>                    <span class="self">self</span>.graphics.reset_retained();
+<a href=#40 id=40 data-nosnippet>40</a>                }
+<a href=#41 id=41 data-nosnippet>41</a>                <span class="comment">// Set backward compatibility mode
+<a href=#42 id=42 data-nosnippet>42</a>                </span><span class="kw">if </span><span class="self">self</span>.graphics.target.preserve_linear_metrics() {
+<a href=#43 id=43 data-nosnippet>43</a>                    <span class="self">self</span>.graphics.backward_compatibility = <span class="bool-val">true</span>;
+<a href=#44 id=44 data-nosnippet>44</a>                } <span class="kw">else if </span><span class="self">self</span>.graphics.target.is_smooth() {
+<a href=#45 id=45 data-nosnippet>45</a>                    <span class="self">self</span>.graphics.backward_compatibility =
+<a href=#46 id=46 data-nosnippet>46</a>                        (<span class="self">self</span>.graphics.instruct_control &amp; <span class="number">0x4</span>) == <span class="number">0</span>;
+<a href=#47 id=47 data-nosnippet>47</a>                } <span class="kw">else </span>{
+<a href=#48 id=48 data-nosnippet>48</a>                    <span class="self">self</span>.graphics.backward_compatibility = <span class="bool-val">false</span>;
+<a href=#49 id=49 data-nosnippet>49</a>                }
+<a href=#50 id=50 data-nosnippet>50</a>            }
+<a href=#51 id=51 data-nosnippet>51</a>        }
+<a href=#52 id=52 data-nosnippet>52</a>    }
+<a href=#53 id=53 data-nosnippet>53</a>
+<a href=#54 id=54 data-nosnippet>54</a>    <span class="doccomment">/// Decodes and dispatches all instructions until completion or error.
+<a href=#55 id=55 data-nosnippet>55</a>    </span><span class="kw">pub fn </span>run(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), HintError&gt; {
+<a href=#56 id=56 data-nosnippet>56</a>        <span class="kw">let </span><span class="kw-2">mut </span>count = <span class="number">0</span>;
+<a href=#57 id=57 data-nosnippet>57</a>        <span class="kw">while let </span><span class="prelude-val">Some</span>(ins) = <span class="self">self</span>.decode() {
+<a href=#58 id=58 data-nosnippet>58</a>            <span class="kw">let </span>ins = ins<span class="question-mark">?</span>;
+<a href=#59 id=59 data-nosnippet>59</a>            <span class="self">self</span>.dispatch(<span class="kw-2">&amp;</span>ins)<span class="question-mark">?</span>;
+<a href=#60 id=60 data-nosnippet>60</a>            count += <span class="number">1</span>;
+<a href=#61 id=61 data-nosnippet>61</a>            <span class="kw">if </span>count &gt; MAX_RUN_INSTRUCTIONS {
+<a href=#62 id=62 data-nosnippet>62</a>                <span class="kw">return </span><span class="prelude-val">Err</span>(HintError {
+<a href=#63 id=63 data-nosnippet>63</a>                    program: <span class="self">self</span>.program.current,
+<a href=#64 id=64 data-nosnippet>64</a>                    glyph_id: <span class="prelude-val">None</span>,
+<a href=#65 id=65 data-nosnippet>65</a>                    pc: ins.pc,
+<a href=#66 id=66 data-nosnippet>66</a>                    opcode: <span class="prelude-val">Some</span>(ins.opcode),
+<a href=#67 id=67 data-nosnippet>67</a>                    kind: HintErrorKind::ExceededExecutionBudget,
+<a href=#68 id=68 data-nosnippet>68</a>                });
+<a href=#69 id=69 data-nosnippet>69</a>            }
+<a href=#70 id=70 data-nosnippet>70</a>        }
+<a href=#71 id=71 data-nosnippet>71</a>        <span class="prelude-val">Ok</span>(())
+<a href=#72 id=72 data-nosnippet>72</a>    }
+<a href=#73 id=73 data-nosnippet>73</a>
+<a href=#74 id=74 data-nosnippet>74</a>    <span class="doccomment">/// Decodes the next instruction from the current program.
+<a href=#75 id=75 data-nosnippet>75</a>    </span><span class="kw">pub fn </span>decode(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;Instruction&lt;<span class="lifetime">'a</span>&gt;, HintError&gt;&gt; {
+<a href=#76 id=76 data-nosnippet>76</a>        <span class="kw">let </span>ins = <span class="self">self</span>.program.decoder.decode()<span class="question-mark">?</span>;
+<a href=#77 id=77 data-nosnippet>77</a>        <span class="prelude-val">Some</span>(ins.map_err(|<span class="kw">_</span>| HintError {
+<a href=#78 id=78 data-nosnippet>78</a>            program: <span class="self">self</span>.program.current,
+<a href=#79 id=79 data-nosnippet>79</a>            glyph_id: <span class="prelude-val">None</span>,
+<a href=#80 id=80 data-nosnippet>80</a>            pc: <span class="self">self</span>.program.decoder.pc,
+<a href=#81 id=81 data-nosnippet>81</a>            opcode: <span class="prelude-val">None</span>,
+<a href=#82 id=82 data-nosnippet>82</a>            kind: HintErrorKind::UnexpectedEndOfBytecode,
+<a href=#83 id=83 data-nosnippet>83</a>        }))
+<a href=#84 id=84 data-nosnippet>84</a>    }
+<a href=#85 id=85 data-nosnippet>85</a>
+<a href=#86 id=86 data-nosnippet>86</a>    <span class="doccomment">/// Executes the appropriate code for the given instruction.
+<a href=#87 id=87 data-nosnippet>87</a>    </span><span class="kw">pub fn </span>dispatch(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ins: <span class="kw-2">&amp;</span>Instruction) -&gt; <span class="prelude-ty">Result</span>&lt;(), HintError&gt; {
+<a href=#88 id=88 data-nosnippet>88</a>        <span class="kw">let </span>current_program = <span class="self">self</span>.program.current;
+<a href=#89 id=89 data-nosnippet>89</a>        <span class="self">self</span>.dispatch_inner(ins).map_err(|kind| HintError {
+<a href=#90 id=90 data-nosnippet>90</a>            program: current_program,
+<a href=#91 id=91 data-nosnippet>91</a>            glyph_id: <span class="prelude-val">None</span>,
+<a href=#92 id=92 data-nosnippet>92</a>            pc: ins.pc,
+<a href=#93 id=93 data-nosnippet>93</a>            opcode: <span class="prelude-val">Some</span>(ins.opcode),
+<a href=#94 id=94 data-nosnippet>94</a>            kind,
+<a href=#95 id=95 data-nosnippet>95</a>        })
+<a href=#96 id=96 data-nosnippet>96</a>    }
+<a href=#97 id=97 data-nosnippet>97</a>
+<a href=#98 id=98 data-nosnippet>98</a>    <span class="kw">fn </span>dispatch_inner(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ins: <span class="kw-2">&amp;</span>Instruction) -&gt; <span class="prelude-ty">Result</span>&lt;(), HintErrorKind&gt; {
+<a href=#99 id=99 data-nosnippet>99</a>        <span class="kw">use </span>Opcode::<span class="kw-2">*</span>;
+<a href=#100 id=100 data-nosnippet>100</a>        <span class="kw">let </span>opcode = ins.opcode;
+<a href=#101 id=101 data-nosnippet>101</a>        <span class="kw">let </span>raw_opcode = opcode <span class="kw">as </span>u8;
+<a href=#102 id=102 data-nosnippet>102</a>        <span class="kw">match </span>ins.opcode {
+<a href=#103 id=103 data-nosnippet>103</a>            SVTCA0 | SVTCA1 | SPVTCA0 | SPVTCA1 | SFVTCA0 | SFVTCA1 =&gt; <span class="self">self</span>.op_svtca(raw_opcode)<span class="question-mark">?</span>,
+<a href=#104 id=104 data-nosnippet>104</a>            SPVTL0 | SPVTL1 | SFVTL0 | SFVTL1 =&gt; <span class="self">self</span>.op_svtl(raw_opcode)<span class="question-mark">?</span>,
+<a href=#105 id=105 data-nosnippet>105</a>            SPVFS =&gt; <span class="self">self</span>.op_spvfs()<span class="question-mark">?</span>,
+<a href=#106 id=106 data-nosnippet>106</a>            SFVFS =&gt; <span class="self">self</span>.op_sfvfs()<span class="question-mark">?</span>,
+<a href=#107 id=107 data-nosnippet>107</a>            GPV =&gt; <span class="self">self</span>.op_gpv()<span class="question-mark">?</span>,
+<a href=#108 id=108 data-nosnippet>108</a>            GFV =&gt; <span class="self">self</span>.op_gfv()<span class="question-mark">?</span>,
+<a href=#109 id=109 data-nosnippet>109</a>            SFVTPV =&gt; <span class="self">self</span>.op_sfvtpv()<span class="question-mark">?</span>,
+<a href=#110 id=110 data-nosnippet>110</a>            ISECT =&gt; <span class="self">self</span>.op_isect()<span class="question-mark">?</span>,
+<a href=#111 id=111 data-nosnippet>111</a>            SRP0 =&gt; <span class="self">self</span>.op_srp0()<span class="question-mark">?</span>,
+<a href=#112 id=112 data-nosnippet>112</a>            SRP1 =&gt; <span class="self">self</span>.op_srp1()<span class="question-mark">?</span>,
+<a href=#113 id=113 data-nosnippet>113</a>            SRP2 =&gt; <span class="self">self</span>.op_srp2()<span class="question-mark">?</span>,
+<a href=#114 id=114 data-nosnippet>114</a>            SZP0 =&gt; <span class="self">self</span>.op_szp0()<span class="question-mark">?</span>,
+<a href=#115 id=115 data-nosnippet>115</a>            SZP1 =&gt; <span class="self">self</span>.op_szp1()<span class="question-mark">?</span>,
+<a href=#116 id=116 data-nosnippet>116</a>            SZP2 =&gt; <span class="self">self</span>.op_szp2()<span class="question-mark">?</span>,
+<a href=#117 id=117 data-nosnippet>117</a>            SZPS =&gt; <span class="self">self</span>.op_szps()<span class="question-mark">?</span>,
+<a href=#118 id=118 data-nosnippet>118</a>            SLOOP =&gt; <span class="self">self</span>.op_sloop()<span class="question-mark">?</span>,
+<a href=#119 id=119 data-nosnippet>119</a>            RTG =&gt; <span class="self">self</span>.op_rtg()<span class="question-mark">?</span>,
+<a href=#120 id=120 data-nosnippet>120</a>            RTHG =&gt; <span class="self">self</span>.op_rthg()<span class="question-mark">?</span>,
+<a href=#121 id=121 data-nosnippet>121</a>            SMD =&gt; <span class="self">self</span>.op_smd()<span class="question-mark">?</span>,
+<a href=#122 id=122 data-nosnippet>122</a>            ELSE =&gt; <span class="self">self</span>.op_else()<span class="question-mark">?</span>,
+<a href=#123 id=123 data-nosnippet>123</a>            JMPR =&gt; <span class="self">self</span>.op_jmpr()<span class="question-mark">?</span>,
+<a href=#124 id=124 data-nosnippet>124</a>            SCVTCI =&gt; <span class="self">self</span>.op_scvtci()<span class="question-mark">?</span>,
+<a href=#125 id=125 data-nosnippet>125</a>            SSWCI =&gt; <span class="self">self</span>.op_sswci()<span class="question-mark">?</span>,
+<a href=#126 id=126 data-nosnippet>126</a>            SSW =&gt; <span class="self">self</span>.op_ssw()<span class="question-mark">?</span>,
+<a href=#127 id=127 data-nosnippet>127</a>            DUP =&gt; <span class="self">self</span>.op_dup()<span class="question-mark">?</span>,
+<a href=#128 id=128 data-nosnippet>128</a>            POP =&gt; <span class="self">self</span>.op_pop()<span class="question-mark">?</span>,
+<a href=#129 id=129 data-nosnippet>129</a>            CLEAR =&gt; <span class="self">self</span>.op_clear()<span class="question-mark">?</span>,
+<a href=#130 id=130 data-nosnippet>130</a>            SWAP =&gt; <span class="self">self</span>.op_swap()<span class="question-mark">?</span>,
+<a href=#131 id=131 data-nosnippet>131</a>            DEPTH =&gt; <span class="self">self</span>.op_depth()<span class="question-mark">?</span>,
+<a href=#132 id=132 data-nosnippet>132</a>            CINDEX =&gt; <span class="self">self</span>.op_cindex()<span class="question-mark">?</span>,
+<a href=#133 id=133 data-nosnippet>133</a>            MINDEX =&gt; <span class="self">self</span>.op_mindex()<span class="question-mark">?</span>,
+<a href=#134 id=134 data-nosnippet>134</a>            ALIGNPTS =&gt; <span class="self">self</span>.op_alignpts()<span class="question-mark">?</span>,
+<a href=#135 id=135 data-nosnippet>135</a>            <span class="comment">// UNUSED: 0x28
+<a href=#136 id=136 data-nosnippet>136</a>            </span>UTP =&gt; <span class="self">self</span>.op_utp()<span class="question-mark">?</span>,
+<a href=#137 id=137 data-nosnippet>137</a>            LOOPCALL =&gt; <span class="self">self</span>.op_loopcall()<span class="question-mark">?</span>,
+<a href=#138 id=138 data-nosnippet>138</a>            CALL =&gt; <span class="self">self</span>.op_call()<span class="question-mark">?</span>,
+<a href=#139 id=139 data-nosnippet>139</a>            FDEF =&gt; <span class="self">self</span>.op_fdef()<span class="question-mark">?</span>,
+<a href=#140 id=140 data-nosnippet>140</a>            ENDF =&gt; <span class="self">self</span>.op_endf()<span class="question-mark">?</span>,
+<a href=#141 id=141 data-nosnippet>141</a>            MDAP0 | MDAP1 =&gt; <span class="self">self</span>.op_mdap(raw_opcode)<span class="question-mark">?</span>,
+<a href=#142 id=142 data-nosnippet>142</a>            IUP0 | IUP1 =&gt; <span class="self">self</span>.op_iup(raw_opcode)<span class="question-mark">?</span>,
+<a href=#143 id=143 data-nosnippet>143</a>            SHP0 | SHP1 =&gt; <span class="self">self</span>.op_shp(raw_opcode)<span class="question-mark">?</span>,
+<a href=#144 id=144 data-nosnippet>144</a>            SHC0 | SHC1 =&gt; <span class="self">self</span>.op_shc(raw_opcode)<span class="question-mark">?</span>,
+<a href=#145 id=145 data-nosnippet>145</a>            SHZ0 | SHZ1 =&gt; <span class="self">self</span>.op_shz(raw_opcode)<span class="question-mark">?</span>,
+<a href=#146 id=146 data-nosnippet>146</a>            SHPIX =&gt; <span class="self">self</span>.op_shpix()<span class="question-mark">?</span>,
+<a href=#147 id=147 data-nosnippet>147</a>            IP =&gt; <span class="self">self</span>.op_ip()<span class="question-mark">?</span>,
+<a href=#148 id=148 data-nosnippet>148</a>            MSIRP0 | MSIRP1 =&gt; <span class="self">self</span>.op_msirp(raw_opcode)<span class="question-mark">?</span>,
+<a href=#149 id=149 data-nosnippet>149</a>            ALIGNRP =&gt; <span class="self">self</span>.op_alignrp()<span class="question-mark">?</span>,
+<a href=#150 id=150 data-nosnippet>150</a>            RTDG =&gt; <span class="self">self</span>.op_rtdg()<span class="question-mark">?</span>,
+<a href=#151 id=151 data-nosnippet>151</a>            MIAP0 | MIAP1 =&gt; <span class="self">self</span>.op_miap(raw_opcode)<span class="question-mark">?</span>,
+<a href=#152 id=152 data-nosnippet>152</a>            NPUSHB | NPUSHW =&gt; <span class="self">self</span>.op_push(<span class="kw-2">&amp;</span>ins.inline_operands)<span class="question-mark">?</span>,
+<a href=#153 id=153 data-nosnippet>153</a>            WS =&gt; <span class="self">self</span>.op_ws()<span class="question-mark">?</span>,
+<a href=#154 id=154 data-nosnippet>154</a>            RS =&gt; <span class="self">self</span>.op_rs()<span class="question-mark">?</span>,
+<a href=#155 id=155 data-nosnippet>155</a>            WCVTP =&gt; <span class="self">self</span>.op_wcvtp()<span class="question-mark">?</span>,
+<a href=#156 id=156 data-nosnippet>156</a>            RCVT =&gt; <span class="self">self</span>.op_rcvt()<span class="question-mark">?</span>,
+<a href=#157 id=157 data-nosnippet>157</a>            GC0 | GC1 =&gt; <span class="self">self</span>.op_gc(raw_opcode)<span class="question-mark">?</span>,
+<a href=#158 id=158 data-nosnippet>158</a>            SCFS =&gt; <span class="self">self</span>.op_scfs()<span class="question-mark">?</span>,
+<a href=#159 id=159 data-nosnippet>159</a>            MD0 | MD1 =&gt; <span class="self">self</span>.op_md(raw_opcode)<span class="question-mark">?</span>,
+<a href=#160 id=160 data-nosnippet>160</a>            MPPEM =&gt; <span class="self">self</span>.op_mppem()<span class="question-mark">?</span>,
+<a href=#161 id=161 data-nosnippet>161</a>            MPS =&gt; <span class="self">self</span>.op_mps()<span class="question-mark">?</span>,
+<a href=#162 id=162 data-nosnippet>162</a>            FLIPON =&gt; <span class="self">self</span>.op_flipon()<span class="question-mark">?</span>,
+<a href=#163 id=163 data-nosnippet>163</a>            FLIPOFF =&gt; <span class="self">self</span>.op_flipoff()<span class="question-mark">?</span>,
+<a href=#164 id=164 data-nosnippet>164</a>            <span class="comment">// Should be unused in production fonts, but we may want to
+<a href=#165 id=165 data-nosnippet>165</a>            // support debugging at some point. Just pops a value from
+<a href=#166 id=166 data-nosnippet>166</a>            // the stack.
+<a href=#167 id=167 data-nosnippet>167</a>            </span>DEBUG =&gt; {
+<a href=#168 id=168 data-nosnippet>168</a>                <span class="self">self</span>.value_stack.pop()<span class="question-mark">?</span>;
+<a href=#169 id=169 data-nosnippet>169</a>            }
+<a href=#170 id=170 data-nosnippet>170</a>            LT =&gt; <span class="self">self</span>.op_lt()<span class="question-mark">?</span>,
+<a href=#171 id=171 data-nosnippet>171</a>            LTEQ =&gt; <span class="self">self</span>.op_lteq()<span class="question-mark">?</span>,
+<a href=#172 id=172 data-nosnippet>172</a>            GT =&gt; <span class="self">self</span>.op_gt()<span class="question-mark">?</span>,
+<a href=#173 id=173 data-nosnippet>173</a>            GTEQ =&gt; <span class="self">self</span>.op_gteq()<span class="question-mark">?</span>,
+<a href=#174 id=174 data-nosnippet>174</a>            EQ =&gt; <span class="self">self</span>.op_eq()<span class="question-mark">?</span>,
+<a href=#175 id=175 data-nosnippet>175</a>            NEQ =&gt; <span class="self">self</span>.op_neq()<span class="question-mark">?</span>,
+<a href=#176 id=176 data-nosnippet>176</a>            ODD =&gt; <span class="self">self</span>.op_odd()<span class="question-mark">?</span>,
+<a href=#177 id=177 data-nosnippet>177</a>            EVEN =&gt; <span class="self">self</span>.op_even()<span class="question-mark">?</span>,
+<a href=#178 id=178 data-nosnippet>178</a>            IF =&gt; <span class="self">self</span>.op_if()<span class="question-mark">?</span>,
+<a href=#179 id=179 data-nosnippet>179</a>            EIF =&gt; <span class="self">self</span>.op_eif()<span class="question-mark">?</span>,
+<a href=#180 id=180 data-nosnippet>180</a>            AND =&gt; <span class="self">self</span>.op_and()<span class="question-mark">?</span>,
+<a href=#181 id=181 data-nosnippet>181</a>            OR =&gt; <span class="self">self</span>.op_or()<span class="question-mark">?</span>,
+<a href=#182 id=182 data-nosnippet>182</a>            NOT =&gt; <span class="self">self</span>.op_not()<span class="question-mark">?</span>,
+<a href=#183 id=183 data-nosnippet>183</a>            DELTAP1 =&gt; <span class="self">self</span>.op_deltap(opcode)<span class="question-mark">?</span>,
+<a href=#184 id=184 data-nosnippet>184</a>            SDB =&gt; <span class="self">self</span>.op_sdb()<span class="question-mark">?</span>,
+<a href=#185 id=185 data-nosnippet>185</a>            SDS =&gt; <span class="self">self</span>.op_sds()<span class="question-mark">?</span>,
+<a href=#186 id=186 data-nosnippet>186</a>            ADD =&gt; <span class="self">self</span>.op_add()<span class="question-mark">?</span>,
+<a href=#187 id=187 data-nosnippet>187</a>            SUB =&gt; <span class="self">self</span>.op_sub()<span class="question-mark">?</span>,
+<a href=#188 id=188 data-nosnippet>188</a>            DIV =&gt; <span class="self">self</span>.op_div()<span class="question-mark">?</span>,
+<a href=#189 id=189 data-nosnippet>189</a>            MUL =&gt; <span class="self">self</span>.op_mul()<span class="question-mark">?</span>,
+<a href=#190 id=190 data-nosnippet>190</a>            ABS =&gt; <span class="self">self</span>.op_abs()<span class="question-mark">?</span>,
+<a href=#191 id=191 data-nosnippet>191</a>            NEG =&gt; <span class="self">self</span>.op_neg()<span class="question-mark">?</span>,
+<a href=#192 id=192 data-nosnippet>192</a>            FLOOR =&gt; <span class="self">self</span>.op_floor()<span class="question-mark">?</span>,
+<a href=#193 id=193 data-nosnippet>193</a>            CEILING =&gt; <span class="self">self</span>.op_ceiling()<span class="question-mark">?</span>,
+<a href=#194 id=194 data-nosnippet>194</a>            ROUND00 | ROUND01 | ROUND10 | ROUND11 =&gt; <span class="self">self</span>.op_round()<span class="question-mark">?</span>,
+<a href=#195 id=195 data-nosnippet>195</a>            <span class="comment">// "No round" means do nothing :)
+<a href=#196 id=196 data-nosnippet>196</a>            </span>NROUND00 | NROUND01 | NROUND10 | NROUND11 =&gt; {}
+<a href=#197 id=197 data-nosnippet>197</a>            WCVTF =&gt; <span class="self">self</span>.op_wcvtf()<span class="question-mark">?</span>,
+<a href=#198 id=198 data-nosnippet>198</a>            DELTAP2 | DELTAP3 =&gt; <span class="self">self</span>.op_deltap(opcode)<span class="question-mark">?</span>,
+<a href=#199 id=199 data-nosnippet>199</a>            DELTAC1 | DELTAC2 | DELTAC3 =&gt; <span class="self">self</span>.op_deltac(opcode)<span class="question-mark">?</span>,
+<a href=#200 id=200 data-nosnippet>200</a>            SROUND =&gt; <span class="self">self</span>.op_sround()<span class="question-mark">?</span>,
+<a href=#201 id=201 data-nosnippet>201</a>            S45ROUND =&gt; <span class="self">self</span>.op_s45round()<span class="question-mark">?</span>,
+<a href=#202 id=202 data-nosnippet>202</a>            JROT =&gt; <span class="self">self</span>.op_jrot()<span class="question-mark">?</span>,
+<a href=#203 id=203 data-nosnippet>203</a>            JROF =&gt; <span class="self">self</span>.op_jrof()<span class="question-mark">?</span>,
+<a href=#204 id=204 data-nosnippet>204</a>            ROFF =&gt; <span class="self">self</span>.op_roff()<span class="question-mark">?</span>,
+<a href=#205 id=205 data-nosnippet>205</a>            <span class="comment">// UNUSED: 0x7B
+<a href=#206 id=206 data-nosnippet>206</a>            </span>RUTG =&gt; <span class="self">self</span>.op_rutg()<span class="question-mark">?</span>,
+<a href=#207 id=207 data-nosnippet>207</a>            RDTG =&gt; <span class="self">self</span>.op_rdtg()<span class="question-mark">?</span>,
+<a href=#208 id=208 data-nosnippet>208</a>            SANGW =&gt; <span class="self">self</span>.op_sangw()<span class="question-mark">?</span>,
+<a href=#209 id=209 data-nosnippet>209</a>            <span class="comment">// Unsupported instruction, do nothing
+<a href=#210 id=210 data-nosnippet>210</a>            </span>AA =&gt; {}
+<a href=#211 id=211 data-nosnippet>211</a>            FLIPPT =&gt; <span class="self">self</span>.op_flippt()<span class="question-mark">?</span>,
+<a href=#212 id=212 data-nosnippet>212</a>            FLIPRGON =&gt; <span class="self">self</span>.op_fliprgon()<span class="question-mark">?</span>,
+<a href=#213 id=213 data-nosnippet>213</a>            FLIPRGOFF =&gt; <span class="self">self</span>.op_fliprgoff()<span class="question-mark">?</span>,
+<a href=#214 id=214 data-nosnippet>214</a>            <span class="comment">// UNUSED: 0x83 | 0x84
+<a href=#215 id=215 data-nosnippet>215</a>            </span>SCANCTRL =&gt; <span class="self">self</span>.op_scanctrl()<span class="question-mark">?</span>,
+<a href=#216 id=216 data-nosnippet>216</a>            SDPVTL0 | SDPVTL1 =&gt; <span class="self">self</span>.op_sdpvtl(raw_opcode)<span class="question-mark">?</span>,
+<a href=#217 id=217 data-nosnippet>217</a>            GETINFO =&gt; <span class="self">self</span>.op_getinfo()<span class="question-mark">?</span>,
+<a href=#218 id=218 data-nosnippet>218</a>            IDEF =&gt; <span class="self">self</span>.op_idef()<span class="question-mark">?</span>,
+<a href=#219 id=219 data-nosnippet>219</a>            ROLL =&gt; <span class="self">self</span>.op_roll()<span class="question-mark">?</span>,
+<a href=#220 id=220 data-nosnippet>220</a>            MAX =&gt; <span class="self">self</span>.op_max()<span class="question-mark">?</span>,
+<a href=#221 id=221 data-nosnippet>221</a>            MIN =&gt; <span class="self">self</span>.op_min()<span class="question-mark">?</span>,
+<a href=#222 id=222 data-nosnippet>222</a>            SCANTYPE =&gt; <span class="self">self</span>.op_scantype()<span class="question-mark">?</span>,
+<a href=#223 id=223 data-nosnippet>223</a>            INSTCTRL =&gt; <span class="self">self</span>.op_instctrl()<span class="question-mark">?</span>,
+<a href=#224 id=224 data-nosnippet>224</a>            <span class="comment">// UNUSED: 0x8F | 0x90 (ADJUST?)
+<a href=#225 id=225 data-nosnippet>225</a>            </span>GETVARIATION =&gt; <span class="self">self</span>.op_getvariation()<span class="question-mark">?</span>,
+<a href=#226 id=226 data-nosnippet>226</a>            GETDATA =&gt; <span class="self">self</span>.op_getdata()<span class="question-mark">?</span>,
+<a href=#227 id=227 data-nosnippet>227</a>            <span class="kw">_ </span>=&gt; {
+<a href=#228 id=228 data-nosnippet>228</a>                <span class="comment">// FreeType handles MIRP, MDRP and pushes here.
+<a href=#229 id=229 data-nosnippet>229</a>                // &lt;https://gitlab.freedesktop.org/freetype/freetype/-/blob/57617782464411201ce7bbc93b086c1b4d7d84a5/src/truetype/ttinterp.c#L7629&gt;
+<a href=#230 id=230 data-nosnippet>230</a>                </span><span class="kw">if </span>opcode &gt;= MIRP00000 {
+<a href=#231 id=231 data-nosnippet>231</a>                    <span class="self">self</span>.op_mirp(raw_opcode)<span class="question-mark">?
+<a href=#232 id=232 data-nosnippet>232</a>                </span>} <span class="kw">else if </span>opcode &gt;= MDRP00000 {
+<a href=#233 id=233 data-nosnippet>233</a>                    <span class="self">self</span>.op_mdrp(raw_opcode)<span class="question-mark">?
+<a href=#234 id=234 data-nosnippet>234</a>                </span>} <span class="kw">else if </span>opcode &gt;= PUSHB000 {
+<a href=#235 id=235 data-nosnippet>235</a>                    <span class="self">self</span>.op_push(<span class="kw-2">&amp;</span>ins.inline_operands)<span class="question-mark">?</span>;
+<a href=#236 id=236 data-nosnippet>236</a>                } <span class="kw">else </span>{
+<a href=#237 id=237 data-nosnippet>237</a>                    <span class="kw">return </span><span class="self">self</span>.op_unknown(opcode <span class="kw">as </span>u8);
+<a href=#238 id=238 data-nosnippet>238</a>                }
+<a href=#239 id=239 data-nosnippet>239</a>            }
+<a href=#240 id=240 data-nosnippet>240</a>        }
+<a href=#241 id=241 data-nosnippet>241</a>        <span class="prelude-val">Ok</span>(())
+<a href=#242 id=242 data-nosnippet>242</a>    }
+<a href=#243 id=243 data-nosnippet>243</a>}</code></pre></div></section></main></body></html>
