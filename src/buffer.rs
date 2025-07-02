@@ -465,8 +465,7 @@ impl Buffer {
                 }
 
                 // Adjust scroll.vertical to be smaller by moving scroll.line forwards
-                //TODO: do we want to adjust it exactly to a layout line?
-                if line_i == self.scroll.line && layout_height < self.scroll.vertical {
+                if line_i == self.scroll.line && layout_height <= self.scroll.vertical {
                     self.scroll.line += 1;
                     self.scroll.vertical -= layout_height;
                 }
