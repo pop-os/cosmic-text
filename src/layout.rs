@@ -5,7 +5,7 @@ use core::fmt::Display;
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 
-use crate::{CacheKey, CacheKeyFlags, Color, math};
+use crate::{math, CacheKey, CacheKeyFlags, Color};
 
 /// A laid out glyph
 #[derive(Clone, Debug)]

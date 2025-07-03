@@ -13,8 +13,8 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use crate::fallback::FontFallbackIter;
 use crate::{
-    Align, AttrsList, CacheKeyFlags, Color, Font, FontSystem, LayoutGlyph, LayoutLine, Metrics,
-    Wrap, math,
+    math, Align, AttrsList, CacheKeyFlags, Color, Font, FontSystem, LayoutGlyph, LayoutLine,
+    Metrics, Wrap,
 };
 
 /// The shaping strategy of some text.
