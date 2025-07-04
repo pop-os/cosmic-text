@@ -89,7 +89,7 @@ pub struct FontSystem {
     db: fontdb::Database,
 
     /// Cache for loaded fonts from the database.
-    font_cache: HashMap<fontdb::ID, Option<Arc<Font>>>,
+    font_cache: HashMap<(fontdb::ID, fontdb::Weight), Option<Arc<Font>>>,
 
     /// Sorted unique ID's of all Monospace fonts in DB
     monospace_font_ids: Vec<fontdb::ID>,
@@ -249,16 +249,16 @@ impl FontSystem {
         (self.locale, self.db)
     }
 
-    /// Get a font by its ID.
-    pub fn get_font(&mut self, id: fontdb::ID) -> Option<Arc<Font>> {
+    /// Get a font by its ID and weight.
+    pub fn get_font(&mut self, id: fontdb::ID, weight: fontdb::Weight) -> Option<Arc<Font>> {
         self.font_cache
-            .entry(id)
+            .entry((id, weight))
             .or_insert_with(|| {
                 #[cfg(feature = "std")]
                 unsafe {
                     self.db.make_shared_face_data(id);
                 }
-                match Font::new(&self.db, id) {
+                match Font::new(&self.db, id, weight) {
                     Some(font) => Some(Arc::new(font)),
                     None => {
                         log::warn!(
@@ -293,9 +293,10 @@ impl FontSystem {
     pub fn get_font_supported_codepoints_in_word(
         &mut self,
         id: fontdb::ID,
+        weight: fontdb::Weight,
         word: &str,
     ) -> Option<usize> {
-        self.get_font(id).map(|font| {
+        self.get_font(id, weight).map(|font| {
             let code_points = font.unicode_codepoints();
             let cache = self
                 .font_codepoint_support_info_cache

@@ -110,7 +110,7 @@ impl Font {
 }
 
 impl Font {
-    pub fn new(db: &fontdb::Database, id: fontdb::ID) -> Option<Self> {
+    pub fn new(db: &fontdb::Database, id: fontdb::ID, weight: fontdb::Weight) -> Option<Self> {
         let info = db.face(id)?;
 
         let monospace_fallback = if cfg!(feature = "monospace_fallback") {
@@ -186,7 +186,19 @@ impl Font {
                 (swash.offset, swash.key)
             },
             rustybuzz: OwnedFace::try_new(Arc::clone(&data), |data| {
-                RustybuzzFace::from_slice((**data).as_ref(), info.index).ok_or(())
+                RustybuzzFace::from_slice((**data).as_ref(), info.index)
+                    .ok_or(())
+                    .map(|mut face| {
+                        if let Some(axis) = face
+                            .variation_axes()
+                            .into_iter()
+                            .find(|axis| axis.tag == ttf_parser::Tag::from_bytes(b"wght"))
+                        {
+                            let wght = (weight.0 as f32).clamp(axis.min_value, axis.max_value);
+                            let _ = face.set_variation(ttf_parser::Tag::from_bytes(b"wght"), wght);
+                        }
+                        face
+                    })
             })
             .ok()?,
             #[cfg(not(feature = "peniko"))]
