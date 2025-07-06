@@ -9,6 +9,8 @@ bitflags::bitflags! {
         const FAKE_ITALIC = 1;
         /// Disable hinting
         const DISABLE_HINTING = 2;
+        /// Render as a pixel font
+        const PIXEL_FONT = 4;
     }
 }
 
