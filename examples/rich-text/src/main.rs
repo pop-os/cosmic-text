@@ -24,6 +24,7 @@ fn set_buffer_text(buffer: &mut BorrowedWithFontSystem<'_, Buffer>) {
     let serif_attrs = attrs.clone().family(Family::Serif);
     let mono_attrs = attrs.clone().family(Family::Monospace);
     let comic_attrs = attrs.clone().family(Family::Name("Comic Neue"));
+    let inter_attrs = attrs.clone().family(Family::Name("Inter Variable"));
 
     let spans: &[(&str, Attrs)] = &[
         (
@@ -128,6 +129,21 @@ fn set_buffer_text(buffer: &mut BorrowedWithFontSystem<'_, Buffer>) {
                 .clone()
                 .cache_key_flags(CacheKeyFlags::DISABLE_HINTING),
         ),
+        (
+            "Inter Variable: 400 ",
+            inter_attrs.clone().weight(Weight(400)),
+        ),
+        ("200 ", inter_attrs.clone().weight(Weight(200))),
+        ("250 ", inter_attrs.clone().weight(Weight(250))),
+        ("300\n", inter_attrs.clone().weight(Weight(300))),
+        (
+            "Inter Variable Italic: 400 ",
+            inter_attrs.clone().weight(Weight(400)).style(Style::Italic),
+        ),
+        (
+            "800",
+            inter_attrs.clone().weight(Weight(800)).style(Style::Italic),
+        ),
     ];
 
     buffer.set_rich_text(
@@ -146,6 +162,12 @@ fn main() {
     let context = softbuffer::Context::new(window.clone()).unwrap();
     let mut surface = softbuffer::Surface::new(&context, window.clone()).unwrap();
     let mut font_system = FontSystem::new();
+    let inter_variable = include_bytes!("../../../fonts/InterVariable.ttf");
+    font_system.db_mut().load_font_data(inter_variable.to_vec());
+    let inter_variable_italic = include_bytes!("../../../fonts/InterVariable-Italic.ttf");
+    font_system
+        .db_mut()
+        .load_font_data(inter_variable_italic.to_vec());
     let mut swash_cache = SwashCache::new();
 
     let mut display_scale = window.scale_factor() as f32;
