@@ -713,8 +713,14 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                         required_indent = tab_width;
                     }
 
+                    // Without selection, insert tab at cursor position
+                    let cursor_to_use = match self.selection {
+                         Selection::None => self.cursor,
+                        _ => Cursor::new(line_i, after_whitespace),
+                    };
+
                     self.insert_at(
-                        Cursor::new(line_i, after_whitespace),
+                        cursor_to_use,
                         &" ".repeat(required_indent),
                         None,
                     );
