@@ -46,7 +46,14 @@ fn swash_image(
 
     // Compute the fractional offset-- you'll likely want to quantize this
     // in a real renderer
-    let offset = Vector::new(cache_key.x_bin.as_float(), cache_key.y_bin.as_float());
+    let offset = if cache_key.flags.contains(CacheKeyFlags::PIXEL_FONT) {
+        Vector::new(
+            cache_key.x_bin.as_float().round() + 1.0,
+            cache_key.y_bin.as_float().round(),
+        )
+    } else {
+        Vector::new(cache_key.x_bin.as_float(), cache_key.y_bin.as_float())
+    };
 
     // Select our source order
     Render::new(&[
