@@ -697,30 +697,34 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                     self.with_buffer(|buffer| {
                         let line = &buffer.lines[line_i];
                         let text = line.text();
-                        // Default to end of line if no non-whitespace found
-                        after_whitespace = text.len();
-                        for (count, (index, c)) in text.char_indices().enumerate() {
-                            if !c.is_whitespace() {
-                                after_whitespace = index;
-                                required_indent = tab_width - (count % tab_width);
-                                break;
+
+                        if self.selection == Selection::None {
+                            //Selection::None counts whitespace from the cursor backwards
+                            let whitespace_length = match line.text()[0..self.cursor.index]
+                                .chars()
+                                .rev()
+                                .position(|c| !c.is_whitespace())
+                            {
+                                Some(length) => length,
+                                // The whole line is whitespace
+                                None => self.cursor.index,
+                            };
+                            required_indent = tab_width - (whitespace_length % tab_width);
+                            after_whitespace = self.cursor.index;
+                        } else {
+                            // Other selections count whitespace from  the start of the line
+                            for (count, (index, c)) in text.char_indices().enumerate() {
+                                if !c.is_whitespace() {
+                                    after_whitespace = index;
+                                    required_indent = tab_width - (count % tab_width);
+                                    break;
+                                }
                             }
                         }
                     });
 
-                    // No indent required (not possible?)
-                    if required_indent == 0 {
-                        required_indent = tab_width;
-                    }
-
-                    // Without selection, insert tab at cursor position
-                    let cursor_to_use = match self.selection {
-                         Selection::None => self.cursor,
-                        _ => Cursor::new(line_i, after_whitespace),
-                    };
-
                     self.insert_at(
-                        cursor_to_use,
+                        Cursor::new(line_i, after_whitespace),
                         &" ".repeat(required_indent),
                         None,
                     );
@@ -745,10 +749,9 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                             }
                         }
                     }
-
-                    // Request redraw
-                    self.with_buffer_mut(|buffer| buffer.set_redraw(true));
                 }
+                // Request redraw
+                self.with_buffer_mut(|buffer| buffer.set_redraw(true));
             }
             Action::Unindent => {
                 // Get start and end of selection
