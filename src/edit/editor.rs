@@ -697,21 +697,31 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                     self.with_buffer(|buffer| {
                         let line = &buffer.lines[line_i];
                         let text = line.text();
-                        // Default to end of line if no non-whitespace found
-                        after_whitespace = text.len();
-                        for (count, (index, c)) in text.char_indices().enumerate() {
-                            if !c.is_whitespace() {
-                                after_whitespace = index;
-                                required_indent = tab_width - (count % tab_width);
-                                break;
+
+                        if self.selection == Selection::None {
+                            //Selection::None counts whitespace from the cursor backwards
+                            let whitespace_length = match line.text()[0..self.cursor.index]
+                                .chars()
+                                .rev()
+                                .position(|c| !c.is_whitespace())
+                            {
+                                Some(length) => length,
+                                // The whole line is whitespace
+                                None => self.cursor.index,
+                            };
+                            required_indent = tab_width - (whitespace_length % tab_width);
+                            after_whitespace = self.cursor.index;
+                        } else {
+                            // Other selections count whitespace from  the start of the line
+                            for (count, (index, c)) in text.char_indices().enumerate() {
+                                if !c.is_whitespace() {
+                                    after_whitespace = index;
+                                    required_indent = tab_width - (count % tab_width);
+                                    break;
+                                }
                             }
                         }
                     });
-
-                    // No indent required (not possible?)
-                    if required_indent == 0 {
-                        required_indent = tab_width;
-                    }
 
                     self.insert_at(
                         Cursor::new(line_i, after_whitespace),
@@ -739,7 +749,6 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                             }
                         }
                     }
-
                     // Request redraw
                     self.with_buffer_mut(|buffer| buffer.set_redraw(true));
                 }
