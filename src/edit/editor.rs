@@ -749,8 +749,8 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                             }
                         }
                     }
-                // Request redraw
-                self.with_buffer_mut(|buffer| buffer.set_redraw(true));
+                    // Request redraw
+                    self.with_buffer_mut(|buffer| buffer.set_redraw(true));
                 }
             }
             Action::Unindent => {
