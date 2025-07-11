@@ -4,7 +4,7 @@ use alloc::collections::BTreeSet;
 use alloc::string::String;
 use alloc::sync::Arc;
 use alloc::vec::Vec;
-use core::fmt;
+use core::fmt::{self, Debug};
 use core::ops::{Deref, DerefMut};
 use fontdb::Query;
 
@@ -131,9 +131,198 @@ impl fmt::Debug for FontSystem {
     }
 }
 
+/// A builder for [`FontSystem`] with the following default configuration:
+///
+/// * Use the system locale on `std` or `en-US` on `no_std`
+/// * Load system fonts
+/// * Use `Noto Sans Mono` as the monospace family
+/// * Use `Open Sans` as the sans-serif family
+/// * Use `DejaVu Serif` as the serif family
+/// * Use a platform-specific font fallback
+///
+/// # Timing
+///
+/// When system fonts are loaded (The default under `std`) this function takes some time to
+/// run. On the release build, it can take up to a second, while debug builds can take up to
+/// ten times longer. For this reason, it should only be built once, and the resulting
+/// [`FontSystem`] should be shared.
+///
+/// # Examples
+///
+/// Basic usage:
+///
+/// ```no_run
+/// # macro_rules! include_bytes { ($e:expr) => {[]} }
+/// use std::sync::Arc;
+/// use cosmic_text::FontSystem;
+/// use cosmic_text::fontdb::Source;
+///
+/// let font = Source::Binary(Arc::new(include_bytes!("Roboto.ttf")));
+/// FontSystem::builder()
+///     .locale(Some("fr-FR"))
+///     .load_font(font)
+///     .build();
+/// ```
+pub struct FontSystemBuilder {
+    locale: Option<String>,
+    load_system_fonts: bool,
+    database: Option<fontdb::Database>,
+    fonts: Vec<fontdb::Source>,
+    monospace_family: String,
+    sans_serif_family: String,
+    serif_family: String,
+    dyn_fallback: Option<Box<dyn Fallback>>,
+}
+
+impl Debug for FontSystemBuilder {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("FontSystemBuilder")
+            .field("locale", &self.locale)
+            .field("load_system_fonts", &self.load_system_fonts)
+            .field("database", &self.database)
+            .field("fonts", &self.fonts)
+            .field("monospace_family", &self.monospace_family)
+            .field("sans_serif_family", &self.sans_serif_family)
+            .field("serif_family", &self.serif_family)
+            .finish()
+    }
+}
+
+impl FontSystemBuilder {
+    fn new() -> Self {
+        FontSystemBuilder {
+            locale: None,
+            load_system_fonts: true,
+            database: None,
+            fonts: Vec::new(),
+            monospace_family: String::from("Noto Sans Mono"),
+            sans_serif_family: String::from("Open Sans"),
+            serif_family: String::from("DejaVu Serif"),
+            dyn_fallback: None,
+        }
+    }
+
+    /// Consume the builder and create the [`FontSystem`]
+    pub fn build(self) -> FontSystem {
+        FontSystem::new_from_builder(self)
+    }
+
+    /// Specify the locale that will be used for font fallback or [`None`] for the default.
+    ///
+    /// Default: the system locale on `std` or `en-US` on `no_std`
+    pub fn locale(mut self, value: Option<impl Into<String>>) -> Self {
+        self.locale = value.map(|s| s.into());
+        self
+    }
+
+    /// Enable loading all system fonts
+    ///
+    /// Default: enabled
+    #[cfg(feature = "std")]
+    pub fn load_system_fonts(mut self, enabled: bool) -> Self {
+        self.load_system_fonts = enabled;
+        self
+    }
+
+    /// Use the specified font database instead of a new one.
+    ///
+    /// *Note*: The database will be modified when the [`FontSystem`] is build depending on the
+    /// configured options. To Start from an unchanged database use
+    /// [`FontSystem::new_with_locale_and_db`].
+    ///
+    pub fn database(mut self, value: Option<fontdb::Database>) -> Self {
+        self.database = value;
+        self
+    }
+
+    /// Load an additional font
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// # macro_rules! include_bytes { ($e:expr) => {[]} }
+    /// use std::sync::Arc;
+    /// use cosmic_text::FontSystem;
+    /// use cosmic_text::fontdb::Source;
+    ///
+    /// FontSystem::builder()
+    ///     .load_font(Source::Binary(Arc::new(include_bytes!("Roboto-Regular.ttf"))))
+    ///     .load_font(Source::File("./Roboto-Bold.ttf".into()))
+    ///     .build();
+    /// ```
+    pub fn load_font(mut self, source: fontdb::Source) -> Self {
+        self.fonts.push(source);
+        self
+    }
+
+    /// Load additional fonts
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// # macro_rules! include_bytes { ($e:expr) => {[]} }
+    /// use std::sync::Arc;
+    /// use cosmic_text::FontSystem;
+    /// use cosmic_text::fontdb::Source;
+    ///
+    /// FontSystem::builder()
+    ///     .load_fonts([
+    ///         Source::Binary(Arc::new(include_bytes!("Roboto-Regular.ttf"))),
+    ///         Source::File("./Roboto-Bold.ttf".into())
+    ///     ])
+    ///     .build();
+    /// ```
+    pub fn load_fonts(mut self, sources: impl IntoIterator<Item = fontdb::Source>) -> Self {
+        for source in sources.into_iter() {
+            self.fonts.push(source);
+        }
+        self
+    }
+
+    /// Sets the family that will be used by `Family::Monospace`.
+    ///
+    /// Default: `Fira Mono`
+    pub fn monospace_family(mut self, value: impl Into<String>) -> Self {
+        self.monospace_family = value.into();
+        self
+    }
+
+    /// Sets the family that will be used by `Family::SansSerif`.
+    ///
+    /// Default: `Fira Sans`
+    pub fn sans_serif_family(mut self, value: impl Into<String>) -> Self {
+        self.sans_serif_family = value.into();
+        self
+    }
+
+    /// Sets the family that will be used by `Family::Serif`.
+    ///
+    /// Default: `DejaVu Serif`
+    pub fn serif_family(mut self, value: impl Into<String>) -> Self {
+        self.serif_family = value.into();
+        self
+    }
+
+    /// Sets the font fallback implementation
+    ///
+    /// Default: [PlatformFallback]
+    pub fn dyn_fallback(mut self, fallback: Option<Box<dyn Fallback>>) -> Self {
+        self.dyn_fallback = fallback;
+        self
+    }
+
+    /// Sets the font fallback implementation
+    ///
+    /// Default: [PlatformFallback]
+    pub fn fallback(self, fallback: impl Fallback + 'static) -> Self {
+        self.dyn_fallback(Some(Box::new(fallback)))
+    }
+}
+
 impl FontSystem {
     const FONT_MATCHES_CACHE_SIZE_LIMIT: usize = 256;
-    /// Create a new [`FontSystem`], that allows access to any installed system fonts
+
+    /// Create a new [`FontSystem`], that allows access to any installed system fonts.
     ///
     /// # Timing
     ///
@@ -141,31 +330,25 @@ impl FontSystem {
     /// while debug builds can take up to ten times longer. For this reason, it should only be
     /// called once, and the resulting [`FontSystem`] should be shared.
     pub fn new() -> Self {
-        Self::new_with_fonts(core::iter::empty())
+        Self::builder().build()
     }
 
-    /// Create a new [`FontSystem`] with a pre-specified set of fonts.
+    /// Create a new [`FontSystem`] with a pre-specified set of fonts and access to any installed
+    /// system fonts.
+    ///
+    /// # Timing
+    ///
+    /// This function takes some time to run. On the release build, it can take up to a second,
+    /// while debug builds can take up to ten times longer. For this reason, it should only be
+    /// called once, and the resulting [`FontSystem`] should be shared.
     pub fn new_with_fonts(fonts: impl IntoIterator<Item = fontdb::Source>) -> Self {
-        let locale = Self::get_locale();
-        log::debug!("Locale: {}", locale);
-
-        let mut db = fontdb::Database::new();
-
-        Self::load_fonts(&mut db, fonts.into_iter());
-
-        //TODO: configurable default fonts
-        db.set_monospace_family("Noto Sans Mono");
-        db.set_sans_serif_family("Open Sans");
-        db.set_serif_family("DejaVu Serif");
-
-        Self::new_with_locale_and_db_and_fallback(locale, db, PlatformFallback)
+        Self::builder().load_fonts(fonts).build()
     }
 
-    /// Create a new [`FontSystem`] with a pre-specified locale, font database and font fallback list.
-    pub fn new_with_locale_and_db_and_fallback(
+    fn new_with_locale_and_db_and_dyn_fallback(
         locale: String,
         db: fontdb::Database,
-        impl_fallback: impl Fallback + 'static,
+        dyn_fallback: Box<dyn Fallback>,
     ) -> Self {
         let mut monospace_font_ids = db
             .faces()
@@ -204,7 +387,7 @@ impl FontSystem {
             .map(|(k, v)| (k, Vec::from_iter(v)))
             .collect();
 
-        let fallbacks = Fallbacks::new(&impl_fallback, &[], &locale);
+        let fallbacks = Fallbacks::new(&*dyn_fallback, &[], &locale);
 
         Self {
             locale,
@@ -218,14 +401,88 @@ impl FontSystem {
             #[cfg(feature = "shape-run-cache")]
             shape_run_cache: crate::ShapeRunCache::default(),
             shape_buffer: ShapeBuffer::default(),
-            dyn_fallback: Box::new(impl_fallback),
+            dyn_fallback,
             fallbacks,
         }
     }
 
+    /// Create a new [`FontSystem`] with a pre-specified locale, font database and font fallback list.
+    pub fn new_with_locale_and_db_and_fallback(
+        locale: String,
+        db: fontdb::Database,
+        impl_fallback: impl Fallback + 'static,
+    ) -> Self {
+        Self::builder()
+            .locale(Some(locale))
+            .database(Some(db))
+            .fallback(impl_fallback)
+            .build()
+    }
+
     /// Create a new [`FontSystem`] with a pre-specified locale and font database.
     pub fn new_with_locale_and_db(locale: String, db: fontdb::Database) -> Self {
-        Self::new_with_locale_and_db_and_fallback(locale, db, PlatformFallback)
+        Self::builder()
+            .locale(Some(locale))
+            .database(Some(db))
+            .build()
+    }
+
+    /// Create builder for [`FontSystem`] with the following default configuration:
+    ///
+    /// * Use the system locale on `std` or `en-US` on `no_std`
+    /// * Load system fonts
+    /// * Use `Fira Mono` as the monospace family
+    /// * Use `Fira Sans` as the sans-serif family
+    /// * Use `DejaVu Serif` as the serif family
+    ///
+    /// # Timing
+    ///
+    /// When system fonts are loaded (The default under `std`) this function takes some time to
+    /// run. On the release build, it can take up to a second, while debug builds can take up to
+    /// ten times longer. For this reason, it should only be built once, and the resulting
+    /// [`FontSystem`] should be shared.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```no_run
+    /// # macro_rules! include_bytes { ($e:expr) => {[]} }
+    /// use std::sync::Arc;
+    /// use cosmic_text::FontSystem;
+    /// use cosmic_text::fontdb::Source;
+    ///
+    /// let font = Source::Binary(Arc::new(include_bytes!("Roboto.ttf")));
+    /// FontSystem::builder()
+    ///     .locale(Some("fr-FR"))
+    ///     .load_font(font)
+    ///     .build();
+    /// ```
+    pub fn builder() -> FontSystemBuilder {
+        FontSystemBuilder::new()
+    }
+
+    fn new_from_builder(builder: FontSystemBuilder) -> FontSystem {
+        let locale = builder.locale.unwrap_or_else(|| Self::get_locale());
+        log::debug!("Locale: {}", locale);
+
+        let mut db = builder.database.unwrap_or_else(|| fontdb::Database::new());
+
+        Self::load_fonts(
+            &mut db,
+            builder.fonts.into_iter(),
+            builder.load_system_fonts,
+        );
+
+        db.set_monospace_family(builder.monospace_family);
+        db.set_sans_serif_family(builder.sans_serif_family);
+        db.set_serif_family(builder.serif_family);
+
+        let dyn_fallback = builder
+            .dyn_fallback
+            .unwrap_or_else(|| Box::new(PlatformFallback));
+
+        Self::new_with_locale_and_db_and_dyn_fallback(locale, db, dyn_fallback)
     }
 
     /// Get the locale.
@@ -392,11 +649,17 @@ impl FontSystem {
     }
 
     #[cfg(feature = "std")]
-    fn load_fonts(db: &mut fontdb::Database, fonts: impl Iterator<Item = fontdb::Source>) {
+    fn load_fonts(
+        db: &mut fontdb::Database,
+        fonts: impl Iterator<Item = fontdb::Source>,
+        load_system_fonts: bool,
+    ) {
         #[cfg(not(target_arch = "wasm32"))]
         let now = std::time::Instant::now();
 
-        db.load_system_fonts();
+        if load_system_fonts {
+            db.load_system_fonts();
+        }
 
         for source in fonts {
             db.load_font_source(source);
@@ -411,7 +674,11 @@ impl FontSystem {
     }
 
     #[cfg(not(feature = "std"))]
-    fn load_fonts(db: &mut fontdb::Database, fonts: impl Iterator<Item = fontdb::Source>) {
+    fn load_fonts(
+        db: &mut fontdb::Database,
+        fonts: impl Iterator<Item = fontdb::Source>,
+        _load_system_fonts: bool,
+    ) {
         for source in fonts {
             db.load_font_source(source);
         }
