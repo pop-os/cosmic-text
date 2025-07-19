@@ -1414,7 +1414,13 @@ impl Buffer {
     ) where
         F: FnMut(i32, i32, u32, u32, Color),
     {
-        self.draw_impl(font_system, cache, color, f, Some((outline_size, outline_color)));
+        self.draw_impl(
+            font_system,
+            cache,
+            color,
+            f,
+            Some((outline_size, outline_color)),
+        );
     }
 }
 
@@ -1547,6 +1553,13 @@ impl BorrowedWithFontSystem<'_, Buffer> {
     ) where
         F: FnMut(i32, i32, u32, u32, Color),
     {
-        self.inner.draw_outlined(self.font_system, cache, color, f, outline_size, outline_color);
+        self.inner.draw_outlined(
+            self.font_system,
+            cache,
+            color,
+            f,
+            outline_size,
+            outline_color,
+        );
     }
 }
