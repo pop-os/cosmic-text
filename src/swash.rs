@@ -206,7 +206,7 @@ impl SwashCache {
                             f(
                                 x + off_x,
                                 y + off_y,
-                                Color(((image.data[i] as u32) << 24) | base.0 & 0xFF_FF_FF),
+                                base.with_replaced_a(image.data[i])
                             );
                             i += 1;
                         }
