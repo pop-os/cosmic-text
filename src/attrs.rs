@@ -30,38 +30,44 @@ impl Color {
 
     /// Get a tuple over all of the attributes, in `(r, g, b, a)` order.
     #[inline]
-    pub fn as_rgba_tuple(self) -> (u8, u8, u8, u8) {
+    pub const fn as_rgba_tuple(self) -> (u8, u8, u8, u8) {
         (self.r(), self.g(), self.b(), self.a())
     }
 
     /// Get an array over all of the components, in `[r, g, b, a]` order.
     #[inline]
-    pub fn as_rgba(self) -> [u8; 4] {
+    pub const fn as_rgba(self) -> [u8; 4] {
         [self.r(), self.g(), self.b(), self.a()]
     }
 
     /// Get the red component
     #[inline]
-    pub fn r(&self) -> u8 {
+    pub const fn r(&self) -> u8 {
         ((self.0 & 0x00_FF_00_00) >> 16) as u8
     }
 
     /// Get the green component
     #[inline]
-    pub fn g(&self) -> u8 {
+    pub const fn g(&self) -> u8 {
         ((self.0 & 0x00_00_FF_00) >> 8) as u8
     }
 
     /// Get the blue component
     #[inline]
-    pub fn b(&self) -> u8 {
+    pub const fn b(&self) -> u8 {
         (self.0 & 0x00_00_00_FF) as u8
     }
 
     /// Get the alpha component
     #[inline]
-    pub fn a(&self) -> u8 {
+    pub const fn a(&self) -> u8 {
         ((self.0 & 0xFF_00_00_00) >> 24) as u8
+    }
+
+    /// Get with a new value for the alpha component
+    #[inline]
+    pub(crate) const fn with_replaced_a(self, a: u8) -> Self {
+        Self(((a as u32) << 24) | self.0 & 0xFF_FF_FF)
     }
 }
 
