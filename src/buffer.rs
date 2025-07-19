@@ -1353,6 +1353,10 @@ impl Buffer {
                         physical_glyph.cache_key,
                         glyph_color,
                         |x, y, color| {
+                            if color.a() < 200 {
+                                return;
+                            }
+
                             let x = physical_glyph.x + x;
                             let y = run.line_y as i32 + physical_glyph.y + y;
 
