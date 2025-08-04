@@ -628,36 +628,54 @@ impl ShapeWord {
 
         let span_rtl = level.is_rtl();
 
-        let mut start_run = word_range.start;
-        let mut attrs = attrs_list.defaults();
-        for (egc_i, _egc) in word.grapheme_indices(true) {
-            let start_egc = word_range.start + egc_i;
-            let attrs_egc = attrs_list.get_span(start_egc);
-            if !attrs.compatible(&attrs_egc) {
+        // Fast path optimization: For simple ASCII words, skip expensive grapheme iteration
+        let is_simple_ascii =
+            word.is_ascii() && !word.chars().any(|c| c.is_ascii_control() && c != '\t');
+
+        if is_simple_ascii && !word.is_empty() {
+            let attrs = attrs_list.defaults();
+            shaping.run(
+                &mut glyphs,
+                font_system,
+                line,
+                attrs_list,
+                word_range.start,
+                word_range.end,
+                span_rtl,
+            );
+        } else {
+            // Complex text path: Full grapheme iteration and attribute processing
+            let mut start_run = word_range.start;
+            let mut attrs = attrs_list.defaults();
+            for (egc_i, _egc) in word.grapheme_indices(true) {
+                let start_egc = word_range.start + egc_i;
+                let attrs_egc = attrs_list.get_span(start_egc);
+                if !attrs.compatible(&attrs_egc) {
+                    shaping.run(
+                        &mut glyphs,
+                        font_system,
+                        line,
+                        attrs_list,
+                        start_run,
+                        start_egc,
+                        span_rtl,
+                    );
+
+                    start_run = start_egc;
+                    attrs = attrs_egc;
+                }
+            }
+            if start_run < word_range.end {
                 shaping.run(
                     &mut glyphs,
                     font_system,
                     line,
                     attrs_list,
                     start_run,
-                    start_egc,
+                    word_range.end,
                     span_rtl,
                 );
-
-                start_run = start_egc;
-                attrs = attrs_egc;
             }
-        }
-        if start_run < word_range.end {
-            shaping.run(
-                &mut glyphs,
-                font_system,
-                line,
-                attrs_list,
-                start_run,
-                word_range.end,
-                span_rtl,
-            );
         }
 
         self.blank = blank;
