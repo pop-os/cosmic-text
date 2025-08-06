@@ -5,10 +5,12 @@ use alloc::{string::String, vec::Vec};
 use core::{cmp, fmt};
 use unicode_segmentation::UnicodeSegmentation;
 
+#[cfg(feature = "swash")]
+use crate::Color;
 use crate::{
-    Affinity, Align, Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem, BufferLine, Color,
-    Cursor, FontSystem, LayoutCursor, LayoutGlyph, LayoutLine, LineEnding, LineIter, Motion,
-    Scroll, ShapeLine, Shaping, Wrap,
+    Affinity, Align, Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem, BufferLine, Cursor,
+    FontSystem, LayoutCursor, LayoutGlyph, LayoutLine, LineEnding, LineIter, Motion, Scroll,
+    ShapeLine, Shaping, Wrap,
 };
 
 /// A line of visible text for rendering
