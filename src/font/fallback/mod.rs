@@ -454,7 +454,7 @@ impl<'a> FontFallbackIter<'a> {
                     }
                 }
             }
-            log::debug!("failed to find family '{}'", common_family);
+            log::debug!("failed to find family '{common_family}'");
         }
 
         //TODO: do we need to do this?

@@ -147,7 +147,7 @@ impl FontSystem {
     /// Create a new [`FontSystem`] with a pre-specified set of fonts.
     pub fn new_with_fonts(fonts: impl IntoIterator<Item = fontdb::Source>) -> Self {
         let locale = Self::get_locale();
-        log::debug!("Locale: {}", locale);
+        log::debug!("Locale: {locale}");
 
         let mut db = fontdb::Database::new();
 
@@ -370,7 +370,7 @@ impl FontSystem {
                 #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
                 {
                     let elapsed = now.elapsed();
-                    log::debug!("font matches for {:?} in {:?}", attrs, elapsed);
+                    log::debug!("font matches for {attrs:?} in {elapsed:?}");
                 }
 
                 Arc::new(font_match_keys)
