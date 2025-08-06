@@ -18,7 +18,7 @@ pub enum LineEnding {
 
 impl LineEnding {
     /// Get the line ending as a str
-    pub fn as_str(&self) -> &'static str {
+    pub const fn as_str(&self) -> &'static str {
         match self {
             Self::Lf => "\n",
             Self::CrLf => "\r\n",
@@ -39,7 +39,7 @@ pub struct LineIter<'a> {
 
 impl<'a> LineIter<'a> {
     /// Create an iterator of lines in a string slice
-    pub fn new(string: &'a str) -> Self {
+    pub const fn new(string: &'a str) -> Self {
         Self {
             string,
             start: 0,
@@ -61,9 +61,9 @@ impl Iterator for LineIter<'_> {
                     LineEnding::CrLf
                 } else if after.starts_with("\n\r") {
                     LineEnding::LfCr
-                } else if after.starts_with("\n") {
+                } else if after.starts_with('\n') {
                     LineEnding::Lf
-                } else if after.starts_with("\r") {
+                } else if after.starts_with('\r') {
                     LineEnding::Cr
                 } else {
                     //TODO: this should not be possible

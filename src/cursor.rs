@@ -43,7 +43,7 @@ impl Affinity {
         *self == Self::After
     }
 
-    pub fn from_before(before: bool) -> Self {
+    pub const fn from_before(before: bool) -> Self {
         if before {
             Self::Before
         } else {
@@ -51,7 +51,7 @@ impl Affinity {
         }
     }
 
-    pub fn from_after(after: bool) -> Self {
+    pub const fn from_after(after: bool) -> Self {
         if after {
             Self::After
         } else {

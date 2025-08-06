@@ -27,16 +27,16 @@ impl Fallback for PlatformFallback {
 }
 
 // Fallbacks to use after any script specific fallbacks
-fn common_fallback() -> &'static [&'static str] {
+const fn common_fallback() -> &'static [&'static str] {
     &[]
 }
 
 // Fallbacks to never use
-fn forbidden_fallback() -> &'static [&'static str] {
+const fn forbidden_fallback() -> &'static [&'static str] {
     &[]
 }
 
 // Fallbacks to use per script
-fn script_fallback(_script: Script, _locale: &str) -> &'static [&'static str] {
+const fn script_fallback(_script: Script, _locale: &str) -> &'static [&'static str] {
     &[]
 }
