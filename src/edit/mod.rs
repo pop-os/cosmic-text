@@ -130,7 +130,7 @@ impl Change {
     // Reverse change (in place)
     pub fn reverse(&mut self) {
         self.items.reverse();
-        for item in self.items.iter_mut() {
+        for item in &mut self.items {
             item.reverse();
         }
     }
@@ -192,7 +192,7 @@ pub trait Edit<'buffer> {
 
     /// Get the [`Buffer`] redraw flag
     fn redraw(&self) -> bool {
-        self.with_buffer(|buffer| buffer.redraw())
+        self.with_buffer(super::buffer::Buffer::redraw)
     }
 
     /// Set the [`Buffer`] redraw flag
@@ -273,7 +273,7 @@ pub trait Edit<'buffer> {
                             .unicode_word_indices()
                             .map(|(i, word)| i + word.len())
                             .find(|&i| i > end.index)
-                            .unwrap_or(line.text().len());
+                            .unwrap_or_else(|| line.text().len());
                     }
 
                     Some((start, end))

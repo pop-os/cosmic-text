@@ -102,7 +102,7 @@ impl SubpixelBin {
         }
     }
 
-    pub fn as_float(&self) -> f32 {
+    pub const fn as_float(&self) -> f32 {
         match self {
             Self::Zero => 0.0,
             Self::One => 0.25,

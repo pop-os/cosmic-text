@@ -17,12 +17,9 @@ fn swash_image(
     context: &mut ScaleContext,
     cache_key: CacheKey,
 ) -> Option<SwashImage> {
-    let font = match font_system.get_font(cache_key.font_id, cache_key.font_weight) {
-        Some(some) => some,
-        None => {
-            log::warn!("did not find font {:?}", cache_key.font_id);
-            return None;
-        }
+    let Some(font) = font_system.get_font(cache_key.font_id, cache_key.font_weight) else {
+        log::warn!("did not find font {:?}", cache_key.font_id);
+        return None;
     };
 
     let variable_width = font
@@ -38,7 +35,7 @@ fn swash_image(
     if let Some(variation) = variable_width {
         scaler = scaler.variations(std::iter::once(swash::Setting {
             tag: swash::Tag::from_be_bytes(*b"wght"),
-            value: (cache_key.font_weight.0 as f32)
+            value: f32::from(cache_key.font_weight.0)
                 .clamp(variation.min_value(), variation.max_value()),
         }));
     }
@@ -87,12 +84,9 @@ fn swash_outline_commands(
 ) -> Option<Box<[swash::zeno::Command]>> {
     use swash::zeno::PathData as _;
 
-    let font = match font_system.get_font(cache_key.font_id, cache_key.font_weight) {
-        Some(some) => some,
-        None => {
-            log::warn!("did not find font {:?}", cache_key.font_id);
-            return None;
-        }
+    let Some(font) = font_system.get_font(cache_key.font_id, cache_key.font_weight) else {
+        log::warn!("did not find font {:?}", cache_key.font_id);
+        return None;
     };
 
     // Build the scaler
@@ -206,7 +200,7 @@ impl SwashCache {
                             f(
                                 x + off_x,
                                 y + off_y,
-                                Color(((image.data[i] as u32) << 24) | base.0 & 0xFF_FF_FF),
+                                Color((u32::from(image.data[i]) << 24) | base.0 & 0xFF_FF_FF),
                             );
                             i += 1;
                         }
