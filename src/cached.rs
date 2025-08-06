@@ -11,7 +11,7 @@ pub enum Cached<T: Clone + Debug> {
 
 impl<T: Clone + Debug> Cached<T> {
     /// Gets the value if in state `Self::Used`.
-    pub fn get(&self) -> Option<&T> {
+    pub const fn get(&self) -> Option<&T> {
         match self {
             Self::Empty | Self::Unused(_) => None,
             Self::Used(t) => Some(t),
@@ -27,7 +27,7 @@ impl<T: Clone + Debug> Cached<T> {
     }
 
     /// Checks if the value is empty or unused.
-    pub fn is_unused(&self) -> bool {
+    pub const fn is_unused(&self) -> bool {
         match self {
             Self::Empty | Self::Unused(_) => true,
             Self::Used(_) => false,
@@ -35,7 +35,7 @@ impl<T: Clone + Debug> Cached<T> {
     }
 
     /// Checks if the value is used (i.e. cached for access).
-    pub fn is_used(&self) -> bool {
+    pub const fn is_used(&self) -> bool {
         match self {
             Self::Empty | Self::Unused(_) => false,
             Self::Used(_) => true,

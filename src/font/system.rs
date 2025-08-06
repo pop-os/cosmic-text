@@ -127,7 +127,7 @@ impl fmt::Debug for FontSystem {
         f.debug_struct("FontSystem")
             .field("locale", &self.locale)
             .field("db", &self.db)
-            .finish()
+            .finish_non_exhaustive()
     }
 }
 
@@ -180,7 +180,7 @@ impl FontSystem {
             HashMap::default();
 
         if cfg!(feature = "monospace_fallback") {
-            monospace_font_ids.iter().for_each(|&id| {
+            for &id in &monospace_font_ids {
                 db.with_face_data(id, |font_data, face_index| {
                     let _ = ttf_parser::Face::parse(font_data, face_index).map(|face| {
                         face.tables()
@@ -196,7 +196,7 @@ impl FontSystem {
                             })
                     });
                 });
-            });
+            }
         }
 
         let per_script_monospace_font_ids = per_script_monospace_font_ids
@@ -211,9 +211,9 @@ impl FontSystem {
             db,
             monospace_font_ids,
             per_script_monospace_font_ids,
-            font_cache: Default::default(),
-            font_matches_cache: Default::default(),
-            font_codepoint_support_info_cache: Default::default(),
+            font_cache: HashMap::default(),
+            font_matches_cache: HashMap::default(),
+            font_codepoint_support_info_cache: HashMap::default(),
             monospace_fallbacks_buffer: BTreeSet::default(),
             #[cfg(feature = "shape-run-cache")]
             shape_run_cache: crate::ShapeRunCache::default(),
@@ -234,7 +234,7 @@ impl FontSystem {
     }
 
     /// Get the database.
-    pub fn db(&self) -> &fontdb::Database {
+    pub const fn db(&self) -> &fontdb::Database {
         &self.db
     }
 
@@ -258,15 +258,14 @@ impl FontSystem {
                 unsafe {
                     self.db.make_shared_face_data(id);
                 }
-                match Font::new(&self.db, id, weight) {
-                    Some(font) => Some(Arc::new(font)),
-                    None => {
-                        log::warn!(
-                            "failed to load font '{}'",
-                            self.db.face(id)?.post_script_name
-                        );
-                        None
-                    }
+                if let Some(font) = Font::new(&self.db, id, weight) {
+                    Some(Arc::new(font))
+                } else {
+                    log::warn!(
+                        "failed to load font '{}'",
+                        self.db.face(id)?.post_script_name
+                    );
+                    None
                 }
             })
             .clone()
