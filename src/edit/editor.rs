@@ -1,21 +1,24 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+#[cfg(not(feature = "std"))]
+use alloc::{
+    string::{String, ToString},
+    vec::Vec,
+};
+
+#[cfg(feature = "swash")]
+use std::cmp;
+
+use core::iter::once;
+use unicode_segmentation::UnicodeSegmentation;
+
 #[cfg(feature = "swash")]
 use crate::Color;
 use crate::{
     Action, Attrs, AttrsList, BorrowedWithFontSystem, BufferLine, BufferRef, Change, ChangeItem,
     Cursor, Edit, FontSystem, LayoutRun, Selection, Shaping,
 };
-#[cfg(feature = "no_std")]
-use alloc::{
-    string::{String, ToString},
-    vec::Vec,
-};
-#[cfg(feature = "swash")]
-use std::cmp;
 
-use core::iter::once;
-use unicode_segmentation::UnicodeSegmentation;
 /// A wrapper of [`Buffer`] for easy editing
 #[derive(Debug, Clone)]
 pub struct Editor<'buffer> {
@@ -66,30 +69,24 @@ fn cursor_glyph_opt(cursor: &Cursor, run: &LayoutRun) -> Option<(usize, f32)> {
 
 fn cursor_position(cursor: &Cursor, run: &LayoutRun) -> Option<(i32, i32)> {
     let (cursor_glyph, cursor_glyph_offset) = cursor_glyph_opt(cursor, run)?;
-    let x = match run.glyphs.get(cursor_glyph) {
-        Some(glyph) => {
-            // Start of detected glyph
-            if glyph.level.is_rtl() {
-                (glyph.x + glyph.w - cursor_glyph_offset) as i32
-            } else {
-                (glyph.x + cursor_glyph_offset) as i32
-            }
-        }
-        None => match run.glyphs.last() {
-            Some(glyph) => {
-                // End of last glyph
+    let x = run.glyphs.get(cursor_glyph).map_or_else(
+        || {
+            run.glyphs.last().map_or(0, |glyph| {
                 if glyph.level.is_rtl() {
                     glyph.x as i32
                 } else {
                     (glyph.x + glyph.w) as i32
                 }
-            }
-            None => {
-                // Start of empty line
-                0
+            })
+        },
+        |glyph| {
+            if glyph.level.is_rtl() {
+                (glyph.x + glyph.w - cursor_glyph_offset) as i32
+            } else {
+                (glyph.x + cursor_glyph_offset) as i32
             }
         },
-    };
+    );
 
     Some((x, run.line_top as i32))
 }
@@ -135,7 +132,7 @@ impl<'buffer> Editor<'buffer> {
                 if let Some((start, end)) = selection_bounds {
                     if line_i >= start.line && line_i <= end.line {
                         let mut range_opt = None;
-                        for glyph in run.glyphs.iter() {
+                        for glyph in run.glyphs {
                             // Guess x offset based on characters
                             let cluster = &run.text[glyph.start..glyph.end];
                             let total = cluster.grapheme_indices(true).count();
@@ -197,13 +194,10 @@ impl<'buffer> Editor<'buffer> {
                     f(x, y, 1, line_height as u32, cursor_color);
                 }
 
-                for glyph in run.glyphs.iter() {
+                for glyph in run.glyphs {
                     let physical_glyph = glyph.physical((0., 0.), 1.0);
 
-                    let mut glyph_color = match glyph.color_opt {
-                        Some(some) => some,
-                        None => text_color,
-                    };
+                    let mut glyph_color = glyph.color_opt.map_or(text_color, |some| some);
                     if text_color != selected_text_color {
                         if let Some((start, end)) = selection_bounds {
                             if line_i >= start.line
@@ -277,7 +271,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
     }
 
     fn tab_width(&self) -> u16 {
-        self.with_buffer(|buffer| buffer.tab_width())
+        self.with_buffer(super::super::buffer::Buffer::tab_width)
     }
 
     fn set_tab_width(&mut self, font_system: &mut FontSystem, tab_width: u16) {
@@ -334,12 +328,12 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
 
                 // Re-add part of line after selection
                 if let Some(after) = after_opt {
-                    buffer.lines[start.line].append(after);
+                    buffer.lines[start.line].append(&after);
                 }
 
                 // Re-add valid parts of end line
                 if let Some(end_line) = end_line_opt {
-                    buffer.lines[start.line].append(end_line);
+                    buffer.lines[start.line].append(&end_line);
                 }
             }
 
@@ -376,7 +370,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                 let ending = buffer
                     .lines
                     .last()
-                    .map(|line| line.ending())
+                    .map(super::super::buffer_line::BufferLine::ending)
                     .unwrap_or_default();
                 let line = BufferLine::new(
                     String::new(),
@@ -386,7 +380,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                             buffer
                                 .lines
                                 .last()
-                                .map_or(Attrs::new(), |line| line.attrs_list().defaults())
+                                .map_or_else(Attrs::new, |line| line.attrs_list().defaults())
                         },
                         |x| x.defaults(),
                     )),
@@ -417,7 +411,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                 let mut these_attrs = final_attrs.split_off(data_line.len());
                 remaining_split_len -= data_line.len();
                 core::mem::swap(&mut these_attrs, &mut final_attrs);
-                line.append(BufferLine::new(
+                line.append(&BufferLine::new(
                     data_line
                         .strip_suffix(char::is_control)
                         .unwrap_or(data_line),
@@ -438,11 +432,11 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                     final_attrs.split_off(remaining_split_len),
                     Shaping::Advanced,
                 );
-                tmp.append(after);
+                tmp.append(&after);
                 buffer.lines.insert(insert_line, tmp);
                 cursor.line += 1;
             } else {
-                line.append(after);
+                line.append(&after);
             }
             for data_line in lines_iter.rev() {
                 remaining_split_len -= data_line.len();
@@ -510,9 +504,8 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
     }
 
     fn delete_selection(&mut self) -> bool {
-        let (start, end) = match self.selection_bounds() {
-            Some(some) => some,
-            None => return false,
+        let Some((start, end)) = self.selection_bounds() else {
+            return false;
         };
 
         // Reset cursor to start of selection
@@ -538,7 +531,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
             }
         }
 
-        for item in change.items.iter() {
+        for item in &change.items {
             //TODO: edit cursor if needed?
             if item.insert {
                 self.cursor = self.insert_at(item.start, &item.text, None);

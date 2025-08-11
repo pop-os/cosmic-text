@@ -1,7 +1,6 @@
-#[cfg(feature = "no_std")]
-use core::cmp;
-
 use alloc::{collections::BTreeMap, string::String};
+#[cfg(feature = "swash")]
+use core::cmp;
 use modit::{Event, Key, Parser, TextObject, WordIter};
 
 use crate::{

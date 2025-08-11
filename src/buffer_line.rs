@@ -95,7 +95,7 @@ impl BufferLine {
     }
 
     /// Get line ending
-    pub fn ending(&self) -> LineEnding {
+    pub const fn ending(&self) -> LineEnding {
         self.ending
     }
 
@@ -114,7 +114,7 @@ impl BufferLine {
     }
 
     /// Get attributes list
-    pub fn attrs_list(&self) -> &AttrsList {
+    pub const fn attrs_list(&self) -> &AttrsList {
         &self.attrs_list
     }
 
@@ -133,7 +133,7 @@ impl BufferLine {
     }
 
     /// Get the Text alignment
-    pub fn align(&self) -> Option<Align> {
+    pub const fn align(&self) -> Option<Align> {
         self.align
     }
 
@@ -155,7 +155,7 @@ impl BufferLine {
     /// Append line at end of this line
     ///
     /// The wrap setting of the appended line will be lost
-    pub fn append(&mut self, other: Self) {
+    pub fn append(&mut self, other: &Self) {
         let len = self.text.len();
         self.text.push_str(other.text());
 
@@ -224,7 +224,7 @@ impl BufferLine {
     }
 
     /// Get line shaping cache
-    pub fn shape_opt(&self) -> Option<&ShapeLine> {
+    pub const fn shape_opt(&self) -> Option<&ShapeLine> {
         self.shape_opt.get()
     }
 
@@ -261,13 +261,13 @@ impl BufferLine {
     }
 
     /// Get line layout cache
-    pub fn layout_opt(&self) -> Option<&Vec<LayoutLine>> {
+    pub const fn layout_opt(&self) -> Option<&Vec<LayoutLine>> {
         self.layout_opt.get()
     }
 
     /// Get line metadata. This will be None if [`BufferLine::set_metadata`] has not been called
     /// after the last reset of shaping and layout caches
-    pub fn metadata(&self) -> Option<usize> {
+    pub const fn metadata(&self) -> Option<usize> {
         self.metadata
     }
 

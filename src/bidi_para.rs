@@ -63,13 +63,12 @@ impl<'text> Iterator for BidiParagraphs<'text> {
         let paragraph = &self.text[para.range];
         // `para.range` includes the newline that splits the line, so remove it if present
         let mut char_indices = paragraph.char_indices();
-        if let Some(i) = char_indices.next_back().and_then(|(i, c)| {
-            // `BidiClass::B` is a Paragraph_Separator (various newline characters)
-            (bidi_class(c) == BidiClass::B).then_some(i)
-        }) {
-            Some(&paragraph[0..i])
-        } else {
-            Some(paragraph)
-        }
+        char_indices
+            .next_back()
+            .and_then(|(i, c)| {
+                // `BidiClass::B` is a Paragraph_Separator (various newline characters)
+                (bidi_class(c) == BidiClass::B).then_some(i)
+            })
+            .map_or(Some(paragraph), |i| Some(&paragraph[0..i]))
     }
 }

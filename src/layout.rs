@@ -2,10 +2,12 @@
 
 use core::fmt::Display;
 
+use crate::{math, CacheKey, CacheKeyFlags, Color};
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 
-use crate::{math, CacheKey, CacheKeyFlags, Color};
+#[cfg(not(feature = "std"))]
+use core_maths::CoreFloat;
 
 /// A laid out glyph
 #[derive(Clone, Debug)]
@@ -78,8 +80,8 @@ impl LayoutGlyph {
             self.glyph_id,
             self.font_size * scale,
             (
-                (self.x + x_offset) * scale + offset.0,
-                math::truncf((self.y - y_offset) * scale + offset.1), // Hinting in Y axis
+                (self.x + x_offset).mul_add(scale, offset.0),
+                math::truncf((self.y - y_offset).mul_add(scale, offset.1)), // Hinting in Y axis
             ),
             self.font_weight,
             self.cache_key_flags,
