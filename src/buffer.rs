@@ -864,7 +864,7 @@ impl Buffer {
     }
 
     /// Get the visible layout runs for rendering and other tasks
-    pub const fn layout_runs(&self) -> LayoutRunIter {
+    pub fn layout_runs(&self) -> LayoutRunIter<'_> {
         LayoutRunIter::new(self)
     }
 
