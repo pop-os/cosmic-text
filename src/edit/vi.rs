@@ -1149,6 +1149,10 @@ impl<'buffer> Edit<'buffer> for ViEditor<'_, 'buffer> {
     fn cursor_position(&self) -> Option<(i32, i32)> {
         self.editor.cursor_position()
     }
+
+    fn set_cursor_hidden(&mut self, hidden: bool) {
+        self.editor.set_cursor_hidden(hidden);
+    }
 }
 
 impl BorrowedWithFontSystem<'_, ViEditor<'_, '_>> {
