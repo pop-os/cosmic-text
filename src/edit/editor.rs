@@ -1,20 +1,21 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-#[cfg(not(feature = "std"))]
-use alloc::{
-    string::{String, ToString},
-    vec::Vec,
-};
-use core::{cmp, iter::once};
-use unicode_segmentation::UnicodeSegmentation;
-
 #[cfg(feature = "swash")]
 use crate::Color;
 use crate::{
     Action, Attrs, AttrsList, BorrowedWithFontSystem, BufferLine, BufferRef, Change, ChangeItem,
     Cursor, Edit, FontSystem, LayoutRun, Selection, Shaping,
 };
+#[cfg(feature = "no_std")]
+use alloc::{
+    string::{String, ToString},
+    vec::Vec,
+};
+#[cfg(feature = "swash")]
+use std::cmp;
 
+use core::iter::once;
+use unicode_segmentation::UnicodeSegmentation;
 /// A wrapper of [`Buffer`] for easy editing
 #[derive(Debug, Clone)]
 pub struct Editor<'buffer> {
@@ -583,7 +584,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
             Action::Insert(character) => {
                 if character.is_control() && !['\t', '\n', '\u{92}'].contains(&character) {
                     // Filter out special chars (except for tab), use Action instead
-                    log::debug!("Refusing to insert control character {:?}", character);
+                    log::debug!("Refusing to insert control character {character:?}");
                 } else if character == '\n' {
                     self.action(font_system, Action::Enter);
                 } else {

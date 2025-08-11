@@ -132,11 +132,11 @@ impl<'syntax_system, 'buffer> SyntaxEditor<'syntax_system, 'buffer> {
         self.syntax = match self.syntax_system.syntax_set.find_syntax_for_file(path) {
             Ok(Some(some)) => some,
             Ok(None) => {
-                log::warn!("no syntax found for {:?}", path);
+                log::warn!("no syntax found for {path:?}");
                 self.syntax_system.syntax_set.find_syntax_plain_text()
             }
             Err(err) => {
-                log::warn!("failed to determine syntax for {:?}: {:?}", path, err);
+                log::warn!("failed to determine syntax for {path:?}: {err:?}");
                 self.syntax_system.syntax_set.find_syntax_plain_text()
             }
         };
@@ -156,7 +156,7 @@ impl<'syntax_system, 'buffer> SyntaxEditor<'syntax_system, 'buffer> {
         {
             Some(some) => some,
             None => {
-                log::warn!("no syntax found for {}", extension);
+                log::warn!("no syntax found for {extension:?}");
                 self.syntax_system.syntax_set.find_syntax_plain_text()
             }
         };

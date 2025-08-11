@@ -68,6 +68,10 @@ warn_on_missing_glyphs = []
 name = "layout"
 harness = false
 
+[[bench]]
+name = "text_shaping_benchmarks"
+harness = false
+
 [workspace]
 members = ["examples/*"]
 

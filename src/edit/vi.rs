@@ -1,7 +1,8 @@
-use alloc::{collections::BTreeMap, string::String};
+#[cfg(feature = "no_std")]
 use core::cmp;
+
+use alloc::{collections::BTreeMap, string::String};
 use modit::{Event, Key, Parser, TextObject, WordIter};
-use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
     Action, AttrsList, BorrowedWithFontSystem, BufferRef, Change, Color, Cursor, Edit, FontSystem,
@@ -9,6 +10,8 @@ use crate::{
 };
 
 pub use modit::{ViMode, ViParser};
+#[cfg(feature = "swash")]
+use unicode_segmentation::UnicodeSegmentation;
 
 fn undo_2_action<'buffer, E: Edit<'buffer>>(
     editor: &mut E,
@@ -599,7 +602,7 @@ impl<'buffer> Edit<'buffer> for ViEditor<'_, 'buffer> {
     }
 
     fn action(&mut self, font_system: &mut FontSystem, action: Action) {
-        log::debug!("Action {:?}", action);
+        log::debug!("Action {action:?}");
 
         let editor = &mut self.editor;
 
@@ -636,7 +639,7 @@ impl<'buffer> Edit<'buffer> for ViEditor<'_, 'buffer> {
             Action::Unindent => Key::Backtab,
             Action::Motion(Motion::Up) => Key::Up,
             _ => {
-                log::debug!("Pass through action {:?}", action);
+                log::debug!("Pass through action {action:?}");
                 editor.action(font_system, action);
                 // Always finish change when passing through (TODO: group changes)
                 finish_change(
@@ -652,7 +655,7 @@ impl<'buffer> Edit<'buffer> for ViEditor<'_, 'buffer> {
         let has_selection = !matches!(editor.selection(), Selection::None);
 
         self.parser.parse(key, has_selection, |event| {
-            log::debug!("  Event {:?}", event);
+            log::debug!("  Event {event:?}");
             let action = match event {
                 Event::AutoIndent => {
                     log::info!("TODO: AutoIndent");
@@ -813,7 +816,7 @@ impl<'buffer> Edit<'buffer> for ViEditor<'_, 'buffer> {
                             editor.set_cursor(cursor);
                         }
                         _ => {
-                            log::info!("TODO: {:?}", text_object);
+                            log::info!("TODO: {text_object:?}");
                         }
                     }
                     return;
@@ -1006,7 +1009,7 @@ impl<'buffer> Edit<'buffer> for ViEditor<'_, 'buffer> {
                                             }
                                             None
                                         })
-                                        .last()
+                                        .next_back()
                                     {
                                         cursor.index = i;
                                     }
