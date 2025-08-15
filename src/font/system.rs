@@ -421,7 +421,7 @@ impl FontSystem {
 #[derive(Debug)]
 pub struct BorrowedWithFontSystem<'a, T> {
     pub(crate) inner: &'a mut T,
-    pub(crate) font_system: &'a mut FontSystem,
+    pub font_system: &'a mut FontSystem,
 }
 
 impl<T> Deref for BorrowedWithFontSystem<'_, T> {
