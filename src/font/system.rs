@@ -141,7 +141,7 @@ impl FontSystem {
     /// while debug builds can take up to ten times longer. For this reason, it should only be
     /// called once, and the resulting [`FontSystem`] should be shared.
     pub fn new() -> Self {
-        Self::new_with_fonts(core::iter::empty(), false)
+        Self::new_with_fonts(core::iter::empty(), true)
     }
 
     /// Create a new [`FontSystem`] with a pre-specified set of fonts.
