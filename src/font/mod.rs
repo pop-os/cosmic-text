@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use harfrust::Shaper;
-use skrifa::raw::ReadError;
+use skrifa::raw::{ReadError, TableProvider as _};
 use skrifa::{metrics::Metrics, prelude::*};
-// re-export ttf_parser
-pub use ttf_parser;
+// re-export skrifa
+pub use skrifa;
 // re-export peniko::Font;
 #[cfg(feature = "peniko")]
 pub use peniko::Font as PenikoFont;
@@ -126,59 +126,6 @@ impl Font {
     pub fn new(db: &fontdb::Database, id: fontdb::ID, weight: fontdb::Weight) -> Option<Self> {
         let info = db.face(id)?;
 
-        let monospace_fallback = if cfg!(feature = "monospace_fallback") {
-            db.with_face_data(id, |font_data, face_index| {
-                let face = ttf_parser::Face::parse(font_data, face_index).ok()?;
-                let monospace_em_width = info
-                    .monospaced
-                    .then(|| {
-                        let hor_advance = face.glyph_hor_advance(face.glyph_index(' ')?)?;
-                        let upem = face.units_per_em();
-                        Some(f32::from(hor_advance) / f32::from(upem))
-                    })
-                    .flatten();
-
-                if info.monospaced && monospace_em_width.is_none() {
-                    None?;
-                }
-
-                let scripts = face
-                    .tables()
-                    .gpos
-                    .into_iter()
-                    .chain(face.tables().gsub)
-                    .flat_map(|table| table.scripts)
-                    .map(|script| script.tag.to_bytes())
-                    .collect();
-
-                let mut unicode_codepoints = Vec::new();
-
-                face.tables()
-                    .cmap?
-                    .subtables
-                    .into_iter()
-                    .filter(ttf_parser::cmap::Subtable::is_unicode)
-                    .for_each(|subtable| {
-                        unicode_codepoints.reserve(1024);
-                        subtable.codepoints(|code_point| {
-                            if subtable.glyph_index(code_point).is_some() {
-                                unicode_codepoints.push(code_point);
-                            }
-                        });
-                    });
-
-                unicode_codepoints.shrink_to_fit();
-
-                Some(FontMonospaceFallback {
-                    monospace_em_width,
-                    scripts,
-                    unicode_codepoints,
-                })
-            })?
-        } else {
-            None
-        };
-
         let data = match &info.source {
             fontdb::Source::Binary(data) => Arc::clone(data),
             #[cfg(feature = "std")]
@@ -199,6 +146,61 @@ impl Font {
             .axes()
             .location([(Tag::new(b"wght"), weight.0 as f32)]);
         let metrics = font_ref.metrics(Size::unscaled(), &location);
+
+        let monospace_fallback = if cfg!(feature = "monospace_fallback") {
+            (|| {
+                let glyph_metrics = font_ref.glyph_metrics(Size::unscaled(), &location);
+                let charmap = font_ref.charmap();
+                let monospace_em_width = info
+                    .monospaced
+                    .then(|| {
+                        let hor_advance = glyph_metrics.advance_width(charmap.map(' ')?)?;
+                        let upem = metrics.units_per_em;
+                        Some(f32::from(hor_advance) / f32::from(upem))
+                    })
+                    .flatten();
+
+                if info.monospaced && monospace_em_width.is_none() {
+                    None?;
+                }
+
+                let scripts = font_ref
+                    .gpos()
+                    .ok()?
+                    .script_list()
+                    .ok()?
+                    .script_records()
+                    .iter()
+                    .chain(
+                        font_ref
+                            .gsub()
+                            .ok()?
+                            .script_list()
+                            .ok()?
+                            .script_records()
+                            .iter(),
+                    )
+                    .map(|script| script.script_tag().into_bytes())
+                    .collect();
+
+                let mut unicode_codepoints = Vec::new();
+
+                for (code_point, _) in charmap.mappings() {
+                    unicode_codepoints.push(code_point);
+                }
+
+                unicode_codepoints.shrink_to_fit();
+
+                Some(FontMonospaceFallback {
+                    monospace_em_width,
+                    scripts,
+                    unicode_codepoints,
+                })
+            })()
+        } else {
+            None
+        };
+
         let (shaper_instance, shaper_data) = {
             (
                 harfrust::ShaperInstance::from_coords(&font_ref, location.coords().iter().copied()),

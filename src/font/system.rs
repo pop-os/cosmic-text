@@ -7,6 +7,7 @@ use alloc::vec::Vec;
 use core::fmt;
 use core::ops::{Deref, DerefMut};
 use fontdb::Query;
+use skrifa::raw::{ReadError, TableProvider as _};
 
 // re-export fontdb and harfrust
 pub use fontdb;
@@ -182,19 +183,20 @@ impl FontSystem {
         if cfg!(feature = "monospace_fallback") {
             for &id in &monospace_font_ids {
                 db.with_face_data(id, |font_data, face_index| {
-                    let _ = ttf_parser::Face::parse(font_data, face_index).map(|face| {
-                        face.tables()
-                            .gpos
-                            .into_iter()
-                            .chain(face.tables().gsub)
-                            .flat_map(|table| table.scripts)
-                            .inspect(|script| {
-                                per_script_monospace_font_ids
-                                    .entry(script.tag.to_bytes())
-                                    .or_default()
-                                    .insert(id);
-                            })
-                    });
+                    let face = skrifa::FontRef::from_index(font_data, face_index)?;
+                    for script in face
+                        .gpos()?
+                        .script_list()?
+                        .script_records()
+                        .iter()
+                        .chain(face.gsub()?.script_list()?.script_records().iter())
+                    {
+                        per_script_monospace_font_ids
+                            .entry(script.script_tag().into_bytes())
+                            .or_default()
+                            .insert(id);
+                    }
+                    Ok::<_, ReadError>(())
                 });
             }
         }
