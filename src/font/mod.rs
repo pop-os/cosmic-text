@@ -99,7 +99,7 @@ impl Font {
     }
 
     pub fn shaper(&self) -> &harfrust::Shaper<'_> {
-        &self.harfrust.borrow_dependent()
+        self.harfrust.borrow_dependent()
     }
 
     pub fn metrics(&self) -> &Metrics {
@@ -156,7 +156,7 @@ impl Font {
                     .then(|| {
                         let hor_advance = glyph_metrics.advance_width(charmap.map(' ')?)?;
                         let upem = metrics.units_per_em;
-                        Some(f32::from(hor_advance) / f32::from(upem))
+                        Some(hor_advance / f32::from(upem))
                     })
                     .flatten();
 
@@ -232,7 +232,7 @@ impl Font {
                     let font_ref = FontRef::from_index((**data).as_ref(), info.index)?;
                     let shaper = shaper_data
                         .shaper(&font_ref)
-                        .instance(Some(&shaper_instance))
+                        .instance(Some(shaper_instance))
                         .build();
                     Ok::<_, ReadError>(shaper)
                 },
