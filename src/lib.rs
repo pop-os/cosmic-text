@@ -4,7 +4,7 @@
 //!
 //! This library provides advanced text handling in a generic way. It provides abstractions for
 //! shaping, font discovery, font fallback, layout, rasterization, and editing. Shaping utilizes
-//! rustybuzz, font discovery utilizes fontdb, and the rasterization is optional and utilizes
+//! HarfRust, font discovery utilizes fontdb, and the rasterization is optional and utilizes
 //! swash. The other features are developed internal to this library.
 //!
 //! It is recommended that you start by creating a [`FontSystem`], after which you can create a

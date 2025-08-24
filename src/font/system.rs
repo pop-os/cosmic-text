@@ -8,9 +8,9 @@ use core::fmt;
 use core::ops::{Deref, DerefMut};
 use fontdb::Query;
 
-// re-export fontdb and rustybuzz
+// re-export fontdb and harfrust
 pub use fontdb;
-pub use rustybuzz;
+pub use harfrust;
 
 use super::fallback::{Fallback, Fallbacks, MonospaceFallbackInfo, PlatformFallback};
 
