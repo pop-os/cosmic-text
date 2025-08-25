@@ -858,11 +858,11 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                     }
                 }
             }
-            Action::Scroll { lines } => {
+            Action::Scroll { pixels } => {
                 self.with_buffer_mut(|buffer| {
                     let mut scroll = buffer.scroll();
                     //TODO: align to layout lines
-                    scroll.vertical += lines as f32 * buffer.metrics().line_height;
+                    scroll.vertical += pixels;
                     buffer.set_scroll(scroll);
                 });
             }
