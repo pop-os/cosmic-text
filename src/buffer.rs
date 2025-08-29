@@ -271,7 +271,7 @@ impl Buffer {
     /// Will panic if `metrics.line_height` is zero.
     pub fn new(font_system: &mut FontSystem, metrics: Metrics) -> Self {
         let mut buffer = Self::new_empty(metrics);
-        buffer.set_text(font_system, "", &Attrs::new(), Shaping::Advanced);
+        buffer.set_text(font_system, "", &Attrs::new(), Shaping::Advanced, None);
         buffer
     }
 
@@ -679,6 +679,7 @@ impl Buffer {
         text: &str,
         attrs: &Attrs,
         shaping: Shaping,
+        alignment: Option<Align>,
     ) {
         self.lines.clear();
         for (range, ending) in LineIter::new(text) {
@@ -697,6 +698,13 @@ impl Buffer {
                 shaping,
             ));
         }
+
+        if alignment.is_some() {
+            self.lines.iter_mut().for_each(|line| {
+                line.set_align(alignment);
+            });
+        }
+
         self.scroll = Scroll::default();
         self.shape_until_scroll(font_system, false);
     }
@@ -1424,8 +1432,15 @@ impl BorrowedWithFontSystem<'_, Buffer> {
     }
 
     /// Set text of buffer, using provided attributes for each line by default
-    pub fn set_text(&mut self, text: &str, attrs: &Attrs, shaping: Shaping) {
-        self.inner.set_text(self.font_system, text, attrs, shaping);
+    pub fn set_text(
+        &mut self,
+        text: &str,
+        attrs: &Attrs,
+        shaping: Shaping,
+        alignment: Option<Align>,
+    ) {
+        self.inner
+            .set_text(self.font_system, text, attrs, shaping, alignment);
     }
 
     /// Set text of buffer, using an iterator of styled spans (pairs of text and attributes)
