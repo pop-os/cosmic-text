@@ -20,7 +20,7 @@ pub use self::vi::*;
 mod vi;
 
 /// An action to perform on an [`Editor`]
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Action {
     /// Move the cursor with some motion
     Motion(Motion),
@@ -58,9 +58,9 @@ pub enum Action {
         x: i32,
         y: i32,
     },
-    /// Scroll specified number of lines
+    /// Scroll specified number of pixels
     Scroll {
-        lines: i32,
+        pixels: f32,
     },
 }
 
