@@ -110,6 +110,7 @@ impl fmt::Debug for ShapeBuffer {
 fn shape_fallback(
     scratch: &mut ShapeBuffer,
     glyphs: &mut Vec<ShapeGlyph>,
+    shape_plan_cache: &mut crate::ShapePlanCache,
     font: &Font,
     line: &str,
     attrs_list: &AttrsList,
@@ -147,7 +148,7 @@ fn shape_fallback(
     let mut rb_font_features = Vec::new();
 
     // Convert attrs::Feature to harfrust::Feature
-    for feature in attrs.font_features.features {
+    for feature in &attrs.font_features.features {
         rb_font_features.push(harfrust::Feature::new(
             harfrust::Tag::new(feature.tag.as_bytes()),
             feature.value,
@@ -155,13 +156,22 @@ fn shape_fallback(
         ));
     }
 
-    let shape_plan = harfrust::ShapePlan::new(
-        font.shaper(),
-        buffer.direction(),
-        Some(buffer.script()),
-        buffer.language().as_ref(),
-        &rb_font_features,
-    );
+    let key = crate::ShapePlanKey {
+        font: font.id(),
+        direction: buffer.direction(),
+        script: buffer.script(),
+        language: buffer.language(),
+        features: attrs.font_features.features,
+    };
+    let shape_plan = shape_plan_cache.get_or_insert_with(key, || {
+        harfrust::ShapePlan::new(
+            font.shaper(),
+            buffer.direction(),
+            Some(buffer.script()),
+            buffer.language().as_ref(),
+            &rb_font_features,
+        )
+    });
     let glyph_buffer = font
         .shaper()
         .shape_with_plan(&shape_plan, buffer, &rb_font_features);
@@ -283,9 +293,17 @@ fn shape_run(
 
     let glyph_start = glyphs.len();
     let mut missing = {
-        let scratch = font_iter.shape_caches();
+        let (scratch, shape_plan_cache) = font_iter.shape_caches();
         shape_fallback(
-            scratch, glyphs, &font, line, attrs_list, start_run, end_run, span_rtl,
+            scratch,
+            glyphs,
+            shape_plan_cache,
+            &font,
+            line,
+            attrs_list,
+            start_run,
+            end_run,
+            span_rtl,
         )
     };
 
@@ -300,10 +318,11 @@ fn shape_run(
             font_iter.face_name(font.id())
         );
         let mut fb_glyphs = Vec::new();
-        let scratch = font_iter.shape_caches();
+        let (scratch, shape_plan_cache) = font_iter.shape_caches();
         let fb_missing = shape_fallback(
             scratch,
             &mut fb_glyphs,
+            shape_plan_cache,
             &font,
             line,
             attrs_list,
