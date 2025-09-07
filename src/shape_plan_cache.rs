@@ -1,3 +1,6 @@
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
+
 use crate::{Feature, HashMap};
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
