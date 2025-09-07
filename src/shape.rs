@@ -79,7 +79,7 @@ impl Shaping {
     }
 }
 
-const NUM_SHAPE_PLANS: usize = 4;
+const NUM_SHAPE_PLANS: usize = 6;
 
 /// A set of buffers containing allocations for shaped text.
 #[derive(Default)]
