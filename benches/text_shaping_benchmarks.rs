@@ -16,6 +16,7 @@ fn bench_ascii_fast_path(c: &mut Criterion) {
                 black_box(&ascii_text),
                 &ct::Attrs::new(),
                 ct::Shaping::Advanced,
+                None,
             );
             buffer.shape_until_scroll(&mut fs, false);
         });
@@ -36,6 +37,7 @@ fn bench_bidi_processing(c: &mut Criterion) {
                 black_box(&bidi_text),
                 &ct::Attrs::new(),
                 ct::Shaping::Advanced,
+                None,
             );
             buffer.shape_until_scroll(&mut fs, false);
         });
@@ -56,6 +58,7 @@ fn bench_layout_heavy(c: &mut Criterion) {
                 black_box(&layout_text),
                 &ct::Attrs::new(),
                 ct::Shaping::Advanced,
+                None,
             );
             buffer.shape_until_scroll(&mut fs, false);
         });
@@ -81,6 +84,7 @@ fn bench_combined_stress(c: &mut Criterion) {
                 black_box(&stress_text),
                 &ct::Attrs::new(),
                 ct::Shaping::Advanced,
+                None,
             );
             buffer.shape_until_scroll(&mut fs, false);
         });

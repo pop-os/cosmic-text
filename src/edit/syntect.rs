@@ -125,7 +125,7 @@ impl<'syntax_system, 'buffer> SyntaxEditor<'syntax_system, 'buffer> {
 
         let text = fs::read_to_string(path)?;
         self.editor.with_buffer_mut(|buffer| {
-            buffer.set_text(font_system, &text, &attrs, Shaping::Advanced);
+            buffer.set_text(font_system, &text, &attrs, Shaping::Advanced, None);
         });
 
         //TODO: re-use text
