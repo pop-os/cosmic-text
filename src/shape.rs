@@ -4,17 +4,17 @@
 
 use crate::fallback::FontFallbackIter;
 use crate::{
-    math, Align, AttrsList, CacheKeyFlags, Color, Font, FontSystem, LayoutGlyph,
-    LayoutLine, Metrics, Wrap,
+    math, Align, AttrsList, CacheKeyFlags, Color, Font, FontSystem, LayoutGlyph, LayoutLine,
+    Metrics, Wrap,
 };
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 
+use alloc::collections::VecDeque;
 use core::cmp::{max, min};
 use core::fmt;
 use core::mem;
 use core::ops::Range;
-use alloc::collections::VecDeque;
 
 #[cfg(not(feature = "std"))]
 use core_maths::CoreFloat;
@@ -84,7 +84,7 @@ const NUM_SHAPE_PLANS: usize = 4;
 /// A set of buffers containing allocations for shaped text.
 #[derive(Default)]
 pub struct ShapeBuffer {
-    /// Cache for HarfRust shape plans. Stores up to [`NUM_SHAPE_PLANS`] plans at once. Inserting a new one past that
+    /// Cache for harfrust shape plans. Stores up to [`NUM_SHAPE_PLANS`] plans at once. Inserting a new one past that
     /// will remove the one that was least recently added (not least recently used).
     shape_plan_cache: VecDeque<harfrust::ShapePlan>,
 
@@ -186,13 +186,16 @@ fn shape_fallback(
                 scratch.shape_plan_cache.pop_front();
             }
             scratch.shape_plan_cache.push_back(plan);
-            scratch.shape_plan_cache.back().unwrap()
+            scratch
+                .shape_plan_cache
+                .back()
+                .expect("we just pushed the shape plan")
         }
     };
 
     let glyph_buffer = font
         .shaper()
-        .shape_with_plan(&shape_plan, buffer, &rb_font_features);
+        .shape_with_plan(shape_plan, buffer, &rb_font_features);
     let glyph_infos = glyph_buffer.glyph_infos();
     let glyph_positions = glyph_buffer.glyph_positions();
 
