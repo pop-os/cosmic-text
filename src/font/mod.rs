@@ -102,6 +102,10 @@ impl Font {
         self.harfrust.borrow_dependent()
     }
 
+    pub(crate) fn shaper_instance(&self) -> &harfrust::ShaperInstance {
+        &self.harfrust.borrow_owner().shaper_instance
+    }
+
     pub fn metrics(&self) -> &Metrics {
         &self.harfrust.borrow_owner().metrics
     }

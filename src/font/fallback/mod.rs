@@ -265,11 +265,8 @@ impl<'a> FontFallbackIter<'a> {
             })
     }
 
-    pub fn shape_caches(&mut self) -> (&mut ShapeBuffer, &mut crate::ShapePlanCache) {
-        (
-            &mut self.font_system.shape_buffer,
-            &mut self.font_system.shape_plan_cache,
-        )
+    pub fn shape_caches(&mut self) -> &mut ShapeBuffer {
+        &mut self.font_system.shape_buffer
     }
 
     fn face_contains_family(&self, id: fontdb::ID, family_name: &str) -> bool {

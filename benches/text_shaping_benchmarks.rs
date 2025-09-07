@@ -42,6 +42,28 @@ fn bench_bidi_processing(c: &mut Criterion) {
     });
 }
 
+fn bench_lang_mixed(c: &mut Criterion) {
+    let mut fs = ct::FontSystem::new();
+    let mut buffer = ct::Buffer::new(&mut fs, ct::Metrics::new(14.0, 20.0));
+    buffer.set_size(&mut fs, Some(500.0), None);
+
+    let bidi_text = include_str!("../sample/hello.txt");
+
+    c.benchmark_group("bench_lang_mixed")
+        .sample_size(10)
+        .bench_function("ShapeLine/Mixed-Language Text", |b| {
+            b.iter(|| {
+                buffer.set_text(
+                    &mut fs,
+                    black_box(&bidi_text),
+                    &ct::Attrs::new(),
+                    ct::Shaping::Advanced,
+                );
+                buffer.shape_until_scroll(&mut fs, false);
+            });
+        });
+}
+
 fn bench_layout_heavy(c: &mut Criterion) {
     let mut fs = ct::FontSystem::new();
     let mut buffer = ct::Buffer::new(&mut fs, ct::Metrics::new(14.0, 20.0));
@@ -113,6 +135,7 @@ criterion_group!(
     benches,
     bench_ascii_fast_path,
     bench_bidi_processing,
+    bench_lang_mixed,
     bench_layout_heavy,
     bench_combined_stress,
     bench_bidi_paragraphs_ascii,

@@ -4,8 +4,8 @@
 
 use crate::fallback::FontFallbackIter;
 use crate::{
-    math, Align, AttrsList, CacheKeyFlags, Color, Font, FontSystem, LayoutGlyph, LayoutLine,
-    Metrics, Wrap,
+    math, Align, AttrsList, CacheKeyFlags, Color, Font, FontSystem, LayoutGlyph,
+    LayoutLine, Metrics, Wrap,
 };
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
@@ -14,6 +14,7 @@ use core::cmp::{max, min};
 use core::fmt;
 use core::mem;
 use core::ops::Range;
+use alloc::collections::VecDeque;
 
 #[cfg(not(feature = "std"))]
 use core_maths::CoreFloat;
@@ -78,9 +79,15 @@ impl Shaping {
     }
 }
 
+const NUM_SHAPE_PLANS: usize = 4;
+
 /// A set of buffers containing allocations for shaped text.
 #[derive(Default)]
 pub struct ShapeBuffer {
+    /// Cache for HarfRust shape plans. Stores up to [`NUM_SHAPE_PLANS`] plans at once. Inserting a new one past that
+    /// will remove the one that was least recently added (not least recently used).
+    shape_plan_cache: VecDeque<harfrust::ShapePlan>,
+
     /// Buffer for holding unicode text.
     harfrust_buffer: Option<harfrust::UnicodeBuffer>,
 
@@ -110,7 +117,6 @@ impl fmt::Debug for ShapeBuffer {
 fn shape_fallback(
     scratch: &mut ShapeBuffer,
     glyphs: &mut Vec<ShapeGlyph>,
-    shape_plan_cache: &mut crate::ShapePlanCache,
     font: &Font,
     line: &str,
     attrs_list: &AttrsList,
@@ -156,22 +162,34 @@ fn shape_fallback(
         ));
     }
 
-    let key = crate::ShapePlanKey {
-        font: font.id(),
-        direction: buffer.direction(),
-        script: buffer.script(),
-        language: buffer.language(),
-        features: attrs.font_features.features,
+    let language = buffer.language();
+    let key = harfrust::ShapePlanKey::new(Some(buffer.script()), buffer.direction())
+        .features(&rb_font_features)
+        .instance(Some(font.shaper_instance()))
+        .language(language.as_ref());
+
+    let shape_plan = match scratch
+        .shape_plan_cache
+        .iter()
+        .find(|plan| key.matches(plan))
+    {
+        Some(plan) => plan,
+        None => {
+            let plan = harfrust::ShapePlan::new(
+                font.shaper(),
+                buffer.direction(),
+                Some(buffer.script()),
+                buffer.language().as_ref(),
+                &rb_font_features,
+            );
+            if scratch.shape_plan_cache.len() >= NUM_SHAPE_PLANS {
+                scratch.shape_plan_cache.pop_front();
+            }
+            scratch.shape_plan_cache.push_back(plan);
+            scratch.shape_plan_cache.back().unwrap()
+        }
     };
-    let shape_plan = shape_plan_cache.get_or_insert_with(key, || {
-        harfrust::ShapePlan::new(
-            font.shaper(),
-            buffer.direction(),
-            Some(buffer.script()),
-            buffer.language().as_ref(),
-            &rb_font_features,
-        )
-    });
+
     let glyph_buffer = font
         .shaper()
         .shape_with_plan(&shape_plan, buffer, &rb_font_features);
@@ -293,17 +311,9 @@ fn shape_run(
 
     let glyph_start = glyphs.len();
     let mut missing = {
-        let (scratch, shape_plan_cache) = font_iter.shape_caches();
+        let scratch = font_iter.shape_caches();
         shape_fallback(
-            scratch,
-            glyphs,
-            shape_plan_cache,
-            &font,
-            line,
-            attrs_list,
-            start_run,
-            end_run,
-            span_rtl,
+            scratch, glyphs, &font, line, attrs_list, start_run, end_run, span_rtl,
         )
     };
 
@@ -318,11 +328,10 @@ fn shape_run(
             font_iter.face_name(font.id())
         );
         let mut fb_glyphs = Vec::new();
-        let (scratch, shape_plan_cache) = font_iter.shape_caches();
+        let scratch = font_iter.shape_caches();
         let fb_missing = shape_fallback(
             scratch,
             &mut fb_glyphs,
-            shape_plan_cache,
             &font,
             line,
             attrs_list,

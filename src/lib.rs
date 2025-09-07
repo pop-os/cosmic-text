@@ -135,9 +135,6 @@ mod shape;
 pub use self::shape_run_cache::*;
 mod shape_run_cache;
 
-pub use self::shape_plan_cache::*;
-mod shape_plan_cache;
-
 #[cfg(feature = "swash")]
 pub use self::swash::*;
 #[cfg(feature = "swash")]

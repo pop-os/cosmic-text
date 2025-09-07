@@ -116,9 +116,6 @@ pub struct FontSystem {
     #[cfg(feature = "shape-run-cache")]
     pub shape_run_cache: crate::ShapeRunCache,
 
-    /// Cache for HarfRust shape plans
-    pub shape_plan_cache: crate::ShapePlanCache,
-
     /// List of fallbacks
     pub(crate) dyn_fallback: Box<dyn Fallback>,
 
@@ -222,7 +219,6 @@ impl FontSystem {
             monospace_fallbacks_buffer: BTreeSet::default(),
             #[cfg(feature = "shape-run-cache")]
             shape_run_cache: crate::ShapeRunCache::default(),
-            shape_plan_cache: crate::ShapePlanCache::default(),
             shape_buffer: ShapeBuffer::default(),
             dyn_fallback: Box::new(impl_fallback),
             fallbacks,
