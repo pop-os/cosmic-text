@@ -86,7 +86,7 @@ const NUM_SHAPE_PLANS: usize = 4;
 pub struct ShapeBuffer {
     /// Cache for harfrust shape plans. Stores up to [`NUM_SHAPE_PLANS`] plans at once. Inserting a new one past that
     /// will remove the one that was least recently added (not least recently used).
-    shape_plan_cache: VecDeque<harfrust::ShapePlan>,
+    shape_plan_cache: VecDeque<(fontdb::ID, harfrust::ShapePlan)>,
 
     /// Buffer for holding unicode text.
     harfrust_buffer: Option<harfrust::UnicodeBuffer>,
@@ -171,9 +171,9 @@ fn shape_fallback(
     let shape_plan = match scratch
         .shape_plan_cache
         .iter()
-        .find(|plan| key.matches(plan))
+        .find(|(id, plan)| *id == font.id() && key.matches(plan))
     {
-        Some(plan) => plan,
+        Some((_font_id, plan)) => plan,
         None => {
             let plan = harfrust::ShapePlan::new(
                 font.shaper(),
@@ -185,11 +185,12 @@ fn shape_fallback(
             if scratch.shape_plan_cache.len() >= NUM_SHAPE_PLANS {
                 scratch.shape_plan_cache.pop_front();
             }
-            scratch.shape_plan_cache.push_back(plan);
-            scratch
+            scratch.shape_plan_cache.push_back((font.id(), plan));
+            &scratch
                 .shape_plan_cache
                 .back()
                 .expect("we just pushed the shape plan")
+                .1
         }
     };
 
