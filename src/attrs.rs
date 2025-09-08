@@ -66,8 +66,8 @@ impl Color {
 
     /// Get with a new value for the alpha component
     #[inline]
-    pub(crate) const fn with_replaced_a(self, a: u8) -> Self {
-        Self(((a as u32) << 24) | self.0 & 0xFF_FF_FF)
+    pub(crate) fn with_replaced_a(self, a: u8) -> Self {
+        Self((u32::from(a) << 24) | self.0 & 0xFF_FF_FF)
     }
 }
 
