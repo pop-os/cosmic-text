@@ -2,20 +2,23 @@
 
 #![allow(clippy::too_many_arguments)]
 
-#[cfg(not(feature = "std"))]
-use alloc::vec::Vec;
-use core::cmp::{max, min};
-use core::fmt;
-use core::mem;
-use core::ops::Range;
-use unicode_script::{Script, UnicodeScript};
-use unicode_segmentation::UnicodeSegmentation;
-
 use crate::fallback::FontFallbackIter;
 use crate::{
     math, Align, AttrsList, CacheKeyFlags, Color, Font, FontSystem, LayoutGlyph, LayoutLine,
     Metrics, Wrap,
 };
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
+
+use core::cmp::{max, min};
+use core::fmt;
+use core::mem;
+use core::ops::Range;
+
+#[cfg(not(feature = "std"))]
+use core_maths::CoreFloat;
+use unicode_script::{Script, UnicodeScript};
+use unicode_segmentation::UnicodeSegmentation;
 
 /// The shaping strategy of some text.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -117,8 +120,8 @@ fn shape_fallback(
     let run = &line[start_run..end_run];
 
     let font_scale = font.rustybuzz().units_per_em() as f32;
-    let ascent = font.rustybuzz().ascender() as f32 / font_scale;
-    let descent = -font.rustybuzz().descender() as f32 / font_scale;
+    let ascent = f32::from(font.rustybuzz().ascender()) / font_scale;
+    let descent = -f32::from(font.rustybuzz().descender()) / font_scale;
 
     let mut buffer = scratch.rustybuzz_buffer.take().unwrap_or_default();
     buffer.set_direction(if span_rtl {
@@ -197,7 +200,7 @@ fn shape_fallback(
             color_opt: attrs.color_opt,
             metadata: attrs.metadata,
             cache_key_flags: attrs.cache_key_flags,
-            metrics_opt: attrs.metrics_opt.map(|x| x.into()),
+            metrics_opt: attrs.metrics_opt.map(Into::into),
         });
     }
 
@@ -286,9 +289,8 @@ fn shape_run(
 
     //TODO: improve performance!
     while !missing.is_empty() {
-        let font = match font_iter.next() {
-            Some(some) => some,
-            None => break,
+        let Some(font) = font_iter.next() else {
+            break;
         };
 
         log::trace!(
@@ -335,9 +337,8 @@ fn shape_run(
             while i < glyphs.len() {
                 if glyphs[i].start >= start && glyphs[i].end <= end {
                     break;
-                } else {
-                    i += 1;
                 }
+                i += 1;
             }
 
             // Remove prior glyphs
@@ -495,7 +496,7 @@ fn shape_skip(
                     color_opt: attrs.color_opt,
                     metadata: attrs.metadata,
                     cache_key_flags: attrs.cache_key_flags,
-                    metrics_opt: attrs.metrics_opt.map(|x| x.into()),
+                    metrics_opt: attrs.metrics_opt.map(Into::into),
                 }
             }),
     );
@@ -523,7 +524,7 @@ pub struct ShapeGlyph {
 }
 
 impl ShapeGlyph {
-    fn layout(
+    const fn layout(
         &self,
         font_size: f32,
         line_height_opt: Option<f32>,
@@ -628,36 +629,54 @@ impl ShapeWord {
 
         let span_rtl = level.is_rtl();
 
-        let mut start_run = word_range.start;
-        let mut attrs = attrs_list.defaults();
-        for (egc_i, _egc) in word.grapheme_indices(true) {
-            let start_egc = word_range.start + egc_i;
-            let attrs_egc = attrs_list.get_span(start_egc);
-            if !attrs.compatible(&attrs_egc) {
+        // Fast path optimization: For simple ASCII words, skip expensive grapheme iteration
+        let is_simple_ascii =
+            word.is_ascii() && !word.chars().any(|c| c.is_ascii_control() && c != '\t');
+
+        if is_simple_ascii && !word.is_empty() {
+            let _attrs = attrs_list.defaults();
+            shaping.run(
+                &mut glyphs,
+                font_system,
+                line,
+                attrs_list,
+                word_range.start,
+                word_range.end,
+                span_rtl,
+            );
+        } else {
+            // Complex text path: Full grapheme iteration and attribute processing
+            let mut start_run = word_range.start;
+            let mut attrs = attrs_list.defaults();
+            for (egc_i, _egc) in word.grapheme_indices(true) {
+                let start_egc = word_range.start + egc_i;
+                let attrs_egc = attrs_list.get_span(start_egc);
+                if !attrs.compatible(&attrs_egc) {
+                    shaping.run(
+                        &mut glyphs,
+                        font_system,
+                        line,
+                        attrs_list,
+                        start_run,
+                        start_egc,
+                        span_rtl,
+                    );
+
+                    start_run = start_egc;
+                    attrs = attrs_egc;
+                }
+            }
+            if start_run < word_range.end {
                 shaping.run(
                     &mut glyphs,
                     font_system,
                     line,
                     attrs_list,
                     start_run,
-                    start_egc,
+                    word_range.end,
                     span_rtl,
                 );
-
-                start_run = start_egc;
-                attrs = attrs_egc;
             }
-        }
-        if start_run < word_range.end {
-            shaping.run(
-                &mut glyphs,
-                font_system,
-                line,
-                attrs_list,
-                start_run,
-                word_range.end,
-                span_rtl,
-            );
         }
 
         self.blank = blank;
@@ -667,7 +686,7 @@ impl ShapeWord {
     /// Get the width of the [`ShapeWord`] in pixels, using the [`ShapeGlyph::width`] function.
     pub fn width(&self, font_size: f32) -> f32 {
         let mut width = 0.0;
-        for glyph in self.glyphs.iter() {
+        for glyph in &self.glyphs {
             width += glyph.width(font_size);
         }
         width
@@ -902,7 +921,7 @@ impl ShapeLine {
 
         log::trace!("Line {}: '{}'", if rtl { "RTL" } else { "LTR" }, line);
 
-        for para_info in bidi.paragraphs.iter() {
+        for para_info in &bidi.paragraphs {
             let line_rtl = para_info.level.is_rtl();
             assert_eq!(line_rtl, rtl);
 
@@ -953,12 +972,12 @@ impl ShapeLine {
 
         // Adjust for tabs
         let mut x = 0.0;
-        for span in spans.iter_mut() {
-            for word in span.words.iter_mut() {
-                for glyph in word.glyphs.iter_mut() {
+        for span in &mut spans {
+            for word in &mut span.words {
+                for glyph in &mut word.glyphs {
                     if line.get(glyph.start..glyph.end) == Some("\t") {
                         // Tabs are shaped as spaces, so they will always have the x_advance of a space.
-                        let tab_x_advance = (tab_width as f32) * glyph.x_advance;
+                        let tab_x_advance = f32::from(tab_width) * glyph.x_advance;
                         let tab_stop = (math::floorf(x / tab_x_advance) + 1.0) * tab_x_advance;
                         glyph.x_advance = tab_stop - x;
                     }
@@ -969,7 +988,7 @@ impl ShapeLine {
 
         self.rtl = rtl;
         self.spans = spans;
-        self.metrics_opt = attrs_list.defaults().metrics_opt.map(|x| x.into());
+        self.metrics_opt = attrs_list.defaults().metrics_opt.map(Into::into);
 
         // Return the buffer for later reuse.
         font_system.shape_buffer.spans = cached_spans;
@@ -977,7 +996,7 @@ impl ShapeLine {
 
     // A modified version of first part of unicode_bidi::bidi_info::visual_run
     fn adjust_levels(para: &unicode_bidi::Paragraph) -> Vec<unicode_bidi::Level> {
-        use unicode_bidi::BidiClass::*;
+        use unicode_bidi::BidiClass::{B, BN, FSI, LRE, LRI, LRO, PDF, PDI, RLE, RLI, RLO, S, WS};
         let text = para.info.text;
         let levels = &para.info.levels;
         let original_classes = &para.info.original_classes;
@@ -1123,6 +1142,23 @@ impl ShapeLine {
         layout_lines: &mut Vec<LayoutLine>,
         match_mono_width: Option<f32>,
     ) {
+        fn add_to_visual_line(
+            vl: &mut VisualLine,
+            span_index: usize,
+            start: (usize, usize),
+            end: (usize, usize),
+            width: f32,
+            number_of_blanks: u32,
+        ) {
+            if end == start {
+                return;
+            }
+
+            vl.ranges.push((span_index, start, end));
+            vl.w += width;
+            vl.spaces += number_of_blanks;
+        }
+
         // For each visual line a list of  (span index,  and range of words in that span)
         // Note that a BiDi visual line could have multiple spans or parts of them
         // let mut vl_range_of_spans = Vec::with_capacity(1);
@@ -1142,23 +1178,6 @@ impl ShapeLine {
             v.glyphs
         }));
 
-        fn add_to_visual_line(
-            vl: &mut VisualLine,
-            span_index: usize,
-            start: (usize, usize),
-            end: (usize, usize),
-            width: f32,
-            number_of_blanks: u32,
-        ) {
-            if end == start {
-                return;
-            }
-
-            vl.ranges.push((span_index, start, end));
-            vl.w += width;
-            vl.spaces += number_of_blanks;
-        }
-
         // This would keep the maximum number of spans that would fit on a visual line
         // If one span is too large, this variable will hold the range of words inside that span
         // that fits on a line.
@@ -1169,7 +1188,7 @@ impl ShapeLine {
             for (span_index, span) in self.spans.iter().enumerate() {
                 let mut word_range_width = 0.;
                 let mut number_of_blanks: u32 = 0;
-                for word in span.words.iter() {
+                for word in &span.words {
                     let word_width = word.width(font_size);
                     word_range_width += word_width;
                     if word.blank {
@@ -1214,7 +1233,6 @@ impl ShapeLine {
                                 width_before_last_blank = word_range_width;
                             }
                             word_range_width += word_width;
-                            continue;
                         } else if wrap == Wrap::Glyph
                             // Make sure that the word is able to fit on it's own line, if not, fall back to Glyph wrapping.
                             || (wrap == Wrap::WordOrGlyph && word_width > width_opt.unwrap_or(f32::INFINITY))
@@ -1248,7 +1266,6 @@ impl ShapeLine {
                                     <= width_opt.unwrap_or(f32::INFINITY)
                                 {
                                     word_range_width += glyph_width;
-                                    continue;
                                 } else {
                                     add_to_visual_line(
                                         &mut current_visual_line,
@@ -1340,7 +1357,6 @@ impl ShapeLine {
                                 width_before_last_blank = word_range_width;
                             }
                             word_range_width += word_width;
-                            continue;
                         } else if wrap == Wrap::Glyph
                             // Make sure that the word is able to fit on it's own line, if not, fall back to Glyph wrapping.
                             || (wrap == Wrap::WordOrGlyph && word_width > width_opt.unwrap_or(f32::INFINITY))
@@ -1374,7 +1390,6 @@ impl ShapeLine {
                                     <= width_opt.unwrap_or(f32::INFINITY)
                                 {
                                     word_range_width += glyph_width;
-                                    continue;
                                 } else {
                                     add_to_visual_line(
                                         &mut current_visual_line,
@@ -1449,26 +1464,26 @@ impl ShapeLine {
             }
         }
 
-        if !current_visual_line.ranges.is_empty() {
-            visual_lines.push(current_visual_line);
-        } else {
+        if current_visual_line.ranges.is_empty() {
             current_visual_line.clear();
             cached_visual_lines.push(current_visual_line);
+        } else {
+            visual_lines.push(current_visual_line);
         }
 
         // Create the LayoutLines using the ranges inside visual lines
         let align = align.unwrap_or(if self.rtl { Align::Right } else { Align::Left });
 
-        let line_width = match width_opt {
-            Some(width) => width,
-            None => {
+        let line_width = width_opt.map_or_else(
+            || {
                 let mut width: f32 = 0.0;
-                for visual_line in visual_lines.iter() {
+                for visual_line in &visual_lines {
                     width = width.max(visual_line.w);
                 }
                 width
-            }
-        };
+            },
+            |width| width,
+        );
 
         let start_x = if self.rtl { line_width } else { 0.0 };
 
@@ -1528,7 +1543,7 @@ impl ShapeLine {
 
             let mut process_range = |range: Range<usize>| {
                 for &(span_index, (starting_word, starting_glyph), (ending_word, ending_glyph)) in
-                    visual_line.ranges[range.clone()].iter()
+                    &visual_line.ranges[range]
                 {
                     let span = &self.spans[span_index];
                     // If ending_glyph is not 0 we need to include glyphs from the ending_word
@@ -1567,12 +1582,14 @@ impl ShapeLine {
                                 _ => font_size,
                             };
 
-                            let x_advance = glyph_font_size * glyph.x_advance
-                                + if word.blank {
+                            let x_advance = glyph_font_size.mul_add(
+                                glyph.x_advance,
+                                if word.blank {
                                     justification_expansion
                                 } else {
                                     0.0
-                                };
+                                },
+                            );
                             if self.rtl {
                                 x -= x_advance;
                             }
@@ -1608,12 +1625,12 @@ impl ShapeLine {
             }
 
             let mut line_height_opt: Option<f32> = None;
-            for glyph in glyphs.iter() {
+            for glyph in &glyphs {
                 if let Some(glyph_line_height) = glyph.line_height_opt {
-                    line_height_opt = match line_height_opt {
-                        Some(line_height) => Some(line_height.max(glyph_line_height)),
-                        None => Some(glyph_line_height),
-                    };
+                    line_height_opt = line_height_opt
+                        .map_or(Some(glyph_line_height), |line_height| {
+                            Some(line_height.max(glyph_line_height))
+                        });
                 }
             }
 
@@ -1639,7 +1656,7 @@ impl ShapeLine {
                 max_ascent: 0.0,
                 max_descent: 0.0,
                 line_height_opt: self.metrics_opt.map(|x| x.line_height),
-                glyphs: Default::default(),
+                glyphs: Vec::default(),
             });
         }
 

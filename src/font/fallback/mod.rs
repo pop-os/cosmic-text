@@ -77,7 +77,7 @@ pub trait Fallback: Send + Sync {
 }
 
 #[derive(Debug, Default)]
-pub(crate) struct Fallbacks {
+pub struct Fallbacks {
     lists: Vec<&'static str>,
     common_fallback_range: Range<usize>,
     forbidden_fallback_range: Range<usize>,
@@ -174,13 +174,14 @@ use log::warn as missing_warn;
 // Default font gets None for both `weight_offset` and `script_non_matches`, and thus, it is
 // always the first to be popped from the set.
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub(crate) struct MonospaceFallbackInfo {
+pub struct MonospaceFallbackInfo {
     font_weight_diff: Option<u16>,
     codepoint_non_matches: Option<usize>,
     font_weight: u16,
     id: fontdb::ID,
 }
 
+#[derive(Debug)]
 pub struct FontFallbackIter<'a> {
     font_system: &'a mut FontSystem,
     font_match_keys: &'a [FontMatchKey],
@@ -223,7 +224,7 @@ impl<'a> FontFallbackIter<'a> {
         }
     }
 
-    pub fn check_missing(&mut self, word: &str) {
+    pub fn check_missing(&self, word: &str) {
         if self.end {
             missing_warn!(
                 "Failed to find any fallback for {:?} locale '{}': '{}'",
@@ -252,15 +253,16 @@ impl<'a> FontFallbackIter<'a> {
     }
 
     pub fn face_name(&self, id: fontdb::ID) -> &str {
-        if let Some(face) = self.font_system.db().face(id) {
-            if let Some((name, _)) = face.families.first() {
-                name
-            } else {
-                &face.post_script_name
-            }
-        } else {
-            "invalid font id"
-        }
+        self.font_system
+            .db()
+            .face(id)
+            .map_or("invalid font id", |face| {
+                if let Some((name, _)) = face.families.first() {
+                    name
+                } else {
+                    &face.post_script_name
+                }
+            })
     }
 
     pub fn shape_caches(&mut self) -> &mut ShapeBuffer {
@@ -268,11 +270,10 @@ impl<'a> FontFallbackIter<'a> {
     }
 
     fn face_contains_family(&self, id: fontdb::ID, family_name: &str) -> bool {
-        if let Some(face) = self.font_system.db().face(id) {
-            face.families.iter().any(|(name, _)| name == family_name)
-        } else {
-            false
-        }
+        self.font_system
+            .db()
+            .face(id)
+            .is_some_and(|face| face.families.iter().any(|(name, _)| name == family_name))
     }
 
     fn default_font_match_key(&self) -> Option<&FontMatchKey> {
@@ -304,7 +305,7 @@ impl<'a> FontFallbackIter<'a> {
         'DEF_FAM: while self.default_i < self.default_families.len() {
             self.default_i += 1;
             let is_mono = self.default_families[self.default_i - 1] == &Family::Monospace;
-            let default_font_match_key = self.default_font_match_key().cloned();
+            let default_font_match_key = self.default_font_match_key().copied();
             let word_chars_count = self.word.chars().count();
 
             macro_rules! mk_mono_fallback_info {
@@ -334,9 +335,8 @@ impl<'a> FontFallbackIter<'a> {
                 (false, Some(m_key)) => {
                     if let Some(font) = self.font_system.get_font(m_key.id, self.ideal_weight) {
                         return Some(font);
-                    } else {
-                        break 'DEF_FAM;
                     }
+                    break 'DEF_FAM;
                 }
                 (true, None) => (),
                 (true, Some(m_key)) => {
@@ -360,7 +360,7 @@ impl<'a> FontFallbackIter<'a> {
                         }
                     }
                 }
-            };
+            }
 
             let mono_ids_for_scripts = if is_mono && !self.scripts.is_empty() {
                 let scripts = self.scripts.iter().filter_map(|script| {
@@ -454,7 +454,7 @@ impl<'a> FontFallbackIter<'a> {
                     }
                 }
             }
-            log::debug!("failed to find family '{}'", common_family);
+            log::debug!("failed to find family '{common_family}'");
         }
 
         //TODO: do we need to do this?

@@ -65,7 +65,6 @@ fn main() {
     let mut mouse_x = 0.0;
     let mut mouse_y = 0.0;
     let mut mouse_left = ElementState::Released;
-    let mut unapplied_scroll_delta = 0.0;
 
     event_loop
         .run(|event, elwt| {
@@ -294,9 +293,9 @@ fn main() {
 
                         // Scroll if cursor is near edge of window while dragging
                         if mouse_y <= 5.0 {
-                            editor.action(Action::Scroll { lines: -1 });
+                            editor.action(Action::Scroll { pixels: -20.0 });
                         } else if mouse_y - 5.0 >= window.inner_size().height as f64 {
-                            editor.action(Action::Scroll { lines: 1 });
+                            editor.action(Action::Scroll { pixels: 20.0 });
                         }
 
                         window.request_redraw();
@@ -323,17 +322,14 @@ fn main() {
                     delta,
                     phase: _,
                 } => {
-                    let line_delta = match delta {
-                        MouseScrollDelta::LineDelta(_x, y) => y as i32,
-                        MouseScrollDelta::PixelDelta(PhysicalPosition { x: _, y }) => {
-                            unapplied_scroll_delta += y;
-                            let line_delta = (unapplied_scroll_delta / 20.0).floor();
-                            unapplied_scroll_delta -= line_delta * 20.0;
-                            line_delta as i32
-                        }
+                    let pixel_delta = match delta {
+                        MouseScrollDelta::LineDelta(_x, y) => y * 20.0,
+                        MouseScrollDelta::PixelDelta(PhysicalPosition { x: _, y }) => y as f32,
                     };
-                    if line_delta != 0 {
-                        editor.action(Action::Scroll { lines: -line_delta });
+                    if pixel_delta != 0.0 {
+                        editor.action(Action::Scroll {
+                            pixels: -pixel_delta,
+                        });
                     }
                     window.request_redraw();
                 }

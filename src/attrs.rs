@@ -85,23 +85,23 @@ pub enum FamilyOwned {
 impl FamilyOwned {
     pub fn new(family: Family) -> Self {
         match family {
-            Family::Name(name) => FamilyOwned::Name(SmolStr::from(name)),
-            Family::Serif => FamilyOwned::Serif,
-            Family::SansSerif => FamilyOwned::SansSerif,
-            Family::Cursive => FamilyOwned::Cursive,
-            Family::Fantasy => FamilyOwned::Fantasy,
-            Family::Monospace => FamilyOwned::Monospace,
+            Family::Name(name) => Self::Name(SmolStr::from(name)),
+            Family::Serif => Self::Serif,
+            Family::SansSerif => Self::SansSerif,
+            Family::Cursive => Self::Cursive,
+            Family::Fantasy => Self::Fantasy,
+            Family::Monospace => Self::Monospace,
         }
     }
 
-    pub fn as_family(&self) -> Family {
+    pub fn as_family(&self) -> Family<'_> {
         match self {
-            FamilyOwned::Name(name) => Family::Name(name),
-            FamilyOwned::Serif => Family::Serif,
-            FamilyOwned::SansSerif => Family::SansSerif,
-            FamilyOwned::Cursive => Family::Cursive,
-            FamilyOwned::Fantasy => Family::Fantasy,
-            FamilyOwned::Monospace => Family::Monospace,
+            Self::Name(name) => Family::Name(name),
+            Self::Serif => Family::Serif,
+            Self::SansSerif => Family::SansSerif,
+            Self::Cursive => Family::Cursive,
+            Self::Fantasy => Family::Fantasy,
+            Self::Monospace => Family::Monospace,
         }
     }
 }
@@ -159,7 +159,7 @@ impl FeatureTag {
     /// Stylistic Set 2 (font-specific alternate glyphs)
     pub const STYLISTIC_SET_2: Self = Self::new(b"ss02");
 
-    pub fn as_bytes(&self) -> &[u8; 4] {
+    pub const fn as_bytes(&self) -> &[u8; 4] {
         &self.0
     }
 }
@@ -176,7 +176,7 @@ pub struct FontFeatures {
 }
 
 impl FontFeatures {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
             features: Vec::new(),
         }
@@ -250,7 +250,7 @@ impl<'a> Attrs<'a> {
     /// Create a new set of attributes with sane defaults
     ///
     /// This defaults to a regular Sans-Serif font.
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
             color_opt: None,
             family: Family::SansSerif,
@@ -266,43 +266,43 @@ impl<'a> Attrs<'a> {
     }
 
     /// Set [Color]
-    pub fn color(mut self, color: Color) -> Self {
+    pub const fn color(mut self, color: Color) -> Self {
         self.color_opt = Some(color);
         self
     }
 
     /// Set [Family]
-    pub fn family(mut self, family: Family<'a>) -> Self {
+    pub const fn family(mut self, family: Family<'a>) -> Self {
         self.family = family;
         self
     }
 
     /// Set [Stretch]
-    pub fn stretch(mut self, stretch: Stretch) -> Self {
+    pub const fn stretch(mut self, stretch: Stretch) -> Self {
         self.stretch = stretch;
         self
     }
 
     /// Set [Style]
-    pub fn style(mut self, style: Style) -> Self {
+    pub const fn style(mut self, style: Style) -> Self {
         self.style = style;
         self
     }
 
     /// Set [Weight]
-    pub fn weight(mut self, weight: Weight) -> Self {
+    pub const fn weight(mut self, weight: Weight) -> Self {
         self.weight = weight;
         self
     }
 
     /// Set metadata
-    pub fn metadata(mut self, metadata: usize) -> Self {
+    pub const fn metadata(mut self, metadata: usize) -> Self {
         self.metadata = metadata;
         self
     }
 
     /// Set [`CacheKeyFlags`]
-    pub fn cache_key_flags(mut self, cache_key_flags: CacheKeyFlags) -> Self {
+    pub const fn cache_key_flags(mut self, cache_key_flags: CacheKeyFlags) -> Self {
         self.cache_key_flags = cache_key_flags;
         self
     }
@@ -314,7 +314,7 @@ impl<'a> Attrs<'a> {
     }
 
     /// Set letter spacing (tracking) in EM
-    pub fn letter_spacing(mut self, letter_spacing: f32) -> Self {
+    pub const fn letter_spacing(mut self, letter_spacing: f32) -> Self {
         self.letter_spacing_opt = Some(LetterSpacing(letter_spacing));
         self
     }
@@ -394,7 +394,7 @@ impl AttrsOwned {
         }
     }
 
-    pub fn as_attrs(&self) -> Attrs {
+    pub fn as_attrs(&self) -> Attrs<'_> {
         Attrs {
             color_opt: self.color_opt,
             family: self.family_owned.as_family(),
@@ -428,7 +428,7 @@ impl AttrsList {
     }
 
     /// Get the default [Attrs]
-    pub fn defaults(&self) -> Attrs {
+    pub fn defaults(&self) -> Attrs<'_> {
         self.defaults.as_attrs()
     }
 
@@ -460,7 +460,7 @@ impl AttrsList {
     /// Get the attribute span for an index
     ///
     /// This returns a span that contains the index
-    pub fn get_span(&self, index: usize) -> Attrs {
+    pub fn get_span(&self, index: usize) -> Attrs<'_> {
         self.spans
             .get(&index)
             .map(|v| v.as_attrs())
@@ -477,7 +477,9 @@ impl AttrsList {
         for span in self.spans.iter() {
             if span.0.end <= index {
                 continue;
-            } else if span.0.start >= index {
+            }
+
+            if span.0.start >= index {
                 removes.push((span.0.clone(), false));
             } else {
                 removes.push((span.0.clone(), true));

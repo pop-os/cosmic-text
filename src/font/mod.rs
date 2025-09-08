@@ -15,7 +15,7 @@ use alloc::vec::Vec;
 use rustybuzz::Face as RustybuzzFace;
 use self_cell::self_cell;
 
-pub(crate) mod fallback;
+pub mod fallback;
 pub use fallback::{Fallback, PlatformFallback};
 
 pub use self::system::*;
@@ -58,7 +58,7 @@ impl fmt::Debug for Font {
 }
 
 impl Font {
-    pub fn id(&self) -> fontdb::ID {
+    pub const fn id(&self) -> fontdb::ID {
         self.id
     }
 
@@ -119,9 +119,9 @@ impl Font {
                 let monospace_em_width = info
                     .monospaced
                     .then(|| {
-                        let hor_advance = face.glyph_hor_advance(face.glyph_index(' ')?)? as f32;
-                        let upem = face.units_per_em() as f32;
-                        Some(hor_advance / upem)
+                        let hor_advance = face.glyph_hor_advance(face.glyph_index(' ')?)?;
+                        let upem = face.units_per_em();
+                        Some(f32::from(hor_advance) / f32::from(upem))
                     })
                     .flatten();
 
@@ -144,7 +144,7 @@ impl Font {
                     .cmap?
                     .subtables
                     .into_iter()
-                    .filter(|subtable| subtable.is_unicode())
+                    .filter(ttf_parser::cmap::Subtable::is_unicode)
                     .for_each(|subtable| {
                         unicode_codepoints.reserve(1024);
                         subtable.codepoints(|code_point| {
@@ -194,7 +194,7 @@ impl Font {
                             .into_iter()
                             .find(|axis| axis.tag == ttf_parser::Tag::from_bytes(b"wght"))
                         {
-                            let wght = (weight.0 as f32).clamp(axis.min_value, axis.max_value);
+                            let wght = f32::from(weight.0).clamp(axis.min_value, axis.max_value);
                             let _ = face.set_variation(ttf_parser::Tag::from_bytes(b"wght"), wght);
                         }
                         face

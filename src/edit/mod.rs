@@ -20,7 +20,7 @@ pub use self::vi::*;
 mod vi;
 
 /// An action to perform on an [`Editor`]
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Action {
     /// Move the cursor with some motion
     Motion(Motion),
@@ -58,9 +58,9 @@ pub enum Action {
         x: i32,
         y: i32,
     },
-    /// Scroll specified number of lines
+    /// Scroll specified number of pixels
     Scroll {
-        lines: i32,
+        pixels: f32,
     },
 }
 
@@ -130,7 +130,7 @@ impl Change {
     // Reverse change (in place)
     pub fn reverse(&mut self) {
         self.items.reverse();
-        for item in self.items.iter_mut() {
+        for item in &mut self.items {
             item.reverse();
         }
     }
@@ -192,7 +192,7 @@ pub trait Edit<'buffer> {
 
     /// Get the [`Buffer`] redraw flag
     fn redraw(&self) -> bool {
-        self.with_buffer(|buffer| buffer.redraw())
+        self.with_buffer(super::buffer::Buffer::redraw)
     }
 
     /// Set the [`Buffer`] redraw flag
@@ -273,7 +273,7 @@ pub trait Edit<'buffer> {
                             .unicode_word_indices()
                             .map(|(i, word)| i + word.len())
                             .find(|&i| i > end.index)
-                            .unwrap_or(line.text().len());
+                            .unwrap_or_else(|| line.text().len());
                     }
 
                     Some((start, end))

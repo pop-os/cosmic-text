@@ -36,7 +36,7 @@
 //! let attrs = Attrs::new();
 //!
 //! // Add some text!
-//! buffer.set_text("Hello, Rust! 🦀\n", &attrs, Shaping::Advanced);
+//! buffer.set_text("Hello, Rust! 🦀\n", &attrs, Shaping::Advanced, None);
 //!
 //! // Perform shaping as desired
 //! buffer.shape_until_scroll(true);

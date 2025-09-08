@@ -92,7 +92,7 @@ impl DrawTestCfg {
             Some((self.canvas_width - margins * 2) as f32),
             Some((self.canvas_height - margins * 2) as f32),
         );
-        buffer.set_text(&self.text, &self.font.as_attrs(), Shaping::Advanced);
+        buffer.set_text(&self.text, &self.font.as_attrs(), Shaping::Advanced, None);
         buffer.shape_until_scroll(true);
 
         // Black
