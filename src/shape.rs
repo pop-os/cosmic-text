@@ -10,6 +10,7 @@ use crate::{
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 
+use alloc::collections::VecDeque;
 use core::cmp::{max, min};
 use core::fmt;
 use core::mem;
@@ -78,11 +79,17 @@ impl Shaping {
     }
 }
 
+const NUM_SHAPE_PLANS: usize = 6;
+
 /// A set of buffers containing allocations for shaped text.
 #[derive(Default)]
 pub struct ShapeBuffer {
+    /// Cache for harfrust shape plans. Stores up to [`NUM_SHAPE_PLANS`] plans at once. Inserting a new one past that
+    /// will remove the one that was least recently added (not least recently used).
+    shape_plan_cache: VecDeque<(fontdb::ID, harfrust::ShapePlan)>,
+
     /// Buffer for holding unicode text.
-    rustybuzz_buffer: Option<rustybuzz::UnicodeBuffer>,
+    harfrust_buffer: Option<harfrust::UnicodeBuffer>,
 
     /// Temporary buffers for scripts.
     scripts: Vec<Script>,
@@ -119,15 +126,15 @@ fn shape_fallback(
 ) -> Vec<usize> {
     let run = &line[start_run..end_run];
 
-    let font_scale = font.rustybuzz().units_per_em() as f32;
-    let ascent = f32::from(font.rustybuzz().ascender()) / font_scale;
-    let descent = -f32::from(font.rustybuzz().descender()) / font_scale;
+    let font_scale = font.metrics().units_per_em as f32;
+    let ascent = font.metrics().ascent / font_scale;
+    let descent = -font.metrics().descent / font_scale;
 
-    let mut buffer = scratch.rustybuzz_buffer.take().unwrap_or_default();
+    let mut buffer = scratch.harfrust_buffer.take().unwrap_or_default();
     buffer.set_direction(if span_rtl {
-        rustybuzz::Direction::RightToLeft
+        harfrust::Direction::RightToLeft
     } else {
-        rustybuzz::Direction::LeftToRight
+        harfrust::Direction::LeftToRight
     });
     if run.contains('\t') {
         // Push string to buffer, replacing tabs with spaces
@@ -140,29 +147,56 @@ fn shape_fallback(
     }
     buffer.guess_segment_properties();
 
-    let rtl = matches!(buffer.direction(), rustybuzz::Direction::RightToLeft);
+    let rtl = matches!(buffer.direction(), harfrust::Direction::RightToLeft);
     assert_eq!(rtl, span_rtl);
 
     let attrs = attrs_list.get_span(start_run);
     let mut rb_font_features = Vec::new();
 
-    // Convert attrs::Feature to rustybuzz::Feature
-    for feature in attrs.font_features.features {
-        rb_font_features.push(rustybuzz::Feature::new(
-            rustybuzz::ttf_parser::Tag::from_bytes(feature.tag.as_bytes()),
+    // Convert attrs::Feature to harfrust::Feature
+    for feature in &attrs.font_features.features {
+        rb_font_features.push(harfrust::Feature::new(
+            harfrust::Tag::new(feature.tag.as_bytes()),
             feature.value,
             0..usize::MAX,
         ));
     }
 
-    let shape_plan = rustybuzz::ShapePlan::new(
-        font.rustybuzz(),
-        buffer.direction(),
-        Some(buffer.script()),
-        buffer.language().as_ref(),
-        &rb_font_features,
-    );
-    let glyph_buffer = rustybuzz::shape_with_plan(font.rustybuzz(), &shape_plan, buffer);
+    let language = buffer.language();
+    let key = harfrust::ShapePlanKey::new(Some(buffer.script()), buffer.direction())
+        .features(&rb_font_features)
+        .instance(Some(font.shaper_instance()))
+        .language(language.as_ref());
+
+    let shape_plan = match scratch
+        .shape_plan_cache
+        .iter()
+        .find(|(id, plan)| *id == font.id() && key.matches(plan))
+    {
+        Some((_font_id, plan)) => plan,
+        None => {
+            let plan = harfrust::ShapePlan::new(
+                font.shaper(),
+                buffer.direction(),
+                Some(buffer.script()),
+                buffer.language().as_ref(),
+                &rb_font_features,
+            );
+            if scratch.shape_plan_cache.len() >= NUM_SHAPE_PLANS {
+                scratch.shape_plan_cache.pop_front();
+            }
+            scratch.shape_plan_cache.push_back((font.id(), plan));
+            &scratch
+                .shape_plan_cache
+                .back()
+                .expect("we just pushed the shape plan")
+                .1
+        }
+    };
+
+    let glyph_buffer = font
+        .shaper()
+        .shape_with_plan(shape_plan, buffer, &rb_font_features);
     let glyph_infos = glyph_buffer.glyph_infos();
     let glyph_positions = glyph_buffer.glyph_positions();
 
@@ -230,7 +264,7 @@ fn shape_fallback(
     }
 
     // Restore the buffer to save an allocation.
-    scratch.rustybuzz_buffer = Some(glyph_buffer.clear());
+    scratch.harfrust_buffer = Some(glyph_buffer.clear());
 
     missing
 }
