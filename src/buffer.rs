@@ -1335,14 +1335,15 @@ impl Buffer {
         Some((cursor, cursor_x_opt))
     }
 
-    /// Draw the buffer
     #[cfg(feature = "swash")]
-    pub fn draw<F>(
+    #[inline]
+    fn draw_impl<F>(
         &self,
         font_system: &mut FontSystem,
         cache: &mut crate::SwashCache,
         color: Color,
         mut f: F,
+        outline: Option<(u16, Color)>,
     ) where
         F: FnMut(i32, i32, u32, u32, Color),
     {
@@ -1351,22 +1352,80 @@ impl Buffer {
                 let physical_glyph = glyph.physical((0., 0.), 1.0);
                 let glyph_color = glyph.color_opt.map_or(color, |some| some);
 
+                if let Some((outline_size, outline_color)) = outline {
+                    cache.with_pixels(
+                        font_system,
+                        physical_glyph.cache_key,
+                        glyph_color,
+                        |x, y, color| {
+                            if color.a() < 200 {
+                                return;
+                            }
+
+                            let x = physical_glyph.x + x;
+                            let y = run.line_y as i32 + physical_glyph.y + y;
+
+                            let rect_size = 1 + u32::from(outline_size) * 2;
+                            f(
+                                x - i32::from(outline_size),
+                                y - i32::from(outline_size),
+                                rect_size,
+                                rect_size,
+                                outline_color.with_replaced_a(color.a()),
+                            );
+                        },
+                    );
+                }
+
                 cache.with_pixels(
                     font_system,
                     physical_glyph.cache_key,
                     glyph_color,
                     |x, y, color| {
-                        f(
-                            physical_glyph.x + x,
-                            run.line_y as i32 + physical_glyph.y + y,
-                            1,
-                            1,
-                            color,
-                        );
+                        let x = physical_glyph.x + x;
+                        let y = run.line_y as i32 + physical_glyph.y + y;
+
+                        f(x, y, 1, 1, color);
                     },
                 );
             }
         }
+    }
+
+    /// Draw the buffer
+    #[cfg(feature = "swash")]
+    pub fn draw<F>(
+        &self,
+        font_system: &mut FontSystem,
+        cache: &mut crate::SwashCache,
+        color: Color,
+        f: F,
+    ) where
+        F: FnMut(i32, i32, u32, u32, Color),
+    {
+        self.draw_impl(font_system, cache, color, f, None);
+    }
+
+    /// Draw the buffer with an outline
+    #[cfg(feature = "swash")]
+    pub fn draw_outlined<F>(
+        &self,
+        font_system: &mut FontSystem,
+        cache: &mut crate::SwashCache,
+        color: Color,
+        f: F,
+        outline_size: u16,
+        outline_color: Color,
+    ) where
+        F: FnMut(i32, i32, u32, u32, Color),
+    {
+        self.draw_impl(
+            font_system,
+            cache,
+            color,
+            f,
+            Some((outline_size, outline_color)),
+        );
     }
 }
 
@@ -1492,5 +1551,27 @@ impl BorrowedWithFontSystem<'_, Buffer> {
         F: FnMut(i32, i32, u32, u32, Color),
     {
         self.inner.draw(self.font_system, cache, color, f);
+    }
+
+    /// Draw the buffer with an outline
+    #[cfg(feature = "swash")]
+    pub fn draw_outlined<F>(
+        &mut self,
+        cache: &mut crate::SwashCache,
+        color: Color,
+        f: F,
+        outline_size: u16,
+        outline_color: Color,
+    ) where
+        F: FnMut(i32, i32, u32, u32, Color),
+    {
+        self.inner.draw_outlined(
+            self.font_system,
+            cache,
+            color,
+            f,
+            outline_size,
+            outline_color,
+        );
     }
 }
