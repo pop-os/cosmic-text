@@ -202,6 +202,7 @@ deny = [
 # Certain crates/versions that will be skipped when doing duplicate detection.
 skip = [
     { name = "bitflags" },
+    { name = "syn" },
 
     # These three are from swash being on an older version of skrifa than harfrust and ourselves
     { name = "font-types" },
