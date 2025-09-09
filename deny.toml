@@ -72,6 +72,9 @@ feature-depth = 1
 ignore = [
     # https://github.com/trishume/syntect/issues/537
     { id = "RUSTSEC-2024-0320" },
+
+    # from derivative via cosmic_undo_2
+    { id = "RUSTSEC-2024-0388" },
 ]
 # If this is true, then cargo deny will use the git executable to fetch advisory database.
 # If this is false, then it uses a built-in git library.
