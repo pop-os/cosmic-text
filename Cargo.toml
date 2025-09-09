@@ -87,3 +87,6 @@ opt-level = 1
 
 [package.metadata.docs.rs]
 features = ["vi"]
+
+[patch.crates-io]
+peniko = { git = "https://github.com/linebender/peniko", rev = "d86ffcd5e5a3853a0a4f57774649e6075424bd6d" }
