@@ -17,6 +17,7 @@ fontdb = { version = "0.23", default-features = false }
 harfrust = { version = "0.2.0", default-features = false }
 hashbrown = { version = "0.15", optional = true, default-features = false }
 libm = { version = "0.2.8", optional = true }
+linebender_resource_handle = { version = "0.1.1", default-features = false }
 log = "0.4.20"
 modit = { version = "0.1.4", optional = true }
 rangemap = "1.4.0"
@@ -41,21 +42,18 @@ version = "0.3.13"
 default-features = false
 features = ["hardcoded-data"]
 
-[dependencies.peniko]
-version = "0.4.0"
-optional = true
-
 [features]
 default = ["std", "swash", "fontconfig"]
 fontconfig = ["fontdb/fontconfig", "std"]
 monospace_fallback = []
 no_std = ["hashbrown", "dep:libm", "skrifa/libm", "core_maths"]
-peniko = ["dep:peniko"]
+peniko = []
 shape-run-cache = []
 std = [
     "fontdb/memmap",
     "fontdb/std",
     "harfrust/std",
+    "linebender_resource_handle/std",
     "skrifa/std",
     "swash?/std",
     "sys-locale",
