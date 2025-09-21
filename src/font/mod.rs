@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use harfrust::Shaper;
+use linebender_resource_handle::{Blob, FontData};
 use skrifa::raw::{ReadError, TableProvider as _};
 use skrifa::{metrics::Metrics, prelude::*};
 // re-export skrifa
 pub use skrifa;
 // re-export peniko::Font;
 #[cfg(feature = "peniko")]
-pub use peniko::Font as PenikoFont;
+pub use linebender_resource_handle::FontData as PenikoFont;
 
 use core::fmt;
 
@@ -50,10 +51,7 @@ pub struct Font {
     #[cfg(feature = "swash")]
     swash: (u32, swash::CacheKey),
     harfrust: OwnedFace,
-    #[cfg(not(feature = "peniko"))]
-    data: Arc<dyn AsRef<[u8]> + Send + Sync>,
-    #[cfg(feature = "peniko")]
-    data: peniko::Font,
+    data: FontData,
     id: fontdb::ID,
     monospace_fallback: Option<FontMonospaceFallback>,
 }
@@ -88,14 +86,7 @@ impl Font {
     }
 
     pub fn data(&self) -> &[u8] {
-        #[cfg(not(feature = "peniko"))]
-        {
-            (*self.data).as_ref()
-        }
-        #[cfg(feature = "peniko")]
-        {
-            self.data.data.data()
-        }
+        self.data.data.data()
     }
 
     pub fn shaper(&self) -> &harfrust::Shaper<'_> {
@@ -242,10 +233,7 @@ impl Font {
                 },
             )
             .ok()?,
-            #[cfg(not(feature = "peniko"))]
-            data,
-            #[cfg(feature = "peniko")]
-            data: peniko::Font::new(peniko::Blob::new(data), info.index),
+            data: FontData::new(Blob::new(data), info.index),
         })
     }
 }
