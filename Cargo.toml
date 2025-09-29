@@ -71,6 +71,10 @@ harness = false
 name = "text_shaping_benchmarks"
 harness = false
 
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
 [workspace]
 members = ["examples/*"]
 
