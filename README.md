@@ -15,10 +15,7 @@ Rust, and supports bidirectional text. Font fallback is also a custom
 implementation, reusing some of the static fallback lists in browsers such as
 Chromium and Firefox. Linux, macOS, and Windows are supported with the full
 feature set. Other platforms may need to implement font fallback capabilities.
-
-## Screenshots
-
-Arabic translation of Universal Declaration of Human Rights
+Universal Declaration of Human Rights
 [![Arabic screenshot](screenshots/arabic.png)](screenshots/arabic.png)
 
 Hindi translation of Universal Declaration of Human Rights
@@ -26,6 +23,9 @@ Hindi translation of Universal Declaration of Human Rights
 
 Simplified Chinese translation of Universal Declaration of Human Rights
 [![Simplified Chinses screenshot](screenshots/chinese-simplified.png)](screenshots/chinese-simplified.png)
+
+Urdu translation of Universal Declaration of Human Rights
+[View Urdu translation](https://www.ohchr.org/EN/UDHR/Pages/Search.aspx?LangID=urd)
 
 ## Roadmap
 
