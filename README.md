@@ -27,6 +27,9 @@ Hindi translation of Universal Declaration of Human Rights
 Simplified Chinese translation of Universal Declaration of Human Rights
 [![Simplified Chinses screenshot](screenshots/chinese-simplified.png)](screenshots/chinese-simplified.png)
 
+Urdu translation of Universal Declaration of Human Rights
+[View Urdu translation](https://www.ohchr.org/en/human-rights/universal-declaration/translations/urdu)
+
 ## Roadmap
 
 The following features must be supported before this is "ready":
