@@ -690,7 +690,15 @@ impl Buffer {
                 shaping,
             ));
         }
-        if self.lines.is_empty() {
+
+        // Ensure there is an ending line with no line ending
+        if self
+            .lines
+            .last()
+            .map(|line| line.ending())
+            .unwrap_or(LineEnding::default())
+            != LineEnding::None
+        {
             self.lines.push(BufferLine::new(
                 "",
                 LineEnding::None,

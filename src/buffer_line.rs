@@ -159,6 +159,9 @@ impl BufferLine {
         let len = self.text.len();
         self.text.push_str(other.text());
 
+        // To preserve line endings, we use the one from the other line
+        self.ending = other.ending();
+
         if other.attrs_list.defaults() != self.attrs_list.defaults() {
             // If default formatting does not match, make a new span for it
             self.attrs_list
@@ -181,6 +184,8 @@ impl BufferLine {
         self.reset();
 
         let mut new = Self::new(text, self.ending, attrs_list, self.shaping);
+        // To preserve line endings, it moves to the new line
+        self.ending = LineEnding::None;
         new.align = self.align;
         new
     }
@@ -282,7 +287,7 @@ impl BufferLine {
     pub(crate) fn empty() -> Self {
         Self {
             text: String::default(),
-            ending: LineEnding::default(),
+            ending: LineEnding::None,
             attrs_list: AttrsList::new(&Attrs::new()),
             align: None,
             shape_opt: Cached::Empty,

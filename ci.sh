@@ -36,4 +36,4 @@ echo Build with all features
 build --all-features
 
 echo Run tests
-cargo test
+cargo test --all-features

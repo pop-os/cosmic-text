@@ -9,14 +9,13 @@ use alloc::{
 #[cfg(feature = "swash")]
 use std::cmp;
 
-use core::iter::once;
 use unicode_segmentation::UnicodeSegmentation;
 
 #[cfg(feature = "swash")]
 use crate::Color;
 use crate::{
     Action, Attrs, AttrsList, BorrowedWithFontSystem, BufferLine, BufferRef, Change, ChangeItem,
-    Cursor, Edit, FontSystem, LayoutRun, Selection, Shaping,
+    Cursor, Edit, FontSystem, LayoutRun, LineEnding, LineIter, Selection, Shaping,
 };
 
 /// A wrapper of [`Buffer`] for easy editing
@@ -300,7 +299,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
 
                 // Remove end line
                 let removed = buffer.lines.remove(end.line);
-                change_lines.insert(0, removed.text().to_string());
+                change_lines.insert(0, removed);
 
                 Some(after)
             } else {
@@ -310,37 +309,51 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
             // Delete interior lines (in reverse for safety)
             for line_i in (start.line + 1..end.line).rev() {
                 let removed = buffer.lines.remove(line_i);
-                change_lines.insert(0, removed.text().to_string());
+                change_lines.insert(0, removed);
             }
 
             // Delete the selection from the first line
             {
+                let line = &mut buffer.lines[start.line];
+
                 // Get part after selection if start line is also end line
                 let after_opt = if start.line == end.line {
-                    Some(buffer.lines[start.line].split_off(end.index))
+                    Some(line.split_off(end.index))
                 } else {
                     None
                 };
 
                 // Delete selected part of line
-                let removed = buffer.lines[start.line].split_off(start.index);
-                change_lines.insert(0, removed.text().to_string());
+                let removed = line.split_off(start.index);
+                change_lines.insert(0, removed);
 
                 // Re-add part of line after selection
                 if let Some(after) = after_opt {
-                    buffer.lines[start.line].append(&after);
+                    line.append(&after);
                 }
 
                 // Re-add valid parts of end line
-                if let Some(end_line) = end_line_opt {
-                    buffer.lines[start.line].append(&end_line);
+                if let Some(mut end_line) = end_line_opt {
+                    // Preserve line ending of original line
+                    end_line.set_ending(line.ending());
+                    line.append(&end_line);
                 }
+            }
+
+            let mut text = String::new();
+            let mut last_ending: Option<LineEnding> = None;
+            for line in change_lines {
+                if let Some(ending) = last_ending {
+                    text.push_str(ending.as_str());
+                }
+                text.push_str(line.text());
+                last_ending = Some(line.ending());
             }
 
             ChangeItem {
                 start,
                 end,
-                text: change_lines.join("\n"),
+                text,
                 insert: false,
             }
         });
@@ -367,14 +380,18 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
 
             // Ensure there are enough lines in the buffer to handle this cursor
             while cursor.line >= buffer.lines.len() {
-                let ending = buffer
-                    .lines
-                    .last()
-                    .map(super::super::buffer_line::BufferLine::ending)
-                    .unwrap_or_default();
+                // Get last line ending
+                let mut last_ending = LineEnding::None;
+                if let Some(last_line) = buffer.lines.last_mut() {
+                    last_ending = last_line.ending();
+                    // Ensure a valid line ending is always set on interior lines
+                    if last_ending == LineEnding::None {
+                        last_line.set_ending(LineEnding::default());
+                    }
+                }
                 let line = BufferLine::new(
                     String::new(),
-                    ending,
+                    last_ending,
                     AttrsList::new(&attrs_list.as_ref().map_or_else(
                         || {
                             buffer
@@ -391,7 +408,6 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
 
             let line: &mut BufferLine = &mut buffer.lines[cursor.line];
             let insert_line = cursor.line + 1;
-            let ending = line.ending();
 
             // Collect text after insertion as a line
             let after: BufferLine = line.split_off(cursor.index);
@@ -403,31 +419,32 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
             });
 
             // Append the inserted text, line by line
-            // we want to see a blank entry if the string ends with a newline
-            //TODO: adjust this to get line ending from data?
-            let addendum = once("").filter(|_| data.ends_with('\n'));
-            let mut lines_iter = data.split_inclusive('\n').chain(addendum);
-            if let Some(data_line) = lines_iter.next() {
+            let mut lines: Vec<_> = LineIter::new(&data).collect();
+            // Ensure there is always an ending line with no line ending
+            if lines.last().map(|line| line.1).unwrap_or(LineEnding::None) != LineEnding::None {
+                lines.push((Default::default(), LineEnding::None));
+            }
+            let mut lines_iter = lines.into_iter();
+
+            // Add first line
+            if let Some((range, ending)) = lines_iter.next() {
+                let data_line = &data[range];
                 let mut these_attrs = final_attrs.split_off(data_line.len());
-                remaining_split_len -= data_line.len();
+                remaining_split_len -= data_line.len() + ending.as_str().len();
                 core::mem::swap(&mut these_attrs, &mut final_attrs);
                 line.append(&BufferLine::new(
-                    data_line
-                        .strip_suffix(char::is_control)
-                        .unwrap_or(data_line),
+                    data_line,
                     ending,
                     these_attrs,
                     Shaping::Advanced,
                 ));
-            } else {
-                panic!("str::lines() did not yield any elements");
             }
-            if let Some(data_line) = lines_iter.next_back() {
-                remaining_split_len -= data_line.len();
+            // Add last line
+            if let Some((range, ending)) = lines_iter.next_back() {
+                let data_line = &data[range];
+                remaining_split_len -= data_line.len() + ending.as_str().len();
                 let mut tmp = BufferLine::new(
-                    data_line
-                        .strip_suffix(char::is_control)
-                        .unwrap_or(data_line),
+                    data_line,
                     ending,
                     final_attrs.split_off(remaining_split_len),
                     Shaping::Advanced,
@@ -438,12 +455,12 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
             } else {
                 line.append(&after);
             }
-            for data_line in lines_iter.rev() {
-                remaining_split_len -= data_line.len();
+            // Add middle lines
+            for (range, ending) in lines_iter.rev() {
+                let data_line = &data[range];
+                remaining_split_len -= data_line.len() + ending.as_str().len();
                 let tmp = BufferLine::new(
-                    data_line
-                        .strip_suffix(char::is_control)
-                        .unwrap_or(data_line),
+                    data_line,
                     ending,
                     final_attrs.split_off(remaining_split_len),
                     Shaping::Advanced,
