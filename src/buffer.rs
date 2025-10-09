@@ -693,7 +693,7 @@ impl Buffer {
         if self.lines.is_empty() {
             self.lines.push(BufferLine::new(
                 "",
-                LineEnding::default(),
+                LineEnding::None,
                 AttrsList::new(attrs),
                 shaping,
             ));
