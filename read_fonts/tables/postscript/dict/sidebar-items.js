@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Entry","Operator","Token"],"fn":["entries","normalize_font_matrix","tokens"],"struct":["BcdComponents","Blues","StemSnaps"]};
