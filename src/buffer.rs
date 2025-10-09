@@ -696,7 +696,7 @@ impl Buffer {
             .lines
             .last()
             .map(|line| line.ending())
-            .unwrap_or(LineEnding::default())
+            .unwrap_or_default()
             != LineEnding::None
         {
             self.lines.push(BufferLine::new(
