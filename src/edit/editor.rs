@@ -419,7 +419,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
             });
 
             // Append the inserted text, line by line
-            let mut lines: Vec<_> = LineIter::new(&data).collect();
+            let mut lines: Vec<_> = LineIter::new(data).collect();
             // Ensure there is always an ending line with no line ending
             if lines.last().map(|line| line.1).unwrap_or(LineEnding::None) != LineEnding::None {
                 lines.push((Default::default(), LineEnding::None));
