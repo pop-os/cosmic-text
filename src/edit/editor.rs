@@ -335,7 +335,9 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                 // Re-add valid parts of end line
                 if let Some(mut end_line) = end_line_opt {
                     // Preserve line ending of original line
-                    end_line.set_ending(line.ending());
+                    if end_line.ending() == LineEnding::None {
+                        end_line.set_ending(line.ending());
+                    }
                     line.append(&end_line);
                 }
             }
