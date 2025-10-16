@@ -63,6 +63,12 @@ impl Color {
     pub const fn a(&self) -> u8 {
         ((self.0 & 0xFF_00_00_00) >> 24) as u8
     }
+
+    /// Get with a new value for the alpha component
+    #[inline]
+    pub(crate) fn with_replaced_a(self, a: u8) -> Self {
+        Self((u32::from(a) << 24) | self.0 & 0xFF_FF_FF)
+    }
 }
 
 /// An owned version of [`Family`]
