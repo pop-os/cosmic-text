@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["Decoration","GlyphMetrics","Metrics"],"type":["BoundingBox"]};
