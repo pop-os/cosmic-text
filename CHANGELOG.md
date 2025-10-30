@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.0] - 2025-10-30
+
+### Added
+
+- Add DISABLE\_HINTING cache flag
+- Variable font support
+- Add pixel font flag
+- Add ASCII fast path optimization to ShapeWord::build
+- Optimize BidiParagraphs with ASCII fast path
+- Add explicit lifetimes to borrowed return types
+- Implement pixel-based scrolling for the Editor
+- Add alignment paramater to set\_text
+
+### Fixed
+
+- Clip based on ascent and descent, not baseline
+- Fix scroll when vertical offset is exactly layout\_height
+- Do not ignore font family
+- Transform outline if fake italic provided
+- Fixed Tab indenting the line instead of adding Tab or spaces
+- Update and fix cargo-deny
+- Fix UDHR link
+- If buffer is empty, do not set line ending
+- Better handling of newlines in editor insert and delete
+- Improve handling of non-existant files in load\_text
+- Fix delete ranges removing interior newlines
+
+### Changed
+
+- fontdb updated to 0.23
+- Replace rustybuzz with HarfRust
+- Use linebender\_resource\_handle instead of peniko
+- Upgrade skrifa to 0.37
+
 ## [0.14.2] - 2025-04-14
 
 ### Fixed
