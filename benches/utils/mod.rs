@@ -6,7 +6,7 @@ use std::sync::Arc;
 
 const DEJA_SANS_FONT: &[u8] = include_bytes!("../../fonts/DejaVuSans.ttf");
 
-const USE_DEJA : bool = false;
+const USE_DEJA: bool = false;
 
 pub(crate) struct CtBencher {
     font_system: ct::FontSystem,
