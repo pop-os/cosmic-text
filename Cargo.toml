@@ -7,7 +7,7 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 documentation = "https://docs.rs/cosmic-text/latest/cosmic_text/"
 repository = "https://github.com/pop-os/cosmic-text"
-rust-version = "1.80"
+rust-version = "1.82"
 
 [dependencies]
 bitflags = "2.4.1"
@@ -79,6 +79,7 @@ tiny-skia = "0.11.2"
 criterion = { version = "0.5.1", default-features = false, features = [
     "cargo_bench_support",
 ] }
+parley = "0.6.0"
 
 [profile.test]
 opt-level = 1
