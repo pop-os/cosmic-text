@@ -3,29 +3,37 @@ use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
 struct CtBencher {
     font_system: ct::FontSystem,
+    buffer: ct::Buffer,
 }
 
 impl CtBencher {
-    fn new() -> Self {
-        let font_system = ct::FontSystem::new();
-        Self { font_system }
+    fn new(font_size: f32, line_height: f32, width: f32) -> Self {
+        let mut font_system = ct::FontSystem::new();
+        let mut buffer =
+            ct::Buffer::new(&mut font_system, ct::Metrics::new(font_size, line_height));
+        buffer.set_size(&mut font_system, Some(width), None);
+        Self {
+            font_system,
+            buffer,
+        }
     }
 
-    fn shape_and_layout_text(&mut self, text: &str, font_size: f32, line_height: f32, width: f32) {
-        let mut buffer = ct::Buffer::new(
-            &mut self.font_system,
-            ct::Metrics::new(font_size, line_height),
-        );
-        buffer.set_size(&mut self.font_system, Some(width), None);
-        buffer.set_text(
+    fn shape_and_layout_text(
+        &mut self,
+        text: &str,
+        _font_size: f32,
+        _line_height: f32,
+        _width: f32,
+    ) {
+        self.buffer.set_text(
             &mut self.font_system,
             black_box(&text),
             &ct::Attrs::new(),
             ct::Shaping::Advanced,
             None,
         );
-        buffer.shape_until_scroll(&mut self.font_system, false);
-        black_box(&mut buffer);
+        self.buffer.shape_until_scroll(&mut self.font_system, false);
+        black_box(&mut self.buffer);
     }
 }
 
@@ -59,7 +67,7 @@ impl ParleyBencher {
 fn bench_both(c: &mut Criterion, name: &str, text: &str) {
     let mut group = c.benchmark_group(name);
 
-    let mut ct_bencher = CtBencher::new();
+    let mut ct_bencher = CtBencher::new(14.0, 20.0, 500.0);
     group.bench_function("cosmic_text", |b| {
         b.iter(|| {
             ct_bencher.shape_and_layout_text(&text, 14.0, 20.0, 500.0);
