@@ -1,5 +1,10 @@
 use cosmic_text as ct;
 use criterion::black_box;
+use linebender_resource_handle::Blob;
+use std::borrow::Cow;
+use std::sync::Arc;
+
+const DEJA_SANS_FONT: &[u8] = include_bytes!("../../fonts/DejaVuSans.ttf");
 
 pub(crate) struct CtBencher {
     font_system: ct::FontSystem,
@@ -9,6 +14,10 @@ pub(crate) struct CtBencher {
 impl CtBencher {
     pub(crate) fn new(font_size: f32, line_height: f32, wrap: ct::Wrap, width: f32) -> Self {
         let mut font_system = ct::FontSystem::new();
+
+        // DEJA
+        font_system.db_mut().load_font_data(DEJA_SANS_FONT.to_vec());
+
         let mut buffer =
             ct::Buffer::new(&mut font_system, ct::Metrics::new(font_size, line_height));
         buffer.set_size(&mut font_system, Some(width), None);
@@ -23,7 +32,7 @@ impl CtBencher {
         self.buffer.set_text(
             &mut self.font_system,
             black_box(&text),
-            &ct::Attrs::new(),
+            &ct::Attrs::new().family(fontdb::Family::Name("DejaVu Sans")),
             shaping_mode,
             None,
         );
@@ -43,8 +52,13 @@ pub(crate) struct ParleyBencher {
 
 impl ParleyBencher {
     pub(crate) fn new(font_size: f32, line_height: f32, wrap: ct::Wrap, width: f32) -> Self {
-        let font_ctx = parley::FontContext::new();
+        let mut font_ctx = parley::FontContext::new();
         let layout_ctx = parley::LayoutContext::new();
+
+        // DEJA
+        font_ctx
+            .collection
+            .register_fonts(Blob::new(Arc::new(DEJA_SANS_FONT)), None);
 
         let width = match wrap {
             ct::Wrap::None => f32::MAX,
@@ -75,6 +89,9 @@ impl ParleyBencher {
         builder.push_default(parley::StyleProperty::FontSize(self.font_size));
         builder.push_default(parley::LineHeight::Absolute(self.line_height));
         builder.push_default(parley::StyleProperty::OverflowWrap(self.overflow_wrap));
+        builder.push_default(parley::style::FontFamily::Named(Cow::Borrowed(
+            "DejaVu Sans",
+        )));
         let mut layout = builder.build(black_box(&text));
         layout.break_all_lines(Some(self.width));
         black_box(&mut layout);

@@ -80,6 +80,7 @@ criterion = { version = "0.5.1", default-features = false, features = [
     "cargo_bench_support",
 ] }
 parley = "0.6.0"
+linebender_resource_handle = "0.1.0"
 
 [profile.test]
 opt-level = 1
