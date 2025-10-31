@@ -6,6 +6,8 @@ use std::sync::Arc;
 
 const DEJA_SANS_FONT: &[u8] = include_bytes!("../../fonts/DejaVuSans.ttf");
 
+const USE_DEJA : bool = false;
+
 pub(crate) struct CtBencher {
     font_system: ct::FontSystem,
     buffer: ct::Buffer,
@@ -16,7 +18,9 @@ impl CtBencher {
         let mut font_system = ct::FontSystem::new();
 
         // DEJA
-        font_system.db_mut().load_font_data(DEJA_SANS_FONT.to_vec());
+        if USE_DEJA {
+            font_system.db_mut().load_font_data(DEJA_SANS_FONT.to_vec());
+        }
 
         let mut buffer =
             ct::Buffer::new(&mut font_system, ct::Metrics::new(font_size, line_height));
@@ -32,7 +36,11 @@ impl CtBencher {
         self.buffer.set_text(
             &mut self.font_system,
             black_box(&text),
-            &ct::Attrs::new().family(fontdb::Family::Name("DejaVu Sans")),
+            &if USE_DEJA {
+                ct::Attrs::new().family(fontdb::Family::Name("DejaVu Sans"))
+            } else {
+                ct::Attrs::new()
+            },
             shaping_mode,
             None,
         );
@@ -56,9 +64,11 @@ impl ParleyBencher {
         let layout_ctx = parley::LayoutContext::new();
 
         // DEJA
-        font_ctx
-            .collection
-            .register_fonts(Blob::new(Arc::new(DEJA_SANS_FONT)), None);
+        if USE_DEJA {
+            font_ctx
+                .collection
+                .register_fonts(Blob::new(Arc::new(DEJA_SANS_FONT)), None);
+        }
 
         let width = match wrap {
             ct::Wrap::None => f32::MAX,
@@ -89,9 +99,11 @@ impl ParleyBencher {
         builder.push_default(parley::StyleProperty::FontSize(self.font_size));
         builder.push_default(parley::LineHeight::Absolute(self.line_height));
         builder.push_default(parley::StyleProperty::OverflowWrap(self.overflow_wrap));
-        builder.push_default(parley::style::FontFamily::Named(Cow::Borrowed(
-            "DejaVu Sans",
-        )));
+        if USE_DEJA {
+            builder.push_default(parley::style::FontFamily::Named(Cow::Borrowed(
+                "DejaVu Sans",
+            )));
+        }
         let mut layout = builder.build(black_box(&text));
         layout.break_all_lines(Some(self.width));
         black_box(&mut layout);
