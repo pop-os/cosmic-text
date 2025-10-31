@@ -197,11 +197,7 @@ impl SwashCache {
                     for off_y in 0..image.placement.height as i32 {
                         for off_x in 0..image.placement.width as i32 {
                             //TODO: blend base alpha?
-                            f(
-                                x + off_x,
-                                y + off_y,
-                                Color((u32::from(image.data[i]) << 24) | base.0 & 0xFF_FF_FF),
-                            );
+                            f(x + off_x, y + off_y, base.with_replaced_a(image.data[i]));
                             i += 1;
                         }
                     }
