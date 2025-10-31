@@ -60,6 +60,7 @@ fn bench_lang_mixed(c: &mut Criterion) {
                     black_box(&bidi_text),
                     &ct::Attrs::new(),
                     ct::Shaping::Advanced,
+                    None
                 );
                 buffer.shape_until_scroll(&mut fs, false);
             });
