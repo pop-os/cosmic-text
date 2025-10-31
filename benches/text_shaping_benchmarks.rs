@@ -1,83 +1,23 @@
 use cosmic_text as ct;
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{criterion_group, criterion_main, Criterion};
 
-struct CtBencher {
-    font_system: ct::FontSystem,
-    buffer: ct::Buffer,
-}
-
-impl CtBencher {
-    fn new(font_size: f32, line_height: f32, width: f32) -> Self {
-        let mut font_system = ct::FontSystem::new();
-        let mut buffer =
-            ct::Buffer::new(&mut font_system, ct::Metrics::new(font_size, line_height));
-        buffer.set_size(&mut font_system, Some(width), None);
-        Self {
-            font_system,
-            buffer,
-        }
-    }
-
-    fn shape_and_layout_text(
-        &mut self,
-        text: &str,
-        _font_size: f32,
-        _line_height: f32,
-        _width: f32,
-    ) {
-        self.buffer.set_text(
-            &mut self.font_system,
-            black_box(&text),
-            &ct::Attrs::new(),
-            ct::Shaping::Advanced,
-            None,
-        );
-        self.buffer.shape_until_scroll(&mut self.font_system, false);
-        black_box(&mut self.buffer);
-    }
-}
-
-struct ParleyBencher {
-    font_ctx: parley::FontContext,
-    layout_ctx: parley::LayoutContext,
-}
-
-impl ParleyBencher {
-    fn new() -> Self {
-        let font_ctx = parley::FontContext::new();
-        let layout_ctx = parley::LayoutContext::new();
-        Self {
-            font_ctx,
-            layout_ctx,
-        }
-    }
-
-    fn shape_and_layout_text(&mut self, text: &str, font_size: f32, line_height: f32, width: f32) {
-        let mut builder =
-            self.layout_ctx
-                .ranged_builder(&mut self.font_ctx, black_box(&text), 1.0, false);
-        builder.push_default(parley::StyleProperty::FontSize(font_size));
-        builder.push_default(parley::LineHeight::Absolute(line_height));
-        let mut layout = builder.build(black_box(&text));
-        layout.break_all_lines(Some(width));
-        black_box(&mut layout);
-    }
-}
+mod utils;
+use utils::{CtBencher, ParleyBencher};
 
 fn bench_both(c: &mut Criterion, name: &str, text: &str) {
     let mut group = c.benchmark_group(name);
 
-    let mut ct_bencher = CtBencher::new(14.0, 20.0, 500.0);
+    let mut ct_bencher = CtBencher::new(14.0, 20.0, ct::Wrap::WordOrGlyph, 500.0);
     group.bench_function("cosmic_text", |b| {
         b.iter(|| {
-            ct_bencher.shape_and_layout_text(&text, 14.0, 20.0, 500.0);
+            ct_bencher.shape_and_layout_text(&text, ct::Shaping::Advanced);
         });
     });
 
-    let mut parley_bencher = ParleyBencher::new();
+    let mut parley_bencher = ParleyBencher::new(14.0, 20.0, ct::Wrap::WordOrGlyph, 500.0);
     group.bench_function("parley", |b| {
         b.iter(|| {
-            parley_bencher.shape_and_layout_text(&text, 14.0, 20.0, 500.0);
+            parley_bencher.shape_and_layout_text(&text);
         });
     });
 }
