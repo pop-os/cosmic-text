@@ -1,9 +1,46 @@
 use cosmic_text as ct;
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
+mod utils;
+use utils::{CtBencher, ParleyBencher};
 
 fn load_font_system(c: &mut Criterion) {
     c.bench_function("load FontSystem", |b| {
         b.iter(|| black_box(ct::FontSystem::new()))
+    });
+}
+
+fn wrap_name(wrap: ct::Wrap) -> &'static str {
+    match wrap {
+        cosmic_text::Wrap::None => "None",
+        cosmic_text::Wrap::Glyph => "Glyph",
+        cosmic_text::Wrap::Word => "Word",
+        cosmic_text::Wrap::WordOrGlyph => "WordOrGlyph",
+    }
+}
+
+fn run_on_text(c: &mut Criterion, name: &str, wrap: ct::Wrap, text: &str) {
+    let mut group = c.benchmark_group(format!("{name} Wrap:{}", wrap_name(wrap)));
+    group.sample_size(10);
+
+    let mut ct_bencher = CtBencher::new(14.0, 20.0, wrap, 500.0);
+    group.bench_function("cosmic_text (simple)", |b| {
+        b.iter(|| {
+            ct_bencher.shape_and_layout_text(&text, ct::Shaping::Advanced);
+        });
+    });
+
+    let mut ct_bencher = CtBencher::new(14.0, 20.0, wrap, 500.0);
+    group.bench_function("cosmic_text (advanced)", |b| {
+        b.iter(|| {
+            ct_bencher.shape_and_layout_text(&text, ct::Shaping::Advanced);
+        });
+    });
+
+    let mut parley_bencher = ParleyBencher::new(14.0, 20.0, wrap, 500.0);
+    group.bench_function("parley", |b| {
+        b.iter(|| {
+            parley_bencher.shape_and_layout_text(&text);
+        });
     });
 }
 
@@ -12,58 +49,12 @@ fn layout(c: &mut Criterion) {
     let mut buffer = ct::Buffer::new(&mut fs, ct::Metrics::new(10.0, 10.0));
     buffer.set_size(&mut fs, Some(80.0), None);
 
-    for (wrap_name, wrap) in &[
-        ("None", ct::Wrap::None),
-        ("Glyph", ct::Wrap::Glyph),
-        ("Word", ct::Wrap::Word),
-    ] {
-        for (shape_name, shape) in &[
-            ("Simple", ct::Shaping::Basic),
-            ("Advanced", ct::Shaping::Advanced),
-        ] {
-            let mut group = c.benchmark_group(format!("Wrap({wrap_name}, {shape_name})"));
-            buffer.set_wrap(&mut fs, *wrap);
-
-            let mut run_on_text = |text: &str| {
-                buffer.lines.clear();
-                buffer.set_text(&mut fs, text, &ct::Attrs::new(), *shape, None);
-                buffer.shape_until_scroll(&mut fs, false);
-            };
-
-            group.bench_function("small amount of text", |b| {
-                b.iter(|| {
-                    run_on_text("Hello, world!");
-                });
-            });
-
-            group.bench_function("large amount of text", |b| {
-                b.iter(|| {
-                    run_on_text(FIRST_CHAPTER_OF_MOBY_DICK);
-                });
-            });
-
-            group.bench_function("arabic text", |b| {
-                b.iter(|| {
-                    run_on_text(include_str!("../sample/arabic.txt"));
-                })
-            });
-
-            // Reduce the sample count for these next ones.
-            // If we can optimize the layout for these, remove this line.
-            group.sample_size(10);
-
-            group.bench_function("hebrew text", |b| {
-                b.iter(|| {
-                    run_on_text(include_str!("../sample/hebrew.txt"));
-                })
-            });
-
-            group.bench_function("emoji text", |b| {
-                b.iter(|| {
-                    run_on_text(include_str!("../sample/emoji.txt"));
-                })
-            });
-        }
+    for wrap in [ct::Wrap::None, ct::Wrap::Glyph, ct::Wrap::Word] {
+        run_on_text(c, "small amount of text", wrap, "Hello, world!");
+        run_on_text(c, "large amount of text", wrap, FIRST_CHAPTER_OF_MOBY_DICK);
+        run_on_text(c, "arabic text", wrap, include_str!("../sample/arabic.txt"));
+        run_on_text(c, "hebrew text", wrap, include_str!("../sample/hebrew.txt"));
+        run_on_text(c, "emoji text", wrap, include_str!("../sample/emoji.txt"));
     }
 }
 
