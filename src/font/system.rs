@@ -151,14 +151,7 @@ impl FontSystem {
         log::debug!("Locale: {locale}");
 
         let mut db = fontdb::Database::new();
-
         Self::load_fonts(&mut db, fonts.into_iter());
-
-        //TODO: configurable default fonts
-        db.set_monospace_family("Noto Sans Mono");
-        db.set_sans_serif_family("Open Sans");
-        db.set_serif_family("DejaVu Serif");
-
         Self::new_with_locale_and_db_and_fallback(locale, db, PlatformFallback)
     }
 
