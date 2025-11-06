@@ -5,17 +5,13 @@ use alloc::{
     string::{String, ToString},
     vec::Vec,
 };
-
-#[cfg(feature = "swash")]
-use std::cmp;
+use core::cmp;
 
 use unicode_segmentation::UnicodeSegmentation;
 
-#[cfg(feature = "swash")]
-use crate::Color;
 use crate::{
     Action, Attrs, AttrsList, BorrowedWithFontSystem, BufferLine, BufferRef, Change, ChangeItem,
-    Cursor, Edit, FontSystem, LayoutRun, LineEnding, LineIter, Selection, Shaping,
+    Color, Cursor, Edit, FontSystem, LayoutRun, LineEnding, LineIter, Renderer, Selection, Shaping,
 };
 
 /// A wrapper of [`Buffer`] for easy editing
@@ -115,10 +111,32 @@ impl<'buffer> Editor<'buffer> {
         cursor_color: Color,
         selection_color: Color,
         selected_text_color: Color,
-        mut f: F,
+        callback: F,
     ) where
         F: FnMut(i32, i32, u32, u32, Color),
     {
+        let mut renderer = crate::LegacyRenderer {
+            font_system,
+            cache,
+            callback,
+        };
+        self.render(
+            &mut renderer,
+            text_color,
+            cursor_color,
+            selection_color,
+            selected_text_color,
+        );
+    }
+
+    pub fn render<R: Renderer>(
+        &self,
+        renderer: &mut R,
+        text_color: Color,
+        cursor_color: Color,
+        selection_color: Color,
+        selected_text_color: Color,
+    ) {
         let selection_bounds = self.selection_bounds();
         self.with_buffer(|buffer| {
             for run in buffer.layout_runs() {
@@ -151,7 +169,7 @@ impl<'buffer> Editor<'buffer> {
                                         None => Some((c_x as i32, (c_x + c_w) as i32)),
                                     };
                                 } else if let Some((min, max)) = range_opt.take() {
-                                    f(
+                                    renderer.rectangle(
                                         min,
                                         line_top as i32,
                                         cmp::max(0, max - min) as u32,
@@ -177,7 +195,7 @@ impl<'buffer> Editor<'buffer> {
                                     max = buffer.size().0.unwrap_or(0.0) as i32;
                                 }
                             }
-                            f(
+                            renderer.rectangle(
                                 min,
                                 line_top as i32,
                                 cmp::max(0, max - min) as u32,
@@ -190,11 +208,11 @@ impl<'buffer> Editor<'buffer> {
 
                 // Draw cursor
                 if let Some((x, y)) = cursor_position(&self.cursor, &run) {
-                    f(x, y, 1, line_height as u32, cursor_color);
+                    renderer.rectangle(x, y, 1, line_height as u32, cursor_color);
                 }
 
                 for glyph in run.glyphs {
-                    let physical_glyph = glyph.physical((0., 0.), 1.0);
+                    let physical_glyph = glyph.physical((0., line_y), 1.0);
 
                     let mut glyph_color = glyph.color_opt.map_or(text_color, |some| some);
                     if text_color != selected_text_color {
@@ -209,20 +227,7 @@ impl<'buffer> Editor<'buffer> {
                         }
                     }
 
-                    cache.with_pixels(
-                        font_system,
-                        physical_glyph.cache_key,
-                        glyph_color,
-                        |x, y, color| {
-                            f(
-                                physical_glyph.x + x,
-                                line_y as i32 + physical_glyph.y + y,
-                                1,
-                                1,
-                                color,
-                            );
-                        },
-                    );
+                    renderer.glyph(physical_glyph, glyph_color);
                 }
             }
         });

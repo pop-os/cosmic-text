@@ -9,13 +9,10 @@ use core::{cmp, fmt};
 use core_maths::CoreFloat;
 use unicode_segmentation::UnicodeSegmentation;
 
-#[cfg(feature = "swash")]
-use crate::Color;
-
 use crate::{
-    Affinity, Align, Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem, BufferLine, Cursor,
-    FontSystem, LayoutCursor, LayoutGlyph, LayoutLine, LineEnding, LineIter, Motion, Scroll,
-    ShapeLine, Shaping, Wrap,
+    Affinity, Align, Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem, BufferLine, Color,
+    Cursor, FontSystem, LayoutCursor, LayoutGlyph, LayoutLine, LineEnding, LineIter, Motion,
+    Renderer, Scroll, ShapeLine, Shaping, Wrap,
 };
 
 /// A line of visible text for rendering
@@ -1350,29 +1347,24 @@ impl Buffer {
         font_system: &mut FontSystem,
         cache: &mut crate::SwashCache,
         color: Color,
-        mut f: F,
+        callback: F,
     ) where
         F: FnMut(i32, i32, u32, u32, Color),
     {
+        let mut renderer = crate::LegacyRenderer {
+            font_system,
+            cache,
+            callback,
+        };
+        self.render(&mut renderer, color);
+    }
+
+    pub fn render<R: Renderer>(&self, renderer: &mut R, color: Color) {
         for run in self.layout_runs() {
             for glyph in run.glyphs {
-                let physical_glyph = glyph.physical((0., 0.), 1.0);
+                let physical_glyph = glyph.physical((0., run.line_y), 1.0);
                 let glyph_color = glyph.color_opt.map_or(color, |some| some);
-
-                cache.with_pixels(
-                    font_system,
-                    physical_glyph.cache_key,
-                    glyph_color,
-                    |x, y, color| {
-                        f(
-                            physical_glyph.x + x,
-                            run.line_y as i32 + physical_glyph.y + y,
-                            1,
-                            1,
-                            color,
-                        );
-                    },
-                );
+                renderer.glyph(physical_glyph, glyph_color);
             }
         }
     }

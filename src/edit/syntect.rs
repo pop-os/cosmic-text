@@ -9,7 +9,7 @@ use syntect::parsing::{ParseState, ScopeStack, SyntaxReference, SyntaxSet};
 
 use crate::{
     Action, AttrsList, BorrowedWithFontSystem, BufferRef, Change, Color, Cursor, Edit, Editor,
-    FontSystem, Selection, Shaping, Style, Weight,
+    FontSystem, Renderer, Selection, Shaping, Style, Weight,
 };
 
 pub use syntect::highlighting::Theme as SyntaxTheme;
@@ -219,24 +219,31 @@ impl<'syntax_system, 'buffer> SyntaxEditor<'syntax_system, 'buffer> {
 
     /// Draw the editor
     #[cfg(feature = "swash")]
-    pub fn draw<F>(&self, font_system: &mut FontSystem, cache: &mut crate::SwashCache, mut f: F)
+    pub fn draw<F>(&self, font_system: &mut FontSystem, cache: &mut crate::SwashCache, callback: F)
     where
         F: FnMut(i32, i32, u32, u32, Color),
     {
+        let mut renderer = crate::LegacyRenderer {
+            font_system,
+            cache,
+            callback,
+        };
+        self.render(&mut renderer);
+    }
+
+    pub fn render<R: Renderer>(&self, renderer: &mut R) {
         let size = self.with_buffer(|buffer| buffer.size());
         if let Some(width) = size.0 {
             if let Some(height) = size.1 {
-                f(0, 0, width as u32, height as u32, self.background_color());
+                renderer.rectangle(0, 0, width as u32, height as u32, self.background_color());
             }
         }
-        self.editor.draw(
-            font_system,
-            cache,
+        self.editor.render(
+            renderer,
             self.foreground_color(),
             self.cursor_color(),
             self.selection_color(),
             self.foreground_color(),
-            f,
         );
     }
 }
