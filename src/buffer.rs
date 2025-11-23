@@ -11,8 +11,8 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
     Affinity, Align, Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem, BufferLine, Color,
-    Cursor, FontSystem, LayoutCursor, LayoutGlyph, LayoutLine, LineEnding, LineIter, Motion,
-    Renderer, Scroll, ShapeLine, Shaping, Wrap,
+    Cursor, FontSystem, Hinting, LayoutCursor, LayoutGlyph, LayoutLine, LineEnding, LineIter,
+    Motion, Renderer, Scroll, ShapeLine, Shaping, Wrap,
 };
 
 /// A line of visible text for rendering
@@ -216,7 +216,7 @@ pub struct Buffer {
     wrap: Wrap,
     monospace_width: Option<f32>,
     tab_width: u16,
-    hint: bool,
+    hint: Hinting,
 }
 
 impl Clone for Buffer {
@@ -248,7 +248,7 @@ impl Buffer {
     /// # Panics
     ///
     /// Will panic if `metrics.line_height` is zero.
-    pub fn new_empty(metrics: Metrics, hint: bool) -> Self {
+    pub fn new_empty(metrics: Metrics, hint: Hinting) -> Self {
         assert_ne!(metrics.line_height, 0.0, "line height cannot be 0");
         Self {
             lines: Vec::new(),
@@ -269,7 +269,7 @@ impl Buffer {
     /// # Panics
     ///
     /// Will panic if `metrics.line_height` is zero.
-    pub fn new(font_system: &mut FontSystem, metrics: Metrics, hint: bool) -> Self {
+    pub fn new(font_system: &mut FontSystem, metrics: Metrics, hint: Hinting) -> Self {
         let mut buffer = Self::new_empty(metrics, hint);
         buffer.set_text(font_system, "", &Attrs::new(), Shaping::Advanced, None);
         buffer
@@ -722,9 +722,9 @@ impl Buffer {
     /// Set text of buffer, using an iterator of styled spans (pairs of text and attributes)
     ///
     /// ```
-    /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, Metrics, Shaping};
+    /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, Metrics, Hinting, Shaping};
     /// # let mut font_system = FontSystem::new();
-    /// let mut buffer = Buffer::new_empty(Metrics::new(32.0, 44.0), false);
+    /// let mut buffer = Buffer::new_empty(Metrics::new(32.0, 44.0), Hinting::Disabled);
     /// let attrs = Attrs::new().family(Family::Serif);
     /// buffer.set_rich_text(
     ///     &mut font_system,
@@ -1451,9 +1451,9 @@ impl BorrowedWithFontSystem<'_, Buffer> {
     /// Set text of buffer, using an iterator of styled spans (pairs of text and attributes)
     ///
     /// ```
-    /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, Metrics, Shaping};
+    /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, Metrics, Hinting, Shaping};
     /// # let mut font_system = FontSystem::new();
-    /// let mut buffer = Buffer::new_empty(Metrics::new(32.0, 44.0), false);
+    /// let mut buffer = Buffer::new_empty(Metrics::new(32.0, 44.0), Hinting::Disabled);
     /// let attrs = Attrs::new().family(Family::Serif);
     /// buffer.set_rich_text(
     ///     &mut font_system,

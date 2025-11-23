@@ -9,7 +9,7 @@ fn load_font_system(c: &mut Criterion) {
 
 fn layout(c: &mut Criterion) {
     let mut fs = ct::FontSystem::new();
-    let mut buffer = ct::Buffer::new(&mut fs, ct::Metrics::new(10.0, 10.0), false);
+    let mut buffer = ct::Buffer::new(&mut fs, ct::Metrics::new(10.0, 10.0), ct::Hinting::Disabled);
     buffer.set_size(&mut fs, Some(80.0), None);
 
     for (wrap_name, wrap) in &[

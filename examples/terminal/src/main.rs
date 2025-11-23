@@ -4,7 +4,7 @@
 //! or `cargo run --package terminal -- "my own text"`
 
 use colored::Colorize;
-use cosmic_text::{Attrs, Buffer, Color, FontSystem, Metrics, Shaping, SwashCache};
+use cosmic_text::{Attrs, Buffer, Color, FontSystem, Hinting, Metrics, Shaping, SwashCache};
 use std::fmt::Write;
 
 fn main() {
@@ -20,7 +20,7 @@ fn main() {
     let metrics = Metrics::new(FONT_SIZE, LINE_HEIGHT);
 
     // A Buffer provides shaping and layout for a UTF-8 string, create one per text widget
-    let mut buffer = Buffer::new(&mut font_system, metrics, false);
+    let mut buffer = Buffer::new(&mut font_system, metrics, Hinting::Disabled);
 
     let mut buffer = buffer.borrow_with(&mut font_system);
 

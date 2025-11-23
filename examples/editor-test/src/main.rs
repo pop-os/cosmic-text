@@ -2,7 +2,7 @@
 
 use cosmic_text::{
     Action, BidiParagraphs, BorrowedWithFontSystem, Buffer, Color, Edit, Editor, FontSystem,
-    Metrics, Motion, SwashCache,
+    Hinting, Metrics, Motion, SwashCache,
 };
 use orbclient::{EventOption, Renderer, Window, WindowFlag};
 use std::{env, fs, process, time::Instant};
@@ -71,7 +71,11 @@ fn main() {
     ];
     let font_size_default = 1; // Body
 
-    let mut buffer = Buffer::new(&mut font_system, font_sizes[font_size_default], false);
+    let mut buffer = Buffer::new(
+        &mut font_system,
+        font_sizes[font_size_default],
+        Hinting::Disabled,
+    );
     buffer
         .borrow_with(&mut font_system)
         .set_size(Some(window.width() as f32), Some(window.height() as f32));

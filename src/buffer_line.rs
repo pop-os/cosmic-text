@@ -3,7 +3,8 @@ use alloc::{string::String, vec::Vec};
 use core::mem;
 
 use crate::{
-    Align, Attrs, AttrsList, Cached, FontSystem, LayoutLine, LineEnding, ShapeLine, Shaping, Wrap,
+    Align, Attrs, AttrsList, Cached, FontSystem, Hinting, LayoutLine, LineEnding, ShapeLine,
+    Shaping, Wrap,
 };
 
 /// A line (or paragraph) of text that is shaped and laid out
@@ -243,7 +244,7 @@ impl BufferLine {
         wrap: Wrap,
         match_mono_width: Option<f32>,
         tab_width: u16,
-        hint: bool,
+        hint: Hinting,
     ) -> &[LayoutLine] {
         if self.layout_opt.is_unused() {
             let align = self.align;

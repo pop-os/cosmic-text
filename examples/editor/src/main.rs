@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic_text::{
-    Action, Attrs, Buffer, Edit, Family, FontSystem, Metrics, Motion, SwashCache, SyntaxEditor,
-    SyntaxSystem,
+    Action, Attrs, Buffer, Edit, Family, FontSystem, Hinting, Metrics, Motion, SwashCache,
+    SyntaxEditor, SyntaxSystem,
 };
 use std::{env, fs, num::NonZeroU32, rc::Rc, slice};
 use tiny_skia::{Paint, PixmapMut, Rect, Transform};
@@ -45,7 +45,7 @@ fn main() {
         Buffer::new(
             &mut font_system,
             font_sizes[font_size_i].scale(display_scale),
-            false,
+            Hinting::Disabled,
         ),
         &syntax_system,
         "base16-eighties.dark",

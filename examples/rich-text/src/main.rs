@@ -7,7 +7,7 @@ use cosmic_text::Editor;
 use cosmic_text::Shaping;
 use cosmic_text::Style;
 use cosmic_text::{
-    Action, Attrs, Buffer, Edit, Family, FontSystem, Metrics, Motion, SwashCache, Weight,
+    Action, Attrs, Buffer, Edit, Family, FontSystem, Hinting, Metrics, Motion, SwashCache, Weight,
 };
 use std::{num::NonZeroU32, rc::Rc, slice};
 use tiny_skia::{Paint, PixmapMut, Rect, Transform};
@@ -172,7 +172,10 @@ fn main() {
 
     let mut display_scale = window.scale_factor() as f32;
     let metrics = Metrics::new(32.0, 44.0);
-    let mut editor = Editor::new(Buffer::new_empty(metrics.scale(display_scale), false));
+    let mut editor = Editor::new(Buffer::new_empty(
+        metrics.scale(display_scale),
+        Hinting::Disabled,
+    ));
     let mut editor = editor.borrow_with(&mut font_system);
     editor.with_buffer_mut(|buffer| {
         buffer.set_size(

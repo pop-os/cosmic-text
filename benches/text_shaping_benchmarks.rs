@@ -4,7 +4,7 @@ use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
 fn bench_ascii_fast_path(c: &mut Criterion) {
     let mut fs = ct::FontSystem::new();
-    let mut buffer = ct::Buffer::new(&mut fs, ct::Metrics::new(14.0, 20.0), false);
+    let mut buffer = ct::Buffer::new(&mut fs, ct::Metrics::new(14.0, 20.0), ct::Hinting::Disabled);
     buffer.set_size(&mut fs, Some(500.0), None);
 
     let ascii_text = "Pure ASCII text for BidiParagraphs optimization testing.\n".repeat(50);
@@ -25,7 +25,7 @@ fn bench_ascii_fast_path(c: &mut Criterion) {
 
 fn bench_bidi_processing(c: &mut Criterion) {
     let mut fs = ct::FontSystem::new();
-    let mut buffer = ct::Buffer::new(&mut fs, ct::Metrics::new(14.0, 20.0), false);
+    let mut buffer = ct::Buffer::new(&mut fs, ct::Metrics::new(14.0, 20.0), ct::Hinting::Disabled);
     buffer.set_size(&mut fs, Some(500.0), None);
 
     let bidi_text = "Mixed English and العربية النص العربي text for BiDi testing.\nThis tests adjust_levels and combined BiDi optimizations.\n".repeat(30);
@@ -46,7 +46,7 @@ fn bench_bidi_processing(c: &mut Criterion) {
 
 fn bench_lang_mixed(c: &mut Criterion) {
     let mut fs = ct::FontSystem::new();
-    let mut buffer = ct::Buffer::new(&mut fs, ct::Metrics::new(14.0, 20.0), false);
+    let mut buffer = ct::Buffer::new(&mut fs, ct::Metrics::new(14.0, 20.0), ct::Hinting::Disabled);
     buffer.set_size(&mut fs, Some(500.0), None);
 
     let bidi_text = include_str!("../sample/hello.txt");
@@ -69,7 +69,7 @@ fn bench_lang_mixed(c: &mut Criterion) {
 
 fn bench_layout_heavy(c: &mut Criterion) {
     let mut fs = ct::FontSystem::new();
-    let mut buffer = ct::Buffer::new(&mut fs, ct::Metrics::new(14.0, 20.0), false);
+    let mut buffer = ct::Buffer::new(&mut fs, ct::Metrics::new(14.0, 20.0), ct::Hinting::Disabled);
     buffer.set_size(&mut fs, Some(500.0), None);
 
     let layout_text = "This is a very long line that will wrap multiple times and stress the reorder optimization through intensive layout processing with comprehensive buffer reuse testing. ".repeat(30);
@@ -90,7 +90,7 @@ fn bench_layout_heavy(c: &mut Criterion) {
 
 fn bench_combined_stress(c: &mut Criterion) {
     let mut fs = ct::FontSystem::new();
-    let mut buffer = ct::Buffer::new(&mut fs, ct::Metrics::new(14.0, 20.0), false);
+    let mut buffer = ct::Buffer::new(&mut fs, ct::Metrics::new(14.0, 20.0), ct::Hinting::Disabled);
     buffer.set_size(&mut fs, Some(500.0), None);
 
     let stress_text = format!("{}\n{}\n{}\n{}\n",
