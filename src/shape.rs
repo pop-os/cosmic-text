@@ -1152,6 +1152,7 @@ impl ShapeLine {
         wrap: Wrap,
         align: Option<Align>,
         match_mono_width: Option<f32>,
+        hint: bool,
     ) -> Vec<LayoutLine> {
         let mut lines = Vec::with_capacity(1);
         self.layout_to_buffer(
@@ -1162,6 +1163,7 @@ impl ShapeLine {
             align,
             &mut lines,
             match_mono_width,
+            hint,
         );
         lines
     }
@@ -1175,6 +1177,7 @@ impl ShapeLine {
         align: Option<Align>,
         layout_lines: &mut Vec<LayoutLine>,
         match_mono_width: Option<f32>,
+        hint: bool,
     ) {
         fn add_to_visual_line(
             vl: &mut VisualLine,
@@ -1550,6 +1553,10 @@ impl ShapeLine {
                 x += alignment_correction;
             }
 
+            if hint {
+                x = x.round();
+            }
+
             // TODO: Only certain `is_whitespace` chars are typically expanded but this is what is
             // currently used to compute `visual_line.spaces`.
             //
@@ -1627,6 +1634,9 @@ impl ShapeLine {
                             if let Some(match_em_width) = match_mono_em_width {
                                 // Round to nearest monospace width
                                 x_advance = ((x_advance / match_em_width).round()) * match_em_width;
+                            }
+                            if hint {
+                                x_advance = x_advance.round();
                             }
                             if self.rtl {
                                 x -= x_advance;

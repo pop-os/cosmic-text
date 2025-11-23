@@ -23,14 +23,15 @@ fn stable_wrap() {
     let mut check_wrap = |text: &_, wrap, align_opt, start_width_opt| {
         let line = ShapeLine::new(&mut font_system, text, &attrs, Shaping::Advanced, 8);
 
-        let layout_unbounded = line.layout(font_size, start_width_opt, wrap, align_opt, None);
+        let layout_unbounded =
+            line.layout(font_size, start_width_opt, wrap, align_opt, None, false);
         let max_width = layout_unbounded.iter().map(|l| l.w).fold(0.0, f32::max);
         let new_limit = match start_width_opt {
             Some(start_width) => f32::min(start_width, max_width),
             None => max_width,
         };
 
-        let layout_bounded = line.layout(font_size, Some(new_limit), wrap, align_opt, None);
+        let layout_bounded = line.layout(font_size, Some(new_limit), wrap, align_opt, None, false);
         let bounded_max_width = layout_bounded.iter().map(|l| l.w).fold(0.0, f32::max);
 
         // For debugging:
@@ -99,7 +100,7 @@ fn wrap_extra_line() {
     let mut font_system = FontSystem::new();
     let metrics = Metrics::new(14.0, 20.0);
 
-    let mut buffer = Buffer::new(&mut font_system, metrics);
+    let mut buffer = Buffer::new(&mut font_system, metrics, false);
 
     let mut buffer = buffer.borrow_with(&mut font_system);
 

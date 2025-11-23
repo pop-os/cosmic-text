@@ -25,7 +25,7 @@ fn main() {
 
     let mut swash_cache = SwashCache::new();
 
-    let mut buffer = Buffer::new_empty(Metrics::new(14.0, 20.0));
+    let mut buffer = Buffer::new_empty(Metrics::new(14.0, 20.0), false);
 
     let mut buffer = buffer.borrow_with(&mut font_system);
 
