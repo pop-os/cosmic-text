@@ -10,7 +10,7 @@ fn wrap_word_fallback() {
     font_system.db_mut().load_font_data(font);
     let metrics = Metrics::new(14.0, 20.0);
 
-    let mut buffer = Buffer::new(&mut font_system, metrics);
+    let mut buffer = Buffer::new(&mut font_system, metrics, false);
 
     let mut buffer = buffer.borrow_with(&mut font_system);
 

@@ -13,7 +13,7 @@ fn editor() -> ViEditor<'static, 'static> {
     let line_height = (font_size * 1.4).ceil();
 
     let metrics = Metrics::new(font_size, line_height);
-    let buffer = Buffer::new_empty(metrics);
+    let buffer = Buffer::new_empty(metrics, false);
     let editor = SyntaxEditor::new(
         buffer,
         SYNTAX_SYSTEM.get_or_init(SyntaxSystem::new),

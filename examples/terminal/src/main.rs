@@ -20,7 +20,7 @@ fn main() {
     let metrics = Metrics::new(FONT_SIZE, LINE_HEIGHT);
 
     // A Buffer provides shaping and layout for a UTF-8 string, create one per text widget
-    let mut buffer = Buffer::new(&mut font_system, metrics);
+    let mut buffer = Buffer::new(&mut font_system, metrics, false);
 
     let mut buffer = buffer.borrow_with(&mut font_system);
 

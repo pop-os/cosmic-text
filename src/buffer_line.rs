@@ -243,6 +243,7 @@ impl BufferLine {
         wrap: Wrap,
         match_mono_width: Option<f32>,
         tab_width: u16,
+        hint: bool,
     ) -> &[LayoutLine] {
         if self.layout_opt.is_unused() {
             let align = self.align;
@@ -259,6 +260,7 @@ impl BufferLine {
                 align,
                 &mut layout,
                 match_mono_width,
+                hint,
             );
             self.layout_opt.set_used(layout);
         }

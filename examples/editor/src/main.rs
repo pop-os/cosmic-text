@@ -45,6 +45,7 @@ fn main() {
         Buffer::new(
             &mut font_system,
             font_sizes[font_size_i].scale(display_scale),
+            false,
         ),
         &syntax_system,
         "base16-eighties.dark",

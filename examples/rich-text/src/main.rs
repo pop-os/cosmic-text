@@ -172,7 +172,7 @@ fn main() {
 
     let mut display_scale = window.scale_factor() as f32;
     let metrics = Metrics::new(32.0, 44.0);
-    let mut editor = Editor::new(Buffer::new_empty(metrics.scale(display_scale)));
+    let mut editor = Editor::new(Buffer::new_empty(metrics.scale(display_scale), false));
     let mut editor = editor.borrow_with(&mut font_system);
     editor.with_buffer_mut(|buffer| {
         buffer.set_size(
