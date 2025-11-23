@@ -4,8 +4,8 @@
 
 use crate::fallback::FontFallbackIter;
 use crate::{
-    math, Align, AttrsList, CacheKeyFlags, Color, Font, FontSystem, LayoutGlyph, LayoutLine,
-    Metrics, Wrap,
+    math, Align, AttrsList, CacheKeyFlags, Color, Font, FontSystem, Hinting, LayoutGlyph,
+    LayoutLine, Metrics, Wrap,
 };
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
@@ -1152,7 +1152,7 @@ impl ShapeLine {
         wrap: Wrap,
         align: Option<Align>,
         match_mono_width: Option<f32>,
-        hint: bool,
+        hinting: Hinting,
     ) -> Vec<LayoutLine> {
         let mut lines = Vec::with_capacity(1);
         self.layout_to_buffer(
@@ -1163,7 +1163,7 @@ impl ShapeLine {
             align,
             &mut lines,
             match_mono_width,
-            hint,
+            hinting,
         );
         lines
     }
@@ -1177,7 +1177,7 @@ impl ShapeLine {
         align: Option<Align>,
         layout_lines: &mut Vec<LayoutLine>,
         match_mono_width: Option<f32>,
-        hint: bool,
+        hinting: Hinting,
     ) {
         fn add_to_visual_line(
             vl: &mut VisualLine,
@@ -1553,7 +1553,7 @@ impl ShapeLine {
                 x += alignment_correction;
             }
 
-            if hint {
+            if hinting == Hinting::Enabled {
                 x = x.round();
             }
 
@@ -1635,7 +1635,7 @@ impl ShapeLine {
                                 // Round to nearest monospace width
                                 x_advance = ((x_advance / match_em_width).round()) * match_em_width;
                             }
-                            if hint {
+                            if hinting == Hinting::Enabled {
                                 x_advance = x_advance.round();
                             }
                             if self.rtl {

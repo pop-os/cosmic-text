@@ -151,3 +151,28 @@ impl Display for Align {
         }
     }
 }
+
+/// Metrics hinting strategy
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Default)]
+pub enum Hinting {
+    /// No metrics hinting.
+    ///
+    /// Glyphs will have subpixel coordinates.
+    ///
+    /// This is the default.
+    #[default]
+    Disabled,
+
+    /// Metrics hinting.
+    ///
+    /// Glyphs will be snapped to integral coordinates in the X-axis during layout.
+    /// This can improve readability for smaller text and/or low-DPI screens.
+    ///
+    /// However, in order to get the right effect, you must use physical coordinates
+    /// during layout and avoid further scaling when rendering. Otherwise, the rounding
+    /// errors can accumulate and glyph distances may look erratic.
+    ///
+    /// In other words, metrics hinting makes layouting dependent of the target
+    /// resolution.
+    Enabled,
+}

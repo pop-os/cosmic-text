@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
 use cosmic_text::{
-    fontdb::Database, Attrs, AttrsOwned, Buffer, Color, Family, FontSystem, Metrics, Shaping,
-    SwashCache,
+    fontdb::Database, Attrs, AttrsOwned, Buffer, Color, Family, FontSystem, Hinting, Metrics,
+    Shaping, SwashCache,
 };
 use tiny_skia::{Paint, Pixmap, Rect, Transform};
 
@@ -85,7 +85,7 @@ impl DrawTestCfg {
         let mut font_system = FontSystem::new_with_locale_and_db("En-US".into(), font_db);
         let mut swash_cache = SwashCache::new();
         let metrics = Metrics::new(self.font_size, self.line_height);
-        let mut buffer = Buffer::new(&mut font_system, metrics, false);
+        let mut buffer = Buffer::new(&mut font_system, metrics, Hinting::Disabled);
         let mut buffer = buffer.borrow_with(&mut font_system);
         let margins = 5;
         buffer.set_size(
