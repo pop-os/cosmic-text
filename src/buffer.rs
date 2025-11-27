@@ -216,7 +216,7 @@ pub struct Buffer {
     wrap: Wrap,
     monospace_width: Option<f32>,
     tab_width: u16,
-    hint: Hinting,
+    hinting: Hinting,
 }
 
 impl Clone for Buffer {
@@ -231,7 +231,7 @@ impl Clone for Buffer {
             wrap: self.wrap,
             monospace_width: self.monospace_width,
             tab_width: self.tab_width,
-            hint: self.hint,
+            hinting: self.hinting,
         }
     }
 }
@@ -248,7 +248,7 @@ impl Buffer {
     /// # Panics
     ///
     /// Will panic if `metrics.line_height` is zero.
-    pub fn new_empty(metrics: Metrics, hint: Hinting) -> Self {
+    pub fn new_empty(metrics: Metrics) -> Self {
         assert_ne!(metrics.line_height, 0.0, "line height cannot be 0");
         Self {
             lines: Vec::new(),
@@ -260,7 +260,7 @@ impl Buffer {
             wrap: Wrap::WordOrGlyph,
             monospace_width: None,
             tab_width: 8,
-            hint,
+            hinting: Hinting::default(),
         }
     }
 
@@ -269,8 +269,8 @@ impl Buffer {
     /// # Panics
     ///
     /// Will panic if `metrics.line_height` is zero.
-    pub fn new(font_system: &mut FontSystem, metrics: Metrics, hint: Hinting) -> Self {
-        let mut buffer = Self::new_empty(metrics, hint);
+    pub fn new(font_system: &mut FontSystem, metrics: Metrics) -> Self {
+        let mut buffer = Self::new_empty(metrics);
         buffer.set_text(font_system, "", &Attrs::new(), Shaping::Advanced, None);
         buffer
     }
@@ -300,7 +300,7 @@ impl Buffer {
                     self.wrap,
                     self.monospace_width,
                     self.tab_width,
-                    self.hint,
+                    self.hinting,
                 );
             }
         }
@@ -544,7 +544,7 @@ impl Buffer {
             self.wrap,
             self.monospace_width,
             self.tab_width,
-            self.hint,
+            self.hinting,
         ))
     }
 
@@ -560,6 +560,20 @@ impl Buffer {
     /// Will panic if `metrics.font_size` is zero.
     pub fn set_metrics(&mut self, font_system: &mut FontSystem, metrics: Metrics) {
         self.set_metrics_and_size(font_system, metrics, self.width_opt, self.height_opt);
+    }
+
+    /// Get the current [`Hinting`] strategy.
+    pub const fn hinting(&self) -> Hinting {
+        self.hinting
+    }
+
+    /// Set the current [`Hinting`] strategy.
+    pub fn set_hinting(&mut self, font_system: &mut FontSystem, hinting: Hinting) {
+        if hinting != self.hinting {
+            self.hinting = hinting;
+            self.relayout(font_system);
+            self.shape_until_scroll(font_system, false);
+        }
     }
 
     /// Get the current [`Wrap`]
@@ -722,9 +736,9 @@ impl Buffer {
     /// Set text of buffer, using an iterator of styled spans (pairs of text and attributes)
     ///
     /// ```
-    /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, Metrics, Hinting, Shaping};
+    /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, Metrics, Shaping};
     /// # let mut font_system = FontSystem::new();
-    /// let mut buffer = Buffer::new_empty(Metrics::new(32.0, 44.0), Hinting::Disabled);
+    /// let mut buffer = Buffer::new_empty(Metrics::new(32.0, 44.0));
     /// let attrs = Attrs::new().family(Family::Serif);
     /// buffer.set_rich_text(
     ///     &mut font_system,
@@ -1451,9 +1465,9 @@ impl BorrowedWithFontSystem<'_, Buffer> {
     /// Set text of buffer, using an iterator of styled spans (pairs of text and attributes)
     ///
     /// ```
-    /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, Metrics, Hinting, Shaping};
+    /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, Metrics, Shaping};
     /// # let mut font_system = FontSystem::new();
-    /// let mut buffer = Buffer::new_empty(Metrics::new(32.0, 44.0), Hinting::Disabled);
+    /// let mut buffer = Buffer::new_empty(Metrics::new(32.0, 44.0));
     /// let attrs = Attrs::new().family(Family::Serif);
     /// buffer.set_rich_text(
     ///     &mut font_system,

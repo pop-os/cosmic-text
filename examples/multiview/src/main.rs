@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic_text::{
-    Action, Attrs, Buffer, Edit, Family, FontSystem, Hinting, Metrics, Scroll, Shaping, SwashCache,
+    Action, Attrs, Buffer, Edit, Family, FontSystem, Metrics, Scroll, Shaping, SwashCache,
 };
 use std::{collections::HashMap, env, fs, num::NonZeroU32, rc::Rc, slice};
 use tiny_skia::{Color, Paint, PixmapMut, Rect, Transform};
@@ -25,7 +25,7 @@ fn main() {
 
     let mut swash_cache = SwashCache::new();
 
-    let mut buffer = Buffer::new_empty(Metrics::new(14.0, 20.0), Hinting::Disabled);
+    let mut buffer = Buffer::new_empty(Metrics::new(14.0, 20.0));
 
     let mut buffer = buffer.borrow_with(&mut font_system);
 
