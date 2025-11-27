@@ -113,7 +113,7 @@ fn wrap_extra_line() {
     let mut font_system = FontSystem::new();
     let metrics = Metrics::new(14.0, 20.0);
 
-    let mut buffer = Buffer::new(&mut font_system, metrics, Hinting::Disabled);
+    let mut buffer = Buffer::new(&mut font_system, metrics);
 
     let mut buffer = buffer.borrow_with(&mut font_system);
 

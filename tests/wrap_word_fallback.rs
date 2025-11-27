@@ -1,4 +1,4 @@
-use cosmic_text::{Attrs, Buffer, FontSystem, Hinting, Metrics, Shaping, Wrap};
+use cosmic_text::{Attrs, Buffer, FontSystem, Metrics, Shaping, Wrap};
 
 // Tests the ability to fallback to glyph wrapping when a word can't fit on a line by itself.
 // No line should ever overflow the buffer size.
@@ -10,7 +10,7 @@ fn wrap_word_fallback() {
     font_system.db_mut().load_font_data(font);
     let metrics = Metrics::new(14.0, 20.0);
 
-    let mut buffer = Buffer::new(&mut font_system, metrics, Hinting::Disabled);
+    let mut buffer = Buffer::new(&mut font_system, metrics);
 
     let mut buffer = buffer.borrow_with(&mut font_system);
 
