@@ -5,11 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.16.0] - 2025-12-29
 
 ### Added
 
 - Add `Renderer` trait for more flexible rendering of buffers and editors
+- Make hinting configurable with `Hinting` enum
+
+### Fixed
+
+- Fix bench compilation
+- Round x_advance to nearest monospace width when requested
+- Do not use ASCII fast path when a word has incompatible spans
+
+### Changed
+
+- Update harfrust to 0.4.1
+- Update skrifa to 0.39.0
 
 ## [0.15.0] - 2025-10-30
 
