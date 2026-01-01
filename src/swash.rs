@@ -89,12 +89,24 @@ fn swash_outline_commands(
         return None;
     };
 
+    let variable_width = font
+        .as_swash()
+        .variations()
+        .find_by_tag(swash::Tag::from_be_bytes(*b"wght"));
+
     // Build the scaler
     let mut scaler = context
         .builder(font.as_swash())
         .size(f32::from_bits(cache_key.font_size_bits))
-        .hint(!cache_key.flags.contains(CacheKeyFlags::DISABLE_HINTING))
-        .build();
+        .hint(!cache_key.flags.contains(CacheKeyFlags::DISABLE_HINTING));
+    if let Some(variation) = variable_width {
+        scaler = scaler.variations(std::iter::once(swash::Setting {
+            tag: swash::Tag::from_be_bytes(*b"wght"),
+            value: f32::from(cache_key.font_weight.0)
+                .clamp(variation.min_value(), variation.max_value()),
+        }));
+    }
+    let mut scaler = scaler.build();
 
     // Scale the outline
     let mut outline = scaler
