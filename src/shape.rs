@@ -4,7 +4,7 @@
 
 use crate::fallback::FontFallbackIter;
 use crate::{
-    math, Align, AttrsList, CacheKeyFlags, Color, Font, FontSystem, Hinting, LayoutGlyph,
+    math, Align, Attrs, AttrsList, CacheKeyFlags, Color, Font, FontSystem, Hinting, LayoutGlyph,
     LayoutLine, Metrics, Wrap,
 };
 #[cfg(not(feature = "std"))]
@@ -18,6 +18,7 @@ use core::ops::Range;
 
 #[cfg(not(feature = "std"))]
 use core_maths::CoreFloat;
+use fontdb::Style;
 use unicode_script::{Script, UnicodeScript};
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -233,7 +234,7 @@ fn shape_fallback(
             //TODO: color should not be related to shaping
             color_opt: attrs.color_opt,
             metadata: attrs.metadata,
-            cache_key_flags: attrs.cache_key_flags,
+            cache_key_flags: override_fake_italic(attrs.cache_key_flags, font, &attrs),
             metrics_opt: attrs.metrics_opt.map(Into::into),
         });
     }
@@ -496,11 +497,11 @@ fn shape_skip(
     let font = font_iter.next().expect("no default font found");
     let font_id = font.id();
     let font_monospace_em_width = font.monospace_em_width();
-    let font = font.as_swash();
+    let swash_font = font.as_swash();
 
-    let charmap = font.charmap();
-    let metrics = font.metrics(&[]);
-    let glyph_metrics = font.glyph_metrics(&[]).scale(1.0);
+    let charmap = swash_font.charmap();
+    let metrics = swash_font.metrics(&[]);
+    let glyph_metrics = swash_font.glyph_metrics(&[]).scale(1.0);
 
     let ascent = metrics.ascent / f32::from(metrics.units_per_em);
     let descent = metrics.descent / f32::from(metrics.units_per_em);
@@ -529,11 +530,30 @@ fn shape_skip(
                     glyph_id,
                     color_opt: attrs.color_opt,
                     metadata: attrs.metadata,
-                    cache_key_flags: attrs.cache_key_flags,
+                    cache_key_flags: override_fake_italic(
+                        attrs.cache_key_flags,
+                        font.as_ref(),
+                        &attrs,
+                    ),
                     metrics_opt: attrs.metrics_opt.map(Into::into),
                 }
             }),
     );
+}
+
+fn override_fake_italic(
+    cache_key_flags: CacheKeyFlags,
+    font: &Font,
+    attrs: &Attrs,
+) -> CacheKeyFlags {
+    cache_key_flags
+        | if !font.italic_or_oblique
+            && (attrs.style == Style::Italic || attrs.style == Style::Oblique)
+        {
+            CacheKeyFlags::FAKE_ITALIC
+        } else {
+            CacheKeyFlags::empty()
+        }
 }
 
 /// A shaped glyph
