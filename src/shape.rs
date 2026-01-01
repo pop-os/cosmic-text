@@ -546,14 +546,11 @@ fn override_fake_italic(
     font: &Font,
     attrs: &Attrs,
 ) -> CacheKeyFlags {
-    cache_key_flags
-        | if !font.italic_or_oblique
-            && (attrs.style == Style::Italic || attrs.style == Style::Oblique)
-        {
-            CacheKeyFlags::FAKE_ITALIC
-        } else {
-            CacheKeyFlags::empty()
-        }
+    if !font.italic_or_oblique && (attrs.style == Style::Italic || attrs.style == Style::Oblique) {
+        cache_key_flags | CacheKeyFlags::FAKE_ITALIC
+    } else {
+        cache_key_flags
+    }
 }
 
 /// A shaped glyph
