@@ -15,7 +15,7 @@ use core::fmt;
 use alloc::sync::Arc;
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
-
+use fontdb::Style;
 use self_cell::self_cell;
 
 pub mod fallback;
@@ -54,6 +54,7 @@ pub struct Font {
     data: FontData,
     id: fontdb::ID,
     monospace_fallback: Option<FontMonospaceFallback>,
+    pub(crate) italic_or_oblique: bool,
 }
 
 impl fmt::Debug for Font {
@@ -234,6 +235,7 @@ impl Font {
             )
             .ok()?,
             data: FontData::new(Blob::new(data), info.index),
+            italic_or_oblique: info.style == Style::Italic || info.style == Style::Oblique,
         })
     }
 }
