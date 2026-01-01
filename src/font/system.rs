@@ -6,7 +6,7 @@ use alloc::sync::Arc;
 use alloc::vec::Vec;
 use core::fmt;
 use core::ops::{Deref, DerefMut};
-use fontdb::Query;
+use fontdb::{FaceInfo, Query, Style};
 use skrifa::raw::{ReadError, TableProvider as _};
 
 // re-export fontdb and harfrust
@@ -17,9 +17,43 @@ use super::fallback::{Fallback, Fallbacks, MonospaceFallbackInfo, PlatformFallba
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FontMatchKey {
+    pub(crate) not_emoji: bool,
     pub(crate) font_weight_diff: u16,
     pub(crate) font_weight: u16,
+    pub(crate) font_stretch_diff: u16,
+    pub(crate) font_stretch: u16,
+    pub(crate) font_style_diff: u8,
     pub(crate) id: fontdb::ID,
+}
+
+impl FontMatchKey {
+    fn new(attrs: &Attrs, face: &FaceInfo) -> FontMatchKey {
+        let not_emoji = !face.post_script_name.contains("Emoji");
+        let font_weight_diff = attrs.weight.0.abs_diff(face.weight.0);
+        let font_weight = face.weight.0;
+        let font_stretch_diff = attrs.stretch.to_number().abs_diff(face.stretch.to_number());
+        let font_stretch = face.stretch.to_number();
+        let font_style_diff = match (attrs.style, face.style) {
+            (Style::Normal, Style::Normal)
+            | (Style::Italic, Style::Italic)
+            | (Style::Oblique, Style::Oblique) => 0,
+            (Style::Italic, Style::Oblique) | (Style::Oblique, Style::Italic) => 1,
+            (Style::Normal, Style::Italic)
+            | (Style::Normal, Style::Oblique)
+            | (Style::Italic, Style::Normal)
+            | (Style::Oblique, Style::Normal) => 2,
+        };
+        let id = face.id;
+        FontMatchKey {
+            not_emoji,
+            font_weight_diff,
+            font_weight,
+            font_stretch_diff,
+            font_stretch,
+            font_style_diff,
+            id,
+        }
+    }
 }
 
 struct FontCachedCodepointSupportInfo {
@@ -326,12 +360,7 @@ impl FontSystem {
                 let mut font_match_keys = self
                     .db
                     .faces()
-                    .filter(|face| attrs.matches(face))
-                    .map(|face| FontMatchKey {
-                        font_weight_diff: attrs.weight.0.abs_diff(face.weight.0),
-                        font_weight: face.weight.0,
-                        id: face.id,
-                    })
+                    .map(|face| FontMatchKey::new(attrs, face))
                     .collect::<Vec<_>>();
 
                 // Sort so we get the keys with weight_offset=0 first
@@ -357,11 +386,7 @@ impl FontSystem {
                         font_match_keys.insert(0, match_key);
                     } else if let Some(face) = self.db.face(id) {
                         // else insert in front
-                        let match_key = FontMatchKey {
-                            font_weight_diff: attrs.weight.0.abs_diff(face.weight.0),
-                            font_weight: face.weight.0,
-                            id,
-                        };
+                        let match_key = FontMatchKey::new(attrs, face);
                         font_match_keys.insert(0, match_key);
                     } else {
                         log::error!("Could not get face from db, that should've been there.");
