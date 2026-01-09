@@ -826,6 +826,14 @@ impl ShapeSpan {
 
         let mut start_word = 0;
         for (end_lb, _) in unicode_linebreak::linebreaks(span) {
+            // Workaround for broken |> ligature in code fonts
+            if end_lb > 0 && end_lb < span.len() {
+                let b = span.as_bytes();
+                if b[end_lb - 1] == b'|' && b[end_lb] == b'>' {
+                    continue;
+                }
+            }
+
             let mut start_lb = end_lb;
             for (i, c) in span[start_word..end_lb].char_indices().rev() {
                 // TODO: Not all whitespace characters are linebreakable, e.g. 00A0 (No-break
