@@ -812,11 +812,16 @@ impl ShapeSpan {
             // The unicode-linebreak crate treats the pipe character '|' as a break opportunity (BA/AL class).
             // This causes ShapeSpan::build to split text like '|>' into separate ShapeWords.
             // When these words are shaped independently, the font shaping engine cannot form ligatures that cross the word boundary.
-            // We manually check for the '|>' sequence during segmentation and skip the break opportunity to ensure they remain in the same shaping run.
+            // We manually check for known ligature sequences during segmentation and skip the break opportunity
+            // to ensure they remain in the same shaping run.
             if end_lb > 0 && end_lb < span.len() {
                 let b = span.as_bytes();
-                if b[end_lb - 1] == b'|' && b[end_lb] == b'>' {
-                    continue;
+                match (b[end_lb - 1], b[end_lb]) {
+                    (b'|', b'>') | // |>
+                    (b'!', b'=') | // !=
+                    (b'+', b'+')   // ++
+                    => continue,
+                    _ => {}
                 }
             }
 

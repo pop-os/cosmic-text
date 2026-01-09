@@ -102,4 +102,28 @@ fn test_ligature_segmentation() {
         "Expected '|>' to be a single word (preserved for ligature), but found {} words.",
         span.words.len()
     );
+
+    // Test !=
+    buffer.set_text("!=", &Attrs::new(), Shaping::Advanced, None);
+    buffer.shape_until_scroll(false);
+    let line = &buffer.lines[0];
+    let shape = line.shape_opt().expect("ShapeLine not found");
+    assert_eq!(
+        shape.spans[0].words.len(),
+        1,
+        "Expected '!=' to be a single word, but found {} words.",
+        shape.spans[0].words.len()
+    );
+
+    // Test ++
+    buffer.set_text("++", &Attrs::new(), Shaping::Advanced, None);
+    buffer.shape_until_scroll(false);
+    let line = &buffer.lines[0];
+    let shape = line.shape_opt().expect("ShapeLine not found");
+    assert_eq!(
+        shape.spans[0].words.len(),
+        1,
+        "Expected '++' to be a single word, but found {} words.",
+        shape.spans[0].words.len()
+    );
 }
