@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["CaretValue","GlyphClassDef"],"type":["AttachList","AttachPoint","CaretValueFormat1","CaretValueFormat2","CaretValueFormat3","Gdef","LigCaretList","LigGlyph","MarkGlyphSets"]};
