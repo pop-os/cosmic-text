@@ -73,3 +73,72 @@ fn test_english_mixed_with_arabic_paragraph_rendering() {
         .canvas(400, 110)
         .validate_text_rendering();
 }
+
+#[test]
+fn test_ligature_segmentation() {
+    use cosmic_text::{Buffer, FontSystem, Metrics, Shaping};
+
+    let mut font_system =
+        FontSystem::new_with_locale_and_db("en-US".into(), fontdb::Database::new());
+    let font = std::fs::read("fonts/Inter-Regular.ttf").unwrap();
+    font_system.db_mut().load_font_data(font);
+    let metrics = Metrics::new(14.0, 20.0);
+
+    let mut buffer = Buffer::new(&mut font_system, metrics);
+    let mut buffer = buffer.borrow_with(&mut font_system);
+
+    buffer.set_text("|>", &Attrs::new(), Shaping::Advanced, None);
+    buffer.shape_until_scroll(false);
+
+    let line = &buffer.lines[0];
+    let shape = line.shape_opt().expect("ShapeLine not found");
+    let span = &shape.spans[0];
+
+    // Inter-Regular HAS a contextual alternate for |> (changing the glyph ID),
+    // so our probe detects it and keeps them together.
+    assert_eq!(
+        span.words.len(),
+        1,
+        "Expected '|>' to be 1 word (contextual alternate in Inter), but found {} words.",
+        span.words.len()
+    );
+
+    // Test -> (Arrow), which is a common ligature.
+    buffer.set_text("->", &Attrs::new(), Shaping::Advanced, None);
+    buffer.shape_until_scroll(false);
+    let line = &buffer.lines[0];
+    let shape = line.shape_opt().expect("ShapeLine not found");
+
+    assert_eq!(
+        shape.spans[0].words.len(),
+        1,
+        "Expected '->' to be a single word (ligature), but found {} words.",
+        shape.spans[0].words.len()
+    );
+
+    // Test !=
+    buffer.set_text("!=", &Attrs::new(), Shaping::Advanced, None);
+    buffer.shape_until_scroll(false);
+    let line = &buffer.lines[0];
+    let shape = line.shape_opt().expect("ShapeLine not found");
+    // Inter has a contextual alternate for != too.
+    assert_eq!(
+        shape.spans[0].words.len(),
+        1,
+        "Expected '!=' to be 1 word (contextual alternate), but found {} words.",
+        shape.spans[0].words.len()
+    );
+
+    // Test ++
+    buffer.set_text("++", &Attrs::new(), Shaping::Advanced, None);
+    buffer.shape_until_scroll(false);
+    let line = &buffer.lines[0];
+    let shape = line.shape_opt().expect("ShapeLine not found");
+    // Inter does not have a ++ ligature.
+    assert_eq!(
+        shape.spans[0].words.len(),
+        2,
+        "Expected '++' to be 2 words, but found {} words.",
+        shape.spans[0].words.len()
+    );
+}
