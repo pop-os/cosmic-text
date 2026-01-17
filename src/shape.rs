@@ -809,19 +809,49 @@ impl ShapeSpan {
 
         let mut start_word = 0;
         for (end_lb, _) in unicode_linebreak::linebreaks(span) {
-            // The unicode-linebreak crate treats the pipe character '|' as a break opportunity (BA/AL class).
-            // This causes ShapeSpan::build to split text like '|>' into separate ShapeWords.
-            // When these words are shaped independently, the font shaping engine cannot form ligatures that cross the word boundary.
-            // We manually check for known ligature sequences during segmentation and skip the break opportunity
-            // to ensure they remain in the same shaping run.
+            // Check if this break opportunity splits a likely ligature (e.g. "|>" or "!=")
             if end_lb > 0 && end_lb < span.len() {
-                let b = span.as_bytes();
-                match (b[end_lb - 1], b[end_lb]) {
-                    (b'|', b'>') | // |>
-                    (b'!', b'=') | // !=
-                    (b'+', b'+')   // ++
-                    => continue,
-                    _ => {}
+                let start_idx = span_range.start;
+                let pre_char = span[..end_lb].chars().last();
+                let post_char = span[end_lb..].chars().next();
+
+                if let (Some(c1), Some(c2)) = (pre_char, post_char) {
+                    // Only probe if both are punctuation (optimization for coding ligatures)
+                    if c1.is_ascii_punctuation() && c2.is_ascii_punctuation() {
+                        let probe_text = format!("{}{}", c1, c2);
+                        let attrs = attrs_list.get_span(start_idx + end_lb);
+                        let fonts = font_system.get_font_matches(&attrs);
+                        let default_families = [&attrs.family];
+
+                        let mut font_iter = FontFallbackIter::new(
+                            font_system,
+                            &fonts,
+                            &default_families,
+                            &[],
+                            &probe_text,
+                            attrs.weight,
+                        );
+
+                        if let Some(font) = font_iter.next() {
+                            let mut glyphs = Vec::new();
+                            let scratch = font_iter.shape_caches();
+                            shape_fallback(
+                                scratch,
+                                &mut glyphs,
+                                &font,
+                                &probe_text,
+                                attrs_list,
+                                0,
+                                probe_text.len(),
+                                false,
+                            );
+
+                            // If we get fewer glyphs than characters, it's likely a ligature.
+                            if glyphs.len() == 1 {
+                                continue;
+                            }
+                        }
+                    }
                 }
             }
 
