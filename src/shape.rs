@@ -863,9 +863,29 @@ impl ShapeSpan {
                                 false,
                             );
 
-                            // If we get fewer glyphs than characters, it's likely a ligature.
-                            if glyphs.len() == 1 {
+                            // 1. If we have fewer glyphs than chars, it's definitely a ligature (e.g. -> becoming 1 arrow).
+                            if glyphs.len() < probe_text.chars().count() {
                                 continue;
+                            }
+
+                            // 2. If we have the same number of glyphs, they might be contextual alternates (e.g. |> becoming 2 special glyphs).
+                            // Check if the glyphs match the standard "cmap" (character to glyph) mapping.
+                            // If they differ, the shaper substituted them, so we should keep them together.
+                            if glyphs.len() == probe_text.chars().count() {
+                                let charmap = font.as_swash().charmap();
+                                let mut is_modified = false;
+                                for (i, c) in probe_text.chars().enumerate() {
+                                    let std_id = charmap.map(c);
+                                    if glyphs[i].glyph_id != std_id {
+                                        is_modified = true;
+                                        break;
+                                    }
+                                }
+
+                                if is_modified {
+                                    // Ligature/Contextual Alternate detected!
+                                    continue;
+                                }
                             }
                         }
                     }

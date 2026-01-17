@@ -94,12 +94,12 @@ fn test_ligature_segmentation() {
     let shape = line.shape_opt().expect("ShapeLine not found");
     let span = &shape.spans[0];
 
-    // Inter-Regular does NOT have a ligature for |>, so we expect it to be split.
-    // This confirms that we didn't break valid wrapping for non-ligatures.
+    // Inter-Regular HAS a contextual alternate for |> (changing the glyph ID),
+    // so our probe detects it and keeps them together.
     assert_eq!(
         span.words.len(),
-        2,
-        "Expected '|>' to be 2 words (no ligature in Inter), but found {} words.",
+        1,
+        "Expected '|>' to be 1 word (contextual alternate in Inter), but found {} words.",
         span.words.len()
     );
 
@@ -121,11 +121,11 @@ fn test_ligature_segmentation() {
     buffer.shape_until_scroll(false);
     let line = &buffer.lines[0];
     let shape = line.shape_opt().expect("ShapeLine not found");
-    // Inter-Regular does not have a != ligature.
+    // Inter has a contextual alternate for != too.
     assert_eq!(
         shape.spans[0].words.len(),
-        2,
-        "Expected '!=' to be 2 words (no ligature), but found {} words.",
+        1,
+        "Expected '!=' to be 1 word (contextual alternate), but found {} words.",
         shape.spans[0].words.len()
     );
 
