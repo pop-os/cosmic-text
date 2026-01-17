@@ -15,20 +15,23 @@ pub use harfrust;
 
 use super::fallback::{Fallback, Fallbacks, MonospaceFallbackInfo, PlatformFallback};
 
+// The fields are used in the derived Ord implementation for sorting fallback candidates.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FontMatchKey {
     pub(crate) not_emoji: bool,
     pub(crate) font_weight_diff: u16,
-    pub(crate) font_weight: u16,
     pub(crate) font_stretch_diff: u16,
-    pub(crate) font_stretch: u16,
     pub(crate) font_style_diff: u8,
+    pub(crate) font_weight: u16,
+    pub(crate) font_stretch: u16,
     pub(crate) id: fontdb::ID,
 }
 
 impl FontMatchKey {
     fn new(attrs: &Attrs, face: &FaceInfo) -> FontMatchKey {
+        // TODO: smarter way of detecting emoji
         let not_emoji = !face.post_script_name.contains("Emoji");
+        // TODO: correctly take variable axes into account
         let font_weight_diff = attrs.weight.0.abs_diff(face.weight.0);
         let font_weight = face.weight.0;
         let font_stretch_diff = attrs.stretch.to_number().abs_diff(face.stretch.to_number());
@@ -47,10 +50,10 @@ impl FontMatchKey {
         FontMatchKey {
             not_emoji,
             font_weight_diff,
-            font_weight,
             font_stretch_diff,
-            font_stretch,
             font_style_diff,
+            font_weight,
+            font_stretch,
             id,
         }
     }
