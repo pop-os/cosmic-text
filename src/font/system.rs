@@ -179,22 +179,24 @@ impl FontSystem {
     /// while debug builds can take up to ten times longer. For this reason, it should only be
     /// called once, and the resulting [`FontSystem`] should be shared.
     pub fn new() -> Self {
-        Self::new_with_fonts(core::iter::empty())
+        Self::new_with_fonts(core::iter::empty(), true)
     }
 
     /// Create a new [`FontSystem`] with a pre-specified set of fonts.
-    pub fn new_with_fonts(fonts: impl IntoIterator<Item = fontdb::Source>) -> Self {
+    pub fn new_with_fonts(fonts: impl IntoIterator<Item = fontdb::Source>, load_system_fonts: bool) -> Self {
         let locale = Self::get_locale();
         log::debug!("Locale: {locale}");
 
         let mut db = fontdb::Database::new();
 
-        Self::load_fonts(&mut db, fonts.into_iter());
+        Self::load_fonts(&mut db, fonts.into_iter(), load_system_fonts);
 
         //TODO: configurable default fonts
-        db.set_monospace_family("Noto Sans Mono");
-        db.set_sans_serif_family("Open Sans");
-        db.set_serif_family("DejaVu Serif");
+        if load_system_fonts {
+            db.set_monospace_family("Noto Sans Mono");
+            db.set_sans_serif_family("Open Sans");
+            db.set_serif_family("DejaVu Serif");
+        }
 
         Self::new_with_locale_and_db_and_fallback(locale, db, PlatformFallback)
     }
@@ -421,12 +423,14 @@ impl FontSystem {
     }
 
     #[cfg(feature = "std")]
-    fn load_fonts(db: &mut fontdb::Database, fonts: impl Iterator<Item = fontdb::Source>) {
+    fn load_fonts(db: &mut fontdb::Database, fonts: impl Iterator<Item = fontdb::Source>, load_system_fonts: bool) {
         #[cfg(not(target_arch = "wasm32"))]
         let now = std::time::Instant::now();
 
-        db.load_system_fonts();
-
+        if load_system_fonts {
+            db.load_system_fonts();
+        }
+        
         for source in fonts {
             db.load_font_source(source);
         }
