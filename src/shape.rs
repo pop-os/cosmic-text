@@ -8,6 +8,8 @@ use crate::{
     LayoutLine, Metrics, Wrap,
 };
 #[cfg(not(feature = "std"))]
+use alloc::format;
+#[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 
 use alloc::collections::VecDeque;
@@ -854,6 +856,7 @@ impl ShapeSpan {
                             // 2. If we have the same number of glyphs, they might be contextual alternates (e.g. |> becoming 2 special glyphs).
                             // Check if the glyphs match the standard "cmap" (character to glyph) mapping.
                             // If they differ, the shaper substituted them, so we should keep them together.
+                            #[cfg(feature = "swash")]
                             if glyphs.len() == probe_text.chars().count() {
                                 let charmap = font.as_swash().charmap();
                                 let mut is_modified = false;
