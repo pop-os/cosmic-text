@@ -8,6 +8,8 @@ use crate::{
     LayoutLine, Metrics, Wrap,
 };
 #[cfg(not(feature = "std"))]
+use alloc::format;
+#[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 
 use alloc::collections::VecDeque;
@@ -826,6 +828,73 @@ impl ShapeSpan {
 
         let mut start_word = 0;
         for (end_lb, _) in unicode_linebreak::linebreaks(span) {
+            // Check if this break opportunity splits a likely ligature (e.g. "|>" or "!=")
+            if end_lb > 0 && end_lb < span.len() {
+                let start_idx = span_range.start;
+                let pre_char = span[..end_lb].chars().last();
+                let post_char = span[end_lb..].chars().next();
+
+                if let (Some(c1), Some(c2)) = (pre_char, post_char) {
+                    // Only probe if both are punctuation (optimization for coding ligatures)
+                    if c1.is_ascii_punctuation() && c2.is_ascii_punctuation() {
+                        let probe_text = format!("{}{}", c1, c2);
+                        let attrs = attrs_list.get_span(start_idx + end_lb);
+                        let fonts = font_system.get_font_matches(&attrs);
+                        let default_families = [&attrs.family];
+
+                        let mut font_iter = FontFallbackIter::new(
+                            font_system,
+                            &fonts,
+                            &default_families,
+                            &[],
+                            &probe_text,
+                            attrs.weight,
+                        );
+
+                        if let Some(font) = font_iter.next() {
+                            let mut glyphs = Vec::new();
+                            let scratch = font_iter.shape_caches();
+                            shape_fallback(
+                                scratch,
+                                &mut glyphs,
+                                &font,
+                                &probe_text,
+                                attrs_list,
+                                0,
+                                probe_text.len(),
+                                false,
+                            );
+
+                            // 1. If we have fewer glyphs than chars, it's definitely a ligature (e.g. -> becoming 1 arrow).
+                            if glyphs.len() < probe_text.chars().count() {
+                                continue;
+                            }
+
+                            // 2. If we have the same number of glyphs, they might be contextual alternates (e.g. |> becoming 2 special glyphs).
+                            // Check if the glyphs match the standard "cmap" (character to glyph) mapping.
+                            // If they differ, the shaper substituted them, so we should keep them together.
+                            #[cfg(feature = "swash")]
+                            if glyphs.len() == probe_text.chars().count() {
+                                let charmap = font.as_swash().charmap();
+                                let mut is_modified = false;
+                                for (i, c) in probe_text.chars().enumerate() {
+                                    let std_id = charmap.map(c);
+                                    if glyphs[i].glyph_id != std_id {
+                                        is_modified = true;
+                                        break;
+                                    }
+                                }
+
+                                if is_modified {
+                                    // Ligature/Contextual Alternate detected!
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             let mut start_lb = end_lb;
             for (i, c) in span[start_word..end_lb].char_indices().rev() {
                 // TODO: Not all whitespace characters are linebreakable, e.g. 00A0 (No-break
