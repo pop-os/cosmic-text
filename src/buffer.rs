@@ -275,6 +275,24 @@ impl Buffer {
         buffer
     }
 
+    /// Get the number of lines in the buffer.
+    ///
+    /// This is equivalent to `buffer.lines.len()` but provides a more
+    /// abstract interface that will work with both Vec and Rope backends.
+    #[inline]
+    pub fn line_count(&self) -> usize {
+        self.lines.len()
+    }
+
+    /// Get the text of a line by index.
+    ///
+    /// This is equivalent to `buffer.lines.get(line_i).map(|l| l.text())`
+    /// but provides a more abstract interface.
+    #[inline]
+    pub fn line_text(&self, line_i: usize) -> Option<&str> {
+        self.lines.get(line_i).map(|l| l.text())
+    }
+
     /// Mutably borrows the buffer together with an [`FontSystem`] for more convenient methods
     pub fn borrow_with<'a>(
         &'a mut self,

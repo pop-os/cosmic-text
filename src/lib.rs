@@ -143,6 +143,36 @@ pub use self::swash::*;
 #[cfg(feature = "swash")]
 mod swash;
 
+#[cfg(feature = "rope-buffer")]
+pub use self::rope_text::*;
+#[cfg(feature = "rope-buffer")]
+mod rope_text;
+
+#[cfg(feature = "rope-buffer")]
+pub use self::sparse_metadata::*;
+#[cfg(feature = "rope-buffer")]
+mod sparse_metadata;
+
+#[cfg(feature = "rope-buffer")]
+pub use self::line_cache::*;
+#[cfg(feature = "rope-buffer")]
+mod line_cache;
+
+#[cfg(feature = "rope-buffer")]
+pub use self::line_view::*;
+#[cfg(feature = "rope-buffer")]
+mod line_view;
+
+#[cfg(feature = "rope-buffer")]
+pub use self::rope_buffer::*;
+#[cfg(feature = "rope-buffer")]
+mod rope_buffer;
+
+#[cfg(feature = "rope-buffer")]
+pub use self::large_file::*;
+#[cfg(feature = "rope-buffer")]
+mod large_file;
+
 mod math;
 
 type BuildHasher = core::hash::BuildHasherDefault<rustc_hash::FxHasher>;
