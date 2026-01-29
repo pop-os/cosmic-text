@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.17.0] - 2026-01-29
+
+### Fixed
+
+- Fix variable font weight for SwashCache::get_outline_commands()
+- Allow fallback to fonts with mismatched stretch or style
+- Shape as fake italic if no matching italic font exists
+- Prevent line break opportunities from splitting ligatures
+
+### Changed
+
+- Update all dependencies to latest versions
+
+### Removed
+
+- Attrs::matches was removed as it is not compatible with new fallback logic
+
 ## [0.16.0] - 2025-12-29
 
 ### Added

@@ -1,7 +1,7 @@
 [package]
 name = "cosmic-text"
 description = "Pure Rust multi-line text handling"
-version = "0.16.0"
+version = "0.17.0"
 authors = ["Jeremy Soller <jeremy@system76.com>"]
 edition = "2021"
 license = "MIT OR Apache-2.0"
@@ -10,35 +10,35 @@ repository = "https://github.com/pop-os/cosmic-text"
 rust-version = "1.80"
 
 [dependencies]
-bitflags = "2.4.1"
+bitflags = "2.10.0"
 core_maths = { version = "0.1.1", optional = true }
 cosmic_undo_2 = { version = "0.2.0", optional = true }
 fontdb = { version = "0.23", default-features = false }
-harfrust = { version = "0.4.1", default-features = false }
+harfrust = { version = "0.2.1", default-features = false }
 hashbrown = { version = "0.16", optional = true, default-features = false }
-libm = { version = "0.2.8", optional = true }
+libm = { version = "0.2.16", optional = true }
 linebender_resource_handle = { version = "0.1.1", default-features = false }
-log = "0.4.20"
-modit = { version = "0.1.4", optional = true }
-rangemap = "1.4.0"
-rustc-hash = { version = "1.1.0", default-features = false }
-self_cell = "1.0.1"
-skrifa = { version = "0.39.0", default-features = false }
-smol_str = { version = "0.2.2", default-features = false }
-syntect = { version = "5.1.0", optional = true }
-sys-locale = { version = "0.3.1", optional = true }
+log = "0.4.29"
+modit = { version = "0.1.5", optional = true }
+rangemap = "1.6.0"
+rustc-hash = { version = "2.1.1", default-features = false }
+self_cell = "1.2.2"
+skrifa = { version = "0.36.0", default-features = false }
+smol_str = { version = "0.3.2", default-features = false }
+syntect = { version = "5.3.0", optional = true }
+sys-locale = { version = "0.3.2", optional = true }
 unicode-linebreak = "0.1.5"
-unicode-script = "0.5.5"
-unicode-segmentation = "1.10.1"
+unicode-script = "0.5.8"
+unicode-segmentation = "1.12.0"
 
 [dependencies.swash]
-version = "0.2.0"
+version = "0.2.6"
 default-features = false
 features = ["render", "scale"]
 optional = true
 
 [dependencies.unicode-bidi]
-version = "0.3.13"
+version = "0.3.18"
 default-features = false
 features = ["hardcoded-data"]
 
@@ -75,8 +75,8 @@ harness = false
 members = ["examples/*"]
 
 [dev-dependencies]
-tiny-skia = "0.11.2"
-criterion = { version = "0.5.1", default-features = false, features = [
+tiny-skia = "0.11.4"
+criterion = { version = "0.7.0", default-features = false, features = [
     "cargo_bench_support",
 ] }
 
