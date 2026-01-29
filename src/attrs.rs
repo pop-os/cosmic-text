@@ -319,6 +319,13 @@ impl<'a> Attrs<'a> {
         self
     }
 
+    /// Check if this set of attributes matches a font face.
+    pub fn matches(&self, face: &fontdb::FaceInfo) -> bool {
+        //TODO: smarter way of including emoji
+        face.post_script_name.contains("Emoji")
+            || (face.style == self.style && face.stretch == self.stretch)
+    }
+
     /// Check if this set of attributes can be shaped with another
     pub fn compatible(&self, other: &Self) -> bool {
         self.family == other.family
