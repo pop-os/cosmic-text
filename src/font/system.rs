@@ -1,5 +1,4 @@
 use crate::{Attrs, Font, FontMatchAttrs, HashMap, ShapeBuffer};
-use alloc::boxed::Box;
 use alloc::collections::BTreeSet;
 use alloc::string::String;
 use alloc::sync::Arc;
@@ -13,7 +12,7 @@ use skrifa::raw::{ReadError, TableProvider as _};
 pub use fontdb;
 pub use harfrust;
 
-use super::fallback::{Fallback, Fallbacks, MonospaceFallbackInfo, PlatformFallback};
+use super::fallback::{platform_fallback, Fallback, MonospaceFallbackInfo};
 
 // The fields are used in the derived Ord implementation for sorting fallback candidates.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -126,6 +125,9 @@ pub struct FontSystem {
     /// The underlying font database.
     db: fontdb::Database,
 
+    /// The font fallback list.
+    fallback: Fallback,
+
     /// Cache for loaded fonts from the database.
     font_cache: HashMap<(fontdb::ID, fontdb::Weight), Option<Arc<Font>>>,
 
@@ -152,12 +154,6 @@ pub struct FontSystem {
     /// Cache for shaped runs
     #[cfg(feature = "shape-run-cache")]
     pub shape_run_cache: crate::ShapeRunCache,
-
-    /// List of fallbacks
-    pub(crate) dyn_fallback: Box<dyn Fallback>,
-
-    /// List of fallbacks
-    pub(crate) fallbacks: Fallbacks,
 }
 
 impl fmt::Debug for FontSystem {
@@ -196,14 +192,16 @@ impl FontSystem {
         db.set_sans_serif_family("Open Sans");
         db.set_serif_family("DejaVu Serif");
 
-        Self::new_with_locale_and_db_and_fallback(locale, db, PlatformFallback)
+        let fallback = platform_fallback(&locale);
+
+        Self::new_with_locale_and_db_and_fallback(locale, db, fallback)
     }
 
     /// Create a new [`FontSystem`] with a pre-specified locale, font database and font fallback list.
     pub fn new_with_locale_and_db_and_fallback(
         locale: String,
         db: fontdb::Database,
-        impl_fallback: impl Fallback + 'static,
+        fallback: Fallback,
     ) -> Self {
         let mut monospace_font_ids = db
             .faces()
@@ -243,8 +241,6 @@ impl FontSystem {
             .map(|(k, v)| (k, Vec::from_iter(v)))
             .collect();
 
-        let fallbacks = Fallbacks::new(&impl_fallback, &[], &locale);
-
         Self {
             locale,
             db,
@@ -257,14 +253,14 @@ impl FontSystem {
             #[cfg(feature = "shape-run-cache")]
             shape_run_cache: crate::ShapeRunCache::default(),
             shape_buffer: ShapeBuffer::default(),
-            dyn_fallback: Box::new(impl_fallback),
-            fallbacks,
+            fallback,
         }
     }
 
     /// Create a new [`FontSystem`] with a pre-specified locale and font database.
     pub fn new_with_locale_and_db(locale: String, db: fontdb::Database) -> Self {
-        Self::new_with_locale_and_db_and_fallback(locale, db, PlatformFallback)
+        let fallback = platform_fallback(&locale);
+        Self::new_with_locale_and_db_and_fallback(locale, db, fallback)
     }
 
     /// Get the locale.
@@ -283,9 +279,24 @@ impl FontSystem {
         &mut self.db
     }
 
+    /// Get the fallback.
+    pub const fn fallback(&self) -> &Fallback {
+        &self.fallback
+    }
+
+    /// Get a mutable reference to the fallback.
+    pub const fn fallback_mut(&mut self) -> &mut Fallback {
+        &mut self.fallback
+    }
+
     /// Consume this [`FontSystem`] and return the locale and database.
     pub fn into_locale_and_db(self) -> (String, fontdb::Database) {
         (self.locale, self.db)
+    }
+
+    /// Consume this [`FontSystem`] and return the locale, database and fallback.
+    pub fn into_locale_and_db_and_fallback(self) -> (String, fontdb::Database, Fallback) {
+        (self.locale, self.db, self.fallback)
     }
 
     /// Get a font by its ID and weight.
