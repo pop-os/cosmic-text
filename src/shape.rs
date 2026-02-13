@@ -2,10 +2,11 @@
 
 #![allow(clippy::too_many_arguments)]
 
+use crate::ellipsize::{plan_start_ellipsize, shape_ellipsis, StartEllipsizePlan};
 use crate::fallback::FontFallbackIter;
 use crate::{
-    math, Align, Attrs, AttrsList, CacheKeyFlags, Color, Ellipsize, Font, FontSystem, Hinting,
-    LayoutGlyph, LayoutLine, Metrics, Wrap,
+    math, Align, Attrs, AttrsList, CacheKeyFlags, Color, EllipsisCache, Ellipsize, Font,
+    FontSystem, Hinting, LayoutGlyph, LayoutLine, Metrics, Wrap,
 };
 #[cfg(not(feature = "std"))]
 use alloc::format;
@@ -752,48 +753,6 @@ impl ShapeWord {
     }
 }
 
-fn shape_ellipsis(
-    font_system: &mut FontSystem,
-    attrs: &Attrs,
-    shaping: Shaping,
-    span_rtl: bool,
-    font_size: f32,
-) -> (Vec<ShapeGlyph>, f32) {
-    let attrs_list = AttrsList::new(attrs);
-    let level = if span_rtl {
-        unicode_bidi::Level::rtl()
-    } else {
-        unicode_bidi::Level::ltr()
-    };
-    let word = ShapeWord::new(
-        font_system,
-        "\u{2026}", // TODO: maybe do CJK ellipsis
-        &attrs_list,
-        0.."\u{2026}".len(),
-        level,
-        false,
-        shaping,
-    );
-    let mut width = word.width(font_size);
-    let mut glyphs = word.glyphs;
-
-    // did we fail to shape it?
-    if glyphs.is_empty() || width == 0.0 || glyphs.iter().all(|g| g.glyph_id == 0) {
-        let fallback = ShapeWord::new(
-            font_system,
-            "...",
-            &attrs_list,
-            0.."...".len(),
-            level,
-            false,
-            shaping,
-        );
-        width = fallback.width(font_size);
-        glyphs = fallback.glyphs;
-    }
-    (glyphs, width)
-}
-
 /// A shaped span (for bidirectional processing)
 #[derive(Clone, Debug)]
 pub struct ShapeSpan {
@@ -1008,16 +967,17 @@ pub struct ShapeLine {
     pub rtl: bool,
     pub spans: Vec<ShapeSpan>,
     pub metrics_opt: Option<Metrics>,
+    ellipsis_start: Option<EllipsisCache>,
 }
 
 // Visual Line Ranges: (span_index, (first_word_index, first_glyph_index), (last_word_index, last_glyph_index))
-type VlRange = (usize, (usize, usize), (usize, usize));
+pub(crate) type VlRange = (usize, (usize, usize), (usize, usize));
 
 #[derive(Default)]
-struct VisualLine {
-    ranges: Vec<VlRange>,
-    spaces: u32,
-    w: f32,
+pub(crate) struct VisualLine {
+    pub(crate) ranges: Vec<VlRange>,
+    pub(crate) spaces: u32,
+    pub(crate) w: f32,
 }
 
 impl VisualLine {
@@ -1037,6 +997,7 @@ impl ShapeLine {
             rtl: false,
             spans: Vec::default(),
             metrics_opt: None,
+            ellipsis_start: None,
         }
     }
 
@@ -1157,6 +1118,19 @@ impl ShapeLine {
         self.rtl = rtl;
         self.spans = spans;
         self.metrics_opt = attrs_list.defaults().metrics_opt.map(Into::into);
+
+        self.ellipsis_start = None;
+        if let Some((span, glyph)) = self.spans.first().and_then(|span| {
+            span.words
+                .iter()
+                .find_map(|w| w.glyphs.first().map(|g| (span, g)))
+        }) {
+            let attrs = attrs_list.get_span(glyph.start);
+            let glyphs = shape_ellipsis(font_system, &attrs, shaping, span.level.is_rtl());
+            if !glyphs.is_empty() {
+                self.ellipsis_start = Some(EllipsisCache { glyphs });
+            }
+        }
 
         // Return the buffer for later reuse.
         font_system.shape_buffer.spans = cached_spans;
@@ -1290,40 +1264,14 @@ impl ShapeLine {
     ) -> Vec<LayoutLine> {
         let mut lines = Vec::with_capacity(1);
         self.layout_to_buffer(
-            &mut ShapeBuffer::default(),
+            &mut FontSystem::new(),
             font_size,
             width_opt,
             None,
             wrap,
             Ellipsize::None,
             align,
-            &mut lines,
-            match_mono_width,
-            hinting,
-        );
-        lines
-    }
-
-    pub fn layout_with_ellipsize(
-        &self,
-        font_size: f32,
-        width_opt: Option<f32>,
-        height_opt: Option<f32>,
-        wrap: Wrap,
-        ellipsize: Ellipsize,
-        align: Option<Align>,
-        match_mono_width: Option<f32>,
-        hinting: Hinting,
-    ) -> Vec<LayoutLine> {
-        let mut lines = Vec::with_capacity(1);
-        self.layout_to_buffer(
-            &mut ShapeBuffer::default(),
-            font_size,
-            width_opt,
-            height_opt,
-            wrap,
-            ellipsize,
-            align,
+            None,
             &mut lines,
             match_mono_width,
             hinting,
@@ -1333,17 +1281,20 @@ impl ShapeLine {
 
     pub fn layout_to_buffer(
         &self,
-        scratch: &mut ShapeBuffer,
+        font_system: &mut FontSystem,
         font_size: f32,
         width_opt: Option<f32>,
-        height_opt: Option<f32>,
+        _height_opt: Option<f32>,
         wrap: Wrap,
         ellipsize: Ellipsize,
         align: Option<Align>,
+        _attrs_list_opt: Option<&AttrsList>,
         layout_lines: &mut Vec<LayoutLine>,
         match_mono_width: Option<f32>,
         hinting: Hinting,
     ) {
+        let scratch = &mut font_system.shape_buffer;
+
         fn add_to_visual_line(
             vl: &mut VisualLine,
             span_index: usize,
@@ -1694,7 +1645,35 @@ impl ShapeLine {
             if visual_line.ranges.is_empty() {
                 continue;
             }
-            let new_order = self.reorder(&visual_line.ranges);
+
+            let start_ellipsize_active = matches!(ellipsize, Ellipsize::Start)
+                && wrap == Wrap::None
+                && width_opt.is_some()
+                && visual_lines.len() == 1;
+            let mut ellipsize_plan: Option<StartEllipsizePlan> = None;
+            let mut line_ranges: &[VlRange] = &visual_line.ranges;
+            let mut line_w = visual_line.w;
+            let mut line_spaces = visual_line.spaces;
+
+            //TODO: use if let chain when we move to Rust 2024
+            if let Some(goal_width) = width_opt {
+                if start_ellipsize_active && index == 0 {
+                    ellipsize_plan = plan_start_ellipsize(
+                        visual_line,
+                        &self.spans,
+                        self.ellipsis_start.as_ref(),
+                        font_size,
+                        goal_width,
+                    );
+                    if let Some(plan) = &ellipsize_plan {
+                        line_ranges = &plan.ranges;
+                        line_w = plan.line_w;
+                        line_spaces = 0; // avoid justification on ellipsized line
+                    }
+                }
+            }
+
+            let new_order = self.reorder(line_ranges);
             let mut glyphs = cached_glyph_sets
                 .pop()
                 .unwrap_or_else(|| Vec::with_capacity(1));
@@ -1703,12 +1682,12 @@ impl ShapeLine {
             let mut max_ascent: f32 = 0.;
             let mut max_descent: f32 = 0.;
             let alignment_correction = match (align, self.rtl) {
-                (Align::Left, true) => line_width - visual_line.w,
+                (Align::Left, true) => line_width - line_w,
                 (Align::Left, false) => 0.,
                 (Align::Right, true) => 0.,
-                (Align::Right, false) => line_width - visual_line.w,
-                (Align::Center, _) => (line_width - visual_line.w) / 2.0,
-                (Align::End, _) => line_width - visual_line.w,
+                (Align::Right, false) => line_width - line_w,
+                (Align::Center, _) => (line_width - line_w) / 2.0,
+                (Align::End, _) => line_width - line_w,
                 (Align::Justified, _) => 0.,
             };
 
@@ -1738,18 +1717,45 @@ impl ShapeLine {
 
             // Amount of extra width added to each blank space within a line.
             let justification_expansion = if matches!(align, Align::Justified)
-                && visual_line.spaces > 0
+                && line_spaces > 0
                 // Don't justify the last line in a paragraph.
                 && index != number_of_visual_lines - 1
             {
-                (line_width - visual_line.w) / visual_line.spaces as f32
+                (line_width - line_w) / line_spaces as f32
             } else {
                 0.
             };
+            if let Some(plan) = &ellipsize_plan {
+                for glyph in &plan.ellipsis {
+                    let glyph_font_size = glyph.metrics_opt.map_or(font_size, |x| x.font_size);
+                    let mut x_advance = glyph_font_size * glyph.x_advance;
+                    if hinting == Hinting::Enabled {
+                        x_advance = x_advance.round();
+                    }
+                    if self.rtl {
+                        x -= x_advance;
+                    }
+                    let y_advance = glyph_font_size * glyph.y_advance;
+                    glyphs.push(glyph.layout(
+                        glyph_font_size,
+                        glyph.metrics_opt.map(|x| x.line_height),
+                        x,
+                        y,
+                        x_advance,
+                        plan.ellipsis_level,
+                    ));
+                    if !self.rtl {
+                        x += x_advance;
+                    }
+                    y += y_advance;
+                    max_ascent = max_ascent.max(glyph_font_size * glyph.ascent);
+                    max_descent = max_descent.max(glyph_font_size * glyph.descent);
+                }
+            }
 
             let mut process_range = |range: Range<usize>| {
                 for &(span_index, (starting_word, starting_glyph), (ending_word, ending_glyph)) in
-                    &visual_line.ranges[range]
+                    &line_ranges[range]
                 {
                     let span = &self.spans[span_index];
                     // If ending_glyph is not 0 we need to include glyphs from the ending_word
@@ -1849,7 +1855,7 @@ impl ShapeLine {
 
             layout_lines.push(LayoutLine {
                 w: if align != Align::Justified {
-                    visual_line.w
+                    line_w
                 } else if self.rtl {
                     start_x - x
                 } else {

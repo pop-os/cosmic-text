@@ -757,15 +757,19 @@ impl Buffer {
     /// Set text of buffer, using an iterator of styled spans (pairs of text and attributes)
     ///
     /// ```
-    /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, Metrics, Shaping};
+    /// # use cosmic_text::{Attrs, Buffer, Ellipsize, Family, FontSystem, Metrics, Shaping, Wrap};
     /// # let mut font_system = FontSystem::new();
     /// let mut buffer = Buffer::new_empty(Metrics::new(32.0, 44.0));
     /// let attrs = Attrs::new().family(Family::Serif);
+    /// buffer.set_size(&mut font_system, Some(160.0), None);
+    /// buffer.set_wrap(&mut font_system, Wrap::None);
+    /// buffer.set_ellipsize(&mut font_system, Ellipsize::Start);
     /// buffer.set_rich_text(
     ///     &mut font_system,
     ///     [
-    ///         ("hello, ", attrs.clone()),
-    ///         ("cosmic\ntext", attrs.clone().family(Family::Monospace)),
+    ///         ("A much longer piece of rich text that will be ", attrs.clone()),
+    ///         ("ellipsized", attrs.clone().family(Family::Monospace)),
+    ///         (" at the start.", attrs.clone()),
     ///     ],
     ///     &attrs,
     ///     Shaping::Advanced,
@@ -1446,6 +1450,11 @@ impl BorrowedWithFontSystem<'_, Buffer> {
         self.inner.set_wrap(self.font_system, wrap);
     }
 
+    /// Set the current [`Ellipsize`]
+    pub fn set_ellipsize(&mut self, ellipsize: Ellipsize) {
+        self.inner.set_ellipsize(self.font_system, ellipsize);
+    }
+
     /// Set the current buffer dimensions
     pub fn set_size(&mut self, width_opt: Option<f32>, height_opt: Option<f32>) {
         self.inner.set_size(self.font_system, width_opt, height_opt);
@@ -1486,15 +1495,19 @@ impl BorrowedWithFontSystem<'_, Buffer> {
     /// Set text of buffer, using an iterator of styled spans (pairs of text and attributes)
     ///
     /// ```
-    /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, Metrics, Shaping};
+    /// # use cosmic_text::{Attrs, Buffer, Ellipsize, Family, FontSystem, Metrics, Shaping, Wrap};
     /// # let mut font_system = FontSystem::new();
     /// let mut buffer = Buffer::new_empty(Metrics::new(32.0, 44.0));
     /// let attrs = Attrs::new().family(Family::Serif);
+    /// buffer.set_size(&mut font_system, Some(160.0), None);
+    /// buffer.set_wrap(&mut font_system, Wrap::None);
+    /// buffer.set_ellipsize(&mut font_system, Ellipsize::Start);
     /// buffer.set_rich_text(
     ///     &mut font_system,
     ///     [
-    ///         ("hello, ", attrs.clone()),
-    ///         ("cosmic\ntext", attrs.clone().family(Family::Monospace)),
+    ///         ("A much longer piece of rich text that will be ", attrs.clone()),
+    ///         ("ellipsized", attrs.clone().family(Family::Monospace)),
+    ///         (" at the start.", attrs.clone()),
     ///     ],
     ///     &attrs,
     ///     Shaping::Advanced,

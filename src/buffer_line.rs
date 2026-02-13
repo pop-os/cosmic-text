@@ -254,15 +254,17 @@ impl BufferLine {
                 .layout_opt
                 .take_unused()
                 .unwrap_or_else(|| Vec::with_capacity(1));
+            let attrs_list = self.attrs_list.clone();
             let shape = self.shape(font_system, tab_width);
             shape.layout_to_buffer(
-                &mut font_system.shape_buffer,
+                font_system,
                 font_size,
                 width_opt,
                 height_opt,
                 wrap,
                 ellipsize,
                 align,
+                Some(&attrs_list),
                 &mut layout,
                 match_mono_width,
                 hinting,
