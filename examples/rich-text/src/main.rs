@@ -25,8 +25,8 @@ fn set_buffer_text(buffer: &mut BorrowedWithFontSystem<'_, Buffer>) {
     let emph_attrs = attrs.clone().weight(Weight::BOLD).style(Style::Italic);
     let color_attrs = attrs.clone().color(Color::rgb(0xFF, 0x7F, 0x00));
 
-    buffer.set_wrap(Wrap::None);
-    buffer.set_ellipsize(Ellipsize::Start);
+    buffer.set_wrap(Wrap::Glyph);
+    buffer.set_ellipsize(Ellipsize::End(cosmic_text::EllipsizeHeightLimit::Lines(1)));
 
     let spans: &[(&str, Attrs)] = &[
         (

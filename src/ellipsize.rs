@@ -1,6 +1,5 @@
-use crate::{
-    Attrs, AttrsList, FontSystem, ShapeGlyph, ShapeSpan, ShapeWord, Shaping, VisualLine, VlRange,
-};
+use crate::shape::{VisualLine, VlRange};
+use crate::{Attrs, AttrsList, FontSystem, ShapeGlyph, ShapeSpan, ShapeWord, Shaping};
 
 #[derive(Clone, Debug)]
 pub(crate) struct EllipsisCache {
@@ -13,6 +12,133 @@ pub(crate) struct StartEllipsizePlan {
     pub(crate) ellipsis: Vec<ShapeGlyph>,
     pub(crate) ellipsis_level: unicode_bidi::Level,
     pub(crate) line_w: f32,
+}
+
+pub(crate) fn plan_end_ellipsize(
+    visual_line: &VisualLine,
+    spans: &[ShapeSpan],
+    ellipsis_opt: Option<&EllipsisCache>,
+    font_size: f32,
+    goal_width: f32,
+) -> Option<StartEllipsizePlan> {
+    let ellipsis_cache = ellipsis_opt?;
+    if ellipsis_cache.glyphs.is_empty() {
+        return None;
+    }
+    let ellipsis_w: f32 = ellipsis_cache
+        .glyphs
+        .iter()
+        .map(|g| g.width(font_size))
+        .sum();
+    if ellipsis_w <= 0.0 {
+        return None;
+    }
+    let ellipsis_glyphs = ellipsis_cache.glyphs.clone();
+    let required_remove = ellipsis_w.max(visual_line.w + ellipsis_w - goal_width);
+    if required_remove <= 0.0 {
+        return None;
+    }
+
+    let mut removed_w = 0.0;
+    let mut removed_start: Option<usize> = None;
+    let mut removed_end: Option<usize> = None;
+    let mut min_level: Option<unicode_bidi::Level> = None;
+    let mut cut_range_index: Option<usize> = None;
+    let mut cut_word: usize = 0;
+    let mut cut_glyph: usize = 0;
+
+    'outer: for (
+        range_index,
+        &(span_index, (starting_word, starting_glyph), (ending_word, ending_glyph)),
+    ) in visual_line.ranges.iter().enumerate().rev()
+    {
+        let span = &spans[span_index];
+        for word_i in (starting_word..ending_word + usize::from(ending_glyph != 0)).rev() {
+            let word = &span.words[word_i];
+            let (start_i, end_i) = match (word_i == starting_word, word_i == ending_word) {
+                (false, false) => (0, word.glyphs.len()),
+                (true, false) => (starting_glyph, word.glyphs.len()),
+                (false, true) => (0, ending_glyph),
+                (true, true) => (starting_glyph, ending_glyph),
+            };
+
+            let mut g = end_i;
+            while g > start_i {
+                let cluster_end = word.glyphs[g - 1].end;
+                let cluster_start = word.glyphs[g - 1].start;
+                let mut g_start = g - 1;
+                while g_start > start_i
+                    && word.glyphs[g_start - 1].start == cluster_start
+                    && word.glyphs[g_start - 1].end == cluster_end
+                {
+                    g_start -= 1;
+                }
+
+                let mut cluster_w = 0.0;
+                for glyph in &word.glyphs[g_start..g] {
+                    cluster_w += glyph.width(font_size);
+                }
+
+                removed_w += cluster_w;
+                if removed_end.is_none() {
+                    removed_end = Some(cluster_end);
+                }
+                removed_start = Some(cluster_start);
+                min_level = Some(min_level.map_or(span.level, |lvl| lvl.min(span.level)));
+
+                if removed_w >= required_remove {
+                    cut_range_index = Some(range_index);
+                    cut_word = word_i;
+                    cut_glyph = g_start;
+                    break 'outer;
+                }
+                g = g_start;
+            }
+        }
+    }
+
+    let cut_range_index = cut_range_index?;
+    let min_level = min_level?;
+    let removed_end = removed_end?;
+    let removed_start = removed_start?;
+
+    let mut new_ranges = Vec::with_capacity(visual_line.ranges.len());
+    for (i, range) in visual_line.ranges.iter().enumerate() {
+        if i > cut_range_index {
+            break;
+        }
+        if i == cut_range_index {
+            let end_word = cut_word;
+            let mut end_glyph = cut_glyph;
+            if let Some(span) = spans.get(range.0) {
+                if let Some(word) = span.words.get(end_word) {
+                    if end_glyph > word.glyphs.len() {
+                        end_glyph = word.glyphs.len();
+                    }
+                }
+            }
+            let new_range = (range.0, range.1, (end_word, end_glyph));
+            if new_range.1 != new_range.2 {
+                new_ranges.push(new_range);
+            }
+        } else {
+            new_ranges.push(*range);
+        }
+    }
+
+    let new_w = visual_line.w - removed_w + ellipsis_w;
+    let mut ellipsis = ellipsis_glyphs;
+    for g in &mut ellipsis {
+        g.start = removed_start;
+        g.end = removed_end;
+    }
+
+    Some(StartEllipsizePlan {
+        ranges: new_ranges,
+        ellipsis,
+        ellipsis_level: min_level,
+        line_w: new_w,
+    })
 }
 
 pub(crate) fn plan_start_ellipsize(
