@@ -1415,12 +1415,10 @@ impl ShapeLine {
                                 && (
                                     // if this  word doesn't fit, then we have an overflow
                                     (total_w + word_range_width + word_width > max_width)
-                                // otherwise if this is the last word and 
-                                // this is not the last span and 
-                                // we can't fit the ellipsis
+                                // otherwise if this is not the last word of the last span
+                                // and we can't fit the ellipsis
                                 ||(
-                                    word_idx == word_count - 1
-                                    && span_index == span_count - 1
+                                    (word_idx != 0 || span_index != span_count - 1)
                                     && total_w + word_range_width + word_width + ellpsis_w > max_width
                                 )
                                 )
@@ -1477,9 +1475,8 @@ impl ShapeLine {
                                 && (
                                     // if this  word doesn't fit, then we have an overflow
                                     (total_w + word_range_width + word_width > max_width)
-                                // otherwise if this is the last word and 
-                                // this is not the last span and 
-                                // we can't fit the ellipsis
+                                // otherwise if this is not the last word of the last span
+                                // and we can't fit the ellipsis
                                 ||(
                                     (word_idx != word_count - 1 || span_index == span_count - 1)
                                     && total_w + word_range_width + word_width + ellpsis_w > max_width
