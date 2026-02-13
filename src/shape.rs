@@ -3,7 +3,8 @@
 #![allow(clippy::too_many_arguments)]
 
 use crate::ellipsize::{
-    plan_end_ellipsize, plan_start_ellipsize, shape_ellipsis, EllipsisCache, StartEllipsizePlan,
+    self, plan_end_ellipsize, plan_start_ellipsize, shape_ellipsis, EllipsisCache,
+    StartEllipsizePlan,
 };
 use crate::fallback::FontFallbackIter;
 use crate::{
@@ -980,6 +981,7 @@ pub(crate) struct VisualLine {
     pub(crate) ranges: Vec<VlRange>,
     pub(crate) spaces: u32,
     pub(crate) w: f32,
+    pub(crate) ellipsized: bool,
 }
 
 impl VisualLine {
@@ -1376,16 +1378,84 @@ impl ShapeLine {
         let mut current_visual_line = cached_visual_lines.pop().unwrap_or_default();
 
         if wrap == Wrap::None {
-            for (span_index, span) in self.spans.iter().enumerate() {
+            let end_ellipsize_for_nowrap =
+                matches!(ellipsize, Ellipsize::End(_)) && width_opt.is_some();
+            let max_width = width_opt.unwrap_or(f32::INFINITY);
+            let ellpsis_w = if end_ellipsize_for_nowrap {
+                self.ellipsis
+                    .as_ref()
+                    .map_or(0.0, |e| e.glyphs.iter().map(|g| g.width(font_size)).sum())
+            } else {
+                0.0
+            };
+
+            let mut total_w: f32 = 0.0;
+            let mut overflow = false;
+            'outer: for (span_index, span) in self.spans.iter().enumerate() {
                 let mut word_range_width = 0.;
                 let mut number_of_blanks: u32 = 0;
-                for word in &span.words {
+                let mut span_start_word = 0;
+
+                for (word_idx, word) in span.words.iter().enumerate() {
                     let word_width = word.width(font_size);
+
+                    if end_ellipsize_for_nowrap
+                        && total_w + word_range_width + word_width > max_width
+                    {
+                        // overflow detected
+                        let avaialble = (max_width - ellpsis_w).max(0.0);
+
+                        // see how many glyphs of the current word fits
+                        let mut glyph_end = 0;
+                        let mut glyphs_w = 0.0;
+                        for (glyph_idx, glyph) in word.glyphs.iter().enumerate() {
+                            let g_w = glyph.width(font_size);
+                            if total_w + word_range_width + glyphs_w + g_w > avaialble {
+                                break;
+                            }
+                            glyphs_w += g_w;
+                            glyph_end = glyph_idx + 1;
+                        }
+
+                        // now that we have the partial word, let first add the whole words
+                        // accumulated so far
+                        if word_idx > span_start_word {
+                            add_to_visual_line(
+                                &mut current_visual_line,
+                                span_index,
+                                (span_start_word, 0),
+                                (word_idx, 0),
+                                word_range_width,
+                                number_of_blanks,
+                            );
+                        }
+
+                        // Now add the partial word
+                        if glyph_end > 0 {
+                            add_to_visual_line(
+                                &mut current_visual_line,
+                                span_index,
+                                (word_idx, 0),
+                                (word_idx, glyph_end),
+                                glyphs_w,
+                                0,
+                            );
+                        }
+
+                        // don't iterate anymore since we overflowed
+                        overflow = true;
+                        current_visual_line.ellipsized = true;
+                        break 'outer;
+                    }
+
                     word_range_width += word_width;
                     if word.blank {
                         number_of_blanks += 1;
                     }
                 }
+
+                // if we get to here that means we didn't overflow, so the whole span would fit
+                total_w += word_range_width;
                 add_to_visual_line(
                     &mut current_visual_line,
                     span_index,
@@ -1690,6 +1760,11 @@ impl ShapeLine {
                 continue;
             }
 
+            let nowrap_end_ellipsize_active = visual_line.ellipsized
+                && matches!(ellipsize, Ellipsize::End(_))
+                && width_opt.is_some()
+                && wrap == Wrap::None;
+
             let start_ellipsize_active = matches!(ellipsize, Ellipsize::Start)
                 && wrap == Wrap::None
                 && width_opt.is_some()
@@ -1909,6 +1984,36 @@ impl ShapeLine {
                         &mut max_ascent,
                         &mut max_descent,
                     );
+                }
+            }
+
+            if nowrap_end_ellipsize_active {
+                if let Some(ellipsis_cache) = &self.ellipsis {
+                    for glyph in &ellipsis_cache.glyphs {
+                        let glyph_font_size = glyph.metrics_opt.map_or(font_size, |x| x.font_size);
+                        let mut x_advance = glyph_font_size * glyph.x_advance;
+                        if hinting == Hinting::Enabled {
+                            x_advance = x_advance.round();
+                        }
+                        if self.rtl {
+                            x -= x_advance;
+                        }
+                        let y_advance = glyph_font_size * glyph.y_advance;
+                        glyphs.push(glyph.layout(
+                            glyph_font_size,
+                            glyph.metrics_opt.map(|x| x.line_height),
+                            x,
+                            y,
+                            x_advance,
+                            unicode_bidi::Level::ltr(), // TODO: Should ellipsis always be LTR?
+                        ));
+                        if !self.rtl {
+                            x += x_advance;
+                        }
+                        y += y_advance;
+                        max_ascent = max_ascent.max(glyph_font_size * glyph.ascent);
+                        max_descent = max_descent.max(glyph_font_size * glyph.descent);
+                    }
                 }
             }
 
