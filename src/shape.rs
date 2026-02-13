@@ -2,10 +2,7 @@
 
 #![allow(clippy::too_many_arguments)]
 
-use crate::ellipsize::{
-    self, plan_end_ellipsize, plan_start_ellipsize, shape_ellipsis, EllipsisCache,
-    StartEllipsizePlan,
-};
+use crate::ellipsize::{self, shape_ellipsis, EllipsisCache};
 use crate::fallback::FontFallbackIter;
 use crate::{
     math, Align, Attrs, AttrsList, CacheKeyFlags, Color, Ellipsize, EllipsizeHeightLimit, Font,
@@ -1642,44 +1639,6 @@ impl ShapeLine {
         match_mono_width: Option<f32>,
         hinting: Hinting,
     ) {
-        fn push_ellipsis(
-            plan: &StartEllipsizePlan,
-            rtl: bool,
-            hinting: Hinting,
-            font_size: f32,
-            x: &mut f32,
-            y: &mut f32,
-            glyphs: &mut Vec<LayoutGlyph>,
-            max_ascent: &mut f32,
-            max_descent: &mut f32,
-        ) {
-            for glyph in &plan.ellipsis {
-                let glyph_font_size = glyph.metrics_opt.map_or(font_size, |x| x.font_size);
-                let mut x_advance = glyph_font_size * glyph.x_advance;
-                if hinting == Hinting::Enabled {
-                    x_advance = x_advance.round();
-                }
-                if rtl {
-                    *x -= x_advance;
-                }
-                let y_advance = glyph_font_size * glyph.y_advance;
-                glyphs.push(glyph.layout(
-                    glyph_font_size,
-                    glyph.metrics_opt.map(|x| x.line_height),
-                    *x,
-                    *y,
-                    x_advance,
-                    plan.ellipsis_level,
-                ));
-                if !rtl {
-                    *x += x_advance;
-                }
-                *y += y_advance;
-                *max_ascent = (*max_ascent).max(glyph_font_size * glyph.ascent);
-                *max_descent = (*max_descent).max(glyph_font_size * glyph.descent);
-            }
-        }
-
         // For each visual line a list of  (span index,  and range of words in that span)
         // Note that a BiDi visual line could have multiple spans or parts of them
         // let mut vl_range_of_spans = Vec::with_capacity(1);
@@ -2005,27 +1964,21 @@ impl ShapeLine {
         // Create the LayoutLines using the ranges inside visual lines
         let align = align.unwrap_or(if self.rtl { Align::Right } else { Align::Left });
 
-        let end_line_limit = match (ellipsize, width_opt) {
-            (Ellipsize::End(EllipsizeHeightLimit::Lines(limit)), Some(_)) => Some(limit.max(1)),
-            _ => None,
-        };
-        let visible_line_count =
-            end_line_limit.map_or(visual_lines.len(), |limit| visual_lines.len().min(limit));
-        let end_truncated = end_line_limit
-            .is_some_and(|limit| visual_lines.len() > limit && visible_line_count > 0);
-
-        let line_width = width_opt.unwrap_or_else(|| {
-            let mut width: f32 = 0.0;
-            for visual_line in visual_lines.iter().take(visible_line_count) {
-                width = width.max(visual_line.w);
-            }
-            width
-        });
+        let line_width = width_opt.map_or_else(
+            || {
+                let mut width: f32 = 0.0;
+                for visual_line in &visual_lines {
+                    width = width.max(visual_line.w);
+                }
+                width
+            },
+            |width| width,
+        );
 
         let start_x = if self.rtl { line_width } else { 0.0 };
 
-        let number_of_visual_lines = visible_line_count;
-        for (index, visual_line) in visual_lines.iter().take(visible_line_count).enumerate() {
+        let number_of_visual_lines = visual_lines.len();
+        for (index, visual_line) in visual_lines.iter().enumerate() {
             if visual_line.ranges.is_empty() {
                 continue;
             }
@@ -2039,52 +1992,7 @@ impl ShapeLine {
                 && width_opt.is_some()
                 && wrap == Wrap::None;
 
-            let start_ellipsize_active = matches!(ellipsize, Ellipsize::Start)
-                && wrap == Wrap::None
-                && width_opt.is_some()
-                && visual_lines.len() == 1;
-            let end_ellipsize_active =
-                matches!(ellipsize, Ellipsize::End(EllipsizeHeightLimit::Lines(_)))
-                    && end_truncated
-                    && width_opt.is_some()
-                    && index + 1 == visible_line_count;
-            let mut ellipsize_plan: Option<StartEllipsizePlan> = None;
-            let mut line_ranges: &[VlRange] = &visual_line.ranges;
-            let mut line_w = visual_line.w;
-            let mut line_spaces = visual_line.spaces;
-
-            //TODO: use if let chain when we move to Rust 2024
-            if let Some(goal_width) = width_opt {
-                if start_ellipsize_active && index == 0 {
-                    ellipsize_plan = plan_start_ellipsize(
-                        visual_line,
-                        &self.spans,
-                        self.ellipsis.as_ref(),
-                        font_size,
-                        goal_width,
-                    );
-                    if let Some(plan) = &ellipsize_plan {
-                        line_ranges = &plan.ranges;
-                        line_w = plan.line_w;
-                        line_spaces = 0; // avoid justification on ellipsized line
-                    }
-                } else if end_ellipsize_active {
-                    ellipsize_plan = plan_end_ellipsize(
-                        visual_line,
-                        &self.spans,
-                        self.ellipsis.as_ref(),
-                        font_size,
-                        goal_width,
-                    );
-                    if let Some(plan) = &ellipsize_plan {
-                        line_ranges = &plan.ranges;
-                        line_w = plan.line_w;
-                        line_spaces = 0; // avoid justification on ellipsized line
-                    }
-                }
-            }
-
-            let new_order = self.reorder(line_ranges);
+            let new_order = self.reorder(&visual_line.ranges);
             let mut glyphs = cached_glyph_sets
                 .pop()
                 .unwrap_or_else(|| Vec::with_capacity(1));
@@ -2093,12 +2001,12 @@ impl ShapeLine {
             let mut max_ascent: f32 = 0.;
             let mut max_descent: f32 = 0.;
             let alignment_correction = match (align, self.rtl) {
-                (Align::Left, true) => line_width - line_w,
+                (Align::Left, true) => line_width - visual_line.w,
                 (Align::Left, false) => 0.,
                 (Align::Right, true) => 0.,
-                (Align::Right, false) => line_width - line_w,
-                (Align::Center, _) => (line_width - line_w) / 2.0,
-                (Align::End, _) => line_width - line_w,
+                (Align::Right, false) => line_width - visual_line.w,
+                (Align::Center, _) => (line_width - visual_line.w) / 2.0,
+                (Align::End, _) => line_width - visual_line.w,
                 (Align::Justified, _) => 0.,
             };
 
@@ -2128,32 +2036,14 @@ impl ShapeLine {
 
             // Amount of extra width added to each blank space within a line.
             let justification_expansion = if matches!(align, Align::Justified)
-                && line_spaces > 0
+                && visual_line.spaces > 0
                 // Don't justify the last line in a paragraph.
                 && index != number_of_visual_lines - 1
             {
-                (line_width - line_w) / line_spaces as f32
+                (line_width - visual_line.w) / visual_line.spaces as f32
             } else {
                 0.
             };
-            let ellipsize_at_start = start_ellipsize_active && ellipsize_plan.is_some();
-            let ellipsize_at_end = end_ellipsize_active && ellipsize_plan.is_some();
-
-            if ellipsize_at_start {
-                if let Some(plan) = &ellipsize_plan {
-                    push_ellipsis(
-                        plan,
-                        self.rtl,
-                        hinting,
-                        font_size,
-                        &mut x,
-                        &mut y,
-                        &mut glyphs,
-                        &mut max_ascent,
-                        &mut max_descent,
-                    );
-                }
-            }
 
             if nowrap_start_ellipsize_active {
                 if let Some(ellipsis_cache) = &self.ellipsis {
@@ -2187,7 +2077,7 @@ impl ShapeLine {
 
             let mut process_range = |range: Range<usize>| {
                 for &(span_index, (starting_word, starting_glyph), (ending_word, ending_glyph)) in
-                    &line_ranges[range]
+                    &visual_line.ranges[range]
                 {
                     let span = &self.spans[span_index];
                     // If ending_glyph is not 0 we need to include glyphs from the ending_word
@@ -2275,22 +2165,6 @@ impl ShapeLine {
                 }
             }
 
-            if ellipsize_at_end {
-                if let Some(plan) = &ellipsize_plan {
-                    push_ellipsis(
-                        plan,
-                        self.rtl,
-                        hinting,
-                        font_size,
-                        &mut x,
-                        &mut y,
-                        &mut glyphs,
-                        &mut max_ascent,
-                        &mut max_descent,
-                    );
-                }
-            }
-
             if nowrap_end_ellipsize_active {
                 if let Some(ellipsis_cache) = &self.ellipsis {
                     for glyph in &ellipsis_cache.glyphs {
@@ -2333,7 +2207,7 @@ impl ShapeLine {
 
             layout_lines.push(LayoutLine {
                 w: if align != Align::Justified {
-                    line_w
+                    visual_line.w
                 } else if self.rtl {
                     start_x - x
                 } else {
