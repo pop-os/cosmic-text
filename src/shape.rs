@@ -4,8 +4,8 @@
 
 use crate::fallback::FontFallbackIter;
 use crate::{
-    math, Align, Attrs, AttrsList, CacheKeyFlags, Color, Font, FontSystem, Hinting, LayoutGlyph,
-    LayoutLine, Metrics, Wrap,
+    math, Align, Attrs, AttrsList, CacheKeyFlags, Color, Ellipsize, Font, FontSystem, Hinting,
+    LayoutGlyph, LayoutLine, Metrics, Wrap,
 };
 #[cfg(not(feature = "std"))]
 use alloc::format;
@@ -1251,7 +1251,36 @@ impl ShapeLine {
             &mut ShapeBuffer::default(),
             font_size,
             width_opt,
+            None,
             wrap,
+            Ellipsize::None,
+            align,
+            &mut lines,
+            match_mono_width,
+            hinting,
+        );
+        lines
+    }
+
+    pub fn layout_with_ellipsize(
+        &self,
+        font_size: f32,
+        width_opt: Option<f32>,
+        height_opt: Option<f32>,
+        wrap: Wrap,
+        ellipsize: Ellipsize,
+        align: Option<Align>,
+        match_mono_width: Option<f32>,
+        hinting: Hinting,
+    ) -> Vec<LayoutLine> {
+        let mut lines = Vec::with_capacity(1);
+        self.layout_to_buffer(
+            &mut ShapeBuffer::default(),
+            font_size,
+            width_opt,
+            height_opt,
+            wrap,
+            ellipsize,
             align,
             &mut lines,
             match_mono_width,
@@ -1265,7 +1294,9 @@ impl ShapeLine {
         scratch: &mut ShapeBuffer,
         font_size: f32,
         width_opt: Option<f32>,
+        height_opt: Option<f32>,
         wrap: Wrap,
+        ellipsize: Ellipsize,
         align: Option<Align>,
         layout_lines: &mut Vec<LayoutLine>,
         match_mono_width: Option<f32>,
