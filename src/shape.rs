@@ -752,6 +752,48 @@ impl ShapeWord {
     }
 }
 
+fn shape_ellipsis(
+    font_system: &mut FontSystem,
+    attrs: &Attrs,
+    shaping: Shaping,
+    span_rtl: bool,
+    font_size: f32,
+) -> (Vec<ShapeGlyph>, f32) {
+    let attrs_list = AttrsList::new(attrs);
+    let level = if span_rtl {
+        unicode_bidi::Level::rtl()
+    } else {
+        unicode_bidi::Level::ltr()
+    };
+    let word = ShapeWord::new(
+        font_system,
+        "\u{2026}", // TODO: maybe do CJK ellipsis
+        &attrs_list,
+        0.."\u{2026}".len(),
+        level,
+        false,
+        shaping,
+    );
+    let mut width = word.width(font_size);
+    let mut glyphs = word.glyphs;
+
+    // did we fail to shape it?
+    if glyphs.is_empty() || width == 0.0 || glyphs.iter().all(|g| g.glyph_id == 0) {
+        let fallback = ShapeWord::new(
+            font_system,
+            "...",
+            &attrs_list,
+            0.."...".len(),
+            level,
+            false,
+            shaping,
+        );
+        width = fallback.width(font_size);
+        glyphs = fallback.glyphs;
+    }
+    (glyphs, width)
+}
+
 /// A shaped span (for bidirectional processing)
 #[derive(Clone, Debug)]
 pub struct ShapeSpan {
