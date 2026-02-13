@@ -969,8 +969,7 @@ pub struct ShapeLine {
     pub rtl: bool,
     pub spans: Vec<ShapeSpan>,
     pub metrics_opt: Option<Metrics>,
-    ellipsis_start: Option<EllipsisCache>,
-    ellipsis_end: Option<EllipsisCache>,
+    ellipsis: Option<EllipsisCache>,
 }
 
 // Visual Line Ranges: (span_index, (first_word_index, first_glyph_index), (last_word_index, last_glyph_index))
@@ -1000,8 +999,7 @@ impl ShapeLine {
             rtl: false,
             spans: Vec::default(),
             metrics_opt: None,
-            ellipsis_start: None,
-            ellipsis_end: None,
+            ellipsis: None,
         }
     }
 
@@ -1123,31 +1121,16 @@ impl ShapeLine {
         self.spans = spans;
         self.metrics_opt = attrs_list.defaults().metrics_opt.map(Into::into);
 
-        self.ellipsis_start = None;
-        if let Some((span, glyph)) = self.spans.first().and_then(|span| {
-            span.words
-                .iter()
-                .find_map(|w| w.glyphs.first().map(|g| (span, g)))
-        }) {
-            let attrs = attrs_list.get_span(glyph.start);
-            let glyphs = shape_ellipsis(font_system, &attrs, shaping, span.level.is_rtl());
-            if !glyphs.is_empty() {
-                self.ellipsis_start = Some(EllipsisCache { glyphs });
-            }
-        }
-
-        self.ellipsis_end = None;
-        if let Some((span, glyph)) = self.spans.iter().rev().find_map(|span| {
-            span.words
-                .iter()
-                .rev()
-                .find_map(|w| w.glyphs.last().map(|g| (span, g)))
-        }) {
-            let attrs = attrs_list.get_span(glyph.start);
-            let glyphs = shape_ellipsis(font_system, &attrs, shaping, span.level.is_rtl());
-            if !glyphs.is_empty() {
-                self.ellipsis_end = Some(EllipsisCache { glyphs });
-            }
+        if self.ellipsis.is_none() {
+            let attrs = if attrs_list.spans.is_empty() {
+                attrs_list.defaults()
+            } else {
+                attrs_list.get_span(0) // TODO: using the attrs from the first span for
+                                       // ellipsis even if it's at the end. Which for rich text may look weird if the first
+                                       // span has a different color or size than where ellipsizing is happening
+            };
+            let glyphs = shape_ellipsis(font_system, &attrs, shaping, rtl);
+            self.ellipsis = Some(EllipsisCache { glyphs });
         }
 
         // Return the buffer for later reuse.
@@ -1727,7 +1710,7 @@ impl ShapeLine {
                     ellipsize_plan = plan_start_ellipsize(
                         visual_line,
                         &self.spans,
-                        self.ellipsis_start.as_ref(),
+                        self.ellipsis.as_ref(),
                         font_size,
                         goal_width,
                     );
@@ -1740,7 +1723,7 @@ impl ShapeLine {
                     ellipsize_plan = plan_end_ellipsize(
                         visual_line,
                         &self.spans,
-                        self.ellipsis_end.as_ref(),
+                        self.ellipsis.as_ref(),
                         font_size,
                         goal_width,
                     );
