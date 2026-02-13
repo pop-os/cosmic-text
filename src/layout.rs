@@ -152,6 +152,21 @@ impl Display for Align {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Ellipsize {
+    None,
+    Start,
+    Middle,
+    End(EllipsizeHeightLimit),
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum EllipsizeHeightLimit {
+    Lines(usize),
+    Heights(f32),    // in pixels
+    AvailableHeight, // use buffer height if avaialble
+}
+
 /// Metrics hinting strategy
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Default)]
 pub enum Hinting {

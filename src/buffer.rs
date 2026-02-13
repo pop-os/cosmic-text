@@ -11,8 +11,8 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
     Affinity, Align, Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem, BufferLine, Color,
-    Cursor, FontSystem, Hinting, LayoutCursor, LayoutGlyph, LayoutLine, LineEnding, LineIter,
-    Motion, Renderer, Scroll, ShapeLine, Shaping, Wrap,
+    Cursor, Ellipsize, FontSystem, Hinting, LayoutCursor, LayoutGlyph, LayoutLine, LineEnding,
+    LineIter, Motion, Renderer, Scroll, ShapeLine, Shaping, Wrap,
 };
 
 /// A line of visible text for rendering
@@ -214,6 +214,7 @@ pub struct Buffer {
     /// True if a redraw is requires. Set to false after processing
     redraw: bool,
     wrap: Wrap,
+    ellipsize: Ellipsize,
     monospace_width: Option<f32>,
     tab_width: u16,
     hinting: Hinting,
@@ -229,6 +230,7 @@ impl Clone for Buffer {
             scroll: self.scroll,
             redraw: self.redraw,
             wrap: self.wrap,
+            ellipsize: self.ellipsize,
             monospace_width: self.monospace_width,
             tab_width: self.tab_width,
             hinting: self.hinting,
@@ -258,6 +260,7 @@ impl Buffer {
             scroll: Scroll::default(),
             redraw: false,
             wrap: Wrap::WordOrGlyph,
+            ellipsize: Ellipsize::None,
             monospace_width: None,
             tab_width: 8,
             hinting: Hinting::default(),
@@ -585,6 +588,20 @@ impl Buffer {
     pub fn set_wrap(&mut self, font_system: &mut FontSystem, wrap: Wrap) {
         if wrap != self.wrap {
             self.wrap = wrap;
+            self.relayout(font_system);
+            self.shape_until_scroll(font_system, false);
+        }
+    }
+
+    /// Get the currnt [`Ellipsize`]
+    pub const fn ellipsize(&self) -> Ellipsize {
+        self.ellipsize
+    }
+
+    /// Set the current [`Ellipsize`]
+    pub fn set_ellipsize(&mut self, font_system: &mut FontSystem, ellipsize: Ellipsize) {
+        if ellipsize != self.ellipsize {
+            self.ellipsize = ellipsize;
             self.relayout(font_system);
             self.shape_until_scroll(font_system, false);
         }
