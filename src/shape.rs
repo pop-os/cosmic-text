@@ -1389,73 +1389,176 @@ impl ShapeLine {
                 0.0
             };
 
+            let span_count = self.spans.len();
+
             let mut total_w: f32 = 0.0;
-            let mut overflow = false;
+
             'outer: for (span_index, span) in self.spans.iter().enumerate() {
                 let mut word_range_width = 0.;
                 let mut number_of_blanks: u32 = 0;
-                let mut span_start_word = 0;
 
-                for (word_idx, word) in span.words.iter().enumerate() {
-                    let word_width = word.width(font_size);
+                let word_count = span.words.len();
 
-                    if end_ellipsize_for_nowrap
-                        && total_w + word_range_width + word_width > max_width
-                    {
-                        // overflow detected
-                        let avaialble = (max_width - ellpsis_w).max(0.0);
+                if self.rtl != span.level.is_rtl() {
+                    for (word_idx, word) in span.words.iter().enumerate().rev() {
+                        let word_width = word.width(font_size);
 
-                        // see how many glyphs of the current word fits
-                        let mut glyph_end = 0;
-                        let mut glyphs_w = 0.0;
-                        for (glyph_idx, glyph) in word.glyphs.iter().enumerate() {
-                            let g_w = glyph.width(font_size);
-                            if total_w + word_range_width + glyphs_w + g_w > avaialble {
-                                break;
+                        // Logic for detecting an overflow
+                        // - If the span doesn't fit in the avaialble width then overflow!
+                        // - If the span fits, but there are more spans, and the available width after
+                        // the current span is not enough to fit ellipsis, then this span should be
+                        // truncated to fit the ellipsis (we can't come back later and chop up some of it
+                        // retroactively)
+                        let overflowing = {
+                            // only check this if we're ellipsizing
+                            end_ellipsize_for_nowrap
+                                && (
+                                    // if this  word doesn't fit, then we have an overflow
+                                    (total_w + word_range_width + word_width > max_width)
+                                // otherwise if this is the last word and 
+                                // this is not the last span and 
+                                // we can't fit the ellipsis
+                                ||(
+                                    word_idx == word_count - 1
+                                    && span_index == span_count - 1
+                                    && total_w + word_range_width + word_width + ellpsis_w > max_width
+                                )
+                                )
+                        };
+
+                        if overflowing {
+                            // overflow detected
+                            let avaialble = (max_width - ellpsis_w).max(0.0);
+
+                            // see how many glyphs of the current word fits
+                            let mut glyph_end = word.glyphs.len();
+                            let mut glyphs_w = 0.0;
+                            for (glyph_idx, glyph) in word.glyphs.iter().enumerate().rev() {
+                                let g_w = glyph.width(font_size);
+                                if total_w + word_range_width + glyphs_w + g_w > avaialble {
+                                    break;
+                                }
+                                glyphs_w += g_w;
+                                glyph_end = glyph_idx;
                             }
-                            glyphs_w += g_w;
-                            glyph_end = glyph_idx + 1;
-                        }
 
-                        // now that we have the partial word, let first add the whole words
-                        // accumulated so far
-                        if word_idx > span_start_word {
+                            // // now that we have the partial word, let first add the whole words
+                            // // accumulated so far
+                            // if word_idx > 0 {
+                            //     add_to_visual_line(
+                            //         &mut current_visual_line,
+                            //         span_index,
+                            //         (word_idx + 1, 0),
+                            //         starting_point,
+                            //         word_range_width,
+                            //         number_of_blanks,
+                            //     );
+                            //     starting_point = (word_idx, 0);
+                            // }
+
+                            // Now add the partial word
                             add_to_visual_line(
                                 &mut current_visual_line,
                                 span_index,
-                                (span_start_word, 0),
-                                (word_idx, 0),
-                                word_range_width,
+                                (word_idx, glyph_end),
+                                (span.words.len(), 0),
+                                word_range_width + glyphs_w,
                                 number_of_blanks,
                             );
+
+                            // don't iterate anymore since we overflowed
+                            current_visual_line.ellipsized = true;
+                            break 'outer;
                         }
 
-                        // Now add the partial word
-                        if glyph_end > 0 {
-                            add_to_visual_line(
-                                &mut current_visual_line,
-                                span_index,
-                                (word_idx, 0),
-                                (word_idx, glyph_end),
-                                glyphs_w,
-                                0,
-                            );
+                        word_range_width += word_width;
+                        if word.blank {
+                            number_of_blanks += 1;
                         }
-
-                        // don't iterate anymore since we overflowed
-                        overflow = true;
-                        current_visual_line.ellipsized = true;
-                        break 'outer;
                     }
+                } else {
+                    for (word_idx, word) in span.words.iter().enumerate() {
+                        let word_width = word.width(font_size);
 
-                    word_range_width += word_width;
-                    if word.blank {
-                        number_of_blanks += 1;
+                        // Logic for detecting an overflow
+                        // - If the span doesn't fit in the avaialble width then overflow!
+                        // - If the span fits, but there are more spans, and the available width after
+                        // the current span is not enough to fit ellipsis, then this span should be
+                        // truncated to fit the ellipsis (we can't come back later and chop up some of it
+                        // retroactively)
+                        let overflowing = {
+                            // only check this if we're ellipsizing
+                            end_ellipsize_for_nowrap
+                                && (
+                                    // if this  word doesn't fit, then we have an overflow
+                                    (total_w + word_range_width + word_width > max_width)
+                                // otherwise if this is the last word and 
+                                // this is not the last span and 
+                                // we can't fit the ellipsis
+                                ||(
+                                    (word_idx != word_count - 1 || span_index == span_count - 1)
+                                    && total_w + word_range_width + word_width + ellpsis_w > max_width
+                                )
+                                )
+                        };
+
+                        if overflowing {
+                            // overflow detected
+                            let avaialble = (max_width - ellpsis_w).max(0.0);
+
+                            // see how many glyphs of the current word fits
+                            let mut glyph_end = 0;
+                            let mut glyphs_w = 0.0;
+                            for (glyph_idx, glyph) in word.glyphs.iter().enumerate() {
+                                let g_w = glyph.width(font_size);
+                                if total_w + word_range_width + glyphs_w + g_w > avaialble {
+                                    break;
+                                }
+                                glyphs_w += g_w;
+                                glyph_end = glyph_idx + 1;
+                            }
+
+                            // now that we have the partial word, let first add the whole words
+                            // accumulated so far
+                            if word_idx > 0 {
+                                add_to_visual_line(
+                                    &mut current_visual_line,
+                                    span_index,
+                                    (0, 0),
+                                    (word_idx, 0),
+                                    word_range_width,
+                                    number_of_blanks,
+                                );
+                            }
+
+                            // Now add the partial word
+                            if glyph_end > 0 {
+                                add_to_visual_line(
+                                    &mut current_visual_line,
+                                    span_index,
+                                    (word_idx, 0),
+                                    (word_idx, glyph_end),
+                                    glyphs_w,
+                                    0,
+                                );
+                            }
+
+                            // don't iterate anymore since we overflowed
+                            current_visual_line.ellipsized = true;
+                            break 'outer;
+                        }
+
+                        word_range_width += word_width;
+                        if word.blank {
+                            number_of_blanks += 1;
+                        }
                     }
                 }
 
-                // if we get to here that means we didn't overflow, so the whole span would fit
+                // if we get to here that means we didn't ellipsize, so either the whole span fits,
+                // or we don't really care
                 total_w += word_range_width;
+                current_visual_line.ellipsized = false;
                 add_to_visual_line(
                     &mut current_visual_line,
                     span_index,
