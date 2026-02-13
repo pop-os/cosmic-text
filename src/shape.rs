@@ -1283,6 +1283,187 @@ impl ShapeLine {
         lines
     }
 
+    #[inline]
+    fn add_to_visual_line(
+        &self,
+        vl: &mut VisualLine,
+        span_index: usize,
+        start: (usize, usize),
+        end: (usize, usize),
+        width: f32,
+        number_of_blanks: u32,
+    ) {
+        if end == start {
+            return;
+        }
+
+        vl.ranges.push((span_index, start, end));
+        vl.w += width;
+        vl.spaces += number_of_blanks;
+    }
+
+    #[inline]
+    fn layout_forward(
+        &self,
+        current_visual_line: &mut VisualLine,
+        font_size: f32,
+        spans: Vec<ShapeSpan>,
+        rtl: bool,
+        width_opt: Option<f32>,
+        ellipsize: Ellipsize,
+        ellipsis_w: f32,
+    ) {
+        let end_ellipsize_for_nowrap =
+            matches!(ellipsize, Ellipsize::End(_)) && width_opt.is_some();
+        let max_width = width_opt.unwrap_or(f32::INFINITY);
+
+        let span_count = spans.len();
+
+        let mut total_w: f32 = 0.0;
+
+        'outer: for (span_index, span) in spans.iter().enumerate() {
+            let mut word_range_width = 0.;
+            let mut number_of_blanks: u32 = 0;
+
+            let word_count = span.words.len();
+
+            if rtl != span.level.is_rtl() {
+                for (word_idx, word) in span.words.iter().enumerate().rev() {
+                    let word_width = word.width(font_size);
+
+                    // Logic for detecting an overflow
+                    // - If the span doesn't fit in the avaialble width then overflow!
+                    // - If the span fits, but there are more spans, and the available width after
+                    // the current span is not enough to fit ellipsis, then this span should be
+                    // truncated to fit the ellipsis (we can't come back later and chop up some of it
+                    // retroactively)
+                    let overflowing = {
+                        // only check this if we're ellipsizing
+                        end_ellipsize_for_nowrap
+                            && (
+                                // if this  word doesn't fit, then we have an overflow
+                                (total_w + word_range_width + word_width > max_width)
+                                // otherwise if this is not the last word of the last span
+                                // and we can't fit the ellipsis
+                                ||(
+                                    (word_idx != 0 || span_index != span_count - 1)
+                                    && total_w + word_range_width + word_width + ellipsis_w > max_width
+                                )
+                            )
+                    };
+
+                    if overflowing {
+                        // overflow detected
+                        let avaialble = (max_width - ellipsis_w).max(0.0);
+
+                        // see how many glyphs of the current word fits
+                        let mut glyph_end = word.glyphs.len();
+                        let mut glyphs_w = 0.0;
+                        for (glyph_idx, glyph) in word.glyphs.iter().enumerate().rev() {
+                            let g_w = glyph.width(font_size);
+                            if total_w + word_range_width + glyphs_w + g_w > avaialble {
+                                break;
+                            }
+                            glyphs_w += g_w;
+                            glyph_end = glyph_idx;
+                        }
+
+                        self.add_to_visual_line(
+                            current_visual_line,
+                            span_index,
+                            (word_idx, glyph_end),
+                            (span.words.len(), 0), // This would contain all the words that fit too
+                            word_range_width + glyphs_w,
+                            number_of_blanks,
+                        );
+
+                        // don't iterate anymore since we overflowed
+                        current_visual_line.ellipsized = true;
+                        break 'outer;
+                    }
+
+                    word_range_width += word_width;
+                    if word.blank {
+                        number_of_blanks += 1;
+                    }
+                }
+            } else {
+                for (word_idx, word) in span.words.iter().enumerate() {
+                    let word_width = word.width(font_size);
+
+                    // Logic for detecting an overflow
+                    // - If the span doesn't fit in the avaialble width then overflow!
+                    // - If the span fits, but there are more spans, and the available width after
+                    // the current span is not enough to fit ellipsis, then this span should be
+                    // truncated to fit the ellipsis (we can't come back later and chop up some of it
+                    // retroactively)
+                    let overflowing = {
+                        // only check this if we're ellipsizing
+                        end_ellipsize_for_nowrap
+                            && (
+                                // if this  word doesn't fit, then we have an overflow
+                                (total_w + word_range_width + word_width > max_width)
+                                // otherwise if this is not the last word of the last span
+                                // and we can't fit the ellipsis
+                                ||(
+                                    (word_idx != word_count - 1 || span_index == span_count - 1)
+                                    && total_w + word_range_width + word_width + ellipsis_w > max_width
+                                )
+                            )
+                    };
+
+                    if overflowing {
+                        // overflow detected
+                        let avaialble = (max_width - ellipsis_w).max(0.0);
+
+                        // see how many glyphs of the current word fits
+                        let mut glyph_end = 0;
+                        let mut glyphs_w = 0.0;
+                        for (glyph_idx, glyph) in word.glyphs.iter().enumerate() {
+                            let g_w = glyph.width(font_size);
+                            if total_w + word_range_width + glyphs_w + g_w > avaialble {
+                                break;
+                            }
+                            glyphs_w += g_w;
+                            glyph_end = glyph_idx + 1;
+                        }
+
+                        self.add_to_visual_line(
+                            current_visual_line,
+                            span_index,
+                            (0, 0), // add all the words that fit before the current word
+                            (word_idx, glyph_end),
+                            word_range_width + glyphs_w,
+                            number_of_blanks,
+                        );
+
+                        // don't iterate anymore since we overflowed
+                        current_visual_line.ellipsized = true;
+                        break 'outer;
+                    }
+
+                    word_range_width += word_width;
+                    if word.blank {
+                        number_of_blanks += 1;
+                    }
+                }
+            }
+
+            // if we get to here that means we didn't ellipsize, so either the whole span fits,
+            // or we don't really care
+            total_w += word_range_width;
+            current_visual_line.ellipsized = false;
+            self.add_to_visual_line(
+                current_visual_line,
+                span_index,
+                (0, 0),
+                (span.words.len(), 0),
+                word_range_width,
+                number_of_blanks,
+            );
+        }
+    }
+
     pub fn layout_to_buffer(
         &self,
         scratch: &mut ShapeBuffer,
@@ -1297,23 +1478,6 @@ impl ShapeLine {
         match_mono_width: Option<f32>,
         hinting: Hinting,
     ) {
-        fn add_to_visual_line(
-            vl: &mut VisualLine,
-            span_index: usize,
-            start: (usize, usize),
-            end: (usize, usize),
-            width: f32,
-            number_of_blanks: u32,
-        ) {
-            if end == start {
-                return;
-            }
-
-            vl.ranges.push((span_index, start, end));
-            vl.w += width;
-            vl.spaces += number_of_blanks;
-        }
-
         fn push_ellipsis(
             plan: &StartEllipsizePlan,
             rtl: bool,
@@ -1380,6 +1544,10 @@ impl ShapeLine {
         if wrap == Wrap::None {
             let end_ellipsize_for_nowrap =
                 matches!(ellipsize, Ellipsize::End(_)) && width_opt.is_some();
+
+            let start_ellipsize_for_nowwrap =
+                matches!(ellipsize, Ellipsize::Start) && width_opt.is_some();
+
             let max_width = width_opt.unwrap_or(f32::INFINITY);
             let ellpsis_w = if end_ellipsize_for_nowrap {
                 self.ellipsis
@@ -1389,151 +1557,15 @@ impl ShapeLine {
                 0.0
             };
 
-            let span_count = self.spans.len();
-
-            let mut total_w: f32 = 0.0;
-
-            'outer: for (span_index, span) in self.spans.iter().enumerate() {
-                let mut word_range_width = 0.;
-                let mut number_of_blanks: u32 = 0;
-
-                let word_count = span.words.len();
-
-                if self.rtl != span.level.is_rtl() {
-                    for (word_idx, word) in span.words.iter().enumerate().rev() {
-                        let word_width = word.width(font_size);
-
-                        // Logic for detecting an overflow
-                        // - If the span doesn't fit in the avaialble width then overflow!
-                        // - If the span fits, but there are more spans, and the available width after
-                        // the current span is not enough to fit ellipsis, then this span should be
-                        // truncated to fit the ellipsis (we can't come back later and chop up some of it
-                        // retroactively)
-                        let overflowing = {
-                            // only check this if we're ellipsizing
-                            end_ellipsize_for_nowrap
-                                && (
-                                    // if this  word doesn't fit, then we have an overflow
-                                    (total_w + word_range_width + word_width > max_width)
-                                // otherwise if this is not the last word of the last span
-                                // and we can't fit the ellipsis
-                                ||(
-                                    (word_idx != 0 || span_index != span_count - 1)
-                                    && total_w + word_range_width + word_width + ellpsis_w > max_width
-                                )
-                                )
-                        };
-
-                        if overflowing {
-                            // overflow detected
-                            let avaialble = (max_width - ellpsis_w).max(0.0);
-
-                            // see how many glyphs of the current word fits
-                            let mut glyph_end = word.glyphs.len();
-                            let mut glyphs_w = 0.0;
-                            for (glyph_idx, glyph) in word.glyphs.iter().enumerate().rev() {
-                                let g_w = glyph.width(font_size);
-                                if total_w + word_range_width + glyphs_w + g_w > avaialble {
-                                    break;
-                                }
-                                glyphs_w += g_w;
-                                glyph_end = glyph_idx;
-                            }
-
-                            add_to_visual_line(
-                                &mut current_visual_line,
-                                span_index,
-                                (word_idx, glyph_end),
-                                (span.words.len(), 0), // This would contain all the words that fit too
-                                word_range_width + glyphs_w,
-                                number_of_blanks,
-                            );
-
-                            // don't iterate anymore since we overflowed
-                            current_visual_line.ellipsized = true;
-                            break 'outer;
-                        }
-
-                        word_range_width += word_width;
-                        if word.blank {
-                            number_of_blanks += 1;
-                        }
-                    }
-                } else {
-                    for (word_idx, word) in span.words.iter().enumerate() {
-                        let word_width = word.width(font_size);
-
-                        // Logic for detecting an overflow
-                        // - If the span doesn't fit in the avaialble width then overflow!
-                        // - If the span fits, but there are more spans, and the available width after
-                        // the current span is not enough to fit ellipsis, then this span should be
-                        // truncated to fit the ellipsis (we can't come back later and chop up some of it
-                        // retroactively)
-                        let overflowing = {
-                            // only check this if we're ellipsizing
-                            end_ellipsize_for_nowrap
-                                && (
-                                    // if this  word doesn't fit, then we have an overflow
-                                    (total_w + word_range_width + word_width > max_width)
-                                // otherwise if this is not the last word of the last span
-                                // and we can't fit the ellipsis
-                                ||(
-                                    (word_idx != word_count - 1 || span_index == span_count - 1)
-                                    && total_w + word_range_width + word_width + ellpsis_w > max_width
-                                )
-                                )
-                        };
-
-                        if overflowing {
-                            // overflow detected
-                            let avaialble = (max_width - ellpsis_w).max(0.0);
-
-                            // see how many glyphs of the current word fits
-                            let mut glyph_end = 0;
-                            let mut glyphs_w = 0.0;
-                            for (glyph_idx, glyph) in word.glyphs.iter().enumerate() {
-                                let g_w = glyph.width(font_size);
-                                if total_w + word_range_width + glyphs_w + g_w > avaialble {
-                                    break;
-                                }
-                                glyphs_w += g_w;
-                                glyph_end = glyph_idx + 1;
-                            }
-
-                            add_to_visual_line(
-                                &mut current_visual_line,
-                                span_index,
-                                (0, 0), // add all the words that fit before the current word
-                                (word_idx, glyph_end),
-                                word_range_width + glyphs_w,
-                                number_of_blanks,
-                            );
-
-                            // don't iterate anymore since we overflowed
-                            current_visual_line.ellipsized = true;
-                            break 'outer;
-                        }
-
-                        word_range_width += word_width;
-                        if word.blank {
-                            number_of_blanks += 1;
-                        }
-                    }
-                }
-
-                // if we get to here that means we didn't ellipsize, so either the whole span fits,
-                // or we don't really care
-                total_w += word_range_width;
-                current_visual_line.ellipsized = false;
-                add_to_visual_line(
-                    &mut current_visual_line,
-                    span_index,
-                    (0, 0),
-                    (span.words.len(), 0),
-                    word_range_width,
-                    number_of_blanks,
-                );
-            }
+            self.layout_forward(
+                &mut current_visual_line,
+                font_size,
+                self.spans.clone(),
+                self.rtl,
+                width_opt,
+                ellipsize,
+                ellpsis_w,
+            )
         } else {
             for (span_index, span) in self.spans.iter().enumerate() {
                 let mut word_range_width = 0.;
@@ -1572,7 +1604,7 @@ impl ShapeLine {
                                 && wrap == Wrap::WordOrGlyph
                                 && word_width > width_opt.unwrap_or(f32::INFINITY)
                             {
-                                add_to_visual_line(
+                                self.add_to_visual_line(
                                     &mut current_visual_line,
                                     span_index,
                                     (i + 1, 0),
@@ -1597,7 +1629,7 @@ impl ShapeLine {
                                 {
                                     word_range_width += glyph_width;
                                 } else {
-                                    add_to_visual_line(
+                                    self.add_to_visual_line(
                                         &mut current_visual_line,
                                         span_index,
                                         (i, glyph_i + 1),
@@ -1628,7 +1660,7 @@ impl ShapeLine {
 
                                 if trailing_blank {
                                     number_of_blanks = number_of_blanks.saturating_sub(1);
-                                    add_to_visual_line(
+                                    self.add_to_visual_line(
                                         &mut current_visual_line,
                                         span_index,
                                         (i + 2, 0),
@@ -1637,7 +1669,7 @@ impl ShapeLine {
                                         number_of_blanks,
                                     );
                                 } else {
-                                    add_to_visual_line(
+                                    self.add_to_visual_line(
                                         &mut current_visual_line,
                                         span_index,
                                         (i + 1, 0),
@@ -1661,7 +1693,7 @@ impl ShapeLine {
                             }
                         }
                     }
-                    add_to_visual_line(
+                    self.add_to_visual_line(
                         &mut current_visual_line,
                         span_index,
                         (0, 0),
@@ -1696,7 +1728,7 @@ impl ShapeLine {
                                 && wrap == Wrap::WordOrGlyph
                                 && word_width > width_opt.unwrap_or(f32::INFINITY)
                             {
-                                add_to_visual_line(
+                                self.add_to_visual_line(
                                     &mut current_visual_line,
                                     span_index,
                                     fitting_start,
@@ -1721,7 +1753,7 @@ impl ShapeLine {
                                 {
                                     word_range_width += glyph_width;
                                 } else {
-                                    add_to_visual_line(
+                                    self.add_to_visual_line(
                                         &mut current_visual_line,
                                         span_index,
                                         fitting_start,
@@ -1749,7 +1781,7 @@ impl ShapeLine {
 
                                 if trailing_blank {
                                     number_of_blanks = number_of_blanks.saturating_sub(1);
-                                    add_to_visual_line(
+                                    self.add_to_visual_line(
                                         &mut current_visual_line,
                                         span_index,
                                         fitting_start,
@@ -1758,7 +1790,7 @@ impl ShapeLine {
                                         number_of_blanks,
                                     );
                                 } else {
-                                    add_to_visual_line(
+                                    self.add_to_visual_line(
                                         &mut current_visual_line,
                                         span_index,
                                         fitting_start,
@@ -1782,7 +1814,7 @@ impl ShapeLine {
                             }
                         }
                     }
-                    add_to_visual_line(
+                    self.add_to_visual_line(
                         &mut current_visual_line,
                         span_index,
                         fitting_start,
