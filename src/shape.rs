@@ -1442,26 +1442,11 @@ impl ShapeLine {
                                 glyph_end = glyph_idx;
                             }
 
-                            // // now that we have the partial word, let first add the whole words
-                            // // accumulated so far
-                            // if word_idx > 0 {
-                            //     add_to_visual_line(
-                            //         &mut current_visual_line,
-                            //         span_index,
-                            //         (word_idx + 1, 0),
-                            //         starting_point,
-                            //         word_range_width,
-                            //         number_of_blanks,
-                            //     );
-                            //     starting_point = (word_idx, 0);
-                            // }
-
-                            // Now add the partial word
                             add_to_visual_line(
                                 &mut current_visual_line,
                                 span_index,
                                 (word_idx, glyph_end),
-                                (span.words.len(), 0),
+                                (span.words.len(), 0), // This would contain all the words that fit too
                                 word_range_width + glyphs_w,
                                 number_of_blanks,
                             );
@@ -1518,30 +1503,14 @@ impl ShapeLine {
                                 glyph_end = glyph_idx + 1;
                             }
 
-                            // now that we have the partial word, let first add the whole words
-                            // accumulated so far
-                            if word_idx > 0 {
-                                add_to_visual_line(
-                                    &mut current_visual_line,
-                                    span_index,
-                                    (0, 0),
-                                    (word_idx, 0),
-                                    word_range_width,
-                                    number_of_blanks,
-                                );
-                            }
-
-                            // Now add the partial word
-                            if glyph_end > 0 {
-                                add_to_visual_line(
-                                    &mut current_visual_line,
-                                    span_index,
-                                    (word_idx, 0),
-                                    (word_idx, glyph_end),
-                                    glyphs_w,
-                                    0,
-                                );
-                            }
+                            add_to_visual_line(
+                                &mut current_visual_line,
+                                span_index,
+                                (0, 0), // add all the words that fit before the current word
+                                (word_idx, glyph_end),
+                                word_range_width + glyphs_w,
+                                number_of_blanks,
+                            );
 
                             // don't iterate anymore since we overflowed
                             current_visual_line.ellipsized = true;
