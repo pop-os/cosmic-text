@@ -1263,8 +1263,9 @@ impl ShapeLine {
         hinting: Hinting,
     ) -> Vec<LayoutLine> {
         let mut lines = Vec::with_capacity(1);
+        let mut scrach = ShapeBuffer::default();
         self.layout_to_buffer(
-            &mut FontSystem::new(),
+            &mut scrach,
             font_size,
             width_opt,
             None,
@@ -1281,7 +1282,7 @@ impl ShapeLine {
 
     pub fn layout_to_buffer(
         &self,
-        font_system: &mut FontSystem,
+        scratch: &mut ShapeBuffer,
         font_size: f32,
         width_opt: Option<f32>,
         _height_opt: Option<f32>,
@@ -1293,8 +1294,6 @@ impl ShapeLine {
         match_mono_width: Option<f32>,
         hinting: Hinting,
     ) {
-        let scratch = &mut font_system.shape_buffer;
-
         fn add_to_visual_line(
             vl: &mut VisualLine,
             span_index: usize,

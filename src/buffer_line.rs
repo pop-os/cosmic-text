@@ -1,3 +1,5 @@
+#![allow(clippy::too_many_arguments)]
+
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, vec::Vec};
 use core::mem;
@@ -257,7 +259,7 @@ impl BufferLine {
             let attrs_list = self.attrs_list.clone();
             let shape = self.shape(font_system, tab_width);
             shape.layout_to_buffer(
-                font_system,
+                &mut font_system.shape_buffer,
                 font_size,
                 width_opt,
                 height_opt,
