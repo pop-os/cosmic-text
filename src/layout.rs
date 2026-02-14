@@ -175,11 +175,7 @@ pub enum EllipsizeHeightLimit {
     /// Number of lines to show before ellipsizing the rest. Only works if `Wrap` is NOT set to
     /// `Wrap::None`.
     Lines(usize),
-    /// Maximum height in pixels to show before ellipsizing the rest. Only works if `Wrap` is NOT
-    /// set to `Wrap::None`.
-    Heights(f32),
-    /// Takes the available height of the buffer into account when ellipsizing. Only works if `Wrap` is NOT set to `Wrap::None`.
-    AvailableHeight,
+    //TODO: Height(f32) in pixels
 }
 
 /// Metrics hinting strategy
