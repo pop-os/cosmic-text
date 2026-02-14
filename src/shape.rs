@@ -986,6 +986,7 @@ impl VisualLine {
         self.ranges.clear();
         self.spaces = 0;
         self.w = 0.;
+        self.ellipsized = false;
     }
 }
 
