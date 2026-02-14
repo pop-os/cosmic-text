@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use cosmic_text::BorrowedWithFontSystem;
+use cosmic_text::CacheKeyFlags;
 use cosmic_text::Color;
 use cosmic_text::Editor;
 use cosmic_text::Shaping;
 use cosmic_text::Style;
 use cosmic_text::{
-    Action, Attrs, Buffer, Edit, Ellipsize, Family, FontSystem, Metrics, Motion, SwashCache,
-    Weight, Wrap,
+    Action, Attrs, Buffer, Edit, Family, FontSystem, Metrics, Motion, SwashCache, Weight,
 };
 use std::{num::NonZeroU32, rc::Rc, slice};
 use tiny_skia::{Paint, PixmapMut, Rect, Transform};
@@ -21,33 +21,128 @@ use winit::{
 
 fn set_buffer_text(buffer: &mut BorrowedWithFontSystem<'_, Buffer>) {
     let attrs = Attrs::new();
+    let serif_attrs = attrs.clone().family(Family::Serif);
     let mono_attrs = attrs.clone().family(Family::Monospace);
-    let emph_attrs = attrs.clone().weight(Weight::BOLD).style(Style::Italic);
-    let color_attrs = attrs.clone().color(Color::rgb(0xFF, 0x7F, 0x00));
-
-    buffer.set_wrap(Wrap::None);
-    buffer.set_ellipsize(Ellipsize::End(cosmic_text::EllipsizeHeightLimit::Lines(1)));
+    let comic_attrs = attrs.clone().family(Family::Name("Comic Neue"));
+    let inter_attrs = attrs.clone().family(Family::Name("Inter Variable"));
 
     let spans: &[(&str, Attrs)] = &[
         (
-            "This is a long rich text line that demonstrates ",
+            "Font size 64 ",
+            attrs.clone().metrics(Metrics::relative(64.0, 1.2)),
+        ),
+        (
+            "Font size 8 ",
+            attrs.clone().metrics(Metrics::relative(8.0, 1.2)),
+        ),
+        (
+            "Font size 20 ",
             attrs.clone().metrics(Metrics::relative(20.0, 1.2)),
         ),
-        ("ellipsizing", emph_attrs.clone()),
         (
-            " at the start when the line exceeds the available width. ",
-            attrs.clone(),
-        ),
-        ("Monospace", mono_attrs.clone()),
-        (" and colored text ", color_attrs.clone()),
-        ("with emoji 🦄🌈\n\n", attrs.clone()),
-        (
-            "هذا سطر عربي طويل يوضح فقرة كاملة مع بعض الكلمات الممتدة لاختبار الاتجاه.\n\n",
-            attrs.clone().color(Color::rgb(0x7F, 0xFF, 0x00)),
+            "Font size 14 ",
+            attrs.clone().metrics(Metrics::relative(14.0, 1.2)),
         ),
         (
-            "Mixed paragraph: English العربية 123 with inline bidi for layout validation.",
-            attrs.clone().color(Color::rgb(0x00, 0x7F, 0xFF)),
+            "Font size 48\n",
+            attrs.clone().metrics(Metrics::relative(48.0, 1.2)),
+        ),
+        ("B", attrs.clone().weight(Weight::BOLD)),
+        ("old ", attrs.clone()),
+        ("I", attrs.clone().style(Style::Italic)),
+        ("talic ", attrs.clone()),
+        ("f", attrs.clone()),
+        ("i ", attrs.clone()),
+        ("f", attrs.clone().weight(Weight::BOLD)),
+        ("i ", attrs.clone()),
+        ("f", attrs.clone().style(Style::Italic)),
+        ("i \n", attrs.clone()),
+        ("Sans-Serif Normal ", attrs.clone()),
+        ("Sans-Serif Bold ", attrs.clone().weight(Weight::BOLD)),
+        ("Sans-Serif Italic ", attrs.clone().style(Style::Italic)),
+        (
+            "Sans-Serif Fake Italic ",
+            attrs.clone().cache_key_flags(CacheKeyFlags::FAKE_ITALIC),
+        ),
+        (
+            "Sans-Serif Bold Italic\n",
+            attrs.clone().weight(Weight::BOLD).style(Style::Italic),
+        ),
+        ("Serif Normal ", serif_attrs.clone()),
+        ("Serif Bold ", serif_attrs.clone().weight(Weight::BOLD)),
+        ("Serif Italic ", serif_attrs.clone().style(Style::Italic)),
+        (
+            "Serif Bold Italic\n",
+            serif_attrs
+                .clone()
+                .weight(Weight::BOLD)
+                .style(Style::Italic),
+        ),
+        ("Mono Normal ", mono_attrs.clone()),
+        ("Mono Bold ", mono_attrs.clone().weight(Weight::BOLD)),
+        ("Mono Italic ", mono_attrs.clone().style(Style::Italic)),
+        (
+            "Mono Bold Italic\n",
+            mono_attrs.clone().weight(Weight::BOLD).style(Style::Italic),
+        ),
+        ("Comic Normal ", comic_attrs.clone()),
+        ("Comic Bold ", comic_attrs.clone().weight(Weight::BOLD)),
+        ("Comic Italic ", comic_attrs.clone().style(Style::Italic)),
+        (
+            "Comic Bold Italic\n",
+            comic_attrs
+                .clone()
+                .weight(Weight::BOLD)
+                .style(Style::Italic),
+        ),
+        ("🌈", attrs.clone()),
+        ("R", attrs.clone().color(Color::rgb(0xFF, 0x00, 0x00))),
+        ("A", attrs.clone().color(Color::rgb(0xFF, 0x7F, 0x00))),
+        ("I", attrs.clone().color(Color::rgb(0xFF, 0xFF, 0x00))),
+        ("N", attrs.clone().color(Color::rgb(0x00, 0xFF, 0x00))),
+        ("B", attrs.clone().color(Color::rgb(0x00, 0x00, 0xFF))),
+        ("O", attrs.clone().color(Color::rgb(0x4B, 0x00, 0x82))),
+        ("W ", attrs.clone().color(Color::rgb(0x94, 0x00, 0xD3))),
+        ("Red ", attrs.clone().color(Color::rgb(0xFF, 0x00, 0x00))),
+        ("Orange ", attrs.clone().color(Color::rgb(0xFF, 0x7F, 0x00))),
+        ("Yellow ", attrs.clone().color(Color::rgb(0xFF, 0xFF, 0x00))),
+        ("Green ", attrs.clone().color(Color::rgb(0x00, 0xFF, 0x00))),
+        ("Blue ", attrs.clone().color(Color::rgb(0x00, 0x00, 0xFF))),
+        ("Indigo ", attrs.clone().color(Color::rgb(0x4B, 0x00, 0x82))),
+        ("Violet ", attrs.clone().color(Color::rgb(0x94, 0x00, 0xD3))),
+        ("U", attrs.clone().color(Color::rgb(0x94, 0x00, 0xD3))),
+        ("N", attrs.clone().color(Color::rgb(0x4B, 0x00, 0x82))),
+        ("I", attrs.clone().color(Color::rgb(0x00, 0x00, 0xFF))),
+        ("C", attrs.clone().color(Color::rgb(0x00, 0xFF, 0x00))),
+        ("O", attrs.clone().color(Color::rgb(0xFF, 0xFF, 0x00))),
+        ("R", attrs.clone().color(Color::rgb(0xFF, 0x7F, 0x00))),
+        ("N", attrs.clone().color(Color::rgb(0xFF, 0x00, 0x00))),
+        ("🦄\n", attrs.clone()),
+        (
+            "生活,삶,जिंदगी 😀\n",
+            attrs.clone().color(Color::rgb(0xFF, 0x00, 0x00)),
+        ),
+        ("Hinting enabled, ", attrs.clone()),
+        (
+            "Hinting disabled\n",
+            attrs
+                .clone()
+                .cache_key_flags(CacheKeyFlags::DISABLE_HINTING),
+        ),
+        (
+            "Inter Variable: 400 ",
+            inter_attrs.clone().weight(Weight(400)),
+        ),
+        ("200 ", inter_attrs.clone().weight(Weight(200))),
+        ("250 ", inter_attrs.clone().weight(Weight(250))),
+        ("300\n", inter_attrs.clone().weight(Weight(300))),
+        (
+            "Inter Variable Italic: 400 ",
+            inter_attrs.clone().weight(Weight(400)).style(Style::Italic),
+        ),
+        (
+            "800",
+            inter_attrs.clone().weight(Weight(800)).style(Style::Italic),
         ),
     ];
 

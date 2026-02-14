@@ -2,7 +2,6 @@
 
 #![allow(clippy::too_many_arguments)]
 
-use crate::ellipsize::{self, shape_ellipsis, EllipsisCache};
 use crate::fallback::FontFallbackIter;
 use crate::{
     math, Align, Attrs, AttrsList, CacheKeyFlags, Color, Ellipsize, EllipsizeHeightLimit, Font,
@@ -614,6 +613,50 @@ impl ShapeGlyph {
     }
 }
 
+#[derive(Clone, Debug)]
+struct EllipsisCache {
+    glyphs: Vec<ShapeGlyph>,
+}
+
+fn shape_ellipsis(
+    font_system: &mut FontSystem,
+    attrs: &Attrs,
+    shaping: Shaping,
+    span_rtl: bool,
+) -> Vec<ShapeGlyph> {
+    let attrs_list = AttrsList::new(attrs);
+    let level = if span_rtl {
+        unicode_bidi::Level::rtl()
+    } else {
+        unicode_bidi::Level::ltr()
+    };
+    let word = ShapeWord::new(
+        font_system,
+        "\u{2026}", // TODO: maybe do CJK ellipsis
+        &attrs_list,
+        0.."\u{2026}".len(),
+        level,
+        false,
+        shaping,
+    );
+    let mut glyphs = word.glyphs;
+
+    // did we fail to shape it?
+    if glyphs.is_empty() || glyphs.iter().all(|g| g.glyph_id == 0) {
+        let fallback = ShapeWord::new(
+            font_system,
+            "...",
+            &attrs_list,
+            0.."...".len(),
+            level,
+            false,
+            shaping,
+        );
+        glyphs = fallback.glyphs;
+    }
+    glyphs
+}
+
 /// A shaped word (for word wrapping)
 #[derive(Clone, Debug)]
 pub struct ShapeWord {
@@ -971,14 +1014,14 @@ pub struct ShapeLine {
 }
 
 // Visual Line Ranges: (span_index, (first_word_index, first_glyph_index), (last_word_index, last_glyph_index))
-pub(crate) type VlRange = (usize, (usize, usize), (usize, usize));
+type VlRange = (usize, (usize, usize), (usize, usize));
 
 #[derive(Default)]
-pub(crate) struct VisualLine {
-    pub(crate) ranges: Vec<VlRange>,
-    pub(crate) spaces: u32,
-    pub(crate) w: f32,
-    pub(crate) ellipsized: bool,
+struct VisualLine {
+    ranges: Vec<VlRange>,
+    spaces: u32,
+    w: f32,
+    ellipsized: bool,
 }
 
 impl VisualLine {
@@ -1269,11 +1312,9 @@ impl ShapeLine {
             &mut scrach,
             font_size,
             width_opt,
-            None,
             wrap,
             Ellipsize::None,
             align,
-            None,
             &mut lines,
             match_mono_width,
             hinting,
@@ -1720,11 +1761,9 @@ impl ShapeLine {
         scratch: &mut ShapeBuffer,
         font_size: f32,
         width_opt: Option<f32>,
-        _height_opt: Option<f32>,
         wrap: Wrap,
         ellipsize: Ellipsize,
         align: Option<Align>,
-        _attrs_list_opt: Option<&AttrsList>,
         layout_lines: &mut Vec<LayoutLine>,
         match_mono_width: Option<f32>,
         hinting: Hinting,

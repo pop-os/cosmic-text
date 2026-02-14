@@ -138,8 +138,6 @@ mod shape;
 pub use self::shape_run_cache::*;
 mod shape_run_cache;
 
-mod ellipsize;
-
 #[cfg(feature = "swash")]
 pub use self::swash::*;
 #[cfg(feature = "swash")]
