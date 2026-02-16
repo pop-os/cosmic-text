@@ -1361,7 +1361,7 @@ impl ShapeLine {
         ellipsize: Ellipsize,
     ) {
         assert!(
-            ellipsize == Ellipsize::Start,
+            matches!(ellipsize, Ellipsize::Start(_)),
             "layout_backward should only be used for Ellipsize::Start"
         );
 
@@ -1801,7 +1801,7 @@ impl ShapeLine {
 
         if wrap == Wrap::None {
             match (ellipsize, width_opt) {
-                (Ellipsize::Start, Some(width)) => {
+                (Ellipsize::Start(_), Some(width)) => {
                     self.layout_backward(
                         &mut current_visual_line,
                         font_size,
@@ -1827,16 +1827,33 @@ impl ShapeLine {
                 }
             }
         } else {
-            fn is_last_line(ellipsize: Ellipsize, visual_line_count: usize) -> bool {
-                // If Ellipsize::End, then how many lines can we fit or how much is the avialble height
-                let maximum_allowed_lines_opt = match ellipsize {
-                    Ellipsize::End(EllipsizeHeightLimit::Lines(lines)) => Some(lines.max(1)),
-                    _ => None,
-                };
-                maximum_allowed_lines_opt == Some(visual_line_count + 1)
-            }
+            let mut total_line_height = 0.0;
+            let mut total_line_count = 0;
+            let max_line_count_opt = match ellipsize {
+                Ellipsize::Start(EllipsizeHeightLimit::Lines(lines))
+                | Ellipsize::Middle(EllipsizeHeightLimit::Lines(lines))
+                | Ellipsize::End(EllipsizeHeightLimit::Lines(lines)) => Some(lines.max(1)),
+                _ => None,
+            };
+            let max_height_opt = match ellipsize {
+                Ellipsize::Start(EllipsizeHeightLimit::Height(height))
+                | Ellipsize::Middle(EllipsizeHeightLimit::Height(height))
+                | Ellipsize::End(EllipsizeHeightLimit::Height(height)) => Some(height),
+                _ => None,
+            };
+            let line_height = self
+                .metrics_opt
+                .map_or_else(|| font_size, |m| m.line_height);
 
-            if is_last_line(ellipsize, visual_lines.len()) {
+            let is_last_line = |total_line_count: usize, total_line_height: f32| -> bool {
+                // If Ellipsize::End, then how many lines can we fit or how much is the avialble height
+                max_line_count_opt == Some(total_line_count + 1)
+                    || max_height_opt.is_some_and(|max_height| {
+                        total_line_height + line_height * 2.0 > max_height
+                    })
+            };
+
+            if is_last_line(total_line_count, total_line_height) {
                 log::warn!("layout_to_buffer: not wrapping since we only have room for one line, so just ellipsizing the single line");
                 self.layout_forward(
                     &mut current_visual_line,
@@ -1903,7 +1920,9 @@ impl ShapeLine {
                                     word_range_width = 0.;
 
                                     fitting_start = (i, 0);
-                                    if is_last_line(ellipsize, visual_lines.len()) {
+                                    total_line_count += 1;
+                                    total_line_height += line_height;
+                                    if is_last_line(total_line_count, total_line_height) {
                                         self.layout_forward(
                                             &mut current_visual_line,
                                             font_size,
@@ -1940,7 +1959,9 @@ impl ShapeLine {
                                         number_of_blanks = 0;
                                         word_range_width = glyph_width;
                                         fitting_start = (i, glyph_i + 1);
-                                        if is_last_line(ellipsize, visual_lines.len()) {
+                                        total_line_count += 1;
+                                        total_line_height += line_height;
+                                        if is_last_line(total_line_count, total_line_height) {
                                             self.layout_forward(
                                                 &mut current_visual_line,
                                                 font_size,
@@ -2001,7 +2022,9 @@ impl ShapeLine {
                                     word_range_width = word_width;
                                     fitting_start = (i + 1, 0);
                                 }
-                                if is_last_line(ellipsize, visual_lines.len()) {
+                                total_line_count += 1;
+                                total_line_height += line_height;
+                                if is_last_line(total_line_count, total_line_height) {
                                     self.layout_forward(
                                         &mut current_visual_line,
                                         font_size,
@@ -2068,7 +2091,9 @@ impl ShapeLine {
                                     word_range_width = 0.;
 
                                     fitting_start = (i, 0);
-                                    if is_last_line(ellipsize, visual_lines.len()) {
+                                    total_line_count += 1;
+                                    total_line_height += line_height;
+                                    if is_last_line(total_line_count, total_line_height) {
                                         self.layout_forward(
                                             &mut current_visual_line,
                                             font_size,
@@ -2105,7 +2130,9 @@ impl ShapeLine {
                                         number_of_blanks = 0;
                                         word_range_width = glyph_width;
                                         fitting_start = (i, glyph_i);
-                                        if is_last_line(ellipsize, visual_lines.len()) {
+                                        total_line_count += 1;
+                                        total_line_height += line_height;
+                                        if is_last_line(total_line_count, total_line_height) {
                                             self.layout_forward(
                                                 &mut current_visual_line,
                                                 font_size,
@@ -2163,7 +2190,9 @@ impl ShapeLine {
                                     word_range_width = word_width;
                                     fitting_start = (i, 0);
                                 }
-                                if is_last_line(ellipsize, visual_lines.len()) {
+                                total_line_count += 1;
+                                total_line_height += line_height;
+                                if is_last_line(total_line_count, total_line_height) {
                                     self.layout_forward(
                                         &mut current_visual_line,
                                         font_size,
@@ -2218,7 +2247,8 @@ impl ShapeLine {
             }
 
             let ellipsized_end = visual_line.ellipsized && matches!(ellipsize, Ellipsize::End(_));
-            let ellipsized_start = visual_line.ellipsized && matches!(ellipsize, Ellipsize::Start);
+            let ellipsized_start =
+                visual_line.ellipsized && matches!(ellipsize, Ellipsize::Start(_));
             let ellipsis_w = if ellipsized_start || ellipsized_end {
                 self.ellipsis
                     .as_ref()

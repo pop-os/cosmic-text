@@ -156,26 +156,22 @@ impl Display for Align {
 pub enum Ellipsize {
     /// No Ellipsizing
     None,
-    /// Ellipsizes the start of the sentence.
-    /// IMPORTANT: Only works if `Wrap` is set to `Wrap::None`.
-    Start,
-    /// Ellipsizes the middle of the sentence.
-    /// IMPORTANT: Only works if `Wrap` is set to `Wrap::None`.
-    Middle,
-    /// Ellipsizes the end of the sentence.
-    /// If `Wrap` is `Wrap::None` then the `EllipsizeHeightLimit` is ignored and the ellipsis will
-    /// be added at the end of the line.
-    /// Otherwise the ellipsis will be added at the end of the last line that fits within the
-    /// `EllipsizeHeightLimit`.
+    /// Ellipsizes the start of the last sentence that fits within the `EllipsizeHeightLimit`
+    Start(EllipsizeHeightLimit),
+    /// Ellipsizes the middle of the last sentence that fits within the `EllipsizeHeightLimit`.
+    Middle(EllipsizeHeightLimit),
+    /// Ellipsizes the end of the last sentence that fits within the `EllipsizeHeightLimit`.
     End(EllipsizeHeightLimit),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum EllipsizeHeightLimit {
     /// Number of lines to show before ellipsizing the rest. Only works if `Wrap` is NOT set to
-    /// `Wrap::None`.
+    /// `Wrap::None`. Otherwise, it will be ignored and the behavior will be the same as `Lines(1)`
     Lines(usize),
-    //TODO: Height(f32) in pixels
+    /// Ellipsizes the last line that fits within the given height limit. If `Wrap` is set to
+    /// `Wrap::None`, the behavior will be the same as `Lines(1)`
+    Height(f32),
 }
 
 /// Metrics hinting strategy
