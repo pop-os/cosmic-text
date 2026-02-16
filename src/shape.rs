@@ -1762,6 +1762,34 @@ impl ShapeLine {
         }
     }
 
+    fn layout_line(
+        &self,
+        current_visual_line: &mut VisualLine,
+        font_size: f32,
+        spans: Vec<ShapeSpan>,
+        starting_span_index: usize,
+        start: (usize, usize),
+        rtl: bool,
+        width_opt: Option<f32>,
+        ellipsize: Ellipsize,
+    ) {
+        match (ellipsize, width_opt) {
+            (Ellipsize::Start(_), Some(width)) => {
+                self.layout_backward(current_visual_line, font_size, spans, rtl, width, ellipsize);
+            }
+            _ => self.layout_forward(
+                current_visual_line,
+                font_size,
+                spans,
+                starting_span_index,
+                start,
+                rtl,
+                width_opt,
+                ellipsize,
+            ),
+        }
+    }
+
     pub fn layout_to_buffer(
         &self,
         scratch: &mut ShapeBuffer,
@@ -1800,32 +1828,16 @@ impl ShapeLine {
         let mut current_visual_line = cached_visual_lines.pop().unwrap_or_default();
 
         if wrap == Wrap::None {
-            match (ellipsize, width_opt) {
-                (Ellipsize::Start(_), Some(width)) => {
-                    self.layout_backward(
-                        &mut current_visual_line,
-                        font_size,
-                        self.spans.clone(),
-                        self.rtl,
-                        width,
-                        ellipsize,
-                    );
-                }
-                _ => {
-                    self.layout_forward(
-                        &mut current_visual_line,
-                        font_size,
-                        self.spans.clone(),
-                        0,
-                        (0, 0),
-                        self.rtl,
-                        width_opt,
-                        ellipsize,
-                    );
-
-                    /* no warnings for other cases since they don't cause unexpected ellipsizing */
-                }
-            }
+            self.layout_line(
+                &mut current_visual_line,
+                font_size,
+                self.spans.clone(),
+                0,
+                (0, 0),
+                self.rtl,
+                width_opt,
+                ellipsize,
+            );
         } else {
             let mut total_line_height = 0.0;
             let mut total_line_count = 0;
@@ -1923,7 +1935,7 @@ impl ShapeLine {
                                     total_line_count += 1;
                                     total_line_height += line_height;
                                     if is_last_line(total_line_count, total_line_height) {
-                                        self.layout_forward(
+                                        self.layout_line(
                                             &mut current_visual_line,
                                             font_size,
                                             self.spans.clone(),
@@ -1962,7 +1974,7 @@ impl ShapeLine {
                                         total_line_count += 1;
                                         total_line_height += line_height;
                                         if is_last_line(total_line_count, total_line_height) {
-                                            self.layout_forward(
+                                            self.layout_line(
                                                 &mut current_visual_line,
                                                 font_size,
                                                 self.spans.clone(),
@@ -2025,7 +2037,7 @@ impl ShapeLine {
                                 total_line_count += 1;
                                 total_line_height += line_height;
                                 if is_last_line(total_line_count, total_line_height) {
-                                    self.layout_forward(
+                                    self.layout_line(
                                         &mut current_visual_line,
                                         font_size,
                                         self.spans.clone(),
@@ -2094,7 +2106,7 @@ impl ShapeLine {
                                     total_line_count += 1;
                                     total_line_height += line_height;
                                     if is_last_line(total_line_count, total_line_height) {
-                                        self.layout_forward(
+                                        self.layout_line(
                                             &mut current_visual_line,
                                             font_size,
                                             self.spans.clone(),
@@ -2133,7 +2145,7 @@ impl ShapeLine {
                                         total_line_count += 1;
                                         total_line_height += line_height;
                                         if is_last_line(total_line_count, total_line_height) {
-                                            self.layout_forward(
+                                            self.layout_line(
                                                 &mut current_visual_line,
                                                 font_size,
                                                 self.spans.clone(),
@@ -2193,7 +2205,7 @@ impl ShapeLine {
                                 total_line_count += 1;
                                 total_line_height += line_height;
                                 if is_last_line(total_line_count, total_line_height) {
-                                    self.layout_forward(
+                                    self.layout_line(
                                         &mut current_visual_line,
                                         font_size,
                                         self.spans.clone(),
