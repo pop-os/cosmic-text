@@ -618,6 +618,12 @@ struct EllipsisCache {
     glyphs: Vec<ShapeGlyph>,
 }
 
+impl EllipsisCache {
+    fn width(&self, font_size: f32) -> f32 {
+        self.glyphs.iter().map(|g| g.width(font_size)).sum()
+    }
+}
+
 fn shape_ellipsis(
     font_system: &mut FontSystem,
     attrs: &Attrs,
@@ -2213,6 +2219,13 @@ impl ShapeLine {
 
             let ellipsized_end = visual_line.ellipsized && matches!(ellipsize, Ellipsize::End(_));
             let ellipsized_start = visual_line.ellipsized && matches!(ellipsize, Ellipsize::Start);
+            let ellipsis_w = if ellipsized_start || ellipsized_end {
+                self.ellipsis
+                    .as_ref()
+                    .map_or(0., |ellipsis_cache| ellipsis_cache.width(font_size))
+            } else {
+                0.
+            };
 
             let new_order = self.reorder(&visual_line.ranges);
             let mut glyphs = cached_glyph_sets
@@ -2222,13 +2235,14 @@ impl ShapeLine {
             let mut y = 0.;
             let mut max_ascent: f32 = 0.;
             let mut max_descent: f32 = 0.;
+            let effective_width = visual_line.w + ellipsis_w;
             let alignment_correction = match (align, self.rtl) {
-                (Align::Left, true) => line_width - visual_line.w,
+                (Align::Left, true) => (line_width - effective_width).max(0.),
                 (Align::Left, false) => 0.,
                 (Align::Right, true) => 0.,
-                (Align::Right, false) => line_width - visual_line.w,
-                (Align::Center, _) => (line_width - visual_line.w) / 2.0,
-                (Align::End, _) => line_width - visual_line.w,
+                (Align::Right, false) => (line_width - effective_width).max(0.),
+                (Align::Center, _) => (line_width - effective_width).max(0.) / 2.0,
+                (Align::End, _) => (line_width - effective_width).max(0.),
                 (Align::Justified, _) => 0.,
             };
 
