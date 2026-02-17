@@ -1506,11 +1506,11 @@ impl ShapeLine {
         direction: LayoutingDirection,
     ) {
         log::info!(
-            "layout_spans: start={:?}, width_opt={:?}, ellipsize={:?}, direction={:?}",
+            "layout_spans(direction={:?}): start={:?}, width_opt={:?}, ellipsize={:?}",
+            direction,
             start,
             width_opt,
             ellipsize,
-            direction
         );
         let check_ellipsizing = matches!(ellipsize, Ellipsize::Start(_) | Ellipsize::End(_)) && {
             if let Some(width) = width_opt {
@@ -1532,8 +1532,6 @@ impl ShapeLine {
         };
 
         'outer: for span_index in span_indices {
-            log::info!("span_index={span_index}");
-
             let mut word_range_width = 0.;
             let mut number_of_blanks: u32 = 0;
 
@@ -1549,13 +1547,19 @@ impl ShapeLine {
             let congruent = rtl == span.level.is_rtl();
             let word_forward: bool = congruent == matches!(direction, LayoutingDirection::Forward);
 
+            log::info!("processing span_index={span_index}, {starting_word_index:?}, word_forward={word_forward}, congruent={congruent}");
             let word_indices: Vec<usize> = if word_forward {
-                (starting_word_index..word_count).collect()
+                if !congruent {
+                    (0..starting_word_index).collect()
+                } else {
+                    (starting_word_index..word_count).collect()
+                }
             } else {
                 ((starting_word_index)..word_count).rev().collect()
             };
 
             for word_idx in word_indices {
+                log::info!("processing word_idx={word_idx}");
                 let word = &span.words[word_idx];
                 let word_width = if span_index == start.span && word_idx == start.word {
                     let mut w = 0.;
@@ -1605,11 +1609,16 @@ impl ShapeLine {
 
                     let (start_pos, end_pos) = if word_forward {
                         if span_index == start.span {
-                            log::info!("100");
-                            (
-                                start.word_glyph_pos(),
-                                WordGlyphPos::new(word_idx, glyph_end),
-                            )
+                            if !congruent {
+                                log::info!("100");
+                                (WordGlyphPos::ZERO, WordGlyphPos::new(word_idx, glyph_end))
+                            } else {
+                                log::info!("105");
+                                (
+                                    start.word_glyph_pos(),
+                                    WordGlyphPos::new(word_idx, glyph_end),
+                                )
+                            }
                         } else {
                             log::info!("101");
                             (WordGlyphPos::ZERO, WordGlyphPos::new(word_idx, glyph_end))
@@ -1695,10 +1704,10 @@ impl ShapeLine {
                     (WordGlyphPos::ZERO, WordGlyphPos::new(span.words.len(), 0))
                 }
             } else if span_index == start.span {
-                log::warn!("layout_span(forward, first_span):  so starting_word_index should be {}, but start is {:?}, resetting start to (0, 0)", starting_word_index, start);
+                log::warn!("layout_span({direction:?}, {congruent:?}, first_span):  so starting_word_index should be {}, but start is {:?}, resetting start to (0, 0)", starting_word_index, start);
                 (WordGlyphPos::ZERO, start.word_glyph_pos())
             } else {
-                log::warn!("layout_span(forward): so starting_word_index should be 0, but start is {:?}, resetting start to (0, 0)", start);
+                log::warn!("layout_span({direction:?}, {congruent:?}): so starting_word_index should be 0, but start is {:?}, resetting start to (0, 0)", start);
                 (WordGlyphPos::ZERO, WordGlyphPos::new(span.words.len(), 0))
             };
 
@@ -1749,16 +1758,26 @@ impl ShapeLine {
             0., //pass 0 for ellipsis_w
             LayoutingDirection::Forward,
         );
+        let forward_pass_overflowed = matches!(starting_line.ellipsized, EllipsizeState::End);
         let end_range_opt = starting_line.ranges.last();
-        log::info!("Ranges:{:?}", current_visual_line.ranges);
+        log::info!("Ranges:{:?}", starting_line.ranges);
         match end_range_opt {
-            Some(range) => {
+            Some(range) if forward_pass_overflowed => {
+                let congruent = rtl == self.spans[range.span].level.is_rtl();
                 // create a new range and do the other half
                 let mut ending_line = VisualLine::default();
-                let start = SpanWordGlyphPos {
-                    span: range.span,
-                    word: range.end.word,
-                    glyph: range.end.glyph,
+                let start = if congruent {
+                    SpanWordGlyphPos {
+                        span: range.span,
+                        word: range.end.word,
+                        glyph: range.end.glyph,
+                    }
+                } else {
+                    SpanWordGlyphPos {
+                        span: range.span,
+                        word: range.start.word,
+                        glyph: range.start.glyph,
+                    }
                 };
                 self.layout_spans(
                     &mut ending_line,
@@ -1809,6 +1828,13 @@ impl ShapeLine {
             None => {
                 log::warn!("Nothing fits??");
                 // Everything fit in the first half?!
+                current_visual_line.ranges = starting_line.ranges;
+                current_visual_line.ellipsized = EllipsizeState::None;
+                current_visual_line.w = starting_line.w;
+                current_visual_line.spaces = starting_line.spaces;
+            }
+            _ => {
+                // everything fit in the forward pass
                 current_visual_line.ranges = starting_line.ranges;
                 current_visual_line.ellipsized = EllipsizeState::None;
                 current_visual_line.w = starting_line.w;
