@@ -1378,7 +1378,12 @@ impl ShapeLine {
             "layout_backward should only be used for Ellipsize::Start"
         );
 
-        log::warn!("backward: start={start:?}, width={width}, ellipsis_w={ellipsis_w}");
+        log::warn!(
+            "layout_backward: ellipsis_w={}, max_width={}, start={:?}",
+            ellipsis_w,
+            width,
+            start
+        );
 
         let max_width = width.max(0.0);
 
@@ -1695,6 +1700,9 @@ impl ShapeLine {
                             )
                     };
 
+                    log::info!(
+                            "span_index={span_index}, word_idx={word_idx}, word_width={word_width}, total_w={total_w}, word_range_width={word_range_width}, overflowing={overflowing}, avaialble={max_width}"
+                        );
                     if overflowing {
                         // overflow detected
                         let avaialble = (max_width - ellipsis_w).max(0.0);
@@ -1790,6 +1798,9 @@ impl ShapeLine {
                                 )
                             )
                     };
+                    log::info!(
+                            "span_index={span_index}, word_idx={word_idx}, word_width={word_width}, total_w={total_w}, word_range_width={word_range_width}, overflowing={overflowing}, avaialble={max_width}"
+                        );
 
                     if overflowing {
                         // overflow detected
@@ -1852,6 +1863,11 @@ impl ShapeLine {
                     (0, 0)
                 };
 
+                log::info!(
+                    "adding span_index {span_index} with partial word: start={:?}, end={:?}, word_range_width={word_range_width}, number_of_blanks={number_of_blanks}",
+                    start,
+                    (span.words.len(), 0)
+                );
                 self.add_to_visual_line(
                     current_visual_line,
                     span_index,
@@ -1876,50 +1892,73 @@ impl ShapeLine {
         ellipsize: Ellipsize,
         ellipsis_w: f32,
     ) {
-        // let mut starting_line = VisualLine::default();
-        // let width_limit = (width - ellipsis_w).max(0.0) / 2.0;
-        // self.layout_forward(
-        //     &mut starting_line,
-        //     font_size,
-        //     spans.clone(),
-        //     starting_span_index,
-        //     start,
-        //     rtl,
-        //     Some(width_limit),
-        //     ellipsize,
-        //     ellipsis_w,
-        // );
-        // let end_range_opt = current_visual_line.ranges.last();
-        // match end_range_opt {
-        //     Some(range) => {
-        //         // create a new range and do the other half
-        //         let mut ending_line = VisualLine::default();
-        //         self.layout_backward(
-        //             &mut ending_line,
-        //             font_size,
-        //             spans.clone(),
-        //             rtl,
-        //             width_limit,
-        //             ellipsize,
-        //             ellipsis_w,
-        //         );
-        //
-        //         // add both to the current_visual_line
-        //         current_visual_line.ranges = starting_line
-        //             .ranges
-        //             .into_iter()
-        //             .chain(ending_line.ranges.into_iter())
-        //             .collect();
-        //         current_visual_line.ellipsized =
-        //     }
-        //     None => {
-        //         // what happened here?
-        //         // nothing fit?
-        //         // maybe just the ellipsis fits?
-        //         // maybe we just return the ellipsis??
-        //         return;
-        //     }
-        // }
+        log::warn!("layout_middle: starting_span_index={starting_span_index}, start={start:?}, width={width}, ellipsis_w={ellipsis_w}");
+        let mut starting_line = VisualLine::default();
+        let width_limit = (width - ellipsis_w).max(0.0) / 2.0;
+        self.layout_forward(
+            &mut starting_line,
+            font_size,
+            spans.clone(),
+            (starting_span_index, start),
+            rtl,
+            Some(width_limit),
+            Ellipsize::End(EllipsizeHeightLimit::Lines(1)),
+            0., //pass 0 for ellipsis_w
+        );
+        let end_range_opt = starting_line.ranges.last();
+        log::info!("Ranges:{:?}", current_visual_line.ranges);
+        match end_range_opt {
+            Some(range) => {
+                // create a new range and do the other half
+                let mut ending_line = VisualLine::default();
+                let start = (range.0, range.2);
+                self.layout_backward(
+                    &mut ending_line,
+                    font_size,
+                    spans.clone(),
+                    start,
+                    rtl,
+                    width_limit,
+                    Ellipsize::Start(EllipsizeHeightLimit::Lines(1)),
+                    0., //pass 0 for ellipsis_w
+                );
+                let insert_at = starting_line.ranges.len();
+
+                // Check if anything was actually skipped between the two halves
+                let first_half_end = (range.0, range.2); // already have this as `start`
+                let second_half_start = ending_line.ranges.first().map(|r| (r.0, r.1));
+                let actually_ellipsized = match second_half_start {
+                    Some(shs) => shs != first_half_end,
+                    None => false, // nothing in backward pass = nothing was skipped
+                };
+                // add both to the current_visual_line
+                current_visual_line.ranges = starting_line
+                    .ranges
+                    .into_iter()
+                    .chain(ending_line.ranges)
+                    .collect();
+                if actually_ellipsized {
+                    let insert_at = insert_at; // already computed above
+                    log::info!("Insert at: {insert_at}");
+                    current_visual_line.ellipsized = EllipsizeState::Middle {
+                        insert_at_range: insert_at,
+                    };
+                    current_visual_line.w = starting_line.w + ending_line.w + ellipsis_w;
+                } else {
+                    current_visual_line.ellipsized = EllipsizeState::None;
+                    current_visual_line.w = starting_line.w + ending_line.w;
+                }
+                current_visual_line.spaces = starting_line.spaces + ending_line.spaces;
+            }
+            None => {
+                log::warn!("Nothing fits??");
+                // Everything fit in the first half?!
+                current_visual_line.ranges = starting_line.ranges;
+                current_visual_line.ellipsized = EllipsizeState::None;
+                current_visual_line.w = starting_line.w;
+                current_visual_line.spaces = starting_line.spaces;
+            }
+        }
     }
 
     fn layout_line(
@@ -1945,6 +1984,19 @@ impl ShapeLine {
                     font_size,
                     spans,
                     (starting_span_index, start),
+                    rtl,
+                    width,
+                    ellipsize,
+                    ellipsis_w,
+                );
+            }
+            (Ellipsize::Middle(_), Some(width)) => {
+                self.layout_middle(
+                    current_visual_line,
+                    font_size,
+                    spans,
+                    starting_span_index,
+                    start,
                     rtl,
                     width,
                     ellipsize,
@@ -2439,7 +2491,18 @@ impl ShapeLine {
             let ellipsized_end = matches!(visual_line.ellipsized, EllipsizeState::End);
             let ellipsized_start = matches!(visual_line.ellipsized, EllipsizeState::Start);
 
+            log::info!(
+                "Visual line {index}: w={}, spaces={}, ellipsized_start={}, ellipsized_end={}, ranges={:?}",
+                visual_line.w,
+                visual_line.spaces,
+                ellipsized_start,
+                ellipsized_end,
+                visual_line.ranges
+            );
+
             let new_order = self.reorder(&visual_line.ranges);
+            log::info!("Reordered ranges for visual line {index}: {new_order:?}");
+
             let mut glyphs = cached_glyph_sets
                 .pop()
                 .unwrap_or_else(|| Vec::with_capacity(1));
@@ -2498,7 +2561,11 @@ impl ShapeLine {
                 0.
             };
 
-            if ellipsized_start {
+            let push_ellipsis = |x: &mut f32,
+                                 y: &mut f32,
+                                 glyphs: &mut Vec<LayoutGlyph>,
+                                 max_ascent: &mut f32,
+                                 max_descent: &mut f32| {
                 if let Some(ellipsis_cache) = &self.ellipsis {
                     for glyph in &ellipsis_cache.glyphs {
                         let glyph_font_size = glyph.metrics_opt.map_or(font_size, |x| x.font_size);
@@ -2507,31 +2574,61 @@ impl ShapeLine {
                             x_advance = x_advance.round();
                         }
                         if self.rtl {
-                            x -= x_advance;
+                            *x -= x_advance;
                         }
                         let y_advance = glyph_font_size * glyph.y_advance;
                         glyphs.push(glyph.layout(
                             glyph_font_size,
                             glyph.metrics_opt.map(|x| x.line_height),
-                            x,
-                            y,
+                            *x,
+                            *y,
                             x_advance,
                             unicode_bidi::Level::ltr(), // TODO: Should ellipsis always be LTR?
                         ));
                         if !self.rtl {
-                            x += x_advance;
+                            *x += x_advance;
                         }
-                        y += y_advance;
-                        max_ascent = max_ascent.max(glyph_font_size * glyph.ascent);
-                        max_descent = max_descent.max(glyph_font_size * glyph.descent);
+                        *y += y_advance;
+                        *max_ascent = max_ascent.max(glyph_font_size * glyph.ascent);
+                        *max_descent = max_descent.max(glyph_font_size * glyph.descent);
                     }
                 }
+            };
+
+            if ellipsized_start {
+                push_ellipsis(
+                    &mut x,
+                    &mut y,
+                    &mut glyphs,
+                    &mut max_ascent,
+                    &mut max_descent,
+                );
             }
 
-            let mut process_range = |range: Range<usize>| {
-                for &(span_index, (starting_word, starting_glyph), (ending_word, ending_glyph)) in
-                    &visual_line.ranges[range]
+            let process_range = |range: Range<usize>,
+                                 x: &mut f32,
+                                 y: &mut f32,
+                                 glyphs: &mut Vec<LayoutGlyph>,
+                                 max_ascent: &mut f32,
+                                 max_descent: &mut f32| {
+                log::info!("Processing range: {range:?}");
+
+                for (
+                    i,
+                    &(span_index, (starting_word, starting_glyph), (ending_word, ending_glyph)),
+                ) in visual_line.ranges[range.clone()].iter().enumerate()
                 {
+                    if let EllipsizeState::Middle { insert_at_range } = visual_line.ellipsized {
+                        if range.start + i == insert_at_range {
+                            push_ellipsis(
+                                &mut *x,
+                                &mut *y,
+                                &mut *glyphs,
+                                &mut *max_ascent,
+                                &mut *max_descent,
+                            );
+                        }
+                    }
                     let span = &self.spans[span_index];
                     // If ending_glyph is not 0 we need to include glyphs from the ending_word
                     for i in starting_word..ending_word + usize::from(ending_glyph != 0) {
@@ -2585,67 +2682,63 @@ impl ShapeLine {
                                 x_advance = x_advance.round();
                             }
                             if self.rtl {
-                                x -= x_advance;
+                                *x -= x_advance;
                             }
                             let y_advance = glyph_font_size * glyph.y_advance;
                             glyphs.push(glyph.layout(
                                 glyph_font_size,
                                 glyph.metrics_opt.map(|x| x.line_height),
-                                x,
-                                y,
+                                *x,
+                                *y,
                                 x_advance,
                                 span.level,
                             ));
                             if !self.rtl {
-                                x += x_advance;
+                                *x += x_advance;
                             }
-                            y += y_advance;
-                            max_ascent = max_ascent.max(glyph_font_size * glyph.ascent);
-                            max_descent = max_descent.max(glyph_font_size * glyph.descent);
+                            *y += y_advance;
+                            *max_ascent = max_ascent.max(glyph_font_size * glyph.ascent);
+                            *max_descent = max_descent.max(glyph_font_size * glyph.descent);
                         }
                     }
                 }
             };
 
+            log::info!("Number of ranges: {:?}", new_order);
+
             if self.rtl {
                 for range in new_order.into_iter().rev() {
-                    process_range(range);
+                    process_range(
+                        range,
+                        &mut x,
+                        &mut y,
+                        &mut glyphs,
+                        &mut max_ascent,
+                        &mut max_descent,
+                    );
                 }
             } else {
                 /* LTR */
                 for range in new_order {
-                    process_range(range);
+                    process_range(
+                        range,
+                        &mut x,
+                        &mut y,
+                        &mut glyphs,
+                        &mut max_ascent,
+                        &mut max_descent,
+                    );
                 }
             }
 
             if ellipsized_end {
-                if let Some(ellipsis_cache) = &self.ellipsis {
-                    for glyph in &ellipsis_cache.glyphs {
-                        let glyph_font_size = glyph.metrics_opt.map_or(font_size, |x| x.font_size);
-                        let mut x_advance = glyph_font_size * glyph.x_advance;
-                        if hinting == Hinting::Enabled {
-                            x_advance = x_advance.round();
-                        }
-                        if self.rtl {
-                            x -= x_advance;
-                        }
-                        let y_advance = glyph_font_size * glyph.y_advance;
-                        glyphs.push(glyph.layout(
-                            glyph_font_size,
-                            glyph.metrics_opt.map(|x| x.line_height),
-                            x,
-                            y,
-                            x_advance,
-                            unicode_bidi::Level::ltr(), // TODO: Should ellipsis always be LTR?
-                        ));
-                        if !self.rtl {
-                            x += x_advance;
-                        }
-                        y += y_advance;
-                        max_ascent = max_ascent.max(glyph_font_size * glyph.ascent);
-                        max_descent = max_descent.max(glyph_font_size * glyph.descent);
-                    }
-                }
+                push_ellipsis(
+                    &mut x,
+                    &mut y,
+                    &mut glyphs,
+                    &mut max_ascent,
+                    &mut max_descent,
+                );
             }
 
             let mut line_height_opt: Option<f32> = None;
