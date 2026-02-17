@@ -1388,6 +1388,40 @@ impl ShapeLine {
         lines
     }
 
+    fn fit_glyphs(
+        word: &ShapeWord,
+        font_size: f32,
+        start_glyph: usize,
+        currently_used_width: f32,
+        total_available_width: f32,
+        forward: bool,
+    ) -> (usize, f32) {
+        let mut glyphs_w = 0.0;
+        if forward {
+            let mut glyph_end = 0;
+            for glyph_idx in start_glyph..word.glyphs.len() {
+                let g_w = &word.glyphs[glyph_idx].width(font_size);
+                if currently_used_width + glyphs_w + g_w > total_available_width {
+                    break;
+                }
+                glyphs_w += g_w;
+                glyph_end = glyph_idx;
+            }
+            (glyph_end, glyphs_w)
+        } else {
+            let mut glyph_end = word.glyphs.len();
+            for glyph_idx in (start_glyph..word.glyphs.len()).rev() {
+                let g_w = &word.glyphs[glyph_idx].width(font_size);
+                if currently_used_width + glyphs_w + g_w > total_available_width {
+                    break;
+                }
+                glyphs_w += g_w;
+                glyph_end = glyph_idx;
+            }
+            (glyph_end, glyphs_w)
+        }
+    }
+
     #[inline]
     fn add_to_visual_line(
         &self,
@@ -1493,16 +1527,11 @@ impl ShapeLine {
                         )
                     };
 
-                    log::info!(
-                            "    word_width={word_width}, total_w={total_w}, word_range_width={word_range_width}, overflowing={overflowing}, avaialble={max_width}"
-                        );
                     if overflowing {
                         // overflow detected
                         let avaialble = (max_width - ellipsis_w).max(0.0);
 
                         // see how many glyphs of the current word fits
-                        let mut glyph_end = 0;
-                        let mut glyphs_w = 0.0;
                         let starting_glyph_index = if span_index == starting_span_index
                             && word_idx == starting_word_index
                         {
@@ -1510,15 +1539,15 @@ impl ShapeLine {
                         } else {
                             0
                         };
-                        for glyph_idx in starting_glyph_index..word.glyphs.len() {
-                            let glyph = &word.glyphs[glyph_idx];
-                            let g_w = glyph.width(font_size);
-                            if total_w + word_range_width + glyphs_w + g_w > avaialble {
-                                break;
-                            }
-                            glyphs_w += g_w;
-                            glyph_end = glyph_idx;
-                        }
+
+                        let (glyph_end, glyphs_w) = Self::fit_glyphs(
+                            word,
+                            font_size,
+                            starting_glyph_index,
+                            total_w + word_range_width,
+                            avaialble,
+                            true,
+                        );
 
                         self.add_to_visual_line(
                             current_visual_line,
@@ -1530,9 +1559,6 @@ impl ShapeLine {
                             },
                             word_range_width + glyphs_w,
                             number_of_blanks,
-                        );
-                        log::info!(
-                            "    added partial word: word_idx={word_idx}, glyph_end={glyph_end}, word_count={word_count}, word_range_width={word_range_width}, glyphs_w={glyphs_w}"
                         );
 
                         // don't iterate anymore since we overflowed
@@ -1548,11 +1574,6 @@ impl ShapeLine {
                         log::info!("  reached starting word and span");
                         current_visual_line.ellipsized = EllipsizeState::None;
 
-                        log::info!(
-                                "adding span_index {span_index} with partial word: start={:?}, end={:?}, word_range_width={word_range_width}, number_of_blanks={number_of_blanks}",
-                                start.word_glyph_pos(),
-                                (span.words.len(), 0)
-                            );
                         self.add_to_visual_line(
                             current_visual_line,
                             span_index,
@@ -1627,21 +1648,19 @@ impl ShapeLine {
                         let avaialble = (max_width - ellipsis_w).max(0.0);
 
                         // see how many glyphs of the current word fits
-                        let mut glyph_end = word.glyphs.len();
-                        let mut glyphs_w = 0.0;
                         let mut starting_glyph_index = 0;
                         if span_index == starting_span_index && word_idx == starting_word_index {
                             starting_glyph_index = start.glyph;
                         }
-                        for glyph_idx in (starting_glyph_index..word.glyphs.len()).rev() {
-                            let glyph = &word.glyphs[glyph_idx];
-                            let g_w = glyph.width(font_size);
-                            if total_w + word_range_width + glyphs_w + g_w > avaialble {
-                                break;
-                            }
-                            glyphs_w += g_w;
-                            glyph_end = glyph_idx;
-                        }
+
+                        let (glyph_end, glyphs_w) = Self::fit_glyphs(
+                            word,
+                            font_size,
+                            starting_glyph_index,
+                            total_w + word_range_width,
+                            avaialble,
+                            false,
+                        );
 
                         self.add_to_visual_line(
                             current_visual_line,
@@ -1772,9 +1791,6 @@ impl ShapeLine {
                             )
                     };
 
-                    log::info!(
-                            "span_index={span_index}, word_idx={word_idx}, word_width={word_width}, total_w={total_w}, word_range_width={word_range_width}, overflowing={overflowing}, avaialble={max_width}"
-                        );
                     if overflowing {
                         // overflow detected
                         let avaialble = (max_width - ellipsis_w).max(0.0);
@@ -1883,25 +1899,21 @@ impl ShapeLine {
                         let avaialble = (max_width - ellipsis_w).max(0.0);
 
                         // see how many glyphs of the current word fits
-                        let mut glyph_end = 0;
-                        let mut glyphs_w = 0.0;
                         let starting_glyph_index =
                             if span_index == start.span && word_idx == starting_word_index {
                                 start.glyph
                             } else {
                                 0
                             };
-                        for (glyph_idx, glyph) in
-                            word.glyphs.iter().enumerate().skip(starting_glyph_index)
-                        {
-                            let glyph = &word.glyphs[glyph_idx];
-                            let g_w = glyph.width(font_size);
-                            if total_w + word_range_width + glyphs_w + g_w > avaialble {
-                                break;
-                            }
-                            glyphs_w += g_w;
-                            glyph_end = glyph_idx;
-                        }
+
+                        let (glyph_end, glyphs_w) = Self::fit_glyphs(
+                            word,
+                            font_size,
+                            starting_glyph_index,
+                            total_w + word_range_width,
+                            avaialble,
+                            true,
+                        );
 
                         let start = if span_index == start.span {
                             WordGlyphPos::new(starting_word_index, starting_glyph_index)
