@@ -2058,12 +2058,10 @@ impl ShapeLine {
 
         let mut total_w: f32 = 0.0;
 
-        let starting_span_index = start.span;
-
         let span_indices: Vec<usize> = if matches!(direction, LayoutingDirection::Forward) {
-            (starting_span_index..spans.len()).collect()
+            (start.span..spans.len()).collect()
         } else {
-            (starting_span_index..spans.len()).rev().collect()
+            (start.span..spans.len()).rev().collect()
         };
 
         'outer: for span_index in span_indices {
@@ -2075,15 +2073,16 @@ impl ShapeLine {
             let span = &spans[span_index];
             let word_count = span.words.len();
 
-            let starting_word_index = if span_index == starting_span_index {
+            let starting_word_index = if span_index == start.span {
                 start.word
             } else {
                 0
             };
 
             let congruent = rtl == span.level.is_rtl();
+            let word_forward: bool = congruent == matches!(direction, LayoutingDirection::Forward);
 
-            let word_indices: Vec<usize> = if congruent {
+            let word_indices: Vec<usize> = if word_forward {
                 (starting_word_index..word_count).collect()
             } else {
                 ((starting_word_index)..word_count).rev().collect()
@@ -2134,24 +2133,31 @@ impl ShapeLine {
                         starting_glyph_index,
                         total_w + word_range_width,
                         avaialble,
-                        congruent,
+                        word_forward,
                     );
 
-                    let (start_pos, end_pos) = if congruent {
+                    let (start_pos, end_pos) = if word_forward {
                         if span_index == start.span {
+                            log::info!("100");
                             (
                                 start.word_glyph_pos(),
                                 WordGlyphPos::new(word_idx, glyph_end),
                             )
                         } else {
+                            log::info!("101");
                             (WordGlyphPos::ZERO, WordGlyphPos::new(word_idx, glyph_end))
                         }
-                    } else if span_index == starting_span_index {
+                    } else if span_index == start.glyph {
+                        log::info!("102");
+                        log::info!("start.word_glyph_pos()={:?}", start.word_glyph_pos());
+                        log::info!("word_idx={}, glyph_end={}", word_idx, glyph_end);
                         (
                             WordGlyphPos::new(word_idx, glyph_end),
-                            WordGlyphPos::new(starting_word_index, starting_glyph_index),
+                            WordGlyphPos::new(span.words.len(), 0),
+                            // WordGlyphPos::new(start.word, start.glyph),
                         )
                     } else {
+                        log::info!("103");
                         (
                             WordGlyphPos::new(word_idx, glyph_end),
                             WordGlyphPos::new(span.words.len(), 0),
@@ -2176,6 +2182,36 @@ impl ShapeLine {
                 if word.blank {
                     number_of_blanks += 1;
                 }
+
+                // Backward-only: if we've reached the starting point, commit and stop.
+                if matches!(direction, LayoutingDirection::Backward)
+                    && word_idx == start.word
+                    && span_index == start.span
+                {
+                    log::info!("reached starting point in backward layout");
+                    current_visual_line.ellipsized = EllipsizeState::None;
+
+                    let (start_pos, end_pos) = if word_forward {
+                        (WordGlyphPos::ZERO, start.word_glyph_pos())
+                    } else {
+                        (
+                            start.word_glyph_pos(),
+                            WordGlyphPos::new(span.words.len(), 0),
+                        )
+                    };
+
+                    log::warn!("21");
+                    self.add_to_visual_line(
+                        current_visual_line,
+                        span_index,
+                        start_pos,
+                        end_pos,
+                        word_range_width,
+                        number_of_blanks,
+                    );
+
+                    break 'outer;
+                }
             }
 
             // if we get to here that means we didn't ellipsize, so either the whole span fits,
@@ -2192,10 +2228,10 @@ impl ShapeLine {
                     (WordGlyphPos::ZERO, WordGlyphPos::new(span.words.len(), 0))
                 }
             } else if span_index == start.span {
-                log::warn!("layout_span(forward, first_span): starting_span_index={starting_span_index}, so starting_word_index should be {}, but start is {:?}, resetting start to (0, 0)", starting_word_index, start);
+                log::warn!("layout_span(forward, first_span):  so starting_word_index should be {}, but start is {:?}, resetting start to (0, 0)", starting_word_index, start);
                 (WordGlyphPos::ZERO, start.word_glyph_pos())
             } else {
-                log::warn!("layout_span(forward): starting_span_index={starting_span_index}, so starting_word_index should be 0, but start is {:?}, resetting start to (0, 0)", start);
+                log::warn!("layout_span(forward): so starting_word_index should be 0, but start is {:?}, resetting start to (0, 0)", start);
                 (WordGlyphPos::ZERO, WordGlyphPos::new(span.words.len(), 0))
             };
 
@@ -2213,6 +2249,10 @@ impl ShapeLine {
                 word_range_width,
                 number_of_blanks,
             );
+        }
+
+        if matches!(direction, LayoutingDirection::Backward) {
+            current_visual_line.ranges.reverse();
         }
     }
 
@@ -2325,15 +2365,16 @@ impl ShapeLine {
 
         match (ellipsize, width_opt) {
             (Ellipsize::Start(_), Some(width)) => {
-                self.layout_backward(
+                self.layout_spans(
                     current_visual_line,
                     font_size,
                     spans,
                     start,
                     rtl,
-                    width,
+                    width_opt,
                     ellipsize,
                     ellipsis_w,
+                    LayoutingDirection::Backward,
                 );
             }
             (Ellipsize::Middle(_), Some(width)) => {
