@@ -2511,7 +2511,7 @@ impl ShapeLine {
             let mut max_ascent: f32 = 0.;
             let mut max_descent: f32 = 0.;
             let effective_width = visual_line.w
-                + if ellipsized_start || ellipsized_end {
+                + if !matches!(visual_line.ellipsized, EllipsizeState::None) {
                     ellipsis_w
                 } else {
                     0.0
