@@ -1431,18 +1431,46 @@ impl ShapeLine {
         lines
     }
 
+    fn get_glyph_start_end(
+        word: &ShapeWord,
+        start: SpanWordGlyphPos,
+        span_index: usize,
+        word_idx: usize,
+        direction: LayoutingDirection,
+        congruent: bool,
+    ) -> (usize, usize) {
+        if span_index != start.span || word_idx != start.word {
+            return (0, word.glyphs.len());
+        }
+        let (start_glyph_pos, end_glyph_pos) = match (direction, congruent) {
+            (LayoutingDirection::Forward, true) => (start.glyph, word.glyphs.len()),
+            (LayoutingDirection::Forward, false) => (0, start.glyph),
+            (LayoutingDirection::Backward, true) => (start.glyph, word.glyphs.len()),
+            (LayoutingDirection::Backward, false) => (0, start.glyph),
+        };
+        (start_glyph_pos, end_glyph_pos)
+    }
+
     fn fit_glyphs(
         word: &ShapeWord,
         font_size: f32,
-        start_glyph: usize,
+        start: SpanWordGlyphPos,
+        span_index: usize,
+        word_idx: usize,
+        direction: LayoutingDirection,
+        congruent: bool,
         currently_used_width: f32,
         total_available_width: f32,
         forward: bool,
     ) -> (usize, f32) {
+        log::info!("fit_glyphs: start={start:?}, currently_used_width={currently_used_width}, total_available_width={total_available_width}, forward={forward}");
         let mut glyphs_w = 0.0;
+        let (start_glyph_pos, end_glyph_pos) =
+            Self::get_glyph_start_end(word, start, span_index, word_idx, direction, congruent);
+
         if forward {
-            let mut glyph_end = start_glyph;
-            for glyph_idx in start_glyph..word.glyphs.len() {
+            let mut glyph_end = start_glyph_pos;
+            for glyph_idx in start_glyph_pos..end_glyph_pos {
                 let g_w = &word.glyphs[glyph_idx].width(font_size);
                 if currently_used_width + glyphs_w + g_w > total_available_width {
                     break;
@@ -1453,7 +1481,7 @@ impl ShapeLine {
             (glyph_end, glyphs_w)
         } else {
             let mut glyph_end = word.glyphs.len();
-            for glyph_idx in (start_glyph..word.glyphs.len()).rev() {
+            for glyph_idx in (start_glyph_pos..end_glyph_pos).rev() {
                 let g_w = &word.glyphs[glyph_idx].width(font_size);
                 if currently_used_width + glyphs_w + g_w > total_available_width {
                     break;
@@ -1498,7 +1526,7 @@ impl ShapeLine {
         current_visual_line: &mut VisualLine,
         font_size: f32,
         spans: &[ShapeSpan],
-        start: SpanWordGlyphPos,
+        start_opt: Option<SpanWordGlyphPos>,
         rtl: bool,
         width_opt: Option<f32>,
         ellipsize: Ellipsize,
@@ -1508,7 +1536,7 @@ impl ShapeLine {
         log::info!(
             "layout_spans(direction={:?}): start={:?}, width_opt={:?}, ellipsize={:?}",
             direction,
-            start,
+            start_opt,
             width_opt,
             ellipsize,
         );
@@ -1524,6 +1552,12 @@ impl ShapeLine {
         let span_count = spans.len();
 
         let mut total_w: f32 = 0.0;
+
+        let start = if let Some(s) = start_opt {
+            s
+        } else {
+            SpanWordGlyphPos::ZERO
+        };
 
         let span_indices: Vec<usize> = if matches!(direction, LayoutingDirection::Forward) {
             (start.span..spans.len()).collect()
@@ -1547,23 +1581,48 @@ impl ShapeLine {
             let congruent = rtl == span.level.is_rtl();
             let word_forward: bool = congruent == matches!(direction, LayoutingDirection::Forward);
 
-            log::info!("processing span_index={span_index}, {starting_word_index:?}, word_forward={word_forward}, congruent={congruent}");
-            let word_indices: Vec<usize> = if word_forward {
-                if !congruent {
-                    (0..starting_word_index).collect()
-                } else {
+            log::info!("processing span_index={span_index}, {starting_word_index:?}, word_forward={word_forward}, congruent={congruent}, direction={direction:?}, start_opt={start_opt:?}");
+            let word_indices: Vec<usize> = match (direction, congruent, start_opt) {
+                (LayoutingDirection::Forward, true, _) => {
                     (starting_word_index..word_count).collect()
                 }
-            } else {
-                ((starting_word_index)..word_count).rev().collect()
+                (LayoutingDirection::Forward, false, Some(start)) => {
+                    if span_index == start.span {
+                        (0..start.word).rev().collect()
+                    } else {
+                        (0..word_count).rev().collect()
+                    }
+                }
+                (LayoutingDirection::Forward, false, None) => (0..word_count).rev().collect(),
+                (LayoutingDirection::Backward, true, _) => {
+                    ((starting_word_index)..word_count).rev().collect()
+                }
+                (LayoutingDirection::Backward, false, Some(start)) => {
+                    if span_index == start.span {
+                        if start.glyph > 0 {
+                            (0..(start.word + 1)).collect()
+                        } else {
+                            (0..(start.word)).collect()
+                        }
+                    } else {
+                        (0..word_count).collect()
+                    }
+                }
+                (LayoutingDirection::Backward, false, None) => (0..span.words.len()).collect(),
             };
+
+            log::info!("word_indices={:?}", word_indices);
 
             for word_idx in word_indices {
                 log::info!("processing word_idx={word_idx}");
+                log::info!("current total_w={total_w}, word_range_width={word_range_width}, max_width={max_width}");
                 let word = &span.words[word_idx];
                 let word_width = if span_index == start.span && word_idx == start.word {
+                    let (start_glyph_pos, end_glyph_pos) = Self::get_glyph_start_end(
+                        word, start, span_index, word_idx, direction, congruent,
+                    );
                     let mut w = 0.;
-                    for glyph_idx in start.glyph..word.glyphs.len() {
+                    for glyph_idx in start_glyph_pos..end_glyph_pos {
                         w += word.glyphs[glyph_idx].width(font_size);
                     }
                     w
@@ -1601,11 +1660,16 @@ impl ShapeLine {
                     let (glyph_end, glyphs_w) = Self::fit_glyphs(
                         word,
                         font_size,
-                        starting_glyph_index,
+                        start,
+                        span_index,
+                        word_idx,
+                        direction,
+                        congruent,
                         total_w + word_range_width,
                         avaialble,
                         word_forward,
                     );
+                    log::info!("fitted glyphs up to index {glyph_end} with width {glyphs_w} (starting_glyph_index={starting_glyph_index})");
 
                     let (start_pos, end_pos) = if word_forward {
                         if span_index == start.span {
@@ -1623,7 +1687,7 @@ impl ShapeLine {
                             log::info!("101");
                             (WordGlyphPos::ZERO, WordGlyphPos::new(word_idx, glyph_end))
                         }
-                    } else if span_index == start.glyph {
+                    } else if span_index == start.span {
                         log::info!("102");
                         log::info!("start.word_glyph_pos()={:?}", start.word_glyph_pos());
                         log::info!("word_idx={}, glyph_end={}", word_idx, glyph_end);
@@ -1632,14 +1696,20 @@ impl ShapeLine {
                             WordGlyphPos::new(span.words.len(), 0),
                             // WordGlyphPos::new(start.word, start.glyph),
                         )
+                    } else if !congruent {
+                        log::info!("104");
+                        (
+                            WordGlyphPos::new(word_idx, glyph_end),
+                            WordGlyphPos::new(span.words.len(), 0),
+                        )
                     } else {
-                        log::info!("103");
+                        log::info!("106");
                         (
                             WordGlyphPos::new(word_idx, glyph_end),
                             WordGlyphPos::new(span.words.len(), 0),
                         )
                     };
-                    log::warn!("20");
+                    log::warn!("20: we overflowed");
                     self.add_to_visual_line(
                         current_visual_line,
                         span_index,
@@ -1664,7 +1734,7 @@ impl ShapeLine {
                     && word_idx == start.word
                     && span_index == start.span
                 {
-                    log::info!("reached starting point in backward layout");
+                    log::info!("reached starting word in backward layout");
                     current_visual_line.ellipsized = EllipsizeState::None;
 
                     let (start_pos, end_pos) = if word_forward {
@@ -1716,7 +1786,7 @@ impl ShapeLine {
                 end_pos
             );
 
-            log::warn!("10");
+            log::warn!("10: no ellipsizing needed for this span span_index={span_index}, start={start_pos:?}, end={end_pos:?}, word_range_width={word_range_width}, number_of_blanks={number_of_blanks}");
             self.add_to_visual_line(
                 current_visual_line,
                 span_index,
@@ -1737,21 +1807,21 @@ impl ShapeLine {
         current_visual_line: &mut VisualLine,
         font_size: f32,
         spans: &[ShapeSpan],
-        start: SpanWordGlyphPos,
+        start_opt: Option<SpanWordGlyphPos>,
         rtl: bool,
         width: f32,
         ellipsize: Ellipsize,
         ellipsis_w: f32,
     ) {
         assert!(matches!(ellipsize, Ellipsize::Middle(_)));
-        log::warn!("layout_middle: start={start:?}, start={start:?}, width={width}, ellipsis_w={ellipsis_w}");
+        log::warn!("layout_middle: start={start_opt:?}, width={width}, ellipsis_w={ellipsis_w}");
         let mut starting_line = VisualLine::default();
         let width_limit = (width - ellipsis_w).max(0.0) / 2.0;
         self.layout_spans(
             &mut starting_line,
             font_size,
             spans,
-            start,
+            start_opt,
             rtl,
             Some(width_limit),
             Ellipsize::End(EllipsizeHeightLimit::Lines(1)),
@@ -1783,7 +1853,7 @@ impl ShapeLine {
                     &mut ending_line,
                     font_size,
                     spans,
-                    start,
+                    Some(start),
                     rtl,
                     Some(width_limit),
                     Ellipsize::Start(EllipsizeHeightLimit::Lines(1)),
@@ -1793,35 +1863,66 @@ impl ShapeLine {
                 let insert_at = starting_line.ranges.len();
 
                 // Check if anything was actually skipped between the two halves
-                let first_half_end = SpanWordGlyphPos {
-                    span: range.span,
-                    word: range.end.word,
-                    glyph: range.end.glyph,
-                }; // already have this as `start`
-                let second_half_start = ending_line.ranges.first().map(|r| SpanWordGlyphPos {
-                    span: r.span,
-                    word: r.start.word,
-                    glyph: r.start.glyph,
+                let first_half_end = if spans[range.span].level.is_rtl() != rtl {
+                    SpanWordGlyphPos {
+                        span: range.span,
+                        word: range.start.word,
+                        glyph: range.start.glyph,
+                    }
+                } else {
+                    SpanWordGlyphPos {
+                        span: range.span,
+                        word: range.end.word,
+                        glyph: range.end.glyph,
+                    }
+                };
+                let second_half_start = ending_line.ranges.first().map(|r| {
+                    if spans[r.span].level.is_rtl() != rtl {
+                        SpanWordGlyphPos {
+                            span: r.span,
+                            word: r.end.word,
+                            glyph: r.end.glyph,
+                        }
+                    } else {
+                        SpanWordGlyphPos {
+                            span: r.span,
+                            word: r.start.word,
+                            glyph: r.start.glyph,
+                        }
+                    }
                 });
+                log::info!(
+                    "first_half_end={first_half_end:?}, second_half_start={second_half_start:?}"
+                );
                 let actually_ellipsized = match second_half_start {
                     Some(shs) => shs != first_half_end,
                     None => false, // nothing in backward pass = nothing was skipped
                 };
                 // add both to the current_visual_line
-                current_visual_line.ranges = starting_line
-                    .ranges
-                    .into_iter()
-                    .chain(ending_line.ranges)
-                    .collect();
                 if actually_ellipsized {
                     log::info!("Insert at: {insert_at}");
+                    current_visual_line.ranges = starting_line
+                        .ranges
+                        .into_iter()
+                        .chain(ending_line.ranges)
+                        .collect();
                     current_visual_line.ellipsized = EllipsizeState::Middle {
                         insert_at_range: insert_at,
                     };
                     current_visual_line.w = starting_line.w + ending_line.w + ellipsis_w;
                 } else {
-                    current_visual_line.ellipsized = EllipsizeState::None;
-                    current_visual_line.w = starting_line.w + ending_line.w;
+                    self.layout_spans(
+                        current_visual_line,
+                        font_size,
+                        spans,
+                        start_opt,
+                        rtl,
+                        Some(width),
+                        Ellipsize::None,
+                        0., //pass 0 for ellipsis_w
+                        LayoutingDirection::Backward,
+                    );
+                    return;
                 }
                 current_visual_line.spaces = starting_line.spaces + ending_line.spaces;
             }
@@ -1848,7 +1949,7 @@ impl ShapeLine {
         current_visual_line: &mut VisualLine,
         font_size: f32,
         spans: &[ShapeSpan],
-        start: SpanWordGlyphPos,
+        start_opt: Option<SpanWordGlyphPos>,
         rtl: bool,
         width_opt: Option<f32>,
         ellipsize: Ellipsize,
@@ -1864,7 +1965,7 @@ impl ShapeLine {
                     current_visual_line,
                     font_size,
                     spans,
-                    start,
+                    start_opt,
                     rtl,
                     width_opt,
                     ellipsize,
@@ -1877,7 +1978,7 @@ impl ShapeLine {
                     current_visual_line,
                     font_size,
                     spans,
-                    start,
+                    start_opt,
                     rtl,
                     width,
                     ellipsize,
@@ -1888,7 +1989,7 @@ impl ShapeLine {
                 current_visual_line,
                 font_size,
                 spans,
-                start,
+                start_opt,
                 rtl,
                 width_opt,
                 ellipsize,
@@ -1910,6 +2011,11 @@ impl ShapeLine {
         match_mono_width: Option<f32>,
         hinting: Hinting,
     ) {
+        log::info!("___________________________________________________________________________________________________");
+        log::info!("layout_to_buffer: width_opt={:?}, wrap={:?}, ellipsize={:?}, align={:?}, match_mono_width={:?}, hinting={:?}",
+            width_opt, wrap, ellipsize, align, match_mono_width, hinting
+        );
+        log::info!("{:?}", scratch.words);
         // For each visual line a list of  (span index,  and range of words in that span)
         // Note that a BiDi visual line could have multiple spans or parts of them
         // let mut vl_range_of_spans = Vec::with_capacity(1);
@@ -1941,7 +2047,7 @@ impl ShapeLine {
                 &mut current_visual_line,
                 font_size,
                 &self.spans,
-                SpanWordGlyphPos::ZERO,
+                None,
                 self.rtl,
                 width_opt,
                 ellipsize,
@@ -1981,7 +2087,7 @@ impl ShapeLine {
                     &mut current_visual_line,
                     font_size,
                     &self.spans,
-                    SpanWordGlyphPos::ZERO,
+                    None,
                     self.rtl,
                     width_opt,
                     ellipsize,
@@ -1998,6 +2104,9 @@ impl ShapeLine {
                         let mut fitting_start = WordGlyphPos::new(span.words.len(), 0);
                         for (i, word) in span.words.iter().enumerate().rev() {
                             let word_width = word.width(font_size);
+                            log::info!("processing span {span_index} word {i}, word_width {word_width} current_visual_line.w={current_visual_line_w}, word_range_width={word_range_width}, width_opt={width_opt:?}",
+                                current_visual_line_w = current_visual_line.w
+                            );
 
                             // Addition in the same order used to compute the final width, so that
                             // relayouts with that width as the `line_width` will produce the same
@@ -2009,6 +2118,7 @@ impl ShapeLine {
                             || (word.blank
                                 && (current_visual_line.w + word_range_width) <= width_opt.unwrap_or(f32::INFINITY))
                             {
+                                log::info!("fits");
                                 // fits
                                 if word.blank {
                                     number_of_blanks += 1;
@@ -2019,6 +2129,7 @@ impl ShapeLine {
                             // Make sure that the word is able to fit on it's own line, if not, fall back to Glyph wrapping.
                             || (wrap == Wrap::WordOrGlyph && word_width > width_opt.unwrap_or(f32::INFINITY))
                             {
+                                log::info!("glyph");
                                 // Commit the current line so that the word starts on the next line.
                                 if word_range_width > 0.
                                     && wrap == Wrap::WordOrGlyph
@@ -2050,10 +2161,10 @@ impl ShapeLine {
                                             &mut current_visual_line,
                                             font_size,
                                             &self.spans,
-                                            SpanWordGlyphPos::with_wordglyph(
+                                            Some(SpanWordGlyphPos::with_wordglyph(
                                                 span_index,
                                                 fitting_start,
-                                            ),
+                                            )),
                                             self.rtl,
                                             width_opt,
                                             ellipsize,
@@ -2093,10 +2204,10 @@ impl ShapeLine {
                                                 &mut current_visual_line,
                                                 font_size,
                                                 &self.spans,
-                                                SpanWordGlyphPos::with_wordglyph(
+                                                Some(SpanWordGlyphPos::with_wordglyph(
                                                     span_index,
                                                     fitting_start,
-                                                ),
+                                                )),
                                                 self.rtl,
                                                 width_opt,
                                                 ellipsize,
@@ -2106,6 +2217,7 @@ impl ShapeLine {
                                     }
                                 }
                             } else {
+                                log::info!("wrap word");
                                 // Wrap::Word, Wrap::WordOrGlyph
 
                                 // If we had a previous range, commit that line before the next word.
@@ -2119,7 +2231,7 @@ impl ShapeLine {
 
                                     if trailing_blank {
                                         number_of_blanks = number_of_blanks.saturating_sub(1);
-                                        log::warn!("23");
+                                        log::warn!("23: Wrapping at span {span_index} word {i} but next word is blank, so we ignore that blank for the current line");
                                         self.add_to_visual_line(
                                             &mut current_visual_line,
                                             span_index,
@@ -2129,7 +2241,10 @@ impl ShapeLine {
                                             number_of_blanks,
                                         );
                                     } else {
-                                        log::warn!("24");
+                                        log::warn!(
+                                            "24: Wrapping at span {span_index} word {i}: Len:{}",
+                                            span.words.len()
+                                        );
                                         self.add_to_visual_line(
                                             &mut current_visual_line,
                                             span_index,
@@ -2139,7 +2254,11 @@ impl ShapeLine {
                                             number_of_blanks,
                                         );
                                     }
+                                }
 
+                                // This fixes a bug that a long first word at the boundary of
+                                // was overflowing
+                                if !current_visual_line.ranges.is_empty() {
                                     visual_lines.push(current_visual_line);
                                     current_visual_line =
                                         cached_visual_lines.pop().unwrap_or_default();
@@ -2148,19 +2267,21 @@ impl ShapeLine {
                                     total_line_height += line_height;
 
                                     if is_last_line(total_line_count, total_line_height) {
-                                        log::warn!("5");
+                                        log::warn!(
+                                            "5: Last line reached at span {span_index} word {i}"
+                                        );
                                         self.layout_line(
                                             &mut current_visual_line,
                                             font_size,
                                             &self.spans,
-                                            SpanWordGlyphPos::with_wordglyph(
+                                            Some(SpanWordGlyphPos::with_wordglyph(
                                                 span_index,
                                                 if word.blank {
                                                     WordGlyphPos::new(i, 0)
                                                 } else {
                                                     WordGlyphPos::new(i + 1, 0)
                                                 },
-                                            ),
+                                            )),
                                             self.rtl,
                                             width_opt,
                                             ellipsize,
@@ -2240,10 +2361,10 @@ impl ShapeLine {
                                             &mut current_visual_line,
                                             font_size,
                                             &self.spans,
-                                            SpanWordGlyphPos::with_wordglyph(
+                                            Some(SpanWordGlyphPos::with_wordglyph(
                                                 span_index,
                                                 fitting_start,
-                                            ),
+                                            )),
                                             self.rtl,
                                             width_opt,
                                             ellipsize,
@@ -2283,10 +2404,10 @@ impl ShapeLine {
                                                 &mut current_visual_line,
                                                 font_size,
                                                 &self.spans,
-                                                SpanWordGlyphPos::with_wordglyph(
+                                                Some(SpanWordGlyphPos::with_wordglyph(
                                                     span_index,
                                                     fitting_start,
-                                                ),
+                                                )),
                                                 self.rtl,
                                                 width_opt,
                                                 ellipsize,
@@ -2306,7 +2427,8 @@ impl ShapeLine {
 
                                     if trailing_blank {
                                         number_of_blanks = number_of_blanks.saturating_sub(1);
-                                        log::warn!("28");
+                                        log::warn!("28: Wrapping at span {span_index} word {i} but previous word is blank, so we ignore that blank for the current line");
+
                                         self.add_to_visual_line(
                                             &mut current_visual_line,
                                             span_index,
@@ -2316,7 +2438,7 @@ impl ShapeLine {
                                             number_of_blanks,
                                         );
                                     } else {
-                                        log::warn!("29");
+                                        log::warn!("29: Wrapping at span {span_index} word {i}");
                                         self.add_to_visual_line(
                                             &mut current_visual_line,
                                             span_index,
@@ -2343,12 +2465,17 @@ impl ShapeLine {
                                 total_line_count += 1;
                                 total_line_height += line_height;
                                 if is_last_line(total_line_count, total_line_height) {
-                                    log::warn!("8");
+                                    log::warn!(
+                                        "8: Last line reached at span {span_index} word {i}"
+                                    );
                                     self.layout_line(
                                         &mut current_visual_line,
                                         font_size,
                                         &self.spans,
-                                        SpanWordGlyphPos::with_wordglyph(span_index, fitting_start),
+                                        Some(SpanWordGlyphPos::with_wordglyph(
+                                            span_index,
+                                            fitting_start,
+                                        )),
                                         self.rtl,
                                         width_opt,
                                         ellipsize,
@@ -2357,7 +2484,7 @@ impl ShapeLine {
                                 }
                             }
                         }
-                        log::warn!("30");
+                        log::warn!("30: Finished span {span_index} with fitting_start={fitting_start:?} word_range_width={word_range_width} number_of_blanks={number_of_blanks}");
                         self.add_to_visual_line(
                             &mut current_visual_line,
                             span_index,
