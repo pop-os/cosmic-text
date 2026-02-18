@@ -595,7 +595,7 @@ impl Buffer {
         }
     }
 
-    /// Get the currnt [`Ellipsize`]
+    /// Get the current [`Ellipsize`]
     pub const fn ellipsize(&self) -> Ellipsize {
         self.ellipsize
     }

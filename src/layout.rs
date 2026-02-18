@@ -152,15 +152,16 @@ impl Display for Align {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub enum Ellipsize {
     /// No Ellipsizing
+    #[default]
     None,
-    /// Ellipsizes the start of the last sentence that fits within the `EllipsizeHeightLimit`
+    /// Ellipsizes the start of the last visual line that fits within the `EllipsizeHeightLimit`
     Start(EllipsizeHeightLimit),
-    /// Ellipsizes the middle of the last sentence that fits within the `EllipsizeHeightLimit`.
+    /// Ellipsizes the middle of the last visual line that fits within the `EllipsizeHeightLimit`.
     Middle(EllipsizeHeightLimit),
-    /// Ellipsizes the end of the last sentence that fits within the `EllipsizeHeightLimit`.
+    /// Ellipsizes the end of the last visual line that fits within the `EllipsizeHeightLimit`.
     End(EllipsizeHeightLimit),
 }
 
