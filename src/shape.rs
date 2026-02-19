@@ -1738,14 +1738,13 @@ impl ShapeLine {
     ) {
         assert!(matches!(ellipsize, Ellipsize::Middle(_)));
         let mut starting_line = VisualLine::default();
-        let width_limit = (width - ellipsis_w).max(0.0) / 2.0;
         self.layout_spans(
             &mut starting_line,
             font_size,
             spans,
             start_opt,
             rtl,
-            Some(width_limit),
+            Some(width / 2.0),
             Ellipsize::End(EllipsizeHeightLimit::Lines(1)),
             0., //pass 0 for ellipsis_w
             LayoutDirection::Forward,
@@ -1776,7 +1775,7 @@ impl ShapeLine {
                     spans,
                     Some(start),
                     rtl,
-                    Some(width_limit),
+                    Some((width - starting_line.w - ellipsis_w).max(0.0)),
                     Ellipsize::Start(EllipsizeHeightLimit::Lines(1)),
                     0., //pass 0 for ellipsis_w
                     LayoutDirection::Backward,
