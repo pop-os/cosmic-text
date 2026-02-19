@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
 use cosmic_text::{
-    fontdb::Database, Attrs, AttrsOwned, Buffer, Color, Family, FontSystem, Metrics, Shaping,
-    SwashCache,
+    fontdb::Database, Align, Attrs, AttrsOwned, Buffer, Color, Ellipsize, Family, FontSystem,
+    Metrics, Shaping, SwashCache, Wrap,
 };
 use tiny_skia::{Paint, Pixmap, Rect, Transform};
 
@@ -29,6 +29,9 @@ pub struct DrawTestCfg {
     line_height: f32,
     canvas_width: u32,
     canvas_height: u32,
+    wrap: Wrap,
+    ellipsize: Ellipsize,
+    alignment: Option<Align>,
 }
 
 impl Default for DrawTestCfg {
@@ -42,6 +45,9 @@ impl Default for DrawTestCfg {
             line_height: 20.0,
             canvas_width: 300,
             canvas_height: 300,
+            wrap: Wrap::WordOrGlyph,
+            ellipsize: Ellipsize::None,
+            alignment: None,
         }
     }
 }
@@ -76,6 +82,21 @@ impl DrawTestCfg {
         self
     }
 
+    pub fn wrap(mut self, wrap: Wrap) -> Self {
+        self.wrap = wrap;
+        self
+    }
+
+    pub fn ellipsize(mut self, ellipsize: Ellipsize) -> Self {
+        self.ellipsize = ellipsize;
+        self
+    }
+
+    pub fn alignment(mut self, alignment: Option<Align>) -> Self {
+        self.alignment = alignment;
+        self
+    }
+
     pub fn validate_text_rendering(self) {
         let repo_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
         // Create a db with just the fonts in our fonts dir to make sure we only test those
@@ -88,11 +109,18 @@ impl DrawTestCfg {
         let mut buffer = Buffer::new(&mut font_system, metrics);
         let mut buffer = buffer.borrow_with(&mut font_system);
         let margins = 5;
+        buffer.set_wrap(self.wrap);
+        buffer.set_ellipsize(self.ellipsize);
         buffer.set_size(
             Some((self.canvas_width - margins * 2) as f32),
             Some((self.canvas_height - margins * 2) as f32),
         );
-        buffer.set_text(&self.text, &self.font.as_attrs(), Shaping::Advanced, None);
+        buffer.set_text(
+            &self.text,
+            &self.font.as_attrs(),
+            Shaping::Advanced,
+            self.alignment,
+        );
         buffer.shape_until_scroll(true);
 
         // Black
