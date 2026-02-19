@@ -4,8 +4,8 @@
 
 use crate::fallback::FontFallbackIter;
 use crate::{
-    math, Align, Attrs, AttrsList, CacheKeyFlags, Color, Font, FontSystem, Hinting, LayoutGlyph,
-    LayoutLine, Metrics, Wrap,
+    math, Align, Attrs, AttrsList, CacheKeyFlags, Color, Ellipsize, EllipsizeHeightLimit, Font,
+    FontSystem, Hinting, LayoutGlyph, LayoutLine, Metrics, Wrap,
 };
 #[cfg(not(feature = "std"))]
 use alloc::format;
@@ -613,6 +613,48 @@ impl ShapeGlyph {
     }
 }
 
+/// span index used in VlRange to indicate this range is the ellipsis.
+const ELLIPSIS_SPAN: usize = usize::MAX;
+
+fn shape_ellipsis(
+    font_system: &mut FontSystem,
+    attrs: &Attrs,
+    shaping: Shaping,
+    span_rtl: bool,
+) -> Vec<ShapeGlyph> {
+    let attrs_list = AttrsList::new(attrs);
+    let level = if span_rtl {
+        unicode_bidi::Level::rtl()
+    } else {
+        unicode_bidi::Level::ltr()
+    };
+    let word = ShapeWord::new(
+        font_system,
+        "\u{2026}", // TODO: maybe do CJK ellipsis
+        &attrs_list,
+        0.."\u{2026}".len(),
+        level,
+        false,
+        shaping,
+    );
+    let mut glyphs = word.glyphs;
+
+    // did we fail to shape it?
+    if glyphs.is_empty() || glyphs.iter().all(|g| g.glyph_id == 0) {
+        let fallback = ShapeWord::new(
+            font_system,
+            "...",
+            &attrs_list,
+            0.."...".len(),
+            level,
+            false,
+            shaping,
+        );
+        glyphs = fallback.glyphs;
+    }
+    glyphs
+}
+
 /// A shaped word (for word wrapping)
 #[derive(Clone, Debug)]
 pub struct ShapeWord {
@@ -966,16 +1008,87 @@ pub struct ShapeLine {
     pub rtl: bool,
     pub spans: Vec<ShapeSpan>,
     pub metrics_opt: Option<Metrics>,
+    ellipsis_span: Option<ShapeSpan>,
 }
 
-// Visual Line Ranges: (span_index, (first_word_index, first_glyph_index), (last_word_index, last_glyph_index))
-type VlRange = (usize, (usize, usize), (usize, usize));
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
+struct WordGlyphPos {
+    word: usize,
+    glyph: usize,
+}
 
-#[derive(Default)]
+impl WordGlyphPos {
+    const ZERO: Self = Self { word: 0, glyph: 0 };
+    fn new(word: usize, glyph: usize) -> Self {
+        Self { word, glyph }
+    }
+}
+
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
+struct SpanWordGlyphPos {
+    span: usize,
+    word: usize,
+    glyph: usize,
+}
+
+impl SpanWordGlyphPos {
+    const ZERO: Self = Self {
+        span: 0,
+        word: 0,
+        glyph: 0,
+    };
+    fn word_glyph_pos(&self) -> WordGlyphPos {
+        WordGlyphPos {
+            word: self.word,
+            glyph: self.glyph,
+        }
+    }
+    fn with_wordglyph(span: usize, wordglyph: WordGlyphPos) -> Self {
+        Self {
+            span,
+            word: wordglyph.word,
+            glyph: wordglyph.glyph,
+        }
+    }
+}
+
+/// Controls whether we layout spans forward or backward.
+/// Backward layout is used to improve efficiency
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+enum LayoutDirection {
+    Forward,
+    Backward,
+}
+
+// Visual Line Ranges
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+struct VlRange {
+    span: usize,
+    start: WordGlyphPos,
+    end: WordGlyphPos,
+    level: unicode_bidi::Level,
+}
+
+impl Default for VlRange {
+    fn default() -> Self {
+        Self {
+            span: Default::default(),
+            start: Default::default(),
+            end: Default::default(),
+            level: unicode_bidi::Level::ltr(),
+        }
+    }
+}
+
+#[derive(Default, Debug)]
 struct VisualLine {
     ranges: Vec<VlRange>,
     spaces: u32,
     w: f32,
+    ellipsized: bool,
+    /// Byte range (start, end) of the original line text that was replaced by the ellipsis.
+    /// Only set when `ellipsized` is true.
+    elided_byte_range: Option<(usize, usize)>,
 }
 
 impl VisualLine {
@@ -983,6 +1096,8 @@ impl VisualLine {
         self.ranges.clear();
         self.spaces = 0;
         self.w = 0.;
+        self.ellipsized = false;
+        self.elided_byte_range = None;
     }
 }
 
@@ -995,6 +1110,7 @@ impl ShapeLine {
             rtl: false,
             spans: Vec::default(),
             metrics_opt: None,
+            ellipsis_span: None,
         }
     }
 
@@ -1116,6 +1232,35 @@ impl ShapeLine {
         self.spans = spans;
         self.metrics_opt = attrs_list.defaults().metrics_opt.map(Into::into);
 
+        self.ellipsis_span.get_or_insert_with(|| {
+            let attrs = if attrs_list.spans.is_empty() {
+                attrs_list.defaults()
+            } else {
+                attrs_list.get_span(0) // TODO: using the attrs from the first span for
+                                       // ellipsis even if it's at the end. Which for rich text may look weird if the first
+                                       // span has a different color or size than where ellipsizing is happening
+            };
+            let mut glyphs = shape_ellipsis(font_system, &attrs, shaping, rtl);
+            if rtl {
+                glyphs.reverse();
+            }
+            let word = ShapeWord {
+                blank: false,
+                glyphs,
+            };
+            // The level here is a placeholder; the actual level used for BiDi reordering
+            // is set on the VlRange when the ellipsis is inserted during layout.
+            let level = if rtl {
+                unicode_bidi::Level::rtl()
+            } else {
+                unicode_bidi::Level::ltr()
+            };
+            ShapeSpan {
+                level,
+                words: vec![word],
+            }
+        });
+
         // Return the buffer for later reuse.
         font_system.shape_buffer.spans = cached_spans;
     }
@@ -1175,30 +1320,23 @@ impl ShapeLine {
 
     // A modified version of second part of unicode_bidi::bidi_info::visual run
     fn reorder(&self, line_range: &[VlRange]) -> Vec<Range<usize>> {
-        let line: Vec<unicode_bidi::Level> = line_range
-            .iter()
-            .map(|(span_index, _, _)| self.spans[*span_index].level)
-            .collect();
-        // Find consecutive level runs.
-        let mut runs = Vec::new();
-        let mut start = 0;
-        let mut run_level = line[start];
-        let mut min_level = run_level;
-        let mut max_level = run_level;
-
-        for (i, &new_level) in line.iter().enumerate().skip(start + 1) {
-            if new_level != run_level {
-                // End of the previous run, start of a new one.
-                runs.push(start..i);
-                start = i;
-                run_level = new_level;
-                min_level = min(run_level, min_level);
-                max_level = max(run_level, max_level);
-            }
+        let line: Vec<unicode_bidi::Level> = line_range.iter().map(|range| range.level).collect();
+        let count = line.len();
+        if count == 0 {
+            return Vec::new();
         }
-        runs.push(start..line.len());
 
-        let run_count = runs.len();
+        // Each VlRange is its own element for L2 reordering.
+        // Using individual elements (not grouped runs) ensures that reversal
+        // correctly reorders elements even when consecutive ranges share a level.
+        let mut elements: Vec<Range<usize>> = (0..count).map(|i| i..i + 1).collect();
+
+        let mut min_level = line[0];
+        let mut max_level = line[0];
+        for &level in &line[1..] {
+            min_level = min(min_level, level);
+            max_level = max(max_level, level);
+        }
 
         // Re-order the odd runs.
         // <http://www.unicode.org/reports/tr9/#L2>
@@ -1207,25 +1345,25 @@ impl ShapeLine {
         min_level = min_level.new_lowest_ge_rtl().expect("Level error");
 
         while max_level >= min_level {
-            // Look for the start of a sequence of consecutive runs of max_level or higher.
+            // Look for the start of a sequence of consecutive elements at max_level or higher.
             let mut seq_start = 0;
-            while seq_start < run_count {
-                if line[runs[seq_start].start] < max_level {
+            while seq_start < count {
+                if line[elements[seq_start].start] < max_level {
                     seq_start += 1;
                     continue;
                 }
 
                 // Found the start of a sequence. Now find the end.
                 let mut seq_end = seq_start + 1;
-                while seq_end < run_count {
-                    if line[runs[seq_end].start] < max_level {
+                while seq_end < count {
+                    if line[elements[seq_end].start] < max_level {
                         break;
                     }
                     seq_end += 1;
                 }
 
-                // Reverse the runs within this sequence.
-                runs[seq_start..seq_end].reverse();
+                // Reverse the individual elements within this sequence.
+                elements[seq_start..seq_end].reverse();
 
                 seq_start = seq_end;
             }
@@ -1234,7 +1372,7 @@ impl ShapeLine {
                 .expect("Lowering embedding level below zero");
         }
 
-        runs
+        elements
     }
 
     pub fn layout(
@@ -1247,11 +1385,13 @@ impl ShapeLine {
         hinting: Hinting,
     ) -> Vec<LayoutLine> {
         let mut lines = Vec::with_capacity(1);
+        let mut scratch = ShapeBuffer::default();
         self.layout_to_buffer(
-            &mut ShapeBuffer::default(),
+            &mut scratch,
             font_size,
             width_opt,
             wrap,
+            Ellipsize::None,
             align,
             &mut lines,
             match_mono_width,
@@ -1260,34 +1400,669 @@ impl ShapeLine {
         lines
     }
 
+    fn get_glyph_start_end(
+        word: &ShapeWord,
+        start: SpanWordGlyphPos,
+        span_index: usize,
+        word_idx: usize,
+        _direction: LayoutDirection,
+        congruent: bool,
+    ) -> (usize, usize) {
+        if span_index != start.span || word_idx != start.word {
+            return (0, word.glyphs.len());
+        }
+        let (start_glyph_pos, end_glyph_pos) = if congruent {
+            (start.glyph, word.glyphs.len())
+        } else {
+            (0, start.glyph)
+        };
+        (start_glyph_pos, end_glyph_pos)
+    }
+
+    fn fit_glyphs(
+        word: &ShapeWord,
+        font_size: f32,
+        start: SpanWordGlyphPos,
+        span_index: usize,
+        word_idx: usize,
+        direction: LayoutDirection,
+        congruent: bool,
+        currently_used_width: f32,
+        total_available_width: f32,
+        forward: bool,
+    ) -> (usize, f32) {
+        let mut glyphs_w = 0.0;
+        let (start_glyph_pos, end_glyph_pos) =
+            Self::get_glyph_start_end(word, start, span_index, word_idx, direction, congruent);
+
+        if forward {
+            let mut glyph_end = start_glyph_pos;
+            for glyph_idx in start_glyph_pos..end_glyph_pos {
+                let g_w = word.glyphs[glyph_idx].width(font_size);
+                if currently_used_width + glyphs_w + g_w > total_available_width {
+                    break;
+                }
+                glyphs_w += g_w;
+                glyph_end = glyph_idx;
+            }
+            (glyph_end, glyphs_w)
+        } else {
+            let mut glyph_end = word.glyphs.len();
+            for glyph_idx in (start_glyph_pos..end_glyph_pos).rev() {
+                let g_w = word.glyphs[glyph_idx].width(font_size);
+                if currently_used_width + glyphs_w + g_w > total_available_width {
+                    break;
+                }
+                glyphs_w += g_w;
+                glyph_end = glyph_idx;
+            }
+            (glyph_end, glyphs_w)
+        }
+    }
+
+    #[inline]
+    fn add_to_visual_line(
+        &self,
+        vl: &mut VisualLine,
+        span_index: usize,
+        start: WordGlyphPos,
+        end: WordGlyphPos,
+        width: f32,
+        number_of_blanks: u32,
+    ) {
+        if end == start {
+            return;
+        }
+
+        vl.ranges.push(VlRange {
+            span: span_index,
+            start,
+            end,
+            level: self.spans[span_index].level,
+        });
+        vl.w += width;
+        vl.spaces += number_of_blanks;
+    }
+
+    /// This will fit as much as possible in one line
+    /// If forward is false, it will fit as much as possible from the end of the spans
+    /// it will stop when it gets to "start".
+    /// If forward is true, it will start from start and keep going to the end of the spans
+    #[inline]
+    fn layout_spans(
+        &self,
+        current_visual_line: &mut VisualLine,
+        font_size: f32,
+        spans: &[ShapeSpan],
+        start_opt: Option<SpanWordGlyphPos>,
+        rtl: bool,
+        width_opt: Option<f32>,
+        ellipsize: Ellipsize,
+        ellipsis_w: f32,
+        direction: LayoutDirection,
+    ) {
+        let check_ellipsizing = matches!(ellipsize, Ellipsize::Start(_) | Ellipsize::End(_))
+            && width_opt.is_some_and(|w| w > 0.0 && w.is_finite());
+
+        let max_width = width_opt.unwrap_or(f32::INFINITY);
+        let span_count = spans.len();
+
+        let mut total_w: f32 = 0.0;
+
+        let start = if let Some(s) = start_opt {
+            s
+        } else {
+            SpanWordGlyphPos::ZERO
+        };
+
+        let span_indices: Vec<usize> = if matches!(direction, LayoutDirection::Forward) {
+            (start.span..spans.len()).collect()
+        } else {
+            (start.span..spans.len()).rev().collect()
+        };
+
+        'outer: for span_index in span_indices {
+            let mut word_range_width = 0.;
+            let mut number_of_blanks: u32 = 0;
+
+            let span = &spans[span_index];
+            let word_count = span.words.len();
+
+            let starting_word_index = if span_index == start.span {
+                start.word
+            } else {
+                0
+            };
+
+            let congruent = rtl == span.level.is_rtl();
+            let word_forward: bool = congruent == (direction == LayoutDirection::Forward);
+
+            let word_indices: Vec<usize> = match (direction, congruent, start_opt) {
+                (LayoutDirection::Forward, true, _) => (starting_word_index..word_count).collect(),
+                (LayoutDirection::Forward, false, Some(start)) => {
+                    if span_index == start.span {
+                        (0..start.word).rev().collect()
+                    } else {
+                        (0..word_count).rev().collect()
+                    }
+                }
+                (LayoutDirection::Forward, false, None) => (0..word_count).rev().collect(),
+                (LayoutDirection::Backward, true, _) => {
+                    ((starting_word_index)..word_count).rev().collect()
+                }
+                (LayoutDirection::Backward, false, Some(start)) => {
+                    if span_index == start.span {
+                        if start.glyph > 0 {
+                            (0..(start.word + 1)).collect()
+                        } else {
+                            (0..(start.word)).collect()
+                        }
+                    } else {
+                        (0..word_count).collect()
+                    }
+                }
+                (LayoutDirection::Backward, false, None) => (0..span.words.len()).collect(),
+            };
+            for word_idx in word_indices {
+                let word = &span.words[word_idx];
+                let word_width = if span_index == start.span && word_idx == start.word {
+                    let (start_glyph_pos, end_glyph_pos) = Self::get_glyph_start_end(
+                        word, start, span_index, word_idx, direction, congruent,
+                    );
+                    let mut w = 0.;
+                    for glyph_idx in start_glyph_pos..end_glyph_pos {
+                        w += word.glyphs[glyph_idx].width(font_size);
+                    }
+                    w
+                } else {
+                    word.width(font_size)
+                };
+
+                let overflowing = {
+                    // only check this if we're ellipsizing
+                    check_ellipsizing
+                        && (
+                            // if this  word doesn't fit, then we have an overflow
+                            (total_w + word_range_width + word_width > max_width)
+                                // otherwise if this is not the last word of the last span
+                                // and we can't fit the ellipsis
+                                ||(
+                                    !(match (direction, congruent) {
+                                        (LayoutDirection::Forward, true) => {
+                                            (span_index == span_count - 1) && (word_idx == word_count - 1)
+                                        }
+                                        (LayoutDirection::Forward, false) => (span_index == span_count - 1) && (word_idx == 0),
+                                        (LayoutDirection::Backward, true) => {
+                                            (span_index == start.span) && (word_idx == starting_word_index)
+                                        }
+                                        (LayoutDirection::Backward, false) => {
+                                            (span_index == start.span) && (word_idx == word_count - 1)
+                                        }
+                                    })
+
+                                    && total_w + word_range_width + word_width + ellipsis_w > max_width
+                                )
+                        )
+                };
+
+                if overflowing {
+                    // overflow detected
+                    let available = (max_width - ellipsis_w).max(0.0);
+
+                    let (glyph_end, glyphs_w) = Self::fit_glyphs(
+                        word,
+                        font_size,
+                        start,
+                        span_index,
+                        word_idx,
+                        direction,
+                        congruent,
+                        total_w + word_range_width,
+                        available,
+                        word_forward,
+                    );
+
+                    let (start_pos, end_pos) = if word_forward {
+                        if span_index == start.span {
+                            if !congruent {
+                                (WordGlyphPos::ZERO, WordGlyphPos::new(word_idx, glyph_end))
+                            } else {
+                                (
+                                    start.word_glyph_pos(),
+                                    WordGlyphPos::new(word_idx, glyph_end),
+                                )
+                            }
+                        } else {
+                            (WordGlyphPos::ZERO, WordGlyphPos::new(word_idx, glyph_end))
+                        }
+                    } else {
+                        // For an incongruent span in the forward direction, the
+                        // word indices are (0..start.word).rev(). Cap the VlRange
+                        // end at start.word_glyph_pos() so it doesn't include
+                        // words beyond start.word that belong to a previous line.
+                        // For the backward direction (congruent span), the word
+                        // indices are (start.word..word_count).rev() and
+                        // span.words.len() is the correct end.
+                        let range_end = if span_index == start.span && !congruent {
+                            start.word_glyph_pos()
+                        } else {
+                            WordGlyphPos::new(span.words.len(), 0)
+                        };
+                        (WordGlyphPos::new(word_idx, glyph_end), range_end)
+                    };
+                    self.add_to_visual_line(
+                        current_visual_line,
+                        span_index,
+                        start_pos,
+                        end_pos,
+                        word_range_width + glyphs_w,
+                        number_of_blanks,
+                    );
+
+                    // don't iterate anymore since we overflowed
+                    current_visual_line.ellipsized = true;
+                    break 'outer;
+                }
+
+                word_range_width += word_width;
+                if word.blank {
+                    number_of_blanks += 1;
+                }
+
+                // Backward-only: if we've reached the starting point, commit and stop.
+                if matches!(direction, LayoutDirection::Backward)
+                    && word_idx == start.word
+                    && span_index == start.span
+                {
+                    let (start_pos, end_pos) = if word_forward {
+                        (WordGlyphPos::ZERO, start.word_glyph_pos())
+                    } else {
+                        (
+                            start.word_glyph_pos(),
+                            WordGlyphPos::new(span.words.len(), 0),
+                        )
+                    };
+
+                    self.add_to_visual_line(
+                        current_visual_line,
+                        span_index,
+                        start_pos,
+                        end_pos,
+                        word_range_width,
+                        number_of_blanks,
+                    );
+
+                    break 'outer;
+                }
+            }
+
+            // if we get to here that means we didn't ellipsize, so either the whole span fits,
+            // or we don't really care
+            total_w += word_range_width;
+            let (start_pos, end_pos) = if congruent {
+                if span_index == start.span {
+                    (
+                        start.word_glyph_pos(),
+                        WordGlyphPos::new(span.words.len(), 0),
+                    )
+                } else {
+                    (WordGlyphPos::ZERO, WordGlyphPos::new(span.words.len(), 0))
+                }
+            } else if span_index == start.span {
+                (WordGlyphPos::ZERO, start.word_glyph_pos())
+            } else {
+                (WordGlyphPos::ZERO, WordGlyphPos::new(span.words.len(), 0))
+            };
+
+            self.add_to_visual_line(
+                current_visual_line,
+                span_index,
+                start_pos,
+                end_pos,
+                word_range_width,
+                number_of_blanks,
+            );
+        }
+
+        if matches!(direction, LayoutDirection::Backward) {
+            current_visual_line.ranges.reverse();
+        }
+    }
+
+    fn layout_middle(
+        &self,
+        current_visual_line: &mut VisualLine,
+        font_size: f32,
+        spans: &[ShapeSpan],
+        start_opt: Option<SpanWordGlyphPos>,
+        rtl: bool,
+        width: f32,
+        ellipsize: Ellipsize,
+        ellipsis_w: f32,
+    ) {
+        assert!(matches!(ellipsize, Ellipsize::Middle(_)));
+        let mut starting_line = VisualLine::default();
+        self.layout_spans(
+            &mut starting_line,
+            font_size,
+            spans,
+            start_opt,
+            rtl,
+            Some(width / 2.0),
+            Ellipsize::End(EllipsizeHeightLimit::Lines(1)),
+            0., //pass 0 for ellipsis_w
+            LayoutDirection::Forward,
+        );
+        let forward_pass_overflowed = starting_line.ellipsized;
+        let end_range_opt = starting_line.ranges.last();
+        match end_range_opt {
+            Some(range) if forward_pass_overflowed => {
+                let congruent = rtl == self.spans[range.span].level.is_rtl();
+                // create a new range and do the other half
+                let mut ending_line = VisualLine::default();
+                let start = if congruent {
+                    SpanWordGlyphPos {
+                        span: range.span,
+                        word: range.end.word,
+                        glyph: range.end.glyph,
+                    }
+                } else {
+                    SpanWordGlyphPos {
+                        span: range.span,
+                        word: range.start.word,
+                        glyph: range.start.glyph,
+                    }
+                };
+                self.layout_spans(
+                    &mut ending_line,
+                    font_size,
+                    spans,
+                    Some(start),
+                    rtl,
+                    Some((width - starting_line.w - ellipsis_w).max(0.0)),
+                    Ellipsize::Start(EllipsizeHeightLimit::Lines(1)),
+                    0., //pass 0 for ellipsis_w
+                    LayoutDirection::Backward,
+                );
+                // Check if anything was actually skipped between the two halves
+                let first_half_end = if spans[range.span].level.is_rtl() != rtl {
+                    SpanWordGlyphPos {
+                        span: range.span,
+                        word: range.start.word,
+                        glyph: range.start.glyph,
+                    }
+                } else {
+                    SpanWordGlyphPos {
+                        span: range.span,
+                        word: range.end.word,
+                        glyph: range.end.glyph,
+                    }
+                };
+                let second_half_start = ending_line.ranges.first().map(|r| {
+                    if spans[r.span].level.is_rtl() != rtl {
+                        SpanWordGlyphPos {
+                            span: r.span,
+                            word: r.end.word,
+                            glyph: r.end.glyph,
+                        }
+                    } else {
+                        SpanWordGlyphPos {
+                            span: r.span,
+                            word: r.start.word,
+                            glyph: r.start.glyph,
+                        }
+                    }
+                });
+                let actually_ellipsized = match second_half_start {
+                    Some(shs) => shs != first_half_end,
+                    None => false, // nothing in backward pass = nothing was skipped
+                };
+                // add both to the current_visual_line
+                if actually_ellipsized {
+                    // Insert the ellipsis VlRange between the two halves.
+                    // Its BiDi level is determined by the adjacent ranges.
+                    let ellipsis_level = self.ellipsis_level_between(
+                        starting_line.ranges.last(),
+                        ending_line.ranges.first(),
+                    );
+                    starting_line
+                        .ranges
+                        .push(self.ellipsis_vlrange(ellipsis_level));
+                    starting_line.ranges.extend(ending_line.ranges);
+                    current_visual_line.ranges = starting_line.ranges;
+                    current_visual_line.ellipsized = true;
+                    current_visual_line.w = starting_line.w + ending_line.w + ellipsis_w;
+                } else {
+                    self.layout_spans(
+                        current_visual_line,
+                        font_size,
+                        spans,
+                        start_opt,
+                        rtl,
+                        Some(width),
+                        Ellipsize::None,
+                        0., //pass 0 for ellipsis_w
+                        LayoutDirection::Backward,
+                    );
+                    return;
+                }
+                current_visual_line.spaces = starting_line.spaces + ending_line.spaces;
+            }
+            _ => {
+                // everything fit in the forward pass
+                current_visual_line.ranges = starting_line.ranges;
+                current_visual_line.w = starting_line.w;
+                current_visual_line.spaces = starting_line.spaces;
+            }
+        }
+    }
+
+    /// Returns the words for a given span index, handling the ellipsis sentinel.
+    fn get_span_words(&self, span_index: usize) -> &[ShapeWord] {
+        if span_index == ELLIPSIS_SPAN {
+            &self.ellipsis_span.as_ref().unwrap().words
+        } else {
+            &self.spans[span_index].words
+        }
+    }
+
+    fn byte_range_of_vlrange(&self, r: &VlRange) -> Option<(usize, usize)> {
+        debug_assert_ne!(r.span, ELLIPSIS_SPAN);
+        let words = self.get_span_words(r.span);
+        let mut min_byte = usize::MAX;
+        let mut max_byte = 0usize;
+        let end_word = r.end.word + usize::from(r.end.glyph != 0);
+        for (i, word) in words.iter().enumerate().take(end_word).skip(r.start.word) {
+            let included_glyphs = match (i == r.start.word, i == r.end.word) {
+                (false, false) => &word.glyphs[..],
+                (true, false) => &word.glyphs[r.start.glyph..],
+                (false, true) => &word.glyphs[..r.end.glyph],
+                (true, true) => &word.glyphs[r.start.glyph..r.end.glyph],
+            };
+            for glyph in included_glyphs {
+                min_byte = min_byte.min(glyph.start);
+                max_byte = max_byte.max(glyph.end);
+            }
+        }
+        if min_byte <= max_byte {
+            Some((min_byte, max_byte))
+        } else {
+            None
+        }
+    }
+
+    fn compute_elided_byte_range(
+        &self,
+        visual_line: &VisualLine,
+        line_len: usize,
+    ) -> Option<(usize, usize)> {
+        if !visual_line.ellipsized {
+            return None;
+        }
+        // Find the position of the ellipsis VlRange
+        let ellipsis_idx = visual_line
+            .ranges
+            .iter()
+            .position(|r| r.span == ELLIPSIS_SPAN)?;
+
+        // Find the byte range of the visible content before the ellipsis
+        let before_end = (0..ellipsis_idx)
+            .rev()
+            .find_map(|i| self.byte_range_of_vlrange(&visual_line.ranges[i]))
+            .map(|(_, end)| end)
+            .unwrap_or(0);
+
+        // Find the byte range of the visible content after the ellipsis
+        let after_start = (ellipsis_idx + 1..visual_line.ranges.len())
+            .find_map(|i| self.byte_range_of_vlrange(&visual_line.ranges[i]))
+            .map(|(start, _)| start)
+            .unwrap_or(line_len);
+
+        Some((before_end, after_start))
+    }
+
+    /// Returns the maximum byte offset across all glyphs in all non-ellipsis spans.
+    /// This effectively gives the byte length of the original shaped text.
+    fn max_byte_offset(&self) -> usize {
+        self.spans
+            .iter()
+            .flat_map(|span| span.words.iter())
+            .flat_map(|word| word.glyphs.iter())
+            .map(|g| g.end)
+            .max()
+            .unwrap_or(0)
+    }
+
+    /// Returns the width of the ellipsis in the given font size.
+    fn ellipsis_w(&self, font_size: f32) -> f32 {
+        self.ellipsis_span
+            .as_ref()
+            .map_or(0.0, |s| s.words.iter().map(|w| w.width(font_size)).sum())
+    }
+
+    /// Creates a VlRange for the ellipsis with the given BiDi level.
+    fn ellipsis_vlrange(&self, level: unicode_bidi::Level) -> VlRange {
+        VlRange {
+            span: ELLIPSIS_SPAN,
+            start: WordGlyphPos::ZERO,
+            end: WordGlyphPos::new(1, 0),
+            level,
+        }
+    }
+
+    /// Determines the appropriate BiDi level for the ellipsis based on the
+    /// adjacent ranges, following UAX#9 N1/N2 rules for neutral characters.
+    fn ellipsis_level_between(
+        &self,
+        before: Option<&VlRange>,
+        after: Option<&VlRange>,
+    ) -> unicode_bidi::Level {
+        match (before, after) {
+            (Some(a), Some(b)) if a.level == b.level => a.level,
+            (Some(a), None) => a.level,
+            (None, Some(b)) => b.level,
+            _ => {
+                if self.rtl {
+                    unicode_bidi::Level::rtl()
+                } else {
+                    unicode_bidi::Level::ltr()
+                }
+            }
+        }
+    }
+
+    fn layout_line(
+        &self,
+        current_visual_line: &mut VisualLine,
+        font_size: f32,
+        spans: &[ShapeSpan],
+        start_opt: Option<SpanWordGlyphPos>,
+        rtl: bool,
+        width_opt: Option<f32>,
+        ellipsize: Ellipsize,
+    ) {
+        let ellipsis_w = self.ellipsis_w(font_size);
+
+        match (ellipsize, width_opt) {
+            (Ellipsize::Start(_), Some(_)) => {
+                self.layout_spans(
+                    current_visual_line,
+                    font_size,
+                    spans,
+                    start_opt,
+                    rtl,
+                    width_opt,
+                    ellipsize,
+                    ellipsis_w,
+                    LayoutDirection::Backward,
+                );
+                // Insert ellipsis at the visual start (index 0, after backward reversal)
+                if current_visual_line.ellipsized {
+                    let level =
+                        self.ellipsis_level_between(None, current_visual_line.ranges.first());
+                    current_visual_line
+                        .ranges
+                        .insert(0, self.ellipsis_vlrange(level));
+                    current_visual_line.w += ellipsis_w;
+                }
+            }
+            (Ellipsize::Middle(_), Some(width)) => {
+                self.layout_middle(
+                    current_visual_line,
+                    font_size,
+                    spans,
+                    start_opt,
+                    rtl,
+                    width,
+                    ellipsize,
+                    ellipsis_w,
+                );
+            }
+            _ => {
+                self.layout_spans(
+                    current_visual_line,
+                    font_size,
+                    spans,
+                    start_opt,
+                    rtl,
+                    width_opt,
+                    ellipsize,
+                    ellipsis_w,
+                    LayoutDirection::Forward,
+                );
+                // Insert ellipsis at the visual end
+                if current_visual_line.ellipsized {
+                    let level =
+                        self.ellipsis_level_between(current_visual_line.ranges.last(), None);
+                    current_visual_line
+                        .ranges
+                        .push(self.ellipsis_vlrange(level));
+                    current_visual_line.w += ellipsis_w;
+                }
+            }
+        }
+
+        // Compute the byte range of ellipsized text so the ellipsis LayoutGlyph
+        // can have valid start/end indices into the original line text.
+        if current_visual_line.ellipsized {
+            let line_len = self.max_byte_offset();
+            current_visual_line.elided_byte_range =
+                self.compute_elided_byte_range(current_visual_line, line_len);
+        }
+    }
+
     pub fn layout_to_buffer(
         &self,
         scratch: &mut ShapeBuffer,
         font_size: f32,
         width_opt: Option<f32>,
         wrap: Wrap,
+        ellipsize: Ellipsize,
         align: Option<Align>,
         layout_lines: &mut Vec<LayoutLine>,
         match_mono_width: Option<f32>,
         hinting: Hinting,
     ) {
-        fn add_to_visual_line(
-            vl: &mut VisualLine,
-            span_index: usize,
-            start: (usize, usize),
-            end: (usize, usize),
-            width: f32,
-            number_of_blanks: u32,
-        ) {
-            if end == start {
-                return;
-            }
-
-            vl.ranges.push((span_index, start, end));
-            vl.w += width;
-            vl.spaces += number_of_blanks;
-        }
-
         // For each visual line a list of  (span index,  and range of words in that span)
         // Note that a BiDi visual line could have multiple spans or parts of them
         // let mut vl_range_of_spans = Vec::with_capacity(1);
@@ -1314,281 +2089,441 @@ impl ShapeLine {
         let mut current_visual_line = cached_visual_lines.pop().unwrap_or_default();
 
         if wrap == Wrap::None {
-            for (span_index, span) in self.spans.iter().enumerate() {
-                let mut word_range_width = 0.;
-                let mut number_of_blanks: u32 = 0;
-                for word in &span.words {
-                    let word_width = word.width(font_size);
-                    word_range_width += word_width;
-                    if word.blank {
-                        number_of_blanks += 1;
-                    }
-                }
-                add_to_visual_line(
-                    &mut current_visual_line,
-                    span_index,
-                    (0, 0),
-                    (span.words.len(), 0),
-                    word_range_width,
-                    number_of_blanks,
-                );
-            }
+            self.layout_line(
+                &mut current_visual_line,
+                font_size,
+                &self.spans,
+                None,
+                self.rtl,
+                width_opt,
+                ellipsize,
+            );
         } else {
-            for (span_index, span) in self.spans.iter().enumerate() {
-                let mut word_range_width = 0.;
-                let mut width_before_last_blank = 0.;
-                let mut number_of_blanks: u32 = 0;
+            let mut total_line_height = 0.0;
+            let mut total_line_count = 0;
+            let max_line_count_opt = match ellipsize {
+                Ellipsize::Start(EllipsizeHeightLimit::Lines(lines))
+                | Ellipsize::Middle(EllipsizeHeightLimit::Lines(lines))
+                | Ellipsize::End(EllipsizeHeightLimit::Lines(lines)) => Some(lines.max(1)),
+                _ => None,
+            };
+            let max_height_opt = match ellipsize {
+                Ellipsize::Start(EllipsizeHeightLimit::Height(height))
+                | Ellipsize::Middle(EllipsizeHeightLimit::Height(height))
+                | Ellipsize::End(EllipsizeHeightLimit::Height(height)) => Some(height),
+                _ => None,
+            };
+            let line_height = self
+                .metrics_opt
+                .map_or_else(|| font_size, |m| m.line_height);
 
-                // Create the word ranges that fits in a visual line
-                if self.rtl != span.level.is_rtl() {
-                    // incongruent directions
-                    let mut fitting_start = (span.words.len(), 0);
-                    for (i, word) in span.words.iter().enumerate().rev() {
-                        let word_width = word.width(font_size);
+            let try_ellipsize_last_line = |total_line_count: usize,
+                                           total_line_height: f32,
+                                           current_visual_line: &mut VisualLine,
+                                           font_size: f32,
+                                           start_opt: Option<SpanWordGlyphPos>,
+                                           width_opt: Option<f32>,
+                                           ellipsize: Ellipsize|
+             -> bool {
+                // If Ellipsize::End, then how many lines can we fit or how much is the available height
+                if max_line_count_opt == Some(total_line_count + 1)
+                    || max_height_opt.is_some_and(|max_height| {
+                        total_line_height + line_height * 2.0 > max_height
+                    })
+                {
+                    self.layout_line(
+                        current_visual_line,
+                        font_size,
+                        &self.spans,
+                        start_opt,
+                        self.rtl,
+                        width_opt,
+                        ellipsize,
+                    );
+                    return true;
+                }
+                false
+            };
 
-                        // Addition in the same order used to compute the final width, so that
-                        // relayouts with that width as the `line_width` will produce the same
-                        // wrapping results.
-                        if current_visual_line.w + (word_range_width + word_width)
+            if !try_ellipsize_last_line(
+                total_line_count,
+                total_line_height,
+                &mut current_visual_line,
+                font_size,
+                None,
+                width_opt,
+                ellipsize,
+            ) {
+                'outer: for (span_index, span) in self.spans.iter().enumerate() {
+                    let mut word_range_width = 0.;
+                    let mut width_before_last_blank = 0.;
+                    let mut number_of_blanks: u32 = 0;
+
+                    // Create the word ranges that fits in a visual line
+                    if self.rtl != span.level.is_rtl() {
+                        // incongruent directions
+                        let mut fitting_start = WordGlyphPos::new(span.words.len(), 0);
+                        for (i, word) in span.words.iter().enumerate().rev() {
+                            let word_width = word.width(font_size);
+                            // Addition in the same order used to compute the final width, so that
+                            // relayouts with that width as the `line_width` will produce the same
+                            // wrapping results.
+                            if current_visual_line.w + (word_range_width + word_width)
                             <= width_opt.unwrap_or(f32::INFINITY)
                             // Include one blank word over the width limit since it won't be
                             // counted in the final width
                             || (word.blank
                                 && (current_visual_line.w + word_range_width) <= width_opt.unwrap_or(f32::INFINITY))
-                        {
-                            // fits
-                            if word.blank {
-                                number_of_blanks += 1;
-                                width_before_last_blank = word_range_width;
-                            }
-                            word_range_width += word_width;
-                        } else if wrap == Wrap::Glyph
+                            {
+                                // fits
+                                if word.blank {
+                                    number_of_blanks += 1;
+                                    width_before_last_blank = word_range_width;
+                                }
+                                word_range_width += word_width;
+                            } else if wrap == Wrap::Glyph
                             // Make sure that the word is able to fit on it's own line, if not, fall back to Glyph wrapping.
                             || (wrap == Wrap::WordOrGlyph && word_width > width_opt.unwrap_or(f32::INFINITY))
-                        {
-                            // Commit the current line so that the word starts on the next line.
-                            if word_range_width > 0.
-                                && wrap == Wrap::WordOrGlyph
-                                && word_width > width_opt.unwrap_or(f32::INFINITY)
                             {
-                                add_to_visual_line(
-                                    &mut current_visual_line,
-                                    span_index,
-                                    (i + 1, 0),
-                                    fitting_start,
-                                    word_range_width,
-                                    number_of_blanks,
-                                );
-
-                                visual_lines.push(current_visual_line);
-                                current_visual_line = cached_visual_lines.pop().unwrap_or_default();
-
-                                number_of_blanks = 0;
-                                word_range_width = 0.;
-
-                                fitting_start = (i, 0);
-                            }
-
-                            for (glyph_i, glyph) in word.glyphs.iter().enumerate().rev() {
-                                let glyph_width = glyph.width(font_size);
-                                if current_visual_line.w + (word_range_width + glyph_width)
-                                    <= width_opt.unwrap_or(f32::INFINITY)
+                                // Commit the current line so that the word starts on the next line.
+                                if word_range_width > 0.
+                                    && wrap == Wrap::WordOrGlyph
+                                    && word_width > width_opt.unwrap_or(f32::INFINITY)
                                 {
-                                    word_range_width += glyph_width;
-                                } else {
-                                    add_to_visual_line(
+                                    self.add_to_visual_line(
                                         &mut current_visual_line,
                                         span_index,
-                                        (i, glyph_i + 1),
+                                        WordGlyphPos::new(i + 1, 0),
                                         fitting_start,
                                         word_range_width,
                                         number_of_blanks,
                                     );
+
                                     visual_lines.push(current_visual_line);
                                     current_visual_line =
                                         cached_visual_lines.pop().unwrap_or_default();
 
                                     number_of_blanks = 0;
-                                    word_range_width = glyph_width;
-                                    fitting_start = (i, glyph_i + 1);
-                                }
-                            }
-                        } else {
-                            // Wrap::Word, Wrap::WordOrGlyph
+                                    word_range_width = 0.;
 
-                            // If we had a previous range, commit that line before the next word.
-                            if word_range_width > 0. {
-                                // Current word causing a wrap is not whitespace, so we ignore the
-                                // previous word if it's a whitespace
-                                let trailing_blank = span
-                                    .words
-                                    .get(i + 1)
-                                    .is_some_and(|previous_word| previous_word.blank);
-
-                                if trailing_blank {
-                                    number_of_blanks = number_of_blanks.saturating_sub(1);
-                                    add_to_visual_line(
+                                    fitting_start = WordGlyphPos::new(i, 0);
+                                    total_line_count += 1;
+                                    total_line_height += line_height;
+                                    if try_ellipsize_last_line(
+                                        total_line_count,
+                                        total_line_height,
                                         &mut current_visual_line,
-                                        span_index,
-                                        (i + 2, 0),
-                                        fitting_start,
-                                        width_before_last_blank,
-                                        number_of_blanks,
-                                    );
-                                } else {
-                                    add_to_visual_line(
-                                        &mut current_visual_line,
-                                        span_index,
-                                        (i + 1, 0),
-                                        fitting_start,
-                                        word_range_width,
-                                        number_of_blanks,
-                                    );
+                                        font_size,
+                                        Some(SpanWordGlyphPos::with_wordglyph(
+                                            span_index,
+                                            fitting_start,
+                                        )),
+                                        width_opt,
+                                        ellipsize,
+                                    ) {
+                                        break 'outer;
+                                    }
                                 }
 
-                                visual_lines.push(current_visual_line);
-                                current_visual_line = cached_visual_lines.pop().unwrap_or_default();
-                                number_of_blanks = 0;
-                            }
+                                for (glyph_i, glyph) in word.glyphs.iter().enumerate().rev() {
+                                    let glyph_width = glyph.width(font_size);
+                                    if current_visual_line.w + (word_range_width + glyph_width)
+                                        <= width_opt.unwrap_or(f32::INFINITY)
+                                    {
+                                        word_range_width += glyph_width;
+                                    } else {
+                                        self.add_to_visual_line(
+                                            &mut current_visual_line,
+                                            span_index,
+                                            WordGlyphPos::new(i, glyph_i + 1),
+                                            fitting_start,
+                                            word_range_width,
+                                            number_of_blanks,
+                                        );
+                                        visual_lines.push(current_visual_line);
+                                        current_visual_line =
+                                            cached_visual_lines.pop().unwrap_or_default();
 
-                            if word.blank {
-                                word_range_width = 0.;
-                                fitting_start = (i, 0);
+                                        number_of_blanks = 0;
+                                        word_range_width = glyph_width;
+                                        fitting_start = WordGlyphPos::new(i, glyph_i + 1);
+                                        total_line_count += 1;
+                                        total_line_height += line_height;
+                                        if try_ellipsize_last_line(
+                                            total_line_count,
+                                            total_line_height,
+                                            &mut current_visual_line,
+                                            font_size,
+                                            Some(SpanWordGlyphPos::with_wordglyph(
+                                                span_index,
+                                                fitting_start,
+                                            )),
+                                            width_opt,
+                                            ellipsize,
+                                        ) {
+                                            break 'outer;
+                                        }
+                                    }
+                                }
                             } else {
-                                word_range_width = word_width;
-                                fitting_start = (i + 1, 0);
+                                // Wrap::Word, Wrap::WordOrGlyph
+
+                                // If we had a previous range, commit that line before the next word.
+                                if word_range_width > 0. {
+                                    // Current word causing a wrap is not whitespace, so we ignore the
+                                    // previous word if it's a whitespace
+                                    let trailing_blank = span
+                                        .words
+                                        .get(i + 1)
+                                        .is_some_and(|previous_word| previous_word.blank);
+
+                                    if trailing_blank {
+                                        number_of_blanks = number_of_blanks.saturating_sub(1);
+                                        self.add_to_visual_line(
+                                            &mut current_visual_line,
+                                            span_index,
+                                            WordGlyphPos::new(i + 2, 0),
+                                            fitting_start,
+                                            width_before_last_blank,
+                                            number_of_blanks,
+                                        );
+                                    } else {
+                                        self.add_to_visual_line(
+                                            &mut current_visual_line,
+                                            span_index,
+                                            WordGlyphPos::new(i + 1, 0),
+                                            fitting_start,
+                                            word_range_width,
+                                            number_of_blanks,
+                                        );
+                                    }
+                                }
+
+                                // This fixes a bug that a long first word at the boundary of
+                                // was overflowing
+                                if !current_visual_line.ranges.is_empty() {
+                                    visual_lines.push(current_visual_line);
+                                    current_visual_line =
+                                        cached_visual_lines.pop().unwrap_or_default();
+                                    number_of_blanks = 0;
+                                    total_line_count += 1;
+                                    total_line_height += line_height;
+
+                                    if try_ellipsize_last_line(
+                                        total_line_count,
+                                        total_line_height,
+                                        &mut current_visual_line,
+                                        font_size,
+                                        Some(SpanWordGlyphPos::with_wordglyph(
+                                            span_index,
+                                            if word.blank {
+                                                WordGlyphPos::new(i, 0)
+                                            } else {
+                                                WordGlyphPos::new(i + 1, 0)
+                                            },
+                                        )),
+                                        width_opt,
+                                        ellipsize,
+                                    ) {
+                                        break 'outer;
+                                    }
+                                }
+
+                                if word.blank {
+                                    word_range_width = 0.;
+                                    fitting_start = WordGlyphPos::new(i, 0);
+                                } else {
+                                    word_range_width = word_width;
+                                    fitting_start = WordGlyphPos::new(i + 1, 0);
+                                }
                             }
                         }
-                    }
-                    add_to_visual_line(
-                        &mut current_visual_line,
-                        span_index,
-                        (0, 0),
-                        fitting_start,
-                        word_range_width,
-                        number_of_blanks,
-                    );
-                } else {
-                    // congruent direction
-                    let mut fitting_start = (0, 0);
-                    for (i, word) in span.words.iter().enumerate() {
-                        let word_width = word.width(font_size);
-                        if current_visual_line.w + (word_range_width + word_width)
+                        self.add_to_visual_line(
+                            &mut current_visual_line,
+                            span_index,
+                            WordGlyphPos::new(0, 0),
+                            fitting_start,
+                            word_range_width,
+                            number_of_blanks,
+                        );
+                    } else {
+                        // congruent direction
+                        let mut fitting_start = WordGlyphPos::ZERO;
+                        for (i, word) in span.words.iter().enumerate() {
+                            let word_width = word.width(font_size);
+                            if current_visual_line.w + (word_range_width + word_width)
                             <= width_opt.unwrap_or(f32::INFINITY)
                             // Include one blank word over the width limit since it won't be
                             // counted in the final width.
                             || (word.blank
                                 && (current_visual_line.w + word_range_width) <= width_opt.unwrap_or(f32::INFINITY))
-                        {
-                            // fits
-                            if word.blank {
-                                number_of_blanks += 1;
-                                width_before_last_blank = word_range_width;
-                            }
-                            word_range_width += word_width;
-                        } else if wrap == Wrap::Glyph
+                            {
+                                // fits
+                                if word.blank {
+                                    number_of_blanks += 1;
+                                    width_before_last_blank = word_range_width;
+                                }
+                                word_range_width += word_width;
+                            } else if wrap == Wrap::Glyph
                             // Make sure that the word is able to fit on it's own line, if not, fall back to Glyph wrapping.
                             || (wrap == Wrap::WordOrGlyph && word_width > width_opt.unwrap_or(f32::INFINITY))
-                        {
-                            // Commit the current line so that the word starts on the next line.
-                            if word_range_width > 0.
-                                && wrap == Wrap::WordOrGlyph
-                                && word_width > width_opt.unwrap_or(f32::INFINITY)
                             {
-                                add_to_visual_line(
-                                    &mut current_visual_line,
-                                    span_index,
-                                    fitting_start,
-                                    (i, 0),
-                                    word_range_width,
-                                    number_of_blanks,
-                                );
-
-                                visual_lines.push(current_visual_line);
-                                current_visual_line = cached_visual_lines.pop().unwrap_or_default();
-
-                                number_of_blanks = 0;
-                                word_range_width = 0.;
-
-                                fitting_start = (i, 0);
-                            }
-
-                            for (glyph_i, glyph) in word.glyphs.iter().enumerate() {
-                                let glyph_width = glyph.width(font_size);
-                                if current_visual_line.w + (word_range_width + glyph_width)
-                                    <= width_opt.unwrap_or(f32::INFINITY)
+                                // Commit the current line so that the word starts on the next line.
+                                if word_range_width > 0.
+                                    && wrap == Wrap::WordOrGlyph
+                                    && word_width > width_opt.unwrap_or(f32::INFINITY)
                                 {
-                                    word_range_width += glyph_width;
-                                } else {
-                                    add_to_visual_line(
+                                    self.add_to_visual_line(
                                         &mut current_visual_line,
                                         span_index,
                                         fitting_start,
-                                        (i, glyph_i),
+                                        WordGlyphPos::new(i, 0),
                                         word_range_width,
                                         number_of_blanks,
                                     );
+
                                     visual_lines.push(current_visual_line);
                                     current_visual_line =
                                         cached_visual_lines.pop().unwrap_or_default();
 
                                     number_of_blanks = 0;
-                                    word_range_width = glyph_width;
-                                    fitting_start = (i, glyph_i);
-                                }
-                            }
-                        } else {
-                            // Wrap::Word, Wrap::WordOrGlyph
+                                    word_range_width = 0.;
 
-                            // If we had a previous range, commit that line before the next word.
-                            if word_range_width > 0. {
-                                // Current word causing a wrap is not whitespace, so we ignore the
-                                // previous word if it's a whitespace.
-                                let trailing_blank = i > 0 && span.words[i - 1].blank;
-
-                                if trailing_blank {
-                                    number_of_blanks = number_of_blanks.saturating_sub(1);
-                                    add_to_visual_line(
+                                    fitting_start = WordGlyphPos::new(i, 0);
+                                    total_line_count += 1;
+                                    total_line_height += line_height;
+                                    if try_ellipsize_last_line(
+                                        total_line_count,
+                                        total_line_height,
                                         &mut current_visual_line,
-                                        span_index,
-                                        fitting_start,
-                                        (i - 1, 0),
-                                        width_before_last_blank,
-                                        number_of_blanks,
-                                    );
-                                } else {
-                                    add_to_visual_line(
-                                        &mut current_visual_line,
-                                        span_index,
-                                        fitting_start,
-                                        (i, 0),
-                                        word_range_width,
-                                        number_of_blanks,
-                                    );
+                                        font_size,
+                                        Some(SpanWordGlyphPos::with_wordglyph(
+                                            span_index,
+                                            fitting_start,
+                                        )),
+                                        width_opt,
+                                        ellipsize,
+                                    ) {
+                                        break 'outer;
+                                    }
                                 }
 
-                                visual_lines.push(current_visual_line);
-                                current_visual_line = cached_visual_lines.pop().unwrap_or_default();
-                                number_of_blanks = 0;
-                            }
+                                for (glyph_i, glyph) in word.glyphs.iter().enumerate() {
+                                    let glyph_width = glyph.width(font_size);
+                                    if current_visual_line.w + (word_range_width + glyph_width)
+                                        <= width_opt.unwrap_or(f32::INFINITY)
+                                    {
+                                        word_range_width += glyph_width;
+                                    } else {
+                                        self.add_to_visual_line(
+                                            &mut current_visual_line,
+                                            span_index,
+                                            fitting_start,
+                                            WordGlyphPos::new(i, glyph_i),
+                                            word_range_width,
+                                            number_of_blanks,
+                                        );
+                                        visual_lines.push(current_visual_line);
+                                        current_visual_line =
+                                            cached_visual_lines.pop().unwrap_or_default();
 
-                            if word.blank {
-                                word_range_width = 0.;
-                                fitting_start = (i + 1, 0);
+                                        number_of_blanks = 0;
+                                        word_range_width = glyph_width;
+                                        fitting_start = WordGlyphPos::new(i, glyph_i);
+                                        total_line_count += 1;
+                                        total_line_height += line_height;
+                                        if try_ellipsize_last_line(
+                                            total_line_count,
+                                            total_line_height,
+                                            &mut current_visual_line,
+                                            font_size,
+                                            Some(SpanWordGlyphPos::with_wordglyph(
+                                                span_index,
+                                                fitting_start,
+                                            )),
+                                            width_opt,
+                                            ellipsize,
+                                        ) {
+                                            break 'outer;
+                                        }
+                                    }
+                                }
                             } else {
-                                word_range_width = word_width;
-                                fitting_start = (i, 0);
+                                // Wrap::Word, Wrap::WordOrGlyph
+
+                                // If we had a previous range, commit that line before the next word.
+                                if word_range_width > 0. {
+                                    // Current word causing a wrap is not whitespace, so we ignore the
+                                    // previous word if it's a whitespace.
+                                    let trailing_blank = i > 0 && span.words[i - 1].blank;
+
+                                    if trailing_blank {
+                                        number_of_blanks = number_of_blanks.saturating_sub(1);
+                                        self.add_to_visual_line(
+                                            &mut current_visual_line,
+                                            span_index,
+                                            fitting_start,
+                                            WordGlyphPos::new(i - 1, 0),
+                                            width_before_last_blank,
+                                            number_of_blanks,
+                                        );
+                                    } else {
+                                        self.add_to_visual_line(
+                                            &mut current_visual_line,
+                                            span_index,
+                                            fitting_start,
+                                            WordGlyphPos::new(i, 0),
+                                            word_range_width,
+                                            number_of_blanks,
+                                        );
+                                    }
+                                }
+
+                                if !current_visual_line.ranges.is_empty() {
+                                    visual_lines.push(current_visual_line);
+                                    current_visual_line =
+                                        cached_visual_lines.pop().unwrap_or_default();
+                                    number_of_blanks = 0;
+                                    total_line_count += 1;
+                                    total_line_height += line_height;
+                                    if try_ellipsize_last_line(
+                                        total_line_count,
+                                        total_line_height,
+                                        &mut current_visual_line,
+                                        font_size,
+                                        Some(SpanWordGlyphPos::with_wordglyph(
+                                            span_index,
+                                            if i > 0 && span.words[i - 1].blank {
+                                                WordGlyphPos::new(i - 1, 0)
+                                            } else {
+                                                WordGlyphPos::new(i, 0)
+                                            },
+                                        )),
+                                        width_opt,
+                                        ellipsize,
+                                    ) {
+                                        break 'outer;
+                                    }
+                                }
+
+                                if word.blank {
+                                    word_range_width = 0.;
+                                    fitting_start = WordGlyphPos::new(i + 1, 0);
+                                } else {
+                                    word_range_width = word_width;
+                                    fitting_start = WordGlyphPos::new(i, 0);
+                                }
                             }
                         }
+                        self.add_to_visual_line(
+                            &mut current_visual_line,
+                            span_index,
+                            fitting_start,
+                            WordGlyphPos::new(span.words.len(), 0),
+                            word_range_width,
+                            number_of_blanks,
+                        );
                     }
-                    add_to_visual_line(
-                        &mut current_visual_line,
-                        span_index,
-                        fitting_start,
-                        (span.words.len(), 0),
-                        word_range_width,
-                        number_of_blanks,
-                    );
                 }
             }
         }
@@ -1603,16 +2538,13 @@ impl ShapeLine {
         // Create the LayoutLines using the ranges inside visual lines
         let align = align.unwrap_or(if self.rtl { Align::Right } else { Align::Left });
 
-        let line_width = width_opt.map_or_else(
-            || {
-                let mut width: f32 = 0.0;
-                for visual_line in &visual_lines {
-                    width = width.max(visual_line.w);
-                }
-                width
-            },
-            |width| width,
-        );
+        let line_width = width_opt.unwrap_or_else(|| {
+            let mut width: f32 = 0.0;
+            for visual_line in &visual_lines {
+                width = width.max(visual_line.w);
+            }
+            width
+        });
 
         let start_x = if self.rtl { line_width } else { 0.0 };
 
@@ -1621,7 +2553,9 @@ impl ShapeLine {
             if visual_line.ranges.is_empty() {
                 continue;
             }
+
             let new_order = self.reorder(&visual_line.ranges);
+
             let mut glyphs = cached_glyph_sets
                 .pop()
                 .unwrap_or_else(|| Vec::with_capacity(1));
@@ -1630,12 +2564,12 @@ impl ShapeLine {
             let mut max_ascent: f32 = 0.;
             let mut max_descent: f32 = 0.;
             let alignment_correction = match (align, self.rtl) {
-                (Align::Left, true) => line_width - visual_line.w,
+                (Align::Left, true) => (line_width - visual_line.w).max(0.),
                 (Align::Left, false) => 0.,
                 (Align::Right, true) => 0.,
-                (Align::Right, false) => line_width - visual_line.w,
-                (Align::Center, _) => (line_width - visual_line.w) / 2.0,
-                (Align::End, _) => line_width - visual_line.w,
+                (Align::Right, false) => (line_width - visual_line.w).max(0.),
+                (Align::Center, _) => (line_width - visual_line.w).max(0.) / 2.0,
+                (Align::End, _) => (line_width - visual_line.w).max(0.),
                 (Align::Justified, _) => 0.,
             };
 
@@ -1674,19 +2608,29 @@ impl ShapeLine {
                 0.
             };
 
-            let mut process_range = |range: Range<usize>| {
-                for &(span_index, (starting_word, starting_glyph), (ending_word, ending_glyph)) in
-                    &visual_line.ranges[range]
-                {
-                    let span = &self.spans[span_index];
+            let elided_byte_range = if visual_line.ellipsized {
+                visual_line.elided_byte_range
+            } else {
+                None
+            };
+
+            let process_range = |range: Range<usize>,
+                                 x: &mut f32,
+                                 y: &mut f32,
+                                 glyphs: &mut Vec<LayoutGlyph>,
+                                 max_ascent: &mut f32,
+                                 max_descent: &mut f32| {
+                for r in visual_line.ranges[range.clone()].iter() {
+                    let is_ellipsis = r.span == ELLIPSIS_SPAN;
+                    let span_words = self.get_span_words(r.span);
                     // If ending_glyph is not 0 we need to include glyphs from the ending_word
-                    for i in starting_word..ending_word + usize::from(ending_glyph != 0) {
-                        let word = &span.words[i];
-                        let included_glyphs = match (i == starting_word, i == ending_word) {
+                    for i in r.start.word..r.end.word + usize::from(r.end.glyph != 0) {
+                        let word = &span_words[i];
+                        let included_glyphs = match (i == r.start.word, i == r.end.word) {
                             (false, false) => &word.glyphs[..],
-                            (true, false) => &word.glyphs[starting_glyph..],
-                            (false, true) => &word.glyphs[..ending_glyph],
-                            (true, true) => &word.glyphs[starting_glyph..ending_glyph],
+                            (true, false) => &word.glyphs[r.start.glyph..],
+                            (false, true) => &word.glyphs[..r.end.glyph],
+                            (true, true) => &word.glyphs[r.start.glyph..r.end.glyph],
                         };
 
                         for glyph in included_glyphs {
@@ -1731,23 +2675,44 @@ impl ShapeLine {
                                 x_advance = x_advance.round();
                             }
                             if self.rtl {
-                                x -= x_advance;
+                                *x -= x_advance;
                             }
                             let y_advance = glyph_font_size * glyph.y_advance;
-                            glyphs.push(glyph.layout(
+                            let mut layout_glyph = glyph.layout(
                                 glyph_font_size,
                                 glyph.metrics_opt.map(|x| x.line_height),
-                                x,
-                                y,
+                                *x,
+                                *y,
                                 x_advance,
-                                span.level,
-                            ));
-                            if !self.rtl {
-                                x += x_advance;
+                                r.level,
+                            );
+                            // Fix ellipsis glyph indices: point both start and
+                            // end to the elision boundary so that hit-detection
+                            // places the cursor at the seam between visible and
+                            // elided text instead of selecting invisible content.
+                            if is_ellipsis {
+                                if let Some((elided_start, elided_end)) = elided_byte_range {
+                                    // Use the boundary closest to the visible
+                                    // content that is adjacent to this ellipsis:
+                                    //   Start:  …|visible  → boundary = elided_end
+                                    //   End:    visible|…  → boundary = elided_start
+                                    //   Middle: vis|…|vis  → boundary = elided_start
+                                    let boundary = if elided_start == 0 {
+                                        elided_end
+                                    } else {
+                                        elided_start
+                                    };
+                                    layout_glyph.start = boundary;
+                                    layout_glyph.end = boundary;
+                                }
                             }
-                            y += y_advance;
-                            max_ascent = max_ascent.max(glyph_font_size * glyph.ascent);
-                            max_descent = max_descent.max(glyph_font_size * glyph.descent);
+                            glyphs.push(layout_glyph);
+                            if !self.rtl {
+                                *x += x_advance;
+                            }
+                            *y += y_advance;
+                            *max_ascent = max_ascent.max(glyph_font_size * glyph.ascent);
+                            *max_descent = max_descent.max(glyph_font_size * glyph.descent);
                         }
                     }
                 }
@@ -1755,12 +2720,26 @@ impl ShapeLine {
 
             if self.rtl {
                 for range in new_order.into_iter().rev() {
-                    process_range(range);
+                    process_range(
+                        range,
+                        &mut x,
+                        &mut y,
+                        &mut glyphs,
+                        &mut max_ascent,
+                        &mut max_descent,
+                    );
                 }
             } else {
                 /* LTR */
                 for range in new_order {
-                    process_range(range);
+                    process_range(
+                        range,
+                        &mut x,
+                        &mut y,
+                        &mut glyphs,
+                        &mut max_ascent,
+                        &mut max_descent,
+                    );
                 }
             }
 
