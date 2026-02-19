@@ -8,9 +8,7 @@ use crate::{
     FontSystem, Hinting, LayoutGlyph, LayoutLine, Metrics, Wrap,
 };
 #[cfg(not(feature = "std"))]
-use alloc::format;
-#[cfg(not(feature = "std"))]
-use alloc::vec::Vec;
+use alloc::{format, vec, vec::Vec};
 
 use alloc::collections::VecDeque;
 use core::cmp::{max, min};
@@ -1860,7 +1858,11 @@ impl ShapeLine {
     /// Returns the words for a given span index, handling the ellipsis sentinel.
     fn get_span_words(&self, span_index: usize) -> &[ShapeWord] {
         if span_index == ELLIPSIS_SPAN {
-            &self.ellipsis_span.as_ref().unwrap().words
+            &self
+                .ellipsis_span
+                .as_ref()
+                .expect("ellipsis_span not set")
+                .words
         } else {
             &self.spans[span_index].words
         }
