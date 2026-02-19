@@ -2479,7 +2479,8 @@ impl ShapeLine {
                                  y: &mut f32,
                                  glyphs: &mut Vec<LayoutGlyph>,
                                  max_ascent: &mut f32,
-                                 max_descent: &mut f32| {
+                                 max_descent: &mut f32,
+                                 level: unicode_bidi::Level| {
                 if let Some(ellipsis_cache) = &self.ellipsis {
                     for glyph in &ellipsis_cache.glyphs {
                         let glyph_font_size = glyph.metrics_opt.map_or(font_size, |x| x.font_size);
@@ -2497,7 +2498,7 @@ impl ShapeLine {
                             *x,
                             *y,
                             x_advance,
-                            unicode_bidi::Level::ltr(), // TODO: Should ellipsis always be LTR?
+                            level,
                         ));
                         if !self.rtl {
                             *x += x_advance;
@@ -2510,12 +2511,21 @@ impl ShapeLine {
             };
 
             if ellipsized_start {
+                let level = new_order
+                    .first()
+                    .map(|r| self.spans[visual_line.ranges[r.start].span].level)
+                    .unwrap_or(if self.rtl {
+                        unicode_bidi::Level::rtl()
+                    } else {
+                        unicode_bidi::Level::ltr()
+                    });
                 push_ellipsis(
                     &mut x,
                     &mut y,
                     &mut glyphs,
                     &mut max_ascent,
                     &mut max_descent,
+                    level,
                 );
             }
 
@@ -2528,12 +2538,14 @@ impl ShapeLine {
                 for (i, r) in visual_line.ranges[range.clone()].iter().enumerate() {
                     if let EllipsizeState::Middle { insert_at_range } = visual_line.ellipsized {
                         if range.start + i == insert_at_range {
+                            let level = self.spans[visual_line.ranges[insert_at_range].span].level;
                             push_ellipsis(
                                 &mut *x,
                                 &mut *y,
                                 &mut *glyphs,
                                 &mut *max_ascent,
                                 &mut *max_descent,
+                                level,
                             );
                         }
                     }
@@ -2612,6 +2624,19 @@ impl ShapeLine {
                 }
             };
 
+            // let's save the last ellipsis before consuming "new_order"
+            let end_ellipsis_level = if ellipsized_end {
+                new_order
+                    .last()
+                    .map(|r| self.spans[visual_line.ranges[r.end - 1].span].level)
+                    .unwrap_or(if self.rtl {
+                        unicode_bidi::Level::rtl()
+                    } else {
+                        unicode_bidi::Level::ltr()
+                    })
+            } else {
+                unicode_bidi::Level::ltr()
+            };
             if self.rtl {
                 for range in new_order.into_iter().rev() {
                     process_range(
@@ -2644,6 +2669,7 @@ impl ShapeLine {
                     &mut glyphs,
                     &mut max_ascent,
                     &mut max_descent,
+                    end_ellipsis_level,
                 );
             }
 
