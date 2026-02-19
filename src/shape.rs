@@ -1632,10 +1632,19 @@ impl ShapeLine {
                             (WordGlyphPos::ZERO, WordGlyphPos::new(word_idx, glyph_end))
                         }
                     } else {
-                        (
-                            WordGlyphPos::new(word_idx, glyph_end),
-                            WordGlyphPos::new(span.words.len(), 0),
-                        )
+                        // For an incongruent span in the forward direction, the
+                        // word indices are (0..start.word).rev(). Cap the VlRange
+                        // end at start.word_glyph_pos() so it doesn't include
+                        // words beyond start.word that belong to a previous line.
+                        // For the backward direction (congruent span), the word
+                        // indices are (start.word..word_count).rev() and
+                        // span.words.len() is the correct end.
+                        let range_end = if span_index == start.span && !congruent {
+                            start.word_glyph_pos()
+                        } else {
+                            WordGlyphPos::new(span.words.len(), 0)
+                        };
+                        (WordGlyphPos::new(word_idx, glyph_end), range_end)
                     };
                     self.add_to_visual_line(
                         current_visual_line,
