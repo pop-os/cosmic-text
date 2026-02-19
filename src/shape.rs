@@ -1086,6 +1086,9 @@ struct VisualLine {
     spaces: u32,
     w: f32,
     ellipsized: bool,
+    /// Byte range (start, end) of the original line text that was replaced by the ellipsis.
+    /// Only set when `ellipsized` is true.
+    elided_byte_range: Option<(usize, usize)>,
 }
 
 impl VisualLine {
@@ -1094,6 +1097,7 @@ impl VisualLine {
         self.spaces = 0;
         self.w = 0.;
         self.ellipsized = false;
+        self.elided_byte_range = None;
     }
 }
 
@@ -1862,6 +1866,73 @@ impl ShapeLine {
         }
     }
 
+    fn byte_range_of_vlrange(&self, r: &VlRange) -> Option<(usize, usize)> {
+        debug_assert_ne!(r.span, ELLIPSIS_SPAN);
+        let words = self.get_span_words(r.span);
+        let mut min_byte = usize::MAX;
+        let mut max_byte = 0usize;
+        let end_word = r.end.word + usize::from(r.end.glyph != 0);
+        for (i, word) in words.iter().enumerate().take(end_word).skip(r.start.word) {
+            let included_glyphs = match (i == r.start.word, i == r.end.word) {
+                (false, false) => &word.glyphs[..],
+                (true, false) => &word.glyphs[r.start.glyph..],
+                (false, true) => &word.glyphs[..r.end.glyph],
+                (true, true) => &word.glyphs[r.start.glyph..r.end.glyph],
+            };
+            for glyph in included_glyphs {
+                min_byte = min_byte.min(glyph.start);
+                max_byte = max_byte.max(glyph.end);
+            }
+        }
+        if min_byte <= max_byte {
+            Some((min_byte, max_byte))
+        } else {
+            None
+        }
+    }
+
+    fn compute_elided_byte_range(
+        &self,
+        visual_line: &VisualLine,
+        line_len: usize,
+    ) -> Option<(usize, usize)> {
+        if !visual_line.ellipsized {
+            return None;
+        }
+        // Find the position of the ellipsis VlRange
+        let ellipsis_idx = visual_line
+            .ranges
+            .iter()
+            .position(|r| r.span == ELLIPSIS_SPAN)?;
+
+        // Find the byte range of the visible content before the ellipsis
+        let before_end = (0..ellipsis_idx)
+            .rev()
+            .find_map(|i| self.byte_range_of_vlrange(&visual_line.ranges[i]))
+            .map(|(_, end)| end)
+            .unwrap_or(0);
+
+        // Find the byte range of the visible content after the ellipsis
+        let after_start = (ellipsis_idx + 1..visual_line.ranges.len())
+            .find_map(|i| self.byte_range_of_vlrange(&visual_line.ranges[i]))
+            .map(|(start, _)| start)
+            .unwrap_or(line_len);
+
+        Some((before_end, after_start))
+    }
+
+    /// Returns the maximum byte offset across all glyphs in all non-ellipsis spans.
+    /// This effectively gives the byte length of the original shaped text.
+    fn max_byte_offset(&self) -> usize {
+        self.spans
+            .iter()
+            .flat_map(|span| span.words.iter())
+            .flat_map(|word| word.glyphs.iter())
+            .map(|g| g.end)
+            .max()
+            .unwrap_or(0)
+    }
+
     /// Returns the width of the ellipsis in the given font size.
     fn ellipsis_w(&self, font_size: f32) -> f32 {
         self.ellipsis_span
@@ -1969,6 +2040,14 @@ impl ShapeLine {
                     current_visual_line.w += ellipsis_w;
                 }
             }
+        }
+
+        // Compute the byte range of ellipsized text so the ellipsis LayoutGlyph
+        // can have valid start/end indices into the original line text.
+        if current_visual_line.ellipsized {
+            let line_len = self.max_byte_offset();
+            current_visual_line.elided_byte_range =
+                self.compute_elided_byte_range(current_visual_line, line_len);
         }
     }
 
@@ -2529,6 +2608,12 @@ impl ShapeLine {
                 0.
             };
 
+            let elided_byte_range = if visual_line.ellipsized {
+                visual_line.elided_byte_range
+            } else {
+                None
+            };
+
             let process_range = |range: Range<usize>,
                                  x: &mut f32,
                                  y: &mut f32,
@@ -2536,6 +2621,7 @@ impl ShapeLine {
                                  max_ascent: &mut f32,
                                  max_descent: &mut f32| {
                 for r in visual_line.ranges[range.clone()].iter() {
+                    let is_ellipsis = r.span == ELLIPSIS_SPAN;
                     let span_words = self.get_span_words(r.span);
                     // If ending_glyph is not 0 we need to include glyphs from the ending_word
                     for i in r.start.word..r.end.word + usize::from(r.end.glyph != 0) {
@@ -2592,14 +2678,35 @@ impl ShapeLine {
                                 *x -= x_advance;
                             }
                             let y_advance = glyph_font_size * glyph.y_advance;
-                            glyphs.push(glyph.layout(
+                            let mut layout_glyph = glyph.layout(
                                 glyph_font_size,
                                 glyph.metrics_opt.map(|x| x.line_height),
                                 *x,
                                 *y,
                                 x_advance,
                                 r.level,
-                            ));
+                            );
+                            // Fix ellipsis glyph indices: point both start and
+                            // end to the elision boundary so that hit-detection
+                            // places the cursor at the seam between visible and
+                            // elided text instead of selecting invisible content.
+                            if is_ellipsis {
+                                if let Some((elided_start, elided_end)) = elided_byte_range {
+                                    // Use the boundary closest to the visible
+                                    // content that is adjacent to this ellipsis:
+                                    //   Start:  …|visible  → boundary = elided_end
+                                    //   End:    visible|…  → boundary = elided_start
+                                    //   Middle: vis|…|vis  → boundary = elided_start
+                                    let boundary = if elided_start == 0 {
+                                        elided_end
+                                    } else {
+                                        elided_start
+                                    };
+                                    layout_glyph.start = boundary;
+                                    layout_glyph.end = boundary;
+                                }
+                            }
+                            glyphs.push(layout_glyph);
                             if !self.rtl {
                                 *x += x_advance;
                             }
