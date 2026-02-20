@@ -1845,73 +1845,23 @@ impl ShapeLine {
                     0., //pass 0 for ellipsis_w
                     LayoutDirection::Backward,
                 );
-                // Check if anything was actually skipped between the two halves
-                let first_half_end = if spans[range.span].level.is_rtl() != rtl {
-                    SpanWordGlyphPos {
-                        span: range.span,
-                        word: range.start.word,
-                        glyph: range.start.glyph,
-                    }
-                } else {
-                    SpanWordGlyphPos {
-                        span: range.span,
-                        word: range.end.word,
-                        glyph: range.end.glyph,
-                    }
-                };
-                let second_half_start = ending_line.ranges.first().map(|r| {
-                    if spans[r.span].level.is_rtl() != rtl {
-                        SpanWordGlyphPos {
-                            span: r.span,
-                            word: r.end.word,
-                            glyph: r.end.glyph,
-                        }
-                    } else {
-                        SpanWordGlyphPos {
-                            span: r.span,
-                            word: r.start.word,
-                            glyph: r.start.glyph,
-                        }
-                    }
-                });
-                let actually_ellipsized = match second_half_start {
-                    Some(shs) => shs != first_half_end,
-                    None => false, // nothing in backward pass = nothing was skipped
-                };
-                // add both to the current_visual_line
-                if actually_ellipsized {
-                    // Insert the ellipsis VlRange between the two halves.
-                    // Its BiDi level is determined by the adjacent ranges.
-                    let ellipsis_level = self.ellipsis_level_between(
-                        starting_line.ranges.last(),
-                        ending_line.ranges.first(),
-                    );
-                    starting_line
-                        .ranges
-                        .push(self.ellipsis_vlrange(ellipsis_level));
-                    starting_line.ranges.extend(ending_line.ranges);
-                    current_visual_line.ranges = starting_line.ranges;
-                    current_visual_line.ellipsized = true;
-                    current_visual_line.w = starting_line.w + ending_line.w + ellipsis_w;
-                } else {
-                    self.layout_spans(
-                        current_visual_line,
-                        font_size,
-                        spans,
-                        start_opt,
-                        rtl,
-                        Some(width),
-                        Ellipsize::None,
-                        0., //pass 0 for ellipsis_w
-                        LayoutDirection::Backward,
-                    );
-                    return;
-                }
+                // Insert the ellipsis VlRange between the two halves.
+                // Its BiDi level is determined by the adjacent ranges.
+                let ellipsis_level = self.ellipsis_level_between(
+                    starting_line.ranges.last(),
+                    ending_line.ranges.first(),
+                );
+                starting_line
+                    .ranges
+                    .push(self.ellipsis_vlrange(ellipsis_level));
+                starting_line.ranges.extend(ending_line.ranges);
+                current_visual_line.ranges = starting_line.ranges;
+                current_visual_line.ellipsized = true;
+                current_visual_line.w = starting_line.w + ending_line.w + ellipsis_w;
                 current_visual_line.spaces = starting_line.spaces + ending_line.spaces;
             }
             _ => {
                 // everything fit in the forward pass
-                log::warn!("This should be unreachable!");
                 current_visual_line.ranges = starting_line.ranges;
                 current_visual_line.w = starting_line.w;
                 current_visual_line.spaces = starting_line.spaces;
