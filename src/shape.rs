@@ -1546,7 +1546,7 @@ impl ShapeLine {
         direction: LayoutDirection,
     ) {
         let check_ellipsizing = matches!(ellipsize, Ellipsize::Start(_) | Ellipsize::End(_))
-            && width_opt.is_some_and(|w| w > 0.0 && w.is_finite());
+            && width_opt.is_some_and(|w| w.is_finite());
 
         let max_width = width_opt.unwrap_or(f32::INFINITY);
         let span_count = spans.len();
