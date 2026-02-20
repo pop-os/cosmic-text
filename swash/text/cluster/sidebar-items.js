@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["MAX_CLUSTER_SIZE"],"enum":["Boundary","Emoji","ShapeClass","Status","Whitespace"],"struct":["Char","CharCluster","CharInfo","ClusterInfo","Parser","SourceRange","Token"],"type":["UserData"]};

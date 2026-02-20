@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["DLNG","SLNG"],"enum":["Metadata"],"struct":["DataMapRecord","ScriptLangTag"],"type":["Meta"]};

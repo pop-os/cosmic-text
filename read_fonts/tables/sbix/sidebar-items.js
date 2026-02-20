@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["HeaderFlags"],"type":["GlyphData","Sbix","Strike"]};

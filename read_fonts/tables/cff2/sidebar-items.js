@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["Cff2"],"type":["Cff2Header"]};

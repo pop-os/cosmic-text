@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["CompositeMode","GradientExtend","Paint"],"struct":["ColorStop","GradientStopsIter","LinearGradient","RadialGradient","SweepGradient","Table"],"trait":["Painter"],"type":["ClipBox"]};

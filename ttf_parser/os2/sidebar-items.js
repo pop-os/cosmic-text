@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Permissions","Style","Weight","Width"],"struct":["ScriptMetrics","Table","UnicodeRanges"]};
