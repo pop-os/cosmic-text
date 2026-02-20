@@ -8,7 +8,7 @@ use crate::{
     FontSystem, Hinting, LayoutGlyph, LayoutLine, Metrics, Wrap,
 };
 #[cfg(not(feature = "std"))]
-use alloc::{boxed::Box, format, vec, vec::Vec};
+use alloc::{format, vec, vec::Vec};
 
 use alloc::collections::VecDeque;
 use core::cmp::{max, min};
@@ -1498,11 +1498,11 @@ impl ShapeLine {
         let mut acc: f32 = 0.0;
 
         // Remaining words in the current span
-        let word_range: Box<dyn Iterator<Item = usize>> = match (direction, congruent) {
-            (LayoutDirection::Forward, true) => Box::new(word_idx + 1..word_count),
-            (LayoutDirection::Forward, false) => Box::new(0..word_idx),
-            (LayoutDirection::Backward, true) => Box::new(starting_word_index..word_idx),
-            (LayoutDirection::Backward, false) => Box::new(word_idx + 1..word_count),
+        let word_range: Range<usize> = match (direction, congruent) {
+            (LayoutDirection::Forward, true) => word_idx + 1..word_count,
+            (LayoutDirection::Forward, false) => 0..word_idx,
+            (LayoutDirection::Backward, true) => starting_word_index..word_idx,
+            (LayoutDirection::Backward, false) => word_idx + 1..word_count,
         };
         for wi in word_range {
             acc += spans[span_index].words[wi].width(font_size);
@@ -1512,9 +1512,9 @@ impl ShapeLine {
         }
 
         // Remaining spans
-        let span_range: Box<dyn Iterator<Item = usize>> = match direction {
-            LayoutDirection::Forward => Box::new(span_index + 1..span_count),
-            LayoutDirection::Backward => Box::new(start_span..span_index),
+        let span_range: Range<usize> = match direction {
+            LayoutDirection::Forward => span_index + 1..span_count,
+            LayoutDirection::Backward => start_span..span_index,
         };
         for si in span_range {
             for w in &spans[si].words {
