@@ -1,5 +1,10 @@
+use std::path::PathBuf;
+
 use common::DrawTestCfg;
-use cosmic_text::{Align, Attrs, Ellipsize, EllipsizeHeightLimit, Family, Wrap};
+use cosmic_text::{
+    fontdb::Database, Align, Attrs, Buffer, Ellipsize, EllipsizeHeightLimit, Family, FontSystem,
+    Metrics, Shaping, Wrap,
+};
 
 mod common;
 
@@ -157,5 +162,24 @@ fn test_ellipsize_mixed_ltr_rtl_ltr_middle_three_lines() {
         .wrap(Wrap::WordOrGlyph)
         .ellipsize(Ellipsize::Middle(EllipsizeHeightLimit::Lines(3)))
         .canvas(200, 100)
+        .validate_text_rendering();
+}
+
+/// Regression rendering test: Fluent's fl!() wraps interpolated values with BiDi
+/// isolation characters. With the bug, this rendered as "Workspace… 2"
+/// After the fix it must render the full "Workspace 2" without ellipsis.
+#[test]
+fn test_ellipsize_bidi_isolates_middle_bug() {
+    let attrs = Attrs::new().family(Family::Name("Inter"));
+    DrawTestCfg::new("ellipsize_bidi_isolates_middle_bug")
+        .font_size(20., 26.)
+        .font_attrs(attrs)
+        .rich_text([(
+            "\u{2068}Workspace\u{2069}\u{2068} \u{2069}\u{2068}2\u{2069}",
+            Attrs::new().family(Family::Name("Inter")),
+        )])
+        .wrap(Wrap::WordOrGlyph)
+        .ellipsize(Ellipsize::Middle(EllipsizeHeightLimit::Lines(1)))
+        .canvas(220, 50)
         .validate_text_rendering();
 }

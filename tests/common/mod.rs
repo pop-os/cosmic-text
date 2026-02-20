@@ -21,6 +21,9 @@ pub struct DrawTestCfg {
     name: String,
     /// The text to render to image
     text: String,
+    /// Optional rich text spans. When set, `set_rich_text` is used instead of `set_text`.
+    /// Each entry is `(text, attrs)` for one styled span.
+    rich_spans: Option<Vec<(String, AttrsOwned)>>,
     /// The name, details of the font to be used.
     /// Expected to be one of the fonts found under the `fonts` directory in this repository.
     font: AttrsOwned,
@@ -41,6 +44,7 @@ impl Default for DrawTestCfg {
             name: "default".into(),
             font: AttrsOwned::new(&font),
             text: "".into(),
+            rich_spans: None,
             font_size: 16.0,
             line_height: 20.0,
             canvas_width: 300,
@@ -62,6 +66,19 @@ impl DrawTestCfg {
 
     pub fn text(mut self, text: impl Into<String>) -> Self {
         self.text = text.into();
+        self
+    }
+
+    pub fn rich_text(
+        mut self,
+        spans: impl IntoIterator<Item = (&'static str, Attrs<'static>)>,
+    ) -> Self {
+        self.rich_spans = Some(
+            spans
+                .into_iter()
+                .map(|(text, attrs)| (text.to_string(), AttrsOwned::new(&attrs)))
+                .collect(),
+        );
         self
     }
 
@@ -115,12 +132,23 @@ impl DrawTestCfg {
             Some((self.canvas_width - margins * 2) as f32),
             Some((self.canvas_height - margins * 2) as f32),
         );
-        buffer.set_text(
-            &self.text,
-            &self.font.as_attrs(),
-            Shaping::Advanced,
-            self.alignment,
-        );
+        if let Some(ref spans) = self.rich_spans {
+            buffer.set_rich_text(
+                spans
+                    .iter()
+                    .map(|(text, attrs)| (text.as_str(), attrs.as_attrs())),
+                &self.font.as_attrs(),
+                Shaping::Advanced,
+                self.alignment,
+            );
+        } else {
+            buffer.set_text(
+                &self.text,
+                &self.font.as_attrs(),
+                Shaping::Advanced,
+                self.alignment,
+            );
+        }
         buffer.shape_until_scroll(true);
 
         // Black
