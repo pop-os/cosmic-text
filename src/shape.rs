@@ -1739,6 +1739,27 @@ impl ShapeLine {
         ellipsis_w: f32,
     ) {
         assert!(matches!(ellipsize, Ellipsize::Middle(_)));
+
+        // First check if all content fits without any ellipsis.
+        {
+            let mut test_line = VisualLine::default();
+            self.layout_spans(
+                &mut test_line,
+                font_size,
+                spans,
+                start_opt,
+                rtl,
+                Some(width),
+                Ellipsize::End(EllipsizeHeightLimit::Lines(1)),
+                ellipsis_w,
+                LayoutDirection::Forward,
+            );
+            if !test_line.ellipsized && test_line.w <= width {
+                *current_visual_line = test_line;
+                return;
+            }
+        }
+
         let mut starting_line = VisualLine::default();
         self.layout_spans(
             &mut starting_line,
@@ -1848,6 +1869,7 @@ impl ShapeLine {
             }
             _ => {
                 // everything fit in the forward pass
+                log::warn!("This should be unreachable!");
                 current_visual_line.ranges = starting_line.ranges;
                 current_visual_line.w = starting_line.w;
                 current_visual_line.spaces = starting_line.spaces;
