@@ -1441,7 +1441,7 @@ impl ShapeLine {
                     break;
                 }
                 glyphs_w += g_w;
-                glyph_end = glyph_idx;
+                glyph_end = glyph_idx + 1;
             }
             (glyph_end, glyphs_w)
         } else {
