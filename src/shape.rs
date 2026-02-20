@@ -8,7 +8,7 @@ use crate::{
     FontSystem, Hinting, LayoutGlyph, LayoutLine, Metrics, Wrap,
 };
 #[cfg(not(feature = "std"))]
-use alloc::{format, vec, vec::Vec};
+use alloc::{boxed::Box, format, vec, vec::Vec};
 
 use alloc::collections::VecDeque;
 use core::cmp::{max, min};
@@ -1482,6 +1482,52 @@ impl ShapeLine {
         vl.spaces += number_of_blanks;
     }
 
+    fn remaining_content_exceeds(
+        spans: &[ShapeSpan],
+        font_size: f32,
+        span_index: usize,
+        word_idx: usize,
+        word_count: usize,
+        starting_word_index: usize,
+        direction: LayoutDirection,
+        congruent: bool,
+        start_span: usize,
+        span_count: usize,
+        threshold: f32,
+    ) -> bool {
+        let mut acc: f32 = 0.0;
+
+        // Remaining words in the current span
+        let word_range: Box<dyn Iterator<Item = usize>> = match (direction, congruent) {
+            (LayoutDirection::Forward, true) => Box::new(word_idx + 1..word_count),
+            (LayoutDirection::Forward, false) => Box::new(0..word_idx),
+            (LayoutDirection::Backward, true) => Box::new(starting_word_index..word_idx),
+            (LayoutDirection::Backward, false) => Box::new(word_idx + 1..word_count),
+        };
+        for wi in word_range {
+            acc += spans[span_index].words[wi].width(font_size);
+            if acc > threshold {
+                return true;
+            }
+        }
+
+        // Remaining spans
+        let span_range: Box<dyn Iterator<Item = usize>> = match direction {
+            LayoutDirection::Forward => Box::new(span_index + 1..span_count),
+            LayoutDirection::Backward => Box::new(start_span..span_index),
+        };
+        for si in span_range {
+            for w in &spans[si].words {
+                acc += w.width(font_size);
+                if acc > threshold {
+                    return true;
+                }
+            }
+        }
+
+        false
+    }
+
     /// This will fit as much as possible in one line
     /// If forward is false, it will fit as much as possible from the end of the spans
     /// it will stop when it gets to "start".
@@ -1582,24 +1628,20 @@ impl ShapeLine {
                         && (
                             // if this  word doesn't fit, then we have an overflow
                             (total_w + word_range_width + word_width > max_width)
-                                // otherwise if this is not the last word of the last span
-                                // and we can't fit the ellipsis
-                                ||(
-                                    !(match (direction, congruent) {
-                                        (LayoutDirection::Forward, true) => {
-                                            (span_index == span_count - 1) && (word_idx == word_count - 1)
-                                        }
-                                        (LayoutDirection::Forward, false) => (span_index == span_count - 1) && (word_idx == 0),
-                                        (LayoutDirection::Backward, true) => {
-                                            (span_index == start.span) && (word_idx == starting_word_index)
-                                        }
-                                        (LayoutDirection::Backward, false) => {
-                                            (span_index == start.span) && (word_idx == word_count - 1)
-                                        }
-                                    })
-
-                                    && total_w + word_range_width + word_width + ellipsis_w > max_width
-                                )
+                                || (Self::remaining_content_exceeds(
+                                    spans,
+                                    font_size,
+                                    span_index,
+                                    word_idx,
+                                    word_count,
+                                    starting_word_index,
+                                    direction,
+                                    congruent,
+                                    start.span,
+                                    span_count,
+                                    ellipsis_w,
+                                ) && total_w + word_range_width + word_width + ellipsis_w
+                                    > max_width)
                         )
                 };
 
