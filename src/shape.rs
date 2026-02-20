@@ -792,6 +792,34 @@ impl ShapeWord {
     }
 }
 
+fn should_shape_with_span_context(
+    span: &str,
+    level: unicode_bidi::Level,
+    shaping: Shaping,
+) -> bool {
+    if shaping != Shaping::Advanced || level.is_rtl() {
+        return false;
+    }
+
+    let mut has_whitespace = false;
+    let mut has_non_whitespace = false;
+    for ch in span.chars() {
+        // Keep this path conservative to avoid changing behavior for complex
+        // scripts / controls where contextual shaping and bidi interactions are
+        // more subtle.
+        if !ch.is_ascii() || ch.is_ascii_control() {
+            return false;
+        }
+        if ch.is_whitespace() {
+            has_whitespace = true;
+        } else {
+            has_non_whitespace = true;
+        }
+    }
+
+    has_whitespace && has_non_whitespace
+}
+
 /// A shaped span (for bidirectional processing)
 #[derive(Clone, Debug)]
 pub struct ShapeSpan {
@@ -866,6 +894,7 @@ impl ShapeSpan {
             cached_words.extend(words.drain(..).rev());
         }
 
+        let mut word_ranges = Vec::new();
         let mut start_word = 0;
         for (end_lb, _) in unicode_linebreak::linebreaks(span) {
             // Check if this break opportunity splits a likely ligature (e.g. "|>" or "!=")
@@ -948,36 +977,58 @@ impl ShapeSpan {
                 }
             }
             if start_word < start_lb {
-                let mut word = cached_words.pop().unwrap_or_else(ShapeWord::empty);
-                word.build(
-                    font_system,
-                    line,
-                    attrs_list,
+                word_ranges.push((
                     (span_range.start + start_word)..(span_range.start + start_lb),
-                    level,
                     false,
-                    shaping,
-                );
-                words.push(word);
+                ));
             }
             if start_lb < end_lb {
                 for (i, c) in span[start_lb..end_lb].char_indices() {
                     // assert!(c.is_whitespace());
-                    let mut word = cached_words.pop().unwrap_or_else(ShapeWord::empty);
-                    word.build(
-                        font_system,
-                        line,
-                        attrs_list,
+                    word_ranges.push((
                         (span_range.start + start_lb + i)
                             ..(span_range.start + start_lb + i + c.len_utf8()),
-                        level,
                         true,
-                        shaping,
-                    );
-                    words.push(word);
+                    ));
                 }
             }
             start_word = end_lb;
+        }
+
+        if should_shape_with_span_context(span, level, shaping) {
+            // Shape the full span first, then split into word buckets. This keeps
+            // OpenType contextual substitutions that depend on neighboring words.
+            let mut span_word = cached_words.pop().unwrap_or_else(ShapeWord::empty);
+            span_word.build(
+                font_system,
+                line,
+                attrs_list,
+                span_range.clone(),
+                level,
+                false,
+                shaping,
+            );
+            let span_glyphs = mem::take(&mut span_word.glyphs);
+            cached_words.push(span_word);
+
+            for (range, blank) in word_ranges {
+                let mut word = cached_words.pop().unwrap_or_else(ShapeWord::empty);
+                word.blank = blank;
+                word.glyphs.clear();
+                word.glyphs.extend(
+                    span_glyphs
+                        .iter()
+                        .filter(|glyph| glyph.start < range.end && glyph.end > range.start)
+                        .cloned(),
+                );
+                words.push(word);
+            }
+        } else {
+            for (range, blank) in word_ranges {
+                let mut word = cached_words.pop().unwrap_or_else(ShapeWord::empty);
+                word.build(font_system, line, attrs_list, range, level, blank, shaping);
+                words.push(word);
+            }
         }
 
         // Reverse glyphs in RTL lines
