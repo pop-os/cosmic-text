@@ -1860,11 +1860,26 @@ impl ShapeLine {
                 current_visual_line.w = starting_line.w + ending_line.w + ellipsis_w;
                 current_visual_line.spaces = starting_line.spaces + ending_line.spaces;
             }
+            None if forward_pass_overflowed && width > ellipsis_w => {
+                // buffer is small enough that the forward pass didn't fit
+                // only show the ellipsis
+                current_visual_line
+                    .ranges
+                    .push(self.ellipsis_vlrange(if self.rtl {
+                        unicode_bidi::Level::rtl()
+                    } else {
+                        unicode_bidi::Level::ltr()
+                    }));
+                current_visual_line.ellipsized = true;
+                current_visual_line.w = ellipsis_w;
+                current_visual_line.spaces = 0;
+            }
             _ => {
                 // everything fit in the forward pass
                 current_visual_line.ranges = starting_line.ranges;
                 current_visual_line.w = starting_line.w;
                 current_visual_line.spaces = starting_line.spaces;
+                current_visual_line.ellipsized = false;
             }
         }
     }

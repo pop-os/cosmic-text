@@ -183,3 +183,16 @@ fn test_ellipsize_bidi_isolates_middle_bug() {
         .canvas(220, 50)
         .validate_text_rendering();
 }
+
+#[test]
+fn test_ellipsize_ltr_middle_small_buffer() {
+    let attrs = Attrs::new().family(Family::Name("Inter"));
+    DrawTestCfg::new("ellipsize_ltr_middle_small_buffer")
+        .font_size(20., 26.)
+        .font_attrs(attrs)
+        .text("A/B Tester x8 Mono")
+        .wrap(Wrap::None)
+        .ellipsize(Ellipsize::Middle(EllipsizeHeightLimit::Lines(1)))
+        .canvas(30, 100)
+        .validate_text_rendering();
+}
