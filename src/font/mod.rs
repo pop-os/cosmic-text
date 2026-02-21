@@ -19,7 +19,7 @@ use fontdb::Style;
 use self_cell::self_cell;
 
 pub mod fallback;
-pub use fallback::{Fallback, PlatformFallback};
+pub use fallback::{platform_fallback, Fallback};
 
 pub use self::system::*;
 mod system;
