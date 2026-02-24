@@ -223,6 +223,38 @@ impl Hash for LetterSpacing {
     }
 }
 
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+pub enum UnderlineStyle {
+    #[default]
+    None,
+    Single,
+    Double,
+    // TODO: Wavy
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+pub struct TextDecoration {
+    pub underline: UnderlineStyle,
+    pub underline_color_opt: Option<Color>,
+    pub strikethrough: bool,
+    pub strikethrough_color_opt: Option<Color>,
+    pub overline: bool,
+    pub overline_color_opt: Option<Color>,
+}
+
+impl TextDecoration {
+    pub const fn new() -> Self {
+        Self {
+            underline: UnderlineStyle::None,
+            underline_color_opt: None,
+            strikethrough: false,
+            strikethrough_color_opt: None,
+            overline: false,
+            overline_color_opt: None,
+        }
+    }
+}
+
 /// Text attributes
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Attrs<'a> {
@@ -238,6 +270,7 @@ pub struct Attrs<'a> {
     /// Letter spacing (tracking) in EM
     pub letter_spacing_opt: Option<LetterSpacing>,
     pub font_features: FontFeatures,
+    pub text_decoration: TextDecoration,
 }
 
 impl<'a> Attrs<'a> {
@@ -256,6 +289,7 @@ impl<'a> Attrs<'a> {
             metrics_opt: None,
             letter_spacing_opt: None,
             font_features: FontFeatures::new(),
+            text_decoration: TextDecoration::new(),
         }
     }
 
@@ -319,6 +353,36 @@ impl<'a> Attrs<'a> {
         self
     }
 
+    pub const fn underline(mut self, style: UnderlineStyle) -> Self {
+        self.text_decoration.underline = style;
+        self
+    }
+
+    pub const fn underline_color(mut self, color: Color) -> Self {
+        self.text_decoration.underline_color_opt = Some(color);
+        self
+    }
+
+    pub const fn strikethrough(mut self) -> Self {
+        self.text_decoration.strikethrough = true;
+        self
+    }
+
+    pub const fn strikethrough_color(mut self, color: Color) -> Self {
+        self.text_decoration.strikethrough_color_opt = Some(color);
+        self
+    }
+
+    pub const fn overline(mut self) -> Self {
+        self.text_decoration.overline = true;
+        self
+    }
+
+    pub const fn overline_color(mut self, color: Color) -> Self {
+        self.text_decoration.overline_color_opt = Some(color);
+        self
+    }
+
     /// Check if this set of attributes can be shaped with another
     pub fn compatible(&self, other: &Self) -> bool {
         self.family == other.family
@@ -363,6 +427,7 @@ pub struct AttrsOwned {
     /// Letter spacing (tracking) in EM
     pub letter_spacing_opt: Option<LetterSpacing>,
     pub font_features: FontFeatures,
+    pub text_decoration: TextDecoration,
 }
 
 impl AttrsOwned {
@@ -378,6 +443,7 @@ impl AttrsOwned {
             metrics_opt: attrs.metrics_opt,
             letter_spacing_opt: attrs.letter_spacing_opt,
             font_features: attrs.font_features.clone(),
+            text_decoration: attrs.text_decoration,
         }
     }
 
@@ -393,6 +459,7 @@ impl AttrsOwned {
             metrics_opt: self.metrics_opt,
             letter_spacing_opt: self.letter_spacing_opt,
             font_features: self.font_features.clone(),
+            text_decoration: self.text_decoration,
         }
     }
 }
