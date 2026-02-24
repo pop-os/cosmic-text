@@ -9,7 +9,7 @@ use syntect::parsing::{ParseState, ScopeStack, SyntaxReference, SyntaxSet};
 
 use crate::{
     Action, AttrsList, BorrowedWithFontSystem, BufferRef, Change, Color, Cursor, Edit, Editor,
-    FontSystem, Renderer, Selection, Shaping, Style, Weight,
+    FontSystem, Renderer, Selection, Shaping, Style, UnderlineStyle, Weight,
 };
 
 pub use syntect::highlighting::Theme as SyntaxTheme;
@@ -366,7 +366,12 @@ impl<'buffer> Edit<'buffer> for SyntaxEditor<'_, 'buffer> {
                             Weight::BOLD
                         } else {
                             Weight::NORMAL
-                        }); //TODO: underline
+                        })
+                        .underline(if style.font_style.contains(FontStyle::UNDERLINE) {
+                            UnderlineStyle::Single
+                        } else {
+                            UnderlineStyle::None
+                        });
                     if span_attrs != original_attrs {
                         attrs_list.add_span(range, &span_attrs);
                     }

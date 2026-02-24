@@ -10,9 +10,9 @@ use core_maths::CoreFloat;
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
-    Affinity, Align, Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem, BufferLine, Color,
-    Cursor, Ellipsize, FontSystem, Hinting, LayoutCursor, LayoutGlyph, LayoutLine, LineEnding,
-    LineIter, Motion, Renderer, Scroll, ShapeLine, Shaping, Wrap,
+    render_decoration, Affinity, Align, Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem,
+    BufferLine, Color, Cursor, Ellipsize, FontSystem, Hinting, LayoutCursor, LayoutGlyph,
+    LayoutLine, LineEnding, LineIter, Motion, Renderer, Scroll, ShapeLine, Shaping, Wrap,
 };
 
 /// A line of visible text for rendering
@@ -1385,6 +1385,8 @@ impl Buffer {
 
     pub fn render<R: Renderer>(&self, renderer: &mut R, color: Color) {
         for run in self.layout_runs() {
+            // draw decorations before glyphs so text renders on top
+            render_decoration(renderer, &run, color);
             for glyph in run.glyphs {
                 let physical_glyph = glyph.physical((0., run.line_y), 1.0);
                 let glyph_color = glyph.color_opt.map_or(color, |some| some);

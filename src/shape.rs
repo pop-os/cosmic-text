@@ -5,7 +5,7 @@
 use crate::fallback::FontFallbackIter;
 use crate::{
     math, Align, Attrs, AttrsList, CacheKeyFlags, Color, Ellipsize, EllipsizeHeightLimit, Font,
-    FontSystem, Hinting, LayoutGlyph, LayoutLine, Metrics, Wrap,
+    FontSystem, Hinting, LayoutGlyph, LayoutLine, Metrics, TextDecoration, Wrap,
 };
 #[cfg(not(feature = "std"))]
 use alloc::{format, vec, vec::Vec};
@@ -236,6 +236,7 @@ fn shape_fallback(
             metadata: attrs.metadata,
             cache_key_flags: override_fake_italic(attrs.cache_key_flags, font, &attrs),
             metrics_opt: attrs.metrics_opt.map(Into::into),
+            text_decoration: attrs.text_decoration,
         });
     }
 
@@ -536,6 +537,7 @@ fn shape_skip(
                         &attrs,
                     ),
                     metrics_opt: attrs.metrics_opt.map(Into::into),
+                    text_decoration: attrs.text_decoration,
                 }
             }),
     );
@@ -572,6 +574,7 @@ pub struct ShapeGlyph {
     pub metadata: usize,
     pub cache_key_flags: CacheKeyFlags,
     pub metrics_opt: Option<Metrics>,
+    pub text_decoration: TextDecoration,
 }
 
 impl ShapeGlyph {
@@ -601,6 +604,7 @@ impl ShapeGlyph {
             color_opt: self.color_opt,
             metadata: self.metadata,
             cache_key_flags: self.cache_key_flags,
+            text_decoration: self.text_decoration,
         }
     }
 

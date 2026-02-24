@@ -10,8 +10,9 @@ use core::cmp;
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
-    Action, Attrs, AttrsList, BorrowedWithFontSystem, BufferLine, BufferRef, Change, ChangeItem,
-    Color, Cursor, Edit, FontSystem, LayoutRun, LineEnding, LineIter, Renderer, Selection, Shaping,
+    render_decoration, Action, Attrs, AttrsList, BorrowedWithFontSystem, BufferLine, BufferRef,
+    Change, ChangeItem, Color, Cursor, Edit, FontSystem, LayoutRun, LineEnding, LineIter, Renderer,
+    Selection, Shaping,
 };
 
 /// A wrapper of [`Buffer`] for easy editing
@@ -211,6 +212,7 @@ impl<'buffer> Editor<'buffer> {
                     renderer.rectangle(x, y, 1, line_height as u32, cursor_color);
                 }
 
+                render_decoration(renderer, &run, text_color);
                 for glyph in run.glyphs {
                     let physical_glyph = glyph.physical((0., line_y), 1.0);
 

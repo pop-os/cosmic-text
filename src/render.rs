@@ -1,6 +1,6 @@
 //! Helpers for rendering buffers and editors
 
-use crate::{Color, PhysicalGlyph};
+use crate::{Color, LayoutGlyph, LayoutRun, PhysicalGlyph, TextDecoration, UnderlineStyle};
 #[cfg(feature = "swash")]
 use crate::{FontSystem, SwashCache};
 
@@ -12,6 +12,117 @@ pub trait Renderer {
     /// Render a [`PhysicalGlyph`] with the provided [`Color`].
     /// For performance, consider using [`SwashCache`].
     fn glyph(&mut self, physical_glyph: PhysicalGlyph, color: Color);
+}
+
+pub fn render_decoration<R: Renderer>(renderer: &mut R, run: &LayoutRun, default_color: Color) {
+    if run.glyphs.is_empty() {
+        return;
+    }
+
+    let mut group_start: Option<usize> = None;
+
+    for (i, glyph) in run.glyphs.iter().enumerate() {
+        let start_new_group = match group_start {
+            None => true,
+            Some(_) => {
+                let prev = &run.glyphs[i - 1];
+                glyph.text_decoration != prev.text_decoration
+            }
+        };
+
+        if start_new_group {
+            if let Some(gs) = group_start {
+                draw_decoration_group(renderer, run, &run.glyphs[gs..i], default_color);
+            }
+            group_start = if has_any_decoration(&glyph.text_decoration) {
+                Some(i)
+            } else {
+                None
+            };
+        }
+    }
+
+    if let Some(gs) = group_start {
+        draw_decoration_group(renderer, run, &run.glyphs[gs..], default_color);
+    }
+}
+
+fn has_any_decoration(td: &TextDecoration) -> bool {
+    td.underline != UnderlineStyle::None || td.overline || td.strikethrough
+}
+
+fn draw_decoration_group<R: Renderer>(
+    renderer: &mut R,
+    run: &LayoutRun,
+    glyphs: &[LayoutGlyph],
+    default_color: Color,
+) {
+    if glyphs.is_empty() {
+        return;
+    }
+
+    let first = &glyphs[0];
+    let last = &glyphs[glyphs.len() - 1];
+    let td = &glyphs[0].text_decoration;
+    let font_size = first.font_size;
+    let x_start = first.x;
+    let x_end = last.x + last.w;
+    let width = (x_end - x_start) as u32;
+    if width <= 0 {
+        return;
+    }
+    // Underline
+    match td.underline {
+        UnderlineStyle::None => {}
+        UnderlineStyle::Single => {
+            let color = td
+                .underline_color_opt
+                .or(first.color_opt)
+                .unwrap_or(default_color);
+            let thickness = (font_size * 14.0).max(1.0);
+            let y = run.line_y + font_size * 0.125;
+            renderer.rectangle(x_start as i32, y as i32, width, thickness as u32, color);
+        }
+        UnderlineStyle::Double => {
+            let color = td
+                .underline_color_opt
+                .or(first.color_opt)
+                .unwrap_or(default_color);
+            let thickness = (font_size * 14.0).max(1.0);
+            let gap = thickness;
+            let y = run.line_y + font_size * 0.125;
+            renderer.rectangle(x_start as i32, y as i32, width, thickness as u32, color);
+            renderer.rectangle(
+                x_start as i32,
+                (y + thickness + gap) as i32,
+                width,
+                thickness as u32,
+                color,
+            );
+        }
+    }
+
+    // Strikethrough
+    if td.strikethrough {
+        let color = td
+            .strikethrough_color_opt
+            .or(first.color_opt)
+            .unwrap_or(default_color);
+        let thickness = (font_size / 14.0).max(1.0);
+        let y = run.line_y - font_size * 0.3;
+        renderer.rectangle(x_start as i32, y as i32, width, thickness as u32, color);
+    }
+
+    // Overline
+    if td.overline {
+        let color = td
+            .overline_color_opt
+            .or(first.color_opt)
+            .unwrap_or(default_color);
+        let thickness = (font_size / 14.0).max(1.0);
+        let y = run.line_top;
+        renderer.rectangle(x_start as i32, y as i32, width, thickness as u32, color);
+    }
 }
 
 /// Helper to migrate from old renderer
