@@ -84,7 +84,9 @@ fn draw_decoration_group<R: Renderer>(
                 .underline_color_opt
                 .or(first.color_opt)
                 .unwrap_or(default_color);
-            let thickness = (first.underline_metrics.thickness * font_size).max(1.0);
+            let thickness = (first.underline_metrics.thickness * font_size)
+                .max(1.0)
+                .ceil();
             let y = run.line_y - first.underline_metrics.offset * font_size;
             renderer.rectangle(x_start as i32, y as i32, width, thickness as u32, color);
         }
@@ -93,7 +95,9 @@ fn draw_decoration_group<R: Renderer>(
                 .underline_color_opt
                 .or(first.color_opt)
                 .unwrap_or(default_color);
-            let thickness = (first.underline_metrics.thickness * font_size).max(1.0);
+            let thickness = (first.underline_metrics.thickness * font_size)
+                .max(1.0)
+                .ceil();
             let gap = thickness;
             let y = run.line_y - first.underline_metrics.offset * font_size;
             renderer.rectangle(x_start as i32, y as i32, width, thickness as u32, color);
@@ -113,7 +117,9 @@ fn draw_decoration_group<R: Renderer>(
             .strikethrough_color_opt
             .or(first.color_opt)
             .unwrap_or(default_color);
-        let thickness = (first.strikethrough_metrics.thickness * font_size).max(1.0);
+        let thickness = (first.strikethrough_metrics.thickness * font_size)
+            .max(1.0)
+            .ceil();
         let y = run.line_y - first.strikethrough_metrics.offset * font_size;
         renderer.rectangle(x_start as i32, y as i32, width, thickness as u32, color);
     }
@@ -125,7 +131,9 @@ fn draw_decoration_group<R: Renderer>(
             .or(first.color_opt)
             .unwrap_or(default_color);
         // we're reusing underline thickness for overline
-        let thickness = (first.underline_metrics.thickness * font_size).max(1.0);
+        let thickness = (first.underline_metrics.thickness * font_size)
+            .max(1.0)
+            .ceil();
         let y = run.line_top; //TODO: this should be run.line_y - ascent
                               // but we don't have ascent in GlyphLayout
                               // using line_top as an approximation for now, which should be good enough for most fonts
