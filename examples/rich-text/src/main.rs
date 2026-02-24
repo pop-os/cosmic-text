@@ -32,7 +32,7 @@ fn set_buffer_text(buffer: &mut BorrowedWithFontSystem<'_, Buffer>) {
             attrs.clone().metrics(Metrics::relative(64.0, 1.2)),
         ),
         (
-            "Font size 8 ",
+            "\n\nFont size 8 \n\n",
             attrs.clone().metrics(Metrics::relative(8.0, 1.2)),
         ),
         (

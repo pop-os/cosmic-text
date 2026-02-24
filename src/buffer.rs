@@ -845,6 +845,11 @@ impl Buffer {
                 if *attrs != attrs_list.defaults() {
                     attrs_list.add_span(text_start..text_end, attrs);
                 }
+            } else if line_string.is_empty() && attrs.metrics_opt.is_some() {
+                // reset the attrs list with the span's attrs so the line height
+                // matches the span's font size rather than falling back to
+                // the buffer default
+                attrs_list = attrs_list.reset(attrs);
             }
 
             // we know that at the end of a line,
