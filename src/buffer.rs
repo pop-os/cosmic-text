@@ -11,8 +11,9 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
     render_decoration, Affinity, Align, Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem,
-    BufferLine, Color, Cursor, Ellipsize, FontSystem, Hinting, LayoutCursor, LayoutGlyph,
-    LayoutLine, LineEnding, LineIter, Motion, Renderer, Scroll, ShapeLine, Shaping, Wrap,
+    BufferLine, Color, Cursor, DecorationSpan, Ellipsize, FontSystem, Hinting, LayoutCursor,
+    LayoutGlyph, LayoutLine, LineEnding, LineIter, Motion, Renderer, Scroll, ShapeLine, Shaping,
+    Wrap,
 };
 
 /// A line of visible text for rendering
@@ -26,6 +27,8 @@ pub struct LayoutRun<'a> {
     pub rtl: bool,
     /// The array of layout glyphs to draw
     pub glyphs: &'a [LayoutGlyph],
+    /// Text decoration spans covering ranges of glyphs
+    pub decorations: &'a [DecorationSpan],
     /// Y offset to baseline of line
     pub line_y: f32,
     /// Y offset to top of line
@@ -147,6 +150,7 @@ impl<'b> Iterator for LayoutRunIter<'b> {
                     text: line.text(),
                     rtl: shape.rtl,
                     glyphs: &layout_line.glyphs,
+                    decorations: &layout_line.decorations,
                     line_y,
                     line_top,
                     line_height,

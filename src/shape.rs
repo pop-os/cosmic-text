@@ -4,9 +4,9 @@
 
 use crate::fallback::FontFallbackIter;
 use crate::{
-    math, Align, Attrs, AttrsList, CacheKeyFlags, Color, DecorationMetrics, Ellipsize,
-    EllipsizeHeightLimit, Font, FontSystem, GlyphDecorationData, Hinting, LayoutGlyph, LayoutLine,
-    Metrics, Wrap,
+    math, Align, Attrs, AttrsList, CacheKeyFlags, Color, DecorationMetrics, DecorationSpan,
+    Ellipsize, EllipsizeHeightLimit, Font, FontSystem, GlyphDecorationData, Hinting, LayoutGlyph,
+    LayoutLine, Metrics, Wrap,
 };
 #[cfg(not(feature = "std"))]
 use alloc::{boxed::Box, format, vec, vec::Vec};
@@ -625,7 +625,6 @@ impl ShapeGlyph {
             color_opt: self.color_opt,
             metadata: self.metadata,
             cache_key_flags: self.cache_key_flags,
-            decoration_data: self.decoration_data.clone(),
         }
     }
 
@@ -2688,10 +2687,13 @@ impl ShapeLine {
                 None
             };
 
+            let mut decorations: Vec<DecorationSpan> = Vec::new();
+
             let process_range = |range: Range<usize>,
                                  x: &mut f32,
                                  y: &mut f32,
                                  glyphs: &mut Vec<LayoutGlyph>,
+                                 decorations: &mut Vec<DecorationSpan>,
                                  max_ascent: &mut f32,
                                  max_descent: &mut f32| {
                 for r in visual_line.ranges[range.clone()].iter() {
@@ -2781,6 +2783,24 @@ impl ShapeLine {
                                 }
                             }
                             glyphs.push(layout_glyph);
+
+                            // Build decoration spans inline: extend or close+open
+                            let glyph_idx = glyphs.len() - 1;
+                            let cur_deco = glyph.decoration_data.as_deref();
+                            let extends = match (decorations.last(), cur_deco) {
+                                (Some(span), Some(d)) if span.data == *d => true,
+                                _ => false,
+                            };
+                            if extends {
+                                decorations.last_mut().unwrap().glyph_range.end = glyph_idx + 1;
+                            } else if let Some(d) = cur_deco {
+                                decorations.push(DecorationSpan {
+                                    glyph_range: glyph_idx..glyph_idx + 1,
+                                    data: d.clone(),
+                                    color_opt: glyphs[glyph_idx].color_opt,
+                                    font_size: glyphs[glyph_idx].font_size,
+                                });
+                            }
                             if !self.rtl {
                                 *x += x_advance;
                             }
@@ -2799,6 +2819,7 @@ impl ShapeLine {
                         &mut x,
                         &mut y,
                         &mut glyphs,
+                        &mut decorations,
                         &mut max_ascent,
                         &mut max_descent,
                     );
@@ -2811,6 +2832,7 @@ impl ShapeLine {
                         &mut x,
                         &mut y,
                         &mut glyphs,
+                        &mut decorations,
                         &mut max_ascent,
                         &mut max_descent,
                     );
@@ -2839,6 +2861,7 @@ impl ShapeLine {
                 max_descent,
                 line_height_opt,
                 glyphs,
+                decorations,
             });
         }
 
@@ -2850,6 +2873,7 @@ impl ShapeLine {
                 max_descent: 0.0,
                 line_height_opt: self.metrics_opt.map(|x| x.line_height),
                 glyphs: Vec::default(),
+                decorations: Vec::new(),
             });
         }
 

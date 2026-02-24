@@ -3,7 +3,7 @@
 #[cfg(not(feature = "std"))]
 use core_maths::CoreFloat;
 
-use crate::{Color, LayoutGlyph, LayoutRun, PhysicalGlyph, UnderlineStyle};
+use crate::{Color, DecorationSpan, LayoutRun, PhysicalGlyph, UnderlineStyle};
 #[cfg(feature = "swash")]
 use crate::{FontSystem, SwashCache};
 
@@ -19,62 +19,35 @@ pub trait Renderer {
 
 /// Draw text decoration lines (underline, strikethrough, overline) for a layout run.
 pub fn render_decoration<R: Renderer>(renderer: &mut R, run: &LayoutRun, default_color: Color) {
-    if run.glyphs.is_empty() {
-        return;
-    }
-
-    let mut group_start: Option<usize> = None;
-
-    for (i, glyph) in run.glyphs.iter().enumerate() {
-        let start_new_group = match group_start {
-            None => true,
-            Some(_) => {
-                let prev = &run.glyphs[i - 1];
-                glyph.decoration_data != prev.decoration_data
-            }
-        };
-
-        if start_new_group {
-            if let Some(gs) = group_start {
-                draw_decoration_group(renderer, run, &run.glyphs[gs..i], default_color);
-            }
-            group_start = if glyph.decoration_data.is_some() {
-                Some(i)
-            } else {
-                None
-            };
-        }
-    }
-
-    if let Some(gs) = group_start {
-        draw_decoration_group(renderer, run, &run.glyphs[gs..], default_color);
+    for span in run.decorations {
+        draw_decoration_span(renderer, run, span, default_color);
     }
 }
 
-fn draw_decoration_group<R: Renderer>(
+fn draw_decoration_span<R: Renderer>(
     renderer: &mut R,
     run: &LayoutRun,
-    glyphs: &[LayoutGlyph],
+    span: &DecorationSpan,
     default_color: Color,
 ) {
+    let glyphs = &run.glyphs[span.glyph_range.clone()];
     if glyphs.is_empty() {
         return;
     }
 
-    let first = &glyphs[0];
-    let last = &glyphs[glyphs.len() - 1];
-
-    // All glyphs in a group have the same decoration_data (guaranteed by grouping logic)
-    let deco = match &first.decoration_data {
-        Some(d) => d,
-        None => return,
-    };
+    let deco = &span.data;
     let td = &deco.text_decoration;
-    let font_size = first.font_size;
+    let font_size = span.font_size;
 
-    let x_start = first.x;
-    let x_end = last.x + last.w;
-    let width = x_end - x_start;
+    // Compute x extent as min/max over all glyphs, not first/last,
+    // because RTL paragraphs store glyphs in right-to-left order.
+    let mut x_min = f32::INFINITY;
+    let mut x_max = f32::NEG_INFINITY;
+    for g in glyphs {
+        x_min = x_min.min(g.x);
+        x_max = x_max.max(g.x + g.w);
+    }
+    let width = x_max - x_min;
     if width <= 0.0 {
         return;
     }
@@ -82,6 +55,7 @@ fn draw_decoration_group<R: Renderer>(
     if w == 0 {
         return;
     }
+    let x_start = x_min;
 
     // Underline
     match td.underline {
@@ -89,7 +63,7 @@ fn draw_decoration_group<R: Renderer>(
         UnderlineStyle::Single => {
             let color = td
                 .underline_color_opt
-                .or(first.color_opt)
+                .or(span.color_opt)
                 .unwrap_or(default_color);
             let thickness = (deco.underline_metrics.thickness * font_size)
                 .max(1.0)
@@ -100,7 +74,7 @@ fn draw_decoration_group<R: Renderer>(
         UnderlineStyle::Double => {
             let color = td
                 .underline_color_opt
-                .or(first.color_opt)
+                .or(span.color_opt)
                 .unwrap_or(default_color);
             let thickness = (deco.underline_metrics.thickness * font_size)
                 .max(1.0)
@@ -122,7 +96,7 @@ fn draw_decoration_group<R: Renderer>(
     if td.strikethrough {
         let color = td
             .strikethrough_color_opt
-            .or(first.color_opt)
+            .or(span.color_opt)
             .unwrap_or(default_color);
         let thickness = (deco.strikethrough_metrics.thickness * font_size)
             .max(1.0)
@@ -135,7 +109,7 @@ fn draw_decoration_group<R: Renderer>(
     if td.overline {
         let color = td
             .overline_color_opt
-            .or(first.color_opt)
+            .or(span.color_opt)
             .unwrap_or(default_color);
         // Reuse underline thickness for overline
         let thickness = (deco.underline_metrics.thickness * font_size)

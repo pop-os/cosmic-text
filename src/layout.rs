@@ -2,9 +2,11 @@
 
 use core::fmt::Display;
 
+use core::ops::Range;
+
 use crate::{math, CacheKey, CacheKeyFlags, Color, GlyphDecorationData};
 #[cfg(not(feature = "std"))]
-use alloc::{boxed::Box, vec::Vec};
+use alloc::vec::Vec;
 
 #[cfg(not(feature = "std"))]
 use core_maths::CoreFloat;
@@ -58,8 +60,19 @@ pub struct LayoutGlyph {
     pub metadata: usize,
     /// [`CacheKeyFlags`]
     pub cache_key_flags: CacheKeyFlags,
-    /// Decoration data, only allocated when decorations are active
-    pub decoration_data: Option<Box<GlyphDecorationData>>,
+}
+
+/// A span of consecutive glyphs sharing the same text decoration.
+#[derive(Clone, Debug, PartialEq)]
+pub struct DecorationSpan {
+    /// Range of glyph indices in `LayoutLine::glyphs` covered by this span
+    pub glyph_range: Range<usize>,
+    /// The decoration config and metrics
+    pub data: GlyphDecorationData,
+    /// Fallback color from the first glyph's `color_opt`
+    pub color_opt: Option<Color>,
+    /// Font size from the first glyph (used to scale EM-unit metrics)
+    pub font_size: f32,
 }
 
 #[derive(Clone, Debug)]
@@ -106,6 +119,8 @@ pub struct LayoutLine {
     pub line_height_opt: Option<f32>,
     /// Glyphs in line
     pub glyphs: Vec<LayoutGlyph>,
+    /// Text decoration spans covering ranges of glyphs
+    pub decorations: Vec<DecorationSpan>,
 }
 
 /// Wrapping mode
