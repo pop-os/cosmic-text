@@ -67,8 +67,13 @@ fn draw_decoration_group<R: Renderer>(
     let font_size = first.font_size;
     let x_start = first.x;
     let x_end = last.x + last.w;
-    let width = (x_end - x_start) as u32;
-    if width <= 0 {
+    let width = x_end - x_start;
+    if width <= 0.0 {
+        // first check to see if it's below 0.0
+        return;
+    }
+    let width = width as u32;
+    if width == 0 {
         return;
     }
     // Underline
@@ -79,8 +84,8 @@ fn draw_decoration_group<R: Renderer>(
                 .underline_color_opt
                 .or(first.color_opt)
                 .unwrap_or(default_color);
-            let thickness = (font_size * 14.0).max(1.0);
-            let y = run.line_y + font_size * 0.125;
+            let thickness = (first.underline_metrics.thickness * font_size).max(1.0);
+            let y = run.line_y - first.underline_metrics.offset * font_size;
             renderer.rectangle(x_start as i32, y as i32, width, thickness as u32, color);
         }
         UnderlineStyle::Double => {
@@ -88,9 +93,9 @@ fn draw_decoration_group<R: Renderer>(
                 .underline_color_opt
                 .or(first.color_opt)
                 .unwrap_or(default_color);
-            let thickness = (font_size * 14.0).max(1.0);
+            let thickness = (first.underline_metrics.thickness * font_size).max(1.0);
             let gap = thickness;
-            let y = run.line_y + font_size * 0.125;
+            let y = run.line_y - first.underline_metrics.offset * font_size;
             renderer.rectangle(x_start as i32, y as i32, width, thickness as u32, color);
             renderer.rectangle(
                 x_start as i32,
@@ -108,8 +113,8 @@ fn draw_decoration_group<R: Renderer>(
             .strikethrough_color_opt
             .or(first.color_opt)
             .unwrap_or(default_color);
-        let thickness = (font_size / 14.0).max(1.0);
-        let y = run.line_y - font_size * 0.3;
+        let thickness = (first.strikethrough_metrics.thickness * font_size).max(1.0);
+        let y = run.line_y - first.strikethrough_metrics.offset * font_size;
         renderer.rectangle(x_start as i32, y as i32, width, thickness as u32, color);
     }
 
@@ -119,8 +124,11 @@ fn draw_decoration_group<R: Renderer>(
             .overline_color_opt
             .or(first.color_opt)
             .unwrap_or(default_color);
-        let thickness = (font_size / 14.0).max(1.0);
-        let y = run.line_top;
+        // we're reusing underline thickness for overline
+        let thickness = (first.underline_metrics.thickness * font_size).max(1.0);
+        let y = run.line_top; //TODO: this should be run.line_y - ascent
+                              // but we don't have ascent in GlyphLayout
+                              // using line_top as an approximation for now, which should be good enough for most fonts
         renderer.rectangle(x_start as i32, y as i32, width, thickness as u32, color);
     }
 }

@@ -4,8 +4,9 @@
 
 use crate::fallback::FontFallbackIter;
 use crate::{
-    math, Align, Attrs, AttrsList, CacheKeyFlags, Color, Ellipsize, EllipsizeHeightLimit, Font,
-    FontSystem, Hinting, LayoutGlyph, LayoutLine, Metrics, TextDecoration, Wrap,
+    math, Align, Attrs, AttrsList, CacheKeyFlags, Color, DecorationMetrics, Ellipsize,
+    EllipsizeHeightLimit, Font, FontSystem, Hinting, LayoutGlyph, LayoutLine, Metrics,
+    TextDecoration, Wrap,
 };
 #[cfg(not(feature = "std"))]
 use alloc::{format, vec, vec::Vec};
@@ -15,6 +16,7 @@ use core::cmp::{max, min};
 use core::fmt;
 use core::mem;
 use core::ops::Range;
+use skrifa::metrics::Decoration;
 
 #[cfg(not(feature = "std"))]
 use core_maths::CoreFloat;
@@ -130,6 +132,7 @@ fn shape_fallback(
     let font_scale = font.metrics().units_per_em as f32;
     let ascent = font.metrics().ascent / font_scale;
     let descent = -font.metrics().descent / font_scale;
+    let (underline_metrics, strikethrough_metrics) = decoration_metrics(font);
 
     let mut buffer = scratch.harfrust_buffer.take().unwrap_or_default();
     buffer.set_direction(if span_rtl {
@@ -237,6 +240,8 @@ fn shape_fallback(
             cache_key_flags: override_fake_italic(attrs.cache_key_flags, font, &attrs),
             metrics_opt: attrs.metrics_opt.map(Into::into),
             text_decoration: attrs.text_decoration,
+            underline_metrics,
+            strikethrough_metrics,
         });
     }
 
@@ -504,6 +509,8 @@ fn shape_skip(
     let metrics = swash_font.metrics(&[]);
     let glyph_metrics = swash_font.glyph_metrics(&[]).scale(1.0);
 
+    let (underline_metrics, strikethrough_metrics) = decoration_metrics(font.as_ref());
+
     let ascent = metrics.ascent / f32::from(metrics.units_per_em);
     let descent = metrics.descent / f32::from(metrics.units_per_em);
 
@@ -538,6 +545,8 @@ fn shape_skip(
                     ),
                     metrics_opt: attrs.metrics_opt.map(Into::into),
                     text_decoration: attrs.text_decoration,
+                    underline_metrics,
+                    strikethrough_metrics,
                 }
             }),
     );
@@ -575,6 +584,8 @@ pub struct ShapeGlyph {
     pub cache_key_flags: CacheKeyFlags,
     pub metrics_opt: Option<Metrics>,
     pub text_decoration: TextDecoration,
+    pub underline_metrics: DecorationMetrics,
+    pub strikethrough_metrics: DecorationMetrics,
 }
 
 impl ShapeGlyph {
@@ -605,6 +616,8 @@ impl ShapeGlyph {
             metadata: self.metadata,
             cache_key_flags: self.cache_key_flags,
             text_decoration: self.text_decoration,
+            underline_metrics: self.underline_metrics,
+            strikethrough_metrics: self.strikethrough_metrics,
         }
     }
 
@@ -613,6 +626,24 @@ impl ShapeGlyph {
     pub fn width(&self, font_size: f32) -> f32 {
         self.metrics_opt.map_or(font_size, |x| x.font_size) * self.x_advance
     }
+}
+
+fn decoration_metrics(font: &Font) -> (DecorationMetrics, DecorationMetrics) {
+    let metrics = font.metrics();
+    let upem = metrics.units_per_em as f32;
+    if upem == 0.0 {
+        return (DecorationMetrics::default(), DecorationMetrics::default());
+    }
+    (
+        DecorationMetrics {
+            offset: metrics.underline.map_or(-0.125, |d| d.offset / upem),
+            thickness: metrics.underline.map_or(1.0 / 14.0, |d| d.thickness / upem),
+        },
+        DecorationMetrics {
+            offset: metrics.strikeout.map_or(0.3, |d| d.offset / upem),
+            thickness: metrics.strikeout.map_or(1.0 / 14.0, |d| d.thickness / upem),
+        },
+    )
 }
 
 /// span index used in VlRange to indicate this range is the ellipsis.

@@ -255,6 +255,12 @@ impl TextDecoration {
     }
 }
 
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct DecorationMetrics {
+    pub offset: f32,
+    pub thickness: f32,
+}
+
 /// Text attributes
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Attrs<'a> {
