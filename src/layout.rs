@@ -2,9 +2,9 @@
 
 use core::fmt::Display;
 
-use crate::{math, CacheKey, CacheKeyFlags, Color, DecorationMetrics, TextDecoration};
+use crate::{math, CacheKey, CacheKeyFlags, Color, GlyphDecorationData};
 #[cfg(not(feature = "std"))]
-use alloc::vec::Vec;
+use alloc::{boxed::Box, vec::Vec};
 
 #[cfg(not(feature = "std"))]
 use core_maths::CoreFloat;
@@ -58,12 +58,8 @@ pub struct LayoutGlyph {
     pub metadata: usize,
     /// [`CacheKeyFlags`]
     pub cache_key_flags: CacheKeyFlags,
-    /// Text decoration (underline, strikethough, overline)
-    pub text_decoration: TextDecoration,
-    /// Underline offset and thickness extracted from the font
-    pub underline_metrics: DecorationMetrics,
-    /// Strikethrough offset and thickness extracted from the font
-    pub strikethrough_metrics: DecorationMetrics,
+    /// Decoration data, only allocated when decorations are active
+    pub decoration_data: Option<Box<GlyphDecorationData>>,
 }
 
 #[derive(Clone, Debug)]

@@ -253,12 +253,29 @@ impl TextDecoration {
             overline_color_opt: None,
         }
     }
+
+    pub const fn has_decoration(&self) -> bool {
+        !matches!(self.underline, UnderlineStyle::None) || self.strikethrough || self.overline
+    }
 }
 
+/// Offset and thickness for a text decoration line, in EM units.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct DecorationMetrics {
+    /// Offset from baseline in EM units
     pub offset: f32,
+    /// Thickness in EM units
     pub thickness: f32,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct GlyphDecorationData {
+    /// The text decoration configuration from the user
+    pub text_decoration: TextDecoration,
+    /// Underline offset and thickness from the font
+    pub underline_metrics: DecorationMetrics,
+    /// Strikethrough offset and thickness from the font
+    pub strikethrough_metrics: DecorationMetrics,
 }
 
 /// Text attributes

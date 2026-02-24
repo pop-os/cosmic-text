@@ -1,6 +1,6 @@
 //! Helpers for rendering buffers and editors
 
-use crate::{Color, LayoutGlyph, LayoutRun, PhysicalGlyph, TextDecoration, UnderlineStyle};
+use crate::{Color, LayoutGlyph, LayoutRun, PhysicalGlyph, UnderlineStyle};
 #[cfg(feature = "swash")]
 use crate::{FontSystem, SwashCache};
 
@@ -14,6 +14,7 @@ pub trait Renderer {
     fn glyph(&mut self, physical_glyph: PhysicalGlyph, color: Color);
 }
 
+/// Draw text decoration lines (underline, strikethrough, overline) for a layout run.
 pub fn render_decoration<R: Renderer>(renderer: &mut R, run: &LayoutRun, default_color: Color) {
     if run.glyphs.is_empty() {
         return;
@@ -26,7 +27,7 @@ pub fn render_decoration<R: Renderer>(renderer: &mut R, run: &LayoutRun, default
             None => true,
             Some(_) => {
                 let prev = &run.glyphs[i - 1];
-                glyph.text_decoration != prev.text_decoration
+                glyph.decoration_data != prev.decoration_data
             }
         };
 
@@ -34,7 +35,7 @@ pub fn render_decoration<R: Renderer>(renderer: &mut R, run: &LayoutRun, default
             if let Some(gs) = group_start {
                 draw_decoration_group(renderer, run, &run.glyphs[gs..i], default_color);
             }
-            group_start = if has_any_decoration(&glyph.text_decoration) {
+            group_start = if glyph.decoration_data.is_some() {
                 Some(i)
             } else {
                 None
@@ -45,10 +46,6 @@ pub fn render_decoration<R: Renderer>(renderer: &mut R, run: &LayoutRun, default
     if let Some(gs) = group_start {
         draw_decoration_group(renderer, run, &run.glyphs[gs..], default_color);
     }
-}
-
-fn has_any_decoration(td: &TextDecoration) -> bool {
-    td.underline != UnderlineStyle::None || td.overline || td.strikethrough
 }
 
 fn draw_decoration_group<R: Renderer>(
@@ -63,19 +60,26 @@ fn draw_decoration_group<R: Renderer>(
 
     let first = &glyphs[0];
     let last = &glyphs[glyphs.len() - 1];
-    let td = &glyphs[0].text_decoration;
+
+    // All glyphs in a group have the same decoration_data (guaranteed by grouping logic)
+    let deco = match &first.decoration_data {
+        Some(d) => d,
+        None => return,
+    };
+    let td = &deco.text_decoration;
     let font_size = first.font_size;
+
     let x_start = first.x;
     let x_end = last.x + last.w;
     let width = x_end - x_start;
     if width <= 0.0 {
-        // first check to see if it's below 0.0
         return;
     }
-    let width = width as u32;
-    if width == 0 {
+    let w = width as u32;
+    if w == 0 {
         return;
     }
+
     // Underline
     match td.underline {
         UnderlineStyle::None => {}
@@ -84,27 +88,27 @@ fn draw_decoration_group<R: Renderer>(
                 .underline_color_opt
                 .or(first.color_opt)
                 .unwrap_or(default_color);
-            let thickness = (first.underline_metrics.thickness * font_size)
+            let thickness = (deco.underline_metrics.thickness * font_size)
                 .max(1.0)
                 .ceil();
-            let y = run.line_y - first.underline_metrics.offset * font_size;
-            renderer.rectangle(x_start as i32, y as i32, width, thickness as u32, color);
+            let y = run.line_y - deco.underline_metrics.offset * font_size;
+            renderer.rectangle(x_start as i32, y as i32, w, thickness as u32, color);
         }
         UnderlineStyle::Double => {
             let color = td
                 .underline_color_opt
                 .or(first.color_opt)
                 .unwrap_or(default_color);
-            let thickness = (first.underline_metrics.thickness * font_size)
+            let thickness = (deco.underline_metrics.thickness * font_size)
                 .max(1.0)
                 .ceil();
             let gap = thickness;
-            let y = run.line_y - first.underline_metrics.offset * font_size;
-            renderer.rectangle(x_start as i32, y as i32, width, thickness as u32, color);
+            let y = run.line_y - deco.underline_metrics.offset * font_size;
+            renderer.rectangle(x_start as i32, y as i32, w, thickness as u32, color);
             renderer.rectangle(
                 x_start as i32,
                 (y + thickness + gap) as i32,
-                width,
+                w,
                 thickness as u32,
                 color,
             );
@@ -117,11 +121,11 @@ fn draw_decoration_group<R: Renderer>(
             .strikethrough_color_opt
             .or(first.color_opt)
             .unwrap_or(default_color);
-        let thickness = (first.strikethrough_metrics.thickness * font_size)
+        let thickness = (deco.strikethrough_metrics.thickness * font_size)
             .max(1.0)
             .ceil();
-        let y = run.line_y - first.strikethrough_metrics.offset * font_size;
-        renderer.rectangle(x_start as i32, y as i32, width, thickness as u32, color);
+        let y = run.line_y - deco.strikethrough_metrics.offset * font_size;
+        renderer.rectangle(x_start as i32, y as i32, w, thickness as u32, color);
     }
 
     // Overline
@@ -130,14 +134,14 @@ fn draw_decoration_group<R: Renderer>(
             .overline_color_opt
             .or(first.color_opt)
             .unwrap_or(default_color);
-        // we're reusing underline thickness for overline
-        let thickness = (first.underline_metrics.thickness * font_size)
+        // Reuse underline thickness for overline
+        let thickness = (deco.underline_metrics.thickness * font_size)
             .max(1.0)
             .ceil();
-        let y = run.line_top; //TODO: this should be run.line_y - ascent
-                              // but we don't have ascent in GlyphLayout
-                              // using line_top as an approximation for now, which should be good enough for most fonts
-        renderer.rectangle(x_start as i32, y as i32, width, thickness as u32, color);
+        //TODO: this should be run.line_y - ascent, but we don't have per-glyph ascent
+        // in LayoutGlyph. Using line_top as an approximation for now.
+        let y = run.line_top;
+        renderer.rectangle(x_start as i32, y as i32, w, thickness as u32, color);
     }
 }
 

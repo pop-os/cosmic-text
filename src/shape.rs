@@ -5,8 +5,8 @@
 use crate::fallback::FontFallbackIter;
 use crate::{
     math, Align, Attrs, AttrsList, CacheKeyFlags, Color, DecorationMetrics, Ellipsize,
-    EllipsizeHeightLimit, Font, FontSystem, Hinting, LayoutGlyph, LayoutLine, Metrics,
-    TextDecoration, Wrap,
+    EllipsizeHeightLimit, Font, FontSystem, GlyphDecorationData, Hinting, LayoutGlyph, LayoutLine,
+    Metrics, Wrap,
 };
 #[cfg(not(feature = "std"))]
 use alloc::{format, vec, vec::Vec};
@@ -16,7 +16,6 @@ use core::cmp::{max, min};
 use core::fmt;
 use core::mem;
 use core::ops::Range;
-use skrifa::metrics::Decoration;
 
 #[cfg(not(feature = "std"))]
 use core_maths::CoreFloat;
@@ -132,7 +131,6 @@ fn shape_fallback(
     let font_scale = font.metrics().units_per_em as f32;
     let ascent = font.metrics().ascent / font_scale;
     let descent = -font.metrics().descent / font_scale;
-    let (underline_metrics, strikethrough_metrics) = decoration_metrics(font);
 
     let mut buffer = scratch.harfrust_buffer.take().unwrap_or_default();
     buffer.set_direction(if span_rtl {
@@ -239,9 +237,16 @@ fn shape_fallback(
             metadata: attrs.metadata,
             cache_key_flags: override_fake_italic(attrs.cache_key_flags, font, &attrs),
             metrics_opt: attrs.metrics_opt.map(Into::into),
-            text_decoration: attrs.text_decoration,
-            underline_metrics,
-            strikethrough_metrics,
+            decoration_data: if attrs.text_decoration.has_decoration() {
+                let (ul_metrics, st_metrics) = decoration_metrics(font);
+                Some(Box::new(GlyphDecorationData {
+                    text_decoration: attrs.text_decoration,
+                    underline_metrics: ul_metrics,
+                    strikethrough_metrics: st_metrics,
+                }))
+            } else {
+                None
+            },
         });
     }
 
@@ -509,7 +514,7 @@ fn shape_skip(
     let metrics = swash_font.metrics(&[]);
     let glyph_metrics = swash_font.glyph_metrics(&[]).scale(1.0);
 
-    let (underline_metrics, strikethrough_metrics) = decoration_metrics(font.as_ref());
+    let deco_metrics = decoration_metrics(font.as_ref());
 
     let ascent = metrics.ascent / f32::from(metrics.units_per_em);
     let descent = metrics.descent / f32::from(metrics.units_per_em);
@@ -544,9 +549,15 @@ fn shape_skip(
                         &attrs,
                     ),
                     metrics_opt: attrs.metrics_opt.map(Into::into),
-                    text_decoration: attrs.text_decoration,
-                    underline_metrics,
-                    strikethrough_metrics,
+                    decoration_data: if attrs.text_decoration.has_decoration() {
+                        Some(Box::new(GlyphDecorationData {
+                            text_decoration: attrs.text_decoration,
+                            underline_metrics: deco_metrics.0,
+                            strikethrough_metrics: deco_metrics.1,
+                        }))
+                    } else {
+                        None
+                    },
                 }
             }),
     );
@@ -583,13 +594,12 @@ pub struct ShapeGlyph {
     pub metadata: usize,
     pub cache_key_flags: CacheKeyFlags,
     pub metrics_opt: Option<Metrics>,
-    pub text_decoration: TextDecoration,
-    pub underline_metrics: DecorationMetrics,
-    pub strikethrough_metrics: DecorationMetrics,
+    /// Decoration data, only allocated when decorations are active
+    pub decoration_data: Option<Box<GlyphDecorationData>>,
 }
 
 impl ShapeGlyph {
-    const fn layout(
+    fn layout(
         &self,
         font_size: f32,
         line_height_opt: Option<f32>,
@@ -615,9 +625,7 @@ impl ShapeGlyph {
             color_opt: self.color_opt,
             metadata: self.metadata,
             cache_key_flags: self.cache_key_flags,
-            text_decoration: self.text_decoration,
-            underline_metrics: self.underline_metrics,
-            strikethrough_metrics: self.strikethrough_metrics,
+            decoration_data: self.decoration_data.clone(),
         }
     }
 
