@@ -1,5 +1,8 @@
 //! Helpers for rendering buffers and editors
 
+#[cfg(not(feature = "std"))]
+use core_maths::CoreFloat;
+
 use crate::{Color, LayoutGlyph, LayoutRun, PhysicalGlyph, UnderlineStyle};
 #[cfg(feature = "swash")]
 use crate::{FontSystem, SwashCache};

@@ -9,7 +9,7 @@ use crate::{
     Metrics, Wrap,
 };
 #[cfg(not(feature = "std"))]
-use alloc::{format, vec, vec::Vec};
+use alloc::{boxed::Box, format, vec, vec::Vec};
 
 use alloc::collections::VecDeque;
 use core::cmp::{max, min};
