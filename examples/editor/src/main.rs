@@ -80,7 +80,10 @@ fn main() {
 
                     display_scale = scale_factor as f32;
                     editor.with_buffer_mut(|buffer| {
-                        buffer.set_metrics(font_sizes[font_size_i].scale(display_scale))
+                        buffer
+                            .configure()
+                            .metrics(font_sizes[font_size_i].scale(display_scale))
+                            .apply()
                     });
 
                     window.request_redraw();
@@ -110,10 +113,13 @@ fn main() {
                     pixmap.fill(tiny_skia::Color::from_rgba8(0, 0, 0, 0xFF));
 
                     editor.with_buffer_mut(|buffer| {
-                        buffer.set_size(
-                            Some(width as f32 - scrollbar_width * display_scale),
-                            Some(height as f32),
-                        )
+                        buffer
+                            .configure()
+                            .size(
+                                Some(width as f32 - scrollbar_width * display_scale),
+                                Some(height as f32),
+                            )
+                            .apply()
                     });
 
                     let mut paint = Paint {
@@ -224,19 +230,26 @@ fn main() {
                                         "0" => {
                                             font_size_i = font_size_default;
                                             editor.with_buffer_mut(|buffer| {
-                                                buffer.set_metrics(
-                                                    font_sizes[font_size_i].scale(display_scale),
-                                                )
+                                                buffer
+                                                    .configure()
+                                                    .metrics(
+                                                        font_sizes[font_size_i]
+                                                            .scale(display_scale),
+                                                    )
+                                                    .apply()
                                             });
                                         }
                                         "-" => {
                                             if font_size_i > 0 {
                                                 font_size_i -= 1;
                                                 editor.with_buffer_mut(|buffer| {
-                                                    buffer.set_metrics(
-                                                        font_sizes[font_size_i]
-                                                            .scale(display_scale),
-                                                    )
+                                                    buffer
+                                                        .configure()
+                                                        .metrics(
+                                                            font_sizes[font_size_i]
+                                                                .scale(display_scale),
+                                                        )
+                                                        .apply()
                                                 });
                                             }
                                         }
@@ -244,10 +257,13 @@ fn main() {
                                             if font_size_i + 1 < font_sizes.len() {
                                                 font_size_i += 1;
                                                 editor.with_buffer_mut(|buffer| {
-                                                    buffer.set_metrics(
-                                                        font_sizes[font_size_i]
-                                                            .scale(display_scale),
-                                                    )
+                                                    buffer
+                                                        .configure()
+                                                        .metrics(
+                                                            font_sizes[font_size_i]
+                                                                .scale(display_scale),
+                                                        )
+                                                        .apply()
                                                 });
                                             }
                                         }

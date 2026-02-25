@@ -125,7 +125,10 @@ impl<'syntax_system, 'buffer> SyntaxEditor<'syntax_system, 'buffer> {
 
         // Clear buffer first (allows sane handling of non-existant files)
         self.editor.with_buffer_mut(|buffer| {
-            buffer.set_text(font_system, "", &attrs, Shaping::Advanced, None);
+            buffer
+                .configure()
+                .text("", &attrs, Shaping::Advanced, None)
+                .apply(font_system);
         });
 
         // Update syntax based on file name
@@ -147,7 +150,10 @@ impl<'syntax_system, 'buffer> SyntaxEditor<'syntax_system, 'buffer> {
         // Set text
         let text = fs::read_to_string(path)?;
         self.editor.with_buffer_mut(|buffer| {
-            buffer.set_text(font_system, &text, &attrs, Shaping::Advanced, None);
+            buffer
+                .configure()
+                .text(&text, &attrs, Shaping::Advanced, None)
+                .apply(font_system);
         });
 
         Ok(())

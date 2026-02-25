@@ -31,7 +31,12 @@ fn main() {
 
     let attrs = Attrs::new().family(Family::Monospace);
     match fs::read_to_string(&path) {
-        Ok(text) => buffer.set_text(&text, &attrs, Shaping::Advanced, None),
+        Ok(text) => {
+            buffer
+                .configure()
+                .text(&text, &attrs, Shaping::Advanced, None)
+                .apply();
+        }
         Err(err) => {
             log::error!("failed to load {:?}: {}", path, err);
         }
@@ -102,7 +107,10 @@ fn main() {
                         // Set scroll to view scroll
                         buffer.set_scroll(*scroll);
                         // Set size, will relayout and shape until scroll if changed
-                        buffer.set_size(Some(width as f32), Some(height as f32));
+                        buffer
+                            .configure()
+                            .size(Some(width as f32), Some(height as f32))
+                            .apply();
                         // Shape until scroll, ensures scroll is clamped
                         //TODO: ability to prune with multiple views?
                         buffer.shape_until_scroll(true);

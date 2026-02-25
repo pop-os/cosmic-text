@@ -281,7 +281,9 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
     }
 
     fn set_tab_width(&mut self, font_system: &mut FontSystem, tab_width: u16) {
-        self.with_buffer_mut(|buffer| buffer.set_tab_width(font_system, tab_width));
+        self.with_buffer_mut(|buffer| {
+            buffer.configure().tab_width(tab_width).apply(font_system);
+        });
     }
 
     fn shape_as_needed(&mut self, font_system: &mut FontSystem, prune: bool) {

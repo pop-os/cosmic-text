@@ -1262,6 +1262,11 @@ impl ShapeLine {
         shaping: Shaping,
         tab_width: u16,
     ) {
+        // Clear stale ellipsis span so it gets recomputed with the current attrs.
+        // Without this, reusing a ShapeLine from a previous text (via Cached::Unused)
+        // would keep an ellipsis shaped with the old attrs.
+        self.ellipsis_span = None;
+
         let mut spans = mem::take(&mut self.spans);
 
         // Cache the shape spans in reverse order so they can be popped for reuse in the same order.

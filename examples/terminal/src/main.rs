@@ -24,11 +24,6 @@ fn main() {
 
     let mut buffer = buffer.borrow_with(&mut font_system);
 
-    // Set a size for the text buffer, in pixels
-    let width = 80.0;
-    // The height is unbounded
-    buffer.set_size(Some(width), None);
-
     // Attributes indicate what font to choose
     let attrs = Attrs::new();
 
@@ -36,7 +31,13 @@ fn main() {
     let text = std::env::args()
         .nth(1)
         .unwrap_or(" Hi, Rust! 🦀 ".to_string());
-    buffer.set_text(&text, &attrs, Shaping::Advanced, None);
+
+    let width = 80.0;
+    buffer
+        .configure()
+        .size(Some(width), None)
+        .text(&text, &attrs, Shaping::Advanced, None)
+        .apply();
 
     // Perform shaping as desired
     buffer.shape_until_scroll(true);

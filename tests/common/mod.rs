@@ -126,28 +126,37 @@ impl DrawTestCfg {
         let mut buffer = Buffer::new(&mut font_system, metrics);
         let mut buffer = buffer.borrow_with(&mut font_system);
         let margins = 5;
-        buffer.set_wrap(self.wrap);
-        buffer.set_ellipsize(self.ellipsize);
-        buffer.set_size(
-            Some((self.canvas_width - margins * 2) as f32),
-            Some((self.canvas_height - margins * 2) as f32),
-        );
+        buffer
+            .configure()
+            .wrap(self.wrap)
+            .ellipsize(self.ellipsize)
+            .size(
+                Some((self.canvas_width - margins * 2) as f32),
+                Some((self.canvas_height - margins * 2) as f32),
+            )
+            .apply();
         if let Some(ref spans) = self.rich_spans {
-            buffer.set_rich_text(
-                spans
-                    .iter()
-                    .map(|(text, attrs)| (text.as_str(), attrs.as_attrs())),
-                &self.font.as_attrs(),
-                Shaping::Advanced,
-                self.alignment,
-            );
+            buffer
+                .configure()
+                .rich_text(
+                    spans
+                        .iter()
+                        .map(|(text, attrs)| (text.as_str(), attrs.as_attrs())),
+                    &self.font.as_attrs(),
+                    Shaping::Advanced,
+                    self.alignment,
+                )
+                .apply();
         } else {
-            buffer.set_text(
-                &self.text,
-                &self.font.as_attrs(),
-                Shaping::Advanced,
-                self.alignment,
-            );
+            buffer
+                .configure()
+                .text(
+                    &self.text,
+                    &self.font.as_attrs(),
+                    Shaping::Advanced,
+                    self.alignment,
+                )
+                .apply();
         }
         buffer.shape_until_scroll(true);
 

@@ -10,7 +10,7 @@ fn load_font_system(c: &mut Criterion) {
 fn layout(c: &mut Criterion) {
     let mut fs = ct::FontSystem::new();
     let mut buffer = ct::Buffer::new(&mut fs, ct::Metrics::new(10.0, 10.0));
-    buffer.set_size(&mut fs, Some(80.0), None);
+    buffer.configure().size(Some(80.0), None).apply(&mut fs);
 
     for (wrap_name, wrap) in &[
         ("None", ct::Wrap::None),
@@ -22,11 +22,14 @@ fn layout(c: &mut Criterion) {
             ("Advanced", ct::Shaping::Advanced),
         ] {
             let mut group = c.benchmark_group(format!("Wrap({wrap_name}, {shape_name})"));
-            buffer.set_wrap(&mut fs, *wrap);
+            buffer.configure().wrap(*wrap).apply(&mut fs);
 
             let mut run_on_text = |text: &str| {
                 buffer.lines.clear();
-                buffer.set_text(&mut fs, text, &ct::Attrs::new(), *shape, None);
+                buffer
+                    .configure()
+                    .text(text, &ct::Attrs::new(), *shape, None)
+                    .apply(&mut fs);
                 buffer.shape_until_scroll(&mut fs, false);
             };
 

@@ -11,9 +11,9 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
     render_decoration, Affinity, Align, Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem,
-    BufferLine, Color, Cursor, DecorationSpan, Ellipsize, FontSystem, Hinting, LayoutCursor,
-    LayoutGlyph, LayoutLine, LineEnding, LineIter, Motion, Renderer, Scroll, ShapeLine, Shaping,
-    Wrap,
+    BufferLine, Color, Cursor, DecorationSpan, Ellipsize, EllipsizeHeightLimit, FontSystem,
+    Hinting, LayoutCursor, LayoutGlyph, LayoutLine, LineEnding, LineIter, Motion, Renderer, Scroll,
+    ShapeLine, Shaping, Wrap,
 };
 
 /// A line of visible text for rendering
@@ -206,6 +206,314 @@ impl fmt::Display for Metrics {
     }
 }
 
+/// Pending configuration changes for a [`Buffer`], collected by [`BufferConfig`].
+///
+/// This is an internal type that holds `Option` fields for each configurable
+/// buffer parameter. `None` means "no change requested".
+#[derive(Clone, Debug, Default)]
+struct PendingBufferConfig {
+    metrics: Option<Metrics>,
+    width_opt: Option<Option<f32>>,
+    height_opt: Option<Option<f32>>,
+    wrap: Option<Wrap>,
+    ellipsize: Option<Ellipsize>,
+    hinting: Option<Hinting>,
+    monospace_width: Option<Option<f32>>,
+    tab_width: Option<u16>,
+    /// Set to `true` when `.text()` or `.rich_text()` was called on the builder.
+    /// When true, `apply_pending_config` knows that lines are already freshly set
+    /// and skips cache invalidation (but still applies other parameter changes
+    /// and calls `shape_until_scroll` once).
+    text_changed: bool,
+}
+
+/// Apply pending configuration changes to a buffer in a single pass.
+///
+/// This determines the minimum work required (reshape vs relayout vs nothing)
+/// and performs cache invalidation and shaping/layout in one pass.
+fn apply_pending_config(
+    buffer: &mut Buffer,
+    config: PendingBufferConfig,
+    font_system: &mut FontSystem,
+) {
+    let mut needs_relayout = false;
+    let mut height_changed = false;
+
+    // Metrics: requires relayout
+    if let Some(metrics) = config.metrics {
+        if metrics != buffer.metrics {
+            assert_ne!(metrics.font_size, 0.0, "font size cannot be 0");
+            assert_ne!(metrics.line_height, 0.0, "line height cannot be 0");
+            needs_relayout = true;
+            buffer.metrics = metrics;
+        }
+    }
+
+    // Width: affects line breaking (relayout only)
+    if let Some(w) = config.width_opt {
+        let clamped = w.map(|v| v.max(0.0));
+        if clamped != buffer.width_opt {
+            buffer.width_opt = clamped;
+            needs_relayout = true;
+        }
+    }
+
+    // Wrap, ellipsize, hinting, monospace_width: relayout only
+    if let Some(wrap) = config.wrap {
+        if wrap != buffer.wrap {
+            buffer.wrap = wrap;
+            needs_relayout = true;
+        }
+    }
+    if let Some(ellipsize) = config.ellipsize {
+        if ellipsize != buffer.ellipsize {
+            buffer.ellipsize = ellipsize;
+            needs_relayout = true;
+        }
+    }
+    if let Some(hinting) = config.hinting {
+        if hinting != buffer.hinting {
+            buffer.hinting = hinting;
+            needs_relayout = true;
+        }
+    }
+    if let Some(mw) = config.monospace_width {
+        if mw != buffer.monospace_width {
+            buffer.monospace_width = mw;
+            needs_relayout = true;
+        }
+    }
+
+    // Height: affects scroll calculation but not relayout
+    // unless ellipsize is set and it's based on height
+    if let Some(h) = config.height_opt {
+        let clamped = h.map(|v| v.max(0.0));
+        if clamped != buffer.height_opt {
+            buffer.height_opt = clamped;
+            if matches!(
+                buffer.ellipsize,
+                Ellipsize::Start(EllipsizeHeightLimit::Height(_))
+                    | Ellipsize::Middle(EllipsizeHeightLimit::Height(_))
+                    | Ellipsize::End(EllipsizeHeightLimit::Height(_))
+            ) {
+                needs_relayout = true;
+            } else {
+                height_changed = true;
+            }
+        }
+    }
+
+    // Tab width: requires reshape for lines containing tabs
+    if let Some(tw) = config.tab_width {
+        if tw != 0 && tw != buffer.tab_width {
+            buffer.tab_width = tw;
+            if !config.text_changed {
+                for line in &mut buffer.lines {
+                    if line.shape_opt().is_some() && line.text().contains('\t') {
+                        line.reset_shaping();
+                    }
+                }
+            }
+            needs_relayout = true;
+        }
+    }
+
+    // Apply invalidation in a single pass
+    if config.text_changed {
+        // Text was just set — lines are already fresh (no shape/layout cache).
+        // Parameter fields (metrics, width, etc.) were already updated above.
+        // Just need to shape visible lines.
+        buffer.redraw = true;
+        buffer.shape_until_scroll(font_system, false);
+    } else if needs_relayout {
+        // Relayout only: reset layout caches, then re-layout visible lines
+        for line in &mut buffer.lines {
+            if line.shape_opt().is_some() {
+                line.reset_layout();
+            }
+        }
+        buffer.redraw = true;
+        buffer.shape_until_scroll(font_system, false);
+    } else if height_changed {
+        // Height-only change: just recalculate scroll visibility
+        buffer.redraw = true;
+        buffer.shape_until_scroll(font_system, false);
+    }
+}
+
+/// Builder for batching multiple [`Buffer`] configuration changes into a single
+/// relayout pass.
+///
+/// Created via [`Buffer::configure`]. Collects parameter changes through builder
+/// methods, then applies them all at once when [`apply`](BufferConfig::apply) is
+/// called.
+///
+/// # Example
+///
+/// ```
+/// # use cosmic_text::{Buffer, FontSystem, Metrics, Wrap};
+/// # let mut font_system = FontSystem::new();
+/// let mut buffer = Buffer::new(&mut font_system, Metrics::new(14.0, 20.0));
+/// // Batches size + wrap change into a single relayout pass
+/// buffer.configure()
+///     .size(Some(800.0), Some(600.0))
+///     .wrap(Wrap::Word)
+///     .apply(&mut font_system);
+/// ```
+#[must_use = "configure() changes are not applied until .apply() is called"]
+#[derive(Debug)]
+pub struct BufferConfig<'a> {
+    buffer: &'a mut Buffer,
+    config: PendingBufferConfig,
+}
+
+impl<'a> BufferConfig<'a> {
+    /// Set the [`Metrics`] (font size and line height).
+    ///
+    /// # Panics
+    ///
+    /// Will panic in [`apply`](Self::apply) if `metrics.font_size` is zero.
+    pub fn metrics(mut self, metrics: Metrics) -> Self {
+        self.config.metrics = Some(metrics);
+        self
+    }
+
+    /// Set the buffer dimensions (width and height).
+    pub fn size(mut self, width_opt: Option<f32>, height_opt: Option<f32>) -> Self {
+        self.config.width_opt = Some(width_opt);
+        self.config.height_opt = Some(height_opt);
+        self
+    }
+
+    /// Set the buffer width only.
+    pub fn width(mut self, width_opt: Option<f32>) -> Self {
+        self.config.width_opt = Some(width_opt);
+        self
+    }
+
+    /// Set the buffer height only.
+    pub fn height(mut self, height_opt: Option<f32>) -> Self {
+        self.config.height_opt = Some(height_opt);
+        self
+    }
+
+    /// Set the [`Wrap`] strategy.
+    pub fn wrap(mut self, wrap: Wrap) -> Self {
+        self.config.wrap = Some(wrap);
+        self
+    }
+
+    /// Set the [`Ellipsize`] strategy.
+    pub fn ellipsize(mut self, ellipsize: Ellipsize) -> Self {
+        self.config.ellipsize = Some(ellipsize);
+        self
+    }
+
+    /// Set the [`Hinting`] strategy.
+    pub fn hinting(mut self, hinting: Hinting) -> Self {
+        self.config.hinting = Some(hinting);
+        self
+    }
+
+    /// Set the monospace width that monospace glyphs should be resized to match.
+    /// `None` means don't resize.
+    pub fn monospace_width(mut self, monospace_width: Option<f32>) -> Self {
+        self.config.monospace_width = Some(monospace_width);
+        self
+    }
+
+    /// Set the tab width (number of spaces between tab stops).
+    /// A value of 0 is ignored.
+    pub fn tab_width(mut self, tab_width: u16) -> Self {
+        self.config.tab_width = Some(tab_width);
+        self
+    }
+
+    /// Set plain text of the buffer, using the provided attributes for each line.
+    ///
+    /// This immediately replaces the buffer's lines, reusing existing line
+    /// allocations where possible to reduce heap churn. The text is split by
+    /// line endings. Shaping and layout are deferred to [`apply`](Self::apply).
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use cosmic_text::{Attrs, Buffer, FontSystem, Metrics, Shaping};
+    /// # let mut font_system = FontSystem::new();
+    /// let mut buffer = Buffer::new(&mut font_system, Metrics::new(14.0, 20.0));
+    /// buffer.configure()
+    ///     .text("Hello, world!", &Attrs::new(), Shaping::Advanced, None)
+    ///     .size(Some(800.0), Some(600.0))
+    ///     .apply(&mut font_system);
+    /// ```
+    pub fn text(
+        mut self,
+        text: &str,
+        attrs: &Attrs,
+        shaping: Shaping,
+        alignment: Option<Align>,
+    ) -> Self {
+        self.buffer.set_text_impl(text, attrs, shaping, alignment);
+        self.config.text_changed = true;
+        self
+    }
+
+    /// Set rich text of the buffer from an iterator of styled spans.
+    ///
+    /// This immediately replaces the buffer's lines, reusing existing line
+    /// allocations where possible to reduce heap churn. Shaping and layout
+    /// are deferred to [`apply`](Self::apply).
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, Metrics, Shaping};
+    /// # let mut font_system = FontSystem::new();
+    /// let mut buffer = Buffer::new(&mut font_system, Metrics::new(14.0, 20.0));
+    /// let attrs = Attrs::new().family(Family::Serif);
+    /// buffer.configure()
+    ///     .rich_text(
+    ///         [
+    ///             ("hello, ", attrs.clone()),
+    ///             ("cosmic\ntext", attrs.clone().family(Family::Monospace)),
+    ///         ],
+    ///         &attrs,
+    ///         Shaping::Advanced,
+    ///         None,
+    ///     )
+    ///     .apply(&mut font_system);
+    /// ```
+    pub fn rich_text<'r, 's, I>(
+        mut self,
+        spans: I,
+        default_attrs: &Attrs,
+        shaping: Shaping,
+        alignment: Option<Align>,
+    ) -> Self
+    where
+        I: IntoIterator<Item = (&'s str, Attrs<'r>)>,
+    {
+        self.buffer
+            .set_rich_text_impl(spans, default_attrs, shaping, alignment);
+        self.config.text_changed = true;
+        self
+    }
+
+    /// Apply all collected changes in a single relayout pass.
+    ///
+    /// This determines the minimum work required:
+    /// - If text was set (via [`text`](Self::text) or [`rich_text`](Self::rich_text)),
+    ///   lines are already populated and just need shaping/layout.
+    /// - If only layout parameters changed (size, wrap, ellipsize, hinting, monospace width),
+    ///   only relayout is performed.
+    /// - If shaping parameters changed (tab width), reshaping is performed
+    ///   (which also triggers relayout).
+    /// - If nothing changed, no work is done.
+    pub fn apply(self, font_system: &mut FontSystem) {
+        apply_pending_config(self.buffer, self.config, font_system);
+    }
+}
+
 /// A buffer of text that is shaped and laid out
 #[derive(Debug)]
 pub struct Buffer {
@@ -278,7 +586,10 @@ impl Buffer {
     /// Will panic if `metrics.line_height` is zero.
     pub fn new(font_system: &mut FontSystem, metrics: Metrics) -> Self {
         let mut buffer = Self::new_empty(metrics);
-        buffer.set_text(font_system, "", &Attrs::new(), Shaping::Advanced, None);
+        buffer
+            .configure()
+            .text("", &Attrs::new(), Shaping::Advanced, None)
+            .apply(font_system);
         buffer
     }
 
@@ -293,30 +604,25 @@ impl Buffer {
         }
     }
 
-    fn relayout(&mut self, font_system: &mut FontSystem) {
-        #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
-        let instant = std::time::Instant::now();
-
-        for line in &mut self.lines {
-            if line.shape_opt().is_some() {
-                line.reset_layout();
-                line.layout(
-                    font_system,
-                    self.metrics.font_size,
-                    self.width_opt,
-                    self.wrap,
-                    self.ellipsize,
-                    self.monospace_width,
-                    self.tab_width,
-                    self.hinting,
-                );
-            }
+    /// Returns a [`BufferConfig`] builder for batching multiple configuration
+    /// changes into a single relayout pass.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use cosmic_text::{Buffer, FontSystem, Metrics, Wrap};
+    /// # let mut font_system = FontSystem::new();
+    /// let mut buffer = Buffer::new(&mut font_system, Metrics::new(14.0, 20.0));
+    /// buffer.configure()
+    ///     .size(Some(800.0), Some(600.0))
+    ///     .wrap(Wrap::Word)
+    ///     .apply(&mut font_system);
+    /// ```
+    pub fn configure(&mut self) -> BufferConfig<'_> {
+        BufferConfig {
+            buffer: self,
+            config: PendingBufferConfig::default(),
         }
-
-        self.redraw = true;
-
-        #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
-        log::debug!("relayout: {:?}", instant.elapsed());
     }
 
     /// Shape lines until cursor, also scrolling to include cursor in view
@@ -567,8 +873,11 @@ impl Buffer {
     /// # Panics
     ///
     /// Will panic if `metrics.font_size` is zero.
+    #[deprecated(
+        note = "Use `configure().metrics(metrics).apply(font_system)` instead for better performance when batching multiple changes"
+    )]
     pub fn set_metrics(&mut self, font_system: &mut FontSystem, metrics: Metrics) {
-        self.set_metrics_and_size(font_system, metrics, self.width_opt, self.height_opt);
+        self.configure().metrics(metrics).apply(font_system);
     }
 
     /// Get the current [`Hinting`] strategy.
@@ -577,12 +886,11 @@ impl Buffer {
     }
 
     /// Set the current [`Hinting`] strategy.
+    #[deprecated(
+        note = "Use `configure().hinting(hinting).apply(font_system)` instead for better performance when batching multiple changes"
+    )]
     pub fn set_hinting(&mut self, font_system: &mut FontSystem, hinting: Hinting) {
-        if hinting != self.hinting {
-            self.hinting = hinting;
-            self.relayout(font_system);
-            self.shape_until_scroll(font_system, false);
-        }
+        self.configure().hinting(hinting).apply(font_system);
     }
 
     /// Get the current [`Wrap`]
@@ -591,12 +899,11 @@ impl Buffer {
     }
 
     /// Set the current [`Wrap`]
+    #[deprecated(
+        note = "Use `configure().wrap(wrap).apply(font_system)` instead for better performance when batching multiple changes"
+    )]
     pub fn set_wrap(&mut self, font_system: &mut FontSystem, wrap: Wrap) {
-        if wrap != self.wrap {
-            self.wrap = wrap;
-            self.relayout(font_system);
-            self.shape_until_scroll(font_system, false);
-        }
+        self.configure().wrap(wrap).apply(font_system);
     }
 
     /// Get the current [`Ellipsize`]
@@ -605,12 +912,11 @@ impl Buffer {
     }
 
     /// Set the current [`Ellipsize`]
+    #[deprecated(
+        note = "Use `configure().ellipsize(ellipsize).apply(font_system)` instead for better performance when batching multiple changes"
+    )]
     pub fn set_ellipsize(&mut self, font_system: &mut FontSystem, ellipsize: Ellipsize) {
-        if ellipsize != self.ellipsize {
-            self.ellipsize = ellipsize;
-            self.relayout(font_system);
-            self.shape_until_scroll(font_system, false);
-        }
+        self.configure().ellipsize(ellipsize).apply(font_system);
     }
 
     /// Get the current `monospace_width`
@@ -619,16 +925,17 @@ impl Buffer {
     }
 
     /// Set monospace width monospace glyphs should be resized to match. `None` means don't resize
+    #[deprecated(
+        note = "Use `configure().monospace_width(width).apply(font_system)` instead for better performance when batching multiple changes"
+    )]
     pub fn set_monospace_width(
         &mut self,
         font_system: &mut FontSystem,
         monospace_width: Option<f32>,
     ) {
-        if monospace_width != self.monospace_width {
-            self.monospace_width = monospace_width;
-            self.relayout(font_system);
-            self.shape_until_scroll(font_system, false);
-        }
+        self.configure()
+            .monospace_width(monospace_width)
+            .apply(font_system);
     }
 
     /// Get the current `tab_width`
@@ -637,22 +944,11 @@ impl Buffer {
     }
 
     /// Set tab width (number of spaces between tab stops)
+    #[deprecated(
+        note = "Use `configure().tab_width(tab_width).apply(font_system)` instead for better performance when batching multiple changes"
+    )]
     pub fn set_tab_width(&mut self, font_system: &mut FontSystem, tab_width: u16) {
-        // A tab width of 0 is not allowed
-        if tab_width == 0 {
-            return;
-        }
-        if tab_width != self.tab_width {
-            self.tab_width = tab_width;
-            // Shaping must be reset when tab width is changed
-            for line in &mut self.lines {
-                if line.shape_opt().is_some() && line.text().contains('\t') {
-                    line.reset_shaping();
-                }
-            }
-            self.redraw = true;
-            self.shape_until_scroll(font_system, false);
-        }
+        self.configure().tab_width(tab_width).apply(font_system);
     }
 
     /// Get the current buffer dimensions (width, height)
@@ -661,13 +957,18 @@ impl Buffer {
     }
 
     /// Set the current buffer dimensions
+    #[deprecated(
+        note = "Use `configure().size(width_opt, height_opt).apply(font_system)` instead for better performance when batching multiple changes"
+    )]
     pub fn set_size(
         &mut self,
         font_system: &mut FontSystem,
         width_opt: Option<f32>,
         height_opt: Option<f32>,
     ) {
-        self.set_metrics_and_size(font_system, self.metrics, width_opt, height_opt);
+        self.configure()
+            .size(width_opt, height_opt)
+            .apply(font_system);
     }
 
     /// Set the current [`Metrics`] and buffer dimensions at the same time
@@ -675,6 +976,9 @@ impl Buffer {
     /// # Panics
     ///
     /// Will panic if `metrics.font_size` is zero.
+    #[deprecated(
+        note = "Use `configure().metrics(metrics).size(width_opt, height_opt).apply(font_system)` instead for better performance when batching multiple changes"
+    )]
     pub fn set_metrics_and_size(
         &mut self,
         font_system: &mut FontSystem,
@@ -682,20 +986,10 @@ impl Buffer {
         width_opt: Option<f32>,
         height_opt: Option<f32>,
     ) {
-        let clamped_width_opt = width_opt.map(|width| width.max(0.0));
-        let clamped_height_opt = height_opt.map(|height| height.max(0.0));
-
-        if metrics != self.metrics
-            || clamped_width_opt != self.width_opt
-            || clamped_height_opt != self.height_opt
-        {
-            assert_ne!(metrics.font_size, 0.0, "font size cannot be 0");
-            self.metrics = metrics;
-            self.width_opt = clamped_width_opt;
-            self.height_opt = clamped_height_opt;
-            self.relayout(font_system);
-            self.shape_until_scroll(font_system, false);
-        }
+        self.configure()
+            .metrics(metrics)
+            .size(width_opt, height_opt)
+            .apply(font_system);
     }
 
     /// Get the current scroll location
@@ -711,40 +1005,67 @@ impl Buffer {
         }
     }
 
-    /// Set text of buffer, using provided attributes for each line by default
-    pub fn set_text(
+    /// Internal: set text of buffer, reusing existing line allocations.
+    ///
+    /// Does NOT call `shape_until_scroll` — the caller is responsible for that.
+    fn set_text_impl(
         &mut self,
-        font_system: &mut FontSystem,
         text: &str,
         attrs: &Attrs,
         shaping: Shaping,
         alignment: Option<Align>,
     ) {
-        self.lines.clear();
+        let mut line_count = 0;
         for (range, ending) in LineIter::new(text) {
-            self.lines.push(BufferLine::new(
-                &text[range],
-                ending,
-                AttrsList::new(attrs),
-                shaping,
-            ));
+            let line_text = &text[range];
+            if line_count < self.lines.len() {
+                // Reuse existing line: reclaim String/AttrsList allocations
+                let mut reused_text = self.lines[line_count].reclaim_text();
+                reused_text.push_str(line_text);
+                let reused_attrs = self.lines[line_count].reclaim_attrs().reset(attrs);
+                self.lines[line_count].reset_new(reused_text, ending, reused_attrs, shaping);
+            } else {
+                self.lines.push(BufferLine::new(
+                    line_text,
+                    ending,
+                    AttrsList::new(attrs),
+                    shaping,
+                ));
+            }
+            line_count += 1;
         }
 
-        // Ensure there is an ending line with no line ending
-        if self
-            .lines
-            .last()
-            .map(|line| line.ending())
-            .unwrap_or_default()
-            != LineEnding::None
-        {
-            self.lines.push(BufferLine::new(
-                "",
-                LineEnding::None,
-                AttrsList::new(attrs),
-                shaping,
-            ));
+        // Ensure there is an ending line with no line ending.
+        // When no lines were produced (empty text), unwrap_or_default() returns
+        // LineEnding::Lf (the Default), which is != None, so we add an empty line.
+        let last_ending = if line_count > 0 {
+            self.lines[line_count - 1].ending()
+        } else {
+            LineEnding::default()
+        };
+        if last_ending != LineEnding::None {
+            if line_count < self.lines.len() {
+                let reused_text = self.lines[line_count].reclaim_text();
+                let reused_attrs = self.lines[line_count].reclaim_attrs().reset(attrs);
+                self.lines[line_count].reset_new(
+                    reused_text,
+                    LineEnding::None,
+                    reused_attrs,
+                    shaping,
+                );
+            } else {
+                self.lines.push(BufferLine::new(
+                    "",
+                    LineEnding::None,
+                    AttrsList::new(attrs),
+                    shaping,
+                ));
+            }
+            line_count += 1;
         }
+
+        // Discard excess lines now that we have reused as much of the existing allocations as possible.
+        self.lines.truncate(line_count);
 
         if alignment.is_some() {
             self.lines.iter_mut().for_each(|line| {
@@ -753,30 +1074,30 @@ impl Buffer {
         }
 
         self.scroll = Scroll::default();
-        self.shape_until_scroll(font_system, false);
     }
 
-    /// Set text of buffer, using an iterator of styled spans (pairs of text and attributes)
-    ///
-    /// ```
-    /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, Metrics, Shaping};
-    /// # let mut font_system = FontSystem::new();
-    /// let mut buffer = Buffer::new_empty(Metrics::new(32.0, 44.0));
-    /// let attrs = Attrs::new().family(Family::Serif);
-    /// buffer.set_rich_text(
-    ///     &mut font_system,
-    ///     [
-    ///         ("hello, ", attrs.clone()),
-    ///         ("cosmic\ntext", attrs.clone().family(Family::Monospace)),
-    ///     ],
-    ///     &attrs,
-    ///     Shaping::Advanced,
-    ///     None,
-    /// );
-    /// ```
-    pub fn set_rich_text<'r, 's, I>(
+    /// Set text of buffer, using provided attributes for each line by default
+    #[deprecated(
+        note = "Use `configure().text(text, attrs, shaping, alignment).apply(&mut font_system)` instead for better performance when batching multiple changes"
+    )]
+    pub fn set_text(
         &mut self,
         font_system: &mut FontSystem,
+        text: &str,
+        attrs: &Attrs,
+        shaping: Shaping,
+        alignment: Option<Align>,
+    ) {
+        self.configure()
+            .text(text, attrs, shaping, alignment)
+            .apply(font_system);
+    }
+
+    /// Internal: set rich text of buffer, reusing existing line allocations.
+    ///
+    /// Does NOT call `shape_until_scroll` — the caller is responsible for that.
+    fn set_rich_text_impl<'r, 's, I>(
+        &mut self,
         spans: I,
         default_attrs: &Attrs,
         shaping: Shaping,
@@ -909,8 +1230,44 @@ impl Buffer {
         });
 
         self.scroll = Scroll::default();
+    }
 
-        self.shape_until_scroll(font_system, false);
+    /// Set text of buffer, using an iterator of styled spans (pairs of text and attributes)
+    ///
+    /// ```
+    /// # #[allow(deprecated)]
+    /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, Metrics, Shaping};
+    /// # let mut font_system = FontSystem::new();
+    /// let mut buffer = Buffer::new_empty(Metrics::new(32.0, 44.0));
+    /// let attrs = Attrs::new().family(Family::Serif);
+    /// # #[allow(deprecated)]
+    /// buffer.set_rich_text(
+    ///     &mut font_system,
+    ///     [
+    ///         ("hello, ", attrs.clone()),
+    ///         ("cosmic\ntext", attrs.clone().family(Family::Monospace)),
+    ///     ],
+    ///     &attrs,
+    ///     Shaping::Advanced,
+    ///     None,
+    /// );
+    /// ```
+    #[deprecated(
+        note = "Use `configure().rich_text(spans, default_attrs, shaping, alignment).apply(&mut font_system)` instead for better performance when batching multiple changes"
+    )]
+    pub fn set_rich_text<'r, 's, I>(
+        &mut self,
+        font_system: &mut FontSystem,
+        spans: I,
+        default_attrs: &Attrs,
+        shaping: Shaping,
+        alignment: Option<Align>,
+    ) where
+        I: IntoIterator<Item = (&'s str, Attrs<'r>)>,
+    {
+        self.configure()
+            .rich_text(spans, default_attrs, shaping, alignment)
+            .apply(font_system);
     }
 
     /// True if a redraw is needed
@@ -1400,7 +1757,199 @@ impl Buffer {
     }
 }
 
+/// Builder for batching multiple [`Buffer`] configuration changes into a single
+/// relayout pass, created from a [`BorrowedWithFontSystem<Buffer>`].
+///
+/// This is the same as [`BufferConfig`] but captures the [`FontSystem`] reference
+/// so that [`apply`](BufferConfigBorrowed::apply) requires no additional arguments.
+///
+/// # Example
+///
+/// ```
+/// # use cosmic_text::{Buffer, FontSystem, Metrics, Wrap};
+/// # let mut font_system = FontSystem::new();
+/// let mut buffer = Buffer::new(&mut font_system, Metrics::new(14.0, 20.0));
+/// let mut borrowed = buffer.borrow_with(&mut font_system);
+/// borrowed.configure()
+///     .size(Some(800.0), Some(600.0))
+///     .wrap(Wrap::Word)
+///     .apply();
+/// ```
+#[must_use = "configure() changes are not applied until .apply() is called"]
+#[derive(Debug)]
+pub struct BufferConfigBorrowed<'a> {
+    buffer: &'a mut Buffer,
+    font_system: &'a mut FontSystem,
+    config: PendingBufferConfig,
+}
+
+impl<'a> BufferConfigBorrowed<'a> {
+    /// Set the [`Metrics`] (font size and line height).
+    ///
+    /// # Panics
+    ///
+    /// Will panic in [`apply`](Self::apply) if `metrics.font_size` is zero.
+    pub fn metrics(mut self, metrics: Metrics) -> Self {
+        self.config.metrics = Some(metrics);
+        self
+    }
+
+    /// Set the buffer dimensions (width and height).
+    pub fn size(mut self, width_opt: Option<f32>, height_opt: Option<f32>) -> Self {
+        self.config.width_opt = Some(width_opt);
+        self.config.height_opt = Some(height_opt);
+        self
+    }
+
+    /// Set the buffer width only.
+    pub fn width(mut self, width_opt: Option<f32>) -> Self {
+        self.config.width_opt = Some(width_opt);
+        self
+    }
+
+    /// Set the buffer height only.
+    pub fn height(mut self, height_opt: Option<f32>) -> Self {
+        self.config.height_opt = Some(height_opt);
+        self
+    }
+
+    /// Set the [`Wrap`] strategy.
+    pub fn wrap(mut self, wrap: Wrap) -> Self {
+        self.config.wrap = Some(wrap);
+        self
+    }
+
+    /// Set the [`Ellipsize`] strategy.
+    pub fn ellipsize(mut self, ellipsize: Ellipsize) -> Self {
+        self.config.ellipsize = Some(ellipsize);
+        self
+    }
+
+    /// Set the [`Hinting`] strategy.
+    pub fn hinting(mut self, hinting: Hinting) -> Self {
+        self.config.hinting = Some(hinting);
+        self
+    }
+
+    /// Set the monospace width that monospace glyphs should be resized to match.
+    /// `None` means don't resize.
+    pub fn monospace_width(mut self, monospace_width: Option<f32>) -> Self {
+        self.config.monospace_width = Some(monospace_width);
+        self
+    }
+
+    /// Set the tab width (number of spaces between tab stops).
+    /// A value of 0 is ignored.
+    pub fn tab_width(mut self, tab_width: u16) -> Self {
+        self.config.tab_width = Some(tab_width);
+        self
+    }
+
+    /// Set plain text of the buffer, using the provided attributes for each line.
+    ///
+    /// This immediately replaces the buffer's lines, reusing existing line
+    /// allocations where possible to reduce heap churn. The text is split by
+    /// line endings. Shaping and layout are deferred to [`apply`](Self::apply).
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use cosmic_text::{Attrs, Buffer, FontSystem, Metrics, Shaping};
+    /// # let mut font_system = FontSystem::new();
+    /// let mut buffer = Buffer::new(&mut font_system, Metrics::new(14.0, 20.0));
+    /// let mut borrowed = buffer.borrow_with(&mut font_system);
+    /// borrowed.configure()
+    ///     .text("Hello, world!", &Attrs::new(), Shaping::Advanced, None)
+    ///     .size(Some(800.0), Some(600.0))
+    ///     .apply();
+    /// ```
+    pub fn text(
+        mut self,
+        text: &str,
+        attrs: &Attrs,
+        shaping: Shaping,
+        alignment: Option<Align>,
+    ) -> Self {
+        self.buffer.set_text_impl(text, attrs, shaping, alignment);
+        self.config.text_changed = true;
+        self
+    }
+
+    /// Set rich text of the buffer from an iterator of styled spans.
+    ///
+    /// This immediately replaces the buffer's lines, reusing existing line
+    /// allocations where possible to reduce heap churn. Shaping and layout
+    /// are deferred to [`apply`](Self::apply).
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, Metrics, Shaping};
+    /// # let mut font_system = FontSystem::new();
+    /// let mut buffer = Buffer::new(&mut font_system, Metrics::new(14.0, 20.0));
+    /// let mut borrowed = buffer.borrow_with(&mut font_system);
+    /// let attrs = Attrs::new().family(Family::Serif);
+    /// borrowed.configure()
+    ///     .rich_text(
+    ///         [
+    ///             ("hello, ", attrs.clone()),
+    ///             ("cosmic\ntext", attrs.clone().family(Family::Monospace)),
+    ///         ],
+    ///         &attrs,
+    ///         Shaping::Advanced,
+    ///         None,
+    ///     )
+    ///     .apply();
+    /// ```
+    pub fn rich_text<'r, 's, I>(
+        mut self,
+        spans: I,
+        default_attrs: &Attrs,
+        shaping: Shaping,
+        alignment: Option<Align>,
+    ) -> Self
+    where
+        I: IntoIterator<Item = (&'s str, Attrs<'r>)>,
+    {
+        self.buffer
+            .set_rich_text_impl(spans, default_attrs, shaping, alignment);
+        self.config.text_changed = true;
+        self
+    }
+
+    /// Apply all collected changes in a single relayout pass.
+    ///
+    /// See [`BufferConfig::apply`] for details on how the minimum required
+    /// work is determined.
+    pub fn apply(self) {
+        apply_pending_config(self.buffer, self.config, self.font_system);
+    }
+}
+
 impl BorrowedWithFontSystem<'_, Buffer> {
+    /// Returns a [`BufferConfigBorrowed`] builder for batching multiple
+    /// configuration changes into a single relayout pass.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use cosmic_text::{Buffer, FontSystem, Metrics, Wrap};
+    /// # let mut font_system = FontSystem::new();
+    /// let mut buffer = Buffer::new(&mut font_system, Metrics::new(14.0, 20.0));
+    /// let mut borrowed = buffer.borrow_with(&mut font_system);
+    /// borrowed.configure()
+    ///     .size(Some(800.0), Some(600.0))
+    ///     .wrap(Wrap::Word)
+    ///     .apply();
+    /// ```
+    pub fn configure(&mut self) -> BufferConfigBorrowed<'_> {
+        BufferConfigBorrowed {
+            buffer: self.inner,
+            font_system: self.font_system,
+            config: PendingBufferConfig::default(),
+        }
+    }
+
     /// Shape lines until cursor, also scrolling to include cursor in view
     pub fn shape_until_cursor(&mut self, cursor: Cursor, prune: bool) {
         self.inner
@@ -1427,23 +1976,35 @@ impl BorrowedWithFontSystem<'_, Buffer> {
     /// # Panics
     ///
     /// Will panic if `metrics.font_size` is zero.
+    #[deprecated(
+        note = "Use `configure().metrics(metrics).apply()` instead for better performance when batching multiple changes"
+    )]
     pub fn set_metrics(&mut self, metrics: Metrics) {
-        self.inner.set_metrics(self.font_system, metrics);
+        self.configure().metrics(metrics).apply();
     }
 
     /// Set the current [`Wrap`]
+    #[deprecated(
+        note = "Use `configure().wrap(wrap).apply()` instead for better performance when batching multiple changes"
+    )]
     pub fn set_wrap(&mut self, wrap: Wrap) {
-        self.inner.set_wrap(self.font_system, wrap);
+        self.configure().wrap(wrap).apply();
     }
 
     /// Set the current [`Ellipsize`]
+    #[deprecated(
+        note = "Use `configure().ellipsize(ellipsize).apply()` instead for better performance when batching multiple changes"
+    )]
     pub fn set_ellipsize(&mut self, ellipsize: Ellipsize) {
-        self.inner.set_ellipsize(self.font_system, ellipsize);
+        self.configure().ellipsize(ellipsize).apply();
     }
 
     /// Set the current buffer dimensions
+    #[deprecated(
+        note = "Use `configure().size(width_opt, height_opt).apply()` instead for better performance when batching multiple changes"
+    )]
     pub fn set_size(&mut self, width_opt: Option<f32>, height_opt: Option<f32>) {
-        self.inner.set_size(self.font_system, width_opt, height_opt);
+        self.configure().size(width_opt, height_opt).apply();
     }
 
     /// Set the current [`Metrics`] and buffer dimensions at the same time
@@ -1451,22 +2012,33 @@ impl BorrowedWithFontSystem<'_, Buffer> {
     /// # Panics
     ///
     /// Will panic if `metrics.font_size` is zero.
+    #[deprecated(
+        note = "Use `configure().metrics(metrics).size(width_opt, height_opt).apply()` instead for better performance when batching multiple changes"
+    )]
     pub fn set_metrics_and_size(
         &mut self,
         metrics: Metrics,
         width_opt: Option<f32>,
         height_opt: Option<f32>,
     ) {
-        self.inner
-            .set_metrics_and_size(self.font_system, metrics, width_opt, height_opt);
+        self.configure()
+            .metrics(metrics)
+            .size(width_opt, height_opt)
+            .apply();
     }
 
     /// Set tab width (number of spaces between tab stops)
+    #[deprecated(
+        note = "Use `configure().tab_width(tab_width).apply()` instead for better performance when batching multiple changes"
+    )]
     pub fn set_tab_width(&mut self, tab_width: u16) {
-        self.inner.set_tab_width(self.font_system, tab_width);
+        self.configure().tab_width(tab_width).apply();
     }
 
     /// Set text of buffer, using provided attributes for each line by default
+    #[deprecated(
+        note = "Use `configure().text(text, attrs, shaping, alignment).apply()` instead for better performance when batching multiple changes"
+    )]
     pub fn set_text(
         &mut self,
         text: &str,
@@ -1474,28 +2046,15 @@ impl BorrowedWithFontSystem<'_, Buffer> {
         shaping: Shaping,
         alignment: Option<Align>,
     ) {
-        self.inner
-            .set_text(self.font_system, text, attrs, shaping, alignment);
+        self.configure()
+            .text(text, attrs, shaping, alignment)
+            .apply();
     }
 
     /// Set text of buffer, using an iterator of styled spans (pairs of text and attributes)
-    ///
-    /// ```
-    /// # use cosmic_text::{Attrs, Buffer, Family, FontSystem, Metrics, Shaping};
-    /// # let mut font_system = FontSystem::new();
-    /// let mut buffer = Buffer::new_empty(Metrics::new(32.0, 44.0));
-    /// let attrs = Attrs::new().family(Family::Serif);
-    /// buffer.set_rich_text(
-    ///     &mut font_system,
-    ///     [
-    ///         ("hello, ", attrs.clone()),
-    ///         ("cosmic\ntext", attrs.clone().family(Family::Monospace)),
-    ///     ],
-    ///     &attrs,
-    ///     Shaping::Advanced,
-    ///     None,
-    /// );
-    /// ```
+    #[deprecated(
+        note = "Use `configure().rich_text(spans, default_attrs, shaping, alignment).apply()` instead for better performance when batching multiple changes"
+    )]
     pub fn set_rich_text<'r, 's, I>(
         &mut self,
         spans: I,
@@ -1505,8 +2064,9 @@ impl BorrowedWithFontSystem<'_, Buffer> {
     ) where
         I: IntoIterator<Item = (&'s str, Attrs<'r>)>,
     {
-        self.inner
-            .set_rich_text(self.font_system, spans, default_attrs, shaping, alignment);
+        self.configure()
+            .rich_text(spans, default_attrs, shaping, alignment)
+            .apply();
     }
 
     /// Apply a [`Motion`] to a [`Cursor`]

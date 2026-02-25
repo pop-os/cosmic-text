@@ -146,12 +146,15 @@ fn set_buffer_text(buffer: &mut BorrowedWithFontSystem<'_, Buffer>) {
         ),
     ];
 
-    buffer.set_rich_text(
-        spans.iter().map(|(text, attrs)| (*text, attrs.clone())),
-        &attrs,
-        Shaping::Advanced,
-        None,
-    );
+    buffer
+        .configure()
+        .rich_text(
+            spans.iter().map(|(text, attrs)| (*text, attrs.clone())),
+            &attrs,
+            Shaping::Advanced,
+            None,
+        )
+        .apply();
 }
 
 fn main() {
@@ -175,10 +178,13 @@ fn main() {
     let mut editor = Editor::new(Buffer::new_empty(metrics.scale(display_scale)));
     let mut editor = editor.borrow_with(&mut font_system);
     editor.with_buffer_mut(|buffer| {
-        buffer.set_size(
-            Some(window.inner_size().width as f32),
-            Some(window.inner_size().height as f32),
-        )
+        buffer
+            .configure()
+            .size(
+                Some(window.inner_size().width as f32),
+                Some(window.inner_size().height as f32),
+            )
+            .apply()
     });
     editor.with_buffer_mut(set_buffer_text);
 
@@ -206,8 +212,12 @@ fn main() {
                     log::info!("Updated scale factor for {window_id:?}");
 
                     display_scale = scale_factor as f32;
-                    editor
-                        .with_buffer_mut(|buffer| buffer.set_metrics(metrics.scale(display_scale)));
+                    editor.with_buffer_mut(|buffer| {
+                        buffer
+                            .configure()
+                            .metrics(metrics.scale(display_scale))
+                            .apply()
+                    });
 
                     window.request_redraw();
                 }
@@ -236,7 +246,10 @@ fn main() {
                     pixmap.fill(bg_color);
 
                     editor.with_buffer_mut(|buffer| {
-                        buffer.set_size(Some(width as f32), Some(height as f32))
+                        buffer
+                            .configure()
+                            .size(Some(width as f32), Some(height as f32))
+                            .apply()
                     });
 
                     let mut paint = Paint {

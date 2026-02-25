@@ -14,9 +14,12 @@ fn wrap_word_fallback() {
 
     let mut buffer = buffer.borrow_with(&mut font_system);
 
-    buffer.set_wrap(Wrap::WordOrGlyph);
-    buffer.set_text("Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.", &Attrs::new().family(cosmic_text::Family::Name("Inter")), Shaping::Advanced, None);
-    buffer.set_size(Some(50.0), Some(1000.0));
+    buffer
+        .configure()
+        .wrap(Wrap::WordOrGlyph)
+        .size(Some(50.0), Some(1000.0))
+        .text("Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.", &Attrs::new().family(cosmic_text::Family::Name("Inter")), Shaping::Advanced, None)
+        .apply();
 
     buffer.shape_until_scroll(false);
 
