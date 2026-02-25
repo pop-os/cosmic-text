@@ -115,9 +115,8 @@ fn draw_decoration_span<R: Renderer>(
         let thickness = (deco.underline_metrics.thickness * font_size)
             .max(1.0)
             .ceil();
-        //TODO: this should be run.line_y - ascent, but we don't have per-glyph ascent
-        // in LayoutGlyph. Using line_top as an approximation for now.
-        let y = run.line_top;
+        // clamped so it doesn't go above the line top.
+        let y = (run.line_y - deco.ascent * font_size).max(run.line_top);
         renderer.rectangle(x_start as i32, y as i32, w, thickness as u32, color);
     }
 }

@@ -50,7 +50,6 @@ fn test_text_decorations() {
         .validate_text_rendering();
 }
 
-
 #[test]
 fn test_text_decorations_rtl() {
     let base = base_attrs();
@@ -123,5 +122,43 @@ fn test_text_decorations_bidi() {
             (" Plain", base),
         ])
         .canvas(600, 50)
+        .validate_text_rendering();
+}
+
+/// Multiline Bidi test
+#[test]
+fn test_text_decorations_multiline_bidi() {
+    let base = base_attrs();
+    let red = Color::rgb(0xFF, 0x00, 0x00);
+    let cyan = Color::rgb(0x00, 0xFF, 0xFF);
+
+    DrawTestCfg::new("text_decoration_multiline_bidi")
+        .font_size(20., 26.)
+        .font_attrs(base.clone())
+        .rich_text(vec![
+            ("زیرخط ", base.clone().underline(UnderlineStyle::Single)),
+            ("Double ", base.clone().underline(UnderlineStyle::Double)),
+            ("خط ", base.clone().strikethrough()),
+            ("Over \n", base.clone().overline()),
+            (
+                "Red زیر خط ",
+                base.clone()
+                    .underline(UnderlineStyle::Single)
+                    .underline_color(red),
+            ),
+            (
+                "CyanSt ",
+                base.clone().strikethrough().strikethrough_color(cyan),
+            ),
+            (
+                "All",
+                base.clone()
+                    .underline(UnderlineStyle::Single)
+                    .strikethrough()
+                    .overline(),
+            ),
+            (" Plain", base),
+        ])
+        .canvas(400, 80)
         .validate_text_rendering();
 }

@@ -612,11 +612,15 @@ impl ShapeGlyph {
     }
 }
 
-fn decoration_metrics(font: &Font) -> (DecorationMetrics, DecorationMetrics) {
+fn decoration_metrics(font: &Font) -> (DecorationMetrics, DecorationMetrics, f32) {
     let metrics = font.metrics();
     let upem = metrics.units_per_em as f32;
     if upem == 0.0 {
-        return (DecorationMetrics::default(), DecorationMetrics::default());
+        return (
+            DecorationMetrics::default(),
+            DecorationMetrics::default(),
+            0.0,
+        );
     }
     (
         DecorationMetrics {
@@ -627,10 +631,11 @@ fn decoration_metrics(font: &Font) -> (DecorationMetrics, DecorationMetrics) {
             offset: metrics.strikeout.map_or(0.3, |d| d.offset / upem),
             thickness: metrics.strikeout.map_or(1.0 / 14.0, |d| d.thickness / upem),
         },
+        metrics.ascent / upem,
     )
 }
 
-/// span index used in VlRange to indicate this range is the ellipsis.
+/// span index used in `VlRange` to indicate this range is the ellipsis.
 const ELLIPSIS_SPAN: usize = usize::MAX;
 
 fn shape_ellipsis(
@@ -1046,7 +1051,7 @@ impl ShapeSpan {
                         .map(|font| decoration_metrics(&font))
                 });
 
-            if let Some((ul_metrics, st_metrics)) = primary_metrics {
+            if let Some((ul_metrics, st_metrics, ascent)) = primary_metrics {
                 // Track which sub-ranges of span_range are covered by explicit spans
                 let mut covered_end = span_range.start;
 
@@ -1068,6 +1073,7 @@ impl ShapeSpan {
                                     text_decoration: default_attrs.text_decoration,
                                     underline_metrics: ul_metrics,
                                     strikethrough_metrics: st_metrics,
+                                    ascent,
                                 },
                             ));
                         }
@@ -1082,6 +1088,7 @@ impl ShapeSpan {
                                 text_decoration: attrs.text_decoration,
                                 underline_metrics: ul_metrics,
                                 strikethrough_metrics: st_metrics,
+                                ascent,
                             },
                         ));
                     }
@@ -1097,6 +1104,7 @@ impl ShapeSpan {
                                 text_decoration: default_attrs.text_decoration,
                                 underline_metrics: ul_metrics,
                                 strikethrough_metrics: st_metrics,
+                                ascent,
                             },
                         ));
                     }
@@ -2081,7 +2089,7 @@ impl ShapeLine {
             .map_or(0.0, |s| s.words.iter().map(|w| w.width(font_size)).sum())
     }
 
-    /// Creates a VlRange for the ellipsis with the given BiDi level.
+    /// Creates a `VlRange` for the ellipsis with the give`BiDi`Di level.
     fn ellipsis_vlrange(&self, level: unicode_bidi::Level) -> VlRange {
         VlRange {
             span: ELLIPSIS_SPAN,
@@ -2091,7 +2099,7 @@ impl ShapeLine {
         }
     }
 
-    /// Determines the appropriate BiDi level for the ellipsis based on the
+    /// Determines the appropriate `BiDi` level for the ellipsis based on the
     /// adjacent ranges, following UAX#9 N1/N2 rules for neutral characters.
     fn ellipsis_level_between(
         &self,
@@ -2860,11 +2868,8 @@ impl ShapeLine {
                             }
                             glyphs.push(layout_glyph);
 
-                            // Advance (or reset) the decoration cursor to find
-                            // the span covering this glyph's byte position.
-                            // Resets for RTL/BiDi where byte order reverses.
-                            if deco_cursor < deco_spans.len()
-                                && glyph.start < deco_spans[deco_cursor].0.start
+                            if deco_cursor >= deco_spans.len()
+                                || glyph.start < deco_spans[deco_cursor].0.start
                             {
                                 deco_cursor = 0;
                             }

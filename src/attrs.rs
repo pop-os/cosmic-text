@@ -276,6 +276,9 @@ pub struct GlyphDecorationData {
     pub underline_metrics: DecorationMetrics,
     /// Strikethrough offset and thickness from the font
     pub strikethrough_metrics: DecorationMetrics,
+    /// Font ascent in EM units (ascent / upem).
+    /// Used for overline positioning
+    pub ascent: f32,
 }
 
 /// Text attributes
