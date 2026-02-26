@@ -29,17 +29,12 @@
 //! // Borrow buffer together with the font system for more convenient method calls
 //! let mut buffer = buffer.borrow_with(&mut font_system);
 //!
-//! // Set a size for the text buffer, in pixels
-//! buffer.set_size(Some(80.0), Some(25.0));
-//!
 //! // Attributes indicate what font to choose
 //! let attrs = Attrs::new();
 //!
-//! // Add some text!
+//! // Set size and text
+//! buffer.set_size(Some(80.0), Some(25.0));
 //! buffer.set_text("Hello, Rust! 🦀\n", &attrs, Shaping::Advanced, None);
-//!
-//! // Perform shaping as desired
-//! buffer.shape_until_scroll(true);
 //!
 //! // Inspect the output runs
 //! for run in buffer.layout_runs() {

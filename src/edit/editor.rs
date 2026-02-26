@@ -102,10 +102,12 @@ impl<'buffer> Editor<'buffer> {
     }
 
     /// Draw the editor
+    ///
+    /// Automatically resolves any pending dirty state before drawing.
     #[cfg(feature = "swash")]
     #[allow(clippy::too_many_arguments)]
     pub fn draw<F>(
-        &self,
+        &mut self,
         font_system: &mut FontSystem,
         cache: &mut crate::SwashCache,
         text_color: Color,
@@ -116,6 +118,7 @@ impl<'buffer> Editor<'buffer> {
     ) where
         F: FnMut(i32, i32, u32, u32, Color),
     {
+        self.with_buffer_mut(|buffer| buffer.shape_until_scroll(font_system, false));
         let mut renderer = crate::LegacyRenderer {
             font_system,
             cache,
@@ -130,6 +133,10 @@ impl<'buffer> Editor<'buffer> {
         );
     }
 
+    /// Render the editor using the provided renderer.
+    ///
+    /// The caller is responsible for calling [`Edit::shape_as_needed`] first
+    /// to ensure layout is up to date.
     pub fn render<R: Renderer>(
         &self,
         renderer: &mut R,
@@ -280,8 +287,8 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
         self.with_buffer(super::super::buffer::Buffer::tab_width)
     }
 
-    fn set_tab_width(&mut self, font_system: &mut FontSystem, tab_width: u16) {
-        self.with_buffer_mut(|buffer| buffer.set_tab_width(font_system, tab_width));
+    fn set_tab_width(&mut self, tab_width: u16) {
+        self.with_buffer_mut(|buffer| buffer.set_tab_width(tab_width));
     }
 
     fn shape_as_needed(&mut self, font_system: &mut FontSystem, prune: bool) {
@@ -837,8 +844,10 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
             Action::Click { x, y } => {
                 self.set_selection(Selection::None);
 
-                if let Some(new_cursor) = self.with_buffer(|buffer| buffer.hit(x as f32, y as f32))
-                {
+                if let Some(new_cursor) = self.with_buffer_mut(|buffer| {
+                    buffer.shape_until_scroll(font_system, false);
+                    buffer.hit(x as f32, y as f32)
+                }) {
                     if new_cursor != self.cursor {
                         self.cursor = new_cursor;
                         self.with_buffer_mut(|buffer| buffer.set_redraw(true));
@@ -848,8 +857,10 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
             Action::DoubleClick { x, y } => {
                 self.set_selection(Selection::None);
 
-                if let Some(new_cursor) = self.with_buffer(|buffer| buffer.hit(x as f32, y as f32))
-                {
+                if let Some(new_cursor) = self.with_buffer_mut(|buffer| {
+                    buffer.shape_until_scroll(font_system, false);
+                    buffer.hit(x as f32, y as f32)
+                }) {
                     if new_cursor != self.cursor {
                         self.cursor = new_cursor;
                         self.with_buffer_mut(|buffer| buffer.set_redraw(true));
@@ -861,8 +872,10 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
             Action::TripleClick { x, y } => {
                 self.set_selection(Selection::None);
 
-                if let Some(new_cursor) = self.with_buffer(|buffer| buffer.hit(x as f32, y as f32))
-                {
+                if let Some(new_cursor) = self.with_buffer_mut(|buffer| {
+                    buffer.shape_until_scroll(font_system, false);
+                    buffer.hit(x as f32, y as f32)
+                }) {
                     if new_cursor != self.cursor {
                         self.cursor = new_cursor;
                     }
@@ -876,8 +889,10 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                     self.with_buffer_mut(|buffer| buffer.set_redraw(true));
                 }
 
-                if let Some(new_cursor) = self.with_buffer(|buffer| buffer.hit(x as f32, y as f32))
-                {
+                if let Some(new_cursor) = self.with_buffer_mut(|buffer| {
+                    buffer.shape_until_scroll(font_system, false);
+                    buffer.hit(x as f32, y as f32)
+                }) {
                     if new_cursor != self.cursor {
                         self.cursor = new_cursor;
                         self.with_buffer_mut(|buffer| buffer.set_redraw(true));
