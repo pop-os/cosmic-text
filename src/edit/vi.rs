@@ -302,11 +302,19 @@ impl<'syntax_system, 'buffer> ViEditor<'syntax_system, 'buffer> {
         self.changed = eval_changed(&self.commands, self.save_pivot);
     }
 
+    /// Draw the editor.
+    ///
+    /// Automatically resolves any pending dirty state before drawing.
     #[cfg(feature = "swash")]
-    pub fn draw<F>(&self, font_system: &mut FontSystem, cache: &mut crate::SwashCache, callback: F)
-    where
+    pub fn draw<F>(
+        &mut self,
+        font_system: &mut FontSystem,
+        cache: &mut crate::SwashCache,
+        callback: F,
+    ) where
         F: FnMut(i32, i32, u32, u32, Color),
     {
+        self.with_buffer_mut(|buffer| buffer.shape_until_scroll(font_system, false));
         let mut renderer = crate::LegacyRenderer {
             font_system,
             cache,
@@ -315,6 +323,10 @@ impl<'syntax_system, 'buffer> ViEditor<'syntax_system, 'buffer> {
         self.render(&mut renderer);
     }
 
+    /// Render the editor using the provided renderer.
+    ///
+    /// The caller is responsible for calling [`Edit::shape_as_needed`] first
+    /// to ensure layout is up to date.
     pub fn render<R: Renderer>(&self, renderer: &mut R) {
         let background_color = self.background_color();
         let foreground_color = self.foreground_color();
@@ -553,8 +565,8 @@ impl<'buffer> Edit<'buffer> for ViEditor<'_, 'buffer> {
         self.editor.tab_width()
     }
 
-    fn set_tab_width(&mut self, font_system: &mut FontSystem, tab_width: u16) {
-        self.editor.set_tab_width(font_system, tab_width);
+    fn set_tab_width(&mut self, tab_width: u16) {
+        self.editor.set_tab_width(tab_width);
     }
 
     fn shape_as_needed(&mut self, font_system: &mut FontSystem, prune: bool) {

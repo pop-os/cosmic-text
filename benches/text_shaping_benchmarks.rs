@@ -5,14 +5,13 @@ use criterion::{black_box, criterion_group, criterion_main, Criterion};
 fn bench_ascii_fast_path(c: &mut Criterion) {
     let mut fs = ct::FontSystem::new();
     let mut buffer = ct::Buffer::new(&mut fs, ct::Metrics::new(14.0, 20.0));
-    buffer.set_size(&mut fs, Some(500.0), None);
+    buffer.set_size(Some(500.0), None);
 
     let ascii_text = "Pure ASCII text for BidiParagraphs optimization testing.\n".repeat(50);
 
     c.bench_function("ShapeLine/ASCII Fast Path", |b| {
         b.iter(|| {
             buffer.set_text(
-                &mut fs,
                 black_box(&ascii_text),
                 &ct::Attrs::new(),
                 ct::Shaping::Advanced,
@@ -26,14 +25,13 @@ fn bench_ascii_fast_path(c: &mut Criterion) {
 fn bench_bidi_processing(c: &mut Criterion) {
     let mut fs = ct::FontSystem::new();
     let mut buffer = ct::Buffer::new(&mut fs, ct::Metrics::new(14.0, 20.0));
-    buffer.set_size(&mut fs, Some(500.0), None);
+    buffer.set_size(Some(500.0), None);
 
     let bidi_text = "Mixed English and العربية النص العربي text for BiDi testing.\nThis tests adjust_levels and combined BiDi optimizations.\n".repeat(30);
 
     c.bench_function("ShapeLine/BiDi Processing", |b| {
         b.iter(|| {
             buffer.set_text(
-                &mut fs,
                 black_box(&bidi_text),
                 &ct::Attrs::new(),
                 ct::Shaping::Advanced,
@@ -47,7 +45,7 @@ fn bench_bidi_processing(c: &mut Criterion) {
 fn bench_lang_mixed(c: &mut Criterion) {
     let mut fs = ct::FontSystem::new();
     let mut buffer = ct::Buffer::new(&mut fs, ct::Metrics::new(14.0, 20.0));
-    buffer.set_size(&mut fs, Some(500.0), None);
+    buffer.set_size(Some(500.0), None);
 
     let bidi_text = include_str!("../sample/hello.txt");
 
@@ -56,7 +54,6 @@ fn bench_lang_mixed(c: &mut Criterion) {
         .bench_function("ShapeLine/Mixed-Language Text", |b| {
             b.iter(|| {
                 buffer.set_text(
-                    &mut fs,
                     black_box(&bidi_text),
                     &ct::Attrs::new(),
                     ct::Shaping::Advanced,
@@ -70,14 +67,13 @@ fn bench_lang_mixed(c: &mut Criterion) {
 fn bench_layout_heavy(c: &mut Criterion) {
     let mut fs = ct::FontSystem::new();
     let mut buffer = ct::Buffer::new(&mut fs, ct::Metrics::new(14.0, 20.0));
-    buffer.set_size(&mut fs, Some(500.0), None);
+    buffer.set_size(Some(500.0), None);
 
     let layout_text = "This is a very long line that will wrap multiple times and stress the reorder optimization through intensive layout processing with comprehensive buffer reuse testing. ".repeat(30);
 
     c.bench_function("ShapeLine/Layout Heavy", |b| {
         b.iter(|| {
             buffer.set_text(
-                &mut fs,
                 black_box(&layout_text),
                 &ct::Attrs::new(),
                 ct::Shaping::Advanced,
@@ -91,7 +87,7 @@ fn bench_layout_heavy(c: &mut Criterion) {
 fn bench_combined_stress(c: &mut Criterion) {
     let mut fs = ct::FontSystem::new();
     let mut buffer = ct::Buffer::new(&mut fs, ct::Metrics::new(14.0, 20.0));
-    buffer.set_size(&mut fs, Some(500.0), None);
+    buffer.set_size(Some(500.0), None);
 
     let stress_text = format!("{}\n{}\n{}\n{}\n",
         "ASCII line for BidiParagraphs optimization. ".repeat(15),
@@ -103,7 +99,6 @@ fn bench_combined_stress(c: &mut Criterion) {
     c.bench_function("ShapeLine/Combined Stress", |b| {
         b.iter(|| {
             buffer.set_text(
-                &mut fs,
                 black_box(&stress_text),
                 &ct::Attrs::new(),
                 ct::Shaping::Advanced,

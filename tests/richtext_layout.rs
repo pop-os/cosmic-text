@@ -28,7 +28,6 @@ fn empty_lines_use_span_metrics() {
         None,
     );
     buffer.set_size(Some(500.0), Some(500.0));
-    buffer.shape_until_scroll(false);
 
     let line_heights: Vec<f32> = buffer.layout_runs().map(|run| run.line_height).collect();
 

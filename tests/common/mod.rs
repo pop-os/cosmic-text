@@ -149,7 +149,6 @@ impl DrawTestCfg {
                 self.alignment,
             );
         }
-        buffer.shape_until_scroll(true);
 
         // Black
         let text_color = Color::rgb(0x00, 0x00, 0x00);
