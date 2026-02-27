@@ -279,7 +279,7 @@ impl BufferLine {
 
     /// Get the visible layout runs for rendering and other tasks
     pub fn layout_runs(&self, height_opt: Option<f32>, line_height: f32) -> LayoutRunIter<'_> {
-        LayoutRunIter::new(core::slice::from_ref(self), height_opt, line_height, 0.0, 0)
+        LayoutRunIter::from_lines(core::slice::from_ref(self), height_opt, line_height, 0.0, 0)
     }
 
     /// Get line metadata. This will be None if [`BufferLine::set_metadata`] has not been called

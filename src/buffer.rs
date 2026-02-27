@@ -108,7 +108,17 @@ pub struct LayoutRunIter<'b> {
 }
 
 impl<'b> LayoutRunIter<'b> {
-    pub const fn new(
+    pub const fn new(buffer: &'b Buffer) -> Self {
+        Self::from_lines(
+            buffer.lines.as_slice(),
+            buffer.height_opt,
+            buffer.metrics.line_height,
+            buffer.scroll.vertical,
+            buffer.scroll.line,
+        )
+    }
+
+    pub const fn from_lines(
         lines: &'b [BufferLine],
         height_opt: Option<f32>,
         line_height: f32,
@@ -935,13 +945,7 @@ impl Buffer {
 
     /// Get the visible layout runs for rendering and other tasks
     pub fn layout_runs(&self) -> LayoutRunIter<'_> {
-        LayoutRunIter::new(
-            &self.lines,
-            self.height_opt,
-            self.metrics.line_height,
-            self.scroll.vertical,
-            self.scroll.line,
-        )
+        LayoutRunIter::new(self)
     }
 
     /// Convert x, y position to Cursor (hit detection)
