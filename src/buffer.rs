@@ -11,159 +11,9 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
     render_decoration, Affinity, Align, Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem,
-    BufferLine, Color, Cursor, DecorationSpan, Ellipsize, FontSystem, Hinting, LayoutCursor,
-    LayoutGlyph, LayoutLine, LineEnding, LineIter, Motion, Renderer, Scroll, ShapeLine, Shaping,
-    Wrap,
+    BufferLine, Color, Cursor, Ellipsize, FontSystem, Hinting, LayoutCursor, LayoutLine,
+    LayoutRunIter, LineEnding, LineIter, Motion, Renderer, Scroll, ShapeLine, Shaping, Wrap,
 };
-
-/// A line of visible text for rendering
-#[derive(Debug)]
-pub struct LayoutRun<'a> {
-    /// The index of the original text line
-    pub line_i: usize,
-    /// The original text line
-    pub text: &'a str,
-    /// True if the original paragraph direction is RTL
-    pub rtl: bool,
-    /// The array of layout glyphs to draw
-    pub glyphs: &'a [LayoutGlyph],
-    /// Text decoration spans covering ranges of glyphs
-    pub decorations: &'a [DecorationSpan],
-    /// Y offset to baseline of line
-    pub line_y: f32,
-    /// Y offset to top of line
-    pub line_top: f32,
-    /// Y offset to next line
-    pub line_height: f32,
-    /// Width of line
-    pub line_w: f32,
-}
-
-impl LayoutRun<'_> {
-    /// Return the pixel span `Some((x_left, x_width))` of the highlighted area between `cursor_start`
-    /// and `cursor_end` within this run, or None if the cursor range does not intersect this run.
-    /// This may return widths of zero if `cursor_start == cursor_end`, if the run is empty, or if the
-    /// region's left start boundary is the same as the cursor's end boundary or vice versa.
-    #[allow(clippy::missing_panics_doc)]
-    pub fn highlight(&self, cursor_start: Cursor, cursor_end: Cursor) -> Option<(f32, f32)> {
-        let mut x_start = None;
-        let mut x_end = None;
-        let rtl_factor = if self.rtl { 1. } else { 0. };
-        let ltr_factor = 1. - rtl_factor;
-        for glyph in self.glyphs {
-            let cursor = self.cursor_from_glyph_left(glyph);
-            if cursor >= cursor_start && cursor <= cursor_end {
-                if x_start.is_none() {
-                    x_start = Some(glyph.x + glyph.w.mul_add(rtl_factor, 0.0));
-                }
-                x_end = Some(glyph.x + glyph.w.mul_add(rtl_factor, 0.0));
-            }
-            let cursor = self.cursor_from_glyph_right(glyph);
-            if cursor >= cursor_start && cursor <= cursor_end {
-                if x_start.is_none() {
-                    x_start = Some(glyph.x + glyph.w.mul_add(ltr_factor, 0.0));
-                }
-                x_end = Some(glyph.x + glyph.w.mul_add(ltr_factor, 0.0));
-            }
-        }
-        x_start.map(|x_start| {
-            let x_end = x_end.expect("end of cursor not found");
-            let (x_start, x_end) = if x_start < x_end {
-                (x_start, x_end)
-            } else {
-                (x_end, x_start)
-            };
-            (x_start, x_end - x_start)
-        })
-    }
-
-    const fn cursor_from_glyph_left(&self, glyph: &LayoutGlyph) -> Cursor {
-        if self.rtl {
-            Cursor::new_with_affinity(self.line_i, glyph.end, Affinity::Before)
-        } else {
-            Cursor::new_with_affinity(self.line_i, glyph.start, Affinity::After)
-        }
-    }
-
-    const fn cursor_from_glyph_right(&self, glyph: &LayoutGlyph) -> Cursor {
-        if self.rtl {
-            Cursor::new_with_affinity(self.line_i, glyph.start, Affinity::After)
-        } else {
-            Cursor::new_with_affinity(self.line_i, glyph.end, Affinity::Before)
-        }
-    }
-}
-
-/// An iterator of visible text lines, see [`LayoutRun`]
-#[derive(Debug)]
-pub struct LayoutRunIter<'b> {
-    buffer: &'b Buffer,
-    line_i: usize,
-    layout_i: usize,
-    total_height: f32,
-    line_top: f32,
-}
-
-impl<'b> LayoutRunIter<'b> {
-    pub const fn new(buffer: &'b Buffer) -> Self {
-        Self {
-            buffer,
-            line_i: buffer.scroll.line,
-            layout_i: 0,
-            total_height: 0.0,
-            line_top: 0.0,
-        }
-    }
-}
-
-impl<'b> Iterator for LayoutRunIter<'b> {
-    type Item = LayoutRun<'b>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        while let Some(line) = self.buffer.lines.get(self.line_i) {
-            let shape = line.shape_opt()?;
-            let layout = line.layout_opt()?;
-            while let Some(layout_line) = layout.get(self.layout_i) {
-                self.layout_i += 1;
-
-                let line_height = layout_line
-                    .line_height_opt
-                    .unwrap_or(self.buffer.metrics.line_height);
-                self.total_height += line_height;
-
-                let line_top = self.line_top - self.buffer.scroll.vertical;
-                let glyph_height = layout_line.max_ascent + layout_line.max_descent;
-                let centering_offset = (line_height - glyph_height) / 2.0;
-                let line_y = line_top + centering_offset + layout_line.max_ascent;
-                if let Some(height) = self.buffer.height_opt {
-                    if line_y - layout_line.max_ascent > height {
-                        return None;
-                    }
-                }
-                self.line_top += line_height;
-                if line_y + layout_line.max_descent < 0.0 {
-                    continue;
-                }
-
-                return Some(LayoutRun {
-                    line_i: self.line_i,
-                    text: line.text(),
-                    rtl: shape.rtl,
-                    glyphs: &layout_line.glyphs,
-                    decorations: &layout_line.decorations,
-                    line_y,
-                    line_top,
-                    line_height,
-                    line_w: layout_line.w,
-                });
-            }
-            self.line_i += 1;
-            self.layout_i = 0;
-        }
-
-        None
-    }
-}
 
 /// Metrics of text
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
@@ -925,7 +775,13 @@ impl Buffer {
 
     /// Get the visible layout runs for rendering and other tasks
     pub fn layout_runs(&self) -> LayoutRunIter<'_> {
-        LayoutRunIter::new(self)
+        LayoutRunIter::new(
+            &self.lines,
+            self.height_opt,
+            self.metrics.line_height,
+            self.scroll.vertical,
+            self.scroll.line,
+        )
     }
 
     /// Convert x, y position to Cursor (hit detection)
