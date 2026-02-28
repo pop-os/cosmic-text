@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::sync::Arc;
 use alloc::vec::Vec;
-use core::{mem, ops::Range};
+use core::mem;
 use fontdb::Family;
 use unicode_script::Script;
 
-use crate::{BuildHasher, Font, FontMatchKey, FontSystem, HashMap, ShapeBuffer};
+use crate::{Font, FontMatchKey, FontSystem, HashMap, ShapeBuffer};
 
 #[cfg(not(any(all(unix, not(target_os = "android")), target_os = "windows")))]
 #[path = "other.rs"]
@@ -26,144 +25,80 @@ mod platform;
 #[path = "windows.rs"]
 mod platform;
 
-/// The `Fallback` trait allows for configurable font fallback lists to be set during construction of the [`FontSystem`].
+macro_rules! enum_fallback_entry {
+    ($doc:expr, $ident:ident { $($variant:ident($ty:ty),)+ }) => {
+        #[derive(Clone, Debug)]
+        #[doc = $doc]
+        pub enum $ident {
+            $($variant($ty),)+
+        }
+
+        $(
+            impl From<$ty> for $ident {
+                fn from(value: $ty) -> Self {
+                    Self::$variant(value)
+                }
+            }
+        )+
+
+        impl AsRef<str> for $ident {
+            fn as_ref(&self) -> &str {
+                match self {
+                    $(Self::$variant(x) => x.as_ref(),)+
+                }
+            }
+        }
+    };
+}
+
+enum_fallback_entry!(
+    "See [Fallback].",
+    FallbackEntry {
+        Owned(String),
+        Static(&'static str),
+        ArcStr(Arc<str>),
+        ArcString(Arc<String>),
+    }
+);
+
+//TODO: abstract style (sans/serif/monospaced)
+/// The `Fallback` struct allows for configurable font fallback lists to be set for the [`FontSystem`].
 ///
-/// A custom fallback list can be added via the [`FontSystem::new_with_locale_and_db_and_fallback`] constructor.
+/// A custom fallback list can be added via the [`FontSystem::new_with_locale_and_db_and_fallback`] constructor, and can be modified by modifying [`FontSystem::fallback_mut`].
 ///
-/// A default implementation is provided by the [`PlatformFallback`] struct, which encapsulates the target platform's pre-configured fallback lists.
+/// A default fallback list is provided by the [`platform_fallback`] function, which returns a pre-configured fallback list for the target platform.
 ///
+/// Example:
 /// ```rust
-/// # use unicode_script::Script;
-/// # use cosmic_text::{Fallback, FontSystem};
-/// struct MyFallback;
-/// impl Fallback for MyFallback {
-///     fn common_fallback(&self) -> &[&'static str] {
-///         &[
-///             "Segoe UI",
-///             "Segoe UI Emoji",
-///             "Segoe UI Symbol",
-///             "Segoe UI Historic",
-///         ]
-///     }
+/// use unicode_script::Script;
+/// use cosmic_text::{Fallback, FontSystem};
+/// use std::collections::HashMap;
 ///
-///     fn forbidden_fallback(&self) -> &[&'static str] {
-///         &[]
-///     }
-///
-///     fn script_fallback(&self, script: Script, locale: &str) -> &[&'static str] {
-///         match script {
-///             Script::Adlam => &["Ebrima"],
-///             Script::Bengali => &["Nirmala UI"],
-///             Script::Canadian_Aboriginal => &["Gadugi"],
-///             // ...
-///             _ => &[],
-///        }
-///     }
-/// }
-///
+/// let fallback = Fallback {
+///     common_fallback: vec![
+///         "Common Font A".into(),
+///         "Common Font B".into(),
+///     ],
+///     forbidden_fallback: vec![],
+///     script_fallback: HashMap::from_iter([
+///         (Script::Adlam, vec!["Adlam Font".into()]),
+///     ]),
+/// };
 /// let locale = "en-US".to_string();
 /// let db = fontdb::Database::new();
-/// let font_system = FontSystem::new_with_locale_and_db_and_fallback(locale, db, MyFallback);
+/// let font_system = FontSystem::new_with_locale_and_db_and_fallback(locale, db, fallback);
 /// ```
-pub trait Fallback: Send + Sync {
+#[derive(Clone, Debug)]
+pub struct Fallback {
     /// Fallbacks to use after any script specific fallbacks
-    fn common_fallback(&self) -> &[&'static str];
-
+    pub common_fallback: Vec<FallbackEntry>,
     /// Fallbacks to never use
-    fn forbidden_fallback(&self) -> &[&'static str];
-
+    pub forbidden_fallback: Vec<FallbackEntry>,
     /// Fallbacks to use per script
-    fn script_fallback(&self, script: Script, locale: &str) -> &[&'static str];
+    pub script_fallback: HashMap<Script, Vec<FallbackEntry>>,
 }
 
-#[derive(Debug, Default)]
-pub struct Fallbacks {
-    lists: Vec<&'static str>,
-    common_fallback_range: Range<usize>,
-    forbidden_fallback_range: Range<usize>,
-    // PERF: Consider using NoHashHasher since Script is just an integer
-    script_fallback_ranges: HashMap<Script, Range<usize>>,
-    locale: String,
-}
-
-impl Fallbacks {
-    pub(crate) fn new(fallbacks: &dyn Fallback, scripts: &[Script], locale: &str) -> Self {
-        let common_fallback = fallbacks.common_fallback();
-
-        let forbidden_fallback = fallbacks.forbidden_fallback();
-
-        let mut lists =
-            Vec::with_capacity(common_fallback.len() + forbidden_fallback.len() + scripts.len());
-
-        let mut index = lists.len();
-        let mut new_range = |lists: &Vec<&str>| {
-            let old_index = index;
-            index = lists.len();
-            old_index..index
-        };
-
-        lists.extend_from_slice(common_fallback);
-        let common_fallback_range = new_range(&lists);
-
-        lists.extend_from_slice(forbidden_fallback);
-        let forbidden_fallback_range = new_range(&lists);
-
-        let mut script_fallback_ranges =
-            HashMap::with_capacity_and_hasher(scripts.len(), BuildHasher::default());
-        for &script in scripts {
-            let script_fallback = fallbacks.script_fallback(script, locale);
-            lists.extend_from_slice(script_fallback);
-            let script_fallback_range = new_range(&lists);
-            script_fallback_ranges.insert(script, script_fallback_range);
-        }
-
-        let locale = locale.to_owned();
-        Self {
-            lists,
-            common_fallback_range,
-            forbidden_fallback_range,
-            script_fallback_ranges,
-            locale,
-        }
-    }
-
-    pub(crate) fn extend(&mut self, fallbacks: &dyn Fallback, scripts: &[Script]) {
-        self.lists.reserve(scripts.len());
-
-        let mut index = self.lists.len();
-        let mut new_range = |lists: &Vec<&str>| {
-            let old_index = index;
-            index = lists.len();
-            old_index..index
-        };
-
-        for &script in scripts {
-            self.script_fallback_ranges
-                .entry(script)
-                .or_insert_with_key(|&script| {
-                    let script_fallback = fallbacks.script_fallback(script, &self.locale);
-                    self.lists.extend_from_slice(script_fallback);
-                    new_range(&self.lists)
-                });
-        }
-    }
-
-    pub(crate) fn common_fallback(&self) -> &[&'static str] {
-        &self.lists[self.common_fallback_range.clone()]
-    }
-
-    pub(crate) fn forbidden_fallback(&self) -> &[&'static str] {
-        &self.lists[self.forbidden_fallback_range.clone()]
-    }
-
-    pub(crate) fn script_fallback(&self, script: Script) -> &[&'static str] {
-        self.script_fallback_ranges
-            .get(&script)
-            .map_or(&[], |range| &self.lists[range.clone()])
-    }
-}
-
-pub use platform::PlatformFallback;
+pub use platform::platform_fallback;
 
 #[cfg(not(feature = "warn_on_missing_glyphs"))]
 use log::debug as missing_warn;
@@ -205,9 +140,6 @@ impl<'a> FontFallbackIter<'a> {
         word: &'a str,
         ideal_weight: fontdb::Weight,
     ) -> Self {
-        font_system
-            .fallbacks
-            .extend(font_system.dyn_fallback.as_ref(), scripts);
         font_system.monospace_fallbacks_buffer.clear();
         Self {
             font_system,
@@ -241,9 +173,9 @@ impl<'a> FontFallbackIter<'a> {
                 word
             );
         } else if !self.scripts.is_empty() && self.common_i > 0 {
-            let family = self.font_system.fallbacks.common_fallback()[self.common_i - 1];
+            let family = &self.font_system.fallback().common_fallback[self.common_i - 1];
             missing_warn!(
-                "Failed to find script fallback for {:?} locale '{}', used '{}': '{}'",
+                "Failed to find script fallback for {:?} locale '{}', used '{:?}': '{}'",
                 self.scripts,
                 self.font_system.locale(),
                 family,
@@ -286,7 +218,7 @@ impl<'a> FontFallbackIter<'a> {
             .find(|m_key| self.face_contains_family(m_key.id, default_family_name))
     }
 
-    fn next_item(&mut self, fallbacks: &Fallbacks) -> Option<<Self as Iterator>::Item> {
+    fn next_item(&mut self, fallback: &Fallback) -> Option<<Self as Iterator>::Item> {
         if let Some(fallback_info) = self.font_system.monospace_fallbacks_buffer.pop_first() {
             if let Some(font) = self
                 .font_system
@@ -295,12 +227,6 @@ impl<'a> FontFallbackIter<'a> {
                 return Some(font);
             }
         }
-
-        let font_match_keys_iter = |is_mono| {
-            self.font_match_keys
-                .iter()
-                .filter(move |m_key| m_key.font_weight_diff == 0 || is_mono)
-        };
 
         'DEF_FAM: while self.default_i < self.default_families.len() {
             self.default_i += 1;
@@ -372,7 +298,7 @@ impl<'a> FontFallbackIter<'a> {
                 Vec::new()
             };
 
-            for m_key in font_match_keys_iter(is_mono) {
+            for m_key in self.font_match_keys.iter() {
                 if Some(m_key.id) != default_font_match_key.as_ref().map(|m_key| m_key.id) {
                     let is_mono_id = if mono_ids_for_scripts.is_empty() {
                         self.font_system.is_monospace(m_key.id)
@@ -419,20 +345,24 @@ impl<'a> FontFallbackIter<'a> {
         while self.script_i.0 < self.scripts.len() {
             let script = self.scripts[self.script_i.0];
 
-            let script_families = fallbacks.script_fallback(script);
+            let script_families = fallback
+                .script_fallback
+                .get(&script)
+                .map(|x| x.as_slice())
+                .unwrap_or_default();
 
             while self.script_i.1 < script_families.len() {
-                let script_family = script_families[self.script_i.1];
+                let script_family = &script_families[self.script_i.1];
                 self.script_i.1 += 1;
-                for m_key in font_match_keys_iter(false) {
-                    if self.face_contains_family(m_key.id, script_family) {
+                for m_key in self.font_match_keys.iter() {
+                    if self.face_contains_family(m_key.id, script_family.as_ref()) {
                         if let Some(font) = self.font_system.get_font(m_key.id, self.ideal_weight) {
                             return Some(font);
                         }
                     }
                 }
                 log::debug!(
-                    "failed to find family '{}' for script {:?} and locale '{}'",
+                    "failed to find family '{:?}' for script {:?} and locale '{}'",
                     script_family,
                     script,
                     self.font_system.locale(),
@@ -443,29 +373,29 @@ impl<'a> FontFallbackIter<'a> {
             self.script_i.1 = 0;
         }
 
-        let common_families = fallbacks.common_fallback();
+        let common_families = &fallback.common_fallback;
         while self.common_i < common_families.len() {
-            let common_family = common_families[self.common_i];
+            let common_family = &common_families[self.common_i];
             self.common_i += 1;
-            for m_key in font_match_keys_iter(false) {
-                if self.face_contains_family(m_key.id, common_family) {
+            for m_key in self.font_match_keys.iter() {
+                if self.face_contains_family(m_key.id, common_family.as_ref()) {
                     if let Some(font) = self.font_system.get_font(m_key.id, self.ideal_weight) {
                         return Some(font);
                     }
                 }
             }
-            log::debug!("failed to find family '{common_family}'");
+            log::debug!("failed to find family '{common_family:?}'");
         }
 
         //TODO: do we need to do this?
         //TODO: do not evaluate fonts more than once!
-        let forbidden_families = fallbacks.forbidden_fallback();
+        let forbidden_families = &fallback.forbidden_fallback;
         while self.other_i < self.font_match_keys.len() {
             let id = self.font_match_keys[self.other_i].id;
             self.other_i += 1;
             if forbidden_families
                 .iter()
-                .all(|family_name| !self.face_contains_family(id, family_name))
+                .all(|family_name| !self.face_contains_family(id, family_name.as_ref()))
             {
                 if let Some(font) = self.font_system.get_font(id, self.ideal_weight) {
                     return Some(font);
@@ -481,9 +411,82 @@ impl<'a> FontFallbackIter<'a> {
 impl Iterator for FontFallbackIter<'_> {
     type Item = Arc<Font>;
     fn next(&mut self) -> Option<Self::Item> {
-        let mut fallbacks = mem::take(&mut self.font_system.fallbacks);
-        let item = self.next_item(&fallbacks);
-        mem::swap(&mut fallbacks, &mut self.font_system.fallbacks);
+        // The `mem::swap`s are a workaround for double borrowing (E0502).
+        let mut fallback = Fallback {
+            common_fallback: Default::default(),
+            forbidden_fallback: Default::default(),
+            script_fallback: Default::default(),
+        };
+        mem::swap(&mut fallback, self.font_system.fallback_mut());
+        let item = self.next_item(&fallback);
+        mem::swap(&mut fallback, self.font_system.fallback_mut());
         item
     }
+}
+
+fn platform_han_fallback(
+    locale: &str,
+    zh_hans: &'static str,
+    zh_hant_tw: &'static str,
+    zh_hant_hk: &'static str,
+    ja: &'static str,
+    ko: &'static str,
+) -> &'static str {
+    // TODO: Use a proper locale parsing library
+    let subtags = locale
+        .split('-')
+        .map(|x| x.to_ascii_lowercase())
+        .collect::<Vec<_>>();
+
+    match subtags.first().map(|x| x.as_str()).unwrap_or_default() {
+        "ja" => ja,
+        "ko" => ko,
+        _ => {
+            if subtags.len() <= 1 || subtags.iter().skip(1).any(|x| x == "hans") {
+                zh_hans
+            } else if subtags.iter().skip(1).any(|x| x == "hk") {
+                zh_hant_hk
+            } else if subtags.iter().skip(1).any(|x| x == "hant" || x == "tw") {
+                zh_hant_tw
+            } else {
+                zh_hans
+            }
+        }
+    }
+}
+
+#[test]
+fn test_platform_han_fallback() {
+    let zh_hans = "zh_hans";
+    let zh_hant_tw = "zh_hant_tw";
+    let zh_hant_hk = "zh_hant_hk";
+    let ja = "ja";
+    let ko = "ko";
+    let han = |locale: &str| platform_han_fallback(locale, zh_hans, zh_hant_tw, zh_hant_hk, ja, ko);
+
+    assert_eq!(han(""), zh_hans);
+    assert_eq!(han("en"), zh_hans);
+    assert_eq!(han("-"), zh_hans);
+
+    assert_eq!(han("ja"), ja);
+    assert_eq!(han("ko"), ko);
+
+    assert_eq!(han("zh"), zh_hans);
+
+    assert_eq!(han("zh-Hans"), zh_hans);
+    assert_eq!(han("zh-Hans-CN"), zh_hans);
+    assert_eq!(han("zh-Hans-HK"), zh_hans);
+    assert_eq!(han("zh-Hans-TW"), zh_hans);
+    assert_eq!(han("zh-Hans-SG"), zh_hans);
+
+    assert_eq!(han("zh-Hant"), zh_hant_tw);
+    assert_eq!(han("zh-Hant-CN"), zh_hant_tw);
+    assert_eq!(han("zh-Hant-HK"), zh_hant_hk);
+    assert_eq!(han("zh-Hant-TW"), zh_hant_tw);
+    assert_eq!(han("zh-Hant-SG"), zh_hant_tw);
+
+    assert_eq!(han("zh-CN"), zh_hans);
+    assert_eq!(han("zh-HK"), zh_hant_hk);
+    assert_eq!(han("zh-TW"), zh_hant_tw);
+    assert_eq!(han("zh-SG"), zh_hans);
 }
