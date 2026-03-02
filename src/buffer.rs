@@ -40,44 +40,131 @@ pub struct LayoutRun<'a> {
 }
 
 impl LayoutRun<'_> {
-    /// Return the pixel span `Some((x_left, x_width))` of the highlighted area between `cursor_start`
-    /// and `cursor_end` within this run, or None if the cursor range does not intersect this run.
-    /// This may return widths of zero if `cursor_start == cursor_end`, if the run is empty, or if the
-    /// region's left start boundary is the same as the cursor's end boundary or vice versa.
-    #[allow(clippy::missing_panics_doc)]
-    pub fn highlight(&self, cursor_start: Cursor, cursor_end: Cursor) -> Option<(f32, f32)> {
-        let mut x_start = None;
-        let mut x_end = None;
-        let rtl_factor = if self.rtl { 1. } else { 0. };
-        let ltr_factor = 1. - rtl_factor;
+    /// Return an iterator of `(x_left, x_width)` pixel spans for the highlighted areas
+    /// between `cursor_start` and `cursor_end` within this run.
+    ///
+    /// For pure LTR or pure RTL runs this yields at most one span. For mixed BiDi runs
+    /// (where selected and unselected glyphs interleave visually) it yields multiple
+    /// disjoint spans.
+    ///
+    /// Returns an empty iterator if the cursor range does not intersect this run.
+    pub fn highlight(
+        &self,
+        cursor_start: Cursor,
+        cursor_end: Cursor,
+    ) -> impl Iterator<Item = (f32, f32)> {
+        let line_i = self.line_i;
+        let mut results = Vec::new();
+        let mut range_opt: Option<(f32, f32)> = None;
+
         for glyph in self.glyphs {
-            let cursor = self.cursor_from_glyph_left(glyph);
-            if cursor >= cursor_start && cursor <= cursor_end {
-                if x_start.is_none() {
-                    x_start = Some(glyph.x + glyph.w.mul_add(rtl_factor, 0.0));
+            let cluster = &self.text[glyph.start..glyph.end];
+            let total = cluster.grapheme_indices(true).count().max(1);
+            let c_w = glyph.w / total as f32;
+            let mut c_x = glyph.x;
+
+            for (i, c) in cluster.grapheme_indices(true) {
+                let c_start = glyph.start + i;
+                let c_end = glyph.start + i + c.len();
+
+                let is_selected = (cursor_start.line != line_i || c_end > cursor_start.index)
+                    && (cursor_end.line != line_i || c_start < cursor_end.index);
+
+                if is_selected {
+                    range_opt = Some(match range_opt {
+                        Some((min, max)) => (min.min(c_x), max.max(c_x + c_w)),
+                        None => (c_x, c_x + c_w),
+                    });
+                } else if let Some((min_x, max_x)) = range_opt.take() {
+                    let width = max_x - min_x;
+                    if width > 0.0 {
+                        results.push((min_x, width));
+                    }
                 }
-                x_end = Some(glyph.x + glyph.w.mul_add(rtl_factor, 0.0));
-            }
-            let cursor = self.cursor_from_glyph_right(glyph);
-            if cursor >= cursor_start && cursor <= cursor_end {
-                if x_start.is_none() {
-                    x_start = Some(glyph.x + glyph.w.mul_add(ltr_factor, 0.0));
-                }
-                x_end = Some(glyph.x + glyph.w.mul_add(ltr_factor, 0.0));
+
+                c_x += c_w;
             }
         }
-        x_start.map(|x_start| {
-            let x_end = x_end.expect("end of cursor not found");
-            let (x_start, x_end) = if x_start < x_end {
-                (x_start, x_end)
-            } else {
-                (x_end, x_start)
-            };
-            (x_start, x_end - x_start)
-        })
+
+        // Flush remaining highlighted region
+        if let Some((min_x, max_x)) = range_opt {
+            let width = max_x - min_x;
+            if width > 0.0 {
+                results.push((min_x, width));
+            }
+        }
+
+        results.into_iter()
     }
 
-    const fn cursor_from_glyph_left(&self, glyph: &LayoutGlyph) -> Cursor {
+    /// Returns the visual x position (in pixels) of `cursor` within this run,
+    /// or `None` if the cursor does not belong to this run.
+    ///
+    /// For RTL glyphs the cursor is placed at the right edge minus the offset;
+    /// for LTR glyphs it is placed at the left edge plus the offset.
+    pub fn cursor_position(&self, cursor: &Cursor) -> Option<f32> {
+        let (glyph_idx, glyph_offset) = self.cursor_glyph(cursor)?;
+        let x = self.glyphs.get(glyph_idx).map_or_else(
+            || {
+                // Past-the-end: position after the last glyph
+                self.glyphs.last().map_or(0.0, |glyph| {
+                    if glyph.level.is_rtl() {
+                        glyph.x
+                    } else {
+                        glyph.x + glyph.w
+                    }
+                })
+            },
+            |glyph| {
+                if glyph.level.is_rtl() {
+                    glyph.x + glyph.w - glyph_offset
+                } else {
+                    glyph.x + glyph_offset
+                }
+            },
+        );
+        Some(x)
+    }
+
+    /// Find which glyph in this run contains `cursor`, returning
+    /// `(glyph_index, pixel_offset_within_glyph)`, or `None` if the cursor
+    /// is not on this run.
+    pub fn cursor_glyph(&self, cursor: &Cursor) -> Option<(usize, f32)> {
+        if cursor.line != self.line_i {
+            return None;
+        }
+        for (glyph_i, glyph) in self.glyphs.iter().enumerate() {
+            if cursor.index == glyph.start {
+                return Some((glyph_i, 0.0));
+            } else if cursor.index > glyph.start && cursor.index < glyph.end {
+                // Guess x offset based on graphemes within the cluster
+                let cluster = &self.text[glyph.start..glyph.end];
+                let mut before = 0;
+                let mut total = 0;
+                for (i, _) in cluster.grapheme_indices(true) {
+                    if glyph.start + i < cursor.index {
+                        before += 1;
+                    }
+                    total += 1;
+                }
+                let offset = glyph.w * (before as f32) / (total as f32);
+                return Some((glyph_i, offset));
+            }
+        }
+        // in mixed BiDi the last logical glyph may not be the last visual glyph.
+        for (glyph_i, glyph) in self.glyphs.iter().enumerate() {
+            if cursor.index == glyph.end {
+                return Some((glyph_i, glyph.w));
+            }
+        }
+        if self.glyphs.is_empty() {
+            return Some((0, 0.0));
+        }
+        None
+    }
+
+    /// Get the left-edge cursor position of a glyph, accounting for paragraph direction.
+    pub const fn cursor_from_glyph_left(&self, glyph: &LayoutGlyph) -> Cursor {
         if self.rtl {
             Cursor::new_with_affinity(self.line_i, glyph.end, Affinity::Before)
         } else {
@@ -85,7 +172,8 @@ impl LayoutRun<'_> {
         }
     }
 
-    const fn cursor_from_glyph_right(&self, glyph: &LayoutGlyph) -> Cursor {
+    /// Get the right-edge cursor position of a glyph, accounting for paragraph direction.
+    pub const fn cursor_from_glyph_right(&self, glyph: &LayoutGlyph) -> Cursor {
         if self.rtl {
             Cursor::new_with_affinity(self.line_i, glyph.start, Affinity::After)
         } else {
