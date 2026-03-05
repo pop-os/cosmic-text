@@ -331,7 +331,14 @@ impl<'a> FontFallbackIter<'a> {
             }
 
             match (is_mono, default_font_match_key.as_ref()) {
-                (false, None) => break 'DEF_FAM,
+                (false, None) => {
+                    missing_warn!(
+                        "No default font match for {:?} at weight {}",
+                        self.default_families[self.default_i - 1],
+                        self.ideal_weight.0,
+                    );
+                    break 'DEF_FAM;
+                }
                 (false, Some(m_key)) => {
                     if let Some(font) = self.font_system.get_font(m_key.id, self.ideal_weight) {
                         return Some(font);
