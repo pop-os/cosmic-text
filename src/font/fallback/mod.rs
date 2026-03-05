@@ -282,7 +282,7 @@ impl<'a> FontFallbackIter<'a> {
 
         self.font_match_keys
             .iter()
-            .filter(|m_key| m_key.font_weight_diff == 0)
+            .filter(|m_key| m_key.font_weight_diff == 0 || m_key.variable_weight_match)
             .find(|m_key| self.face_contains_family(m_key.id, default_family_name))
     }
 
@@ -297,9 +297,9 @@ impl<'a> FontFallbackIter<'a> {
         }
 
         let font_match_keys_iter = |is_mono| {
-            self.font_match_keys
-                .iter()
-                .filter(move |m_key| m_key.font_weight_diff == 0 || is_mono)
+            self.font_match_keys.iter().filter(move |m_key| {
+                m_key.font_weight_diff == 0 || m_key.variable_weight_match || is_mono
+            })
         };
 
         'DEF_FAM: while self.default_i < self.default_families.len() {
