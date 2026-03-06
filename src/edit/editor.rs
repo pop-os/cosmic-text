@@ -616,10 +616,14 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                 //TODO: what about indenting more after opening brackets or parentheses?
                 if self.auto_indent {
                     let mut string = String::from("\n");
+                    let cursor_index = self.cursor.index;
                     self.with_buffer(|buffer| {
                         let line = &buffer.lines[self.cursor.line];
                         let text = line.text();
-                        for c in text.chars() {
+                        for (i, c) in text.char_indices() {
+                            if i >= cursor_index {
+                                break;
+                            }
                             if c.is_whitespace() {
                                 string.push(c);
                             } else {
