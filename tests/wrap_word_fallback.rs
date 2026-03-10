@@ -15,12 +15,12 @@ fn wrap_word_fallback() {
     let mut buffer = buffer.borrow_with(&mut font_system);
 
     buffer.set_wrap(Wrap::WordOrGlyph);
-    buffer.set_text("Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.", &Attrs::new().family(cosmic_text::Family::Name("Inter")), Shaping::Advanced, None);
     buffer.set_size(Some(50.0), Some(1000.0));
+    buffer.set_text("Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.", &Attrs::new().family(cosmic_text::Family::Name("Inter")), Shaping::Advanced, None);
 
-    buffer.shape_until_scroll(false);
-
-    let measured_size = measure(&buffer);
+    let measured_size = buffer
+        .layout_runs()
+        .fold(0.0f32, |width, run| width.max(run.line_w));
 
     assert!(
         measured_size <= buffer.size().0.unwrap_or(0.0),
@@ -28,10 +28,4 @@ fn wrap_word_fallback() {
         measured_size,
         buffer.size().0.unwrap_or(0.0)
     );
-}
-
-fn measure(buffer: &Buffer) -> f32 {
-    buffer
-        .layout_runs()
-        .fold(0.0f32, |width, run| width.max(run.line_w))
 }

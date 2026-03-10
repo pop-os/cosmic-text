@@ -88,7 +88,7 @@ fn test_ligature_segmentation() {
     let mut buffer = buffer.borrow_with(&mut font_system);
 
     buffer.set_text("|>", &Attrs::new(), Shaping::Advanced, None);
-    buffer.shape_until_scroll(false);
+    let _ = buffer.layout_runs();
 
     let line = &buffer.lines[0];
     let shape = line.shape_opt().expect("ShapeLine not found");
@@ -105,7 +105,7 @@ fn test_ligature_segmentation() {
 
     // Test -> (Arrow), which is a common ligature.
     buffer.set_text("->", &Attrs::new(), Shaping::Advanced, None);
-    buffer.shape_until_scroll(false);
+    let _ = buffer.layout_runs();
     let line = &buffer.lines[0];
     let shape = line.shape_opt().expect("ShapeLine not found");
 
@@ -118,7 +118,7 @@ fn test_ligature_segmentation() {
 
     // Test !=
     buffer.set_text("!=", &Attrs::new(), Shaping::Advanced, None);
-    buffer.shape_until_scroll(false);
+    let _ = buffer.layout_runs();
     let line = &buffer.lines[0];
     let shape = line.shape_opt().expect("ShapeLine not found");
     // Inter has a contextual alternate for != too.
@@ -131,7 +131,7 @@ fn test_ligature_segmentation() {
 
     // Test ++
     buffer.set_text("++", &Attrs::new(), Shaping::Advanced, None);
-    buffer.shape_until_scroll(false);
+    let _ = buffer.layout_runs();
     let line = &buffer.lines[0];
     let shape = line.shape_opt().expect("ShapeLine not found");
     // Inter does not have a ++ ligature.

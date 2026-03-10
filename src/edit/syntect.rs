@@ -107,7 +107,7 @@ impl<'syntax_system, 'buffer> SyntaxEditor<'syntax_system, 'buffer> {
     #[cfg(feature = "std")]
     pub fn load_text<P: AsRef<Path>>(
         &mut self,
-        font_system: &mut FontSystem,
+        _font_system: &mut FontSystem,
         path: P,
         mut attrs: crate::Attrs,
     ) -> io::Result<()> {
@@ -125,7 +125,7 @@ impl<'syntax_system, 'buffer> SyntaxEditor<'syntax_system, 'buffer> {
 
         // Clear buffer first (allows sane handling of non-existant files)
         self.editor.with_buffer_mut(|buffer| {
-            buffer.set_text(font_system, "", &attrs, Shaping::Advanced, None);
+            buffer.set_text("", &attrs, Shaping::Advanced, None);
         });
 
         // Update syntax based on file name
@@ -147,7 +147,7 @@ impl<'syntax_system, 'buffer> SyntaxEditor<'syntax_system, 'buffer> {
         // Set text
         let text = fs::read_to_string(path)?;
         self.editor.with_buffer_mut(|buffer| {
-            buffer.set_text(font_system, &text, &attrs, Shaping::Advanced, None);
+            buffer.set_text(&text, &attrs, Shaping::Advanced, None);
         });
 
         Ok(())
@@ -218,19 +218,32 @@ impl<'syntax_system, 'buffer> SyntaxEditor<'syntax_system, 'buffer> {
     }
 
     /// Draw the editor
+    ///
+    /// Automatically resolves any pending dirty state before drawing.
     #[cfg(feature = "swash")]
-    pub fn draw<F>(&self, font_system: &mut FontSystem, cache: &mut crate::SwashCache, callback: F)
-    where
+    pub fn draw<F>(
+        &mut self,
+        font_system: &mut FontSystem,
+        cache: &mut crate::SwashCache,
+        callback: F,
+    ) where
         F: FnMut(i32, i32, u32, u32, Color),
     {
-        let mut renderer = crate::LegacyRenderer {
+        self.editor.draw(
             font_system,
             cache,
+            self.foreground_color(),
+            self.cursor_color(),
+            self.selection_color(),
+            self.foreground_color(),
             callback,
-        };
-        self.render(&mut renderer);
+        );
     }
 
+    /// Render the editor using the provided renderer.
+    ///
+    /// The caller is responsible for calling [`Edit::shape_as_needed`] first
+    /// to ensure layout is up to date.
     pub fn render<R: Renderer>(&self, renderer: &mut R) {
         let size = self.with_buffer(|buffer| buffer.size());
         if let Some(width) = size.0 {
@@ -285,8 +298,8 @@ impl<'buffer> Edit<'buffer> for SyntaxEditor<'_, 'buffer> {
         self.editor.tab_width()
     }
 
-    fn set_tab_width(&mut self, font_system: &mut FontSystem, tab_width: u16) {
-        self.editor.set_tab_width(font_system, tab_width);
+    fn set_tab_width(&mut self, tab_width: u16) {
+        self.editor.set_tab_width(tab_width);
     }
 
     fn shape_as_needed(&mut self, font_system: &mut FontSystem, prune: bool) {
