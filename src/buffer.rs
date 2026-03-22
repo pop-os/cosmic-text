@@ -597,14 +597,13 @@ impl Buffer {
             let scroll_start = self.scroll.vertical;
             let scroll_end = scroll_start + self.height_opt.unwrap_or(f32::INFINITY);
 
-            let mut total_height = 0.0;
-            for line_i in 0..self.lines.len() {
-                if line_i < self.scroll.line {
-                    if prune {
-                        self.lines[line_i].reset_shaping();
-                    }
-                    continue;
+            if prune {
+                for line_i in 0..self.scroll.line {
+                    self.lines[line_i].reset_shaping();
                 }
+            }
+            let mut total_height = 0.0;
+            for line_i in self.scroll.line..self.lines.len() {
                 if total_height > scroll_end {
                     if prune {
                         self.lines[line_i].reset_shaping();
