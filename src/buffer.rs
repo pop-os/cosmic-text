@@ -1109,11 +1109,13 @@ impl Buffer {
                         new_cursor.affinity = new_cursor_affinity;
                     }
                     None => {
-                        if let Some(glyph) = run.glyphs.last() {
-                            // Position at end of line
-                            new_cursor.index = glyph.end;
-                            new_cursor.affinity = Affinity::Before;
-                        }
+                        // Click was past all glyphs in this visual run.
+                        // Use the maximum glyph.end across all glyphs.
+                        // this is the logical end of this visual line's byte coverage,
+                        // correct for LTR, RTL, mixed-BiDi, and wrapped paragraphs.
+                        let run_end = run.glyphs.iter().map(|g| g.end).max().unwrap_or(0);
+                        new_cursor.index = run_end;
+                        new_cursor.affinity = Affinity::Before;
                     }
                 }
 
@@ -1121,10 +1123,10 @@ impl Buffer {
 
                 break;
             } else if runs.peek().is_none() && y > run.line_y {
-                let mut new_cursor = Cursor::new(run.line_i, 0);
-                if let Some(glyph) = run.glyphs.last() {
-                    new_cursor = run.cursor_from_glyph_right(glyph);
-                }
+                // Click below the last run: place cursor at the logical end of the
+                // line, regardless of paragraph direction or BiDi mixing.
+                let new_cursor =
+                    Cursor::new_with_affinity(run.line_i, run.text.len(), Affinity::Before);
                 new_cursor_opt = Some(new_cursor);
             }
         }
