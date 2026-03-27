@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 #[cfg(not(feature = "std"))]
-use alloc::vec::Vec;
+use alloc::boxed::Box;
+#[cfg(feature = "no_std")]
+use core_maths::CoreFloat;
+
 use core::fmt;
 use swash::scale::{image::Content, ScaleContext};
 use swash::scale::{Render, Source, StrikeWith};
