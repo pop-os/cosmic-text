@@ -236,6 +236,10 @@ impl BufferLine {
         self.shape_opt.get()
     }
 
+    pub const fn needs_reshaping(&self) -> bool {
+        self.shape_opt.is_invalidated() || self.layout_opt.is_invalidated()
+    }
+
     /// Layout line, will cache results
     #[allow(clippy::missing_panics_doc)]
     pub fn layout(
