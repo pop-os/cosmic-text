@@ -44,7 +44,7 @@ fn swash_image(
     // in a real renderer
     let offset = if cache_key.flags.contains(CacheKeyFlags::PIXEL_FONT) {
         Vector::new(
-            cache_key.x_bin.as_float().round() + 1.0,
+            cache_key.x_bin.as_float().round(),
             cache_key.y_bin.as_float().round(),
         )
     } else {
