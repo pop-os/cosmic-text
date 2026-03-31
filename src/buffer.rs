@@ -1234,6 +1234,21 @@ impl Buffer {
         new_cursor_opt
     }
 
+    /// Returns the visual (x, y) position of a cursor within the buffer.
+    /// y is the top of the line containing the cursor.
+    /// This is a convenience wrapper around [`LayoutRun::cursor_position`].
+    pub fn cursor_position(&self, cursor: &Cursor) -> Option<(f32, f32)> {
+        self.layout_runs()
+            .filter(|run| run.line_i == cursor.line)
+            .find_map(|run| run.cursor_position(cursor).map(|x| (x, run.line_top)))
+    }
+
+    /// Returns if the text direction for a given line is RTL
+    /// Returns `None` if the line doesn't exist or hasn't been shaped yet.
+    pub fn is_rtl(&self, line: usize) -> Option<bool> {
+        self.lines.get(line)?.shape_opt().map(|shape| shape.rtl)
+    }
+
     /// Apply a [`Motion`] to a [`Cursor`]
     pub fn cursor_motion(
         &mut self,
