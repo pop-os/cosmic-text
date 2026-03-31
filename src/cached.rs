@@ -42,6 +42,11 @@ impl<T: Clone + Debug> Cached<T> {
         }
     }
 
+    /// Checks if the value was previously cached but has been invalidated.
+    pub const fn is_invalidated(&self) -> bool {
+        matches!(self, Self::Unused(_))
+    }
+
     /// Takes the buffered value if in state `Self::Unused`.
     pub fn take_unused(&mut self) -> Option<T> {
         if matches!(*self, Self::Unused(_)) {

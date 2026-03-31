@@ -426,6 +426,11 @@ impl Buffer {
     fn resolve_dirty(&mut self) -> bool {
         let dirty = self.dirty;
         if dirty.is_empty() {
+            // individual lines may have been externally invalidated
+            if self.lines.iter().any(|line| line.needs_reshaping()) {
+                self.redraw = true;
+                return true;
+            }
             return false;
         }
 
