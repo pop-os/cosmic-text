@@ -168,6 +168,10 @@ pub struct FontSystem {
 
     /// List of fallbacks
     pub(crate) fallbacks: Fallbacks,
+
+    /// Reverse index: family name → sorted font IDs belonging to that family.
+    /// Built lazily via `ensure_family_id_cache()`. Cleared in `db_mut()`.
+    family_to_ids: HashMap<String, Vec<fontdb::ID>>,
 }
 
 impl fmt::Debug for FontSystem {
@@ -269,6 +273,7 @@ impl FontSystem {
             shape_buffer: ShapeBuffer::default(),
             dyn_fallback: Box::new(impl_fallback),
             fallbacks,
+            family_to_ids: HashMap::default(),
         }
     }
 
@@ -290,6 +295,7 @@ impl FontSystem {
     /// Get a mutable reference to the database.
     pub fn db_mut(&mut self) -> &mut fontdb::Database {
         self.font_matches_cache.clear();
+        self.family_to_ids.clear();
         &mut self.db
     }
 
@@ -415,6 +421,33 @@ impl FontSystem {
                 Arc::new(font_match_keys)
             })
             .clone()
+    }
+
+    /// Build the family-name → font-ID reverse index if not already built.
+    pub(crate) fn ensure_family_id_cache(&mut self) {
+        if !self.family_to_ids.is_empty() {
+            return;
+        }
+        for face in self.db.faces() {
+            for (name, _) in &face.families {
+                self.family_to_ids
+                    .entry(name.clone())
+                    .or_default()
+                    .push(face.id);
+            }
+        }
+        for ids in self.family_to_ids.values_mut() {
+            ids.sort_unstable();
+            ids.dedup();
+        }
+    }
+
+    /// Check whether font `id` belongs to `family_name` using the cached reverse index.
+    /// The cache must have been built via `ensure_family_id_cache` first.
+    pub(crate) fn face_in_family(&self, id: fontdb::ID, family_name: &str) -> bool {
+        self.family_to_ids
+            .get(family_name)
+            .is_some_and(|ids| ids.binary_search(&id).is_ok())
     }
 
     #[cfg(feature = "std")]
