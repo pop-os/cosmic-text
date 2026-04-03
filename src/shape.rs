@@ -5,8 +5,8 @@
 use crate::fallback::FontFallbackIter;
 use crate::{
     math, Align, Attrs, AttrsList, CacheKeyFlags, Color, DecorationMetrics, DecorationSpan,
-    Ellipsize, EllipsizeHeightLimit, Font, FontSystem, GlyphDecorationData, Hinting, LayoutGlyph,
-    LayoutLine, Metrics, Wrap,
+    Ellipsize, EllipsizeHeightLimit, Family, Font, FontSystem, GlyphDecorationData, Hinting,
+    LayoutGlyph, LayoutLine, Metrics, Wrap,
 };
 #[cfg(not(feature = "std"))]
 use alloc::{format, vec, vec::Vec};
@@ -496,6 +496,78 @@ fn shape_skip(
     );
 
     let font = font_iter.next().expect("no default font found");
+    let glyph_start = glyphs.len();
+
+    shape_skip_glyphs(glyphs, &font, line, attrs_list, start_run, end_run);
+
+    // If any glyphs are missing and the user has specified a font,
+    // fall back to a default font (SansSerif or Monospace)
+    if matches!(attrs.family, Family::Name(_))
+        && glyphs[glyph_start..].iter().any(|g| g.glyph_id == 0)
+    {
+        let is_mono = font_system
+            .db()
+            .face(font.id())
+            .is_some_and(|face| face.monospaced);
+        let fb_family = if is_mono {
+            Family::Monospace
+        } else {
+            Family::SansSerif
+        };
+        let fb_attrs = Attrs::new()
+            .family(fb_family)
+            .weight(attrs.weight)
+            .style(attrs.style)
+            .stretch(attrs.stretch);
+        let fb_fonts = font_system.get_font_matches(&fb_attrs);
+        let fb_families = [&fb_family];
+        let mut fb_iter =
+            FontFallbackIter::new(font_system, &fb_fonts, &fb_families, &[], "", attrs.weight);
+
+        if let Some(fb_font) = fb_iter.next() {
+            let fb_swash = fb_font.as_swash();
+            let fb_charmap = fb_swash.charmap();
+            let fb_metrics = fb_swash.metrics(&[]);
+            let fb_glyph_metrics = fb_swash.glyph_metrics(&[]).scale(1.0);
+            let fb_scale = f32::from(fb_metrics.units_per_em);
+
+            for glyph in glyphs[glyph_start..].iter_mut() {
+                if glyph.glyph_id != 0 {
+                    continue;
+                }
+                let codepoint = line[glyph.start..glyph.end].chars().next().unwrap_or('\0');
+                let glyph_id = fb_charmap.map(codepoint);
+                if glyph_id != 0 {
+                    let span_attrs = attrs_list.get_span(glyph.start);
+                    glyph.glyph_id = glyph_id;
+                    glyph.font_id = fb_font.id();
+                    glyph.font_monospace_em_width = fb_font.monospace_em_width();
+                    glyph.ascent = fb_metrics.ascent / fb_scale;
+                    glyph.descent = fb_metrics.descent / fb_scale;
+                    glyph.x_advance = fb_glyph_metrics.advance_width(glyph_id)
+                        + span_attrs
+                            .letter_spacing_opt
+                            .map_or(0.0, |spacing| spacing.0);
+                    glyph.cache_key_flags = override_fake_italic(
+                        span_attrs.cache_key_flags,
+                        fb_font.as_ref(),
+                        &span_attrs,
+                    );
+                }
+            }
+        }
+    }
+}
+
+#[cfg(feature = "swash")]
+fn shape_skip_glyphs(
+    glyphs: &mut Vec<ShapeGlyph>,
+    font: &Font,
+    line: &str,
+    attrs_list: &AttrsList,
+    start_run: usize,
+    end_run: usize,
+) {
     let font_id = font.id();
     let font_monospace_em_width = font.monospace_em_width();
     let swash_font = font.as_swash();
@@ -513,7 +585,10 @@ fn shape_skip(
             .map(|(chr_idx, codepoint)| {
                 let glyph_id = charmap.map(codepoint);
                 let x_advance = glyph_metrics.advance_width(glyph_id)
-                    + attrs.letter_spacing_opt.map_or(0.0, |spacing| spacing.0);
+                    + attrs_list
+                        .get_span(start_run + chr_idx)
+                        .letter_spacing_opt
+                        .map_or(0.0, |spacing| spacing.0);
                 let attrs = attrs_list.get_span(start_run + chr_idx);
 
                 ShapeGlyph {
@@ -531,11 +606,7 @@ fn shape_skip(
                     glyph_id,
                     color_opt: attrs.color_opt,
                     metadata: attrs.metadata,
-                    cache_key_flags: override_fake_italic(
-                        attrs.cache_key_flags,
-                        font.as_ref(),
-                        &attrs,
-                    ),
+                    cache_key_flags: override_fake_italic(attrs.cache_key_flags, font, &attrs),
                     metrics_opt: attrs.metrics_opt.map(Into::into),
                 }
             }),
