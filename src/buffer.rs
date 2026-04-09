@@ -573,6 +573,13 @@ impl Buffer {
             return;
         }
         let metrics = self.metrics;
+
+        // Clamp scroll.line to valid range (lines may have been removed by editing)
+        if self.scroll.line >= self.lines.len() {
+            self.scroll.line = self.lines.len().saturating_sub(1);
+            self.scroll.vertical = 0.0;
+        }
+
         let old_scroll = self.scroll;
 
         loop {
