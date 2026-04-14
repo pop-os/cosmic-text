@@ -2903,9 +2903,12 @@ impl ShapeLine {
                                     0.0
                                 },
                             );
-                            if let Some(match_em_width) = match_mono_em_width {
-                                // Round to nearest monospace width
-                                x_advance = ((x_advance / match_em_width).round()) * match_em_width;
+                            if let Some(mono_width) = match_mono_width {
+                                // Round to nearest multiple of the monospace cell width
+                                let cells = (x_advance / mono_width).round();
+                                // Ensure visible glyphs occupy at least one cell
+                                let cells = if x_advance > 0.0 { cells.max(1.0) } else { cells };
+                                x_advance = cells * mono_width;
                             }
                             if hinting == Hinting::Enabled {
                                 x_advance = x_advance.round();
