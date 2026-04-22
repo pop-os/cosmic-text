@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.0] - 2026-04-22
+
+### Fixed
+
+- Empty lines use span metrics: https://github.com/pop-os/cosmic-text/pull/479
+- Match variable fonts using wght axis: https://github.com/pop-os/cosmic-text/pull/486
+- Used normalized\_coords for swash scaler: https://github.com/pop-os/cosmic-text/pull/488
+- Fix highlight for editor: https://github.com/pop-os/cosmic-text/pull/491
+- Optimize shape\_until\_scroll with large line count: https://github.com/pop-os/cosmic-text/pull/490
+- Fix shape\_until\_scroll if a buffer\_line is modified: https://github.com/pop-os/cosmic-text/pull/494
+- Remove 1px horizontal offset on pixel fonts: https://github.com/pop-os/cosmic-text/pull/495
+- Make the swash feature compile with no\_std: https://github.com/pop-os/cosmic-text/pull/492
+- Fallback to a default font in basic shaping mode: https://github.com/pop-os/cosmic-text/pull/498
+- Clamp scroll.line to a valid range: https://github.com/pop-os/cosmic-text/pull/501
+
+### Added
+
+- Text decoration: https://github.com/pop-os/cosmic-text/pull/480
+- Implement layout\_runs for BufferLine: https://github.com/pop-os/cosmic-text/pull/484
+- Add cursor\_position and is\_rtl methods to buffer: https://github.com/pop-os/cosmic-text/pull/496
+
+### Changed
+
+- Buffer setter methods are now lazy: https://github.com/pop-os/cosmic-text/pull/483
+- Update hashbrown: https://github.com/pop-os/cosmic-text/pull/502
+
 ## [0.18.2] - 2026-02-20
 
 ### Fixed
