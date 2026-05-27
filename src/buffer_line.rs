@@ -259,7 +259,8 @@ impl BufferLine {
                 .layout_opt
                 .take_unused()
                 .unwrap_or_else(|| Vec::with_capacity(1));
-            let shape = self.shape(font_system, tab_width);
+            self.shape(font_system, tab_width);
+            let shape = self.shape_opt.get().expect("shape not found");
             shape.layout_to_buffer(
                 &mut font_system.shape_buffer,
                 font_size,
@@ -270,6 +271,7 @@ impl BufferLine {
                 &mut layout,
                 match_mono_width,
                 hinting,
+                &self.text,
             );
             self.layout_opt.set_used(layout);
         }
