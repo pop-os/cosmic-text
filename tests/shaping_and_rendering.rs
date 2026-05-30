@@ -142,3 +142,32 @@ fn test_ligature_segmentation() {
         shape.spans[0].words.len()
     );
 }
+
+#[test]
+fn test_mixed_direction_paragraphs_do_not_panic() {
+    use cosmic_text::{AttrsList, FontSystem, ShapeLine, Shaping};
+
+    let mut font_system =
+        FontSystem::new_with_locale_and_db("en-US".into(), fontdb::Database::new());
+    font_system
+        .db_mut()
+        .load_font_data(std::fs::read("fonts/Inter-Regular.ttf").unwrap());
+    font_system
+        .db_mut()
+        .load_font_data(std::fs::read("fonts/NotoSansHebrew.ttf").unwrap());
+
+    // Latin 'A' and Hebrew Aleph separated by each BidiClass::B code point, including
+    // PS (U+2029) and the ASCII FS (U+001C), to cover more than just newlines.
+    for sep in [
+        '\u{000A}', '\u{000D}', '\u{001C}', '\u{001D}', '\u{001E}', '\u{0085}', '\u{2029}',
+    ] {
+        let line = format!("A{sep}\u{05D0}");
+        ShapeLine::new(
+            &mut font_system,
+            &line,
+            &AttrsList::new(&Attrs::new()),
+            Shaping::Advanced,
+            8,
+        );
+    }
+}
