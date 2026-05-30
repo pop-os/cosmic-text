@@ -1300,12 +1300,11 @@ impl ShapeLine {
         }
     }
 
-    /// Shape a line into a set of spans, using a scratch buffer. If [`unicode_bidi::BidiInfo`]
-    /// detects multiple paragraphs, they will be joined.
+    /// Shape a line into a set of spans, using a scratch buffer.
     ///
-    /// # Panics
-    ///
-    /// Will panic if `line` contains multiple paragraphs that do not have matching direction
+    /// When [`unicode_bidi::BidiInfo`] splits `line` into multiple paragraphs (on
+    /// any `BidiClass::B` separator, e.g. LF, CR, FS, NEL, PS), the whole line is
+    /// laid out in the first paragraph's base direction.
     pub fn new(
         font_system: &mut FontSystem,
         line: &str,
@@ -1321,10 +1320,6 @@ impl ShapeLine {
     /// See [`Self::new`].
     ///
     /// Reuses as much of the pre-existing internal allocations as possible.
-    ///
-    /// # Panics
-    ///
-    /// Will panic if `line` contains multiple paragraphs that do not have matching direction
     pub fn build(
         &mut self,
         font_system: &mut FontSystem,
@@ -1355,9 +1350,6 @@ impl ShapeLine {
         log::trace!("Line {}: '{}'", if rtl { "RTL" } else { "LTR" }, line);
 
         for para_info in &bidi.paragraphs {
-            let line_rtl = para_info.level.is_rtl();
-            assert_eq!(line_rtl, rtl);
-
             let line_range = para_info.range.clone();
             let levels = Self::adjust_levels(&unicode_bidi::Paragraph::new(&bidi, para_info));
 
@@ -1381,7 +1373,7 @@ impl ShapeLine {
                         line,
                         attrs_list,
                         start..i,
-                        line_rtl,
+                        rtl,
                         run_level,
                         shaping,
                     );
@@ -1396,7 +1388,7 @@ impl ShapeLine {
                 line,
                 attrs_list,
                 start..line_range.end,
-                line_rtl,
+                rtl,
                 run_level,
                 shaping,
             );
