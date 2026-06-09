@@ -892,10 +892,7 @@ impl ShapeWord {
 pub struct ShapeSpan {
     pub level: unicode_bidi::Level,
     pub words: Vec<ShapeWord>,
-    /// Decoration data per user-level attr span within this shape span.
-    /// Each entry maps a byte range to its decoration config and font metrics.
-    /// Empty when no decorations are active.
-    pub decoration_spans: Vec<(Range<usize>, GlyphDecorationData)>,
+    pub byte_range: Range<usize>,
 }
 
 impl ShapeSpan {
@@ -906,7 +903,7 @@ impl ShapeSpan {
         Self {
             level: unicode_bidi::Level::ltr(),
             words: Vec::default(),
-            decoration_spans: Vec::new(),
+            byte_range: 0..0,
         }
     }
 
@@ -1094,11 +1091,22 @@ impl ShapeSpan {
 
         self.level = level;
         self.words = words;
+        self.byte_range = span_range;
 
-        // Build decoration spans: one entry per user-level attr span that has
-        // decorations within this shape span's byte range.  Font metrics come from
-        // the primary font (first shaped glyph), following Pango convention.
-        self.decoration_spans.clear();
+        // Cache buffer for future reuse.
+        font_system.shape_buffer.words = cached_words;
+    }
+
+    /// The decoration spans for this shape span, resolved from the current
+    /// attrs. Font metrics come from the primary font (first shaped glyph),
+    /// following Pango convention.
+    pub fn decorations(
+        &self,
+        attrs_list: &AttrsList,
+        font_system: &mut FontSystem,
+    ) -> Vec<(Range<usize>, GlyphDecorationData)> {
+        let span_range = self.byte_range.clone();
+        let mut decorations = Vec::new();
 
         // Early-out: skip font lookup and span iteration when no decorations exist.
         // For plain text (the common case) this is a single bool check.
@@ -1138,7 +1146,7 @@ impl ShapeSpan {
                     if covered_end < start {
                         let default_attrs = attrs_list.defaults();
                         if default_attrs.text_decoration.has_decoration() {
-                            self.decoration_spans.push((
+                            decorations.push((
                                 covered_end..start,
                                 GlyphDecorationData {
                                     text_decoration: default_attrs.text_decoration,
@@ -1153,7 +1161,7 @@ impl ShapeSpan {
 
                     let attrs = attr_owned.as_attrs();
                     if attrs.text_decoration.has_decoration() {
-                        self.decoration_spans.push((
+                        decorations.push((
                             start..end,
                             GlyphDecorationData {
                                 text_decoration: attrs.text_decoration,
@@ -1169,7 +1177,7 @@ impl ShapeSpan {
                 if covered_end < span_range.end {
                     let default_attrs = attrs_list.defaults();
                     if default_attrs.text_decoration.has_decoration() {
-                        self.decoration_spans.push((
+                        decorations.push((
                             covered_end..span_range.end,
                             GlyphDecorationData {
                                 text_decoration: default_attrs.text_decoration,
@@ -1183,8 +1191,7 @@ impl ShapeSpan {
             }
         }
 
-        // Cache buffer for future reuse.
-        font_system.shape_buffer.words = cached_words;
+        decorations
     }
 }
 
@@ -1449,7 +1456,7 @@ impl ShapeLine {
             ShapeSpan {
                 level,
                 words: vec![word],
-                decoration_spans: Vec::new(),
+                byte_range: 0..0,
             }
         });
 
@@ -1588,6 +1595,7 @@ impl ShapeLine {
             &mut lines,
             match_mono_width,
             hinting,
+            &[],
         );
         lines
     }
@@ -2287,6 +2295,7 @@ impl ShapeLine {
         layout_lines: &mut Vec<LayoutLine>,
         match_mono_width: Option<f32>,
         hinting: Hinting,
+        span_decorations: &[Vec<(Range<usize>, GlyphDecorationData)>],
     ) {
         // For each visual line a list of  (span index,  and range of words in that span)
         // Note that a BiDi visual line could have multiple spans or parts of them
@@ -2854,7 +2863,7 @@ impl ShapeLine {
                     let deco_spans: &[(Range<usize>, GlyphDecorationData)] = if is_ellipsis {
                         &[]
                     } else {
-                        &self.spans[r.span].decoration_spans
+                        span_decorations.get(r.span).map_or(&[][..], Vec::as_slice)
                     };
                     // Cursor into deco_spans — advances forward as glyphs are
                     // emitted in byte order, giving amortized O(1) lookup.

@@ -457,6 +457,20 @@ pub struct AttrsOwned {
 }
 
 impl AttrsOwned {
+    /// Equal in every field except `text_decoration`.
+    pub fn eq_ignoring_decoration(&self, other: &Self) -> bool {
+        self.color_opt == other.color_opt
+            && self.family_owned == other.family_owned
+            && self.stretch == other.stretch
+            && self.style == other.style
+            && self.weight == other.weight
+            && self.metadata == other.metadata
+            && self.cache_key_flags == other.cache_key_flags
+            && self.metrics_opt == other.metrics_opt
+            && self.letter_spacing_opt == other.letter_spacing_opt
+            && self.font_features == other.font_features
+    }
+
     pub fn new(attrs: &Attrs) -> Self {
         Self {
             color_opt: attrs.color_opt,
@@ -510,6 +524,27 @@ impl AttrsList {
     /// Get the default [Attrs]
     pub fn defaults(&self) -> Attrs<'_> {
         self.defaults.as_attrs()
+    }
+
+    /// True if the two lists differ only in `text_decoration`. Spans that carry
+    /// only decoration (otherwise equal to the defaults) are ignored.
+    pub fn eq_ignoring_decoration(&self, other: &Self) -> bool {
+        if !self.defaults.eq_ignoring_decoration(&other.defaults) {
+            return false;
+        }
+        let mut a = self
+            .spans_iter()
+            .filter(|(_, attrs)| !attrs.eq_ignoring_decoration(&self.defaults));
+        let mut b = other
+            .spans_iter()
+            .filter(|(_, attrs)| !attrs.eq_ignoring_decoration(&other.defaults));
+        loop {
+            match (a.next(), b.next()) {
+                (None, None) => return true,
+                (Some((ra, aa)), Some((rb, ab))) if ra == rb && aa.eq_ignoring_decoration(ab) => {}
+                _ => return false,
+            }
+        }
     }
 
     /// Get the current attribute spans
