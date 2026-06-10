@@ -194,12 +194,90 @@ impl FontSystem {
 
     /// Create a new [`FontSystem`] with a pre-specified set of fonts.
     pub fn new_with_fonts(fonts: impl IntoIterator<Item = fontdb::Source>) -> Self {
-        let locale = Self::get_locale();
-        log::debug!("Locale: {locale}");
+        let mut db = fontdb::Database::new();
+        Self::load_fonts(&mut db, fonts.into_iter());
+        Self::finish_with_db(db)
+    }
 
+    /// Create a new [`FontSystem`] backed by a persistent on-disk system-font index cache
+    /// at the platform's conventional cache location
+    /// (e.g. `$XDG_CACHE_HOME/cosmic-text/fonts.cache`).
+    ///
+    /// Falls back to a normal, uncached scan if no cache directory can be determined.
+    #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
+    pub fn new_cached() -> Self {
+        Self::new_with_fonts_and_cache(core::iter::empty())
+    }
+
+    /// Returns the default system-font cache file path used by [`FontSystem::new_cached`]
+    /// and [`FontSystem::new_with_fonts_and_cache`]
+    /// (`<cache-dir>/cosmic-text/fonts.cache`, following the platform's conventional cache
+    /// directory).
+    ///
+    /// Returns `None` if no cache directory can be determined from the environment.
+    #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
+    pub fn default_cache_path() -> Option<std::path::PathBuf> {
+        super::cache::default_cache_path()
+    }
+
+    /// Like [`FontSystem::new_with_fonts`], but reads from and writes to a persistent
+    /// system-font index cache at the default platform cache location (see
+    /// [`FontSystem::new_cached`]).
+    ///
+    /// The cache path is resolved automatically; if no cache directory can be determined
+    /// this falls back to a normal, uncached scan.
+    /// The user-provided `fonts` are always loaded fresh and
+    /// are never persisted to the cache
+    ///
+    /// To cache at an explicit location instead, use
+    /// [`FontSystem::new_with_fonts_and_cache_path`].
+    #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
+    pub fn new_with_fonts_and_cache(fonts: impl IntoIterator<Item = fontdb::Source>) -> Self {
+        Self::new_with_fonts_and_cache_inner(fonts, Self::default_cache_path())
+    }
+
+    /// Like [`FontSystem::new_with_fonts_and_cache`], but uses the persistent system-font
+    /// index cache at the explicitly provided `cache_path` rather than the default
+    /// location.
+    #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
+    pub fn new_with_fonts_and_cache_path(
+        fonts: impl IntoIterator<Item = fontdb::Source>,
+        cache_path: std::path::PathBuf,
+    ) -> Self {
+        Self::new_with_fonts_and_cache_inner(fonts, Some(cache_path))
+    }
+
+    #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
+    fn new_with_fonts_and_cache_inner(
+        fonts: impl IntoIterator<Item = fontdb::Source>,
+        cache_path: Option<std::path::PathBuf>,
+    ) -> Self {
         let mut db = fontdb::Database::new();
 
-        Self::load_fonts(&mut db, fonts.into_iter());
+        let now = std::time::Instant::now();
+
+        match cache_path {
+            Some(cache_path) => super::cache::load_system_fonts_cached(&mut db, &cache_path),
+            None => db.load_system_fonts(),
+        }
+        for source in fonts {
+            db.load_font_source(source);
+        }
+
+        log::debug!(
+            "Loaded {} font faces in {}ms.",
+            db.len(),
+            now.elapsed().as_millis()
+        );
+
+        Self::finish_with_db(db)
+    }
+
+    /// Apply the default font families and finish constructing the [`FontSystem`] from a
+    /// loaded font database.
+    fn finish_with_db(mut db: fontdb::Database) -> Self {
+        let locale = Self::get_locale();
+        log::debug!("Locale: {locale}");
 
         //TODO: configurable default fonts
         db.set_monospace_family("Noto Sans Mono");

@@ -24,6 +24,9 @@ pub use fallback::{Fallback, PlatformFallback};
 pub use self::system::*;
 mod system;
 
+#[cfg(all(feature = "std", not(target_arch = "wasm32")))]
+mod cache;
+
 struct OwnedFaceData {
     data: Arc<dyn AsRef<[u8]> + Send + Sync>,
     shaper_data: harfrust::ShaperData,
