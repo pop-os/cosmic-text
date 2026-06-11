@@ -2967,9 +2967,13 @@ impl ShapeLine {
                                 .get(deco_cursor)
                                 .filter(|(range, _)| glyph.start >= range.start);
                             let glyph_idx = glyphs.len() - 1;
+                            // Only extend a span that ends at this glyph, so
+                            // two equally decorated ranges with undecorated
+                            // glyphs between them stay separate spans.
                             let extends = matches!(
                                 (decorations.last(), &glyph_deco),
-                                (Some(span), Some((_, d))) if span.data == *d
+                                (Some(span), Some((_, d)))
+                                    if span.data == *d && span.glyph_range.end == glyph_idx
                             );
                             if extends {
                                 if let Some(last) = decorations.last_mut() {
