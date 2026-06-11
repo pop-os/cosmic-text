@@ -130,7 +130,7 @@ impl BufferLine {
         if attrs_list == self.attrs_list {
             return false;
         }
-        if attrs_list.eq_ignoring_decoration(&self.attrs_list) {
+        if attrs_list.eq_shape_attrs(&self.attrs_list) {
             self.attrs_list = attrs_list;
             self.reset_layout();
             false

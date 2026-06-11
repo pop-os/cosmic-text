@@ -457,8 +457,9 @@ pub struct AttrsOwned {
 }
 
 impl AttrsOwned {
-    /// Equal in every field except `text_decoration`.
-    pub fn eq_ignoring_decoration(&self, other: &Self) -> bool {
+    /// Equal in every attribute that affects shaping, ignoring
+    /// `text_decoration`, which is resolved at layout.
+    pub fn eq_shape_attrs(&self, other: &Self) -> bool {
         self.color_opt == other.color_opt
             && self.family_owned == other.family_owned
             && self.stretch == other.stretch
@@ -528,20 +529,20 @@ impl AttrsList {
 
     /// True if the two lists differ only in `text_decoration`. Spans that carry
     /// only decoration (otherwise equal to the defaults) are ignored.
-    pub fn eq_ignoring_decoration(&self, other: &Self) -> bool {
-        if !self.defaults.eq_ignoring_decoration(&other.defaults) {
+    pub fn eq_shape_attrs(&self, other: &Self) -> bool {
+        if !self.defaults.eq_shape_attrs(&other.defaults) {
             return false;
         }
         let mut a = self
             .spans_iter()
-            .filter(|(_, attrs)| !attrs.eq_ignoring_decoration(&self.defaults));
+            .filter(|(_, attrs)| !attrs.eq_shape_attrs(&self.defaults));
         let mut b = other
             .spans_iter()
-            .filter(|(_, attrs)| !attrs.eq_ignoring_decoration(&other.defaults));
+            .filter(|(_, attrs)| !attrs.eq_shape_attrs(&other.defaults));
         loop {
             match (a.next(), b.next()) {
                 (None, None) => return true,
-                (Some((ra, aa)), Some((rb, ab))) if ra == rb && aa.eq_ignoring_decoration(ab) => {}
+                (Some((ra, aa)), Some((rb, ab))) if ra == rb && aa.eq_shape_attrs(ab) => {}
                 _ => return false,
             }
         }
