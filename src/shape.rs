@@ -220,9 +220,12 @@ fn shape_fallback(
         }
     };
 
-    let glyph_buffer = font
-        .shaper()
-        .shape_with_plan(shape_plan, buffer, &rb_font_features);
+    let glyph_buffer = font.shaper().shape(
+        buffer,
+        harfrust::ShapeOptions::new()
+            .plan(Some(shape_plan))
+            .features(&rb_font_features),
+    );
     let glyph_infos = glyph_buffer.glyph_infos();
     let glyph_positions = glyph_buffer.glyph_positions();
 
