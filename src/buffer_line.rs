@@ -5,8 +5,8 @@ use alloc::{string::String, vec::Vec};
 use core::mem;
 
 use crate::{
-    Align, Attrs, AttrsList, Cached, Ellipsize, FontSystem, Hinting, LayoutLine, LayoutRunIter,
-    LineEnding, ShapeLine, Shaping, Wrap,
+    Align, Attrs, AttrsList, Cached, Direction, Ellipsize, FontSystem, Hinting, LayoutLine,
+    LayoutRunIter, LineEnding, ShapeLine, Shaping, Wrap,
 };
 
 /// A line (or paragraph) of text that is shaped and laid out
@@ -212,7 +212,12 @@ impl BufferLine {
 
     /// Shape line, will cache results
     #[allow(clippy::missing_panics_doc)]
-    pub fn shape(&mut self, font_system: &mut FontSystem, tab_width: u16) -> &ShapeLine {
+    pub fn shape(
+        &mut self,
+        font_system: &mut FontSystem,
+        tab_width: u16,
+        direction: Direction,
+    ) -> &ShapeLine {
         if self.shape_opt.is_unused() {
             let mut line = self
                 .shape_opt
@@ -224,6 +229,7 @@ impl BufferLine {
                 &self.attrs_list,
                 self.shaping,
                 tab_width,
+                direction,
             );
             self.shape_opt.set_used(line);
             self.layout_opt.set_unused();
@@ -252,6 +258,7 @@ impl BufferLine {
         match_mono_width: Option<f32>,
         tab_width: u16,
         hinting: Hinting,
+        direction: Direction,
     ) -> &[LayoutLine] {
         if self.layout_opt.is_unused() {
             let align = self.align;
@@ -259,7 +266,7 @@ impl BufferLine {
                 .layout_opt
                 .take_unused()
                 .unwrap_or_else(|| Vec::with_capacity(1));
-            let shape = self.shape(font_system, tab_width);
+            let shape = self.shape(font_system, tab_width, direction);
             shape.layout_to_buffer(
                 &mut font_system.shape_buffer,
                 font_size,

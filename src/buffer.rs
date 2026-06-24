@@ -11,9 +11,9 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
     render_decoration, Affinity, Align, Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem,
-    BufferLine, Color, Cursor, DecorationSpan, Ellipsize, FontSystem, Hinting, LayoutCursor,
-    LayoutGlyph, LayoutLine, LineEnding, LineIter, Motion, Renderer, Scroll, ShapeLine, Shaping,
-    Wrap,
+    BufferLine, Color, Cursor, DecorationSpan, Direction, Ellipsize, FontSystem, Hinting,
+    LayoutCursor, LayoutGlyph, LayoutLine, LineEnding, LineIter, Motion, Renderer, Scroll,
+    ShapeLine, Shaping, Wrap,
 };
 
 bitflags::bitflags! {
@@ -28,6 +28,8 @@ bitflags::bitflags! {
         const TEXT_SET  = 0b0100;
         /// Scroll position changed — visible region may have shifted to unshaped lines
         const SCROLL    = 0b1000;
+        /// Base direction changed, reshape every line (some characters like '(' are shaped differently based on direction)
+        const DIRECTION = 0b1_0000;
     }
 }
 
@@ -345,6 +347,7 @@ pub struct Buffer {
     monospace_width: Option<f32>,
     tab_width: u16,
     hinting: Hinting,
+    direction: Direction,
     /// Dirty flags tracking which properties changed since last layout
     dirty: DirtyFlags,
 }
@@ -363,6 +366,7 @@ impl Clone for Buffer {
             monospace_width: self.monospace_width,
             tab_width: self.tab_width,
             hinting: self.hinting,
+            direction: self.direction,
             dirty: self.dirty,
         }
     }
@@ -394,6 +398,7 @@ impl Buffer {
             monospace_width: None,
             tab_width: 8,
             hinting: Hinting::default(),
+            direction: Direction::default(),
             dirty: DirtyFlags::empty(),
         }
     }
@@ -437,7 +442,13 @@ impl Buffer {
         if dirty.contains(DirtyFlags::TEXT_SET) {
             // Lines were replaced — already fresh, no cache to invalidate.
         } else {
-            if dirty.contains(DirtyFlags::TAB_SHAPE) {
+            if dirty.contains(DirtyFlags::DIRECTION) {
+                for line in &mut self.lines {
+                    if line.shape_opt().is_some() {
+                        line.reset_shaping();
+                    }
+                }
+            } else if dirty.contains(DirtyFlags::TAB_SHAPE) {
                 for line in &mut self.lines {
                     if line.shape_opt().is_some() && line.text().contains('\t') {
                         line.reset_shaping();
@@ -694,7 +705,7 @@ impl Buffer {
         line_i: usize,
     ) -> Option<&ShapeLine> {
         let line = self.lines.get_mut(line_i)?;
-        Some(line.shape(font_system, self.tab_width))
+        Some(line.shape(font_system, self.tab_width, self.direction))
     }
 
     /// Lay out the provided line index and return the result
@@ -713,6 +724,7 @@ impl Buffer {
             self.monospace_width,
             self.tab_width,
             self.hinting,
+            self.direction,
         ))
     }
 
@@ -805,6 +817,26 @@ impl Buffer {
         if tab_width != self.tab_width {
             self.tab_width = tab_width;
             self.dirty |= DirtyFlags::TAB_SHAPE | DirtyFlags::RELAYOUT;
+            self.redraw = true;
+        }
+    }
+
+    /// Get the current base [`Direction`].
+    pub const fn direction(&self) -> Direction {
+        self.direction
+    }
+
+    /// Set the base [`Direction`] used when shaping text.
+    ///
+    /// [`Direction::Auto`] (the default) detects each paragraph's base direction
+    /// from its content. [`Direction::LeftToRight`] and [`Direction::RightToLeft`]
+    /// force it for the whole buffer; use them when you know the direction from
+    /// context such as the UI locale rather than from the text.
+    pub fn set_direction(&mut self, direction: Direction) {
+        if direction != self.direction {
+            self.direction = direction;
+            // DIRECTION reshapes every line, which resets layout as a side effect.
+            self.dirty |= DirtyFlags::DIRECTION;
             self.redraw = true;
         }
     }
@@ -1682,6 +1714,11 @@ impl BorrowedWithFontSystem<'_, Buffer> {
     /// Set the current [`Wrap`].
     pub fn set_wrap(&mut self, wrap: Wrap) {
         self.inner.set_wrap(wrap);
+    }
+
+    /// Set the base [`Direction`] used when shaping text.
+    pub fn set_direction(&mut self, direction: Direction) {
+        self.inner.set_direction(direction);
     }
 
     /// Set the current [`Ellipsize`].

@@ -81,6 +81,30 @@ impl Shaping {
     }
 }
 
+/// The base direction (paragraph level) used when shaping text.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+pub enum Direction {
+    /// Detect each paragraph's base direction from its first strong character.
+    #[default]
+    Auto,
+    /// Force a left-to-right base direction for all text.
+    LeftToRight,
+    /// Force a right-to-left base direction for all text.
+    RightToLeft,
+}
+
+impl Direction {
+    /// The base paragraph level to hand to the bidi algorithm, or `None` to let
+    /// it auto-detect the level from the text.
+    fn bidi_level(self) -> Option<unicode_bidi::Level> {
+        match self {
+            Self::Auto => None,
+            Self::LeftToRight => Some(unicode_bidi::Level::ltr()),
+            Self::RightToLeft => Some(unicode_bidi::Level::rtl()),
+        }
+    }
+}
+
 const NUM_SHAPE_PLANS: usize = 6;
 
 /// A set of buffers containing allocations for shaped text.
@@ -1312,9 +1336,10 @@ impl ShapeLine {
         attrs_list: &AttrsList,
         shaping: Shaping,
         tab_width: u16,
+        direction: Direction,
     ) -> Self {
         let mut empty = Self::empty();
-        empty.build(font_system, line, attrs_list, shaping, tab_width);
+        empty.build(font_system, line, attrs_list, shaping, tab_width, direction);
         empty
     }
 
@@ -1332,6 +1357,7 @@ impl ShapeLine {
         attrs_list: &AttrsList,
         shaping: Shaping,
         tab_width: u16,
+        direction: Direction,
     ) {
         // Clear stale ellipsis span so it gets recomputed with the current attrs.
         // Without this, reusing a ShapeLine from a previous text (via Cached::Unused)
@@ -1345,9 +1371,10 @@ impl ShapeLine {
         cached_spans.clear();
         cached_spans.extend(spans.drain(..).rev());
 
-        let bidi = unicode_bidi::BidiInfo::new(line, None);
+        let bidi = unicode_bidi::BidiInfo::new(line, direction.bidi_level());
         let rtl = if bidi.paragraphs.is_empty() {
-            false
+            // No strong content to detect from, go with default base direction if it's set
+            direction == Direction::RightToLeft
         } else {
             bidi.paragraphs[0].level.is_rtl()
         };

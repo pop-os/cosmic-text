@@ -1,6 +1,6 @@
 use cosmic_text::{
-    fontdb, Align, Attrs, AttrsList, BidiParagraphs, Buffer, Family, FontSystem, Hinting,
-    LayoutLine, Metrics, ShapeLine, Shaping, Weight, Wrap,
+    fontdb, Align, Attrs, AttrsList, BidiParagraphs, Buffer, Direction, Family, FontSystem,
+    Hinting, LayoutLine, Metrics, ShapeLine, Shaping, Weight, Wrap,
 };
 
 // Test for https://github.com/pop-os/cosmic-text/issues/134
@@ -21,7 +21,14 @@ fn stable_wrap() {
     font_system.db_mut().load_font_data(font);
 
     let mut check_wrap = |text: &_, wrap, align_opt, start_width_opt| {
-        let line = ShapeLine::new(&mut font_system, text, &attrs, Shaping::Advanced, 8);
+        let line = ShapeLine::new(
+            &mut font_system,
+            text,
+            &attrs,
+            Shaping::Advanced,
+            8,
+            Direction::Auto,
+        );
 
         let layout_unbounded = line.layout(
             font_size,
