@@ -55,6 +55,22 @@ fn forced_ltr_overrides_rtl_content() {
 }
 
 #[test]
+fn forced_ltr_keeps_rtl_glyphs() {
+    // a line whose content is entirely RTL must still produce glyphs
+    // when the base direction is forced to LTR (incongruent span on the no-wrap path)
+    let mut font_system = font_system();
+    let buffer = make_buffer(&mut font_system, "سلام", Direction::LeftToRight);
+    let run = buffer
+        .layout_runs()
+        .next()
+        .expect("expected at least one layout run");
+    assert!(
+        !run.glyphs.is_empty(),
+        "forced-LTR RTL line produced no glyphs"
+    );
+}
+
+#[test]
 fn force_ltr_overrides_first_strong_rtl() {
     let mut font_system = font_system();
     let buffer = make_buffer(&mut font_system, "   سلام", Direction::LeftToRight);

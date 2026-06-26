@@ -1969,9 +1969,15 @@ impl ShapeLine {
                 } else {
                     (WordGlyphPos::ZERO, WordGlyphPos::new(span.words.len(), 0))
                 }
-            } else if span_index == start.span {
+            } else if span_index == start.span && (start.word, start.glyph) != (0, 0) {
+                // Continuation of an incongruent (reversed) span after a wrap:
+                // this visual line holds the logically-leading words [0, start).
                 (WordGlyphPos::ZERO, start.word_glyph_pos())
             } else {
+                // No continuation offset, so the whole incongruent span belongs to
+                // this line. Without this, a fully-RTL span under a forced-LTR base
+                // direction (start == 0) would collapse to an empty range and drop
+                // all of its glyphs.
                 (WordGlyphPos::ZERO, WordGlyphPos::new(span.words.len(), 0))
             };
 
