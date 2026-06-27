@@ -10,6 +10,7 @@ use crate::{
 };
 #[cfg(not(feature = "std"))]
 use alloc::{format, vec, vec::Vec};
+use unicode_width::UnicodeWidthChar;
 
 use alloc::collections::VecDeque;
 use core::cmp::{max, min};
@@ -1588,6 +1589,7 @@ impl ShapeLine {
             &mut lines,
             match_mono_width,
             hinting,
+            "",
         );
         lines
     }
@@ -2287,6 +2289,7 @@ impl ShapeLine {
         layout_lines: &mut Vec<LayoutLine>,
         match_mono_width: Option<f32>,
         hinting: Hinting,
+        line_text: &str,
     ) {
         // For each visual line a list of  (span index,  and range of words in that span)
         // Note that a BiDi visual line could have multiple spans or parts of them
@@ -2903,9 +2906,14 @@ impl ShapeLine {
                                     0.0
                                 },
                             );
-                            if let Some(match_em_width) = match_mono_em_width {
-                                // Round to nearest monospace width
-                                x_advance = ((x_advance / match_em_width).round()) * match_em_width;
+                            if let Some(mono_width) = match_mono_width {
+                                let cells = line_text
+                                    .get(glyph.start..)
+                                    .and_then(|s| s.chars().next())
+                                    .and_then(|c| c.width())
+                                    .map(|ucw| ucw as f32)
+                                    .unwrap_or_else(|| (x_advance / mono_width).round());
+                                x_advance = cells * mono_width;
                             }
                             if hinting == Hinting::Enabled {
                                 x_advance = x_advance.round();

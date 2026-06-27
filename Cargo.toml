@@ -30,6 +30,7 @@ sys-locale = { version = "0.3.2", optional = true }
 unicode-linebreak = "0.1.5"
 unicode-script = "0.5.8"
 unicode-segmentation = "1.12.0"
+unicode-width = "0.2.2"
 
 [dependencies.swash]
 version = "0.2.6"
