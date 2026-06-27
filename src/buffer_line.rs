@@ -123,15 +123,21 @@ impl BufferLine {
 
     /// Set attributes list
     ///
-    /// Will reset shape and layout if it differs from current attributes list.
-    /// Returns true if the line was reset
+    /// Resets shape and layout if the new list differs in a field that affects
+    /// shaping. A change confined to `text_decoration` resets layout only.
+    /// Returns true if shaping was reset.
     pub fn set_attrs_list(&mut self, attrs_list: AttrsList) -> bool {
-        if attrs_list != self.attrs_list {
+        if attrs_list == self.attrs_list {
+            return false;
+        }
+        if attrs_list.eq_shape_attrs(&self.attrs_list) {
+            self.attrs_list = attrs_list;
+            self.reset_layout();
+            false
+        } else {
             self.attrs_list = attrs_list;
             self.reset_shaping();
             true
-        } else {
-            false
         }
     }
 
@@ -259,7 +265,14 @@ impl BufferLine {
                 .layout_opt
                 .take_unused()
                 .unwrap_or_else(|| Vec::with_capacity(1));
-            let shape = self.shape(font_system, tab_width);
+            self.shape(font_system, tab_width);
+            let attrs_list = &self.attrs_list;
+            let shape = self.shape_opt.get().expect("shape not found");
+            let span_decorations: Vec<_> = shape
+                .spans
+                .iter()
+                .map(|span| span.decorations(attrs_list, font_system))
+                .collect();
             shape.layout_to_buffer(
                 &mut font_system.shape_buffer,
                 font_size,
@@ -270,6 +283,7 @@ impl BufferLine {
                 &mut layout,
                 match_mono_width,
                 hinting,
+                &span_decorations,
             );
             self.layout_opt.set_used(layout);
         }

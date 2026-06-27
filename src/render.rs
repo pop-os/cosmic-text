@@ -30,32 +30,16 @@ fn draw_decoration_span<R: Renderer>(
     span: &DecorationSpan,
     default_color: Color,
 ) {
-    let glyphs = &run.glyphs[span.glyph_range.clone()];
-    if glyphs.is_empty() {
-        return;
-    }
-
     let deco = &span.data;
     let td = &deco.text_decoration;
     let font_size = span.font_size;
 
-    // Compute x extent as min/max over all glyphs, not first/last,
-    // because RTL paragraphs store glyphs in right-to-left order.
-    let mut x_min = f32::INFINITY;
-    let mut x_max = f32::NEG_INFINITY;
-    for g in glyphs {
-        x_min = x_min.min(g.x);
-        x_max = x_max.max(g.x + g.w);
-    }
-    let width = x_max - x_min;
-    if width <= 0.0 {
-        return;
-    }
-    let w = width as u32;
+    let x_range = span.x_range(run);
+    let w = (x_range.end - x_range.start) as u32;
     if w == 0 {
         return;
     }
-    let x_start = x_min;
+    let x_start = x_range.start;
 
     // Underline
     match td.underline {
