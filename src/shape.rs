@@ -1242,11 +1242,8 @@ struct SpanWordGlyphPos {
 }
 
 impl SpanWordGlyphPos {
-    const ZERO: Self = Self {
-        span: 0,
-        word: 0,
-        glyph: 0,
-    };
+    // NOTE: the old `ZERO` sentinel was removed; a fresh line (no resume point)
+    // now uses an unaliasable usize::MAX sentinel in `layout_spans` (see there).
     fn word_glyph_pos(&self) -> WordGlyphPos {
         WordGlyphPos {
             word: self.word,
@@ -1774,16 +1771,26 @@ impl ShapeLine {
 
         let mut total_w: f32 = 0.0;
 
-        let start = if let Some(s) = start_opt {
-            s
-        } else {
-            SpanWordGlyphPos::ZERO
-        };
+        // A fresh line (no resume point) must not alias span 0 / word 0: the old
+        // ZERO sentinel made every `== start.span` / `== start.word` "resumed
+        // span" arm fire on the FIRST span of a fresh line. The tail-commit arm
+        // was guarded individually, but the same aliasing still zeroes word 0's
+        // width through get_glyph_start_end (an incongruent fresh-line word
+        // measures 0, so ellipsis triggers too late and the line overflows) and
+        // truncates the overflow range_end to (0, 0). usize::MAX matches no real
+        // span/word, so every resume arm is uniformly dead on a fresh line;
+        // traversal still starts at span 0 via `traverse_from`.
+        let traverse_from = start_opt.map_or(0, |s| s.span);
+        let start = start_opt.unwrap_or(SpanWordGlyphPos {
+            span: usize::MAX,
+            word: usize::MAX,
+            glyph: 0,
+        });
 
         let span_indices: Vec<usize> = if matches!(direction, LayoutDirection::Forward) {
-            (start.span..spans.len()).collect()
+            (traverse_from..spans.len()).collect()
         } else {
-            (start.span..spans.len()).rev().collect()
+            (traverse_from..spans.len()).rev().collect()
         };
 
         'outer: for span_index in span_indices {
@@ -1858,7 +1865,11 @@ impl ShapeLine {
                                     starting_word_index,
                                     direction,
                                     congruent,
-                                    start.span,
+                                    // The traversal floor, not `start` itself: on a
+                                    // fresh line `start` is the unaliasable sentinel,
+                                    // while the Backward remaining-spans range needs
+                                    // the real lower bound (0 on a fresh line).
+                                    traverse_from,
                                     span_count,
                                     ellipsis_w,
                                 ) && total_w + word_range_width + word_width + ellipsis_w
