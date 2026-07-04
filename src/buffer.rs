@@ -146,9 +146,27 @@ impl LayoutRun<'_> {
     /// Find which glyph in this run contains `cursor`, returning
     /// `(glyph_index, pixel_offset_within_glyph)`, or `None` if the cursor
     /// is not on this run.
+    ///
+    /// At an exact glyph boundary the cursor's [`Affinity`] picks the side:
+    /// `Before` attaches to the glyph that *ends* at the index, `After` to the
+    /// glyph that *starts* there. The two positions only differ where runs of
+    /// opposite direction meet — in single-direction text they are the same x.
     pub fn cursor_glyph(&self, cursor: &Cursor) -> Option<(usize, f32)> {
         if cursor.line != self.line_i {
             return None;
+        }
+        // Honor Affinity::Before at exact glyph boundaries. hit() and the cursor
+        // motions set affinity, but resolving the position while ignoring it
+        // painted every boundary caret on the After side, so the caret teleported
+        // across a mixed line's direction seam regardless of how the cursor
+        // arrived. When no glyph ends at the index (index 0), fall through to the
+        // existing search below.
+        if cursor.affinity == Affinity::Before && cursor.index > 0 {
+            for (glyph_i, glyph) in self.glyphs.iter().enumerate() {
+                if cursor.index == glyph.end {
+                    return Some((glyph_i, glyph.w));
+                }
+            }
         }
         for (glyph_i, glyph) in self.glyphs.iter().enumerate() {
             if cursor.index == glyph.start {
