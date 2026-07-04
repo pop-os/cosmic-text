@@ -1199,7 +1199,12 @@ impl Buffer {
                 'hit: for (glyph_i, glyph) in run.glyphs.iter().enumerate() {
                     if first_glyph {
                         first_glyph = false;
-                        if (run.rtl && x > glyph.x) || (!run.rtl && x < 0.0) {
+                        // "Before the line" for LTR is left of the first glyph, not
+                        // left of x=0: under Align::Right/Center a short line starts at
+                        // glyph.x > 0, and the hardcoded 0.0 sent clicks in the leading
+                        // gap to the line END via the fall-through arm. glyphs[0].x is
+                        // the true minimum x by L2-reorder construction.
+                        if (run.rtl && x > glyph.x) || (!run.rtl && x < glyph.x) {
                             new_cursor_glyph = 0;
                             new_cursor_char = 0;
                         }
