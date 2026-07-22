@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Prefer color font for emoji presentation clusters during fallback selection, fixing inconsistent (mixed color/monochrome) emoji rendering: https://github.com/pop-os/cosmic-text/issues/327
+- Prefer color font for emoji presentation clusters during fallback selection, fixing inconsistent (mixed color/monochrome) emoji rendering: https://github.com/pop-os/cosmic-text/pull/524
 
 ## [0.19.0] - 2026-04-22
 
