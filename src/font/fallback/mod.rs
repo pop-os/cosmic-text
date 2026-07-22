@@ -224,6 +224,16 @@ impl<'a> FontFallbackIter<'a> {
         }
     }
 
+    /// Returns `true` once the iterator has progressed past the structured
+    /// fallback lists (default, script and common) into the unstructured
+    /// "scan every font in the database" phase.
+    ///
+    /// Callers can use this to bound fallback strategies that only make sense
+    /// against the curated fallback lists.
+    pub fn in_other_phase(&self) -> bool {
+        self.other_i > 0 || self.end
+    }
+
     pub fn check_missing(&self, word: &str) {
         if self.end {
             missing_warn!(
