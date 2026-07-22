@@ -381,11 +381,21 @@ fn shape_run(
             break;
         };
 
+        let is_color_font = font.has_color();
+        // When only emoji upgrades remain (no missing clusters), a non-color
+        // font cannot help: it could at best provide the same monochrome glyph
+        // we are trying to upgrade away from. Skip the expensive shaping pass
+        // in that case and keep searching the fallback chain for a color font.
+        // This makes the upgrade search essentially free unless a color font is
+        // actually reached.
+        if missing.is_empty() && !emoji_upgrade.is_empty() && !is_color_font {
+            continue;
+        }
+
         log::trace!(
             "Evaluating fallback with font '{}'",
             font_iter.face_name(font.id())
         );
-        let is_color_font = font.has_color();
         let mut fb_glyphs = Vec::new();
         let scratch = font_iter.shape_caches();
         let fb_missing = shape_fallback(
