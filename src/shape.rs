@@ -459,38 +459,37 @@ fn shape_run(
                 }
             }
 
-            // Find prior glyphs
-            let mut i = glyph_start;
-            while i < glyphs.len() {
-                if glyphs[i].start >= start && glyphs[i].end <= end {
-                    break;
-                }
-                i += 1;
+            // Replace the prior glyphs for this cluster. The run's glyphs are
+            // monotonic in `start` (ascending for LTR spans, descending for
+            // RTL), so binary-search the block's first position and extend it
+            // over exactly the glyphs this cluster owns; `splice` then moves
+            // the tail at most once (not at all when lengths match), instead
+            // of once per removed and once per inserted glyph.
+            let block_lo = if span_rtl {
+                glyphs[glyph_start..].partition_point(|g| g.start >= end)
+            } else {
+                glyphs[glyph_start..].partition_point(|g| g.start < start)
+            } + glyph_start;
+            let mut block_hi = block_lo;
+            while block_hi < glyphs.len()
+                && glyphs[block_hi].start >= start
+                && glyphs[block_hi].end <= end
+            {
+                block_hi += 1;
             }
 
-            // Remove prior glyphs
-            while i < glyphs.len() {
-                if glyphs[i].start >= start && glyphs[i].end <= end {
-                    let _glyph = glyphs.remove(i);
-                    // log::trace!("Removed {},{} from {}", _glyph.start, _glyph.end, i);
-                } else {
-                    break;
-                }
+            // Count the fallback glyphs for this cluster and splice them in
+            // with a single drain instead of per-glyph Vec::remove/insert.
+            let mut count = 0;
+            while fb_i + count < fb_glyphs.len()
+                && fb_glyphs[fb_i + count].start >= start
+                && fb_glyphs[fb_i + count].end <= end
+            {
+                count += 1;
             }
-
-            while fb_i < fb_glyphs.len() {
-                if fb_glyphs[fb_i].start >= start && fb_glyphs[fb_i].end <= end {
-                    let fb_glyph = fb_glyphs.remove(fb_i);
-                    // log::trace!("Insert {},{} from font {} at {}", fb_glyph.start, fb_glyph.end, font_i, i);
-                    glyphs.insert(i, fb_glyph);
-                    i += 1;
-                } else {
-                    break;
-                }
-            }
+            glyphs.splice(block_lo..block_hi, fb_glyphs.drain(fb_i..fb_i + count));
         }
     }
-
     // Debug missing font fallbacks
     font_iter.check_missing(&line[start_run..end_run]);
 
