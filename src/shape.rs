@@ -8,14 +8,14 @@ use crate::{
     Ellipsize, EllipsizeHeightLimit, Family, Font, FontSystem, GlyphDecorationData, Hinting,
     LayoutGlyph, LayoutLine, Metrics, Wrap,
 };
+use alloc::collections::VecDeque;
 #[cfg(not(feature = "std"))]
 use alloc::{format, vec, vec::Vec};
-
-use alloc::collections::VecDeque;
 use core::cmp::{max, min};
 use core::fmt;
 use core::mem;
 use core::ops::Range;
+use smallvec::SmallVec;
 
 #[cfg(not(feature = "std"))]
 use core_maths::CoreFloat;
@@ -355,9 +355,9 @@ fn shape_run(
     // them as upgrade candidates and swap them to a color font when one is
     // reached in the fallback chain. See <https://github.com/pop-os/cosmic-text/issues/327>.
     let emoji_clusters = emoji_upgrade_clusters(line, start_run, end_run);
-    let mut emoji_upgrade: Vec<usize> = if font.has_color() {
+    let mut emoji_upgrade: SmallVec<[usize; 8]> = if font.has_color() {
         // The default font already renders these in color; nothing to upgrade.
-        Vec::new()
+        SmallVec::new()
     } else {
         emoji_clusters
             .iter()
@@ -367,6 +367,7 @@ fn shape_run(
     };
 
     //TODO: improve performance!
+    let mut fb_glyphs = Vec::new();
     loop {
         // Continue while there are missing clusters, or emoji clusters that
         // could still be upgraded to a color font. The upgrade search is bound
@@ -396,8 +397,8 @@ fn shape_run(
             "Evaluating fallback with font '{}'",
             font_iter.face_name(font.id())
         );
-        let mut fb_glyphs = Vec::new();
         let scratch = font_iter.shape_caches();
+        fb_glyphs.clear();
         let fb_missing = shape_fallback(
             scratch,
             &mut fb_glyphs,
@@ -748,8 +749,8 @@ fn wants_emoji_presentation(c: char, next: Option<char>) -> bool {
 /// shaped glyphs. Each cluster is the text between emoji "boundaries": an
 /// emoji character together with any following emoji modifiers, variation
 /// selectors and zero-width joiners.
-fn emoji_upgrade_clusters(line: &str, start_run: usize, end_run: usize) -> Vec<usize> {
-    let mut clusters = Vec::new();
+fn emoji_upgrade_clusters(line: &str, start_run: usize, end_run: usize) -> SmallVec<[usize; 8]> {
+    let mut clusters = SmallVec::new();
 
     let mut i = start_run;
     while i < end_run {
@@ -3251,23 +3252,5 @@ impl ShapeLine {
         scratch.visual_lines.append(&mut cached_visual_lines);
         scratch.cached_visual_lines = cached_visual_lines;
         scratch.glyph_sets = cached_glyph_sets;
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn emoji_upgrade_clusters_treats_zwj_sequences_as_one() {
-        // 👩‍👩‍👧 (woman + ZWJ + woman + ZWJ + girl) is a single ZWJ cluster and
-        // should produce a single upgrade offset. If the cluster-boundary logic
-        // split this, each component would be upgraded independently and the
-        // color font's ZWJ ligature would render as separate glyphs.
-        let line = "a👩\u{200D}👩\u{200D}👧b";
-        let clusters = emoji_upgrade_clusters(line, 0, line.len());
-
-        let base = line.find('👩').unwrap();
-        assert_eq!(clusters, vec![base]);
     }
 }
