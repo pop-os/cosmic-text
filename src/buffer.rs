@@ -60,7 +60,7 @@ impl LayoutRun<'_> {
     /// Return an iterator of `(x_left, x_width)` pixel spans for the highlighted areas
     /// between `cursor_start` and `cursor_end` within this run.
     ///
-    /// For pure LTR or pure RTL runs this yields at most one span. For mixed BiDi runs
+    /// For pure LTR or pure RTL runs this yields at most one span. For mixed `BiDi` runs
     /// (where selected and unselected glyphs interleave visually) it yields multiple
     /// disjoint spans.
     ///

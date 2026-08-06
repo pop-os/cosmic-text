@@ -322,7 +322,7 @@ fn shape_run(
         }
     }
 
-    log::trace!("      Run {:?}: '{}'", &scripts, &line[start_run..end_run],);
+    log::trace!("      Run {:?}: '{}'", scripts, &line[start_run..end_run],);
 
     let attrs = attrs_list.get_span(start_run);
 
@@ -3056,8 +3056,12 @@ impl ShapeLine {
                     // emitted in byte order, giving amortized O(1) lookup.
                     let mut deco_cursor: usize = 0;
                     // If ending_glyph is not 0 we need to include glyphs from the ending_word
-                    for i in r.start.word..r.end.word + usize::from(r.end.glyph != 0) {
-                        let word = &span_words[i];
+                    for (i, word) in span_words
+                        .iter()
+                        .enumerate()
+                        .take(r.end.word + usize::from(r.end.glyph != 0))
+                        .skip(r.start.word)
+                    {
                         let included_glyphs = match (i == r.start.word, i == r.end.word) {
                             (false, false) => &word.glyphs[..],
                             (true, false) => &word.glyphs[r.start.glyph..],
