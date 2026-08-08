@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["CharsetKind","CustomCharset"],"struct":["Charset","Format0","Format1","Format2","Iter","Range1","Range2"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["Glyph","GlyphCluster","GlyphInfo"]};

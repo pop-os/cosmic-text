@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["NESTING_DEPTH_LIMIT"],"enum":["CharstringKind"],"fn":["evaluate"],"struct":["NopFilterSink","TransformSink"],"trait":["CharstringContext","CommandSink"]};

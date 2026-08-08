@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["CustomEncoding","Encoding"],"struct":["Range1","Supplement"]};

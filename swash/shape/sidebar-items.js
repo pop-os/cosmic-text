@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Direction"],"mod":["cluster"],"struct":["ShapeContext","Shaper","ShaperBuilder"]};
