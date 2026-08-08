@@ -145,7 +145,7 @@ fn test_ligature_segmentation() {
 
 #[test]
 fn test_mixed_direction_paragraphs_do_not_panic() {
-    use cosmic_text::{AttrsList, FontSystem, ShapeLine, Shaping};
+    use cosmic_text::{AttrsList, Direction, FontSystem, ShapeLine, Shaping};
 
     let mut font_system =
         FontSystem::new_with_locale_and_db("en-US".into(), fontdb::Database::new());
@@ -168,6 +168,7 @@ fn test_mixed_direction_paragraphs_do_not_panic() {
             &AttrsList::new(&Attrs::new()),
             Shaping::Advanced,
             8,
+            Direction::Auto,
         );
     }
 }
