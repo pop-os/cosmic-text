@@ -8,18 +8,19 @@ use crate::{
     Ellipsize, EllipsizeHeightLimit, Family, Font, FontSystem, GlyphDecorationData, Hinting,
     LayoutGlyph, LayoutLine, Metrics, Wrap,
 };
+use alloc::collections::VecDeque;
 #[cfg(not(feature = "std"))]
 use alloc::{format, vec, vec::Vec};
-
-use alloc::collections::VecDeque;
 use core::cmp::{max, min};
 use core::fmt;
 use core::mem;
 use core::ops::Range;
+use smallvec::SmallVec;
 
 #[cfg(not(feature = "std"))]
 use core_maths::CoreFloat;
 use fontdb::Style;
+use unicode_properties::{EmojiStatus, UnicodeEmoji};
 use unicode_script::{Script, UnicodeScript};
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -321,7 +322,7 @@ fn shape_run(
         }
     }
 
-    log::trace!("      Run {:?}: '{}'", &scripts, &line[start_run..end_run],);
+    log::trace!("      Run {:?}: '{}'", scripts, &line[start_run..end_run],);
 
     let attrs = attrs_list.get_span(start_run);
 
@@ -347,18 +348,57 @@ fn shape_run(
         )
     };
 
+    // Clusters in this run that want an emoji (color) presentation. A cluster
+    // may already be "covered" by a non-color font that ships a monochrome
+    // outline glyph for the codepoint (e.g. Noto Sans Symbols); such clusters
+    // are not in `missing` and would otherwise be left monochrome. We track
+    // them as upgrade candidates and swap them to a color font when one is
+    // reached in the fallback chain. See <https://github.com/pop-os/cosmic-text/issues/327>.
+    let emoji_clusters = emoji_upgrade_clusters(line, start_run, end_run);
+    let mut emoji_upgrade: SmallVec<[usize; 8]> = if font.has_color() {
+        // The default font already renders these in color; nothing to upgrade.
+        SmallVec::new()
+    } else {
+        emoji_clusters
+            .iter()
+            .filter(|&&c| !missing.contains(&c))
+            .copied()
+            .collect()
+    };
+
     //TODO: improve performance!
-    while !missing.is_empty() {
+    let mut fb_glyphs = Vec::new();
+    loop {
+        // Continue while there are missing clusters, or emoji clusters that
+        // could still be upgraded to a color font. The upgrade search is bound
+        // to the structured fallback lists (default/script/common): once we
+        // have started scanning every font in the database there is nothing
+        // more to gain for upgrades, and missing clusters are already empty.
+        if missing.is_empty() && (emoji_upgrade.is_empty() || font_iter.in_other_phase()) {
+            break;
+        }
+
         let Some(font) = font_iter.next() else {
             break;
         };
+
+        let is_color_font = font.has_color();
+        // When only emoji upgrades remain (no missing clusters), a non-color
+        // font cannot help: it could at best provide the same monochrome glyph
+        // we are trying to upgrade away from. Skip the expensive shaping pass
+        // in that case and keep searching the fallback chain for a color font.
+        // This makes the upgrade search essentially free unless a color font is
+        // actually reached.
+        if missing.is_empty() && !emoji_upgrade.is_empty() && !is_color_font {
+            continue;
+        }
 
         log::trace!(
             "Evaluating fallback with font '{}'",
             font_iter.face_name(font.id())
         );
-        let mut fb_glyphs = Vec::new();
         let scratch = font_iter.shape_caches();
+        fb_glyphs.clear();
         let fb_missing = shape_fallback(
             scratch,
             &mut fb_glyphs,
@@ -376,54 +416,80 @@ fn shape_run(
             let start = fb_glyphs[fb_i].start;
             let end = fb_glyphs[fb_i].end;
 
-            // Skip clusters that are not missing, or where the fallback font is missing
-            if !missing.contains(&start) || fb_missing.contains(&start) {
+            let fb_covers = !fb_missing.contains(&start);
+            let was_missing = missing.contains(&start);
+            // An emoji cluster already drawn by a non-color font is upgraded
+            // only when this fallback font provides color glyphs and covers it.
+            let is_emoji_upgrade = !was_missing && is_color_font && emoji_upgrade.contains(&start);
+
+            // Skip clusters the fallback font doesn't cover, or that are
+            // neither missing nor an upgradable emoji cluster.
+            if !fb_covers || (!was_missing && !is_emoji_upgrade) {
                 fb_i += 1;
                 continue;
             }
 
-            let mut missing_i = 0;
-            while missing_i < missing.len() {
-                if missing[missing_i] >= start && missing[missing_i] < end {
-                    // println!("No longer missing {}", missing[missing_i]);
-                    missing.remove(missing_i);
-                } else {
-                    missing_i += 1;
+            if was_missing {
+                // No longer missing: remove all missing entries in this cluster.
+                let mut missing_i = 0;
+                while missing_i < missing.len() {
+                    if missing[missing_i] >= start && missing[missing_i] < end {
+                        // println!("No longer missing {}", missing[missing_i]);
+                        missing.remove(missing_i);
+                    } else {
+                        missing_i += 1;
+                    }
+                }
+                // If a *non-color* fallback just covered a missing emoji
+                // cluster with a monochrome glyph, it becomes an upgrade
+                // candidate so a later color font can take over.
+                if !is_color_font && emoji_clusters.contains(&start) {
+                    emoji_upgrade.push(start);
+                }
+            }
+            if is_emoji_upgrade {
+                // Upgraded to a color font: no longer pending.
+                let mut up_i = 0;
+                while up_i < emoji_upgrade.len() {
+                    if emoji_upgrade[up_i] >= start && emoji_upgrade[up_i] < end {
+                        emoji_upgrade.remove(up_i);
+                    } else {
+                        up_i += 1;
+                    }
                 }
             }
 
-            // Find prior glyphs
-            let mut i = glyph_start;
-            while i < glyphs.len() {
-                if glyphs[i].start >= start && glyphs[i].end <= end {
-                    break;
-                }
-                i += 1;
+            // Replace the prior glyphs for this cluster. The run's glyphs are
+            // monotonic in `start` (ascending for LTR spans, descending for
+            // RTL), so binary-search the block's first position and extend it
+            // over exactly the glyphs this cluster owns; `splice` then moves
+            // the tail at most once (not at all when lengths match), instead
+            // of once per removed and once per inserted glyph.
+            let block_lo = if span_rtl {
+                glyphs[glyph_start..].partition_point(|g| g.start >= end)
+            } else {
+                glyphs[glyph_start..].partition_point(|g| g.start < start)
+            } + glyph_start;
+            let mut block_hi = block_lo;
+            while block_hi < glyphs.len()
+                && glyphs[block_hi].start >= start
+                && glyphs[block_hi].end <= end
+            {
+                block_hi += 1;
             }
 
-            // Remove prior glyphs
-            while i < glyphs.len() {
-                if glyphs[i].start >= start && glyphs[i].end <= end {
-                    let _glyph = glyphs.remove(i);
-                    // log::trace!("Removed {},{} from {}", _glyph.start, _glyph.end, i);
-                } else {
-                    break;
-                }
+            // Count the fallback glyphs for this cluster and splice them in
+            // with a single drain instead of per-glyph Vec::remove/insert.
+            let mut count = 0;
+            while fb_i + count < fb_glyphs.len()
+                && fb_glyphs[fb_i + count].start >= start
+                && fb_glyphs[fb_i + count].end <= end
+            {
+                count += 1;
             }
-
-            while fb_i < fb_glyphs.len() {
-                if fb_glyphs[fb_i].start >= start && fb_glyphs[fb_i].end <= end {
-                    let fb_glyph = fb_glyphs.remove(fb_i);
-                    // log::trace!("Insert {},{} from font {} at {}", fb_glyph.start, fb_glyph.end, font_i, i);
-                    glyphs.insert(i, fb_glyph);
-                    i += 1;
-                } else {
-                    break;
-                }
-            }
+            glyphs.splice(block_lo..block_hi, fb_glyphs.drain(fb_i..fb_i + count));
         }
     }
-
     // Debug missing font fallbacks
     font_iter.check_missing(&line[start_run..end_run]);
 
@@ -635,6 +701,103 @@ fn shape_skip_glyphs(
                 }
             }),
     );
+}
+
+/// Returns `true` if `c` should be rendered using an emoji (color) font when
+/// one is available.
+///
+/// This covers the Unicode `Emoji_Presentation` property (characters that
+/// default to emoji presentation, e.g. ☕ ☀️ ❤️) as well as emoji characters
+/// explicitly forced to emoji presentation by a following `U+FE0F` variation
+/// selector (VS16).
+#[inline]
+fn wants_emoji_presentation(c: char, next: Option<char>) -> bool {
+    use EmojiStatus as E;
+    // Characters that have `Emoji_Presentation=YES` according to TR51. The
+    // `unicode-properties` crate folds this into the `EmojiStatus` variants
+    // whose name contains "Presentation".
+    let presentation_default = matches!(
+        c.emoji_status(),
+        E::EmojiPresentation
+            | E::EmojiPresentationAndModifierBase
+            | E::EmojiPresentationAndEmojiComponent
+            | E::EmojiPresentationAndModifierAndEmojiComponent
+    );
+    // U+FE0F explicitly requests emoji presentation for the preceding emoji
+    // character.
+    let forced_by_vs16 = next == Some('\u{FE0F}')
+        && matches!(
+            c.emoji_status(),
+            E::EmojiPresentation
+                | E::EmojiPresentationAndModifierBase
+                | E::EmojiPresentationAndEmojiComponent
+                | E::EmojiPresentationAndModifierAndEmojiComponent
+                | E::EmojiModifierBase
+                | E::EmojiOther
+                | E::EmojiOtherAndEmojiComponent
+        );
+    presentation_default || forced_by_vs16
+}
+
+/// Returns the byte offsets (relative to `line`) of clusters in the run
+/// `line[start_run..end_run]` that should be upgraded to a color emoji font
+/// when one is available.
+///
+/// The returned offsets are the `start` byte index of each emoji cluster and
+/// align with [`ShapeGlyph::start`], so they can be matched directly against
+/// shaped glyphs. Each cluster is the text between emoji "boundaries": an
+/// emoji character together with any following emoji modifiers, variation
+/// selectors and zero-width joiners.
+fn emoji_upgrade_clusters(line: &str, start_run: usize, end_run: usize) -> SmallVec<[usize; 8]> {
+    let mut clusters = SmallVec::new();
+
+    let mut i = start_run;
+    while i < end_run {
+        // Safely decode one char and peek the following char.
+        let c = match line[i..].chars().next() {
+            Some(c) => c,
+            None => break,
+        };
+        let next = line[i + c.len_utf8()..end_run].chars().next();
+
+        if wants_emoji_presentation(c, next) {
+            // Start of an emoji cluster. Consume the cluster: the base char
+            // plus any trailing emoji modifiers, variation selectors, regional
+            // indicators, tag characters and ZWJ-joined chars. These all share
+            // this cluster's offset and don't produce their own.
+            let mut j = i + c.len_utf8();
+            while j < end_run {
+                let nc = match line[j..end_run].chars().next() {
+                    Some(nc) => nc,
+                    None => break,
+                };
+                let is_trailer = matches!(nc,
+                    '\u{FE0E}' | '\u{FE0F}'                  // variation selectors
+                    | '\u{200D}'                             // ZWJ
+                    | '\u{1F1E6}'..='\u{1F1FF}'              // regional indicators (flags)
+                    | '\u{E0020}'..='\u{E007F}'              // tag chars (subdivision flags)
+                    | '\u{1F3FB}'..='\u{1F3FF}'             // skin-tone modifiers
+                );
+                if is_trailer {
+                    j += nc.len_utf8();
+                    // If this trailer is a ZWJ, also consume the joined char
+                    // that follows it so it stays in the same cluster.
+                    if nc == '\u{200D}' {
+                        if let Some(joined) = line[j..end_run].chars().next() {
+                            j += joined.len_utf8();
+                        }
+                    }
+                } else {
+                    break;
+                }
+            }
+            clusters.push(i);
+            i = j;
+            continue;
+        }
+        i += c.len_utf8();
+    }
+    clusters
 }
 
 fn override_fake_italic(
@@ -2885,8 +3048,12 @@ impl ShapeLine {
                     // emitted in byte order, giving amortized O(1) lookup.
                     let mut deco_cursor: usize = 0;
                     // If ending_glyph is not 0 we need to include glyphs from the ending_word
-                    for i in r.start.word..r.end.word + usize::from(r.end.glyph != 0) {
-                        let word = &span_words[i];
+                    for (i, word) in span_words
+                        .iter()
+                        .enumerate()
+                        .take(r.end.word + usize::from(r.end.glyph != 0))
+                        .skip(r.start.word)
+                    {
                         let included_glyphs = match (i == r.start.word, i == r.end.word) {
                             (false, false) => &word.glyphs[..],
                             (true, false) => &word.glyphs[r.start.glyph..],

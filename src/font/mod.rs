@@ -58,6 +58,11 @@ pub struct Font {
     id: fontdb::ID,
     monospace_fallback: Option<FontMonospaceFallback>,
     pub(crate) italic_or_oblique: bool,
+    /// Whether this font provides color glyphs (COLR/CBDT/sbix/SVG).
+    ///
+    /// Used to prefer color fonts for emoji presentation clusters during
+    /// fallback selection.
+    has_color: bool,
 }
 
 impl fmt::Debug for Font {
@@ -91,6 +96,12 @@ impl Font {
 
     pub fn data(&self) -> &[u8] {
         self.data.data.data()
+    }
+
+    /// Returns `true` if this font provides color glyphs (COLR, CBDT/CBLC,
+    /// sbix or SVG tables).
+    pub fn has_color(&self) -> bool {
+        self.has_color
     }
 
     pub fn shaper(&self) -> &harfrust::Shaper<'_> {
@@ -145,6 +156,15 @@ impl Font {
             .axes()
             .location([(Tag::new(b"wght"), weight.0 as f32)]);
         let metrics = font_ref.metrics(Size::unscaled(), &location);
+
+        // Detect color glyph support so emoji presentation clusters can be
+        // upgraded to this font during fallback selection. Presence of any of
+        // these tables is a sufficient signal that the font carries color
+        // glyphs.
+        let has_color = font_ref.colr().is_ok()
+            || font_ref.cbdt().is_ok()
+            || font_ref.sbix().is_ok()
+            || font_ref.svg().is_ok();
 
         let monospace_fallback = if cfg!(feature = "monospace_fallback") {
             (|| {
@@ -239,6 +259,7 @@ impl Font {
             .ok()?,
             data: FontData::new(Blob::new(data), info.index),
             italic_or_oblique: info.style == Style::Italic || info.style == Style::Oblique,
+            has_color,
         })
     }
 }
