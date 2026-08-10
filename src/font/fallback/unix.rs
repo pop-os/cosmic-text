@@ -54,15 +54,24 @@ const fn forbidden_fallback() -> &'static [&'static str] {
 }
 
 fn han_unification(locale: &str) -> &'static [&'static str] {
-    match locale {
+    // The locale comes from `sys_locale`, which reports BCP-47 tags that
+    // usually carry a region ("ja-JP", "ko-KR", "zh-TW"); other callers may
+    // hand in POSIX-style tags ("ja_JP", "ja_JP.UTF-8"). Matching the whole
+    // tag against bare language codes meant e.g. "ja-JP" fell through to the
+    // Simplified Chinese default, so Japanese systems rendered Han with SC
+    // glyph forms. Compare subtags instead, keeping the zh distinctions.
+    let mut subtags = locale.split(['-', '_', '.', '@']);
+    let lang = subtags.next().unwrap_or(locale);
+    let subtag = subtags.next();
+    match (lang, subtag) {
         // Japan
-        "ja" => &["Noto Sans CJK JP"],
+        ("ja", _) => &["Noto Sans CJK JP"],
         // Korea
-        "ko" => &["Noto Sans CJK KR"],
+        ("ko", _) => &["Noto Sans CJK KR"],
         // Hong Kong
-        "zh-HK" => &["Noto Sans CJK HK"],
-        // Taiwan
-        "zh-TW" => &["Noto Sans CJK TC"],
+        ("zh", Some("HK")) => &["Noto Sans CJK HK"],
+        // Taiwan, and Traditional-script tags like "zh-Hant(-…)"
+        ("zh", Some("TW")) | ("zh", Some("Hant")) => &["Noto Sans CJK TC"],
         // Simplified Chinese is the default (also catches "zh-CN" for China)
         _ => &["Noto Sans CJK SC"],
     }
@@ -125,5 +134,33 @@ fn script_fallback(script: Script, locale: &str) -> &'static [&'static str] {
         //TODO: Use han_unification?
         Script::Yi => &["Noto Sans Yi", "Noto Sans CJK SC"],
         _ => &[],
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::han_unification;
+
+    #[test]
+    fn han_unification_handles_locales_with_region_subtags() {
+        // Bare language codes (previous behavior, still supported)
+        assert_eq!(han_unification("ja"), &["Noto Sans CJK JP"]);
+        assert_eq!(han_unification("ko"), &["Noto Sans CJK KR"]);
+        // BCP-47 tags as reported by sys_locale
+        assert_eq!(han_unification("ja-JP"), &["Noto Sans CJK JP"]);
+        assert_eq!(han_unification("ko-KR"), &["Noto Sans CJK KR"]);
+        assert_eq!(han_unification("zh-HK"), &["Noto Sans CJK HK"]);
+        assert_eq!(han_unification("zh-TW"), &["Noto Sans CJK TC"]);
+        assert_eq!(han_unification("zh-Hant"), &["Noto Sans CJK TC"]);
+        assert_eq!(han_unification("zh-Hant-TW"), &["Noto Sans CJK TC"]);
+        // POSIX-style tags
+        assert_eq!(han_unification("ja_JP"), &["Noto Sans CJK JP"]);
+        assert_eq!(han_unification("ja_JP.UTF-8"), &["Noto Sans CJK JP"]);
+        assert_eq!(han_unification("zh_HK.UTF-8"), &["Noto Sans CJK HK"]);
+        // Simplified Chinese default
+        assert_eq!(han_unification("zh"), &["Noto Sans CJK SC"]);
+        assert_eq!(han_unification("zh-CN"), &["Noto Sans CJK SC"]);
+        assert_eq!(han_unification("zh-Hans"), &["Noto Sans CJK SC"]);
+        assert_eq!(han_unification("en-US"), &["Noto Sans CJK SC"]);
     }
 }
