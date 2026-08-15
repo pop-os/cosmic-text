@@ -1,7 +1,7 @@
 use alloc::sync::Arc;
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, vec::Vec};
-use core::cmp;
+use core::{cmp, ops};
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{AttrsList, BorrowedWithFontSystem, Buffer, Cursor, FontSystem, Motion};
@@ -364,3 +364,37 @@ impl<'buffer, E: Edit<'buffer>> BorrowedWithFontSystem<'_, E> {
         self.inner.action(self.font_system, action);
     }
 }
+
+macro_rules! deref_buffer {
+    ($t:ty, $($lt:lifetime),*) => {
+        impl<$($lt),*> ops::Deref for $t {
+            type Target = Buffer;
+
+            fn deref(&self) -> &Self::Target {
+                match self.buffer_ref() {
+                    BufferRef::Owned(buffer) => buffer,
+                    BufferRef::Borrowed(buffer) => buffer,
+                    BufferRef::Arc(buffer) => buffer,
+                }
+            }
+        }
+
+        impl<$($lt),*> ops::DerefMut for $t {
+            fn deref_mut(&mut self) -> &mut Self::Target {
+                match self.buffer_ref_mut() {
+                    BufferRef::Owned(buffer) => buffer,
+                    BufferRef::Borrowed(buffer) => buffer,
+                    BufferRef::Arc(buffer) => Arc::make_mut(buffer),
+                }
+            }
+        }
+    };
+}
+
+deref_buffer!(Editor<'buffer>, 'buffer);
+
+#[cfg(feature = "syntect")]
+deref_buffer!(SyntaxEditor<'syntax_system, 'buffer>, 'syntax_system, 'buffer);
+
+#[cfg(feature = "vi")]
+deref_buffer!(ViEditor<'syntax_system, 'buffer>, 'syntax_system, 'buffer);
