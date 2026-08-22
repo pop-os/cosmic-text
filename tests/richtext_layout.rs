@@ -1,4 +1,6 @@
-use cosmic_text::{Attrs, Buffer, FontSystem, Metrics, Shaping};
+use cosmic_text::{
+    fontdb, Attrs, Buffer, Family, FeatureTag, FontFeatures, FontSystem, Metrics, Shaping,
+};
 
 // Test for https://github.com/pop-os/cosmic-text/issues/364
 //
@@ -69,4 +71,52 @@ fn empty_lines_use_span_metrics() {
         "line 5 should use buffer default: {}",
         line_heights[5]
     );
+}
+
+// Test for https://github.com/pop-os/cosmic-text/issues/530
+#[test]
+fn font_features_apply_within_a_word() {
+    let mut font_db = fontdb::Database::new();
+    font_db.load_font_data(std::fs::read("fonts/Inter-Regular.ttf").unwrap());
+    let mut font_system = FontSystem::new_with_locale_and_db("en-US".into(), font_db);
+
+    let normal = Attrs::new().family(Family::Name("Inter"));
+    let mut features = FontFeatures::new();
+    features.enable(FeatureTag::new(b"subs"));
+
+    let subscript = normal.clone().font_features(features);
+
+    // The id of "3" without the 'subs' feature
+    let normal_id = glyph_ids(&mut font_system, "3", &normal)[0];
+    // The id of "3" with the 'subs' feature
+    let subscript_id = glyph_ids(&mut font_system, "3", &subscript)[0];
+    assert_ne!(normal_id, subscript_id, "test font must support 'subs'");
+
+    let mut buffer = Buffer::new(&mut font_system, Metrics::new(32.0, 40.0));
+    buffer.set_rich_text(
+        [("x", normal.clone()), ("3", subscript)],
+        &normal,
+        Shaping::Advanced,
+        None,
+    );
+    buffer.shape_until_scroll(&mut font_system, false);
+    let rich_text_ids: Vec<_> = buffer
+        .layout_runs()
+        .flat_map(|run| run.glyphs.iter().map(|glyph| glyph.glyph_id))
+        .collect();
+
+    assert_eq!(
+        rich_text_ids[1], subscript_id,
+        "subscript '3' should have different glyph id than normal '3'"
+    );
+}
+
+fn glyph_ids(font_system: &mut FontSystem, text: &str, attrs: &Attrs<'_>) -> Vec<u16> {
+    let mut buffer = Buffer::new(font_system, Metrics::new(32.0, 40.0));
+    buffer.set_text(text, attrs, Shaping::Advanced, None);
+    buffer.shape_until_scroll(font_system, false);
+    buffer
+        .layout_runs()
+        .flat_map(|run| run.glyphs.iter().map(|glyph| glyph.glyph_id))
+        .collect()
 }
