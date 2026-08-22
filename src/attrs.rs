@@ -415,6 +415,7 @@ impl<'a> Attrs<'a> {
             && self.stretch == other.stretch
             && self.style == other.style
             && self.weight == other.weight
+            && self.font_features == other.font_features
     }
 }
 
