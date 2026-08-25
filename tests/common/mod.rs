@@ -1,3 +1,6 @@
+// Shared test fixture: not every test binary uses every builder here.
+#![allow(dead_code)]
+
 use std::path::PathBuf;
 
 use cosmic_text::{
@@ -35,6 +38,16 @@ pub struct DrawTestCfg {
     wrap: Wrap,
     ellipsize: Ellipsize,
     alignment: Option<Align>,
+}
+
+/// Creates a `FontSystem` that only sees the fonts bundled in this
+/// repository's `fonts` directory, so tests are hermetic and deterministic.
+pub fn test_font_system() -> FontSystem {
+    let repo_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
+    // Create a db with just the fonts in our fonts dir to make sure we only test those
+    let mut font_db = Database::new();
+    font_db.load_fonts_dir(PathBuf::from(&repo_dir).join("fonts"));
+    FontSystem::new_with_locale_and_db("En-US".into(), font_db)
 }
 
 impl Default for DrawTestCfg {
@@ -116,11 +129,7 @@ impl DrawTestCfg {
 
     pub fn validate_text_rendering(self) {
         let repo_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
-        // Create a db with just the fonts in our fonts dir to make sure we only test those
-        let fonts_path = PathBuf::from(&repo_dir).join("fonts");
-        let mut font_db = Database::new();
-        font_db.load_fonts_dir(fonts_path);
-        let mut font_system = FontSystem::new_with_locale_and_db("En-US".into(), font_db);
+        let mut font_system = test_font_system();
         let mut swash_cache = SwashCache::new();
         let metrics = Metrics::new(self.font_size, self.line_height);
         let mut buffer = Buffer::new(&mut font_system, metrics);
