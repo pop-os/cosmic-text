@@ -639,6 +639,18 @@ fn override_fake_italic(
     }
 }
 
+/// Whether `cluster` starts in a Private Use Area, which is where icon fonts such as
+/// Nerd Fonts keep their glyphs. Those are drawn to fill the cell, so scaling them to a
+/// proportional fallback's em makes them smaller than a terminal would render them.
+fn is_symbol_glyph(cluster: &str) -> bool {
+    cluster.chars().next().is_some_and(|c| {
+        matches!(
+            c as u32,
+            0xE000..=0xF8FF | 0xF_0000..=0xF_FFFD | 0x10_0000..=0x10_FFFD
+        )
+    })
+}
+
 fn terminal_cluster_width(cluster: &str) -> usize {
     let mut chars = cluster.chars();
     if let (Some(base), Some('\u{FE0F}'), None) = (chars.next(), chars.next(), chars.next()) {
@@ -2943,12 +2955,17 @@ impl ShapeLine {
 
                             let match_mono_em_width = match_mono_width.map(|w| w / font_size);
 
+                            // Kept at full size below; the advance is still snapped
+                            let is_symbol = line_text
+                                .get(glyph.start..glyph.end)
+                                .is_some_and(is_symbol_glyph);
+
                             let glyph_font_size = match (
                                 match_mono_em_width,
                                 glyph.font_monospace_em_width,
                             ) {
                                 (Some(match_em_width), Some(glyph_em_width))
-                                    if glyph_em_width != match_em_width =>
+                                    if glyph_em_width != match_em_width && !is_symbol =>
                                 {
                                     let glyph_to_match_factor = glyph_em_width / match_em_width;
                                     let glyph_font_size = math::roundf(glyph_to_match_factor)
