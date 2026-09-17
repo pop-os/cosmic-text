@@ -379,6 +379,7 @@ impl<'a> FontFallbackIter<'a> {
                 Vec::new()
             };
 
+            let forbidden_families = fallbacks.forbidden_fallback();
             for m_key in font_match_keys_iter(is_mono) {
                 if Some(m_key.id) != default_font_match_key.as_ref().map(|m_key| m_key.id) {
                     let is_mono_id = if mono_ids_for_scripts.is_empty() {
@@ -387,7 +388,14 @@ impl<'a> FontFallbackIter<'a> {
                         mono_ids_for_scripts.binary_search(&m_key.id).is_ok()
                     };
 
-                    if is_mono_id {
+                    // Unifont covers nearly all of Unicode with placeholder glyphs,
+                    // so it wins the ranking outright wherever it is installed. Checked
+                    // after `is_mono_id`, which narrows thousands of faces to a handful.
+                    if is_mono_id
+                        && !forbidden_families
+                            .iter()
+                            .any(|family_name| self.face_contains_family(m_key.id, family_name))
+                    {
                         let supported_cp_count_opt =
                             self.font_system.get_font_supported_codepoints_in_word(
                                 m_key.id,
