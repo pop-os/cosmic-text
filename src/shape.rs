@@ -10,6 +10,7 @@ use crate::{
 };
 #[cfg(not(feature = "std"))]
 use alloc::{format, vec, vec::Vec};
+use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 
 use alloc::collections::VecDeque;
 use core::cmp::{max, min};
@@ -635,6 +636,15 @@ fn override_fake_italic(
         cache_key_flags | CacheKeyFlags::FAKE_ITALIC
     } else {
         cache_key_flags
+    }
+}
+
+fn terminal_cluster_width(cluster: &str) -> usize {
+    let mut chars = cluster.chars();
+    if let (Some(base), Some('\u{FE0F}'), None) = (chars.next(), chars.next(), chars.next()) {
+        base.width().unwrap_or(0)
+    } else {
+        UnicodeWidthStr::width(cluster)
     }
 }
 
@@ -1616,6 +1626,7 @@ impl ShapeLine {
             &mut lines,
             match_mono_width,
             hinting,
+            "",
         );
         lines
     }
@@ -2340,6 +2351,7 @@ impl ShapeLine {
         layout_lines: &mut Vec<LayoutLine>,
         match_mono_width: Option<f32>,
         hinting: Hinting,
+        line_text: &str,
     ) {
         // For each visual line a list of  (span index,  and range of words in that span)
         // Note that a BiDi visual line could have multiple spans or parts of them
@@ -2837,6 +2849,7 @@ impl ShapeLine {
             let mut y = 0.;
             let mut max_ascent: f32 = 0.;
             let mut max_descent: f32 = 0.;
+            let mut last_mono_cluster: Option<(usize, usize)> = None;
             let alignment_correction = match (align, self.rtl) {
                 (Align::Left, true) => (line_width - visual_line.w).max(0.),
                 (Align::Left, false) => 0.,
@@ -2856,6 +2869,7 @@ impl ShapeLine {
             if hinting == Hinting::Enabled {
                 x = x.round();
             }
+            let content_start_x = x;
 
             // TODO: Only certain `is_whitespace` chars are typically expanded but this is what is
             // currently used to compute `visual_line.spaces`.
@@ -2890,13 +2904,13 @@ impl ShapeLine {
 
             let mut decorations: Vec<DecorationSpan> = Vec::new();
 
-            let process_range = |range: Range<usize>,
-                                 x: &mut f32,
-                                 y: &mut f32,
-                                 glyphs: &mut Vec<LayoutGlyph>,
-                                 decorations: &mut Vec<DecorationSpan>,
-                                 max_ascent: &mut f32,
-                                 max_descent: &mut f32| {
+            let mut process_range = |range: Range<usize>,
+                                     x: &mut f32,
+                                     y: &mut f32,
+                                     glyphs: &mut Vec<LayoutGlyph>,
+                                     decorations: &mut Vec<DecorationSpan>,
+                                     max_ascent: &mut f32,
+                                     max_descent: &mut f32| {
                 for r in visual_line.ranges[range.clone()].iter() {
                     let is_ellipsis = r.span == ELLIPSIS_SPAN;
                     let span_words = self.get_span_words(r.span);
@@ -2955,9 +2969,20 @@ impl ShapeLine {
                                 } else {
                                     0.0
                                 };
-                            if let Some(match_em_width) = match_mono_em_width {
-                                // Round to nearest monospace width
-                                x_advance = ((x_advance / match_em_width).round()) * match_em_width;
+                            if let Some(mono_width) = match_mono_width {
+                                let cluster = (glyph.start, glyph.end);
+                                let cells = if !is_ellipsis && last_mono_cluster == Some(cluster) {
+                                    0.0
+                                } else if !is_ellipsis {
+                                    last_mono_cluster = Some(cluster);
+                                    line_text.get(glyph.start..glyph.end).map_or_else(
+                                        || (x_advance / mono_width).round(),
+                                        |s| terminal_cluster_width(s) as f32,
+                                    )
+                                } else {
+                                    (x_advance / mono_width).round()
+                                };
+                                x_advance = cells * mono_width;
                             }
                             if hinting == Hinting::Enabled {
                                 x_advance = x_advance.round();
@@ -3078,7 +3103,13 @@ impl ShapeLine {
             }
 
             layout_lines.push(LayoutLine {
-                w: if align != Align::Justified {
+                w: if match_mono_width.is_some() {
+                    if self.rtl {
+                        content_start_x - x
+                    } else {
+                        x - content_start_x
+                    }
+                } else if align != Align::Justified {
                     visual_line.w
                 } else if self.rtl {
                     start_x - x

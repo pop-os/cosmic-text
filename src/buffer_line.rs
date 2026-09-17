@@ -286,6 +286,7 @@ impl BufferLine {
                 &mut layout,
                 match_mono_width,
                 hinting,
+                &self.text,
             );
             self.layout_opt.set_used(layout);
         }
