@@ -466,15 +466,9 @@ impl FontSystem {
                 };
 
                 if let Some(id) = self.db.query(&query) {
-                    if let Some(i) = font_match_keys
-                        .iter()
-                        .enumerate()
-                        .find(|(_i, key)| key.id == id)
-                        .map(|(i, _)| i)
-                    {
+                    if let Some(i) = font_match_keys.iter().position(|key| key.id == id) {
                         // if exists move to front
-                        let match_key = font_match_keys.remove(i);
-                        font_match_keys.insert(0, match_key);
+                        font_match_keys[..=i].rotate_right(1);
                     } else if let Some(face) = self.db.face(id) {
                         // else insert in front
                         let match_key = FontMatchKey::new(attrs, face, &self.db);
