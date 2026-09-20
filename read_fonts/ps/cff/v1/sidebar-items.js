@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["CustomCharset","FdSelect"],"struct":["Cff","CffHeader","CharsetFormat0","CharsetFormat1","CharsetFormat2","CharsetRange1","CharsetRange2","EncodingRange1","EncodingSupplement","FdSelectFormat0","FdSelectFormat3","FdSelectFormat4","FdSelectRange3","FdSelectRange4","Index"]};

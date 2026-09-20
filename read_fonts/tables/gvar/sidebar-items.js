@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["GlyphDelta","GlyphVariationDataHeader","Gvar","GvarFlags","SharedTuples","U16Or32"],"type":["GlyphVariationData"]};
