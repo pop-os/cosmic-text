@@ -42,7 +42,11 @@ const fn common_fallback() -> &'static [&'static str] {
         /* Symbols fallbacks */
         "Noto Sans Symbols",
         "Noto Sans Symbols2",
-        /* Emoji fallbacks*/
+        /* Emoji fallbacks.
+         * Emoji presentation clusters are upgraded to a color font during
+         * shaping (see `emoji_upgrade_clusters` in `shape.rs`), so the exact
+         * position here only matters for codepoints the color font lacks.
+         * See <https://github.com/pop-os/cosmic-text/issues/327>. */
         "Noto Color Emoji",
         //TODO: Add CJK script here for doublewides?
     ]
