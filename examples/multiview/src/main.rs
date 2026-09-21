@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use cosmic_text::{
-    Action, Attrs, Buffer, Edit, Family, FontSystem, Metrics, Scroll, Shaping, SwashCache,
-};
+use cosmic_text::{Attrs, Buffer, Family, FontSystem, Metrics, Scroll, Shaping, SwashCache};
 use std::{collections::HashMap, env, fs, num::NonZeroU32, rc::Rc, slice};
 use tiny_skia::{Color, Paint, PixmapMut, Rect, Transform};
 use winit::{
@@ -41,7 +39,7 @@ fn main() {
 
     struct Window {
         window: Rc<WinitWindow>,
-        context: softbuffer::Context<Rc<WinitWindow>>,
+        _context: softbuffer::Context<Rc<WinitWindow>>,
         surface: softbuffer::Surface<Rc<WinitWindow>, Rc<WinitWindow>>,
         scroll: Scroll,
     }
@@ -54,7 +52,7 @@ fn main() {
             window.id(),
             Window {
                 window,
-                context,
+                _context: context,
                 surface,
                 scroll: Scroll::default(),
             },
@@ -109,8 +107,10 @@ fn main() {
                         // Update scroll after buffer clamps it
                         *scroll = buffer.scroll();
 
-                        let mut paint = Paint::default();
-                        paint.anti_alias = false;
+                        let mut paint = Paint {
+                            anti_alias: false,
+                            ..Default::default()
+                        };
                         let transform = Transform::identity();
                         buffer.draw(
                             &mut swash_cache,

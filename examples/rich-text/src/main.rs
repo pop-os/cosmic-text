@@ -309,11 +309,9 @@ fn main() {
                                     }
                                 }
                             }
-                            Key::Character(text) => {
-                                if !ctrl_pressed {
-                                    for c in text.chars() {
-                                        editor.action(Action::Insert(c));
-                                    }
+                            Key::Character(text) if !ctrl_pressed => {
+                                for c in text.chars() {
+                                    editor.action(Action::Insert(c));
                                 }
                             }
                             _ => {}
