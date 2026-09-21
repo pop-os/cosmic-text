@@ -847,11 +847,16 @@ impl ShapeWord {
 
         if is_simple_ascii && !word.is_empty() && {
             let attrs_start = attrs_list.get_span(word_range.start);
+            // The fast path shapes the whole word with `attrs_start`. Besides
+            // the explicit spans, an uncovered gap falls back to the defaults,
+            // so reject the fast path when those differ (e.g. a styled prefix
+            // with a default tail, otherwise shaped with the prefix's font).
             attrs_list.spans_iter().all(|(other_range, other_attrs)| {
                 word_range.end <= other_range.start
                     || other_range.end <= word_range.start
                     || attrs_start.compatible(&other_attrs.as_attrs())
-            })
+            }) && (attrs_list.spans.gaps(&word_range).next().is_none()
+                || attrs_start.compatible(&attrs_list.defaults()))
         } {
             shaping.run(
                 &mut glyphs,
