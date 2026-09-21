@@ -126,7 +126,7 @@ impl From<CacheMetrics> for Metrics {
     }
 }
 /// A 4-byte `OpenType` feature tag identifier
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct FeatureTag([u8; 4]);
 
 impl FeatureTag {
@@ -166,7 +166,7 @@ pub struct Feature {
 
 #[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct FontFeatures {
-    pub features: Vec<Feature>,
+    features: Vec<Feature>,
 }
 
 impl FontFeatures {
@@ -176,8 +176,21 @@ impl FontFeatures {
         }
     }
 
+    pub fn iter(&self) -> impl Iterator<Item = &Feature> {
+        self.features.iter()
+    }
+
+    /// Set a feature value by [`FeatureTag`].
+    ///
+    /// This ensures that the features are sorted by [`FeatureTag`] without duplicate tags.
     pub fn set(&mut self, tag: FeatureTag, value: u32) -> &mut Self {
-        self.features.push(Feature { tag, value });
+        match self
+            .features
+            .binary_search_by_key(&tag, |feature| feature.tag)
+        {
+            Ok(index) => self.features[index].value = value,
+            Err(index) => self.features.insert(index, Feature { tag, value }),
+        }
         self
     }
 
@@ -415,6 +428,7 @@ impl<'a> Attrs<'a> {
             && self.stretch == other.stretch
             && self.style == other.style
             && self.weight == other.weight
+            && self.font_features == other.font_features
     }
 }
 
