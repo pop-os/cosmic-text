@@ -5,8 +5,8 @@
 use crate::fallback::FontFallbackIter;
 use crate::{
     math, Align, Attrs, AttrsList, CacheKeyFlags, Color, DecorationMetrics, DecorationSpan,
-    Ellipsize, EllipsizeHeightLimit, Family, Font, FontSystem, GlyphDecorationData, Hinting,
-    LayoutGlyph, LayoutLine, Metrics, Wrap,
+    Ellipsize, EllipsizeHeightLimit, Family, Font, FontSystem, GlyphDecorationData, HashSet,
+    Hinting, LayoutGlyph, LayoutLine, Metrics, Wrap,
 };
 #[cfg(not(feature = "std"))]
 use alloc::{format, vec, vec::Vec};
@@ -149,7 +149,7 @@ fn shape_fallback(
     start_run: usize,
     end_run: usize,
     span_rtl: bool,
-) -> Vec<usize> {
+) -> HashSet<usize> {
     let run = &line[start_run..end_run];
 
     let font_scale = font.metrics().units_per_em as f32;
@@ -226,14 +226,14 @@ fn shape_fallback(
     let glyph_infos = glyph_buffer.glyph_infos();
     let glyph_positions = glyph_buffer.glyph_positions();
 
-    let mut missing = Vec::new();
+    let mut missing = HashSet::default();
     glyphs.reserve(glyph_infos.len());
     let glyph_start = glyphs.len();
     for (info, pos) in glyph_infos.iter().zip(glyph_positions.iter()) {
         let start_glyph = start_run + info.cluster as usize;
 
         if info.glyph_id == 0 {
-            missing.push(start_glyph);
+            missing.insert(start_glyph);
         }
 
         let attrs = attrs_list.get_span(start_glyph);
@@ -370,57 +370,35 @@ fn shape_run(
             span_rtl,
         );
 
-        // Insert all matching glyphs
-        let mut fb_i = 0;
-        while fb_i < fb_glyphs.len() {
-            let start = fb_glyphs[fb_i].start;
-            let end = fb_glyphs[fb_i].end;
+        // Keep clusters that were missing, and not missing in the fallback font
+        fb_glyphs
+            .retain(|glyph| missing.contains(&glyph.start) && !fb_missing.contains(&glyph.start));
 
-            // Skip clusters that are not missing, or where the fallback font is missing
-            if !missing.contains(&start) || fb_missing.contains(&start) {
-                fb_i += 1;
-                continue;
-            }
+        // Update missing
+        let mut added = HashSet::default();
+        for fb_glyph in &fb_glyphs {
+            let start = fb_glyph.start;
+            let end = fb_glyph.end;
 
-            let mut missing_i = 0;
-            while missing_i < missing.len() {
-                if missing[missing_i] >= start && missing[missing_i] < end {
-                    // println!("No longer missing {}", missing[missing_i]);
-                    missing.remove(missing_i);
-                } else {
-                    missing_i += 1;
-                }
+            for i in start..end {
+                missing.remove(&i);
+                added.insert(i);
             }
+        }
 
-            // Find prior glyphs
-            let mut i = glyph_start;
-            while i < glyphs.len() {
-                if glyphs[i].start >= start && glyphs[i].end <= end {
-                    break;
-                }
-                i += 1;
-            }
+        if added.is_empty() {
+            continue;
+        }
 
-            // Remove prior glyphs
-            while i < glyphs.len() {
-                if glyphs[i].start >= start && glyphs[i].end <= end {
-                    let _glyph = glyphs.remove(i);
-                    // log::trace!("Removed {},{} from {}", _glyph.start, _glyph.end, i);
-                } else {
-                    break;
-                }
-            }
+        // Remove prior glyphs
+        glyphs.retain(|glyph| !added.contains(&glyph.start));
 
-            while fb_i < fb_glyphs.len() {
-                if fb_glyphs[fb_i].start >= start && fb_glyphs[fb_i].end <= end {
-                    let fb_glyph = fb_glyphs.remove(fb_i);
-                    // log::trace!("Insert {},{} from font {} at {}", fb_glyph.start, fb_glyph.end, font_i, i);
-                    glyphs.insert(i, fb_glyph);
-                    i += 1;
-                } else {
-                    break;
-                }
-            }
+        // Sort the new glyphs in to maintain monotonicity.
+        glyphs.extend(fb_glyphs);
+        if span_rtl {
+            (&mut glyphs[glyph_start..]).sort_by(|a, b| b.start.cmp(&a.start));
+        } else {
+            (&mut glyphs[glyph_start..]).sort_by(|a, b| a.start.cmp(&b.start));
         }
     }
 
