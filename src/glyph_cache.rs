@@ -11,6 +11,14 @@ bitflags::bitflags! {
         const DISABLE_HINTING = 2;
         /// Render as a pixel font
         const PIXEL_FONT = 4;
+        /// Render an LCD subpixel coverage mask, physical RGB stripe order.
+        /// Outlines only: color glyphs still render as `SwashContent::Color`.
+        /// Alpha is the rounded mean of the three stripes.
+        const SUBPIXEL_RGB = 8;
+        /// Render an LCD subpixel coverage mask, physical BGR stripe order.
+        /// Outlines only: color glyphs still render as `SwashContent::Color`.
+        /// Alpha is the rounded mean of the three stripes.
+        const SUBPIXEL_BGR = 16;
     }
 }
 

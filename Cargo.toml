@@ -71,6 +71,10 @@ harness = false
 name = "text_shaping_benchmarks"
 harness = false
 
+[[bench]]
+name = "glyph_rasterization"
+harness = false
+
 [workspace]
 members = ["examples/*"]
 
