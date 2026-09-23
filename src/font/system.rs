@@ -1,4 +1,4 @@
-use crate::{Attrs, Font, FontMatchAttrs, HashMap, ShapeBuffer};
+use crate::{Attrs, Font, FontMatchAttrs, HashMap, HashSet, ShapeBuffer};
 use alloc::boxed::Box;
 use alloc::collections::BTreeSet;
 use alloc::string::String;
@@ -140,7 +140,7 @@ pub struct FontSystem {
     font_cache: HashMap<(fontdb::ID, fontdb::Weight), Option<Arc<Font>>>,
 
     /// Sorted unique ID's of all Monospace fonts in DB
-    monospace_font_ids: Vec<fontdb::ID>,
+    monospace_font_ids: HashSet<fontdb::ID>,
 
     /// Sorted unique ID's of all Monospace fonts in DB per script.
     /// A font may support multiple scripts of course, so the same ID
@@ -293,14 +293,13 @@ impl FontSystem {
         db: fontdb::Database,
         impl_fallback: impl Fallback + 'static,
     ) -> Self {
-        let mut monospace_font_ids = db
+        let monospace_font_ids = db
             .faces()
             .filter(|face_info| {
                 face_info.monospaced && !face_info.post_script_name.contains("Emoji")
             })
             .map(|face_info| face_info.id)
-            .collect::<Vec<_>>();
-        monospace_font_ids.sort();
+            .collect::<HashSet<_>>();
 
         let mut per_script_monospace_font_ids: HashMap<[u8; 4], BTreeSet<fontdb::ID>> =
             HashMap::default();
@@ -399,7 +398,7 @@ impl FontSystem {
     }
 
     pub fn is_monospace(&self, id: fontdb::ID) -> bool {
-        self.monospace_font_ids.binary_search(&id).is_ok()
+        self.monospace_font_ids.contains(&id)
     }
 
     pub fn get_monospace_ids_for_scripts(
