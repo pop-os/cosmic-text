@@ -2920,14 +2920,12 @@ impl ShapeLine {
                                 _ => font_size,
                             };
 
-                            let mut x_advance = glyph_font_size.mul_add(
-                                glyph.x_advance,
-                                if word.blank {
+                            let mut x_advance = glyph_font_size * glyph.x_advance
+                                + if word.blank {
                                     justification_expansion
                                 } else {
                                     0.0
-                                },
-                            );
+                                };
                             if let Some(match_em_width) = match_mono_em_width {
                                 // Round to nearest monospace width
                                 x_advance = ((x_advance / match_em_width).round()) * match_em_width;
