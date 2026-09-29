@@ -381,7 +381,7 @@ impl FontSystem {
         self.font_cache
             .entry((id, weight))
             .or_insert_with(|| {
-                #[cfg(feature = "std")]
+                #[cfg(feature = "fontdb-memmap")]
                 unsafe {
                     self.db.make_shared_face_data(id);
                 }

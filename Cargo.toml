@@ -43,14 +43,15 @@ default-features = false
 features = ["hardcoded-data"]
 
 [features]
-default = ["std", "swash", "fontconfig"]
+default = ["std", "swash", "fontconfig", "fontdb-memmap"]
 fontconfig = ["fontdb/fontconfig", "std"]
+fontdb-memmap = ["fontdb/memmap"]
 monospace_fallback = []
 no_std = ["hashbrown", "dep:libm", "skrifa/libm", "core_maths", "swash?/libm"]
 peniko = []
 shape-run-cache = []
 std = [
-    "fontdb/memmap",
+    "fontdb/fs",
     "fontdb/std",
     "harfrust/std",
     "linebender_resource_handle/std",

@@ -132,7 +132,7 @@ impl Font {
                 log::warn!("Unsupported fontdb Source::File('{}')", path.display());
                 return None;
             }
-            #[cfg(feature = "std")]
+            #[cfg(feature = "fontdb-memmap")]
             fontdb::Source::SharedFile(_path, data) => Arc::clone(data),
         };
 

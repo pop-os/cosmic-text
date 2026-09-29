@@ -185,9 +185,9 @@ fn write(db: &Database, cache_path: &Path) -> std::io::Result<()> {
     let mut faces: Vec<(u32, &FaceInfo)> = Vec::new();
 
     for face in db.faces() {
-        // cosmic-text's `std` feature always enables `fontdb/memmap`
         let path = match &face.source {
             Source::File(path) => path,
+            #[cfg(feature = "fontdb-memmap")]
             Source::SharedFile(path, _) => path,
             // Binary sources (e.g. user-provided fonts) are not persistable.
             Source::Binary(_) => continue,
