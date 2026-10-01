@@ -2985,7 +2985,7 @@ impl ShapeLine {
                             let glyph_idx = glyphs.len() - 1;
                             let extends = matches!(
                                 (decorations.last(), &glyph_deco),
-                                (Some(span), Some((_, d))) if span.data == *d
+                                (Some(span), Some((_, d))) if span.data == *d && span.glyph_range.end == glyph_idx
                             );
                             if extends {
                                 if let Some(last) = decorations.last_mut() {
