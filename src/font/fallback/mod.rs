@@ -404,6 +404,33 @@ impl<'a> FontFallbackIter<'a> {
             };
 
             let forbidden_families = fallbacks.forbidden_fallback();
+
+            // Only the codepoints the default font lacks need a fallback, so rank the
+            // candidates by how many of those they cover and skip faces covering none;
+            // every queued face costs a shaping attempt before the script fallbacks run.
+            let word = self.word;
+            let mut missing = String::new();
+            for ch in word.chars() {
+                let covered = match default_font_match_key.as_ref() {
+                    Some(m_key) => {
+                        self.font_system.get_font_supported_codepoints_in_word(
+                            m_key.id,
+                            self.ideal_weight,
+                            ch.encode_utf8(&mut [0; 4]),
+                        ) == Some(1)
+                    }
+                    None => false,
+                };
+                if !covered {
+                    missing.push(ch);
+                }
+            }
+            if missing.is_empty() {
+                // The default covers the word but could not be loaded above
+                missing = word.to_owned();
+            }
+            let missing_count = missing.chars().count();
+
             for m_key in font_match_keys_iter(is_mono) {
                 if Some(m_key.id) != default_font_match_key.as_ref().map(|m_key| m_key.id) {
                     let is_mono_id = if mono_ids_for_scripts.is_empty() {
@@ -425,11 +452,13 @@ impl<'a> FontFallbackIter<'a> {
                             self.font_system.get_font_supported_codepoints_in_word(
                                 m_key.id,
                                 self.ideal_weight,
-                                self.word,
+                                &missing,
                             );
                         if let Some(supported_cp_count) = supported_cp_count_opt {
-                            let codepoint_non_matches =
-                                self.word.chars().count() - supported_cp_count;
+                            if supported_cp_count == 0 {
+                                continue;
+                            }
+                            let codepoint_non_matches = missing_count - supported_cp_count;
 
                             let fallback_info = MonospaceFallbackInfo {
                                 font_weight_diff: Some(m_key.font_weight_diff),
