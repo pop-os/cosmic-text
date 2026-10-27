@@ -680,6 +680,8 @@ impl ShapeGlyph {
             x,
             y,
             w,
+            ascender: font_size * self.ascent,
+            descender: font_size * self.descent,
             level,
             x_offset: self.x_offset,
             y_offset: self.y_offset,

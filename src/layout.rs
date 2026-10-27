@@ -34,6 +34,14 @@ pub struct LayoutGlyph {
     pub y: f32,
     /// Width of hitbox
     pub w: f32,
+    /// Ascender of the glyph in pixels
+    ///
+    /// This is the distance from the baseline to the top of the glyph
+    pub ascender: f32,
+    /// Descender of the glyph in pixels
+    ///
+    /// This is the distance from the baseline to the bottom of the glyph
+    pub descender: f32,
     /// Unicode `BiDi` embedding level, character is left-to-right if `level` is divisible by 2
     pub level: unicode_bidi::Level,
     /// X offset in line
