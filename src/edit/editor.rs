@@ -150,7 +150,7 @@ impl<'buffer> Editor<'buffer> {
                 for glyph in run.glyphs {
                     let physical_glyph = glyph.physical((0., line_y), 1.0);
 
-                    let mut glyph_color = glyph.color_opt.map_or(text_color, |some| some);
+                    let mut glyph_color = glyph.color_opt.unwrap_or(text_color);
                     if text_color != selected_text_color {
                         if let Some((start, end)) = selection_bounds {
                             if line_i >= start.line

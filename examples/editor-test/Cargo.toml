@@ -6,6 +6,9 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 publish = false
 
+[features]
+mono = []
+
 [dependencies]
 cosmic-text = { path = "../../" }
 env_logger = "0.11"

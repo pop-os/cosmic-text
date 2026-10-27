@@ -56,6 +56,7 @@ impl Default for DrawTestCfg {
     }
 }
 
+#[allow(dead_code)]
 impl DrawTestCfg {
     pub fn new(name: impl Into<String>) -> Self {
         Self {

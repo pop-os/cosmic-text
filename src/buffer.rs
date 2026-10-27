@@ -60,7 +60,7 @@ impl LayoutRun<'_> {
     /// Return an iterator of `(x_left, x_width)` pixel spans for the highlighted areas
     /// between `cursor_start` and `cursor_end` within this run.
     ///
-    /// For pure LTR or pure RTL runs this yields at most one span. For mixed BiDi runs
+    /// For pure LTR or pure RTL runs this yields at most one span. For mixed `BiDi` runs
     /// (where selected and unselected glyphs interleave visually) it yields multiple
     /// disjoint spans.
     ///
@@ -1651,7 +1651,7 @@ impl Buffer {
         for run in self.layout_runs() {
             for glyph in run.glyphs {
                 let physical_glyph = glyph.physical((0., run.line_y), 1.0);
-                let glyph_color = glyph.color_opt.map_or(color, |some| some);
+                let glyph_color = glyph.color_opt.unwrap_or(color);
                 renderer.glyph(physical_glyph, glyph_color);
             }
             render_decoration(&mut renderer, &run, color);
@@ -1671,7 +1671,7 @@ impl Buffer {
         for run in self.layout_runs() {
             for glyph in run.glyphs {
                 let physical_glyph = glyph.physical((0., run.line_y), 1.0);
-                let glyph_color = glyph.color_opt.map_or(color, |some| some);
+                let glyph_color = glyph.color_opt.unwrap_or(color);
                 renderer.glyph(physical_glyph, glyph_color);
             }
             // draw decorations after glyphs so strikethrough is over the glyphs

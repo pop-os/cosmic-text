@@ -1,6 +1,7 @@
 use cosmic_text as ct;
 use cosmic_text::BidiParagraphs;
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{criterion_group, criterion_main, Criterion};
+use std::hint::black_box;
 
 fn bench_ascii_fast_path(c: &mut Criterion) {
     let mut fs = ct::FontSystem::new();
@@ -54,7 +55,7 @@ fn bench_lang_mixed(c: &mut Criterion) {
         .bench_function("ShapeLine/Mixed-Language Text", |b| {
             b.iter(|| {
                 buffer.set_text(
-                    black_box(&bidi_text),
+                    black_box(bidi_text),
                     &ct::Attrs::new(),
                     ct::Shaping::Advanced,
                     None,

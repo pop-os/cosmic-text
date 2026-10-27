@@ -262,8 +262,12 @@ mod test {
         .map(std::fs::read) else {
             return;
         };
-        let regular = FontRef::from_index(&sfns, 0).unwrap();
-        let italic = FontRef::from_index(&sfns_italic, 0).unwrap();
+        let (Some(regular), Some(italic)) = (
+            FontRef::from_index(&sfns, 0),
+            FontRef::from_index(&sfns_italic, 0),
+        ) else {
+            return;
+        };
         let wght = Tag::from_be_bytes(*b"wght");
 
         let render = |ctx: &mut ScaleContext, font: FontRef, weight: f32, use_normalized| {
