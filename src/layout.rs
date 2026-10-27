@@ -4,7 +4,7 @@ use core::fmt::Display;
 
 use core::ops::Range;
 
-use crate::{math, CacheKey, CacheKeyFlags, Color, GlyphDecorationData};
+use crate::{math, CacheKey, CacheKeyFlags, Color, GlyphDecorationData, LayoutRun};
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 
@@ -73,6 +73,28 @@ pub struct DecorationSpan {
     pub color_opt: Option<Color>,
     /// Font size from the first glyph (used to scale EM-unit metrics)
     pub font_size: f32,
+}
+
+impl DecorationSpan {
+    /// The horizontal extent of this span's glyphs within `run`, which must
+    /// be the layout run containing the span. Empty if the span covers no
+    /// glyphs.
+    pub fn x_range(&self, run: &LayoutRun) -> Range<f32> {
+        // Compute the extent as min/max over all glyphs, not first/last,
+        // because RTL paragraphs store glyphs in right-to-left order.
+        let mut x_min = f32::INFINITY;
+        let mut x_max = f32::NEG_INFINITY;
+        for glyph in &run.glyphs[self.glyph_range.clone()] {
+            x_min = x_min.min(glyph.x);
+            x_max = x_max.max(glyph.x + glyph.w);
+        }
+
+        if x_max > x_min {
+            x_min..x_max
+        } else {
+            0.0..0.0
+        }
+    }
 }
 
 #[derive(Clone, Debug)]

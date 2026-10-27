@@ -71,6 +71,10 @@ harness = false
 name = "text_shaping_benchmarks"
 harness = false
 
+[[bench]]
+name = "decoration_toggle"
+harness = false
+
 [workspace]
 members = ["examples/*"]
 
