@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["AdvanceWidthBatch","BuiltinFontFuncs","RawAdvanceWidthBatch"],"trait":["FontFuncs"]};

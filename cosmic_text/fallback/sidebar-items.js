@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["Fallbacks","FontFallbackIter","MonospaceFallbackInfo","PlatformFallback"],"trait":["Fallback"]};

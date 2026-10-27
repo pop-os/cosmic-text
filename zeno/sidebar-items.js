@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["ArcSize","ArcSweep","Cap","Command","Fill","Format","Join","Origin","Style","Verb","Vertex"],"fn":["apply","bounds","length","validate_svg"],"struct":["Angle","Bounds","HitTest","Mask","Placement","Scratch","Stroke","Transform","Vector","Vertices","Walk"],"trait":["PathBuilder","PathData"],"type":["Point"]};

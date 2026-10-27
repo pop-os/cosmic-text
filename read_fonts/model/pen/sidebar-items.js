@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["PathElement"],"struct":["ControlBoundsPen","NullPen","SvgPen"],"trait":["OutlinePen"]};

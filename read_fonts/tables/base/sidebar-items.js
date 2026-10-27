@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["BaseCoord"],"struct":["Axis","Base","BaseCoordFormat1","BaseCoordFormat2","BaseCoordFormat3","BaseLangSysRecord","BaseScript","BaseScriptList","BaseScriptRecord","BaseTagList","BaseValues","FeatMinMaxRecord","MinMax"]};

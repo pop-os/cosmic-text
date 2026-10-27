@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["combine_scaled"],"struct":["ScaledFontMatrix","Transform"],"type":["FontMatrix"]};

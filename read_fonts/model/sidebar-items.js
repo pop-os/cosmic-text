@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["FontBlob","FontFormat","FontKind","FontSource"],"mod":["pen"],"struct":["Font","FontFeatureVariations","FontInstance","FontInstanceBuilder","FontTableFunction","FontTables","FontVariation"],"type":["NormalizedCoord"]};

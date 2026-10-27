@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["MAX_BLUE_VALUES","MAX_STEM_SNAPS"],"struct":["Blues","HintingParams","StemSnaps"]};

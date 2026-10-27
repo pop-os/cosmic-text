@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["ConditionList","DecomposedTransform","MultiItemVariationData","MultiItemVariationStore","SparseRegionAxisCoordinates","SparseVariationRegion","SparseVariationRegionList","Varc","VarcComponent","VarcFlags","VarcGlyph"]};

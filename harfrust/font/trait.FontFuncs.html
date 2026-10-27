@@ -1,0 +1,95 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Customizable font callback surface."><title>FontFuncs in harfrust::font - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-0c87338a.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="harfrust" data-themes="" data-resource-suffix="" data-rustdoc-version="1.99.1 (58cf8f9c3 2026-10-13)" data-channel="1.99.1" data-search-js="search-cf4fc35e.js" data-stringdex-js="stringdex-b5109af9.js" data-settings-js="settings-170eb4bf.js" ><script src="../../static.files/storage-41dd4d93.js"></script><script defer src="sidebar-items.js"></script><script defer src="../../static.files/main-417ebf0a.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-9f56287d.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc trait"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">FontFuncs</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../../harfrust/index.html">harfrust</a><span class="version">0.12.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Font<wbr>Funcs</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#metrics-scaling" title="Metrics scaling">Metrics scaling</a></li></ul><h3><a href="#provided-methods">Provided Methods</a></h3><ul class="block"><li><a href="#method.advance_height" title="advance_height">advance_height</a></li><li><a href="#method.advance_width" title="advance_width">advance_width</a></li><li><a href="#method.extents" title="extents">extents</a></li><li><a href="#method.nominal_glyph" title="nominal_glyph">nominal_glyph</a></li><li><a href="#method.populate_advance_widths" title="populate_advance_widths">populate_advance_widths</a></li><li><a href="#method.variant_glyph" title="variant_glyph">variant_glyph</a></li><li><a href="#method.vertical_origin" title="vertical_origin">vertical_origin</a></li></ul><h3><a href="#implementors">Implementors</a></h3></section><div id="rustdoc-modnav"><h2><a href="index.html">In harfrust::<wbr>font</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">harfrust</a>::<wbr><a href="index.html">font</a></div><h1>Trait <span class="trait">Font<wbr>Funcs</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/harfrust/hb/font_funcs.rs.html#204-262">Source</a> </span></div><pre class="rust item-decl"><code>pub trait FontFuncs {
+    // Provided methods
+    fn <a href="#method.nominal_glyph" class="fn">nominal_glyph</a>(
+        &amp;mut self,
+        builtin: &amp;<a class="struct" href="struct.BuiltinFontFuncs.html" title="struct harfrust::font::BuiltinFontFuncs">BuiltinFontFuncs</a>&lt;'_&gt;,
+        c: <a class="primitive" href="https://doc.rust-lang.org/1.99.1/std/primitive.u32.html">u32</a>,
+    ) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.99.1/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="../struct.GlyphId.html" title="struct harfrust::GlyphId">GlyphId</a>&gt; { ... }
+<span class="item-spacer"></span>    fn <a href="#method.variant_glyph" class="fn">variant_glyph</a>(
+        &amp;mut self,
+        builtin: &amp;<a class="struct" href="struct.BuiltinFontFuncs.html" title="struct harfrust::font::BuiltinFontFuncs">BuiltinFontFuncs</a>&lt;'_&gt;,
+        c: <a class="primitive" href="https://doc.rust-lang.org/1.99.1/std/primitive.u32.html">u32</a>,
+        vs: <a class="primitive" href="https://doc.rust-lang.org/1.99.1/std/primitive.u32.html">u32</a>,
+    ) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.99.1/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="../struct.GlyphId.html" title="struct harfrust::GlyphId">GlyphId</a>&gt; { ... }
+<span class="item-spacer"></span>    fn <a href="#method.advance_width" class="fn">advance_width</a>(
+        &amp;mut self,
+        builtin: &amp;<a class="struct" href="struct.BuiltinFontFuncs.html" title="struct harfrust::font::BuiltinFontFuncs">BuiltinFontFuncs</a>&lt;'_&gt;,
+        glyph: <a class="struct" href="../struct.GlyphId.html" title="struct harfrust::GlyphId">GlyphId</a>,
+    ) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.99.1/std/primitive.i32.html">i32</a> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.populate_advance_widths" class="fn">populate_advance_widths</a>(
+        &amp;mut self,
+        builtin: &amp;<a class="struct" href="struct.BuiltinFontFuncs.html" title="struct harfrust::font::BuiltinFontFuncs">BuiltinFontFuncs</a>&lt;'_&gt;,
+        batch: <a class="struct" href="struct.AdvanceWidthBatch.html" title="struct harfrust::font::AdvanceWidthBatch">AdvanceWidthBatch</a>&lt;'_&gt;,
+    ) { ... }
+<span class="item-spacer"></span>    fn <a href="#method.advance_height" class="fn">advance_height</a>(
+        &amp;mut self,
+        builtin: &amp;<a class="struct" href="struct.BuiltinFontFuncs.html" title="struct harfrust::font::BuiltinFontFuncs">BuiltinFontFuncs</a>&lt;'_&gt;,
+        glyph: <a class="struct" href="../struct.GlyphId.html" title="struct harfrust::GlyphId">GlyphId</a>,
+    ) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.99.1/std/primitive.i32.html">i32</a> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.vertical_origin" class="fn">vertical_origin</a>(
+        &amp;mut self,
+        builtin: &amp;<a class="struct" href="struct.BuiltinFontFuncs.html" title="struct harfrust::font::BuiltinFontFuncs">BuiltinFontFuncs</a>&lt;'_&gt;,
+        glyph: <a class="struct" href="../struct.GlyphId.html" title="struct harfrust::GlyphId">GlyphId</a>,
+    ) -&gt; (<a class="primitive" href="https://doc.rust-lang.org/1.99.1/std/primitive.i32.html">i32</a>, <a class="primitive" href="https://doc.rust-lang.org/1.99.1/std/primitive.i32.html">i32</a>) { ... }
+<span class="item-spacer"></span>    fn <a href="#method.extents" class="fn">extents</a>(
+        &amp;mut self,
+        builtin: &amp;<a class="struct" href="struct.BuiltinFontFuncs.html" title="struct harfrust::font::BuiltinFontFuncs">BuiltinFontFuncs</a>&lt;'_&gt;,
+        glyph: <a class="struct" href="../struct.GlyphId.html" title="struct harfrust::GlyphId">GlyphId</a>,
+    ) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.99.1/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="../struct.GlyphExtents.html" title="struct harfrust::GlyphExtents">GlyphExtents</a>&gt; { ... }
+}</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Customizable font callback surface.</p>
+<h2 id="metrics-scaling"><a class="doc-anchor" href="#metrics-scaling">§</a>Metrics scaling</h2>
+<p>All font metrics returned by these callbacks must be consistent with the
+scale factor configured via
+<a href="../struct.ShapeOptions.html#method.scale" title="method harfrust::ShapeOptions::scale"><code>ShapeOptions::scale</code></a>.</p>
+<p>If no scale is set, values must be in unscaled font units (i.e. the same
+coordinate space as the font’s <code>units_per_em</code>). If a scale is set —
+for example <code>font_size * 64</code> for FreeType-style 26.6 — then all returned
+values must already be in that scaled coordinate space.</p>
+</div></details><h2 id="provided-methods" class="section-header">Provided Methods<a href="#provided-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="method.nominal_glyph" class="method"><a class="src rightside" href="../../src/harfrust/hb/font_funcs.rs.html#206-208">Source</a><h4 class="code-header">fn <a href="#method.nominal_glyph" class="fn">nominal_glyph</a>(
+    &amp;mut self,
+    builtin: &amp;<a class="struct" href="struct.BuiltinFontFuncs.html" title="struct harfrust::font::BuiltinFontFuncs">BuiltinFontFuncs</a>&lt;'_&gt;,
+    c: <a class="primitive" href="https://doc.rust-lang.org/1.99.1/std/primitive.u32.html">u32</a>,
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.99.1/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="../struct.GlyphId.html" title="struct harfrust::GlyphId">GlyphId</a>&gt;</h4></section></summary><div class="docblock"><p>Nominal character-to-glyph mapping callback.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.variant_glyph" class="method"><a class="src rightside" href="../../src/harfrust/hb/font_funcs.rs.html#211-213">Source</a><h4 class="code-header">fn <a href="#method.variant_glyph" class="fn">variant_glyph</a>(
+    &amp;mut self,
+    builtin: &amp;<a class="struct" href="struct.BuiltinFontFuncs.html" title="struct harfrust::font::BuiltinFontFuncs">BuiltinFontFuncs</a>&lt;'_&gt;,
+    c: <a class="primitive" href="https://doc.rust-lang.org/1.99.1/std/primitive.u32.html">u32</a>,
+    vs: <a class="primitive" href="https://doc.rust-lang.org/1.99.1/std/primitive.u32.html">u32</a>,
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.99.1/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="../struct.GlyphId.html" title="struct harfrust::GlyphId">GlyphId</a>&gt;</h4></section></summary><div class="docblock"><p>Variation-selector mapping callback.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.advance_width" class="method"><a class="src rightside" href="../../src/harfrust/hb/font_funcs.rs.html#219-221">Source</a><h4 class="code-header">fn <a href="#method.advance_width" class="fn">advance_width</a>(
+    &amp;mut self,
+    builtin: &amp;<a class="struct" href="struct.BuiltinFontFuncs.html" title="struct harfrust::font::BuiltinFontFuncs">BuiltinFontFuncs</a>&lt;'_&gt;,
+    glyph: <a class="struct" href="../struct.GlyphId.html" title="struct harfrust::GlyphId">GlyphId</a>,
+) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.99.1/std/primitive.i32.html">i32</a></h4></section></summary><div class="docblock"><p>Horizontal advance callback.</p>
+<p>See “Metrics scaling” in the <a href="trait.FontFuncs.html" title="trait harfrust::font::FontFuncs">trait-level docs</a> for details
+on what value this method should return.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.populate_advance_widths" class="method"><a class="src rightside" href="../../src/harfrust/hb/font_funcs.rs.html#227-235">Source</a><h4 class="code-header">fn <a href="#method.populate_advance_widths" class="fn">populate_advance_widths</a>(
+    &amp;mut self,
+    builtin: &amp;<a class="struct" href="struct.BuiltinFontFuncs.html" title="struct harfrust::font::BuiltinFontFuncs">BuiltinFontFuncs</a>&lt;'_&gt;,
+    batch: <a class="struct" href="struct.AdvanceWidthBatch.html" title="struct harfrust::font::AdvanceWidthBatch">AdvanceWidthBatch</a>&lt;'_&gt;,
+)</h4></section></summary><div class="docblock"><p>Batch horizontal-advance callback.</p>
+<p>See “Metrics scaling” in the <a href="trait.FontFuncs.html" title="trait harfrust::font::FontFuncs">trait-level docs</a> for details
+on what value this method should return.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.advance_height" class="method"><a class="src rightside" href="../../src/harfrust/hb/font_funcs.rs.html#241-243">Source</a><h4 class="code-header">fn <a href="#method.advance_height" class="fn">advance_height</a>(
+    &amp;mut self,
+    builtin: &amp;<a class="struct" href="struct.BuiltinFontFuncs.html" title="struct harfrust::font::BuiltinFontFuncs">BuiltinFontFuncs</a>&lt;'_&gt;,
+    glyph: <a class="struct" href="../struct.GlyphId.html" title="struct harfrust::GlyphId">GlyphId</a>,
+) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.99.1/std/primitive.i32.html">i32</a></h4></section></summary><div class="docblock"><p>Vertical advance callback.</p>
+<p>See “Metrics scaling” in the <a href="trait.FontFuncs.html" title="trait harfrust::font::FontFuncs">trait-level docs</a> for details
+on what value this method should return.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.vertical_origin" class="method"><a class="src rightside" href="../../src/harfrust/hb/font_funcs.rs.html#251-253">Source</a><h4 class="code-header">fn <a href="#method.vertical_origin" class="fn">vertical_origin</a>(
+    &amp;mut self,
+    builtin: &amp;<a class="struct" href="struct.BuiltinFontFuncs.html" title="struct harfrust::font::BuiltinFontFuncs">BuiltinFontFuncs</a>&lt;'_&gt;,
+    glyph: <a class="struct" href="../struct.GlyphId.html" title="struct harfrust::GlyphId">GlyphId</a>,
+) -&gt; (<a class="primitive" href="https://doc.rust-lang.org/1.99.1/std/primitive.i32.html">i32</a>, <a class="primitive" href="https://doc.rust-lang.org/1.99.1/std/primitive.i32.html">i32</a>)</h4></section></summary><div class="docblock"><p>Vertical origin callback.</p>
+<p>Returns the (x, y) coordinates of the vertical origin for the given glyph.</p>
+<p>See “Metrics scaling” in the <a href="trait.FontFuncs.html" title="trait harfrust::font::FontFuncs">trait-level docs</a> for details
+on what values this method should return.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.extents" class="method"><a class="src rightside" href="../../src/harfrust/hb/font_funcs.rs.html#259-261">Source</a><h4 class="code-header">fn <a href="#method.extents" class="fn">extents</a>(
+    &amp;mut self,
+    builtin: &amp;<a class="struct" href="struct.BuiltinFontFuncs.html" title="struct harfrust::font::BuiltinFontFuncs">BuiltinFontFuncs</a>&lt;'_&gt;,
+    glyph: <a class="struct" href="../struct.GlyphId.html" title="struct harfrust::GlyphId">GlyphId</a>,
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.99.1/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="../struct.GlyphExtents.html" title="struct harfrust::GlyphExtents">GlyphExtents</a>&gt;</h4></section></summary><div class="docblock"><p>Glyph extents callback.</p>
+<p>See “Metrics scaling” in the <a href="trait.FontFuncs.html" title="trait harfrust::font::FontFuncs">trait-level docs</a> for details
+on what values this method should return.</p>
+</div></details></div><h2 id="dyn-compatibility" class="section-header">Dyn Compatibility<a href="#dyn-compatibility" class="anchor">§</a></h2><div class="dyn-compatibility-info"><p>This trait <b>is</b> <a href="https://doc.rust-lang.org/1.99.1/reference/items/traits.html#dyn-compatibility">dyn compatible</a>.</p><p><i>In older versions of Rust, dyn compatibility was called "object safety".</i></p></div><h2 id="implementors" class="section-header">Implementors<a href="#implementors" class="anchor">§</a></h2><div id="implementors-list"></div><script src="../../trait.impl/harfrust/hb/font_funcs/trait.FontFuncs.js" async></script></section></div></main></body></html>

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["Dsig","PermissionFlags","SignatureBlockFormat1","SignatureRecord"]};

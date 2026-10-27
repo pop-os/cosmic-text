@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["SubtableKind"],"struct":["Chain","ContextualEntryData","ContextualSubtable","Feature","InsertionEntryData","InsertionSubtable","LigatureSubtable","Morx","Subtable"]};
