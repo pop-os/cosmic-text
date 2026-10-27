@@ -1199,7 +1199,7 @@ impl Buffer {
                 'hit: for (glyph_i, glyph) in run.glyphs.iter().enumerate() {
                     if first_glyph {
                         first_glyph = false;
-                        if (run.rtl && x > glyph.x) || (!run.rtl && x < 0.0) {
+                        if (run.rtl && x > glyph.x) || (!run.rtl && x < glyph.x) {
                             new_cursor_glyph = 0;
                             new_cursor_char = 0;
                         }

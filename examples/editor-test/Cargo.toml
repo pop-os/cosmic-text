@@ -9,7 +9,7 @@ publish = false
 [dependencies]
 cosmic-text = { path = "../../" }
 env_logger = "0.11"
-fontdb = "0.23"
+fontdb = "0.24"
 log = "0.4"
 orbclient = "0.3.50"
 unicode-segmentation = "1.12"

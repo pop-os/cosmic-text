@@ -146,3 +146,8 @@ type BuildHasher = core::hash::BuildHasherDefault<rustc_hash::FxHasher>;
 type HashMap<K, V> = std::collections::HashMap<K, V, BuildHasher>;
 #[cfg(not(feature = "std"))]
 type HashMap<K, V> = hashbrown::HashMap<K, V, BuildHasher>;
+
+#[cfg(feature = "std")]
+type HashSet<T> = std::collections::HashSet<T, BuildHasher>;
+#[cfg(not(feature = "std"))]
+type HashSet<T> = hashbrown::HashSet<T, BuildHasher>;
