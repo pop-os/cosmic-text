@@ -2857,6 +2857,7 @@ impl ShapeLine {
             let mut max_ascent: f32 = 0.;
             let mut max_descent: f32 = 0.;
             let mut last_mono_cluster: Option<(usize, usize)> = None;
+            let mut mono_cluster_left: f32 = 0.0;
             let alignment_correction = match (align, self.rtl) {
                 (Align::Left, true) => (line_width - visual_line.w).max(0.),
                 (Align::Left, false) => 0.,
@@ -2944,7 +2945,7 @@ impl ShapeLine {
                             (true, true) => &word.glyphs[r.start.glyph..r.end.glyph],
                         };
 
-                        for glyph in included_glyphs {
+                        for (glyph_i, glyph) in included_glyphs.iter().enumerate() {
                             // Use overridden font size
                             let font_size = glyph.metrics_opt.map_or(font_size, |x| x.font_size);
 
@@ -2982,19 +2983,30 @@ impl ShapeLine {
                                     0.0
                                 };
                             if let Some(mono_width) = match_mono_width {
-                                let cluster = (glyph.start, glyph.end);
-                                let cells = if !is_ellipsis && last_mono_cluster == Some(cluster) {
-                                    0.0
-                                } else if !is_ellipsis {
-                                    last_mono_cluster = Some(cluster);
-                                    line_text.get(glyph.start..glyph.end).map_or_else(
-                                        || (x_advance / mono_width).round(),
-                                        |s| terminal_cluster_width(s) as f32,
-                                    )
+                                if is_ellipsis {
+                                    x_advance = (x_advance / mono_width).round() * mono_width;
                                 } else {
-                                    (x_advance / mono_width).round()
-                                };
-                                x_advance = cells * mono_width;
+                                    let cluster = (glyph.start, glyph.end);
+                                    if last_mono_cluster != Some(cluster) {
+                                        last_mono_cluster = Some(cluster);
+                                        mono_cluster_left =
+                                            line_text.get(glyph.start..glyph.end).map_or_else(
+                                                || (x_advance / mono_width).round(),
+                                                |s| terminal_cluster_width(s) as f32,
+                                            ) * mono_width;
+                                    }
+                                    let last_in_cluster = included_glyphs
+                                        .get(glyph_i + 1)
+                                        .is_none_or(|next| (next.start, next.end) != cluster);
+                                    if last_in_cluster {
+                                        x_advance = mono_cluster_left;
+                                    } else {
+                                        if hinting == Hinting::Enabled {
+                                            x_advance = x_advance.round();
+                                        }
+                                        mono_cluster_left -= x_advance;
+                                    }
+                                }
                             }
                             if hinting == Hinting::Enabled {
                                 x_advance = x_advance.round();
@@ -3008,7 +3020,7 @@ impl ShapeLine {
                                 glyph.metrics_opt.map(|x| x.line_height),
                                 *x,
                                 *y,
-                                x_advance,
+                                x_advance.max(0.0),
                                 r.level,
                             );
                             // Fix ellipsis glyph indices: point both start and
