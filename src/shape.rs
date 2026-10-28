@@ -10,7 +10,7 @@ use crate::{
 };
 #[cfg(not(feature = "std"))]
 use alloc::{format, vec, vec::Vec};
-use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
+use unicode_width::UnicodeWidthChar;
 
 use alloc::collections::VecDeque;
 use core::cmp::{max, min};
@@ -652,12 +652,7 @@ fn is_symbol_glyph(cluster: &str) -> bool {
 }
 
 fn terminal_cluster_width(cluster: &str) -> usize {
-    let mut chars = cluster.chars();
-    if let (Some(base), Some('\u{FE0F}'), None) = (chars.next(), chars.next(), chars.next()) {
-        base.width().unwrap_or(0)
-    } else {
-        UnicodeWidthStr::width(cluster)
-    }
+    cluster.chars().map(|c| c.width().unwrap_or(0)).sum()
 }
 
 /// A shaped glyph
