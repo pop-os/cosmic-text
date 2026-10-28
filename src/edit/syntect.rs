@@ -244,7 +244,7 @@ impl<'syntax_system, 'buffer> SyntaxEditor<'syntax_system, 'buffer> {
     ///
     /// The caller is responsible for calling [`Edit::shape_as_needed`] first
     /// to ensure layout is up to date.
-    pub fn render<R: Renderer>(&self, renderer: &mut R) {
+    pub fn render<R: Renderer>(&self, font_system: &mut FontSystem, renderer: &mut R) {
         let size = self.with_buffer(|buffer| buffer.size());
         if let Some(width) = size.0 {
             if let Some(height) = size.1 {
@@ -252,6 +252,7 @@ impl<'syntax_system, 'buffer> SyntaxEditor<'syntax_system, 'buffer> {
             }
         }
         self.editor.render(
+            font_system,
             renderer,
             self.foreground_color(),
             self.cursor_color(),

@@ -64,12 +64,9 @@ impl<'buffer> Editor<'buffer> {
         F: FnMut(i32, i32, u32, u32, Color),
     {
         self.with_buffer_mut(|buffer| buffer.shape_until_scroll(font_system, false));
-        let mut renderer = crate::LegacyRenderer {
-            font_system,
-            cache,
-            callback,
-        };
+        let mut renderer = crate::LegacyRenderer { cache, callback };
         self.render(
+            font_system,
             &mut renderer,
             text_color,
             cursor_color,
@@ -84,6 +81,7 @@ impl<'buffer> Editor<'buffer> {
     /// to ensure layout is up to date.
     pub fn render<R: Renderer>(
         &self,
+        font_system: &mut FontSystem,
         renderer: &mut R,
         text_color: Color,
         cursor_color: Color,
@@ -163,7 +161,7 @@ impl<'buffer> Editor<'buffer> {
                         }
                     }
 
-                    renderer.glyph(physical_glyph, glyph_color);
+                    renderer.glyph(font_system, physical_glyph, glyph_color);
                 }
             }
         });

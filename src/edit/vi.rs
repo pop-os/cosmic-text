@@ -315,19 +315,15 @@ impl<'syntax_system, 'buffer> ViEditor<'syntax_system, 'buffer> {
         F: FnMut(i32, i32, u32, u32, Color),
     {
         self.with_buffer_mut(|buffer| buffer.shape_until_scroll(font_system, false));
-        let mut renderer = crate::LegacyRenderer {
-            font_system,
-            cache,
-            callback,
-        };
-        self.render(&mut renderer);
+        let mut renderer = crate::LegacyRenderer { cache, callback };
+        self.render(font_system, &mut renderer);
     }
 
     /// Render the editor using the provided renderer.
     ///
     /// The caller is responsible for calling [`Edit::shape_as_needed`] first
     /// to ensure layout is up to date.
-    pub fn render<R: Renderer>(&self, renderer: &mut R) {
+    pub fn render<R: Renderer>(&self, font_system: &mut FontSystem, renderer: &mut R) {
         let background_color = self.background_color();
         let foreground_color = self.foreground_color();
         let cursor_color = self.cursor_color();
@@ -521,7 +517,7 @@ impl<'syntax_system, 'buffer> ViEditor<'syntax_system, 'buffer> {
                         None => foreground_color,
                     };
 
-                    renderer.glyph(physical_glyph, glyph_color);
+                    renderer.glyph(font_system, physical_glyph, glyph_color);
                 }
             }
         });
