@@ -14,7 +14,7 @@ pub trait Renderer {
 
     /// Render a [`PhysicalGlyph`] with the provided [`Color`].
     /// For performance, consider using [`SwashCache`].
-    fn glyph(&mut self, physical_glyph: PhysicalGlyph, color: Color);
+    fn glyph(&mut self, font_system: &mut FontSystem, physical_glyph: PhysicalGlyph, color: Color);
 }
 
 /// Draw text decoration lines (underline, strikethrough, overline) for a layout run.
@@ -110,7 +110,6 @@ fn draw_decoration_span<R: Renderer>(
 #[cfg(feature = "swash")]
 #[derive(Debug)]
 pub struct LegacyRenderer<'a, F: FnMut(i32, i32, u32, u32, Color)> {
-    pub font_system: &'a mut FontSystem,
     pub cache: &'a mut SwashCache,
     pub callback: F,
 }
@@ -121,9 +120,9 @@ impl<'a, F: FnMut(i32, i32, u32, u32, Color)> Renderer for LegacyRenderer<'a, F>
         (self.callback)(x, y, w, h, color);
     }
 
-    fn glyph(&mut self, physical_glyph: PhysicalGlyph, color: Color) {
+    fn glyph(&mut self, font_system: &mut FontSystem, physical_glyph: PhysicalGlyph, color: Color) {
         self.cache.with_pixels(
-            self.font_system,
+            font_system,
             physical_glyph.cache_key,
             color,
             |x, y, pixel_color| {

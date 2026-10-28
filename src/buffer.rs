@@ -1642,20 +1642,8 @@ impl Buffer {
     ) where
         F: FnMut(i32, i32, u32, u32, Color),
     {
-        self.shape_until_scroll(font_system, false);
-        let mut renderer = crate::LegacyRenderer {
-            font_system,
-            cache,
-            callback,
-        };
-        for run in self.layout_runs() {
-            for glyph in run.glyphs {
-                let physical_glyph = glyph.physical((0., run.line_y), 1.0);
-                let glyph_color = glyph.color_opt.map_or(color, |some| some);
-                renderer.glyph(physical_glyph, glyph_color);
-            }
-            render_decoration(&mut renderer, &run, color);
-        }
+        let mut renderer = crate::LegacyRenderer { cache, callback };
+        self.render(font_system, &mut renderer, color);
     }
 
     /// Render the buffer using the provided renderer.
@@ -1672,7 +1660,7 @@ impl Buffer {
             for glyph in run.glyphs {
                 let physical_glyph = glyph.physical((0., run.line_y), 1.0);
                 let glyph_color = glyph.color_opt.map_or(color, |some| some);
-                renderer.glyph(physical_glyph, glyph_color);
+                renderer.glyph(font_system, physical_glyph, glyph_color);
             }
             // draw decorations after glyphs so strikethrough is over the glyphs
             render_decoration(renderer, &run, color);
