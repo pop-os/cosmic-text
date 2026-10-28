@@ -10,6 +10,7 @@ use crate::{
 };
 #[cfg(not(feature = "std"))]
 use alloc::{format, vec, vec::Vec};
+use unicode_width::UnicodeWidthChar;
 
 use alloc::collections::VecDeque;
 use core::cmp::{max, min};
@@ -636,6 +637,22 @@ fn override_fake_italic(
     } else {
         cache_key_flags
     }
+}
+
+/// Whether `cluster` starts in a Private Use Area, which is where icon fonts such as
+/// Nerd Fonts keep their glyphs. Those are drawn to fill the cell, so scaling them to a
+/// proportional fallback's em makes them smaller than a terminal would render them.
+fn is_symbol_glyph(cluster: &str) -> bool {
+    cluster.chars().next().is_some_and(|c| {
+        matches!(
+            c as u32,
+            0xE000..=0xF8FF | 0xF_0000..=0xF_FFFD | 0x10_0000..=0x10_FFFD
+        )
+    })
+}
+
+fn terminal_cluster_width(cluster: &str) -> usize {
+    cluster.chars().map(|c| c.width().unwrap_or(0)).sum()
 }
 
 /// A shaped glyph
@@ -1616,6 +1633,7 @@ impl ShapeLine {
             &mut lines,
             match_mono_width,
             hinting,
+            "",
         );
         lines
     }
@@ -2340,6 +2358,7 @@ impl ShapeLine {
         layout_lines: &mut Vec<LayoutLine>,
         match_mono_width: Option<f32>,
         hinting: Hinting,
+        line_text: &str,
     ) {
         // For each visual line a list of  (span index,  and range of words in that span)
         // Note that a BiDi visual line could have multiple spans or parts of them
@@ -2837,6 +2856,8 @@ impl ShapeLine {
             let mut y = 0.;
             let mut max_ascent: f32 = 0.;
             let mut max_descent: f32 = 0.;
+            let mut last_mono_cluster: Option<(usize, usize)> = None;
+            let mut mono_cluster_left: f32 = 0.0;
             let alignment_correction = match (align, self.rtl) {
                 (Align::Left, true) => (line_width - visual_line.w).max(0.),
                 (Align::Left, false) => 0.,
@@ -2856,6 +2877,7 @@ impl ShapeLine {
             if hinting == Hinting::Enabled {
                 x = x.round();
             }
+            let content_start_x = x;
 
             // TODO: Only certain `is_whitespace` chars are typically expanded but this is what is
             // currently used to compute `visual_line.spaces`.
@@ -2890,13 +2912,13 @@ impl ShapeLine {
 
             let mut decorations: Vec<DecorationSpan> = Vec::new();
 
-            let process_range = |range: Range<usize>,
-                                 x: &mut f32,
-                                 y: &mut f32,
-                                 glyphs: &mut Vec<LayoutGlyph>,
-                                 decorations: &mut Vec<DecorationSpan>,
-                                 max_ascent: &mut f32,
-                                 max_descent: &mut f32| {
+            let mut process_range = |range: Range<usize>,
+                                     x: &mut f32,
+                                     y: &mut f32,
+                                     glyphs: &mut Vec<LayoutGlyph>,
+                                     decorations: &mut Vec<DecorationSpan>,
+                                     max_ascent: &mut f32,
+                                     max_descent: &mut f32| {
                 for r in visual_line.ranges[range.clone()].iter() {
                     let is_ellipsis = r.span == ELLIPSIS_SPAN;
                     let span_words = self.get_span_words(r.span);
@@ -2923,18 +2945,27 @@ impl ShapeLine {
                             (true, true) => &word.glyphs[r.start.glyph..r.end.glyph],
                         };
 
-                        for glyph in included_glyphs {
+                        for (glyph_i, glyph) in included_glyphs.iter().enumerate() {
                             // Use overridden font size
                             let font_size = glyph.metrics_opt.map_or(font_size, |x| x.font_size);
 
                             let match_mono_em_width = match_mono_width.map(|w| w / font_size);
 
-                            let glyph_font_size = match (
+                            // Kept at full size below; the advance is still snapped
+                            let is_symbol = line_text
+                                .get(glyph.start..glyph.end)
+                                .is_some_and(is_symbol_glyph);
+
+                            let cluster_cells = match_mono_width
+                                .and_then(|_| line_text.get(glyph.start..glyph.end))
+                                .map(terminal_cluster_width);
+
+                            let mut glyph_font_size = match (
                                 match_mono_em_width,
                                 glyph.font_monospace_em_width,
                             ) {
                                 (Some(match_em_width), Some(glyph_em_width))
-                                    if glyph_em_width != match_em_width =>
+                                    if glyph_em_width != match_em_width && !is_symbol =>
                                 {
                                     let glyph_to_match_factor = glyph_em_width / match_em_width;
                                     let glyph_font_size = math::roundf(glyph_to_match_factor)
@@ -2949,15 +2980,53 @@ impl ShapeLine {
                                 _ => font_size,
                             };
 
+                            if let (Some(mono_width), Some(cells)) =
+                                (match_mono_width, cluster_cells)
+                            {
+                                let blank_after = line_text.get(glyph.end..).map_or(0, |rest| {
+                                    rest.chars().take_while(|c| *c == ' ').count()
+                                });
+                                let max_width = (cells + blank_after) as f32 * mono_width;
+                                let width = glyph_font_size * glyph.x_advance;
+                                if !is_symbol
+                                    && !is_ellipsis
+                                    && cells > 0
+                                    && width > max_width + 0.01
+                                {
+                                    glyph_font_size *= max_width / width;
+                                }
+                            }
+
                             let mut x_advance = glyph_font_size * glyph.x_advance
                                 + if word.blank {
                                     justification_expansion
                                 } else {
                                     0.0
                                 };
-                            if let Some(match_em_width) = match_mono_em_width {
-                                // Round to nearest monospace width
-                                x_advance = ((x_advance / match_em_width).round()) * match_em_width;
+                            if let Some(mono_width) = match_mono_width {
+                                if is_ellipsis {
+                                    x_advance = (x_advance / mono_width).round() * mono_width;
+                                } else {
+                                    let cluster = (glyph.start, glyph.end);
+                                    if last_mono_cluster != Some(cluster) {
+                                        last_mono_cluster = Some(cluster);
+                                        mono_cluster_left = cluster_cells.map_or_else(
+                                            || (x_advance / mono_width).round(),
+                                            |cells| cells as f32,
+                                        ) * mono_width;
+                                    }
+                                    let last_in_cluster = included_glyphs
+                                        .get(glyph_i + 1)
+                                        .is_none_or(|next| (next.start, next.end) != cluster);
+                                    if last_in_cluster {
+                                        x_advance = mono_cluster_left;
+                                    } else {
+                                        if hinting == Hinting::Enabled {
+                                            x_advance = x_advance.round();
+                                        }
+                                        mono_cluster_left -= x_advance;
+                                    }
+                                }
                             }
                             if hinting == Hinting::Enabled {
                                 x_advance = x_advance.round();
@@ -2971,7 +3040,7 @@ impl ShapeLine {
                                 glyph.metrics_opt.map(|x| x.line_height),
                                 *x,
                                 *y,
-                                x_advance,
+                                x_advance.max(0.0),
                                 r.level,
                             );
                             // Fix ellipsis glyph indices: point both start and
@@ -3078,7 +3147,13 @@ impl ShapeLine {
             }
 
             layout_lines.push(LayoutLine {
-                w: if align != Align::Justified {
+                w: if match_mono_width.is_some() {
+                    if self.rtl {
+                        content_start_x - x
+                    } else {
+                        x - content_start_x
+                    }
+                } else if align != Align::Justified {
                     visual_line.w
                 } else if self.rtl {
                     start_x - x

@@ -7,6 +7,7 @@ use alloc::vec::Vec;
 use core::{mem, ops::Range};
 use fontdb::Family;
 use unicode_script::Script;
+use unicode_width::UnicodeWidthChar;
 
 use crate::{BuildHasher, Font, FontMatchKey, FontSystem, HashMap, ShapeBuffer};
 
@@ -190,10 +191,18 @@ pub struct FontFallbackIter<'a> {
     scripts: &'a [Script],
     word: &'a str,
     script_i: (usize, usize),
+    emoji: bool,
+    emoji_i: usize,
     common_i: usize,
     other_i: usize,
     end: bool,
     ideal_weight: fontdb::Weight,
+}
+
+fn wants_emoji_font(word: &str) -> bool {
+    word.chars().any(|c| {
+        matches!(c, '\u{FE0F}' | '\u{20E3}' | '\u{1F1E6}'..='\u{1F1FF}') || c.width() == Some(2)
+    })
 }
 
 impl<'a> FontFallbackIter<'a> {
@@ -217,6 +226,8 @@ impl<'a> FontFallbackIter<'a> {
             scripts,
             word,
             script_i: (0, 0),
+            emoji: wants_emoji_font(word),
+            emoji_i: 0,
             common_i: 0,
             other_i: 0,
             end: false,
@@ -274,6 +285,19 @@ impl<'a> FontFallbackIter<'a> {
             .db()
             .face(id)
             .is_some_and(|face| face.families.iter().any(|(name, _)| name == family_name))
+    }
+
+    fn family_font(&mut self, family_name: &str) -> Option<Arc<Font>> {
+        for m_key in self.font_match_keys {
+            if (m_key.font_weight_diff == 0 || m_key.variable_weight_match)
+                && self.face_contains_family(m_key.id, family_name)
+            {
+                if let Some(font) = self.font_system.get_font(m_key.id, self.ideal_weight) {
+                    return Some(font);
+                }
+            }
+        }
+        None
     }
 
     fn default_font_match_key(&self) -> Option<&FontMatchKey> {
@@ -379,6 +403,34 @@ impl<'a> FontFallbackIter<'a> {
                 Vec::new()
             };
 
+            let forbidden_families = fallbacks.forbidden_fallback();
+
+            // Only the codepoints the default font lacks need a fallback, so rank the
+            // candidates by how many of those they cover and skip faces covering none;
+            // every queued face costs a shaping attempt before the script fallbacks run.
+            let word = self.word;
+            let mut missing = String::new();
+            for ch in word.chars() {
+                let covered = match default_font_match_key.as_ref() {
+                    Some(m_key) => {
+                        self.font_system.get_font_supported_codepoints_in_word(
+                            m_key.id,
+                            self.ideal_weight,
+                            ch.encode_utf8(&mut [0; 4]),
+                        ) == Some(1)
+                    }
+                    None => false,
+                };
+                if !covered {
+                    missing.push(ch);
+                }
+            }
+            if missing.is_empty() {
+                // The default covers the word but could not be loaded above
+                missing = word.to_owned();
+            }
+            let missing_count = missing.chars().count();
+
             for m_key in font_match_keys_iter(is_mono) {
                 if Some(m_key.id) != default_font_match_key.as_ref().map(|m_key| m_key.id) {
                     let is_mono_id = if mono_ids_for_scripts.is_empty() {
@@ -387,16 +439,26 @@ impl<'a> FontFallbackIter<'a> {
                         mono_ids_for_scripts.binary_search(&m_key.id).is_ok()
                     };
 
-                    if is_mono_id {
+                    // Unifont covers nearly all of Unicode with placeholder glyphs,
+                    // so it wins the ranking outright wherever it is installed. Checked
+                    // after `is_mono_id`, which narrows thousands of faces to a handful.
+                    if !self.emoji
+                        && is_mono_id
+                        && !forbidden_families
+                            .iter()
+                            .any(|family_name| self.face_contains_family(m_key.id, family_name))
+                    {
                         let supported_cp_count_opt =
                             self.font_system.get_font_supported_codepoints_in_word(
                                 m_key.id,
                                 self.ideal_weight,
-                                self.word,
+                                &missing,
                             );
                         if let Some(supported_cp_count) = supported_cp_count_opt {
-                            let codepoint_non_matches =
-                                self.word.chars().count() - supported_cp_count;
+                            if supported_cp_count == 0 {
+                                continue;
+                            }
+                            let codepoint_non_matches = missing_count - supported_cp_count;
 
                             let fallback_info = MonospaceFallbackInfo {
                                 font_weight_diff: Some(m_key.font_weight_diff),
@@ -431,12 +493,8 @@ impl<'a> FontFallbackIter<'a> {
             while self.script_i.1 < script_families.len() {
                 let script_family = script_families[self.script_i.1];
                 self.script_i.1 += 1;
-                for m_key in font_match_keys_iter(false) {
-                    if self.face_contains_family(m_key.id, script_family) {
-                        if let Some(font) = self.font_system.get_font(m_key.id, self.ideal_weight) {
-                            return Some(font);
-                        }
-                    }
+                if let Some(font) = self.family_font(script_family) {
+                    return Some(font);
                 }
                 log::debug!(
                     "failed to find family '{}' for script {:?} and locale '{}'",
@@ -451,15 +509,22 @@ impl<'a> FontFallbackIter<'a> {
         }
 
         let common_families = fallbacks.common_fallback();
+
+        while self.emoji && self.emoji_i < common_families.len() {
+            let family = common_families[self.emoji_i];
+            self.emoji_i += 1;
+            if family.contains("Emoji") {
+                if let Some(font) = self.family_font(family) {
+                    return Some(font);
+                }
+            }
+        }
+
         while self.common_i < common_families.len() {
             let common_family = common_families[self.common_i];
             self.common_i += 1;
-            for m_key in font_match_keys_iter(false) {
-                if self.face_contains_family(m_key.id, common_family) {
-                    if let Some(font) = self.font_system.get_font(m_key.id, self.ideal_weight) {
-                        return Some(font);
-                    }
-                }
+            if let Some(font) = self.family_font(common_family) {
+                return Some(font);
             }
             log::debug!("failed to find family '{common_family}'");
         }
