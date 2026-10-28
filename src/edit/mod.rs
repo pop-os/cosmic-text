@@ -4,7 +4,10 @@ use alloc::{string::String, vec::Vec};
 use core::cmp;
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::{AttrsList, BorrowedWithFontSystem, Buffer, Cursor, FontSystem, Motion};
+use crate::{
+    Attrs, AttrsList, BorrowedWithFontSystem, Buffer, Cursor, FontSystem, InlineBox, InlineBoxId,
+    Motion,
+};
 
 pub use self::editor::*;
 mod editor;
@@ -318,6 +321,51 @@ pub trait Edit<'buffer> {
         self.set_cursor(new_cursor);
     }
 
+    /// Insert an [`InlineBox`] placeholder at the current cursor, replacing any
+    /// active selection.
+    fn insert_inline_box(&mut self, inline_box: InlineBox) {
+        self.delete_selection();
+        let cursor = self.cursor();
+        let attrs_list = self.with_buffer(|buffer| {
+            let base = buffer
+                .lines
+                .get(cursor.line)
+                .map(|line| line.attrs_list().get_span(cursor.index.saturating_sub(1)))
+                .unwrap_or_else(Attrs::new);
+            AttrsList::new(&base.inline_box(inline_box))
+        });
+        let new_cursor = self.insert_at(cursor, "\u{FFFC}", Some(attrs_list));
+        self.set_cursor(new_cursor);
+    }
+
+    /// Remove the inline box with the given `id`, if present.
+    fn remove_inline_box(&mut self, id: InlineBoxId) -> bool {
+        let range = self.with_buffer(|buffer| {
+            for (line_i, line) in buffer.lines.iter().enumerate() {
+                let text = line.text();
+                let attrs = line.attrs_list();
+                for (byte_i, _) in text.match_indices('\u{FFFC}') {
+                    if attrs.get_span(byte_i).inline_box.map(|ib| ib.id) == Some(id) {
+                        return Some((
+                            Cursor::new(line_i, byte_i),
+                            Cursor::new(line_i, byte_i + "\u{FFFC}".len()),
+                        ));
+                    }
+                }
+            }
+            None
+        });
+
+        match range {
+            Some((start, end)) => {
+                self.delete_range(start, end);
+                self.set_cursor(start);
+                true
+            }
+            None => false,
+        }
+    }
+
     /// Apply a change
     fn apply_change(&mut self, change: &Change) -> bool;
 
@@ -362,5 +410,15 @@ impl<'buffer, E: Edit<'buffer>> BorrowedWithFontSystem<'_, E> {
     /// Perform an [Action] on the editor
     pub fn action(&mut self, action: Action) {
         self.inner.action(self.font_system, action);
+    }
+
+    /// Insert an [`InlineBox`] at the cursor
+    pub fn insert_inline_box(&mut self, inline_box: InlineBox) {
+        self.inner.insert_inline_box(inline_box);
+    }
+
+    /// Remove the inline box with the given `id`
+    pub fn remove_inline_box(&mut self, id: InlineBoxId) -> bool {
+        self.inner.remove_inline_box(id)
     }
 }

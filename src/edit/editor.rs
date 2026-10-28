@@ -32,6 +32,49 @@ fn cursor_position(cursor: &Cursor, run: &LayoutRun) -> Option<(i32, i32)> {
     Some((x as i32, run.line_top as i32))
 }
 
+#[derive(Clone, Copy)]
+struct InlineBoxCursorHit {
+    leading: Cursor,
+    trailing: Cursor,
+    local_x: f32,
+    width: f32,
+}
+
+fn inline_box_cursor_hit(run: &LayoutRun, x: f32, y: f32) -> Option<InlineBoxCursorHit> {
+    for span in run.inline_boxes {
+        let top = run.line_y + span.y;
+        let bottom = top + span.height;
+        let right = span.x + span.width;
+        if x < span.x || x > right || y < top || y > bottom {
+            continue;
+        }
+
+        let glyph = run.glyphs.iter().find(|glyph| {
+            glyph.font_id == fontdb::ID::dummy()
+                && glyph.x == span.x
+                && glyph.w == span.width
+                && run.text.get(glyph.start..glyph.end) == Some("\u{FFFC}")
+        })?;
+
+        return Some(InlineBoxCursorHit {
+            leading: run.cursor_from_glyph_left(glyph),
+            trailing: run.cursor_from_glyph_right(glyph),
+            local_x: x - span.x,
+            width: span.width,
+        });
+    }
+
+    None
+}
+
+fn pick_inline_box_cursor(hit: InlineBoxCursorHit) -> Cursor {
+    if hit.local_x >= hit.width / 2.0 {
+        hit.trailing
+    } else {
+        hit.leading
+    }
+}
+
 impl<'buffer> Editor<'buffer> {
     /// Create a new [`Editor`] with the provided [`Buffer`]
     pub fn new(buffer: impl Into<BufferRef<'buffer>>) -> Self {
@@ -146,8 +189,11 @@ impl<'buffer> Editor<'buffer> {
                     renderer.rectangle(x, y, 1, line_height as u32, cursor_color);
                 }
 
-                render_decoration(renderer, &run, text_color);
                 for glyph in run.glyphs {
+                    if glyph.font_id == fontdb::ID::dummy() {
+                        continue;
+                    }
+
                     let physical_glyph = glyph.physical((0., line_y), 1.0);
 
                     let mut glyph_color = glyph.color_opt.map_or(text_color, |some| some);
@@ -165,6 +211,12 @@ impl<'buffer> Editor<'buffer> {
 
                     renderer.glyph(physical_glyph, glyph_color);
                 }
+
+                for span in run.inline_boxes {
+                    renderer.inline_box(&run, span);
+                }
+
+                render_decoration(renderer, &run, text_color);
             }
         });
     }
@@ -773,7 +825,14 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
 
                 if let Some(new_cursor) = self.with_buffer_mut(|buffer| {
                     buffer.shape_until_scroll(font_system, false);
-                    buffer.hit(x as f32, y as f32)
+                    let x = x as f32;
+                    let y = y as f32;
+                    buffer
+                        .layout_runs()
+                        .find_map(|run| {
+                            inline_box_cursor_hit(&run, x, y).map(pick_inline_box_cursor)
+                        })
+                        .or_else(|| buffer.hit(x, y))
                 }) {
                     if new_cursor != self.cursor {
                         self.cursor = new_cursor;
@@ -784,15 +843,29 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
             Action::DoubleClick { x, y } => {
                 self.set_selection(Selection::None);
 
-                if let Some(new_cursor) = self.with_buffer_mut(|buffer| {
+                let hit = self.with_buffer_mut(|buffer| {
                     buffer.shape_until_scroll(font_system, false);
-                    buffer.hit(x as f32, y as f32)
-                }) {
+                    let x = x as f32;
+                    let y = y as f32;
+                    buffer
+                        .layout_runs()
+                        .find_map(|run| inline_box_cursor_hit(&run, x, y))
+                        .map(|hit| (pick_inline_box_cursor(hit), Some(hit)))
+                        .or_else(|| buffer.hit(x, y).map(|cursor| (cursor, None)))
+                });
+
+                if let Some((new_cursor, inline_box_hit)) = hit {
                     if new_cursor != self.cursor {
                         self.cursor = new_cursor;
                         self.with_buffer_mut(|buffer| buffer.set_redraw(true));
                     }
-                    self.selection = Selection::Word(self.cursor);
+                    self.selection = match inline_box_hit {
+                        Some(hit) => {
+                            self.cursor = hit.trailing;
+                            Selection::Normal(hit.leading)
+                        }
+                        None => Selection::Word(self.cursor),
+                    };
                     self.with_buffer_mut(|buffer| buffer.set_redraw(true));
                 }
             }
@@ -818,7 +891,14 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
 
                 if let Some(new_cursor) = self.with_buffer_mut(|buffer| {
                     buffer.shape_until_scroll(font_system, false);
-                    buffer.hit(x as f32, y as f32)
+                    let x = x as f32;
+                    let y = y as f32;
+                    buffer
+                        .layout_runs()
+                        .find_map(|run| {
+                            inline_box_cursor_hit(&run, x, y).map(pick_inline_box_cursor)
+                        })
+                        .or_else(|| buffer.hit(x, y))
                 }) {
                     if new_cursor != self.cursor {
                         self.cursor = new_cursor;

@@ -272,6 +272,285 @@ impl TextDecoration {
     }
 }
 
+/// Size of an inline box, using u32 bit storage for Eq + Hash (same as `CacheMetrics`).
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub struct InlineBoxSize {
+    width_bits: u32,
+    ascent_bits: u32,
+    descent_bits: u32,
+    /// [`InlineResolve::None`] means `ascent`/`descent` are final.
+    resolve: InlineResolve,
+}
+
+/// How an inline box should be resolved against surrounding text extents at
+/// layout time. `ascent`/`descent` stored on [`InlineBoxSize`] are placeholders
+/// for [`InlineResolve::Top`] / [`InlineResolve::Bottom`], the real values are
+/// computed once the enclosing line's text metrics are known.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub(crate) enum InlineResolve {
+    None,
+    Top,
+    Bottom,
+    Center,
+}
+
+/// Vertical alignment mode for an inline box with a given width/height.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum InlineAlignment {
+    /// The box baseline is inside the rectangle at `offset` px from the top.
+    /// `offset` is clamped to `[0, height]`.
+    ///
+    /// - Baseline {offset:0} -> BelowBaseline
+    /// - Baseline {offset:height} -> AboveBaseline
+    /// - Baseline {offset:height/2} -> Middle
+    Baseline { offset: f32 },
+    /// The bottom edge of the box sits on the text baseline.
+    AboveBaseline,
+    /// The top edge of the box sits on the text baseline.
+    BelowBaseline,
+    /// The box is centered around the text baseline.
+    Middle,
+    /// The top edge of the box sits flush with the top of the tallest text
+    /// (the line's `max_text_ascent`) in the surrounding line.
+    /// TODO: should this be the paragraph? or the whole text?
+    ///
+    /// Resolved at layout time. unlike [`InlineAlignment::AboveBaseline`], the box can
+    /// extend below the baseline when its height exceeds the text ascent.
+    TextTop,
+    /// Opposite of [`Top`]
+    TextBottom,
+    /// The box is centered on the surrounding text's vertical extent, midway
+    /// between the line's `max_text_ascent` and `max_text_descent`. Resolved at
+    /// layout time, falls back to [`InlineAlignment::Middle`] when the line has
+    /// no text. Prefer this over `Middle` to center icons on the text.
+    TextCenter,
+}
+
+impl InlineBoxSize {
+    fn is_valid_dimension(value: f32) -> bool {
+        value.is_finite() && value >= 0.0
+    }
+
+    fn sanitize_dimension(value: f32) -> f32 {
+        if Self::is_valid_dimension(value) {
+            value
+        } else {
+            0.0
+        }
+    }
+
+    fn sanitize_baseline_offset(offset: f32, height: f32) -> f32 {
+        if offset.is_finite() {
+            offset.clamp(0.0, height)
+        } else {
+            0.0
+        }
+    }
+
+    fn split_height(height: f32, alignment: InlineAlignment) -> (f32, f32) {
+        match alignment {
+            InlineAlignment::Baseline { offset } => {
+                let ascent = Self::sanitize_baseline_offset(offset, height);
+                (ascent, height - ascent)
+            }
+            InlineAlignment::AboveBaseline => (height, 0.0),
+            InlineAlignment::BelowBaseline => (0.0, height),
+            InlineAlignment::TextTop => (height, 0.0),
+            InlineAlignment::TextBottom => (0.0, height),
+            InlineAlignment::Middle | InlineAlignment::TextCenter => {
+                let ascent = height * 0.5;
+                (ascent, height - ascent)
+            }
+        }
+    }
+
+    /// Create a new inline box size from width, total height and an alignment mode.
+    ///
+    /// Invalid values (`NaN`, infinite, or negative) are debug-asserted and
+    /// sanitized to `0.0` in release builds.
+    pub fn new(width: f32, height: f32, alignment: InlineAlignment) -> Self {
+        debug_assert!(
+            Self::is_valid_dimension(width) && Self::is_valid_dimension(height),
+            "InlineBoxSize values must be finite and non-negative"
+        );
+        if let InlineAlignment::Baseline { offset } = alignment {
+            debug_assert!(
+                offset.is_finite() && offset >= 0.0 && offset <= height,
+                "InlineAlignment::Baseline offset must be finite and in [0, height]"
+            );
+        }
+
+        let width = Self::sanitize_dimension(width);
+        let height = Self::sanitize_dimension(height);
+        let (ascent, descent) = Self::split_height(height, alignment);
+        let resolve = match alignment {
+            InlineAlignment::TextTop => InlineResolve::Top,
+            InlineAlignment::TextBottom => InlineResolve::Bottom,
+            InlineAlignment::TextCenter => InlineResolve::Center,
+            _ => InlineResolve::None,
+        };
+        Self {
+            width_bits: width.to_bits(),
+            ascent_bits: ascent.to_bits(),
+            descent_bits: descent.to_bits(),
+            resolve,
+        }
+    }
+
+    /// Total height of the box in pixels.
+    pub fn height(&self) -> f32 {
+        self.ascent() + self.descent()
+    }
+
+    pub(crate) fn resolve(&self) -> InlineResolve {
+        self.resolve
+    }
+
+    /// Create a new inline box size from width, total height and alignment mode.
+    ///
+    /// Returns `None` for invalid values.
+    pub fn try_new(width: f32, height: f32, alignment: InlineAlignment) -> Option<Self> {
+        if !Self::is_valid_dimension(width) || !Self::is_valid_dimension(height) {
+            return None;
+        }
+        if let InlineAlignment::Baseline { offset } = alignment {
+            if !offset.is_finite() || offset < 0.0 || offset > height {
+                return None;
+            }
+        }
+
+        Some(Self::new(width, height, alignment))
+    }
+
+    /// Width in pixels
+    pub fn width(&self) -> f32 {
+        f32::from_bits(self.width_bits)
+    }
+
+    /// Ascent (above baseline) in pixels.
+    ///
+    /// For [`InlineAlignment::Top`], [`InlineAlignment::Bottom`] and
+    /// [`InlineAlignment::Center`], this is a preliminary value. If you need the final layout positions you should
+    /// read [`InlineBoxSpan`] on a laid-out [`LayoutRun`] instead.
+    pub fn ascent(&self) -> f32 {
+        f32::from_bits(self.ascent_bits)
+    }
+
+    /// See [`Self::ascent`] for notes on [`InlineAlignment::Top`] /
+    /// [`InlineAlignment::Bottom`] / [`InlineAlignment::Center`].
+    pub fn descent(&self) -> f32 {
+        f32::from_bits(self.descent_bits)
+    }
+}
+
+/// Identifier for an inline box.
+///
+/// Wraps a `u64` so callers can't accidentally pass another integer. Build one
+/// with [`InlineBoxId::new`] or `InlineBoxId::from(u64)`. For collision-free
+/// ids, mint them via [`Buffer::next_inline_box_id`].
+#[repr(transparent)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct InlineBoxId(u64);
+
+impl InlineBoxId {
+    /// Create a new `InlineBoxId` from a raw `u64`.
+    pub const fn new(id: u64) -> Self {
+        Self(id)
+    }
+
+    /// Access the underlying raw `u64`.
+    pub const fn get(self) -> u64 {
+        self.0
+    }
+}
+
+impl From<u64> for InlineBoxId {
+    fn from(id: u64) -> Self {
+        Self(id)
+    }
+}
+
+impl From<InlineBoxId> for u64 {
+    fn from(id: InlineBoxId) -> Self {
+        id.0
+    }
+}
+
+impl core::fmt::Display for InlineBoxId {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        core::fmt::Display::fmt(&self.0, f)
+    }
+}
+
+impl PartialEq<u64> for InlineBoxId {
+    fn eq(&self, other: &u64) -> bool {
+        self.0 == *other
+    }
+}
+
+impl PartialEq<InlineBoxId> for u64 {
+    fn eq(&self, other: &InlineBoxId) -> bool {
+        *self == other.0
+    }
+}
+
+/// An inline box placeholder to reserve space for non-text elements (images,
+/// icons, widgets).
+///
+/// # How it works:
+///
+/// The shaping algorithm creates inline boxes as synthetic glyphs
+/// whose `font_id == fontdb::ID::dummy()`. When iterating a [`LayoutRun`]'s
+/// glyphs for rendering text you **MUST** skip dummy-font glyphs.
+///
+/// To render the inline box content use one of:
+///
+/// - Override [`Renderer::inline_box`], which the built-in render dispatches once per box
+/// - Iterate [`LayoutRun::inline_boxes`] directly and draw the box content by `id`.
+///
+/// # IDs
+///
+/// `id` is a caller-assigned [`usize`] used to look up what to draw.
+/// The library does not enforce uniqueness. If two boxes share an id, renderers
+/// that dispatch by id will be ambiguous.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub struct InlineBox {
+    /// Identifier used to match the placeholder back to the content
+    ///
+    /// IMPORTANT: Uniqueness is caller-enforced (use [`Buffer::next_inline_box_id`] for collision-free ids)
+    pub id: InlineBoxId,
+    /// Size of the inline box in pixels
+    pub size: InlineBoxSize,
+}
+
+impl InlineBox {
+    /// Create an inline box from width/height and alignment mode.
+    pub fn new(
+        id: impl Into<InlineBoxId>,
+        width: f32,
+        height: f32,
+        alignment: InlineAlignment,
+    ) -> Self {
+        Self {
+            id: id.into(),
+            size: InlineBoxSize::new(width, height, alignment),
+        }
+    }
+
+    /// Fallible version of [`Self::new`].
+    pub fn try_new(
+        id: impl Into<InlineBoxId>,
+        width: f32,
+        height: f32,
+        alignment: InlineAlignment,
+    ) -> Option<Self> {
+        InlineBoxSize::try_new(width, height, alignment).map(|size| Self {
+            id: id.into(),
+            size,
+        })
+    }
+}
+
 /// Offset and thickness for a text decoration line, in EM units.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct DecorationMetrics {
@@ -310,6 +589,7 @@ pub struct Attrs<'a> {
     pub letter_spacing_opt: Option<LetterSpacing>,
     pub font_features: FontFeatures,
     pub text_decoration: TextDecoration,
+    pub inline_box: Option<InlineBox>,
 }
 
 impl<'a> Attrs<'a> {
@@ -329,6 +609,7 @@ impl<'a> Attrs<'a> {
             letter_spacing_opt: None,
             font_features: FontFeatures::new(),
             text_decoration: TextDecoration::new(),
+            inline_box: None,
         }
     }
 
@@ -422,6 +703,18 @@ impl<'a> Attrs<'a> {
         self
     }
 
+    /// Attach an [`InlineBox`] placeholder to this [`Attrs`].
+    ///
+    /// The shaper only creates a box when it encounters a `U+FFFC` Object
+    /// Replacement Character whose attributes carry this field. In practice,
+    /// prefer [`Buffer::set_rich_text_with_boxes`] and
+    /// [`RichSpan::InlineBox`], which handle everything for you.
+    /// Call this directly only when building a custom [`AttrsList`] by hand.
+    pub const fn inline_box(mut self, ib: InlineBox) -> Self {
+        self.inline_box = Some(ib);
+        self
+    }
+
     /// Check if this set of attributes can be shaped with another
     pub fn compatible(&self, other: &Self) -> bool {
         self.family == other.family
@@ -468,6 +761,7 @@ pub struct AttrsOwned {
     pub letter_spacing_opt: Option<LetterSpacing>,
     pub font_features: FontFeatures,
     pub text_decoration: TextDecoration,
+    pub inline_box: Option<InlineBox>,
 }
 
 impl AttrsOwned {
@@ -499,6 +793,7 @@ impl AttrsOwned {
             letter_spacing_opt: attrs.letter_spacing_opt,
             font_features: attrs.font_features.clone(),
             text_decoration: attrs.text_decoration,
+            inline_box: attrs.inline_box,
         }
     }
 
@@ -515,6 +810,7 @@ impl AttrsOwned {
             letter_spacing_opt: self.letter_spacing_opt,
             font_features: self.font_features.clone(),
             text_decoration: self.text_decoration,
+            inline_box: self.inline_box,
         }
     }
 }
