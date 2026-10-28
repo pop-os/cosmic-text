@@ -2,11 +2,12 @@
 
 #![allow(clippy::too_many_arguments)]
 
+use crate::attrs::InlineResolve;
 use crate::fallback::FontFallbackIter;
 use crate::{
     math, Align, Attrs, AttrsList, CacheKeyFlags, Color, DecorationMetrics, DecorationSpan,
     Ellipsize, EllipsizeHeightLimit, Family, Font, FontSystem, GlyphDecorationData, HashSet,
-    Hinting, LayoutGlyph, LayoutLine, Metrics, Wrap,
+    Hinting, InlineBox, InlineBoxSpan, LayoutGlyph, LayoutLine, Metrics, Wrap,
 };
 #[cfg(not(feature = "std"))]
 use alloc::{format, vec, vec::Vec};
@@ -862,9 +863,55 @@ impl ShapeWord {
             // Complex text path: Full grapheme iteration and attribute processing
             let mut start_run = word_range.start;
             let mut attrs = attrs_list.defaults();
-            for (egc_i, _egc) in word.grapheme_indices(true) {
+            for (egc_i, egc) in word.grapheme_indices(true) {
                 let start_egc = word_range.start + egc_i;
                 let attrs_egc = attrs_list.get_span(start_egc);
+
+                // Intercept U+FFFC (Object Replacement Character) with an inline box attribute.
+                // Push a synthetic ShapeGlyph with pixel-unit dimensions and metrics_opt font_size=1.0
+                // so layout multiplies by 1.0, keeping pixel values unchanged.
+                if egc == "\u{FFFC}" {
+                    if let Some(ib) = attrs_egc.inline_box {
+                        // Flush any pending run before the placeholder
+                        if start_run < start_egc {
+                            shaping.run(
+                                &mut glyphs,
+                                font_system,
+                                line,
+                                attrs_list,
+                                start_run,
+                                start_egc,
+                                span_rtl,
+                            );
+                        }
+                        let end_egc = start_egc + egc.len();
+                        glyphs.push(ShapeGlyph {
+                            start: start_egc,
+                            end: end_egc,
+                            x_advance: ib.size.width(),
+                            y_advance: 0.0,
+                            x_offset: 0.0,
+                            y_offset: 0.0,
+                            ascent: ib.size.ascent(),
+                            descent: ib.size.descent(),
+                            font_monospace_em_width: None,
+                            font_id: fontdb::ID::dummy(),
+                            font_weight: attrs_egc.weight,
+                            glyph_id: 0,
+                            color_opt: attrs_egc.color_opt,
+                            metadata: attrs_egc.metadata,
+                            cache_key_flags: attrs_egc.cache_key_flags,
+                            metrics_opt: Some(Metrics {
+                                font_size: 1.0,
+                                line_height: ib.size.ascent() + ib.size.descent(),
+                            }),
+                        });
+                        start_run = end_egc;
+                        attrs = attrs_egc;
+                        continue;
+                    }
+                }
+
                 if !attrs.compatible(&attrs_egc) {
                     shaping.run(
                         &mut glyphs,
@@ -913,6 +960,7 @@ pub struct ShapeSpan {
     pub level: unicode_bidi::Level,
     pub words: Vec<ShapeWord>,
     pub byte_range: Range<usize>,
+    pub inline_box_spans: Vec<(Range<usize>, InlineBox)>,
 }
 
 impl ShapeSpan {
@@ -924,6 +972,7 @@ impl ShapeSpan {
             level: unicode_bidi::Level::ltr(),
             words: Vec::default(),
             byte_range: 0..0,
+            inline_box_spans: Vec::new(),
         }
     }
 
@@ -1107,6 +1156,18 @@ impl ShapeSpan {
         // Reverse words in spans that do not match line direction
         if line_rtl != level.is_rtl() {
             words.reverse();
+        }
+
+        self.inline_box_spans.clear();
+        for (range, attr_owned) in attrs_list.spans_iter() {
+            let start = range.start.max(span_range.start);
+            let end = range.end.min(span_range.end);
+            if start >= end {
+                continue;
+            }
+            if let Some(ib) = attr_owned.as_attrs().inline_box {
+                self.inline_box_spans.push((start..end, ib));
+            }
         }
 
         self.level = level;
@@ -1478,6 +1539,7 @@ impl ShapeLine {
                 level,
                 words: vec![word],
                 byte_range: 0..0,
+                inline_box_spans: Vec::new(),
             }
         });
 
@@ -2889,14 +2951,27 @@ impl ShapeLine {
             };
 
             let mut decorations: Vec<DecorationSpan> = Vec::new();
+            let mut inline_boxes: Vec<InlineBoxSpan> = Vec::new();
+            // Top/Bottom-aligned boxes need a second pass once the line's
+            // text-only ascent/descent are known. I'm tracking their index in
+            // `inline_boxes` and the baseline y at placement time.
+            //
+            // TODO: potentially a better approach can be used here
+            let mut ib_fixups: Vec<(usize, f32, InlineResolve)> = Vec::new();
+            let mut max_text_ascent: f32 = 0.;
+            let mut max_text_descent: f32 = 0.;
 
             let process_range = |range: Range<usize>,
                                  x: &mut f32,
                                  y: &mut f32,
                                  glyphs: &mut Vec<LayoutGlyph>,
                                  decorations: &mut Vec<DecorationSpan>,
+                                 inline_boxes: &mut Vec<InlineBoxSpan>,
+                                 ib_fixups: &mut Vec<(usize, f32, InlineResolve)>,
                                  max_ascent: &mut f32,
-                                 max_descent: &mut f32| {
+                                 max_descent: &mut f32,
+                                 max_text_ascent: &mut f32,
+                                 max_text_descent: &mut f32| {
                 for r in visual_line.ranges[range.clone()].iter() {
                     let is_ellipsis = r.span == ELLIPSIS_SPAN;
                     let span_words = self.get_span_words(r.span);
@@ -2910,9 +2985,15 @@ impl ShapeLine {
                                 &scratch.span_decoration_data[range.start..range.end]
                             })
                     };
+                    let ib_spans: &[(Range<usize>, InlineBox)] = if is_ellipsis {
+                        &[]
+                    } else {
+                        &self.spans[r.span].inline_box_spans
+                    };
                     // Cursor into deco_spans — advances forward as glyphs are
                     // emitted in byte order, giving amortized O(1) lookup.
                     let mut deco_cursor: usize = 0;
+                    let mut ib_cursor: usize = 0;
                     // If ending_glyph is not 0 we need to include glyphs from the ending_word
                     for i in r.start.word..r.end.word + usize::from(r.end.glyph != 0) {
                         let word = &span_words[i];
@@ -2974,6 +3055,8 @@ impl ShapeLine {
                                 x_advance,
                                 r.level,
                             );
+                            let placeholder_x = layout_glyph.x;
+                            let placeholder_y = layout_glyph.y;
                             // Fix ellipsis glyph indices: point both start and
                             // end to the elision boundary so that hit-detection
                             // places the cursor at the seam between visible and
@@ -3029,12 +3112,62 @@ impl ShapeLine {
                                     font_size: glyphs[glyph_idx].font_size,
                                 });
                             }
+
+                            let is_inline_box_placeholder = glyph.font_id == fontdb::ID::dummy();
+
+                            // Top/Bottom/Center boxes carry placeholder extents until the
+                            // second pass resolves them against the text.
+                            let mut is_resolved_box = false;
+
+                            // Inline box lookup (same cursor pattern as decorations).
+                            if is_inline_box_placeholder {
+                                if ib_cursor >= ib_spans.len()
+                                    || glyph.start < ib_spans[ib_cursor].0.start
+                                {
+                                    ib_cursor = 0;
+                                }
+                                while ib_cursor < ib_spans.len()
+                                    && ib_spans[ib_cursor].0.end <= glyph.start
+                                {
+                                    ib_cursor += 1;
+                                }
+                                if let Some((_range, ib)) = ib_spans
+                                    .get(ib_cursor)
+                                    .filter(|(range, _)| glyph.start >= range.start)
+                                {
+                                    let resolve = ib.size.resolve();
+                                    inline_boxes.push(InlineBoxSpan {
+                                        id: ib.id,
+                                        x: placeholder_x,
+                                        y: placeholder_y - ib.size.ascent(),
+                                        width: ib.size.width(),
+                                        height: ib.size.ascent() + ib.size.descent(),
+                                    });
+                                    is_resolved_box = !matches!(resolve, InlineResolve::None);
+                                    if is_resolved_box {
+                                        ib_fixups.push((
+                                            inline_boxes.len() - 1,
+                                            placeholder_y,
+                                            resolve,
+                                        ));
+                                    }
+                                }
+                            }
+
                             if !self.rtl {
                                 *x += x_advance;
                             }
                             *y += y_advance;
-                            *max_ascent = max_ascent.max(glyph_font_size * glyph.ascent);
-                            *max_descent = max_descent.max(glyph_font_size * glyph.descent);
+                            let g_asc = glyph_font_size * glyph.ascent;
+                            let g_desc = glyph_font_size * glyph.descent;
+                            if !is_resolved_box {
+                                *max_ascent = max_ascent.max(g_asc);
+                                *max_descent = max_descent.max(g_desc);
+                            }
+                            if !is_inline_box_placeholder {
+                                *max_text_ascent = max_text_ascent.max(g_asc);
+                                *max_text_descent = max_text_descent.max(g_desc);
+                            }
                         }
                     }
                 }
@@ -3048,8 +3181,12 @@ impl ShapeLine {
                         &mut y,
                         &mut glyphs,
                         &mut decorations,
+                        &mut inline_boxes,
+                        &mut ib_fixups,
                         &mut max_ascent,
                         &mut max_descent,
+                        &mut max_text_ascent,
+                        &mut max_text_descent,
                     );
                 }
             } else {
@@ -3061,10 +3198,51 @@ impl ShapeLine {
                         &mut y,
                         &mut glyphs,
                         &mut decorations,
+                        &mut inline_boxes,
+                        &mut ib_fixups,
                         &mut max_ascent,
                         &mut max_descent,
+                        &mut max_text_ascent,
+                        &mut max_text_descent,
                     );
                 }
+            }
+
+            // Second pass:
+            // resolve Top/Bottom/Center-aligned boxes against the now-known
+            // text extents of this line, then add their real extents to the
+            // line. Fall back to the box's height (or to the baseline, for
+            // Center) when no surrounding text exists.
+            //
+            // TODO: we probably can just keep a running tally instead of this
+            for (idx, placeholder_y, resolve) in &ib_fixups {
+                let span = &mut inline_boxes[*idx];
+                let height = span.height;
+                let ascent = match resolve {
+                    InlineResolve::Top => {
+                        if max_text_ascent > 0.0 {
+                            max_text_ascent
+                        } else {
+                            height
+                        }
+                    }
+                    InlineResolve::Bottom => {
+                        let descent = if max_text_descent > 0.0 {
+                            max_text_descent
+                        } else {
+                            height
+                        };
+                        height - descent
+                    }
+                    // Midpoint of the text extent, measured up from the baseline.
+                    InlineResolve::Center => {
+                        height * 0.5 + (max_text_ascent - max_text_descent) * 0.5
+                    }
+                    InlineResolve::None => continue,
+                };
+                span.y = *placeholder_y - ascent;
+                max_ascent = max_ascent.max(ascent);
+                max_descent = max_descent.max(height - ascent);
             }
 
             let mut line_height_opt: Option<f32> = None;
@@ -3090,6 +3268,7 @@ impl ShapeLine {
                 line_height_opt,
                 glyphs,
                 decorations,
+                inline_boxes,
             });
         }
 
@@ -3102,6 +3281,7 @@ impl ShapeLine {
                 line_height_opt: self.metrics_opt.map(|x| x.line_height),
                 glyphs: Vec::default(),
                 decorations: Vec::new(),
+                inline_boxes: Vec::new(),
             });
         }
 

@@ -12,8 +12,8 @@ use unicode_segmentation::UnicodeSegmentation;
 use crate::{
     render_decoration, Affinity, Align, Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem,
     BufferLine, Color, Cursor, DecorationSpan, Direction, Ellipsize, FontSystem, Hinting,
-    LayoutCursor, LayoutGlyph, LayoutLine, LineEnding, LineIter, Motion, Renderer, Scroll,
-    ShapeLine, Shaping, Wrap,
+    InlineBox, InlineBoxHit, InlineBoxSpan, LayoutCursor, LayoutGlyph, LayoutLine, LineEnding,
+    LineIter, Motion, Renderer, Scroll, ShapeLine, Shaping, Wrap,
 };
 
 bitflags::bitflags! {
@@ -46,6 +46,8 @@ pub struct LayoutRun<'a> {
     pub glyphs: &'a [LayoutGlyph],
     /// Text decoration spans covering ranges of glyphs
     pub decorations: &'a [DecorationSpan],
+    /// Inline box spans within this line
+    pub inline_boxes: &'a [InlineBoxSpan],
     /// Y offset to baseline of line
     pub line_y: f32,
     /// Y offset to top of line
@@ -197,6 +199,34 @@ impl LayoutRun<'_> {
             Cursor::new_with_affinity(self.line_i, glyph.end, Affinity::Before)
         }
     }
+
+    /// Test whether a point within this run's coordinate space lands on an
+    /// inline box, returning the box's id and the click-local position.
+    ///
+    /// `x` is in the buffer's horizontal coordinate space (same as
+    /// [`InlineBoxSpan::x`]). `y` is in the buffer's absolute vertical
+    /// coordinate space (same as what [`Buffer::hit`] accepts).
+    ///
+    /// NOTE: this method handles the `line_y`-relative conversion internally.
+    ///
+    /// Returns the first matching box if multiple overlap.
+    ///
+    /// TODO: how to handle overlap.
+    pub fn hit_inline_box(&self, x: f32, y: f32) -> Option<InlineBoxHit> {
+        for ib in self.inline_boxes {
+            let top = self.line_y + ib.y;
+            let bottom = top + ib.height;
+            let right = ib.x + ib.width;
+            if x >= ib.x && x <= right && y >= top && y <= bottom {
+                return Some(InlineBoxHit {
+                    id: ib.id,
+                    local_x: x - ib.x,
+                    local_y: y - top,
+                });
+            }
+        }
+        None
+    }
 }
 
 /// An iterator of visible text lines, see [`LayoutRun`]
@@ -253,7 +283,7 @@ impl<'b> Iterator for LayoutRunIter<'b> {
             while let Some(layout_line) = layout.get(self.layout_i) {
                 self.layout_i += 1;
 
-                let line_height = layout_line.line_height_opt.unwrap_or(self.line_height);
+                let line_height = layout_line.line_height(self.line_height);
                 self.total_height += line_height;
 
                 let line_top = self.line_top - self.scroll;
@@ -276,6 +306,7 @@ impl<'b> Iterator for LayoutRunIter<'b> {
                     rtl: shape.rtl,
                     glyphs: &layout_line.glyphs,
                     decorations: &layout_line.decorations,
+                    inline_boxes: &layout_line.inline_boxes,
                     line_y,
                     line_top,
                     line_height,
@@ -331,6 +362,18 @@ impl fmt::Display for Metrics {
     }
 }
 
+/// A rich text span that can be either regular text or an inline box placeholder.
+///
+/// Used with [`Buffer::set_rich_text_with_boxes`] to mix text and non-text elements
+/// (images, icons, widgets) in the text flow.
+#[derive(Clone, Debug)]
+pub enum RichSpan<'s, 'a> {
+    /// A span of styled text
+    Text(&'s str, Attrs<'a>),
+    /// An inline box placeholder that reserves space in the text flow
+    InlineBox(InlineBox),
+}
+
 /// A buffer of text that is shaped and laid out
 #[derive(Debug)]
 pub struct Buffer {
@@ -350,6 +393,8 @@ pub struct Buffer {
     direction: Direction,
     /// Dirty flags tracking which properties changed since last layout
     dirty: DirtyFlags,
+    /// Monotonic counter for [`Buffer::next_inline_box_id`].
+    next_inline_box_id: u64,
 }
 
 impl Clone for Buffer {
@@ -368,6 +413,7 @@ impl Clone for Buffer {
             hinting: self.hinting,
             direction: self.direction,
             dirty: self.dirty,
+            next_inline_box_id: self.next_inline_box_id,
         }
     }
 }
@@ -400,6 +446,7 @@ impl Buffer {
             hinting: Hinting::default(),
             direction: Direction::default(),
             dirty: DirtyFlags::empty(),
+            next_inline_box_id: 1,
         }
     }
 
@@ -491,14 +538,9 @@ impl Buffer {
                 .line_layout(font_system, layout_cursor.line)
                 .expect("shape_until_cursor failed to scroll forwards");
             (0..layout_cursor.layout).for_each(|layout_i| {
-                layout_y += layout[layout_i]
-                    .line_height_opt
-                    .unwrap_or(metrics.line_height);
+                layout_y += layout[layout_i].line_height(metrics.line_height);
             });
-            layout_y
-                + layout[layout_cursor.layout]
-                    .line_height_opt
-                    .unwrap_or(metrics.line_height)
+            layout_y + layout[layout_cursor.layout].line_height(metrics.line_height)
         };
 
         if self.scroll.line > layout_cursor.line
@@ -522,7 +564,7 @@ impl Buffer {
                         .line_layout(font_system, line_i)
                         .expect("shape_until_cursor failed to scroll forwards");
                     for layout_line in layout {
-                        total_height += layout_line.line_height_opt.unwrap_or(metrics.line_height);
+                        total_height += layout_line.line_height(metrics.line_height);
                     }
                     if total_height > height + self.scroll.vertical {
                         self.scroll.line = line_i;
@@ -601,8 +643,7 @@ impl Buffer {
                     if let Some(layout) = self.line_layout(font_system, line_i) {
                         let mut layout_height = 0.0;
                         for layout_line in layout {
-                            layout_height +=
-                                layout_line.line_height_opt.unwrap_or(metrics.line_height);
+                            layout_height += layout_line.line_height(metrics.line_height);
                         }
                         self.scroll.line = line_i;
                         self.scroll.vertical += layout_height;
@@ -640,7 +681,7 @@ impl Buffer {
                     .line_layout(font_system, line_i)
                     .expect("shape_until_scroll invalid line");
                 for layout_line in layout {
-                    let line_height = layout_line.line_height_opt.unwrap_or(metrics.line_height);
+                    let line_height = layout_line.line_height(metrics.line_height);
                     layout_height += line_height;
                     total_height += line_height;
                 }
@@ -1145,6 +1186,59 @@ impl Buffer {
         self.redraw = true;
     }
 
+    /// Mint a fresh [`crate::InlineBoxId`] guaranteed not to collide with any
+    /// other id previously returned by this method on the same buffer.
+    ///
+    /// Callers who pick their own ids are responsible for uniqueness. If two
+    /// boxes in the same layout share an id, any renderer that dispatches by
+    /// id (for example using a `HashMap<InlineBoxId, _>`) will be ambiguous.
+    /// Prefer this method when you don't already have a natural id.
+    pub fn next_inline_box_id(&mut self) -> crate::InlineBoxId {
+        let id = self.next_inline_box_id;
+        self.next_inline_box_id = id.wrapping_add(1);
+        crate::InlineBoxId::new(id)
+    }
+
+    /// Set rich text of buffer, accepting [`RichSpan`] items which can be either
+    /// text spans or inline box placeholders.
+    ///
+    /// Inline boxes insert a `U+FFFC` (Object Replacement Character) with the
+    /// box dimensions encoded in the attributes. The layout engine treats them
+    /// as normal glyphs for line breaking, wrapping, and alignment. Use
+    /// [`LayoutRun::inline_boxes`] to retrieve positioned box data for rendering.
+    pub fn set_rich_text_with_boxes<'r, 's, I>(
+        &mut self,
+        spans: I,
+        default_attrs: &Attrs,
+        shaping: Shaping,
+        alignment: Option<Align>,
+    ) where
+        I: IntoIterator<Item = RichSpan<'s, 'r>>,
+    {
+        // Convert RichSpan items into (&str, Attrs) pairs, substituting
+        // U+FFFC for inline boxes with the inline_box attribute set.
+        //
+        // Inline box placeholders inherit the most recent text style so that
+        // decoration/color/style behavior stays consistent with surrounding text.
+        let mut converted: alloc::vec::Vec<(&str, Attrs)> = alloc::vec::Vec::new();
+        let mut current_attrs = default_attrs.clone();
+        for span in spans {
+            match span {
+                RichSpan::Text(text, attrs) => {
+                    current_attrs = attrs.clone();
+                    converted.push((text, attrs));
+                }
+                RichSpan::InlineBox(ib) => {
+                    converted.push(("\u{FFFC}", current_attrs.clone().inline_box(ib)));
+                }
+            }
+        }
+
+        self.set_rich_text_impl(converted, default_attrs, shaping, alignment);
+        self.dirty |= DirtyFlags::TEXT_SET;
+        self.redraw = true;
+    }
+
     /// True if a redraw is needed
     pub const fn redraw(&self) -> bool {
         self.redraw
@@ -1165,6 +1259,22 @@ impl Buffer {
     /// [`shape_until_scroll`]: Self::shape_until_scroll
     pub fn layout_runs(&self) -> LayoutRunIter<'_> {
         LayoutRunIter::new(self)
+    }
+
+    /// Convert `(x, y)` to an [`InlineBoxHit`] if the point lands on an inline
+    /// box, or `None` otherwise.
+    ///
+    /// Complements [`Self::hit`], which always returns a text [`Cursor`]
+    /// regardless of whether the click was on a box. Callers that need
+    /// box-aware dispatch should call this first; if it returns `Some`, route
+    /// the event to the box handler, otherwise fall back to `hit`.
+    ///
+    /// Call [`shape_until_scroll`] first, or use [`BorrowedWithFontSystem`]
+    /// which does it automatically.
+    ///
+    /// [`shape_until_scroll`]: Self::shape_until_scroll
+    pub fn hit_inline_box(&self, x: f32, y: f32) -> Option<InlineBoxHit> {
+        self.layout_runs().find_map(|run| run.hit_inline_box(x, y))
     }
 
     /// Convert x, y position to Cursor (hit detection).
@@ -1649,7 +1759,10 @@ impl Buffer {
             callback,
         };
         for run in self.layout_runs() {
-            for glyph in run.glyphs {
+            for glyph in run.glyphs.iter() {
+                if glyph.font_id == fontdb::ID::dummy() {
+                    continue;
+                }
                 let physical_glyph = glyph.physical((0., run.line_y), 1.0);
                 let glyph_color = glyph.color_opt.map_or(color, |some| some);
                 renderer.glyph(physical_glyph, glyph_color);
@@ -1669,10 +1782,16 @@ impl Buffer {
     ) {
         self.shape_until_scroll(font_system, false);
         for run in self.layout_runs() {
-            for glyph in run.glyphs {
+            for glyph in run.glyphs.iter() {
+                if glyph.font_id == fontdb::ID::dummy() {
+                    continue;
+                }
                 let physical_glyph = glyph.physical((0., run.line_y), 1.0);
                 let glyph_color = glyph.color_opt.map_or(color, |some| some);
                 renderer.glyph(physical_glyph, glyph_color);
+            }
+            for span in run.inline_boxes {
+                renderer.inline_box(&run, span);
             }
             // draw decorations after glyphs so strikethrough is over the glyphs
             render_decoration(renderer, &run, color);
@@ -1783,6 +1902,21 @@ impl BorrowedWithFontSystem<'_, Buffer> {
             .set_rich_text(spans, default_attrs, shaping, alignment);
     }
 
+    /// Set rich text of buffer, accepting [`RichSpan`] items which can be either
+    /// text spans or inline box placeholders.
+    pub fn set_rich_text_with_boxes<'r, 's, I>(
+        &mut self,
+        spans: I,
+        default_attrs: &Attrs,
+        shaping: Shaping,
+        alignment: Option<Align>,
+    ) where
+        I: IntoIterator<Item = RichSpan<'s, 'r>>,
+    {
+        self.inner
+            .set_rich_text_with_boxes(spans, default_attrs, shaping, alignment);
+    }
+
     /// Shape lines until scroll, resolving any pending dirty state first.
     ///
     /// See [`Buffer::shape_until_scroll`].
@@ -1804,6 +1938,14 @@ impl BorrowedWithFontSystem<'_, Buffer> {
     pub fn hit(&mut self, x: f32, y: f32) -> Option<Cursor> {
         self.inner.shape_until_scroll(self.font_system, false);
         self.inner.hit(x, y)
+    }
+
+    /// Inline-box hit detection. See [`Buffer::hit_inline_box`].
+    ///
+    /// Automatically resolves any pending dirty state.
+    pub fn hit_inline_box(&mut self, x: f32, y: f32) -> Option<InlineBoxHit> {
+        self.inner.shape_until_scroll(self.font_system, false);
+        self.inner.hit_inline_box(x, y)
     }
 
     /// Apply a [`Motion`] to a [`Cursor`]

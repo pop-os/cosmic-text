@@ -104,6 +104,36 @@ impl DecorationSpan {
         }
     }
 }
+/// A span representing an inline box within a layout line.
+///
+/// NOTE: To get the absolute top, use `run.line_y + span.y`.
+#[derive(Clone, Debug, PartialEq)]
+pub struct InlineBoxSpan {
+    /// Identifier of the source [`crate::InlineBox`].
+    pub id: crate::InlineBoxId,
+    /// X offset of the box's left edge (absolute, buffer coordinate space).
+    pub x: f32,
+    /// Y offset of the box's top edge, relative to the line baseline.
+    pub y: f32,
+    /// Width in pixels.
+    pub width: f32,
+    /// Height in pixels.
+    pub height: f32,
+}
+
+/// Result of an inline-box hit test. Reports which box was hit and where the
+/// click landed within it.
+///
+/// NOTE: The local x and y potentially can be used to embed widgets! maybe.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct InlineBoxHit {
+    /// Identifier of the hit [`crate::InlineBox`].
+    pub id: crate::InlineBoxId,
+    /// Horizontal position within the box, in pixels from the left edge.
+    pub local_x: f32,
+    /// Vertical position within the box, in pixels from the top edge.
+    pub local_y: f32,
+}
 
 #[derive(Clone, Debug)]
 pub struct PhysicalGlyph {
@@ -151,6 +181,24 @@ pub struct LayoutLine {
     pub glyphs: Vec<LayoutGlyph>,
     /// Text decoration spans covering ranges of glyphs
     pub decorations: Vec<DecorationSpan>,
+    /// Inline box spans within this line
+    pub inline_boxes: Vec<InlineBoxSpan>,
+}
+
+impl LayoutLine {
+    /// Height of this line, given the buffer's default line height.
+    ///
+    /// A line holding inline boxes grows to contain them.
+    pub fn line_height(&self, default: f32) -> f32 {
+        let line_height = self.line_height_opt.unwrap_or(default);
+        if self.inline_boxes.is_empty() {
+            line_height
+        } else {
+            line_height
+                .max(default)
+                .max(self.max_ascent + self.max_descent)
+        }
+    }
 }
 
 /// Wrapping mode
