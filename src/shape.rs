@@ -2956,7 +2956,11 @@ impl ShapeLine {
                                 .get(glyph.start..glyph.end)
                                 .is_some_and(is_symbol_glyph);
 
-                            let glyph_font_size = match (
+                            let cluster_cells = match_mono_width
+                                .and_then(|_| line_text.get(glyph.start..glyph.end))
+                                .map(terminal_cluster_width);
+
+                            let mut glyph_font_size = match (
                                 match_mono_em_width,
                                 glyph.font_monospace_em_width,
                             ) {
@@ -2976,6 +2980,23 @@ impl ShapeLine {
                                 _ => font_size,
                             };
 
+                            if let (Some(mono_width), Some(cells)) =
+                                (match_mono_width, cluster_cells)
+                            {
+                                let blank_after = line_text.get(glyph.end..).map_or(0, |rest| {
+                                    rest.chars().take_while(|c| *c == ' ').count()
+                                });
+                                let max_width = (cells + blank_after) as f32 * mono_width;
+                                let width = glyph_font_size * glyph.x_advance;
+                                if !is_symbol
+                                    && !is_ellipsis
+                                    && cells > 0
+                                    && width > max_width + 0.01
+                                {
+                                    glyph_font_size *= max_width / width;
+                                }
+                            }
+
                             let mut x_advance = glyph_font_size * glyph.x_advance
                                 + if word.blank {
                                     justification_expansion
@@ -2989,11 +3010,10 @@ impl ShapeLine {
                                     let cluster = (glyph.start, glyph.end);
                                     if last_mono_cluster != Some(cluster) {
                                         last_mono_cluster = Some(cluster);
-                                        mono_cluster_left =
-                                            line_text.get(glyph.start..glyph.end).map_or_else(
-                                                || (x_advance / mono_width).round(),
-                                                |s| terminal_cluster_width(s) as f32,
-                                            ) * mono_width;
+                                        mono_cluster_left = cluster_cells.map_or_else(
+                                            || (x_advance / mono_width).round(),
+                                            |cells| cells as f32,
+                                        ) * mono_width;
                                     }
                                     let last_in_cluster = included_glyphs
                                         .get(glyph_i + 1)
