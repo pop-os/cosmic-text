@@ -6,6 +6,7 @@ use alloc::{
     vec::Vec,
 };
 use core::cmp;
+use std::time::Instant;
 
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -298,6 +299,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                 end,
                 text,
                 insert: false,
+                timestamp: Instant::now(),
             }
         });
 
@@ -422,6 +424,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                 end: cursor,
                 text: data.to_string(),
                 insert: true,
+                timestamp: Instant::now(),
             }
         });
 

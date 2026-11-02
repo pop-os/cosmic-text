@@ -2,6 +2,7 @@ use alloc::sync::Arc;
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, vec::Vec};
 use core::cmp;
+use std::time::Instant;
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{AttrsList, BorrowedWithFontSystem, Buffer, Cursor, FontSystem, Motion};
@@ -110,6 +111,8 @@ pub struct ChangeItem {
     pub text: String,
     /// Insert if true, delete if false
     pub insert: bool,
+    /// Change timestamp
+    pub timestamp: Instant,
 }
 
 impl ChangeItem {

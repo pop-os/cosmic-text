@@ -1,6 +1,9 @@
 use alloc::{collections::BTreeMap, string::String};
 use core::cmp;
+use cosmic_undo_2::Merge;
 use modit::{Event, Key, Parser, TextObject, WordIter};
+use std::ops::ControlFlow;
+use std::time::Duration;
 
 use crate::{
     Action, AttrsList, BorrowedWithFontSystem, BufferRef, Change, Color, Cursor, Edit, FontSystem,
@@ -27,18 +30,64 @@ fn undo_2_action<'buffer, E: Edit<'buffer>>(
     }
 }
 
+fn can_merge_change_items(first_change: &Change, second_change: &Change) -> bool {
+    let last_index = first_change.items.len() - 1;
+    let first_change_is_multichar_whitespace = if last_index > 0 {
+        first_change.items[last_index].text.trim().is_empty()
+            && first_change.items[last_index - 1].text.trim().is_empty()
+    } else {
+        false
+    };
+
+    if let Some(first_item) = first_change.items.last() {
+        if let Some(second_item) = second_change.items.first() {
+            return first_item.timestamp + Duration::from_millis(500) > second_item.timestamp
+                && second_item.insert == first_item.insert
+                && ((!second_item.text.trim().is_empty()
+                    && second_item.insert
+                    && !first_change_is_multichar_whitespace)
+                    || (!first_item.text.trim().is_empty() && !second_item.insert)
+                    || (first_item.text.trim().is_empty() && second_item.text.trim().is_empty()));
+        }
+    }
+    false
+}
+
 fn finish_change<'buffer, E: Edit<'buffer>>(
     editor: &mut E,
     commands: &mut cosmic_undo_2::Commands<Change>,
     changed: &mut bool,
     pivot: Option<usize>,
 ) -> Option<Change> {
-    //TODO: join changes together
     match editor.finish_change() {
         Some(change) => {
             if !change.items.is_empty() {
                 commands.push(change.clone());
                 *changed = eval_changed(commands, pivot);
+                if *changed {
+                    commands.merge(|mut it| {
+                        let start = it.clone();
+                        if let Some(second_change) = it.next() {
+                            if let Some(first_change) = it.next() {
+                                if can_merge_change_items(first_change, second_change) {
+                                    return ControlFlow::Break(Some(Merge {
+                                        start,
+                                        end: it,
+                                        command: Some(Change {
+                                            items: [
+                                                first_change.items.clone(),
+                                                second_change.items.clone(),
+                                            ]
+                                            .concat(),
+                                        }),
+                                    }));
+                                }
+                            };
+                            return ControlFlow::Break(None);
+                        };
+                        ControlFlow::Break(None)
+                    });
+                }
             }
             Some(change)
         }
