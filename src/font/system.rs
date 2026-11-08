@@ -204,7 +204,7 @@ impl FontSystem {
     /// (e.g. `$XDG_CACHE_HOME/cosmic-text/fonts.cache`).
     ///
     /// Falls back to a normal, uncached scan if no cache directory can be determined.
-    #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
+    #[cfg(all(feature = "std", not(target_family = "wasm")))]
     pub fn new_cached() -> Self {
         Self::new_with_fonts_and_cache(core::iter::empty())
     }
@@ -215,7 +215,7 @@ impl FontSystem {
     /// directory).
     ///
     /// Returns `None` if no cache directory can be determined from the environment.
-    #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
+    #[cfg(all(feature = "std", not(target_family = "wasm")))]
     pub fn default_cache_path() -> Option<std::path::PathBuf> {
         super::cache::default_cache_path()
     }
@@ -231,7 +231,7 @@ impl FontSystem {
     ///
     /// To cache at an explicit location instead, use
     /// [`FontSystem::new_with_fonts_and_cache_path`].
-    #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
+    #[cfg(all(feature = "std", not(target_family = "wasm")))]
     pub fn new_with_fonts_and_cache(fonts: impl IntoIterator<Item = fontdb::Source>) -> Self {
         Self::new_with_fonts_and_cache_inner(fonts, Self::default_cache_path())
     }
@@ -239,7 +239,7 @@ impl FontSystem {
     /// Like [`FontSystem::new_with_fonts_and_cache`], but uses the persistent system-font
     /// index cache at the explicitly provided `cache_path` rather than the default
     /// location.
-    #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
+    #[cfg(all(feature = "std", not(target_family = "wasm")))]
     pub fn new_with_fonts_and_cache_path(
         fonts: impl IntoIterator<Item = fontdb::Source>,
         cache_path: std::path::PathBuf,
@@ -247,7 +247,7 @@ impl FontSystem {
         Self::new_with_fonts_and_cache_inner(fonts, Some(cache_path))
     }
 
-    #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
+    #[cfg(all(feature = "std", not(target_family = "wasm")))]
     fn new_with_fonts_and_cache_inner(
         fonts: impl IntoIterator<Item = fontdb::Source>,
         cache_path: Option<std::path::PathBuf>,
@@ -444,7 +444,7 @@ impl FontSystem {
             //TODO: do not create AttrsOwned unless entry does not already exist
             .entry(attrs.into())
             .or_insert_with(|| {
-                #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
+                #[cfg(all(feature = "std", not(target_family = "wasm")))]
                 let now = std::time::Instant::now();
 
                 let mut font_match_keys = self
@@ -483,7 +483,7 @@ impl FontSystem {
                     }
                 }
 
-                #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
+                #[cfg(all(feature = "std", not(target_family = "wasm")))]
                 {
                     let elapsed = now.elapsed();
                     log::debug!("font matches for {attrs:?} in {elapsed:?}");
@@ -509,7 +509,7 @@ impl FontSystem {
 
     #[cfg(feature = "std")]
     fn load_fonts(db: &mut fontdb::Database, fonts: impl Iterator<Item = fontdb::Source>) {
-        #[cfg(not(target_arch = "wasm32"))]
+        #[cfg(not(target_family = "wasm"))]
         let now = std::time::Instant::now();
 
         db.load_system_fonts();
@@ -518,7 +518,7 @@ impl FontSystem {
             db.load_font_source(source);
         }
 
-        #[cfg(not(target_arch = "wasm32"))]
+        #[cfg(not(target_family = "wasm"))]
         log::debug!(
             "Parsed {} font faces in {}ms.",
             db.len(),
