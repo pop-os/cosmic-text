@@ -24,7 +24,7 @@ pub use fallback::{Fallback, PlatformFallback};
 pub use self::system::*;
 mod system;
 
-#[cfg(all(feature = "std", not(target_arch = "wasm32")))]
+#[cfg(all(feature = "std", not(target_family = "wasm")))]
 mod cache;
 
 struct OwnedFaceData {
@@ -250,7 +250,7 @@ mod test {
         use crate::FontSystem;
         use sys_locale::get_locale;
 
-        #[cfg(not(target_arch = "wasm32"))]
+        #[cfg(not(target_family = "wasm"))]
         let now = std::time::Instant::now();
 
         let mut db = fontdb::Database::new();
@@ -258,7 +258,7 @@ mod test {
         db.load_system_fonts();
         FontSystem::new_with_locale_and_db(locale, db);
 
-        #[cfg(not(target_arch = "wasm32"))]
+        #[cfg(not(target_family = "wasm"))]
         println!("Fonts load time {}ms.", now.elapsed().as_millis());
     }
 }

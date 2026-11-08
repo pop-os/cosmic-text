@@ -1174,7 +1174,7 @@ impl Buffer {
     ///
     /// [`shape_until_scroll`]: Self::shape_until_scroll
     pub fn hit(&self, x: f32, y: f32) -> Option<Cursor> {
-        #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
+        #[cfg(all(feature = "std", not(target_family = "wasm")))]
         let instant = std::time::Instant::now();
 
         let mut new_cursor_opt = None;
@@ -1267,7 +1267,7 @@ impl Buffer {
             }
         }
 
-        #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
+        #[cfg(all(feature = "std", not(target_family = "wasm")))]
         log::trace!("click({}, {}): {:?}", x, y, instant.elapsed());
 
         new_cursor_opt
