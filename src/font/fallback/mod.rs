@@ -280,10 +280,19 @@ impl<'a> FontFallbackIter<'a> {
         let default_family = self.default_families[self.default_i - 1];
         let default_family_name = self.font_system.db().family_name(default_family);
 
-        self.font_match_keys
+        // Prefer the family name over the matching weight.
+        // Please refer to [Issue #241](https://github.com/pop-os/cosmic-text/issues/241) for the details.
+        let mut family_keys = self
+            .font_match_keys
             .iter()
-            .filter(|m_key| m_key.font_weight_diff == 0 || m_key.variable_weight_match)
-            .find(|m_key| self.face_contains_family(m_key.id, default_family_name))
+            .filter(|key| self.face_contains_family(key.id, default_family_name))
+            .peekable();
+
+        // `font_match_keys` is ordered by weight difference, so choose the first match.
+        let first = family_keys.peek().copied();
+        family_keys
+            .find(|key| key.font_weight_diff == 0 || key.variable_weight_match)
+            .or(first)
     }
 
     fn next_item(&mut self, fallbacks: &Fallbacks) -> Option<<Self as Iterator>::Item> {
