@@ -1,5 +1,6 @@
 use cosmic_text::{
-    fontdb, Attrs, Buffer, Family, FeatureTag, FontFeatures, FontSystem, Metrics, Shaping,
+    fontdb, Attrs, Buffer, Family, FeatureTag, FontFeatures, FontSystem, LineEnding, Metrics,
+    Shaping,
 };
 
 // Test for https://github.com/pop-os/cosmic-text/issues/364
@@ -119,4 +120,27 @@ fn glyph_ids(font_system: &mut FontSystem, text: &str, attrs: &Attrs<'_>) -> Vec
         .layout_runs()
         .flat_map(|run| run.glyphs.iter().map(|glyph| glyph.glyph_id))
         .collect()
+}
+
+// Please see the issue [#291](https://github.com/pop-os/cosmic-text/issues/291).
+// `set_rich_text` should use the line ending information to split lines.
+#[test]
+fn rich_text_respects_line_endings() {
+    let mut font_system = FontSystem::new();
+
+    let metrics = Metrics::new(32.0, 44.0);
+    let mut buffer = Buffer::new(&mut font_system, metrics);
+    let mut buffer = buffer.borrow_with(&mut font_system);
+
+    let attrs = Attrs::new();
+
+    buffer.set_rich_text(
+        [("a\u{2029}b\r\nc", attrs.clone())],
+        &attrs,
+        Shaping::Advanced,
+        None,
+    );
+
+    let endings: Vec<_> = buffer.lines.iter().map(|line| line.ending()).collect();
+    assert_eq!(endings, [LineEnding::CrLf, LineEnding::None]);
 }

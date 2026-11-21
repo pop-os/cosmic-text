@@ -10,10 +10,10 @@ use core_maths::CoreFloat;
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
-    render_decoration, Affinity, Align, Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem,
-    BufferLine, Color, Cursor, DecorationSpan, Direction, Ellipsize, FontSystem, Hinting,
-    LayoutCursor, LayoutGlyph, LayoutLine, LineEnding, LineIter, Motion, Renderer, Scroll,
-    ShapeLine, Shaping, Wrap,
+    render_decoration, Affinity, Align, Attrs, AttrsList, BorrowedWithFontSystem, BufferLine,
+    Color, Cursor, DecorationSpan, Direction, Ellipsize, FontSystem, Hinting, LayoutCursor,
+    LayoutGlyph, LayoutLine, LineEnding, LineIter, Motion, Renderer, Scroll, ShapeLine, Shaping,
+    Wrap,
 };
 
 bitflags::bitflags! {
@@ -1002,15 +1002,8 @@ impl Buffer {
         let mut maybe_span = spans_iter.next();
 
         // split the string into lines, as ranges
-        let string_start = string.as_ptr() as usize;
-        let mut lines_iter = BidiParagraphs::new(&string).map(|line: &str| {
-            let start = line.as_ptr() as usize - string_start;
-            let end = start + line.len();
-            start..end
-        });
+        let mut lines_iter = LineIter::new(&string);
         let mut maybe_line = lines_iter.next();
-        //TODO: set this based on information from spans
-        let line_ending = LineEnding::default();
 
         let mut line_count = 0;
         let mut attrs_list = self
@@ -1025,20 +1018,23 @@ impl Buffer {
             .unwrap_or_default();
 
         loop {
-            let (Some(line_range), Some((attrs, span_range))) = (&maybe_line, &maybe_span) else {
+            let (Some((line_range, line_ending)), Some((attrs, span_range))) =
+                (&maybe_line, &maybe_span)
+            else {
                 // this is reached only if this text is empty
                 if self.lines.len() == line_count {
                     self.lines.push(BufferLine::empty());
                 }
                 self.lines[line_count].reset_new(
                     String::new(),
-                    line_ending,
+                    LineEnding::None,
                     AttrsList::new(default_attrs),
                     shaping,
                 );
                 line_count += 1;
                 break;
             };
+            let line_ending = *line_ending;
 
             // start..end is the intersection of this line and this span
             let start = line_range.start.max(span_range.start);
