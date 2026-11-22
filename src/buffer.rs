@@ -10,10 +10,10 @@ use core_maths::CoreFloat;
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{
-    render_decoration, Affinity, Align, Attrs, AttrsList, BidiParagraphs, BorrowedWithFontSystem,
-    BufferLine, Color, Cursor, DecorationSpan, Direction, Ellipsize, FontSystem, Hinting,
-    LayoutCursor, LayoutGlyph, LayoutLine, LineEnding, LineIter, Motion, Renderer, Scroll,
-    ShapeLine, Shaping, Wrap,
+    render_decoration, Affinity, Align, Attrs, AttrsList, BorrowedWithFontSystem, BufferLine,
+    Color, Cursor, DecorationSpan, Direction, Ellipsize, FontSystem, Hinting, LayoutCursor,
+    LayoutGlyph, LayoutLine, LineEnding, LineIter, Motion, Renderer, Scroll, ShapeLine, Shaping,
+    Wrap,
 };
 
 bitflags::bitflags! {
@@ -1002,15 +1002,8 @@ impl Buffer {
         let mut maybe_span = spans_iter.next();
 
         // split the string into lines, as ranges
-        let string_start = string.as_ptr() as usize;
-        let mut lines_iter = BidiParagraphs::new(&string).map(|line: &str| {
-            let start = line.as_ptr() as usize - string_start;
-            let end = start + line.len();
-            start..end
-        });
+        let mut lines_iter = LineIter::new(&string);
         let mut maybe_line = lines_iter.next();
-        //TODO: set this based on information from spans
-        let line_ending = LineEnding::default();
 
         let mut line_count = 0;
         let mut attrs_list = self
@@ -1025,20 +1018,23 @@ impl Buffer {
             .unwrap_or_default();
 
         loop {
-            let (Some(line_range), Some((attrs, span_range))) = (&maybe_line, &maybe_span) else {
+            let (Some((line_range, line_ending)), Some((attrs, span_range))) =
+                (&maybe_line, &maybe_span)
+            else {
                 // this is reached only if this text is empty
                 if self.lines.len() == line_count {
                     self.lines.push(BufferLine::empty());
                 }
                 self.lines[line_count].reset_new(
                     String::new(),
-                    line_ending,
+                    LineEnding::None,
                     AttrsList::new(default_attrs),
                     shaping,
                 );
                 line_count += 1;
                 break;
             };
+            let line_ending = *line_ending;
 
             // start..end is the intersection of this line and this span
             let start = line_range.start.max(span_range.start);
@@ -1102,6 +1098,36 @@ impl Buffer {
                     break;
                 }
             }
+        }
+
+        // The above loop ensures `line_count` is always larger than 0.
+        let last_ending = self.lines[line_count - 1].ending();
+        // Ensure there is an ending line with no line ending.
+        if last_ending != LineEnding::None {
+            // To match the line height with the last span, use the last span's attrs.
+            let last_span = spans_iter.last().or(maybe_span);
+            let attrs = match &last_span {
+                Some((attrs, _)) if attrs.metrics_opt.is_some() => attrs,
+                _ => default_attrs,
+            };
+            if line_count < self.lines.len() {
+                let reused_text = self.lines[line_count].reclaim_text();
+                let reused_attrs = self.lines[line_count].reclaim_attrs().reset(attrs);
+                self.lines[line_count].reset_new(
+                    reused_text,
+                    LineEnding::None,
+                    reused_attrs,
+                    shaping,
+                );
+            } else {
+                self.lines.push(BufferLine::new(
+                    "",
+                    LineEnding::None,
+                    AttrsList::new(attrs),
+                    shaping,
+                ));
+            }
+            line_count += 1;
         }
 
         // Discard excess lines now that we have reused as much of the existing allocations as possible.
