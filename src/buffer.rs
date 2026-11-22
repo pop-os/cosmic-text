@@ -1100,6 +1100,36 @@ impl Buffer {
             }
         }
 
+        // The above loop ensures `line_count` is always larger than 0.
+        let last_ending = self.lines[line_count - 1].ending();
+        // Ensure there is an ending line with no line ending.
+        if last_ending != LineEnding::None {
+            // To match the line height with the last span, use the last span's attrs.
+            let last_span = spans_iter.last().or(maybe_span);
+            let attrs = match &last_span {
+                Some((attrs, _)) if attrs.metrics_opt.is_some() => attrs,
+                _ => default_attrs,
+            };
+            if line_count < self.lines.len() {
+                let reused_text = self.lines[line_count].reclaim_text();
+                let reused_attrs = self.lines[line_count].reclaim_attrs().reset(attrs);
+                self.lines[line_count].reset_new(
+                    reused_text,
+                    LineEnding::None,
+                    reused_attrs,
+                    shaping,
+                );
+            } else {
+                self.lines.push(BufferLine::new(
+                    "",
+                    LineEnding::None,
+                    AttrsList::new(attrs),
+                    shaping,
+                ));
+            }
+            line_count += 1;
+        }
+
         // Discard excess lines now that we have reused as much of the existing allocations as possible.
         self.lines.truncate(line_count);
 
