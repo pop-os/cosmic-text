@@ -4,7 +4,10 @@ use alloc::{string::String, vec::Vec};
 use core::cmp;
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::{AttrsList, BorrowedWithFontSystem, Buffer, Cursor, FontSystem, Motion};
+use crate::{
+    Attrs, AttrsList, BorrowedWithFontSystem, Buffer, BufferLine, Cursor, FontSystem, InlineBox,
+    InlineBoxId, LineEnding, Motion,
+};
 
 pub use self::editor::*;
 mod editor;
@@ -99,6 +102,36 @@ impl From<Arc<Buffer>> for BufferRef<'_> {
     }
 }
 
+/// Join slices of lines into one string, with each line's ending between
+/// them, and an attrs list using the same byte offsets as that string.
+pub(crate) fn text_with_attrs<'a>(
+    lines: impl IntoIterator<Item = (&'a BufferLine, core::ops::Range<usize>)>,
+) -> (String, AttrsList) {
+    let mut text = String::new();
+    let mut attrs_list: Option<AttrsList> = None;
+    let mut last_ending: Option<LineEnding> = None;
+    for (line, range) in lines {
+        if let Some(ending) = last_ending {
+            text.push_str(ending.as_str());
+        }
+        let attrs_list =
+            attrs_list.get_or_insert_with(|| AttrsList::new(&line.attrs_list().defaults()));
+        let mut part = line.attrs_list().clone().split_off(range.start);
+        part.split_off(range.end - range.start);
+        let offset = text.len();
+        if !range.is_empty() && part.defaults() != attrs_list.defaults() {
+            attrs_list.add_span(offset..offset + range.len(), &part.defaults());
+        }
+        for (span, attrs) in part.spans_iter() {
+            attrs_list.add_span(offset + span.start..offset + span.end, &attrs.as_attrs());
+        }
+        text.push_str(&line.text()[range]);
+        last_ending = Some(line.ending());
+    }
+    let attrs_list = attrs_list.unwrap_or_else(|| AttrsList::new(&Attrs::new()));
+    (text, attrs_list)
+}
+
 /// A unique change to an editor
 #[derive(Clone, Debug)]
 pub struct ChangeItem {
@@ -108,6 +141,10 @@ pub struct ChangeItem {
     pub end: Cursor,
     /// Text to be inserted or deleted
     pub text: String,
+    /// Attributes of `text`, using the same byte offsets. `None` derives them
+    /// from the surrounding text on insert, like [`Edit::insert_string`].
+    /// Deletions always record them so that undo restores inline boxes.
+    pub attrs_list: Option<AttrsList>,
     /// Insert if true, delete if false
     pub insert: bool,
 }
@@ -303,8 +340,45 @@ pub trait Edit<'buffer> {
     /// Insert text at specified cursor with specified `attrs_list`
     fn insert_at(&mut self, cursor: Cursor, data: &str, attrs_list: Option<AttrsList>) -> Cursor;
 
-    /// Copy selection
+    /// Copy the selection as plain text.
+    ///
+    /// Inline box placeholders are omitted, so the result is safe to hand to
+    /// the system clipboard. Use [`Edit::copy_selection_with_attrs`] to keep
+    /// boxes and styling for a paste back into an editor.
     fn copy_selection(&self) -> Option<String>;
+
+    /// Copy the selection as text plus the attributes of that text, with
+    /// inline box placeholders and their boxes kept.
+    ///
+    /// The attrs list uses the same byte offsets as the text, so the pair can
+    /// go straight back into [`Edit::insert_string`]. Before pasting, pass the
+    /// attrs list through [`Buffer::remint_inline_box_ids`] so the pasted
+    /// boxes get ids of their own:
+    ///
+    /// ```ignore
+    /// let (text, mut attrs) = editor.copy_selection_with_attrs()?;
+    /// let renamed = editor.with_buffer_mut(|b| b.remint_inline_box_ids(&mut attrs));
+    /// editor.insert_string(&text, Some(attrs));
+    /// ```
+    fn copy_selection_with_attrs(&self) -> Option<(String, AttrsList)> {
+        let (start, end) = self.selection_bounds()?;
+        Some(self.with_buffer(|buffer| {
+            let lines = buffer.lines[start.line..=end.line]
+                .iter()
+                .enumerate()
+                .map(|(i, line)| {
+                    let line_i = start.line + i;
+                    let from = if line_i == start.line { start.index } else { 0 };
+                    let to = if line_i == end.line {
+                        end.index
+                    } else {
+                        line.text().len()
+                    };
+                    (line, from..to)
+                });
+            text_with_attrs(lines)
+        }))
+    }
 
     /// Delete selection, adjusting cursor and returning true if there was a selection
     // Also used by backspace, delete, insert, and enter when there is a selection
@@ -316,6 +390,41 @@ pub trait Edit<'buffer> {
         self.delete_selection();
         let new_cursor = self.insert_at(self.cursor(), data, attrs_list);
         self.set_cursor(new_cursor);
+    }
+
+    /// Insert an [`InlineBox`] placeholder at the current cursor, replacing any
+    /// active selection.
+    fn insert_inline_box(&mut self, inline_box: InlineBox) {
+        self.delete_selection();
+        let cursor = self.cursor();
+        let attrs_list = self.with_buffer(|buffer| {
+            let base = buffer
+                .lines
+                .get(cursor.line)
+                .map(|line| line.attrs_list().get_span(cursor.index.saturating_sub(1)))
+                .unwrap_or_else(Attrs::new);
+            AttrsList::new(&base.inline_box(inline_box))
+        });
+        let new_cursor = self.insert_at(cursor, "\u{FFFC}", Some(attrs_list));
+        self.set_cursor(new_cursor);
+    }
+
+    /// Remove the inline box with the given `id`, if present.
+    fn remove_inline_box(&mut self, id: InlineBoxId) -> bool {
+        let range = self.with_buffer(|buffer| {
+            let (start, _) = buffer.inline_boxes().find(|(_, ib)| ib.id == id)?;
+            let end = Cursor::new(start.line, start.index + "\u{FFFC}".len());
+            Some((start, end))
+        });
+
+        match range {
+            Some((start, end)) => {
+                self.delete_range(start, end);
+                self.set_cursor(start);
+                true
+            }
+            None => false,
+        }
     }
 
     /// Apply a change
@@ -362,5 +471,15 @@ impl<'buffer, E: Edit<'buffer>> BorrowedWithFontSystem<'_, E> {
     /// Perform an [Action] on the editor
     pub fn action(&mut self, action: Action) {
         self.inner.action(self.font_system, action);
+    }
+
+    /// Insert an [`InlineBox`] at the cursor
+    pub fn insert_inline_box(&mut self, inline_box: InlineBox) {
+        self.inner.insert_inline_box(inline_box);
+    }
+
+    /// Remove the inline box with the given `id`
+    pub fn remove_inline_box(&mut self, id: InlineBoxId) -> bool {
+        self.inner.remove_inline_box(id)
     }
 }

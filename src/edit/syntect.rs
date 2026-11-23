@@ -327,8 +327,7 @@ impl<'buffer> Edit<'buffer> for SyntaxEditor<'_, 'buffer> {
                         match buffer.line_layout(font_system, line_i) {
                             Some(layout_lines) => {
                                 for layout_line in layout_lines.iter() {
-                                    total_height +=
-                                        layout_line.line_height_opt.unwrap_or(metrics.line_height);
+                                    total_height += layout_line.line_height(metrics.line_height);
                                 }
                             }
                             None => {
@@ -398,8 +397,7 @@ impl<'buffer> Edit<'buffer> for SyntaxEditor<'_, 'buffer> {
                     match buffer.line_layout(font_system, line_i) {
                         Some(layout_lines) => {
                             for layout_line in layout_lines.iter() {
-                                total_height +=
-                                    layout_line.line_height_opt.unwrap_or(metrics.line_height);
+                                total_height += layout_line.line_height(metrics.line_height);
                             }
                         }
                         None => {

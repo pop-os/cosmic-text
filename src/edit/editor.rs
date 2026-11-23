@@ -32,6 +32,75 @@ fn cursor_position(cursor: &Cursor, run: &LayoutRun) -> Option<(i32, i32)> {
     Some((x as i32, run.line_top as i32))
 }
 
+#[derive(Clone, Copy)]
+struct InlineBoxCursorHit {
+    leading: Cursor,
+    trailing: Cursor,
+    local_x: f32,
+    width: f32,
+}
+
+fn inline_box_cursor_hit(run: &LayoutRun, x: f32, y: f32) -> Option<InlineBoxCursorHit> {
+    for span in run.inline_boxes {
+        let top = run.line_y + span.y;
+        let bottom = top + span.height;
+        let right = span.x + span.width;
+        if x < span.x || x > right || y < top || y > bottom {
+            continue;
+        }
+
+        let glyph = run.glyphs.iter().find(|glyph| {
+            glyph.font_id == fontdb::ID::dummy()
+                && glyph.start == span.start
+                && glyph.end == span.end
+        })?;
+
+        return Some(InlineBoxCursorHit {
+            leading: run.cursor_from_glyph_left(glyph),
+            trailing: run.cursor_from_glyph_right(glyph),
+            local_x: x - span.x,
+            width: span.width,
+        });
+    }
+
+    None
+}
+
+fn pick_inline_box_cursor(hit: InlineBoxCursorHit) -> Cursor {
+    if hit.local_x >= hit.width / 2.0 {
+        hit.trailing
+    } else {
+        hit.leading
+    }
+}
+
+/// Top and height of the caret on `run`.
+fn caret_extent(cursor: &Cursor, run: &LayoutRun, default_line_height: f32) -> (i32, u32) {
+    let glyph = run
+        .glyphs
+        .iter()
+        .find(|glyph| glyph.end == cursor.index)
+        .or_else(|| run.glyphs.iter().find(|glyph| glyph.start == cursor.index));
+    let Some(glyph) = glyph else {
+        return (run.line_top as i32, run.line_height as u32);
+    };
+    if glyph.font_id == fontdb::ID::dummy() {
+        if let Some(span) = run
+            .inline_boxes
+            .iter()
+            .find(|span| span.start == glyph.start && span.end == glyph.end)
+        {
+            return ((run.line_y + span.y) as i32, span.height as u32);
+        }
+    }
+    let height = glyph.line_height_opt.unwrap_or(default_line_height);
+    let leading = (height - (glyph.ascender + glyph.descender)) / 2.0;
+    (
+        (run.line_y - glyph.ascender - leading) as i32,
+        height as u32,
+    )
+}
+
 impl<'buffer> Editor<'buffer> {
     /// Create a new [`Editor`] with the provided [`Buffer`]
     pub fn new(buffer: impl Into<BufferRef<'buffer>>) -> Self {
@@ -142,12 +211,17 @@ impl<'buffer> Editor<'buffer> {
                 }
 
                 // Draw cursor
-                if let Some((x, y)) = cursor_position(&self.cursor, &run) {
-                    renderer.rectangle(x, y, 1, line_height as u32, cursor_color);
+                if let Some(x) = run.cursor_position(&self.cursor) {
+                    let (y, height) =
+                        caret_extent(&self.cursor, &run, buffer.metrics().line_height);
+                    renderer.rectangle(x as i32, y, 1, height, cursor_color);
                 }
 
-                render_decoration(renderer, &run, text_color);
                 for glyph in run.glyphs {
+                    if glyph.font_id == fontdb::ID::dummy() {
+                        continue;
+                    }
+
                     let physical_glyph = glyph.physical((0., line_y), 1.0);
 
                     let mut glyph_color = glyph.color_opt.map_or(text_color, |some| some);
@@ -165,6 +239,12 @@ impl<'buffer> Editor<'buffer> {
 
                     renderer.glyph(physical_glyph, glyph_color);
                 }
+
+                for span in run.inline_boxes {
+                    renderer.inline_box(&run, span);
+                }
+
+                render_decoration(renderer, &run, text_color);
             }
         });
     }
@@ -283,20 +363,15 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                 }
             }
 
-            let mut text = String::new();
-            let mut last_ending: Option<LineEnding> = None;
-            for line in change_lines {
-                if let Some(ending) = last_ending {
-                    text.push_str(ending.as_str());
-                }
-                text.push_str(line.text());
-                last_ending = Some(line.ending());
-            }
+            let (text, attrs_list) = super::text_with_attrs(
+                change_lines.iter().map(|line| (line, 0..line.text().len())),
+            );
 
             ChangeItem {
                 start,
                 end,
                 text,
+                attrs_list: Some(attrs_list),
                 insert: false,
             }
         });
@@ -317,6 +392,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
             return cursor;
         }
 
+        let change_attrs = attrs_list.clone();
         let change_item = self.with_buffer_mut(|buffer| {
             // Save cursor for change tracking
             let start = cursor;
@@ -358,7 +434,10 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
 
             // Collect attributes
             let mut final_attrs = attrs_list.unwrap_or_else(|| {
-                AttrsList::new(&line.attrs_list().get_span(cursor.index.saturating_sub(1)))
+                let mut attrs = line.attrs_list().get_span(cursor.index.saturating_sub(1));
+                // Text typed after an inline box must not inherit the box itself.
+                attrs.inline_box = None;
+                AttrsList::new(&attrs)
             });
 
             // Append the inserted text, line by line
@@ -375,6 +454,10 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                 let mut these_attrs = final_attrs.split_off(data_line.len());
                 remaining_split_len -= data_line.len() + ending.as_str().len();
                 core::mem::swap(&mut these_attrs, &mut final_attrs);
+                // Drop the ending's attrs so `final_attrs` starts at the next line.
+                if !ending.as_str().is_empty() {
+                    final_attrs = final_attrs.split_off(ending.as_str().len());
+                }
                 line.append(&BufferLine::new(
                     data_line,
                     ending,
@@ -402,12 +485,10 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
             for (range, ending) in lines_iter.rev() {
                 let data_line = &data[range];
                 remaining_split_len -= data_line.len() + ending.as_str().len();
-                let tmp = BufferLine::new(
-                    data_line,
-                    ending,
-                    final_attrs.split_off(remaining_split_len),
-                    Shaping::Advanced,
-                );
+                let mut line_attrs = final_attrs.split_off(remaining_split_len);
+                // Drop the ending's attrs because the line only spans its text.
+                line_attrs.split_off(data_line.len());
+                let tmp = BufferLine::new(data_line, ending, line_attrs, Shaping::Advanced);
                 buffer.lines.insert(insert_line, tmp);
                 cursor.line += 1;
             }
@@ -421,6 +502,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
                 start,
                 end: cursor,
                 text: data.to_string(),
+                attrs_list: change_attrs,
                 insert: true,
             }
         });
@@ -435,28 +517,46 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
     fn copy_selection(&self) -> Option<String> {
         let (start, end) = self.selection_bounds()?;
         self.with_buffer(|buffer| {
+            // Append `line[range]` without inline box placeholders.
+            let push_text =
+                |selection: &mut String, line: &BufferLine, range: core::ops::Range<usize>| {
+                    for (i, c) in line.text()[range.clone()].char_indices() {
+                        let is_box = c == '\u{FFFC}'
+                            && line
+                                .attrs_list()
+                                .get_span(range.start + i)
+                                .inline_box
+                                .is_some();
+                        if !is_box {
+                            selection.push(c);
+                        }
+                    }
+                };
+
             let mut selection = String::new();
             // Take the selection from the first line
             {
+                let line = &buffer.lines[start.line];
                 // Add selected part of line to string
                 if start.line == end.line {
-                    selection.push_str(&buffer.lines[start.line].text()[start.index..end.index]);
+                    push_text(&mut selection, line, start.index..end.index);
                 } else {
-                    selection.push_str(&buffer.lines[start.line].text()[start.index..]);
+                    push_text(&mut selection, line, start.index..line.text().len());
                     selection.push('\n');
                 }
             }
 
             // Take the selection from all interior lines (if they exist)
             for line_i in start.line + 1..end.line {
-                selection.push_str(buffer.lines[line_i].text());
+                let line = &buffer.lines[line_i];
+                push_text(&mut selection, line, 0..line.text().len());
                 selection.push('\n');
             }
 
             // Take the selection from the last line
             if end.line > start.line {
                 // Add selected part of line to string
-                selection.push_str(&buffer.lines[end.line].text()[..end.index]);
+                push_text(&mut selection, &buffer.lines[end.line], 0..end.index);
             }
 
             Some(selection)
@@ -494,7 +594,7 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
         for item in &change.items {
             //TODO: edit cursor if needed?
             if item.insert {
-                self.cursor = self.insert_at(item.start, &item.text, None);
+                self.cursor = self.insert_at(item.start, &item.text, item.attrs_list.clone());
             } else {
                 self.cursor = item.start;
                 self.delete_range(item.start, item.end);
@@ -773,7 +873,14 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
 
                 if let Some(new_cursor) = self.with_buffer_mut(|buffer| {
                     buffer.shape_until_scroll(font_system, false);
-                    buffer.hit(x as f32, y as f32)
+                    let x = x as f32;
+                    let y = y as f32;
+                    buffer
+                        .layout_runs()
+                        .find_map(|run| {
+                            inline_box_cursor_hit(&run, x, y).map(pick_inline_box_cursor)
+                        })
+                        .or_else(|| buffer.hit(x, y))
                 }) {
                     if new_cursor != self.cursor {
                         self.cursor = new_cursor;
@@ -784,15 +891,29 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
             Action::DoubleClick { x, y } => {
                 self.set_selection(Selection::None);
 
-                if let Some(new_cursor) = self.with_buffer_mut(|buffer| {
+                let hit = self.with_buffer_mut(|buffer| {
                     buffer.shape_until_scroll(font_system, false);
-                    buffer.hit(x as f32, y as f32)
-                }) {
+                    let x = x as f32;
+                    let y = y as f32;
+                    buffer
+                        .layout_runs()
+                        .find_map(|run| inline_box_cursor_hit(&run, x, y))
+                        .map(|hit| (pick_inline_box_cursor(hit), Some(hit)))
+                        .or_else(|| buffer.hit(x, y).map(|cursor| (cursor, None)))
+                });
+
+                if let Some((new_cursor, inline_box_hit)) = hit {
                     if new_cursor != self.cursor {
                         self.cursor = new_cursor;
                         self.with_buffer_mut(|buffer| buffer.set_redraw(true));
                     }
-                    self.selection = Selection::Word(self.cursor);
+                    self.selection = match inline_box_hit {
+                        Some(hit) => {
+                            self.cursor = hit.trailing;
+                            Selection::Normal(hit.leading)
+                        }
+                        None => Selection::Word(self.cursor),
+                    };
                     self.with_buffer_mut(|buffer| buffer.set_redraw(true));
                 }
             }
@@ -818,7 +939,14 @@ impl<'buffer> Edit<'buffer> for Editor<'buffer> {
 
                 if let Some(new_cursor) = self.with_buffer_mut(|buffer| {
                     buffer.shape_until_scroll(font_system, false);
-                    buffer.hit(x as f32, y as f32)
+                    let x = x as f32;
+                    let y = y as f32;
+                    buffer
+                        .layout_runs()
+                        .find_map(|run| {
+                            inline_box_cursor_hit(&run, x, y).map(pick_inline_box_cursor)
+                        })
+                        .or_else(|| buffer.hit(x, y))
                 }) {
                     if new_cursor != self.cursor {
                         self.cursor = new_cursor;

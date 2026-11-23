@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Inline boxes, with editor support
+
+### Changed
+
+- `Attrs`, `AttrsOwned`, `LayoutLine`, `LayoutRun`, `ShapeLine` and
+  `ChangeItem` have new public fields.
+- Renderers that iterate `LayoutRun::glyphs` must skip glyphs whose `font_id`
+  is `fontdb::ID::dummy()`, they are inline box placeholders.
+- A line that holds inline boxes grows to contain them, so its height can
+  exceed `line_height_opt`. Use `LayoutLine::line_height`.
+- `Edit::copy_selection` omits inline box placeholders.
+- The editor caret is sized from the glyph or inline box next to it instead of
+  the whole line.
+
 ## [0.19.0] - 2026-04-22
 
 ### Fixed
