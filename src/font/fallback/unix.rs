@@ -50,7 +50,13 @@ const fn common_fallback() -> &'static [&'static str] {
 
 // Fallbacks to never use
 const fn forbidden_fallback() -> &'static [&'static str] {
-    &[]
+    &[
+        "Unifont",
+        "Unifont Sample",
+        "Unifont Upper",
+        "Unifont CSUR",
+        "Unifont-JP",
+    ]
 }
 
 fn han_unification(locale: &str) -> &'static [&'static str] {
