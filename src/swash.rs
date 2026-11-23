@@ -20,6 +20,10 @@ fn swash_image(
     context: &mut ScaleContext,
     cache_key: CacheKey,
 ) -> Option<SwashImage> {
+    // Inline box placeholders carry the dummy font id and have nothing to draw.
+    if cache_key.font_id == fontdb::ID::dummy() {
+        return None;
+    }
     let Some(font) = font_system.get_font(cache_key.font_id, cache_key.font_weight) else {
         log::warn!("did not find font {:?}", cache_key.font_id);
         return None;
@@ -86,6 +90,10 @@ fn swash_outline_commands(
 ) -> Option<Box<[swash::zeno::Command]>> {
     use swash::zeno::PathData as _;
 
+    // Inline box placeholders carry the dummy font id and have nothing to draw.
+    if cache_key.font_id == fontdb::ID::dummy() {
+        return None;
+    }
     let Some(font) = font_system.get_font(cache_key.font_id, cache_key.font_weight) else {
         log::warn!("did not find font {:?}", cache_key.font_id);
         return None;

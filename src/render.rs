@@ -3,7 +3,7 @@
 #[cfg(not(feature = "std"))]
 use core_maths::CoreFloat;
 
-use crate::{Color, DecorationSpan, LayoutRun, PhysicalGlyph, UnderlineStyle};
+use crate::{Color, DecorationSpan, InlineBoxSpan, LayoutRun, PhysicalGlyph, UnderlineStyle};
 #[cfg(feature = "swash")]
 use crate::{FontSystem, SwashCache};
 
@@ -15,6 +15,18 @@ pub trait Renderer {
     /// Render a [`PhysicalGlyph`] with the provided [`Color`].
     /// For performance, consider using [`SwashCache`].
     fn glyph(&mut self, physical_glyph: PhysicalGlyph, color: Color);
+
+    /// Render an inline box within a layout run.
+    ///
+    /// `span` carries the box's id and its size/position in the buffer's
+    /// coordinate space. `span.x` is the absolute left edge, the absolute top
+    /// is `run.line_y + span.y`.
+    ///
+    /// IMPORTANT: The default implementation is a no-op, override to draw whatever the
+    /// box represents (image, widget, rectangle, etc.).
+    fn inline_box(&mut self, run: &LayoutRun, span: &InlineBoxSpan) {
+        let _ = (run, span);
+    }
 }
 
 /// Draw text decoration lines (underline, strikethrough, overline) for a layout run.
